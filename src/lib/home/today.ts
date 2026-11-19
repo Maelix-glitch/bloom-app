@@ -22,7 +22,7 @@ import type {
 import type { HabitLog, Habit } from "@/lib/home/habits";
 import { noticedOf } from "@/lib/smart/noticed";
 import type { HabitToday } from "@/hooks/useHabits";
-import { localDay, localTime } from "@/lib/localDay";
+import { localDay, localTime, unionDayCount } from "@/lib/localDay";
 
 export type SignalId = "mood" | "habits" | "cycle" | "energy" | "study" | "sleep";
 
@@ -351,27 +351,41 @@ export function connections(input: {
   moodCorrelations: readonly MoodCorrelation[];
   cycle: CycleAnalysis;
   cycleMode?: CycleMode | undefined;
+  /**
+   * The person has explicitly chosen a cycle mode at some point
+   * (their settings carry a modeChangedAt stamp). The DEFAULT
+   * settings say "tracking" for every account, so the mode alone is
+   * not an opt-in — see the cycle node rule below (M-114).
+   */
+  cycleOptedIn?: boolean | undefined;
+  /** Local day keys carrying food entries / weigh-ins (v6 §1.2). */
+  foodDates?: readonly string[] | undefined;
+  weighInDates?: readonly string[] | undefined;
   today: string;
 }): { nodes: Connection[]; links: CrossLink[]; loggedDays: number } {
   const { trackers, habits, moodEntries, moodDays, moodCorrelations, cycle, today } = input;
   const cycleMode = input.cycleMode ?? "tracking";
   const monthAgo = shiftDate(today, -29);
 
-  /* Distinct days in the window carrying ANY mapped signal — the honest
-     "logged days behind this map". Each node counts its own signal's days,
-     so summing the nodes counts a day with three signals three times; the
-     map once printed that sum as its day count (6 "logged days" over a
-     record whose real count was 1–2). */
-  const loggedDayKeys = new Set<string>();
-  for (const d of trackers.entries) {
-    if (d.date >= monthAgo && !isEmptyDay(d)) loggedDayKeys.add(d.date);
-  }
-  for (const l of habits.logs) {
-    if (l.date >= monthAgo) loggedDayKeys.add(l.date);
-  }
-  for (const d of moodDays) {
-    if (d.date >= monthAgo) loggedDayKeys.add(d.date);
-  }
+  /* Distinct days in the window carrying ANY log — the honest "days
+     with any log" behind this map, counted once by unionDayCount
+     (lib/localDay, the one logged-day definition, M-113). Each node
+     counts its own signal's days, so summing the nodes counts a day
+     with three signals three times; the map once printed that sum as
+     its day count (6 "logged days" over a record whose real count was
+     1–2). Cycle days are NOT in this union: cycle entries are period
+     spans, not day-log events, and the cycle node keeps its own count.
+     Food and weigh-in days joined the union in v6 — a day the person
+     logged food is a logged day, map node or not. */
+  const inWindow = (dates: readonly string[]): string[] =>
+    dates.filter((d) => d >= monthAgo && d <= today);
+  const loggedDays = unionDayCount(
+    inWindow(trackers.entries.filter((d) => !isEmptyDay(d)).map((d) => d.date)),
+    inWindow(habits.logs.map((l) => l.date)),
+    inWindow(moodDays.map((d) => d.date)),
+    inWindow(input.foodDates ?? []),
+    inWindow(input.weighInDates ?? []),
+  );
 
   /* strength = evidence: how many of the last 30 days carry this signal,
      nudged up when today is logged. Strictly from the record. */
@@ -412,7 +426,12 @@ export function connections(input: {
             ? "Nothing due today."
             : `${habits.completedToday} of ${habits.dueToday} done today · ${habitDays} active ${habitDays === 1 ? "day" : "days"} this month.`,
     },
-    cycleMode === "off"
+    /* Cycle is a sensitive tracker: it joins the map only when the
+       person opted in — they have logged cycle days, or they have
+       explicitly chosen a mode at some point. The default settings
+       read "tracking" for accounts that never touched Cycle, so
+       mode alone must never summon the node (M-114). */
+    cycleMode === "off" || (cycleDays === 0 && input.cycleOptedIn !== true)
       ? null
       : {
           id: "cycle" as const,
@@ -487,7 +506,7 @@ export function connections(input: {
   }
   links.sort((x, y) => y.weight - x.weight);
 
-  return { nodes, links: dedupeLinks(links).slice(0, 5), loggedDays: loggedDayKeys.size };
+  return { nodes, links: dedupeLinks(links).slice(0, 5), loggedDays };
 }
 
 function dedupeLinks(links: CrossLink[]): CrossLink[] {

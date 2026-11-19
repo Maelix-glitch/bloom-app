@@ -49,3 +49,47 @@ export function shiftDay(key: string, days: number): string {
   const dt = new Date(Date.UTC(y!, m! - 1, d! + days));
   return `${dt.getUTCFullYear()}-${pad(dt.getUTCMonth() + 1)}-${pad(dt.getUTCDate())}`;
 }
+
+/* --------------------- day counting (Brief v6 §1.1–1.2) -------------------- */
+
+/**
+ * The one vocabulary for counting days, so no surface can invent its own:
+ *
+ *   · a PAIRED day has BOTH sides logged on that local date — counted by
+ *     `pairedDays`, the set intersection of the two sides' day lists. A
+ *     counter that reads only one side (mood days dressed up as "paired
+ *     days", M-112) is the bug this section exists to prevent.
+ *   · an ANY-LOG day has at least one entry in ANY area — a date present
+ *     in the union of the areas' day lists (`unionDayCount`,
+ *     `isAnyLogDay`). A per-area TRACKED day is membership in that area's
+ *     own list, and surfaces must label which of the two they mean
+ *     (M-113: "8 days with any log" vs "1 day with trackers").
+ *
+ * Inputs are local day keys (`YYYY-MM-DD`, see above); duplicates and
+ * ordering never matter.
+ */
+
+/** A list of day keys as a set — duplicates collapse. */
+export function daySet(dates: readonly string[]): Set<string> {
+  return new Set(dates);
+}
+
+/** How many local dates appear in BOTH lists — the paired-day count. */
+export function pairedDays(aDates: readonly string[], bDates: readonly string[]): number {
+  const b = daySet(bDates);
+  let n = 0;
+  for (const d of daySet(aDates)) if (b.has(d)) n += 1;
+  return n;
+}
+
+/** How many distinct local dates appear in ANY of the lists. */
+export function unionDayCount(...lists: readonly (readonly string[])[]): number {
+  const all = new Set<string>();
+  for (const list of lists) for (const d of list) all.add(d);
+  return all.size;
+}
+
+/** True when the date carries at least one entry in any of the areas. */
+export function isAnyLogDay(date: string, ...lists: readonly (readonly string[])[]): boolean {
+  return lists.some((list) => daySet(list).has(date));
+}

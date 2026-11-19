@@ -15,7 +15,7 @@
  *               --ci-* variable those rules read is bound to the
  *               global tokens in the .tk2-root block in section 2.
  *   section 2 — the design itself (formerly "Atlas"): the token
- *               bindings, the compass, territories, route, targets
+ *               bindings, the flower, territories, route, targets
  *               and the finishing passes.
  *
  * One deliberate removal: cycle's phone-width suppression of the
@@ -49,9 +49,7 @@
   font-family: var(--ci-font-sans);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-}
-
-@supports (height: 100dvh) {
+}@supports (height: 100dvh) {
   .ci-root {
     min-height: 100dvh;
   }
@@ -74,12 +72,18 @@
   font-optical-sizing: auto;
 }
 
+/* Sentence-case sans (Brief v6 Slice 6; M-128): the eyebrow on this page
+   is a label in the UI sans at meta size — the mono tracked capitals were
+   the audit's "mono uppercase everywhere". Scoped to this sheet, which
+   only the trackers route loads; the cycle page's own copy in cycle.css
+   and the app-wide @utility eyebrow are untouched. The colour steps up
+   from mute to soft: at this size mute was the contrast failure. */
 .ci-eyebrow {
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--ci-text-mute);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  color: var(--ci-text-soft);
 }
 
 .ci-num {
@@ -259,12 +263,11 @@
 
 .ci-table th {
   text-align: left;
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--ci-text-mute);
-  font-weight: 400;
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  letter-spacing: var(--tracking-body);
+  color: var(--ci-text-soft);
+  font-weight: 500;
   padding: 0 var(--space-3) 9px;
   border-bottom: 1px solid var(--ci-line-strong);
 }
@@ -282,11 +285,7 @@
 
 .ci-table tbody tr.is-anomaly {
   background: color-mix(in oklab, var(--ci-ovulation) 6%, transparent);
-}
-
-/* --------------------------------- motion --------------------------------- */
-
-@media (prefers-reduced-motion: reduce) {
+}@media (prefers-reduced-motion: reduce) {
   .ci *, .ci *::before, .ci *::after {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
@@ -475,9 +474,7 @@
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
   overflow-x: clip;
-}
-
-@supports (height: 100dvh) {
+}@supports (height: 100dvh) {
   .tk2-root {
     min-height: 100dvh;
   }
@@ -500,32 +497,36 @@
    ATLAS — a map of the day
    ========================================================================== */
 
-/* The page measure is the app-wide 1280px (owner directive 2026-11-17:
-   the cards were not wide enough). A cap this wide can only bind at
-   desktop widths, so phone and tablet rendering is unchanged. */
+/* The page measure is the app-wide container (Brief v6 Slice 2:
+   --container, 1120px, 24px gutters), superseding the 2026-11-17 1280px
+   directive (M-76, resolved by v6). */
 .at {
-  max-width: 1280px;
+  max-width: var(--container);
   margin: 0 auto;
-  padding: var(--space-12) var(--space-5) 4rem;
+  padding: var(--space-12) var(--space-6) 4rem;
 }
 
 .at-head {
   max-width: 46rem;
 }
 
+/* The page's eyebrow and section heads (M-128): sentence-case sans, the
+   same recipe as .ci-eyebrow above — labels, not coordinates. */
 .at-kicker, .at-sectionhead {
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-wide);
-  text-transform: uppercase;
-  color: var(--ci-text-mute);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  color: var(--ci-text-soft);
 }
 
 .at-title {
   margin: 0.6rem 0 0;
-  font-family: var(--ci-font-sans);
+  /* One heading style (Brief v6 Slice 2; M-127): the serif display every
+     other page H1 uses — this was the last bold-sans H1 in the app. */
+  font-family: var(--ci-font-display);
   font-size: clamp(26px, 5vw, 44px);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.05;
   letter-spacing: var(--tracking-display);
 }
@@ -572,9 +573,9 @@
   }
 }
 
-/* The compass column and everything it explains. One wrapper, so the grid
-   keeps exactly two children — a third child would drop into row two and
-   leave the right-hand column empty beside it. */
+/* The territories column. One wrapper, so the board grid keeps exactly
+   two children — a third child would drop into row two and leave the
+   right-hand column empty beside the flower. */
 
 .at-board-main {
   min-width: 0;
@@ -583,163 +584,12 @@
   align-content: start;
 }
 
-.at-board-main .at-key {
-  margin-top: 0;
-}
-
 .at-territories {
   min-width: 0;
 }
 
 .at-territory {
   min-width: 0;
-}
-
-.at-compass {
-  position: sticky;
-  top: 1.5rem;
-}
-
-.at-compass svg {
-  width: 100%;
-  height: auto;
-}
-
-/* On a phone the compass would otherwise be as wide as the screen. */
-
-@media (max-width: 959px) {
-  .at-compass {
-    position: static;
-    max-width: 320px;
-    margin: 0 auto;
-  }
-}
-
-.at-track {
-  fill: none;
-  stroke: color-mix(in oklab, var(--ci-text) 8%, transparent);
-  stroke-width: 10;
-}
-
-.at-tick {
-  stroke: var(--ci-text);
-  opacity: 0.25;
-  stroke-width: 0.7;
-}
-
-.at-tick[data-major="true"] {
-  opacity: 0.5;
-  stroke-width: 1.4;
-}
-
-.at-arc {
-  fill: none;
-  stroke-width: 9;
-  stroke-linecap: round;
-}
-
-.at-arc[data-id="sleep"] {
-  stroke: var(--tk2-ring-sleep);
-}
-
-.at-arc[data-id="water"] {
-  stroke: var(--tk2-ring-water);
-}
-
-.at-arc[data-id="screen"] {
-  stroke: var(--tk2-ring-screen);
-}
-
-.at-arc[data-id="movement"] {
-  stroke: var(--tk2-ring-movement);
-}
-
-.at-hour {
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-meta);
-  text-anchor: middle;
-  fill: var(--ci-text);
-  opacity: 0.5;
-}
-
-.at-centre-fig {
-  font-family: var(--ci-font-display);
-  font-size: 34px;
-  text-anchor: middle;
-  fill: var(--ci-text);
-}
-
-.at-centre-label {
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-caps);
-  text-anchor: middle;
-  text-transform: uppercase;
-  fill: var(--ci-text);
-  opacity: 0.55;
-}
-
-.at-key {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  margin: var(--space-5) 0 0;
-  padding: 0;
-  list-style: none;
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-meta);
-  text-transform: uppercase;
-  color: var(--ci-text-mute);
-}
-
-.at-key li {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.at-key i {
-  width: 12px;
-  height: 3px;
-  border-radius: var(--radius-pill);
-  background: var(--ci-text);
-  opacity: 0.7;
-}
-
-.at-key li[data-id="sleep"] i {
-  background: var(--tk2-ring-sleep);
-}
-
-.at-key li[data-id="water"] i {
-  background: var(--tk2-ring-water);
-}
-
-.at-key li[data-id="study"] i {
-  background: var(--tk2-ring-study);
-}
-
-.at-key li[data-id="movement"] i {
-  background: var(--tk2-ring-movement);
-}
-
-.at-key li[data-id="energy"] i {
-  background: var(--tk2-ring-energy);
-}
-
-.at-key li[data-id="screen"] i {
-  background: var(--tk2-ring-screen);
-}
-
-.at-arc[data-id="study"] {
-  stroke: var(--tk2-ring-study);
-  stroke-width: 7;
-}
-
-.at-arc[data-id="energy"] {
-  stroke: var(--tk2-ring-energy);
-  stroke-width: 6;
 }
 
 .at-route-today {
@@ -806,9 +656,7 @@
   margin: 0;
   padding: 0;
   list-style: none;
-}
-
-@media (min-width: 640px) {
+}@media (min-width: 640px) {
   .at-territories {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -876,9 +724,9 @@
   justify-content: space-between;
   gap: var(--space-2);
   margin-top: 0.35rem;
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-label);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  letter-spacing: var(--tracking-body);
   color: var(--ci-text-mute);
 }
 
@@ -891,8 +739,8 @@
   padding: 0.15rem 0.4rem;
   border: 1px solid var(--tk2-rule);
   border-radius: var(--radius-pill);
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
   color: var(--ci-text-soft);
   cursor: pointer;
 }
@@ -905,7 +753,7 @@
 .at-notice {
   min-height: 1.2rem;
   margin-top: var(--space-4);
-  font-family: var(--ci-font-mono);
+  font-family: var(--ci-font-sans);
   font-size: var(--text-meta);
   color: var(--ci-follicular);
 }
@@ -1002,8 +850,8 @@
   margin: var(--space-4) 0 0;
   padding: 0;
   list-style: none;
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
   color: var(--ci-text-soft);
 }
 
@@ -1135,15 +983,15 @@
 
 .at-fine {
   margin-top: 0.85rem;
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
   line-height: 1.7;
   color: var(--ci-text-mute);
 }
 
 .at-loading {
   margin-top: var(--space-12);
-  font-family: var(--ci-font-mono);
+  font-family: var(--ci-font-sans);
   font-size: var(--text-meta);
   color: var(--ci-text-mute);
 }
@@ -1235,11 +1083,11 @@
   align-items: baseline;
   gap: var(--space-1) var(--space-3);
   margin: 0 0 0.6rem;
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--ci-text-mute);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  color: var(--ci-text-soft);
 }
 
 .tk2-active-head span {
@@ -1319,9 +1167,22 @@
   background: var(--tk2-ring-screen);
 }
 
+/* Off reads as off, not as deleted (M-132): a dashed rim and the
+   state word in the chip, against the on state's solid rim, lit dot
+   and raised ground. The word is in the markup (.tk2-active-state);
+   aria-checked has always carried it to assistive tech. */
 .tk2-active-toggle[data-on="false"] {
-  text-decoration: line-through;
-  text-decoration-color: var(--tk2-rule);
+  border-style: dashed;
+}
+
+.tk2-active-toggle[data-on="true"] {
+  background: var(--surface-2);
+}
+
+.tk2-active-state {
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-body);
+  opacity: 0.75;
 }
 
 .tk2-active-toggle:hover:not(:disabled) {
@@ -1357,11 +1218,11 @@
 }
 
 .tk2-targets-grid label {
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--ci-text-mute);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  color: var(--ci-text-soft);
 }
 
 .tk2-target-field {
@@ -1432,13 +1293,17 @@
 
 .tk2-badges-count {
   margin: 0 0 var(--space-3);
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--ci-text-mute);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  color: var(--ci-text-soft);
 }
 
+/* No blanket dimming (M-133): the flat 0.55 opacity on every tile was
+   the "near-invisible" — an unearned tile is a full-contrast neutral
+   surface that says what would earn it; the earned state is the gold
+   treatment below, not the removal of a fade. */
 .tk2-badges-grid li {
   display: flex;
   flex-direction: column;
@@ -1446,13 +1311,15 @@
   padding: 0.7rem 0.85rem;
   border: 1px solid var(--tk2-rule);
   border-radius: var(--radius-control);
-  opacity: 0.55;
 }
 
 .tk2-badges-grid li[data-earned="true"] {
-  opacity: 1;
   border-color: color-mix(in oklab, var(--ci-follicular) 55%, transparent);
   background: color-mix(in oklab, var(--ci-follicular) 8%, transparent);
+}
+
+.tk2-badges-grid li[data-earned="true"] .tk2-badge-name {
+  color: var(--gold-solid-fallback, var(--ci-follicular));
 }
 
 .tk2-badge-name {
@@ -1461,12 +1328,16 @@
 }
 
 .tk2-badge-detail {
-  font-family: var(--ci-font-mono);
-  font-size: var(--text-micro);
-  color: var(--ci-text-mute);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  color: var(--ci-text-soft);
 }
 
-@media (max-width: 560px) {
+.tk2-badge-hint {
+  font-size: var(--text-meta);
+  line-height: var(--leading-body);
+  color: var(--ci-text-mute);
+}@media (max-width: 560px) {
   .tk2-targets-grid, .tk2-badges-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -1504,18 +1375,23 @@
 
 /* ----------------------------- 2. typography ----------------------------- */
 
-/* Small labels go to tracked capitals; the units drop to 40% so the figures
-   themselves carry the weight. */
+/* Small labels sit in sentence case at body tracking; the units drop so
+   the figures themselves carry the weight. */
 
 /* OTT pass: .at-coord left this list — it carries live figures ("8h 30m",
    "2,200 ml") and the caps + tracking rendered them "8H 30M". Figures are
    not eyebrows; the coord's own mono/tabular rule above carries it. */
-.tk2-root .at-kicker, .tk2-root .at-sectionhead, .tk2-root .at-key span, .tk2-root .at-legend li, .tk2-root .tk2-sync, .tk2-root .tk2-badges-count, .tk2-root .tk2-targets-grid label {
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-meta);
+/* v6 Slice 6 (M-128): the tracked capitals came off this list entirely —
+   these selectors carry labels and whole sentences (the sync line, the
+   territory foot), and sentence-case sans is the page's label recipe
+   now. The .at-fine dimming also came off: at 40% opacity the sleep
+   methodology paragraph was the audit's unreadable all-caps block; it
+   carries its own readable rule below. */
+.tk2-root .at-kicker, .tk2-root .at-sectionhead, .tk2-root .at-legend li, .tk2-root .tk2-sync, .tk2-root .tk2-badges-count, .tk2-root .tk2-targets-grid label {
+  letter-spacing: var(--tracking-body);
 }
 
-.tk2-root .tk2-target-field em, .tk2-root .at-fine {
+.tk2-root .tk2-target-field em {
   opacity: 0.4;
 }
 
@@ -1533,73 +1409,6 @@
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 0.03, transparent);
 }
 
-/* ------------------------ 4. spacing and selectors ------------------------ */
-
-/* rating scales: capsule pills, champagne glow on the selected one */
-
-/* ------------------------------- 5. the dial ------------------------------ */
-
-/* An unlogged ring is a faint deep track; a filled one is jewel-toned with a
-   glow along its length and a lit cap where it stops. */
-
-.at-track {
-  stroke: color-mix(in oklab, var(--foreground) 0.03, transparent);
-}
-
-.at-arc[data-id="sleep"] {
-  stroke: var(--tk2-ring-sleep);
-}
-
-.at-arc[data-id="water"] {
-  stroke: var(--tk2-ring-water);
-}
-
-.at-arc[data-id="movement"] {
-  stroke: var(--tk2-ring-movement);
-}
-
-.at-arc[data-id="screen"] {
-  stroke: var(--tk2-ring-screen);
-}
-
-.at-arc[data-id="study"] {
-  stroke: var(--tk2-ring-study);
-  stroke-width: 7;
-}
-
-.at-arc[data-id="energy"] {
-  stroke: var(--tk2-ring-energy);
-  stroke-width: 6;
-}
-
-.at-cap {
-
-}
-
-.at-cap[data-id="sleep"] {
-  fill: var(--tk2-ring-sleep);
-}
-
-.at-cap[data-id="water"] {
-  fill: var(--tk2-ring-water);
-}
-
-.at-cap[data-id="movement"] {
-  fill: var(--tk2-ring-movement);
-}
-
-.at-cap[data-id="screen"] {
-  fill: var(--tk2-ring-screen);
-}
-
-.at-cap[data-id="study"] {
-  fill: var(--tk2-ring-study);
-}
-
-.at-cap[data-id="energy"] {
-  fill: var(--tk2-ring-energy);
-}
-
 /* ==========================================================================
    Haute-horlogerie pass.
 
@@ -1611,17 +1420,19 @@
 
 /* -------------------- 4. editorial labels and metrics -------------------- */
 
-/* Micro-metadata sits in tracked capitals; the figures themselves stay in
-   platinum while the units drop to 35% so the number is what you read. */
+/* Micro-metadata sits in sentence case at meta size; the figures
+   themselves stay in platinum while the units drop to 35% so the number
+   is what you read. */
 
 /* OTT pass: .at-coord left this list too (figures are not eyebrows), and
    the -apple-system stack came off — a third font family the rest of the
-   app never loads. The labels keep their size/tracking/caps from here and
-   their family from their own rules (Inter / IBM Plex Mono). */
-.tk2-root .at-kicker, .tk2-root .at-sectionhead, .tk2-root .at-key span, .tk2-root .at-legend li, .tk2-root .at-fine, .tk2-root .at-territory-foot span, .tk2-root .tk2-sync, .tk2-root .tk2-badges-count, .tk2-root .tk2-badge-detail, .tk2-root .tk2-targets-grid label {
-  font-size: 0.68rem;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
+   app never loads. */
+/* v6 Slice 6 (M-128): the capitals and the caps tracking came off, and
+   the size steps up from 0.68rem to the meta step — these are labels
+   and sentences in the UI sans now, sized to be read. */
+.tk2-root .at-kicker, .tk2-root .at-sectionhead, .tk2-root .at-legend li, .tk2-root .at-fine, .tk2-root .at-territory-foot span, .tk2-root .tk2-sync, .tk2-root .tk2-badges-count, .tk2-root .tk2-badge-detail, .tk2-root .tk2-targets-grid label {
+  font-size: var(--text-meta);
+  letter-spacing: var(--tracking-body);
   color: var(--text-muted);
 }
 
@@ -1680,46 +1491,6 @@
 
 .tk2-root .ci-btn--primary:hover:not(:disabled) {
   filter: brightness(1.05);
-}
-
-/* --------------------------- 2. the dial itself -------------------------- */
-
-.at-track {
-  stroke: color-mix(in oklab, var(--foreground) 0.03, transparent);
-  stroke-width: 2;
-}
-
-.at-arc {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-
-.at-arc[data-id="sleep"] {
-  --active-track-color-hex: var(--tk2-ring-sleep);
-}
-
-.at-arc[data-id="water"] {
-  --active-track-color-hex: var(--tk2-ring-water);
-}
-
-.at-arc[data-id="movement"] {
-  --active-track-color-hex: var(--tk2-ring-movement);
-}
-
-.at-arc[data-id="screen"] {
-  --active-track-color-hex: var(--tk2-ring-screen);
-}
-
-.at-arc[data-id="study"] {
-  --active-track-color-hex: var(--tk2-ring-study);
-}
-
-.at-arc[data-id="energy"] {
-  --active-track-color-hex: var(--tk2-ring-energy);
-}
-
-.at-cap {
-
 }
 
 /* ------------------ 5. tag groups and the number scale ------------------- */
@@ -1800,9 +1571,8 @@
   border-radius: var(--radius-pill);
   background: transparent;
   color: var(--text-muted);
-  font-size: 0.72rem;
-  letter-spacing: var(--tracking-label);
-  text-transform: uppercase;
+  font-size: var(--text-meta);
+  letter-spacing: var(--tracking-body);
   cursor: pointer;
   transition: all var(--motion-standard) var(--ease-out-expo);
 }
@@ -1816,43 +1586,20 @@
   transform: scale(0.94);
 }
 
+/* The pressed energy dot: flat gold + ink, like every other selected
+   surface in the app — the gold→violet gradient and glow that stood
+   here were off-palette leftovers. */
 .at-territory-actions button[aria-pressed="true"] {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
-  background-color: var(--gold);
-  border-color: color-mix(in oklab, var(--gold) 0.8, transparent);
-  color: var(--foreground);
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--primary-foreground);
   font-weight: 600;
-  box-shadow: 0 0 12px color-mix(in oklab, var(--gold) 0.4, transparent);
+  box-shadow: none;
 }
 
-/* -------------------- the dial: percentage-driven rings ------------------ */
-
-/* Each ring is one circle whose dashoffset hides whatever share of the target
-   is still missing, so an increment sweeps into place instead of jumping. */
-
-.at-arc {
-  transition: stroke-dashoffset var(--motion-signature) var(--ease-out-expo);
-}
-
-.at-cap {
-  transition:
-  cx var(--motion-page) var(--ease-out-expo),
-  cy var(--motion-page) var(--ease-out-expo);
-}
-
-/* the night itself — bed to wake — kept as a hairline outside the rings */
-
-.at-nightspan {
-  fill: none;
-  stroke: color-mix(in oklab, var(--foreground) 0.12, transparent);
-  stroke-width: 1;
-  stroke-linecap: round;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .at-arc, .at-cap {
-    transition: none;
-  }
+.at-energy-dots {
+  display: inline-flex;
+  gap: 6px;
 }
 
 /* The overlay layer. Panels mount to <body> through a portal, out of the page
@@ -1887,9 +1634,8 @@
 }
 
 .at-territory-more {
-  font-size: 0.68rem;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
+  font-size: var(--text-meta);
+  letter-spacing: var(--tracking-body);
   color: var(--text-dim);
   opacity: 0;
   transition: opacity var(--motion-standard) var(--ease-out-expo);
@@ -1897,9 +1643,7 @@
 
 .at-territory:hover .at-territory-more, .at-territory:focus-visible .at-territory-more {
   opacity: 1;
-}
-
-@media (prefers-reduced-motion: reduce) {
+}@media (prefers-reduced-motion: reduce) {
   .at-territory {
     transition: none;
   }
@@ -1912,106 +1656,10 @@
 /* ==========================================================================
    The clean blueprint.
 
-   One floating action, cards that only ever report, and a record table that
+   Cards that only ever report, and a record table that
    reads like a statement rather than a spreadsheet. Everything here is
    surface: no new data, no new claims — the same numbers, better lit.
    ========================================================================== */
-
-/* ------------------------- the floating action --------------------------- */
-
-/* The dock is inert — it only holds the button, and it never eats a click
-   meant for the page under it. */
-
-.premium-action-dock {
-  position: fixed;
-  /* Clear the phone tab bar + home indicator. The Atlas component no longer
-  sets `bottom` inline, so this rule is finally the one that applies. */
-  bottom: calc(16px + var(--app-bottom-nav, 0px));
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 40;
-  pointer-events: none;
-  max-width: calc(100vw - 32px);
-  max-width: calc(100dvw - 32px);
-  transition:
-    opacity var(--motion-standard) var(--ease-out-expo),
-    transform var(--motion-standard) var(--ease-out-expo);
-}
-
-/* While the page scrolls, the dock steps aside — faded and slipped down —
-   so it never rides over captions, the route fine print or the field grid.
-   TrackersPage drives [data-away] from the scroll itself (dockVisibility);
-   the CTA's own pointer-events are what need switching off, since the dock
-   itself is already click-through. */
-.premium-action-dock[data-away="true"] {
-  opacity: 0;
-  transform: translate(-50%, 16px);
-}
-.premium-action-dock[data-away="true"] .premium-log-cta {
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .premium-action-dock {
-    transition-property: opacity;
-  }
-  .premium-action-dock[data-away="true"] {
-    transform: translateX(-50%);
-  }
-}
-
-@media (max-width: 639px) {
-/* Scoped to the dock so it still wins over the base rule below, which
-     appears later in the file for readability. */
-
-  .premium-action-dock .premium-log-cta {
-    padding: 13px var(--space-6);
-    font-size: 0.8rem;
-    max-width: calc(100dvw - 32px);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-.premium-log-cta {
-  pointer-events: auto;
-  background: var(--primary);
-  color: var(--primary-foreground);
-  font-weight: 600;
-  text-transform: none;
-  letter-spacing: var(--tracking-body);
-  font-size: 0.85rem;
-  padding: var(--space-3) 26px;
-  border-radius: var(--radius-pill);
-  border: none;
-  box-shadow: 0 14px 30px -16px rgba(0, 0, 0, 0.7);
-  cursor: pointer;
-  transition: opacity var(--motion-standard) var(--ease-out-expo);
-}
-
-.premium-log-cta:hover {
-  opacity: 0.92;
-}
-
-.premium-log-cta:active {
-  transform: scale(0.97);
-}
-
-.premium-log-cta:focus-visible {
-  outline: 2px solid var(--foreground);
-  outline-offset: 4px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .premium-log-cta {
-    transition: none;
-  }
-
-  .premium-log-cta:hover, .premium-log-cta:active {
-    transform: none;
-  }
-}
 
 /* ------------------------- the log sheet (TrackerModal) -------------------
    The quick-log panel wears the sheet family's shape but not its glass.
@@ -2104,11 +1752,10 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .tk2-insight-caption {
   display: block;
   margin: 0 0 var(--space-5);
-  font-size: 0.65rem;
+  font-size: var(--text-meta);
   font-weight: 600;
-  letter-spacing: var(--tracking-wide);
+  letter-spacing: var(--tracking-body);
   color: var(--gold-solid-fallback);
-  text-transform: uppercase;
 }
 
 .tk2-insight-list {
@@ -2181,10 +1828,9 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .at-territory-foot span {
-  font-size: 0.68rem;
+  font-size: var(--text-meta);
   font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-meta);
+  letter-spacing: var(--tracking-body);
   color: var(--text-cool-silver);
   margin-top: 14px;
 }
@@ -2222,9 +1868,8 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .ci-table th {
   padding: var(--space-4) var(--space-6);
   color: var(--text-cool-silver);
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: var(--tracking-caps);
+  font-size: var(--text-meta);
+  letter-spacing: var(--tracking-body);
   font-weight: 600;
   text-align: left;
 }
@@ -2272,19 +1917,6 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   cursor: not-allowed;
 }
 
-/* --------------------------- 6. the dial -------------------------------- */
-
-.at-arc {
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition: stroke-dashoffset var(--motion-signature) var(--ease-out-expo);
-}
-
-.at-track {
-  stroke: color-mix(in oklab, var(--foreground) 0.035, transparent);
-  stroke-width: 2.5px;
-}
-
 /* The floating action needs room at the foot of the page, and it must never
    sit on top of an open panel — or on the page's own content. The dock is a
    fixed strip: its button (~48px) plus its 16px offset from the viewport
@@ -2305,12 +1937,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 .at-board, .at-section {
   scroll-margin-bottom: calc(var(--app-bottom-nav, 0px) + 5.5rem);
-}
-
-/* phones: compact territory cards and stacked comparisons — the same map,
-   composed for a narrow viewport instead of squeezed into it */
-
-@media (max-width: 639px) {
+}@media (max-width: 639px) {
   .at {
     padding: 1.75rem 1rem calc(var(--app-bottom-nav, 0px) + 7.5rem);
   }
@@ -2335,15 +1962,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
     width: 44px;
     height: 44px;
   }
-}
-
-/* OTT pass: the same 44px floor for every touch pointer (tablets included,
-   not just ≤639px phones), for the targets the phone pass never covered —
-   the tracker toggle chips (~29px), the body-tools pill link (38px), the
-   record table's delete button (~20px) and small buttons (~34px), the
-   reset-goals text button, and the target fields. Adjacent toggle chips
-   also move to the 8px minimum gap. Desktop density is untouched. */
-@media (pointer: coarse) {
+}@media (pointer: coarse) {
   .tk2-active-toggle {
     min-height: 44px;
   }
@@ -2398,9 +2017,9 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 .tk2-sheet-field > span {
   display: block;
-  font-size: 0.65rem;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
   color: var(--text-muted);
 }
 
@@ -2427,40 +2046,17 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 .tk2-sheet-input::placeholder {
   color: color-mix(in oklab, var(--foreground) 53%, transparent);
-}
-
-@media (max-width: 460px) {
+}@media (max-width: 460px) {
   .tk2-sheet-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-}
-
-/* ==========================================================================
-   Slice 3 — Atlas phone pass (≤480px only, desktop untouched).
-
-   1. Floating "Reflect & log" button goes smaller (!important beats the
-      inline critical styles Atlas sets in TSX).
-   2. Territory cards: reverted to normal — no card rules (per your call).
-   3. Bottom text shrinks (statement + medical-safety footer, words kept).
-   4. Hero title steps down one notch; compass untouched.
-   5. "Today's snapshot" became a centered floating pop (retired by the
-      popup-premium slice: it now uses the family's bottom-sheet placement
-      and the tk2-snap-* solid panel, like the quick-log sheet).
-   ========================================================================== */
-
-@media (max-width: 480px) {
+}@media (max-width: 480px) {
   .at {
-    padding: 2rem 1rem calc(var(--app-bottom-nav, 0px) + 7.5rem);
+    padding: 2rem var(--space-6) calc(var(--app-bottom-nav, 0px) + 7.5rem);
   }
 
   .at-title {
     font-size: var(--text-title);
-  }
-
-  .premium-log-cta {
-    font-size: 0.78rem !important;
-    padding: 13px var(--space-6) !important;
-    letter-spacing: var(--tracking-label) !important;
   }
 
   .at-statement {
@@ -2584,3 +2180,182 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 /* phones: quick taps and rating pills meet the 44px touch floor, and the
    goal field stays tappable without widening its card. */
+
+/* ==========================================================================
+   Brief v6 Slice 6 — the flower, the shown targets, the readable page.
+
+   The compass column's ~400px of rings and void is a flower the height
+   of its own content; the Targets form moved into a sheet, leaving a
+   display list; the fine print under Sleep and the route reads as
+   prose, at prose size and contrast.
+   ========================================================================== */
+
+/* ------------------------------- the flower ------------------------------ */
+
+.at-flower-col {
+  position: sticky;
+  top: 1.5rem;
+}
+
+@media (max-width: 959px) {
+  .at-flower-col {
+    position: static;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+}
+
+.at-flower {
+  margin: 0;
+}
+
+.at-flower svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.at-petal {
+  fill: color-mix(in oklab, var(--petal) 14%, transparent);
+  stroke: color-mix(in oklab, var(--petal) 45%, transparent);
+  stroke-width: 1.2;
+}
+
+.at-petal[data-met="true"] {
+  fill: var(--petal);
+  stroke: var(--petal);
+}
+
+.at-petal[data-id="sleep"] {
+  --petal: var(--tk2-ring-sleep);
+}
+
+.at-petal[data-id="water"] {
+  --petal: var(--tk2-ring-water);
+}
+
+.at-petal[data-id="study"] {
+  --petal: var(--tk2-ring-study);
+}
+
+.at-petal[data-id="movement"] {
+  --petal: var(--tk2-ring-movement);
+}
+
+.at-petal[data-id="energy"] {
+  --petal: var(--tk2-ring-energy);
+}
+
+.at-petal[data-id="screen"] {
+  --petal: var(--tk2-ring-screen);
+}
+
+.at-petal-label {
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  fill: var(--ci-text-soft);
+}
+
+.at-flower-heart {
+  fill: var(--ci-surface);
+  stroke: var(--tk2-rule);
+}
+
+.at-flower-seed {
+  fill: var(--gold);
+}
+
+.at-flower-count {
+  margin-top: var(--space-3);
+  font-family: var(--ci-font-display);
+  font-size: var(--text-callout);
+  text-align: center;
+  color: var(--ci-text);
+}
+
+/* --------------------------- targets, displayed -------------------------- */
+
+.tk2-targets-display {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+  padding: 0;
+  list-style: none;
+}
+
+.tk2-targets-display li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.7rem 0.8rem;
+  background: var(--surface);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent);
+}
+
+.tk2-target-name {
+  font-size: var(--text-caption);
+  color: var(--ci-text-soft);
+}
+
+/* The value and its unit are one phrase — "3 of 5" never wraps into
+   "of / 5" (M-132). */
+.tk2-target-value {
+  font-family: var(--ci-font-display);
+  font-size: var(--text-section);
+  color: var(--ci-text);
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .tk2-targets-display {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* The edit sheet wears the log sheet's treatment: a solid panel, so the
+   page never ghosts through the form. */
+.bsheet.bsheet--card.tk2-targets-sheet {
+  max-width: 520px;
+}
+
+.bsheet-panel.tk2-targets-panel {
+  background: var(--surface);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.bsheet.bsheet--phone .bsheet-panel.tk2-targets-panel {
+  border-radius: 24px 24px 0 0;
+}
+
+body:has(.tk2-targets-sheet) .bsheet-backdrop {
+  background:
+    radial-gradient(
+      80% 60% at 50% 100%,
+      color-mix(in oklab, var(--violet) 10%, transparent),
+      transparent 70%
+    ),
+    color-mix(in oklab, var(--background) 86%, transparent);
+  backdrop-filter: blur(18px) saturate(1.05);
+  -webkit-backdrop-filter: blur(18px) saturate(1.05);
+}
+
+/* The human reading under each target field, in the sheet. */
+.tk2-target-human {
+  font-size: var(--text-meta);
+  color: var(--ci-text-mute);
+}
+
+/* ------------------------------ fine print ------------------------------- */
+
+/* The methodology notes (Sleep's, the route's) are prose: support size,
+   the soft text step, full opacity — the readable sentence the brief
+   asks for, where a dim all-caps mono paragraph stood (M-128, M-134). */
+.tk2-root .at-fine {
+  font-size: var(--text-support);
+  line-height: 1.7;
+  color: var(--ci-text-soft);
+}

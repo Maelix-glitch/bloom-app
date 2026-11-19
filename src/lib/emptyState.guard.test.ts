@@ -59,13 +59,19 @@ describe("empty-state guard: Nutrition's merged fresh state", () => {
   });
 
   it("the sections the merge replaces are gated on it", () => {
-    expect(NUTRITION_PAGE).toContain("{!freshAccount ? <MetabolicTwinSection /> : null}");
+    /* Feel layer (v6 Slice 3): the Twin and the Pattern Lab now render
+       inside <FeelIn> entrance wrappers — the gates themselves
+       (!freshAccount) are byte-for-byte the same conditions, so the pin
+       follows the grocery precedent below: gate + component, not the
+       one-line literal. */
+    expect(NUTRITION_PAGE).toContain("{!freshAccount ? (");
+    expect(NUTRITION_PAGE).toContain("<MetabolicTwinSection />");
+    expect(NUTRITION_PAGE).toContain("<PatternLab patterns={patterns} />");
     /* Plan B (IA slice): the grocery section now renders inside its
        #nut-grocery sub-nav anchor wrapper — the gate itself
        (isToday && !freshAccount) is byte-for-byte the same condition. */
     expect(NUTRITION_PAGE).toContain("{isToday && !freshAccount ? (");
     expect(NUTRITION_PAGE).toContain("<GrocerySection />");
-    expect(NUTRITION_PAGE).toContain("{!freshAccount ? <PatternLab patterns={patterns} /> : null}");
   });
 });
 

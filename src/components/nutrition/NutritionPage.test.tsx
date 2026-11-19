@@ -255,20 +255,25 @@ describe("NutritionPage — totals vs targets", () => {
     if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    /* Component slice (§H): the ring centre now leads with the
-       REMAINING figure; the consumed-vs-target pair moved into its
-       caption ("380 of ~2,950 kcal eaten"), replacing the old
-       consumed-numeral + "of ~target" centre these pins used to read. */
+    /* Brief v6 Slice 7 (M-126/M-125): the hero numeral is kcal EATEN
+       so far with the guide as its context line ("of your ~2,950 kcal
+       guide") — the §H countdown centre ("kcal left" + the remaining
+       figure) is gone, and the double ring is now a house meter whose
+       max is the guide and whose value is what was eaten. These pins
+       replace the §H ones for that reason; the target itself and
+       every computed number are unchanged. */
     const consumed = entry.nutrients.kcal;
-    expect(
-      screen.getByText(`${fmtCount(consumed)} of ${fmtKcalApprox(targets.calories)} eaten`),
-    ).toBeTruthy();
-    expect(screen.getByText("kcal left")).toBeTruthy();
-    expect(
-      screen.getByText(fmtCount(Math.round(targets.calories - consumed))),
-    ).toBeTruthy();
+    expect(document.querySelector('[data-metric="day-kcal-headline"]')?.textContent).toBe(
+      fmtCount(consumed),
+    );
+    expect(document.querySelector('[data-metric="day-kcal-vs-target"]')?.textContent).toBe(
+      `of your ${fmtKcalApprox(targets.calories)} guide`,
+    );
+    expect(screen.queryByText("kcal left")).toBeNull();
     expect(screen.getByText(/Targets are estimates/)).toBeTruthy();
-    expect(screen.getByRole("progressbar", { name: "Calories against target" })).toBeTruthy();
+    const bar = screen.getByRole("progressbar", { name: "Calories against target" });
+    expect(bar.getAttribute("aria-valuemax")).toBe(String(Math.round(targets.calories)));
+    expect(bar.getAttribute("aria-valuenow")).toBe(String(Math.round(consumed)));
   });
 
   it("a safety refusal shows totals only — no target, no bar, no deficit framing", () => {
@@ -314,9 +319,10 @@ describe("NutritionPage — totals vs targets", () => {
     if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    /* Same §H centre caption as the test above (reason recorded there). */
+    /* Same hero context line as the test above (v6 M-126: the guide
+       as the eaten numeral's context — reason recorded there). */
     expect(
-      screen.getByText(`380 of ${fmtKcalApprox(targets.calories)} eaten`),
+      screen.getByText(`of your ${fmtKcalApprox(targets.calories)} guide`),
     ).toBeTruthy();
     expect(screen.queryByText(/doesn't set calorie targets/)).toBeNull();
   });

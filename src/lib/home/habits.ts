@@ -556,6 +556,17 @@ export function draftToColumns(draft: HabitDraft) {
   };
 }
 
+/**
+ * The habit-name rule, at the lib boundary so every create/edit surface
+ * speaks with one voice (brief v6 Slice 5, M-120): a name is required
+ * and needs at least two characters once trimmed. Returns the inline
+ * message to show, or null when the name is acceptable. Existing habits
+ * are never judged by this — it gates creation and edits only.
+ */
+export function validateHabitName(name: string): string | null {
+  return name.trim().length < 2 ? "Give the habit a name — two letters or more." : null;
+}
+
 /** One key for "the same habit" — case and extra spaces do not make a new one. */
 export function habitNameKey(name: string): string {
   return name.trim().replace(/\s+/g, " ").toLowerCase();

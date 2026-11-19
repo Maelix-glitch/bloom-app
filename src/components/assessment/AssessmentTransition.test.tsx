@@ -166,8 +166,10 @@ describe("AssessmentPromptCard — already complete at mount", () => {
     expect(section).not.toBeNull();
     expect(screen.getByRole("heading", { name: "Your starting point" })).toBeTruthy();
     expect(section!.textContent).toContain("Your goal: lose weight.");
-    /* The engine's own numbers, in the card's estimates framing. */
-    expect(section!.textContent).toMatch(/~\d+ kcal/);
+    /* The engine's own numbers, in the card's estimates framing.
+       Grouped since v6 §1.4 (M-119): fmtKcalApprox renders "~1,900 kcal",
+       so the pin admits the separator it previously forbade by omission. */
+    expect(section!.textContent).toMatch(/~[\d,]+ kcal/);
     expect(section!.textContent).toMatch(/\d+ g protein/);
     expect(section!.textContent).toContain("a guide, not a prescription");
     /* No plan stored yet — the plan hook's own verdict. */

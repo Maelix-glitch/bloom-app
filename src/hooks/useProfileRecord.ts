@@ -1,7 +1,8 @@
 /**
- * useProfileRecord — joins the four records the app already keeps (tracker
- * days, mood check-ins, habit ticks, cycle days/periods) into the profile's
- * twelve-week grid, totals and "tracking now" chips.
+ * useProfileRecord — joins the records the app already keeps (tracker
+ * days, mood check-ins, habit ticks, cycle days/periods — plus food and
+ * weigh-in day lists for the totals' any-log union, v6 §1.2) into the
+ * profile's twelve-week grid, totals and "tracking now" chips.
  *
  * It only reads. Every store below is the same one its own page uses, so
  * the profile can never disagree with /trackers, /mood, / or /cycle.
@@ -9,9 +10,11 @@
 
 import { useMemo } from "react";
 
+import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useEverReady } from "@/hooks/useEverReady";
 import { useHabits, type HabitsAuth } from "@/hooks/useHabits";
+import { useNutrition } from "@/hooks/useNutrition";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { useTrackers, type TrackerSyncState } from "@/hooks/useTrackers";
 import type { MoodEntry } from "@/lib/mood/types";
@@ -87,6 +90,10 @@ export function useProfileRecord(
   const trackers = useTrackers();
   const habits = useHabits();
   const cycle = usePeriodLog();
+  /* Food + weigh-in day lists feed the totals' any-log union (v6 §1.2)
+     — the same join the Whole-Life section makes on Today. */
+  const nutrition = useNutrition();
+  const body = useBodyProfile();
   /* The same lever Today uses: the onboarding opt-out reads as mode "off"
      for the cycle chip, so opting out removes it here too — checking the
      period mode alone left the chip (and its cycle detail) on the profile
@@ -103,8 +110,10 @@ export function useProfileRecord(
       habitLogs: habits.logs,
       cycleDays: cycle.days,
       periods: cycle.logs,
+      foodDays: nutrition.entries.map((e) => e.day),
+      weighInDays: body.weighIns.map((w) => w.date),
     }),
-    [trackers.days, moodEntries, habits.logs, cycle.days, cycle.logs],
+    [trackers.days, moodEntries, habits.logs, cycle.days, cycle.logs, nutrition.entries, body.weighIns],
   );
 
   const grid = useMemo(() => recordGrid(input), [input]);

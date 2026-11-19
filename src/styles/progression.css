@@ -167,21 +167,21 @@
 
 /* --------------------------------- shell -------------------------------- */
 
-/* The page measure is the app-wide 1280px (owner directive 2026-11-17:
-   the cards were not wide enough). A cap this wide can only bind at
-   desktop widths, so phone and tablet rendering is unchanged. */
+/* The page measure is the app-wide container (Brief v6 Slice 2:
+   --container, 1120px, 24px gutters), superseding the 2026-11-17 1280px
+   directive (M-76, resolved by v6). */
 .pg-main {
   position: relative;
   margin: 0 auto;
   width: 100%;
-  max-width: 1280px;
+  max-width: var(--container);
   padding: var(--space-12) var(--space-6) 9rem;
 }
 
 @media (min-width: 640px) {
   .pg-main {
-    padding-left: var(--space-8);
-    padding-right: var(--space-8);
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
   }
 }
 

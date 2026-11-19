@@ -369,3 +369,52 @@ describe("language — associative only, never causal", () => {
     });
   });
 });
+
+/* Brief v6 §1.1 (M-112) — the pair-PROGRESS counter must count days with
+   BOTH sides logged. The audit's shape: mood on 8 days, the other side on
+   2 of them, read as "7 of 8" (mood days only). Flat mood values mean no
+   insight can fire, so the pair must sit in pending with its true paired
+   count — and must not vanish. */
+describe("paired-day progress counts (M-112)", () => {
+  it("food & mood: mood on 8 days, food on 2 reads 2 of 8", () => {
+    const moodEntries: MoodEntry[] = [];
+    const foodEntries: LogEntry[] = [];
+    for (let back = 1; back <= 8; back += 1) {
+      moodEntries.push(mood(day(back), 6));
+      if (back <= 2) foodEntries.push(food(day(back), 600));
+    }
+    const result = buildWholeLifeInsights(input({ moodEntries, foodEntries }));
+    const pending = result.pending.find((p) => p.kind === "food-mood")!;
+    expect(pending).toBeDefined();
+    expect(pending.sampleDays).toBe(2);
+    expect(pending.neededDays).toBe(MIN_PAIRED_DAYS);
+    expect(result.coverage.foodDays).toBe(2);
+    expect(result.coverage.moodDays).toBe(8);
+  });
+
+  it("habit ticks & mood: mood on 8 days, ticks on 2 reads 2 of 8", () => {
+    const moodEntries: MoodEntry[] = [];
+    const habitLogs: HabitLog[] = [];
+    for (let back = 1; back <= 8; back += 1) {
+      moodEntries.push(mood(day(back), 6));
+      if (back <= 2) habitLogs.push(...ticks(day(back), 2));
+    }
+    const result = buildWholeLifeInsights(input({ moodEntries, habitLogs }));
+    const pending = result.pending.find((p) => p.kind === "habits-mood")!;
+    expect(pending).toBeDefined();
+    expect(pending.sampleDays).toBe(2);
+  });
+
+  it("a continuous pair's progress still counts its both-sides days", () => {
+    const moodEntries: MoodEntry[] = [];
+    const trackerDays: DayEntry[] = [];
+    for (let back = 1; back <= 5; back += 1) {
+      moodEntries.push(mood(day(back), 6));
+      trackerDays.push(tracker(day(back), { sleepMinutes: 420 }));
+    }
+    /* Two extra mood days with no sleep logged must not inflate it. */
+    moodEntries.push(mood(day(6), 6), mood(day(7), 6));
+    const result = buildWholeLifeInsights(input({ moodEntries, trackerDays }));
+    expect(result.pending.find((p) => p.kind === "sleep-mood")!.sampleDays).toBe(5);
+  });
+});

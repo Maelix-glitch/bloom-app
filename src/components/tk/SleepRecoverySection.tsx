@@ -28,10 +28,15 @@ export function SleepRecoverySection({
   );
 
   const lines = recoveryLines(snapshot);
+  /* A thin record gets ONE honest line (M-134): the inputs line, which
+     carries the count and what a read needs. The fuller line list is
+     built for a record that can be read — on a thin one its debt line
+     ("…there is no sleep debt to read") and the inputs line ("…there
+     is nothing to read yet") said the same thing twice, and a debt
+     figure drawn from one or two nights is a read the band itself
+     refuses to make. */
   const shown =
-    snapshot.recovery.band === "not-enough-data"
-      ? [...lines, snapshot.recovery.inputsLine]
-      : lines;
+    snapshot.recovery.band === "not-enough-data" ? [snapshot.recovery.inputsLine] : lines;
 
   return (
     <section className="at-section" aria-label="Sleep and recovery">

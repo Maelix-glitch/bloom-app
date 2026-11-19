@@ -14,7 +14,19 @@ import { Link } from "@tanstack/react-router";
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { Button } from "@/components/ui/button";
 import { useNutrition } from "@/hooks/useNutrition";
+import { usePlan } from "@/hooks/usePlan";
 import { fmtCount, fmtGrams, fmtKcalApprox } from "@/lib/format";
+import type { DailyPlan } from "@/lib/nutrition/plan";
+import {
+  PLAN_LOG_KEY,
+  parsePlanLogValue,
+  planLoggedEntryIdFrom,
+} from "@/lib/nutrition/planLog";
+import type { LogEntry, Meal } from "@/lib/nutrition/types";
+import { usePrefValue } from "@/lib/prefsStore";
+import { MEAL_LABEL } from "./input";
+
+const NO_PLAN_LOG: Record<string, string> = {};
 
 function useTodaySummary() {
   const nutrition = useNutrition();
@@ -30,12 +42,67 @@ function summaryLine(count: number, kcal: number, proteinG: number): string {
   } logged`;
 }
 
+/* ------------------------- the plan's next meal ------------------------- */
+
+export interface NextPlanMeal {
+  meal: Meal;
+  label: string;
+  name: string;
+}
+
+/**
+ * The day's next unlogged planned meal (brief v6 Slice 5, M-123), read
+ * from the stored plan and the real log — nothing computed, nothing
+ * invented. A dish counts as logged by the plan section's own rule (a
+ * dish entry for that meal whose recipe provenance names the dish) or
+ * by the plan-log record; a food-composed meal counts through the
+ * plan-log record for any of its suggestions. Returns the first meal
+ * in plan order that still has something unlogged, or null when there
+ * is no plan or the whole plan is in the log.
+ */
+export function nextUnloggedPlanMeal(
+  plan: DailyPlan | null,
+  entries: readonly LogEntry[],
+  planLog: Readonly<Record<string, string>>,
+): NextPlanMeal | null {
+  if (!plan) return null;
+  for (const meal of plan.meals) {
+    const headline =
+      meal.dishes.find((d) => d.role === "anchor") ?? meal.dishes[0] ?? null;
+    const name = headline?.name ?? meal.suggestions[0]?.name ?? null;
+    if (!name) continue;
+    const dishLogged = meal.dishes.some(
+      (dish) =>
+        entries.some(
+          (e) =>
+            e.day === plan.day &&
+            e.meal === meal.meal &&
+            e.source === "dish" &&
+            e.provenance.kind === "recipe" &&
+            e.provenance.sourceId === dish.dishId,
+        ) || planLoggedEntryIdFrom(planLog, entries, plan.day, meal.meal, dish.dishId) !== null,
+    );
+    const suggestionLogged = meal.suggestions.some(
+      (s) => planLoggedEntryIdFrom(planLog, entries, plan.day, meal.meal, s.foodId) !== null,
+    );
+    if (dishLogged || suggestionLogged) continue;
+    return { meal: meal.meal, label: MEAL_LABEL[meal.meal], name };
+  }
+  return null;
+}
+
 /* ---------------------------------- Today ---------------------------------- */
 
 export function NutritionTodayCard() {
   const { comparison, count } = useTodaySummary();
   const { totals, targets } = comparison;
   const hasData = count > 0;
+  const nutrition = useNutrition();
+  const plan = usePlan();
+  const planLog = usePrefValue(PLAN_LOG_KEY, parsePlanLogValue, NO_PLAN_LOG);
+  const readyPlan = plan.state.kind === "ready" ? plan.state.plan : null;
+  const nextMeal = nextUnloggedPlanMeal(readyPlan, nutrition.entries, planLog ?? {});
+  const planComplete = readyPlan !== null && nextMeal === null;
 
   return (
     <section className="home-band" aria-labelledby="home-nutrition-title">
@@ -55,6 +122,24 @@ export function NutritionTodayCard() {
                 : `${Math.round(totals.kcal)} kcal logged today`
               : "What did you eat today?"}
           </h2>
+          {/* The plan's next step, from the stored plan and the real
+              log (M-123) — the card names what is next, not just that
+              food exists. */}
+          {nextMeal ? (
+            <p
+              className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground"
+              data-testid="home-nutrition-next"
+            >
+              Next: {nextMeal.label} · {nextMeal.name}
+            </p>
+          ) : planComplete ? (
+            <p
+              className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground"
+              data-testid="home-nutrition-next"
+            >
+              Every planned meal is in today's log.
+            </p>
+          ) : null}
           <p className="mt-1 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             {hasData
               ? `${summaryLine(count, totals.kcal, totals.proteinG)}. Every value carries its source — USDA data, your labels, or a marked estimate.`

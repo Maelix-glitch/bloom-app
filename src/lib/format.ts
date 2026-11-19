@@ -59,3 +59,26 @@ export function fmtKcalApprox(n: number): string {
   const rounded = Math.round(n / 50) * 50;
   return `~${rounded.toLocaleString("en-IN")} kcal`;
 }
+
+/**
+ * A counted noun, grouped and pluralised in one place — "1 day",
+ * "0 days", "1,202 days" — so no surface can reassemble the "1 DAYS"
+ * class from a template and a bare suffix (Brief v6 §1.4).
+ */
+export const plural = (n: number, one: string, many: string = `${one}s`): string =>
+  `${fmtCount(n)} ${n === 1 ? one : many}`;
+
+/**
+ * Minutes as a human duration — "8 h", "1 h 30 min", "45 min"
+ * (Brief v6 §1.4). For target and total displays; prose inside insight
+ * sentences keeps its own phrasing.
+ */
+export function fmtDuration(min: number): string {
+  const h = Math.floor(min / 60);
+  const m = Math.round(min % 60);
+  return h && m ? `${h} h ${m} min` : h ? `${h} h` : `${m} min`;
+}
+
+/** Millilitres as litres at a litre or more — "2.2 L", else "800 ml". */
+export const fmtLitres = (ml: number): string =>
+  ml >= 1000 ? `${+(ml / 1000).toFixed(1)} L` : `${ml} ml`;

@@ -21,6 +21,11 @@
  * lights the same tile here. Tapping a tile logs — or re-logs — today
  * through the caller's handler; the full Composer stays one tap away
  * for notes, emotions and detail.
+ *
+ * Layout (brief v6, M-121): a row — prompt text beside the faces — and
+ * the card's height follows its content. The faces render at full
+ * opacity here (MoodBlob's `fullOpacity`); the Mood page's own dimmed
+ * inactive faces are untouched.
  */
 
 import { MOOD_LABELS, MoodBlob } from "@/components/mood/page/MoodBlob";
@@ -54,78 +59,83 @@ export function MoodCard({
 
   return (
     <section
-      className="home-panel home-mood-card home-rise flex h-full flex-col p-5 sm:p-7"
+      className="home-panel home-mood-card home-rise flex flex-col p-5 sm:p-7"
       style={{ animationDelay: "150ms" }}
       aria-labelledby="home-mood-title"
       data-testid="home-mood-card"
     >
-      <div>
-        <p className="home-eyebrow">Check-in</p>
-        <h2 id="home-mood-title" className="home-band-title mt-1">
-          {selected ? `Feeling ${MOOD_LABELS[selected].toLowerCase()}.` : "How does today feel?"}
-        </h2>
-      </div>
-      <p className="mt-3 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-        {selected
-          ? "Logged — thank you. Tap a face to change it, any time today."
-          : "One tap. It takes five seconds, and it is what your week is read from."}
-      </p>
+      {/* Row layout (brief v6, M-121): the prompt and the faces sit side
+          by side and the card's height follows its content — the old
+          column stretched to the habits card's height and pushed the
+          faces to the bottom across a dead void. */}
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
+        <div className="min-w-0 flex-1">
+          <p className="home-eyebrow">Check-in</p>
+          <h2 id="home-mood-title" className="home-band-title mt-1">
+            {selected ? `Feeling ${MOOD_LABELS[selected].toLowerCase()}.` : "How does today feel?"}
+          </h2>
+          <p className="mt-3 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+            {selected
+              ? "Logged — thank you. Tap a face to change it, any time today."
+              : "One tap. It takes five seconds, and it is what your week is read from."}
+          </p>
+          <button
+            type="button"
+            onClick={onOpenComposer}
+            className="mt-4 inline-flex min-h-9 items-center self-start text-[length:var(--text-caption)] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+            data-testid="home-mood-more"
+          >
+            {selected ? "Add words or detail" : "More than a face? Add words"}
+          </button>
+        </div>
 
-      <div className="mt-auto grid grid-cols-6 gap-1.5 pt-6 sm:gap-2">
-        {PAGE_MOODS.map((face) => {
-          const tone = MOOD_TONES[face];
-          const isSelected = selected === face;
-          return (
-            <button
-              key={face}
-              type="button"
-              onClick={() => onPick(face)}
-              aria-pressed={isSelected}
-              data-testid={`home-mood-face-${face}`}
-              className={cn(
-                "group flex flex-col items-center gap-2 rounded-2xl border px-1 py-3.5 transition-[transform,background-color,border-color] duration-[var(--motion-standard)] ease-[var(--ease-out-expo)] hover:-translate-y-1 sm:py-4",
-                isSelected
-                  ? "bg-white/[0.07]"
-                  : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]",
-              )}
-              style={
-                isSelected
-                  ? {
-                      borderColor: `color-mix(in oklab, ${tone} 53%, transparent)`,
-                      boxShadow: `0 12px 32px -14px ${tone}`,
-                    }
-                  : undefined
-              }
-            >
-              <span
+        <div className="grid shrink-0 grid-cols-6 gap-1.5 sm:w-[11.5rem] sm:grid-cols-3 sm:gap-2">
+          {PAGE_MOODS.map((face) => {
+            const tone = MOOD_TONES[face];
+            const isSelected = selected === face;
+            return (
+              <button
+                key={face}
+                type="button"
+                onClick={() => onPick(face)}
+                aria-pressed={isSelected}
+                data-testid={`home-mood-face-${face}`}
                 className={cn(
-                  "transition-transform duration-[var(--motion-standard)] ease-[var(--ease-out-expo)]",
-                  isSelected && "scale-110",
+                  "group flex flex-col items-center gap-2 rounded-2xl border px-1 py-3.5 transition-[transform,background-color,border-color] duration-[var(--motion-standard)] ease-[var(--ease-out-expo)] hover:-translate-y-1 sm:py-4",
+                  isSelected
+                    ? "bg-white/[0.07]"
+                    : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]",
                 )}
+                style={
+                  isSelected
+                    ? {
+                        borderColor: `color-mix(in oklab, ${tone} 53%, transparent)`,
+                        boxShadow: `0 12px 32px -14px ${tone}`,
+                      }
+                    : undefined
+                }
               >
-                <MoodBlob mood={face} size={30} active={isSelected} />
-              </span>
-              <span
-                className={cn(
-                  "text-[length:var(--text-micro)] transition-colors",
-                  isSelected ? "text-foreground" : "text-muted-foreground",
-                )}
-              >
-                {MOOD_LABELS[face]}
-              </span>
-            </button>
-          );
-        })}
+                <span
+                  className={cn(
+                    "transition-transform duration-[var(--motion-standard)] ease-[var(--ease-out-expo)]",
+                    isSelected && "scale-110",
+                  )}
+                >
+                  <MoodBlob mood={face} size={30} active={isSelected} fullOpacity />
+                </span>
+                <span
+                  className={cn(
+                    "text-[length:var(--text-micro)] transition-colors",
+                    isSelected ? "text-foreground" : "text-muted-foreground",
+                  )}
+                >
+                  {MOOD_LABELS[face]}
+                </span>
+              </button>
+            );
+          })}
+        </div>
       </div>
-
-      <button
-        type="button"
-        onClick={onOpenComposer}
-        className="mt-4 inline-flex min-h-9 items-center self-start text-[length:var(--text-caption)] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
-        data-testid="home-mood-more"
-      >
-        {selected ? "Add words or detail" : "More than a face? Add words"}
-      </button>
     </section>
   );
 }

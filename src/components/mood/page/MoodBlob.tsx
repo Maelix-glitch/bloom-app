@@ -112,10 +112,20 @@ export function MoodBlob({
   mood,
   size = 88,
   active = false,
+  fullOpacity = false,
 }: {
   mood: MoodKey;
   size?: number;
   active?: boolean;
+  /**
+   * Render at full strength even when inactive. Today's check-in card
+   * (brief v6, M-121) and the Mood page's own faces (M-136) opt in:
+   * there the faces ARE the interaction, and the dimmed default read
+   * as disabled. The Composer keeps the dimmed default — its faces
+   * are a form's options mid-composition, with their own halo, disc
+   * and tick affordances.
+   */
+  fullOpacity?: boolean;
 }) {
   return (
     <svg
@@ -126,9 +136,9 @@ export function MoodBlob({
       style={{ filter: active ? "drop-shadow(0 0 22px oklch(0.86 0.1 85 / 0.45))" : undefined }}
       aria-hidden="true"
     >
-      <path d={BLOB} fill={FILL[mood]} opacity={active ? 1 : 0.42} />
+      <path d={BLOB} fill={FILL[mood]} opacity={active || fullOpacity ? 1 : 0.42} />
       <path d={BLOB} fill="none" stroke="oklch(1 0 0 / 0.14)" strokeWidth={1.5} />
-      <g opacity={active ? 1 : 0.72}>
+      <g opacity={active || fullOpacity ? 1 : 0.72}>
         <Face mood={mood} />
       </g>
     </svg>

@@ -11,6 +11,7 @@ import { Download, Pencil, Trash2 } from "lucide-react";
 
 import { Button, Card } from "@/components/ci/primitives";
 import { formatDateShort } from "@/lib/cycle/predict";
+import { plural } from "@/lib/format";
 import { Metric } from "@/components/tk/shared";
 import {
   TRACKERS,
@@ -55,8 +56,8 @@ export function HistoryTable({
             Every day you've logged
           </h2>
           <p className="mt-1.5 text-[length:var(--text-caption)] leading-relaxed ci-soft">
-            {analysis.daysLogged} {analysis.daysLogged === 1 ? "day" : "days"} in the record · best
-            run {analysis.bestStreak} {analysis.bestStreak === 1 ? "day" : "days"}
+            {plural(analysis.daysLogged, "day")} with trackers in the record · best run{" "}
+            {plural(analysis.bestStreak, "day")}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -89,7 +90,7 @@ export function HistoryTable({
           data-testid="tk-clear-all-confirm"
         >
           <p className="text-[length:var(--text-caption)] leading-relaxed ci-soft">
-            Remove all {days.length} {days.length === 1 ? "day" : "days"} from your record
+            Remove all {plural(days.length, "day")} from your record
             {" — "}every tracker, every date? You'll get a few seconds to undo.
           </p>
           <span className="flex items-center gap-2">
@@ -194,7 +195,7 @@ export function HistoryTable({
       )}
 
       <p className="mt-3 text-[length:var(--text-meta)] leading-relaxed ci-muted">
-        Showing the {rows.length} most recent {rows.length === 1 ? "day" : "days"}. Targets:{" "}
+        Showing the most recent {plural(rows.length, "day")}. Targets:{" "}
         {TRACKERS.map((def) => `${def.name} ${def.format(analysis.trackers[def.id].goal)}`).join(
           " · ",
         )}

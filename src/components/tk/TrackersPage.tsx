@@ -1,9 +1,11 @@
 /**
  * Trackers — the one design (the former "Atlas", chosen in UI update U6).
  *
- * Trackers as a map of the day. The twenty-four hours are a compass rose;
- * each tracker is a territory drawn from its own contour line; the history
- * is one route with six paths crossing it rather than six separate charts.
+ * Trackers as a map of the day. Today is a Bloom flower — one petal per
+ * tracker, filled when its target is reached (Brief v6 Slice 6 retired
+ * the twenty-four hour compass that stood here); each tracker is a
+ * territory drawn from its own contour line; the history is one route
+ * with six paths crossing it rather than six separate charts.
  * Serif place-names, generous margins, and coordinates where a card would
  * have a title.
  *
@@ -17,7 +19,8 @@
  * data: zeros with nothing behind them are noise.
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { FeelIn } from "@/components/system/FeelIn";
 
 import { Correlations } from "@/components/tk/Correlations";
 import { HistoryTable } from "@/components/tk/HistoryTable";
@@ -26,32 +29,20 @@ import { StudyMap } from "@/components/tk/StudyMap";
 import { TRACKERS, trackerDef, type TrackerId } from "@/lib/trackers/core";
 import { formatDate } from "@/lib/cycle/predict";
 
-import { Achievements, TargetSheet } from "./Targets";
+import { Achievements, TargetsPanel } from "./Targets";
 import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
+import { TrackerFlower } from "./TrackerFlower";
 import { TrackerModal } from "./TrackerModal";
 import { contour, loggedCount, routePath, spreadRouteDots } from "./atlasCharts";
-import { DOCK_RETURN_MS, dockHiddenAfterScroll } from "./dockVisibility";
-import { Footer, Metric, Observations, SyncNote, useTrackers } from "./shared";
-
-const C = 130;
-
-/** Ring radii, outermost in. Every tracker has one, and they never overlap. */
-const RING_ORDER: { id: TrackerId; r: number }[] = [
-  { id: "sleep", r: 118 },
-  { id: "water", r: 100 },
-  { id: "screen", r: 82 },
-  { id: "movement", r: 64 },
-  { id: "study", r: 46 },
-  { id: "energy", r: 28 },
-];
-
-const polar = (r: number, deg: number) => {
-  const rad = ((deg - 90) * Math.PI) / 180;
-  return {
-    x: Math.round((C + r * Math.cos(rad)) * 100) / 100,
-    y: Math.round((C + r * Math.sin(rad)) * 100) / 100,
-  };
-};
+import { onMetricsEntryRequest } from "@/lib/trackers/entrySheet";
+import {
+  applyQuickAdd,
+  Footer,
+  Metric,
+  Observations,
+  SyncNote,
+  useTrackers,
+} from "./shared";
 
 /** Where day `i` of fourteen sits on the route chart. */
 const routeX = (i: number) => Math.round((i / 13) * 690 + 15);
@@ -65,99 +56,35 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
   /* only what this person tracks — switched-off trackers keep their history but leave the page */
   const defs = TRACKERS.filter((def) => store.active.includes(def.id));
 
-  /* the compass: sleep as the night's arc, everything else as a share of its target */
-  /**
-   * One ring per tracker, each a circle revealed by its share of the target.
-   *
-   * stroke-dasharray is the whole circumference and stroke-dashoffset is what
-   * hides the remainder, so a ring is pure geometry: value over target, no
-   * path building. That also means the browser can animate it — the CSS
-   * transition on stroke-dashoffset is what makes a tap sweep rather than
-   * jump. Caps sit at the end of the revealed part.
-   */
-  const rings = useMemo(() => {
-    const entry = store.days.find((d) => d.date === today);
-    const studyMinutes = (entry?.sessions ?? []).reduce((sum, s) => sum + s.minutes, 0);
-    const values: Record<TrackerId, number> = {
-      sleep: entry?.sleepMinutes ?? 0,
-      water: entry?.waterMl ?? 0,
-      study: studyMinutes,
-      movement: entry?.movementMinutes ?? 0,
-      energy: entry?.energy ?? 0,
-      screen: entry?.screenMinutes ?? 0,
-    };
-    const goals: Record<TrackerId, number> = {
-      sleep: store.goals.sleepMinutes || 480,
-      water: store.goals.waterMl || 2200,
-      study: store.goals.studyMinutes || 120,
-      movement: store.goals.movementMinutes || 30,
-      energy: 5,
-      screen: store.goals.screenMinutes || 180,
-    };
+  /* The flower (Brief v6 §5.2; M-131): one petal per tracker, filled
+     from the core's own reached state — `met` is metGoal() against the
+     person's goal, the same state the retired dial's centre figure
+     counted as goalsMetToday. Nothing new is defined here. */
+  const petals = defs.map((def) => ({
+    id: def.id,
+    name: def.name,
+    met: analysis.trackers[def.id].met === true,
+  }));
 
-    return RING_ORDER.filter(({ id }) => store.active.includes(id)).map(({ id, r }) => {
-      const circumference = 2 * Math.PI * r;
-      const share = Math.min(Math.max(values[id] / goals[id], 0), 1);
-      return {
-        id,
-        r,
-        circumference: Math.round(circumference * 100) / 100,
-        offset: Math.round(circumference * (1 - share) * 100) / 100,
-        share,
-      };
-    });
-  }, [store.active, store.days, store.goals, today]);
-
-  /**
-   * The night itself, as a hairline outside the rings.
-   *
-   * Sleep is the one tracker where *when* matters as much as how much, so the
-   * bed-to-wake span stays drawn on the dial even though the ring inside it
-   * now fills by hours against target.
-   */
-  const nightSpan = useMemo(() => {
-    const entry = store.days.find((d) => d.date === today);
-    const bed = entry?.bedTime ? Number(entry.bedTime.split(":")[0]) : null;
-    const wake = entry?.wakeTime ? Number(entry.wakeTime.split(":")[0]) : null;
-    if (bed === null || wake === null) return null;
-    const r = 132;
-    const span = ((wake - bed + 24) % 24) * 15 || 5;
-    const a = polar(r, bed * 15);
-    const b = polar(r, bed * 15 + span);
-    return `M ${a.x} ${a.y} A ${r} ${r} 0 ${span > 180 ? 1 : 0} 1 ${b.x} ${b.y}`;
-  }, [store.days, today]);
+  /* One tap on a tile's quick log writes through the store's own save
+     path (applyQuickAdd in shared.tsx — the write the log sheet's
+     increments always used), and the page's live region says so. */
+  const quickAdd = (id: TrackerId, amount: number) => {
+    const error = applyQuickAdd(store, id, amount);
+    setNotice(error ?? `${trackerDef(id).name} noted on the map.`);
+  };
 
   const [openId, setOpenId] = useState<TrackerId | null>(null);
   const [sheetOpen, setSheetOpen] = useState(false);
 
   /*
-   * The log dock steps aside while the page scrolls (see dockVisibility):
-   * hidden on the way down, back the moment the scroll turns up, and back
-   * on its own once the scroll has rested for DOCK_RETURN_MS. The page
-   * scrolls on the window — Atlas has no inner scroll container.
+   * The "Reflect & log today" entry (Brief v6 Slice 2; M-130): the
+   * floating pill that used to sit over this page is deleted — its
+   * action now lives in the global dock, which dispatches the
+   * metrics-entry bus. The sheet opens with the exact handler the pill
+   * called.
    */
-  const dockRendered = openId === null && !sheetOpen;
-  const [dockAway, setDockAway] = useState(false);
-  useEffect(() => {
-    if (!dockRendered) {
-      setDockAway(false);
-      return;
-    }
-    let lastY = window.scrollY;
-    let restTimer: number | undefined;
-    const onScroll = () => {
-      const y = window.scrollY;
-      setDockAway((away) => dockHiddenAfterScroll(away, y - lastY));
-      lastY = y;
-      window.clearTimeout(restTimer);
-      restTimer = window.setTimeout(() => setDockAway(false), DOCK_RETURN_MS);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.clearTimeout(restTimer);
-    };
-  }, [dockRendered]);
+  useEffect(() => onMetricsEntryRequest(() => setSheetOpen(true)), []);
 
   const closeModal = useCallback(() => {
     setOpenId(null);
@@ -200,7 +127,7 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
               ? `${analysis.daysLogged} ${analysis.daysLogged === 1 ? "day" : "days"} tracked`
               : "start tracking"}{" "}
             ·{" "}
-            {analysis.goalsMetToday}/6 targets today
+            {analysis.goalsMetToday}/{analysis.goalsCounted} targets today
           </p>
           <h1 className="at-title">Daily metrics at a glance.</h1>
           <p className="at-lede">
@@ -219,92 +146,13 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
           </p>
         ) : (
           <>
-            {/* ------------------------------ the compass --------------------------- */}
-            <section className="at-board">
-              <div className="at-compass">
-                <svg
-                  viewBox="-26 -26 312 312"
-                  role="img"
-                  aria-label="Today on a twenty-four hour compass"
-                >
-                  <circle cx={C} cy={C} r={118} className="at-track" />
-                  <circle cx={C} cy={C} r={100} className="at-track" />
-                  <circle cx={C} cy={C} r={82} className="at-track" />
-                  <circle cx={C} cy={C} r={64} className="at-track" />
-                  <circle cx={C} cy={C} r={46} className="at-track" />
-                  <circle cx={C} cy={C} r={28} className="at-track" />
-                  {nightSpan ? <path d={nightSpan} className="at-nightspan" /> : null}
-                  {Array.from({ length: 24 }, (_, h) => {
-                    const a = polar(126, h * 15);
-                    const b = polar(h % 6 === 0 ? 120 : 123, h * 15);
-                    return (
-                      <line
-                        key={h}
-                        x1={a.x}
-                        y1={a.y}
-                        x2={b.x}
-                        y2={b.y}
-                        className="at-tick"
-                        data-major={h % 6 === 0 ? "true" : "false"}
-                      />
-                    );
-                  })}
-                  {rings.map((ring) => (
-                    <circle
-                      key={ring.id}
-                      className="at-arc"
-                      data-id={ring.id}
-                      cx={C}
-                      cy={C}
-                      r={ring.r}
-                      strokeDasharray={ring.circumference}
-                      strokeDashoffset={ring.offset}
-                      transform={`rotate(-90 ${C} ${C})`}
-                      pathLength={ring.circumference}
-                    />
-                  ))}
-                  {rings
-                    .filter((ring) => ring.share > 0)
-                    .map((ring) => {
-                      const end = polar(ring.r, ring.share * 360);
-                      return (
-                        <circle
-                          key={`cap-${ring.id}`}
-                          className="at-cap"
-                          data-id={ring.id}
-                          cx={end.x}
-                          cy={end.y}
-                          r={5.2}
-                        />
-                      );
-                    })}
-                  {[0, 6, 12, 18].map((h) => {
-                    const p = polar(140, h * 15);
-                    return (
-                      <text key={h} x={p.x} y={p.y + 3} className="at-hour">
-                        {h === 0 ? "midnight" : h === 6 ? "06" : h === 12 ? "noon" : "18"}
-                      </text>
-                    );
-                  })}
-                  <text x={C} y={C - 6} className="at-centre-fig">
-                    {analysis.goalsMetToday}
-                  </text>
-                  <text x={C} y={C + 12} className="at-centre-label">
-                    of six reached
-                  </text>
-                </svg>
+            {/* ------------------------------ the flower ---------------------------- */}
+            <FeelIn as="section" className="at-board">
+              <div className="at-flower-col">
+                <TrackerFlower petals={petals} />
               </div>
 
               <div className="at-board-main">
-                <ul className="at-key" aria-label="Compass key">
-                  {defs.map((def) => (
-                    <li key={def.id} data-id={def.id}>
-                      <i aria-hidden />
-                      {def.name}
-                    </li>
-                  ))}
-                </ul>
-
                 <ul className="at-territories">
                   {defs.map((def) => {
                     const stat = analysis.trackers[def.id];
@@ -337,39 +185,88 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                             )}
                           </span>
                         </div>
-                        <svg
-                          viewBox="0 0 240 54"
-                          className="at-contour"
-                          role="img"
-                          aria-label={`${def.name}: ${shape.logged} of ${values.length} days logged`}
-                        >
-                          {/* The ground axis — y=51 is exactly where a value
-                              of zero maps in this plot. It used to render
-                              only for an empty series and vanish the moment
-                              a day was logged, leaving a lone dot floating
-                              in a blank strip; it now stays under the data
-                              in every state, as the chart's ground. */}
-                          <line x1="0" y1="51" x2="240" y2="51" className="at-contour-empty" />
-                          {shape.logged === 0 ? null : (
-                            <>
-                              {shape.areas.map((d) => (
-                                <path key={d} d={d} className="at-contour-area" />
+                        {/* The contour only exists once a day is logged.
+                            On an empty tile the dotted "nothing here"
+                            baseline stood in for an action; the quick
+                            log below is that action now (M-129). */}
+                        {shape.logged === 0 ? null : (
+                          <svg
+                            viewBox="0 0 240 54"
+                            className="at-contour"
+                            role="img"
+                            aria-label={`${def.name}: ${shape.logged} of ${values.length} days logged`}
+                          >
+                            {/* The ground axis — y=51 is exactly where a
+                                value of zero maps in this plot. It stays
+                                under the data in every logged state, as
+                                the chart's ground. */}
+                            <line x1="0" y1="51" x2="240" y2="51" className="at-contour-empty" />
+                            {shape.areas.map((d) => (
+                              <path key={d} d={d} className="at-contour-area" />
+                            ))}
+                            {shape.lines.map((d) => (
+                              <path key={d} d={d} className="at-contour-line" />
+                            ))}
+                            {shape.dots.map((dot) => (
+                              <circle
+                                key={`${dot.x}-${dot.y}`}
+                                cx={dot.x}
+                                cy={dot.y}
+                                r={2.4}
+                                className="at-contour-dot"
+                              />
+                            ))}
+                          </svg>
+                        )}
+                        {/* Quick log (§4.3; M-129): the tracker's own
+                            primary input, on the tile. Increments write
+                            through applyQuickAdd — the store's own save
+                            path; sleep's total and energy's rating open
+                            / set through the same flows as the sheet.
+                            The buttons stop propagation: the card behind
+                            them opens the full log sheet. */}
+                        <div className="at-territory-actions">
+                          {def.id === "sleep" ? (
+                            <button
+                              type="button"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                setOpenId("sleep");
+                              }}
+                            >
+                              Log last night
+                            </button>
+                          ) : def.id === "energy" ? (
+                            <span role="group" aria-label="Log energy" className="at-energy-dots">
+                              {[1, 2, 3, 4, 5].map((n) => (
+                                <button
+                                  key={n}
+                                  type="button"
+                                  aria-pressed={stat.today === n}
+                                  onClick={(event) => {
+                                    event.stopPropagation();
+                                    quickAdd("energy", n);
+                                  }}
+                                >
+                                  {n}
+                                </button>
                               ))}
-                              {shape.lines.map((d) => (
-                                <path key={d} d={d} className="at-contour-line" />
-                              ))}
-                              {shape.dots.map((dot) => (
-                                <circle
-                                  key={`${dot.x}-${dot.y}`}
-                                  cx={dot.x}
-                                  cy={dot.y}
-                                  r={2.4}
-                                  className="at-contour-dot"
-                                />
-                              ))}
-                            </>
+                            </span>
+                          ) : (
+                            def.quickAdds.map((amount) => (
+                              <button
+                                key={amount}
+                                type="button"
+                                onClick={(event) => {
+                                  event.stopPropagation();
+                                  quickAdd(def.id, amount);
+                                }}
+                              >
+                                +{def.format(amount)}
+                              </button>
+                            ))
                           )}
-                        </svg>
+                        </div>
                         <div className="at-territory-foot">
                           <span>
                             target <Metric value={def.format(stat.goal)} /> · avg{" "}
@@ -393,28 +290,32 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                   })}
                 </ul>
               </div>
-            </section>
+            </FeelIn>
             <p aria-live="polite" className="at-notice">
               {notice}
             </p>
 
-            {/* ---------------------- targets, always editable -------------------- */}
-            <section className="at-section">
+            {/* ---------------------- targets, shown not formed -------------------- */}
+            <FeelIn as="section" className="at-section">
               <p className="at-sectionhead">Targets</p>
-              <TargetSheet store={store} />
-            </section>
+              <TargetsPanel store={store} />
+            </FeelIn>
 
             {hasDays ? (
-              <section className="at-section">
+              <FeelIn as="section" className="at-section">
                 <p className="at-sectionhead">Achievements</p>
                 <Achievements analysis={analysis} />
-              </section>
+              </FeelIn>
             ) : null}
 
             {hasDays ? (
               <>
                 {/* ------------------------------ the route --------------------------- */}
-                <section className="at-section">
+                {/* The route renders only when a series actually has a
+                    logged day — a record of notes alone would otherwise
+                    stand a head over a blank chart (M-134). */}
+                {routeSeries.some((s) => s.path.logged > 0) ? (
+                <FeelIn as="section" className="at-section">
                   <p className="at-sectionhead">The route · fourteen days, six paths</p>
                   <div className="at-route-scroll">
                     <svg
@@ -489,10 +390,11 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                     in a line is a day you didn't log, left empty on purpose; a dot on its own is a
                     single logged day, with nothing on either side of it yet.
                   </p>
-                </section>
+                </FeelIn>
+                ) : null}
 
                 {/* ------------------------------ study field -------------------------- */}
-                <section className="at-section">
+                <FeelIn as="section" className="at-section">
                   <p className="at-sectionhead">Study · the field</p>
                   <StudyMap days={store.days} today={today} goal={store.goals.studyMinutes} />
                   {analysis.subjects.length > 0 ? (
@@ -509,10 +411,10 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                       ))}
                     </ul>
                   ) : null}
-                </section>
+                </FeelIn>
 
                 {/* ------------------------------- the deep read ---------------------- */}
-                <section className="at-section">
+                <FeelIn as="section" className="at-section">
                   <p className="at-sectionhead">Advanced · bright days against low ones</p>
                   <p className="at-statement">{analysis.advanced.headline}</p>
                   <ul className="at-contrasts">
@@ -549,40 +451,45 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                       <li key={i}>{line}</li>
                     ))}
                   </ul>
-                </section>
+                </FeelIn>
 
-                <section className="at-section">
-                  <p className="at-sectionhead">What the record shows</p>
-                  <Observations
-                    items={analysis.observations}
-                    className="at-observations"
-                    caption="From your own logged days"
-                  />
-                </section>
+                {/* Observations renders nothing for an empty list, so
+                    the section itself is gated on there being something
+                    to show — no head over an empty body (M-134). */}
+                {analysis.observations.length > 0 ? (
+                  <FeelIn as="section" className="at-section">
+                    <p className="at-sectionhead">What the record shows</p>
+                    <Observations
+                      items={analysis.observations}
+                      className="at-observations"
+                      caption="From your own logged days"
+                    />
+                  </FeelIn>
+                ) : null}
 
                 {store.active.includes("sleep") ? (
                   <SleepRecoverySection days={store.days} today={today} />
                 ) : null}
 
                 {analysis.correlations.length > 0 ? (
-                  <section className="at-section">
+                  <FeelIn as="section" className="at-section">
                     <p className="at-sectionhead">What moves together</p>
                     <Correlations items={analysis.correlations} />
-                  </section>
+                  </FeelIn>
                 ) : null}
 
-                <section className="at-section">
+                <FeelIn as="section" className="at-section">
                   <p className="at-sectionhead">Field notes · every entry</p>
                   <HistoryTable days={store.days} analysis={analysis} onDelete={store.removeDay} />
-                </section>
+                </FeelIn>
               </>
             ) : (
-              <section className="at-section">
+              <FeelIn as="section" className="at-section">
                 <p className="at-statement">
                   Nothing plotted yet. Add one day above and the contours, the route and the deep
                   read all draw themselves from it.
                 </p>
-              </section>
+              </FeelIn>
             )}
 
             <TrackerModal
@@ -598,23 +505,6 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
           </>
         )}
 
-        {openId === null && !sheetOpen ? (
-          /* The dock and the CTA are styled entirely by trackers.css
-             (.premium-action-dock / .premium-log-cta — positioning, phone
-             tab-bar clearance, states). They used to be duplicated inline
-             "in case the stylesheet is late"; the sheet is a route-level
-             link, and every other control on the page trusts it. */
-          <div className="premium-action-dock" data-away={dockAway ? "true" : undefined}>
-            <button
-              type="button"
-              className="premium-log-cta"
-              onClick={() => setSheetOpen(true)}
-              aria-haspopup="dialog"
-            >
-              Reflect &amp; log today
-            </button>
-          </div>
-        ) : null}
       </div>
     </div>
   );

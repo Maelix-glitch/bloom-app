@@ -35,7 +35,7 @@ import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { fmtDate } from "@/lib/format";
+import { fmtDate, fmtKcalApprox } from "@/lib/format";
 import { setPref } from "@/lib/prefs";
 import { WEIGHINS_KEY, parseWeighIns, type WeighIn } from "@/lib/health/body";
 import { FOODLOG_KEY, parseFoodLogValue } from "@/lib/nutrition/store";
@@ -280,6 +280,21 @@ function AssessmentSettledCard({
     }
   })();
 
+  /* The one-line summary (brief v6 Slice 5, M-119): goal and guide from
+     the same real data the paragraphs below carry — and when the safety
+     gate blocks targets, the line says so without naming a number. */
+  const summaryLine = [
+    goal ? `Goal: ${GOAL_LABEL[goal].toLowerCase()}` : "Assessment complete",
+    targetState.kind === "ready"
+      ? `${fmtKcalApprox(targetState.targets.kcal)} guide`
+      : targetState.kind === "blocked"
+        ? "no calorie target set"
+        : "no daily target yet",
+    ...(targetState.kind === "ready"
+      ? [`${Math.round(targetState.targets.proteinG)} g protein a day`]
+      : []),
+  ].join(" · ");
+
   return (
     <section
       className={`home-band assess-prompt h-full${flying ? " assess-fly" : ""}`}
@@ -297,36 +312,49 @@ function AssessmentSettledCard({
           <h2 id="home-starting-point-title" className="home-band-title mt-1">
             Your starting point
           </h2>
-          <p className="mt-1 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            {state.completedAt ? <>Completed {fmtDate(state.completedAt)}. </> : null}
-            {goal ? <>Your goal: {GOAL_LABEL[goal].toLowerCase()}.</> : null}
+          {/* The settled card's resting form is this one line (M-119) —
+              the full account sits behind Details, one tap away. */}
+          <p
+            className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground"
+            data-testid="home-starting-point-summary"
+          >
+            {summaryLine}
           </p>
-          {targetState.kind === "ready" ? (
-            <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-              <span className="whitespace-nowrap text-foreground">
-                ~{Math.round(targetState.targets.kcal)} kcal
-              </span>{" "}
-              ·{" "}
-              <span className="whitespace-nowrap text-foreground">
-                {Math.round(targetState.targets.proteinG)} g protein
-              </span>{" "}
-              a day — estimates from your body numbers (Mifflin–St Jeor), a guide, not a
-              prescription.
+          <details className="group mt-2">
+            <summary className="inline-flex min-h-9 cursor-pointer list-none items-center text-[length:var(--text-caption)] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline [&::-webkit-details-marker]:hidden">
+              Details
+            </summary>
+            <p className="mt-1 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+              {state.completedAt ? <>Completed {fmtDate(state.completedAt)}. </> : null}
+              {goal ? <>Your goal: {GOAL_LABEL[goal].toLowerCase()}.</> : null}
             </p>
-          ) : targetState.kind === "blocked" ? (
-            <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-              Your safety answers mean Bloom doesn't set calorie targets for you.
-            </p>
-          ) : (
-            <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-              No daily target yet — targets come from your body numbers on Trackers.
-            </p>
-          )}
-          {planLine ? (
-            <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-              {planLine}
-            </p>
-          ) : null}
+            {targetState.kind === "ready" ? (
+              <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                <span className="whitespace-nowrap text-foreground">
+                  {fmtKcalApprox(targetState.targets.kcal)}
+                </span>{" "}
+                ·{" "}
+                <span className="whitespace-nowrap text-foreground">
+                  {Math.round(targetState.targets.proteinG)} g protein
+                </span>{" "}
+                a day — estimates from your body numbers (Mifflin–St Jeor), a guide, not a
+                prescription.
+              </p>
+            ) : targetState.kind === "blocked" ? (
+              <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                Your safety answers mean Bloom doesn't set calorie targets for you.
+              </p>
+            ) : (
+              <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                No daily target yet — targets come from your body numbers on Trackers.
+              </p>
+            )}
+            {planLine ? (
+              <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                {planLine}
+              </p>
+            ) : null}
+          </details>
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <Button type="button" size="sm" asChild>
               <Link to="/nutrition">Open Nutrition</Link>

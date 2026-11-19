@@ -34,6 +34,10 @@
  *     be spoken at all. Below that it is reported as pending, WITH its
  *     real count, so the page can say "5 of 8 days" instead of either
  *     dressing five days up as a pattern or pretending nothing exists.
+ *     A paired day has BOTH sides logged on that local date, counted by
+ *     `pairedDays` (lib/localDay) — never by one side alone. (An earlier
+ *     version counted the food and habit pairs' progress in mood days
+ *     only: "7 of 8 paired days" over a 2-day food log — M-112.)
  *   · Each group needs at least MIN_GROUP_DAYS days.
  *   · An association weaker than MIN_EFFECT is NOT surfaced — not
  *     softened, not footnoted: absent. Weak noise does not become a
@@ -58,7 +62,7 @@
 
 import type { WeighIn } from "@/lib/health/body";
 import type { HabitLog } from "@/lib/home/habits";
-import { localDay, shiftDay } from "@/lib/localDay";
+import { localDay, pairedDays, shiftDay } from "@/lib/localDay";
 import type { MoodEntry } from "@/lib/mood/types";
 import type { LogEntry } from "@/lib/nutrition/types";
 import { valueOf, type DayEntry } from "@/lib/trackers/core";
@@ -244,7 +248,13 @@ export interface WholeLifeInsight {
    * from the same GroupComparison, so they can never disagree.
    */
   figures: { label: string; value: string }[];
-  /** Paired days (or weigh-ins, for the weight trend) behind this. */
+  /**
+   * Days behind this: the days the comparison actually ran over (for
+   * the binary food pair that includes the unlogged group — it is one
+   * of the two compared groups; weigh-ins for the weight trend). The
+   * PENDING progress count is a different quantity — paired days, both
+   * sides logged — and lives on WholeLifePending.
+   */
   sampleDays: number;
   windowDays: number;
   /** Signed standardised difference; sign = direction, magnitude = rank. */
@@ -256,6 +266,7 @@ export interface WholeLifePending {
   kind: WholeLifeInsightKind;
   /** "Sleep & mood" — the pair's plain name. */
   label: string;
+  /** PAIRED days — both sides logged on the same local date (pairedDays). */
   sampleDays: number;
   neededDays: number;
 }
@@ -561,6 +572,16 @@ function weightInsight(input: WholeLifeInput): WholeLifeInsight | null {
 
 /* --------------------------------- engine -------------------------------- */
 
+/**
+ * Was the pair's DRIVER side actually logged on this day? For value
+ * drivers, presence is a non-null value. For the habit-tick count the
+ * comparison treats absence as a recorded 0 — but a PAIR still needs a
+ * day with at least one tick, or "paired" silently means "mood days"
+ * (the M-112 defect).
+ */
+const driverLogged = (def: PairDef, p: DayPoint): boolean =>
+  def.kind === "habits-mood" ? p.habitTicks > 0 : def.driver(p) !== null;
+
 export function buildWholeLifeInsights(input: WholeLifeInput): WholeLifeResult {
   const series = buildDailySeries(input);
   const insights: WholeLifeInsight[] = [];
@@ -573,19 +594,26 @@ export function buildWholeLifeInsights(input: WholeLifeInput): WholeLifeResult {
       const outcome = def.outcome(p);
       if (driver !== null && outcome !== null) pairs.push({ driver, outcome });
     }
-    if (pairs.length < MIN_PAIRED_DAYS) {
-      if (pairs.length > 0) {
+    /* Progress toward the minimum is counted in paired days — both
+       sides logged on the same local date (pairedDays, lib/localDay).
+       For the continuous pairs that equals the compared sample; for
+       the count driver it is the tick days that also carry the outcome. */
+    const paired = pairedDays(
+      series.filter((p) => driverLogged(def, p)).map((p) => p.date),
+      series.filter((p) => def.outcome(p) !== null).map((p) => p.date),
+    );
+    const comparison = pairs.length >= MIN_PAIRED_DAYS ? compareGroups(pairs) : null;
+    if (comparison === null || Math.abs(comparison.d) < MIN_EFFECT) {
+      if (paired > 0 && paired < MIN_PAIRED_DAYS) {
         pending.push({
           kind: def.kind,
           label: def.label,
-          sampleDays: pairs.length,
+          sampleDays: paired,
           neededDays: MIN_PAIRED_DAYS,
         });
       }
       continue;
     }
-    const comparison = compareGroups(pairs);
-    if (comparison === null || Math.abs(comparison.d) < MIN_EFFECT) continue;
     insights.push({
       kind: def.kind,
       headline: def.headline(comparison.d > 0),
@@ -598,24 +626,25 @@ export function buildWholeLifeInsights(input: WholeLifeInput): WholeLifeResult {
   }
 
   /* Food & mood — the binary pair: days food was logged vs days it
-     wasn't, among days mood was logged at all. */
+     wasn't, among days mood was logged at all. The comparison's sample
+     is those mood days (the unlogged days are one of its two groups);
+     the pair's PROGRESS is counted in paired days — days carrying both
+     food and mood — so a thin food log can never borrow the mood count,
+     and the pair reports its real standing instead of vanishing when
+     the mood count alone crosses the minimum (M-112). */
   const moodDays = series.filter((p) => p.mood !== null);
   const foodYes = moodDays.filter((p) => p.foodLogged).map((p) => p.mood!);
   const foodNo = moodDays.filter((p) => !p.foodLogged).map((p) => p.mood!);
   const foodTotal = foodYes.length + foodNo.length;
-  if (foodTotal < MIN_PAIRED_DAYS) {
-    if (foodTotal > 0) {
-      pending.push({
-        kind: "food-mood",
-        label: "Food logging & mood",
-        sampleDays: foodTotal,
-        neededDays: MIN_PAIRED_DAYS,
-      });
-    }
-  } else {
+  const foodPaired = pairedDays(
+    series.filter((p) => p.foodLogged).map((p) => p.date),
+    moodDays.map((p) => p.date),
+  );
+  let foodInsight: WholeLifeInsight | null = null;
+  if (foodTotal >= MIN_PAIRED_DAYS) {
     const comparison = compareBinary(foodYes, foodNo);
     if (comparison !== null && Math.abs(comparison.d) >= MIN_EFFECT) {
-      insights.push({
+      foodInsight = {
         kind: "food-mood",
         headline:
           comparison.d > 0
@@ -635,8 +664,18 @@ export function buildWholeLifeInsights(input: WholeLifeInput): WholeLifeResult {
         sampleDays: foodTotal,
         windowDays: WHOLE_LIFE_WINDOW_DAYS,
         strength: Math.round(comparison.d * 100) / 100,
-      });
+      };
     }
+  }
+  if (foodInsight !== null) {
+    insights.push(foodInsight);
+  } else if (foodPaired > 0 && foodPaired < MIN_PAIRED_DAYS) {
+    pending.push({
+      kind: "food-mood",
+      label: "Food logging & mood",
+      sampleDays: foodPaired,
+      neededDays: MIN_PAIRED_DAYS,
+    });
   }
 
   const weight = weightInsight(input);

@@ -7,10 +7,14 @@
  * no target or nothing logged — never a fabricated fraction).
  *
  * The Hero is the prototype's card-gold composition on Bloom's rules:
- * rings only for the two targets Bloom's engine actually sets (kcal,
- * protein — carbs and fat are totals, drawn without target framing);
- * the provenance ledger counts the day's energy by where it came from;
- * the eating window appears only when entries carry real timestamps.
+ * the day's figure is kcal EATEN against the guide — progress, never a
+ * countdown (brief v6, M-126) — and the two targets Bloom's engine
+ * actually sets (kcal, protein) read as house meters; carbs and fat
+ * are totals, drawn without target framing. The footer is ONE row
+ * (M-124): the provenance ledger's one-line summary — the ledger
+ * counts the day's energy by where it came from — and the eating
+ * window as one chip; the window appears only when entries carry real
+ * timestamps.
  * Safety states are Bloom's, unchanged: blocked → totals only, no
  * target framing anywhere and the gate's own note; no profile → the
  * unlock note naming the next step.
@@ -20,7 +24,7 @@ import type { CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight, ShieldCheck } from "lucide-react";
 
-import { fmtCount, fmtGrams, fmtKcalApprox } from "@/lib/format";
+import { fmtCount, fmtGrams, fmtKcalApprox, plural } from "@/lib/format";
 import { shiftDay } from "@/lib/localDay";
 import {
   eatingWindowOf,
@@ -32,7 +36,6 @@ import {
 } from "@/lib/nutrition";
 import { pctOfTarget } from "@/lib/nutrition/targets";
 import type { NutritionTargetState } from "@/hooks/useNutrition";
-import { Bar, Rings } from "./NutritionPrimitives";
 import { EstimateChip } from "./ProvenanceBadge";
 
 /* --------------------------------- dates -------------------------------- */
@@ -168,9 +171,9 @@ export function NutritionHero({
   const window = eatingWindowOf(log.entries);
   const empty = log.entries.length === 0;
 
-  /* The remaining figure is the ring centre's hero numeral now (§H),
-     so the headline no longer repeats it — it carries only the day's
-     posture, and the number lives in exactly one place on the card. */
+  /* The headline carries only the day's posture, derived from the
+     engine's remaining figure; the numeral itself is what was EATEN
+     (M-126) and lives in exactly one place on the card. */
   const headline = empty ? (
     <>
       A blank page, <em className="nut-gold-text">ready.</em>
@@ -191,39 +194,6 @@ export function NutritionHero({
     <>{fmtCount(totals.kcal)} kcal logged {day === today ? "today" : "that day"}</>
   );
 
-  const macros: {
-    label: string;
-    color: string;
-    value: string;
-    targetText?: string;
-    fraction: number | null;
-    metric?: string;
-  }[] = [
-    {
-      label: "Protein",
-      color: "var(--sage)",
-      metric: "day-protein-vs-target",
-      /* Computed day totals go through the shared display formatter
-         (whole, grouped) — the input module's formatGrams is for the
-         person's own entered amounts, where their decimal is theirs. */
-      value: `${fmtGrams(totals.proteinG)} g`,
-      ...(targets ? { targetText: ` / ~${fmtGrams(targets.proteinG)} g` } : {}),
-      fraction: comparison.proteinFraction,
-    },
-    {
-      label: "Carbs",
-      color: "var(--sky)",
-      value: `${fmtGrams(totals.carbsG)} g`,
-      fraction: null,
-    },
-    {
-      label: "Fat",
-      color: "var(--amber)",
-      value: `${fmtGrams(totals.fatG)} g`,
-      fraction: null,
-    },
-  ];
-
   const ledger: { label: string; kcal: number; color: string }[] = [
     { label: "USDA FoodData Central", kcal: shares.usdaKcal, color: "var(--sage)" },
     { label: "Your value", kcal: shares.ownKcal, color: "var(--gold)" },
@@ -233,61 +203,39 @@ export function NutritionHero({
   return (
     <section className="nut-card nut-card-gold nut-rise section section--lead" aria-label="Day totals" style={{ "--d": "80ms" } as CSSProperties}>
       <div className="flex flex-col items-center gap-7 sm:flex-row sm:items-center">
-        <div
-          {...(targets
-            ? {
-                role: "progressbar",
-                "aria-label": "Calories against target",
-                "aria-valuemin": 0,
-                "aria-valuemax": 100,
-                "aria-valuenow": pctOfTarget(totals.kcal, targets.kcal),
-              }
-            : {})}
-        >
-          <Rings
-            size={232}
-            stroke={11}
-            gap={7}
-            rings={[
-              { fraction: comparison.kcalFraction, color: "var(--gold-soft)" },
-              { fraction: comparison.proteinFraction, color: "var(--sage)" },
-            ]}
-          >
-            {/* The centre answers "how much is left" (§H): with a
-                target, the hero numeral is the REMAINING figure and
-                the caption carries the consumed-vs-target pair; the
-                arc still draws the consumed fraction. Without a
-                target there is no remainder to state, so the centre
-                stays the day's logged total, plainly captioned. */}
-            {targets && comparison.kcalRemaining !== null ? (
-              <>
-                <span
-                  className="font-display text-[44px] leading-none text-foreground tabular-nums"
-                  data-metric="day-kcal-headline"
-                >
-                  {fmtCount(Math.abs(comparison.kcalRemaining))}
-                </span>
-                <span className="mt-1.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
-                  {comparison.kcalRemaining < 0 ? "kcal past your guide" : "kcal left"}
-                </span>
-                <span
-                  className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums"
-                  data-metric="day-kcal-vs-target"
-                >
-                  {fmtCount(totals.kcal)} of {fmtKcalApprox(targets.kcal)} eaten
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="font-display text-[44px] leading-none text-foreground tabular-nums">
-                  {fmtCount(totals.kcal)}
-                </span>
-                <span className="mt-1.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
-                  kcal
-                </span>
-              </>
-            )}
-          </Rings>
+        {/* The day's figure (M-126): kcal EATEN so far, the guide as
+            its context line. It used to be the countdown — the
+            remaining figure as the hero numeral with a remaining-kcal
+            caption beneath it, inside a concentric double ring
+            (M-125). The targets
+            and every computed number are unchanged; only the framing
+            moved from what's left to what's done. */}
+        <div className="shrink-0 text-center sm:w-[232px]">
+          {targets ? (
+            <>
+              <span
+                className="font-display text-[44px] leading-none text-foreground tabular-nums"
+                data-metric="day-kcal-headline"
+              >
+                {fmtCount(totals.kcal)}
+              </span>
+              <span
+                className="mt-1.5 block text-[length:var(--text-caption)] text-muted-foreground tabular-nums"
+                data-metric="day-kcal-vs-target"
+              >
+                of your {fmtKcalApprox(targets.kcal)} guide
+              </span>
+            </>
+          ) : (
+            <>
+              <span className="font-display text-[44px] leading-none text-foreground tabular-nums">
+                {fmtCount(totals.kcal)}
+              </span>
+              <span className="mt-1.5 block text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
+                kcal
+              </span>
+            </>
+          )}
         </div>
 
         <div className="min-w-0 flex-1">
@@ -296,30 +244,110 @@ export function NutritionHero({
             {headline}
           </h2>
           <div className="mt-5 space-y-3.5">
-            {macros.map((macro, i) => (
-              <div key={macro.label}>
-                <div className="flex items-baseline gap-2 text-[length:var(--text-callout)]">
-                  <span
-                    className="size-2 shrink-0 translate-y-[-1px] rounded-full"
-                    style={{ background: macro.color }}
-                    aria-hidden
+            {/* Calories and Protein read as house meters against the
+                guide (M-125): each meter's max is the guide and its
+                value what was eaten, figures adjacent on the label
+                row. Carbs and fat are totals — the engine sets no
+                guide for them, so they carry no track at all (the old
+                rows drew empty tracks under them whenever a target
+                existed). Computed day totals go through the shared
+                display formatter (whole, grouped) — the input
+                module's formatGrams is for the person's own entered
+                amounts, where their decimal is theirs. */}
+            <div>
+              <div className="flex items-baseline gap-2 text-[length:var(--text-callout)]">
+                <span
+                  className="size-2 shrink-0 translate-y-[-1px] rounded-full"
+                  style={{ background: "var(--gold-soft)" }}
+                  aria-hidden
+                />
+                <span className="text-muted-foreground">Calories</span>
+                <span className="ml-auto font-semibold text-foreground tabular-nums">
+                  {targets ? (
+                    <>
+                      {fmtCount(totals.kcal)} of {fmtKcalApprox(targets.kcal)}
+                    </>
+                  ) : (
+                    <>{fmtCount(totals.kcal)} kcal</>
+                  )}
+                </span>
+              </div>
+              {targets ? (
+                <div className="ml-4 mt-1.5">
+                  <div
+                    className="meter"
+                    role="progressbar"
+                    aria-label="Calories against target"
+                    aria-valuemin={0}
+                    aria-valuemax={Math.round(targets.kcal)}
+                    aria-valuenow={Math.round(totals.kcal)}
+                    style={
+                      {
+                        "--v": `${Math.max(0, Math.min(100, pctOfTarget(totals.kcal, targets.kcal)))}%`,
+                      } as CSSProperties
+                    }
                   />
-                  <span className="text-muted-foreground">{macro.label}</span>
-                  <span
-                    className="ml-auto font-semibold text-foreground tabular-nums"
-                    data-metric={macro.metric}
-                  >
-                    {macro.value}
-                    {macro.targetText ? (
-                      <span className="font-normal text-muted-foreground">{macro.targetText}</span>
-                    ) : null}
-                  </span>
                 </div>
-                {targets ? (
-                  <div className="ml-4 mt-1.5">
-                    <Bar fraction={macro.fraction} color={macro.color} height={5} delay={200 + i * 120} />
-                  </div>
-                ) : null}
+              ) : null}
+            </div>
+
+            <div>
+              <div className="flex items-baseline gap-2 text-[length:var(--text-callout)]">
+                <span
+                  className="size-2 shrink-0 translate-y-[-1px] rounded-full"
+                  style={{ background: "var(--sage)" }}
+                  aria-hidden
+                />
+                <span className="text-muted-foreground">Protein</span>
+                <span
+                  className="ml-auto font-semibold text-foreground tabular-nums"
+                  data-metric="day-protein-vs-target"
+                >
+                  {fmtGrams(totals.proteinG)} g
+                  {targets ? (
+                    <span className="font-normal text-muted-foreground">
+                      {" "}
+                      of ~{fmtGrams(targets.proteinG)} g
+                    </span>
+                  ) : null}
+                </span>
+              </div>
+              {targets ? (
+                <div className="ml-4 mt-1.5">
+                  <div
+                    className="meter"
+                    role="progressbar"
+                    aria-label="Protein against target"
+                    aria-valuemin={0}
+                    aria-valuemax={Math.round(targets.proteinG)}
+                    aria-valuenow={Math.round(totals.proteinG)}
+                    style={
+                      {
+                        "--v": `${Math.max(0, Math.min(100, (comparison.proteinFraction ?? 0) * 100))}%`,
+                      } as CSSProperties
+                    }
+                  />
+                </div>
+              ) : null}
+            </div>
+
+            {[
+              { label: "Carbs", value: totals.carbsG, color: "var(--sky)" },
+              { label: "Fat", value: totals.fatG, color: "var(--amber)" },
+            ].map((m) => (
+              <div
+                key={m.label}
+                className="flex items-baseline gap-2 text-[length:var(--text-callout)]"
+              >
+                <span
+                  className="size-2 shrink-0 translate-y-[-1px] rounded-full"
+                  style={{ background: m.color }}
+                  aria-hidden
+                />
+                <span className="text-muted-foreground">{m.label}</span>
+                <span className="ml-auto font-semibold text-foreground tabular-nums">
+                  {fmtGrams(m.value)} g
+                </span>
               </div>
             ))}
           </div>
@@ -328,85 +356,81 @@ export function NutritionHero({
 
       <hr className="nut-hairline my-6" />
 
-      <div className="grid gap-6 sm:grid-cols-[1.4fr_1fr]">
-        <div>
-          <div className="flex items-center justify-between gap-3">
-            <p className="flex items-center gap-2 text-[length:var(--text-callout)] font-medium text-foreground">
-              <ShieldCheck className="size-4 text-[var(--sage)]" aria-hidden />
-              Provenance ledger
-            </p>
-            {shares.verifiedShare !== null ? (
-              <p className="text-right">
-                <span className="font-display text-[length:var(--text-title)] text-foreground tabular-nums">
-                  {Math.round(shares.verifiedShare * 100)}%
-                </span>{" "}
-                <span className="text-[length:var(--text-caption)] text-muted-foreground">
-                  of your energy is from stated values, not estimates
-                </span>
-              </p>
-            ) : (
-              <p className="text-[length:var(--text-caption)] text-muted-foreground">
-                Nothing to verify yet
-              </p>
-            )}
-          </div>
-          {shares.totalKcal > 0 ? (
-            <>
-              <div className="nut-ledger mt-3" aria-hidden>
-                {ledger.map((row) => (
-                  <span
-                    key={row.label}
-                    style={{
-                      width: `${(row.kcal / shares.totalKcal) * 100}%`,
-                      background: row.color,
-                    }}
-                  />
-                ))}
-              </div>
-              <ul className="mt-3 space-y-1.5">
-                {ledger.map((row) => (
-                  <li
-                    key={row.label}
-                    className="flex items-center gap-2 text-[length:var(--text-caption)] text-muted-foreground"
-                  >
-                    <span className="size-2 rounded-full" style={{ background: row.color }} aria-hidden />
-                    {row.label}
-                    <span className="ml-auto font-semibold text-foreground tabular-nums">
-                      {fmtCount(row.kcal)} kcal
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </>
-          ) : null}
-        </div>
-
-        <div>
-          <p className="eyebrow">Eating window</p>
-          {window ? (
-            <>
-              <p className="mt-2 font-display text-[24px] text-foreground tabular-nums">
-                {window.first} → {window.last}
-              </p>
-              <p className="mt-1 text-[length:var(--text-caption)] text-muted-foreground">
-                {window.spanMinutes > 0 ? formatSpan(window.spanMinutes) : "A single sitting so far"}
-              </p>
-            </>
-          ) : (
-            <p className="mt-2 text-[length:var(--text-callout)] text-muted-foreground">
-              Appears with your first log.
-            </p>
-          )}
-        </div>
+      {/* ONE footer row (M-124): the ledger's summary in one line on
+          the left — entry count plus its factual state, where the
+          empty day's "Nothing to verify yet" belongs — and the eating
+          window as one chip on the right. The ledger detail (bar +
+          source rows) and the target's own source line follow below. */}
+      <div className="nut-hero-foot flex flex-wrap items-center justify-between gap-x-4 gap-y-3">
+        <p className="flex items-center gap-2 text-[length:var(--text-callout)] font-medium text-foreground">
+          <ShieldCheck className="size-4 shrink-0 text-[var(--sage)]" aria-hidden />
+          Provenance ledger
+          <span className="font-normal text-muted-foreground">
+            · {plural(log.entries.length, "entry", "entries")}
+            {shares.verifiedShare !== null
+              ? ` · ${Math.round(shares.verifiedShare * 100)}% from stated values`
+              : " · Nothing to verify yet"}
+          </span>
+        </p>
+        <span className="nut-chip">
+          Eating window ·{" "}
+          {window
+            ? window.spanMinutes > 0
+              ? `${window.first} → ${window.last} · ${formatSpan(window.spanMinutes)}`
+              : window.first
+            : "appears with your first log"}
+        </span>
       </div>
 
+      {shares.totalKcal > 0 ? (
+        <>
+          <div className="nut-ledger mt-4" aria-hidden>
+            {ledger.map((row) => (
+              <span
+                key={row.label}
+                style={{
+                  width: `${(row.kcal / shares.totalKcal) * 100}%`,
+                  background: row.color,
+                }}
+              />
+            ))}
+          </div>
+          <ul className="mt-3 space-y-1.5">
+            {ledger.map((row) => (
+              <li
+                key={row.label}
+                className="flex items-center gap-2 text-[length:var(--text-caption)] text-muted-foreground"
+              >
+                <span className="size-2 rounded-full" style={{ background: row.color }} aria-hidden />
+                {row.label}
+                <span className="ml-auto font-semibold text-foreground tabular-nums">
+                  {fmtCount(row.kcal)} kcal
+                </span>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
+      {/* The target's own provenance — the BMR/TDEE specifics moved
+          here, into the ledger detail (M-124), out of the sentence
+          that used to wrap under the estimate chip. */}
+      {targetState.kind === "ready" && bmr !== null && tdee !== null ? (
+        <p
+          className="mt-3 text-[length:var(--text-caption)] text-muted-foreground"
+          data-testid="target-source-line"
+        >
+          Where the target comes from: {fmtCount(bmr)} kcal at rest, {fmtKcalApprox(tdee)} with
+          activity (Mifflin–St Jeor).
+        </p>
+      ) : null}
+
       {targetState.kind === "ready" ? (
-        <p className="nut-note">
-          <EstimateChip /> Targets are estimates from your body numbers (Mifflin–St Jeor
-          {bmr !== null && tdee !== null
-            ? `, ${fmtCount(bmr)} kcal at rest, ${fmtKcalApprox(tdee)} with activity`
-            : ""}
-          ) — a guide for the day, not a prescription.
+        <p className="nut-note flex items-center gap-2">
+          <EstimateChip />
+          <span>
+            Targets are estimates (Mifflin–St Jeor) — a guide for the day, not a prescription.
+          </span>
         </p>
       ) : targetState.kind === "blocked" ? (
         <p className="nut-note">
