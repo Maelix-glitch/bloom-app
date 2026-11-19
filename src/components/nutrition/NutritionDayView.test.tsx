@@ -207,9 +207,28 @@ describe("WeekPanel + PatternLab", () => {
   });
 
   it("PatternLab keeps the honest empty state with no mood history", () => {
+    /* A logged day takes the page out of the fresh-account merged
+       empty state (empty-state slice), so the lab's own empty row is
+       what renders — the assertion below is unchanged. */
+    const egg = findUsdaReference("usda-171287")!;
+    log(egg, 100, todayLocal());
     render(<NutritionPage />);
     expect(screen.getByText(/How food and mood/)).toBeTruthy();
     expect(screen.getByText(/Patterns appear once you have at least two days/)).toBeTruthy();
+  });
+
+  it("a fresh account gets ONE merged empty state, not a stack of empty blocks", () => {
+    render(<NutritionPage />);
+    /* The merged state: one card, one action. */
+    expect(screen.getByText("Nothing logged yet")).toBeTruthy();
+    expect(screen.getByRole("button", { name: /Log your first food/ })).toBeTruthy();
+    /* …and none of the separate empty blocks it replaces. */
+    expect(screen.queryByText(/How food and mood/)).toBeNull();
+    expect(screen.queryByText("Your rhythm")).toBeNull();
+    expect(screen.queryByText("Beyond the macros")).toBeNull();
+    expect(screen.queryByText(/Nothing logged for Breakfast yet/)).toBeNull();
+    /* Content that is not an empty state stays: the dish library. */
+    expect(screen.getByLabelText("Search dishes")).toBeTruthy();
   });
 
   it("a future day in the strip is reachable — Bloom logs future days too", () => {

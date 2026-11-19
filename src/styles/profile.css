@@ -640,6 +640,19 @@ button.pf-number:hover {
     scroll-margin-top: 124px;
   }
 }
+/* The same clearance for in-page anchors that are NOT account-nav
+   targets (the getting-started card's link to the Assessment section).
+   .pf-jump itself is pinned to the nav's sections by the profileNav
+   guard, so anchor targets outside the nav carry their own class —
+   keep these values in step with .pf-jump above. */
+.pf-anchor-jump {
+  scroll-margin-top: 64px;
+}
+@media (max-width: 1023px) {
+  .pf-anchor-jump {
+    scroll-margin-top: 124px;
+  }
+}
 
 .pf-card {
   border-radius: var(--pf-radius);

@@ -62,6 +62,7 @@ import { SessionsSection } from "@/components/profile/SessionsSection";
 import { PremiumSection } from "@/components/billing/PremiumSection";
 import { TrainerSection } from "@/components/trainer/TrainerSection";
 import { LabReportsSection } from "@/components/profile/LabReportsSection";
+import { GettingStartedCard } from "@/components/profile/GettingStartedCard";
 import { HouseholdSection } from "@/components/household/HouseholdSection";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/RecordBlock";
@@ -645,9 +646,19 @@ function ProfilePage() {
                 loading={!record.settled || journey.status === "loading"}
               />
 
+              {/* Getting started (empty-state slice): the three first
+                  steps in ONE card, each read from the real record —
+                  it renders nothing once all three are done, so a new
+                  account meets one card here instead of an empty
+                  paragraph inside every section below. */}
+              <section className="pf-section" aria-label="Getting started">
+                <GettingStartedCard />
+              </section>
+
               {/* W4-1: the assessment's permanent home — take, continue,
-                  read the summary, retake. */}
-              <section className="pf-section" aria-label="Assessment">
+                  read the summary, retake. The getting-started card's
+                  first step anchors here. */}
+              <section id="pf-assessment" className="pf-section pf-anchor-jump" aria-label="Assessment">
                 <AssessmentProfileCard />
               </section>
 
