@@ -129,6 +129,32 @@ describe("MetabolicTwinSection — a record that can speak", () => {
   });
 });
 
+describe("MetabolicTwinSection — the energy percentage (M-57)", () => {
+  it("the rendered % is the logged average over the SAME targets the hero uses", () => {
+    /* Rulebook v2 §11: any "X% of target" claim is tied by test to
+       the displayed target. The section and the Nutrition hero both
+       read useNutrition's targetState — this pins the rendered
+       percentage to that exact targets object: 458 logged against a
+       1,350 kcal guide is 34% (the figures the v2 audit compared
+       against the maintenance estimate, a different quantity). */
+    const targets = { kcal: 1350, proteinG: 171 };
+    nutritionState.current = {
+      entries: daysFrom("2026-10-01", 12, 458),
+      targetState: { kind: "ready", targets },
+      spectrumSex: "male",
+      today: "2026-10-22",
+    };
+    bodyState.current = { weighIns: [] };
+    habitsState.current = { habits: [], logs: [] };
+    const { container } = render(<MetabolicTwinSection />);
+    const text = container.textContent ?? "";
+    const expectedPct = Math.round((458 / targets.kcal) * 100);
+    expect(expectedPct).toBe(34);
+    expect(text).toContain(`${expectedPct}% of your energy target`);
+    expect(text).toContain("458 kcal");
+  });
+});
+
 describe("MetabolicTwinSection — an empty record", () => {
   it("shows the honest unlocks and no invented numbers", () => {
     setStores({});

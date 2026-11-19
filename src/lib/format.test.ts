@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { fmtCount, fmtDate, fmtGrams, fmtKcalApprox } from "./format";
+import { fmtCount, fmtDate, fmtGrams, fmtKcalApprox, fmtShoppingQty } from "./format";
 
 describe("fmtDate", () => {
   it("renders a day key in the house format, never ISO", () => {
@@ -21,6 +21,29 @@ describe("fmtGrams", () => {
     expect(fmtGrams(206.25)).toBe("206");
     expect(fmtGrams(206.5)).toBe("207");
     expect(fmtGrams(400)).toBe("400");
+  });
+});
+
+describe("fmtShoppingQty — rulebook v2 §7 (M-58, M-59)", () => {
+  it("never prints 0 g for something the plan needs — under 5 g is a pinch", () => {
+    expect(fmtShoppingQty(0.4)).toBe("a pinch");
+    expect(fmtShoppingQty(4.9)).toBe("a pinch");
+    expect(fmtShoppingQty(0)).toBe("a pinch");
+  });
+
+  it("rounds to the step a shopper can act on, per band", () => {
+    expect(fmtShoppingQty(12)).toBe("~10 g");
+    expect(fmtShoppingQty(48)).toBe("~50 g");
+    expect(fmtShoppingQty(103)).toBe("~100 g");
+    expect(fmtShoppingQty(358)).toBe("~350 g");
+    expect(fmtShoppingQty(263)).toBe("~275 g");
+    expect(fmtShoppingQty(600)).toBe("~600 g");
+  });
+
+  it("prints a kilo or more as kilos", () => {
+    expect(fmtShoppingQty(999)).toBe("~1 kg");
+    expect(fmtShoppingQty(1250)).toBe("~1.25 kg");
+    expect(fmtShoppingQty(1500)).toBe("~1.5 kg");
   });
 });
 
