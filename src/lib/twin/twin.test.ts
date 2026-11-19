@@ -305,6 +305,54 @@ describe("buildTwinSnapshot — nutrient gaps", () => {
   });
 });
 
+describe("buildTwinSnapshot — requirement progress (anti-document v3)", () => {
+  /* The tile surfaces meter an insufficient field's requirements
+     instead of restating its prose unlock (M-54). The counts are the
+     same numbers the reason sentences carry — one source, two forms. */
+  it("expenditure progress counts logged days and weigh-ins", () => {
+    const twin = buildTwinSnapshot(
+      inputs({
+        entries: loggedDays("2026-11-10", 3, 2000),
+        weighIns: [weigh("2026-11-10", 90)],
+      }),
+    );
+    expect(twin.expenditure.state).toBe("insufficient");
+    if (twin.expenditure.state === "insufficient") {
+      expect(twin.expenditure.progress).toEqual([
+        { label: "Logged days", have: 3, need: 10 },
+        { label: "Weigh-ins", have: 1, need: 2 },
+      ]);
+    }
+  });
+
+  it("weight trend progress counts weigh-ins toward two", () => {
+    const empty = buildTwinSnapshot(inputs({}));
+    if (empty.weightTrend.state === "insufficient") {
+      expect(empty.weightTrend.progress).toEqual([{ label: "Weigh-ins", have: 0, need: 2 }]);
+    }
+    const one = buildTwinSnapshot(inputs({ weighIns: [weigh("2026-11-01", 88.5)] }));
+    if (one.weightTrend.state === "insufficient") {
+      expect(one.weightTrend.progress).toEqual([{ label: "Weigh-ins", have: 1, need: 2 }]);
+    }
+  });
+
+  it("nutrient gaps progress counts logged days toward the minimum", () => {
+    const twin = buildTwinSnapshot(inputs({ entries: loggedDays("2026-11-10", 2, 2000) }));
+    expect(twin.nutrientGaps.state).toBe("insufficient");
+    if (twin.nutrientGaps.state === "insufficient") {
+      expect(twin.nutrientGaps.progress).toEqual([{ label: "Logged days", have: 2, need: 4 }]);
+    }
+  });
+
+  it("habit insufficiency carries no countable progress", () => {
+    const twin = buildTwinSnapshot(inputs({}));
+    expect(twin.habitAdherence.state).toBe("insufficient");
+    if (twin.habitAdherence.state === "insufficient") {
+      expect(twin.habitAdherence.progress).toBeUndefined();
+    }
+  });
+});
+
 describe("buildTwinSnapshot — determinism", () => {
   it("same record, same twin; input order does not matter", () => {
     const a = buildTwinSnapshot(

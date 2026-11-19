@@ -284,7 +284,13 @@ describe("NutritionPage — totals vs targets", () => {
     expect(screen.getAllByText("380").length).toBeGreaterThan(0);
     /* …but nothing that frames them against a target. */
     expect(screen.queryByText(/of ~/)).toBeNull();
-    expect(screen.queryByRole("progressbar")).toBeNull();
+    /* Pin narrowed 2026-11-19 (antidoc-twin slice): the blanket
+       role query also matched the anti-document requirement meters
+       (Logged days x/10 — data completeness, no target involved)
+       that the Twin's gathering tiles render with role="progressbar"
+       per rulebook §6. The safety property is the TARGET bar; it
+       stays asserted, by its aria-label. */
+    expect(screen.queryByRole("progressbar", { name: "Calories against target" })).toBeNull();
     expect(screen.getByText(/doesn't set calorie targets/)).toBeTruthy();
   });
 

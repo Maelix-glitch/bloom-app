@@ -6,25 +6,25 @@
  * weigh-ins, the habits — and reuses Bloom's gated estimators rather
  * than restating them.
  *
- * The Twin is a standing model, not a plan artefact, so it renders
- * whether or not a plan exists for today (the "What your plan
- * learned" block inside the plan section cannot). Each field shows
- * its value with the provenance of the computation, or — when the
- * record cannot honestly support a value — what exists and what
- * would unlock it. No field ever shows a dressed-up guess.
+ * Anti-document form (brief v3): the five signals are TILES, not
+ * paragraphs. A ready tile leads with its value as the figure, a
+ * meter where the value is a share, and its source as a chip (solid
+ * = measured from the record, dashed = estimated). A gathering tile
+ * is dashed, shows "—", and meters its requirements from the counts
+ * on the field itself — never from the prose unlock. The full
+ * provenance sentences live in the "How the twin works" disclosure
+ * under the grid; no number on a tile differs from the number the
+ * rows before them showed.
  */
 
-import { useMemo } from "react";
+import { Fragment, useMemo } from "react";
 
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useHabits } from "@/hooks/useHabits";
 import { useNutrition } from "@/hooks/useNutrition";
-import { buildTwinSnapshot, type TwinField } from "@/lib/twin/twin";
+import { buildTwinSnapshot, type TwinField, type TwinProgress } from "@/lib/twin/twin";
 import { fmtCount, fmtGrams } from "@/lib/format";
 
-/* Counts render through the shared formatter (fmtCount, en-IN) —
-   a local en-US grouping helper here was a format.ts bypass on a
-   Slice-1 surface (rulebook v2 §11: one format module). */
 const signed1 = (n: number) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(1)}`;
 
 function shortDay(dayKey: string): string {
@@ -34,37 +34,109 @@ function shortDay(dayKey: string): string {
   });
 }
 
-function FieldRow({
+/* ------------------------------- atoms ---------------------------------- */
+
+function Meter({
+  have,
+  need,
   label,
-  children,
-  provenance,
+  gold = false,
 }: {
+  have: number;
+  need: number;
   label: string;
-  children: React.ReactNode;
-  provenance: string;
+  gold?: boolean;
 }) {
+  const pct = need > 0 ? Math.min(100, Math.max(0, (have / need) * 100)) : 0;
   return (
-    <div className="py-3.5 first:pt-0 last:pb-0">
-      <p className="nut-group-label">{label}</p>
-      <div className="mt-1.5 text-[length:var(--text-callout)] leading-[var(--leading-body)] text-foreground">
-        {children}
-      </div>
-      <p className="mt-1 text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
-        {provenance}
-      </p>
+    <div
+      className={`nut-track tile-meter${gold ? " tile-meter--gold" : ""}`}
+      role="progressbar"
+      aria-label={label}
+      aria-valuenow={have}
+      aria-valuemin={0}
+      aria-valuemax={need}
+    >
+      <span className="nut-track-fill" style={{ width: `${pct}%` }} />
     </div>
   );
 }
 
-function Insufficient({ field }: { field: TwinField<never> }) {
-  if (field.state !== "insufficient") return null;
+function ReqMeters({ progress }: { progress: readonly TwinProgress[] }) {
   return (
-    <>
-      <span className="text-muted-foreground">{field.reason}</span>{" "}
-      <span className="text-muted-foreground">{field.unlock}</span>
-    </>
+    <ul className="req">
+      {progress.slice(0, 3).map((req) => (
+        <li key={req.label}>
+          <span>{req.label}</span>
+          <Meter have={req.have} need={req.need} label={req.label} />
+          <b>
+            {req.have}/{req.need}
+          </b>
+        </li>
+      ))}
+    </ul>
   );
 }
+
+function SrcChip({ label, estimate = false }: { label: string; estimate?: boolean }) {
+  return (
+    <span className="nut-badge src-chip" data-estimate={estimate ? true : undefined}>
+      {label}
+    </span>
+  );
+}
+
+function ReadyBadge() {
+  return <span className="tile-badge tile-badge--ready">Ready</span>;
+}
+
+function GatheringBadge({ noData = false }: { noData?: boolean }) {
+  return (
+    <span className={`tile-badge ${noData ? "tile-badge--nodata" : "tile-badge--gathering"}`}>
+      {noData ? "No data yet" : "Gathering data"}
+    </span>
+  );
+}
+
+function TileHead({ title, badge }: { title: string; badge: React.ReactNode }) {
+  return (
+    <header className="tile__head">
+      <h3>{title}</h3>
+      {badge}
+    </header>
+  );
+}
+
+function GatheringTile({
+  title,
+  badge,
+  hint,
+  progress,
+  chip,
+}: {
+  title: string;
+  badge: React.ReactNode;
+  hint?: string | undefined;
+  progress?: readonly TwinProgress[] | undefined;
+  chip: React.ReactNode;
+}) {
+  return (
+    <article className="tile" data-state="gathering">
+      <TileHead title={title} badge={badge} />
+      <div className="tile__figure">
+        <strong>—</strong>
+      </div>
+      {progress && progress.length > 0 ? <ReqMeters progress={progress} /> : null}
+      {hint ? <p className="tile__hint">{hint}</p> : null}
+      <footer className="tile__foot">
+        <span />
+        {chip}
+      </footer>
+    </article>
+  );
+}
+
+/* ------------------------------- section -------------------------------- */
 
 export function MetabolicTwinSection() {
   const nutrition = useNutrition();
@@ -96,114 +168,268 @@ export function MetabolicTwinSection() {
     ],
   );
 
+  /* Editorial order (brief v3 §1), then ready before gathering —
+     a stable partition, so a tile moves up only when its data
+     arrives, never sideways. */
+  const ordered: { key: string; field: TwinField<never> }[] = [
+    { key: "habit", field: twin.habitAdherence as TwinField<never> },
+    { key: "coverage", field: twin.logCoverage as TwinField<never> },
+    { key: "expenditure", field: twin.expenditure as TwinField<never> },
+    { key: "trend", field: twin.weightTrend as TwinField<never> },
+    { key: "gaps", field: twin.nutrientGaps as TwinField<never> },
+  ];
+  const readyFirst = [
+    ...ordered.filter((t) => t.field.state === "value"),
+    ...ordered.filter((t) => t.field.state !== "value"),
+  ];
+  /* One gold figure per screen: the first ready tile's. */
+  const goldKey = readyFirst.find((t) => t.field.state === "value")?.key;
+
+  const habitTile = () =>
+    twin.habitAdherence.state === "value" ? (
+      <article className="tile" data-state="ready">
+        <TileHead title="Habit rhythm" badge={<ReadyBadge />} />
+        <div className="tile__figure" data-gold={goldKey === "habit" ? true : undefined}>
+          <strong>{Math.round(twin.habitAdherence.value.rate * 100)}%</strong>
+          <span>of due days done</span>
+        </div>
+        <Meter
+          have={twin.habitAdherence.value.doneDays}
+          need={twin.habitAdherence.value.dueDays}
+          label="Habit rhythm"
+          gold={goldKey === "habit"}
+        />
+        <footer className="tile__foot">
+          <span>
+            {twin.habitAdherence.value.doneDays} of {twin.habitAdherence.value.dueDays} · last{" "}
+            {twin.habitAdherence.value.windowDays} days
+          </span>
+          <SrcChip label="Habit log" />
+        </footer>
+      </article>
+    ) : (
+      <GatheringTile
+        title="Habit rhythm"
+        badge={<GatheringBadge noData={twin.habitAdherence.reason === "No active habits."} />}
+        hint={twin.habitAdherence.reason}
+        progress={twin.habitAdherence.progress}
+        chip={<SrcChip label="Habit log" />}
+      />
+    );
+
+  const coverageTile = () => {
+    /* twin.ts always returns a value field for coverage (pinned in
+       twin.test.ts); the check only satisfies the union type. */
+    if (twin.logCoverage.state !== "value") return null;
+    const cov = twin.logCoverage.value;
+    return (
+      <article className="tile" data-state="ready">
+        <TileHead title="Food-log coverage" badge={<ReadyBadge />} />
+        <div className="tile__figure" data-gold={goldKey === "coverage" ? true : undefined}>
+          <strong>
+            {cov.daysLogged}/{cov.windowDays}
+          </strong>
+          <span>days logged</span>
+        </div>
+        {cov.avgKcal !== null && cov.avgProteinG !== null ? (
+          <div className="vstats">
+            <div className="vstat">
+              <b>{fmtCount(cov.avgKcal)} kcal</b>
+              <span>
+                {cov.kcalVsTarget !== null
+                  ? `avg · ${Math.round(cov.kcalVsTarget * 100)}% of your energy target`
+                  : "daily average"}
+              </span>
+            </div>
+            <div className="vstat">
+              <b>{fmtGrams(cov.avgProteinG)} g</b>
+              <span>
+                {cov.proteinVsTarget !== null
+                  ? `avg · ${Math.round(cov.proteinVsTarget * 100)}% of your protein target`
+                  : "daily average"}
+              </span>
+            </div>
+          </div>
+        ) : null}
+        {cov.daysLogged / cov.windowDays < 0.5 ? (
+          <p className="tile__hint">Logging looks partial.</p>
+        ) : null}
+        <footer className="tile__foot">
+          <span>last {cov.windowDays} days</span>
+          <SrcChip label="Food log" />
+        </footer>
+      </article>
+    );
+  };
+
+  const expenditureTile = () =>
+    twin.expenditure.state === "value" ? (
+      <article className="tile" data-state="ready">
+        <TileHead title="Maintenance energy" badge={<ReadyBadge />} />
+        <div className="tile__figure" data-gold={goldKey === "expenditure" ? true : undefined}>
+          <strong>{fmtCount(twin.expenditure.value.maintenanceKcal)} kcal</strong>
+          <span>a day</span>
+        </div>
+        <footer className="tile__foot">
+          <span>
+            intake averaged {fmtCount(twin.expenditure.value.avgIntakeKcal)} kcal · weight{" "}
+            {signed1(twin.expenditure.value.weightChangeKg)} kg
+          </span>
+          <SrcChip label="Food log and weigh-ins" estimate />
+        </footer>
+      </article>
+    ) : (
+      <GatheringTile
+        title="Maintenance energy"
+        badge={<GatheringBadge />}
+        hint="Needs two weigh-ins 10+ days apart."
+        progress={twin.expenditure.progress}
+        chip={<SrcChip label="Food log and weigh-ins" estimate />}
+      />
+    );
+
+  const trendTile = () =>
+    twin.weightTrend.state === "value" ? (
+      <article className="tile" data-state="ready">
+        <TileHead title="Weight trend" badge={<ReadyBadge />} />
+        <div className="tile__figure" data-gold={goldKey === "trend" ? true : undefined}>
+          <strong>{signed1(twin.weightTrend.value.changeKg)} kg</strong>
+          <span>
+            over {twin.weightTrend.value.spanDays}{" "}
+            {twin.weightTrend.value.spanDays === 1 ? "day" : "days"}
+          </span>
+        </div>
+        <footer className="tile__foot">
+          <span>
+            {twin.weightTrend.value.fromKg.toFixed(1)} kg {shortDay(twin.weightTrend.value.fromDate)}{" "}
+            → {twin.weightTrend.value.toKg.toFixed(1)} kg {shortDay(twin.weightTrend.value.toDate)}
+            {twin.weightTrend.value.rateKgPerWeek !== null
+              ? ` · ${signed1(twin.weightTrend.value.rateKgPerWeek)} kg a week`
+              : ""}
+          </span>
+          <SrcChip label="Weigh-ins" />
+        </footer>
+      </article>
+    ) : (
+      <GatheringTile
+        title="Weight trend"
+        badge={<GatheringBadge noData={twin.weightTrend.reason === "No weigh-ins on record yet."} />}
+        hint={`${twin.weightTrend.reason} ${twin.weightTrend.unlock}`}
+        progress={twin.weightTrend.progress}
+        chip={<SrcChip label="Weigh-ins" />}
+      />
+    );
+
+  const gapsTile = () =>
+    twin.nutrientGaps.state === "value" ? (
+      <article className="tile" data-state="ready">
+        <TileHead title="Nutrient gaps" badge={<ReadyBadge />} />
+        <div className="tile__figure" data-gold={goldKey === "gaps" ? true : undefined}>
+          <strong>{twin.nutrientGaps.value.length}</strong>
+          <span>
+            {twin.nutrientGaps.value.length === 1 ? "nutrient" : "nutrients"} under 70% of
+            reference
+          </span>
+        </div>
+        {twin.nutrientGaps.value.length > 0 ? (
+          <ul className="space-y-1.5">
+            {twin.nutrientGaps.value.map((gap) => (
+              <li
+                key={gap.key}
+                className="flex flex-wrap items-baseline justify-between gap-2 text-[length:var(--text-support)] text-muted-foreground"
+              >
+                <span className="text-foreground">{gap.label}</span>
+                <span>
+                  {gap.unit === "g" ? Math.round(gap.avg * 10) / 10 : Math.round(gap.avg)} {gap.unit}{" "}
+                  a day · reference {gap.reference} {gap.unit} · {gap.days} days
+                </span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="tile__hint">
+            No nutrient is running under 70% of its reference in the days judged.
+          </p>
+        )}
+        <footer className="tile__foot">
+          <span />
+          <SrcChip label="Food log" />
+        </footer>
+      </article>
+    ) : (
+      <GatheringTile
+        title="Nutrient gaps"
+        badge={<GatheringBadge />}
+        hint={twin.nutrientGaps.unlock}
+        progress={twin.nutrientGaps.progress}
+        chip={<SrcChip label="Food log" />}
+      />
+    );
+
+  const tileFor = (key: string) =>
+    key === "habit"
+      ? habitTile()
+      : key === "coverage"
+        ? coverageTile()
+        : key === "expenditure"
+          ? expenditureTile()
+          : key === "trend"
+            ? trendTile()
+            : gapsTile();
+
+  const provenanceLines: { label: string; field: TwinField<never> }[] = [
+    { label: "Maintenance energy", field: twin.expenditure as TwinField<never> },
+    { label: "Weight trend", field: twin.weightTrend as TwinField<never> },
+    { label: "Habit rhythm", field: twin.habitAdherence as TwinField<never> },
+    { label: "Food-log coverage", field: twin.logCoverage as TwinField<never> },
+    { label: "Nutrient gaps", field: twin.nutrientGaps as TwinField<never> },
+  ];
+
   return (
     <section className="nut-card nut-rise mt-4" aria-label="Your metabolic twin">
-      <p className="eyebrow">Metabolic twin</p>
-      <h2 className="mt-2 font-display text-[length:var(--text-section)] text-foreground">
-        Your metabolic twin
-      </h2>
-      <p className="mt-2 max-w-[58ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-        A living model of you, computed from your own record each time you look — nothing
-        stored, nothing guessed. {twin.readyCount} of {twin.totalFields} signals have enough
-        data to speak today.
-      </p>
-
-      <div className="mt-4 divide-y divide-border border-t border-border-subtle">
-        <FieldRow label="Maintenance energy" provenance={twin.expenditure.provenance}>
-          {twin.expenditure.state === "value" ? (
-            <>
-              <span className="font-display text-[length:var(--text-title)] text-foreground">
-                {fmtCount(twin.expenditure.value.maintenanceKcal)} kcal
-              </span>{" "}
-              a day — what your record says your body actually burns. Your logged intake
-              averaged {fmtCount(twin.expenditure.value.avgIntakeKcal)} kcal over that window,
-              with your weight moving {signed1(twin.expenditure.value.weightChangeKg)} kg.
-            </>
-          ) : (
-            <Insufficient field={twin.expenditure} />
-          )}
-        </FieldRow>
-
-        <FieldRow label="Weight trend" provenance={twin.weightTrend.provenance}>
-          {twin.weightTrend.state === "value" ? (
-            <>
-              <span className="font-display text-[length:var(--text-title)] text-foreground">
-                {signed1(twin.weightTrend.value.changeKg)} kg
-              </span>{" "}
-              over {twin.weightTrend.value.spanDays}{" "}
-              {twin.weightTrend.value.spanDays === 1 ? "day" : "days"} —{" "}
-              {twin.weightTrend.value.fromKg.toFixed(1)} kg on{" "}
-              {shortDay(twin.weightTrend.value.fromDate)} to{" "}
-              {twin.weightTrend.value.toKg.toFixed(1)} kg on{" "}
-              {shortDay(twin.weightTrend.value.toDate)}
-              {twin.weightTrend.value.rateKgPerWeek !== null
-                ? `, about ${signed1(twin.weightTrend.value.rateKgPerWeek)} kg a week`
-                : ""}
-              .
-            </>
-          ) : (
-            <Insufficient field={twin.weightTrend} />
-          )}
-        </FieldRow>
-
-        <FieldRow label="Habit rhythm" provenance={twin.habitAdherence.provenance}>
-          {twin.habitAdherence.state === "value" ? (
-            <>
-              <span className="font-display text-[length:var(--text-title)] text-foreground">
-                {Math.round(twin.habitAdherence.value.rate * 100)}%
-              </span>{" "}
-              of due days done — {twin.habitAdherence.value.doneDays} of{" "}
-              {twin.habitAdherence.value.dueDays} across {twin.habitAdherence.value.habits}{" "}
-              active {twin.habitAdherence.value.habits === 1 ? "habit" : "habits"}.
-            </>
-          ) : (
-            <Insufficient field={twin.habitAdherence} />
-          )}
-        </FieldRow>
-
-        <FieldRow label="Food-log coverage" provenance={twin.logCoverage.provenance}>
-          {twin.logCoverage.state === "value" ? (
-            <>
-              Logged <strong>{twin.logCoverage.value.daysLogged}</strong> of the last{" "}
-              {twin.logCoverage.value.windowDays} days.
-              {twin.logCoverage.value.avgKcal !== null &&
-              twin.logCoverage.value.avgProteinG !== null ? (
-                <>
-                  {" "}
-                  On those days you averaged {fmtCount(twin.logCoverage.value.avgKcal)} kcal and{" "}
-                  {fmtGrams(twin.logCoverage.value.avgProteinG)} g protein
-                  {twin.logCoverage.value.kcalVsTarget !== null &&
-                  twin.logCoverage.value.proteinVsTarget !== null
-                    ? ` — ${Math.round(twin.logCoverage.value.kcalVsTarget * 100)}% of your energy target, ${Math.round(twin.logCoverage.value.proteinVsTarget * 100)}% of your protein target`
-                    : ""}
-                  .
-                </>
-              ) : null}
-            </>
-          ) : null}
-        </FieldRow>
-
-        <FieldRow label="Nutrient gaps" provenance={twin.nutrientGaps.provenance}>
-          {twin.nutrientGaps.state === "value" ? (
-            twin.nutrientGaps.value.length > 0 ? (
-              <ul className="space-y-1">
-                {twin.nutrientGaps.value.map((gap) => (
-                  <li key={gap.key}>
-                    {gap.label} averaged{" "}
-                    {gap.unit === "g" ? Math.round(gap.avg * 10) / 10 : Math.round(gap.avg)}{" "}
-                    {gap.unit} a day over {gap.days} logged days, against the {gap.reference}{" "}
-                    {gap.unit} reference.
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              "No nutrient is running under 70% of its reference in the days judged."
-            )
-          ) : (
-            <Insufficient field={twin.nutrientGaps} />
-          )}
-        </FieldRow>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="font-display text-[length:var(--text-section)] text-foreground">
+            Your metabolic twin
+          </h2>
+          <p className="mt-1.5 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+            Computed fresh from your record. Nothing stored, nothing guessed.
+          </p>
+        </div>
+        <div className="flex items-center gap-2.5 pt-1">
+          <span className="twin-dots" aria-hidden="true">
+            {readyFirst.map((t) => (
+              <i key={t.key} data-ready={t.field.state === "value" ? true : undefined} />
+            ))}
+          </span>
+          <span className="text-[length:var(--text-callout)] text-muted-foreground">
+            {twin.readyCount} of {twin.totalFields} signals ready
+          </span>
+        </div>
       </div>
+
+      <div className="tile-grid mt-5">
+        {readyFirst.map((t) => (
+          <Fragment key={t.key}>{tileFor(t.key)}</Fragment>
+        ))}
+      </div>
+
+      <details className="mt-5">
+        <summary className="cursor-pointer text-[length:var(--text-callout)] font-medium text-foreground">
+          How the twin works
+        </summary>
+        <div className="mt-3 space-y-3">
+          {provenanceLines.map(({ label, field }) => (
+            <p
+              key={label}
+              className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
+            >
+              <strong className="text-foreground">{label}.</strong> {field.provenance}.
+              {field.state === "insufficient" ? ` ${field.reason} ${field.unlock}` : ""}
+            </p>
+          ))}
+        </div>
+      </details>
     </section>
   );
 }

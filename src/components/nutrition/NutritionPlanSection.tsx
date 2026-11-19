@@ -40,7 +40,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Check, ChevronDown, Plus, RefreshCw } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  EyeOff,
+  Flame,
+  Gauge,
+  Hourglass,
+  Plus,
+  RefreshCw,
+  Scale,
+  SlidersHorizontal,
+  TrendingDown,
+  UtensilsCrossed,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { useAssessment } from "@/hooks/useAssessment";
@@ -63,6 +76,7 @@ import {
   dishIdeaFor,
   dishNutrients,
   displayNameForFoodId,
+  EXPENDITURE_MIN_LOGGED_DAYS,
   estimateExpenditure,
   findDish,
   findUsdaReference,
@@ -1067,87 +1081,207 @@ export function NutritionPlanSection() {
       (estimate && !showProposal && proposalDelta !== null && Math.abs(proposalDelta) < 25) ? (
         <div className="mt-5">
           <p className="nut-group-label">What your plan learned</p>
-          {learning?.adherence ? (
-            <p className="nut-note">
-              Over your last {learning.adherence.days} logged days you averaged{" "}
-              {Math.round(learning.adherence.avgKcal).toLocaleString("en-US")} kcal and{" "}
-              {Math.round(learning.adherence.avgProteinG)} g protein a day, against targets of{" "}
-              {Math.round(plan.targets.kcal).toLocaleString("en-US")} kcal and{" "}
-              {fmtGrams(plan.targets.proteinG)} g.
-            </p>
-          ) : null}
-          {learning && learning.favouredDishes.length > 0 ? (
-            <p className="nut-note">
-              Dishes you return to:{" "}
-              {learning.favouredDishes
-                .slice(0, 5)
-                .map((d) => `${d.name} (logged ${d.count} times)`)
-                .join(", ")}
-              {learning.favouredDishes.length > 5
-                ? `, and ${learning.favouredDishes.length - 5} more`
-                : ""}
-              . They lead the picks.
-            </p>
-          ) : null}
-          {learning && learning.deprioritisedDishes.length > 0 ? (
-            <p className="nut-note">
-              Served by an earlier plan but never logged:{" "}
-              {learning.deprioritisedDishes
-                .slice(0, 5)
-                .map((d) => d.name)
-                .join(", ")}
-              . They sit further back.
-            </p>
-          ) : null}
-          {learning?.microGaps.map((gap) => (
-            <p key={gap.key} className="nut-note">
-              {gap.label} averaged{" "}
-              {gap.unit === "g" ? Math.round(gap.avg * 10) / 10 : Math.round(gap.avg)} {gap.unit} a
-              day over {gap.days} logged days, against the {gap.reference} {gap.unit} reference —
-              dishes richer in {gap.label.toLowerCase()} are favoured.
-            </p>
-          ))}
-          {learning?.portionSignals.map((signal) => (
-            <p key={signal.foodId} className="nut-note">
-              You usually log {signal.typicalGrams} g of {signal.name}; the plan serves{" "}
-              {signal.plannedGrams} g (from {signal.logs} logs). Portions stay as planned — the
-              choice is yours.
-            </p>
-          ))}
-          {estimate && !showProposal && proposalDelta !== null && Math.abs(proposalDelta) < 25 ? (
-            <p className="nut-note">
-              Your record puts your maintenance near{" "}
-              {estimate.maintenanceKcal.toLocaleString("en-US")} kcal — in line with your current
-              target, so no change is proposed.
-            </p>
-          ) : null}
-          {expenditure.kind === "insufficient" &&
-          (expenditure.loggedDays > 0 || expenditure.weightPoints > 0) ? (
-            <p className="nut-note">
-              Maintenance estimate: still gathering — {expenditure.loggedDays} of 10 logged days and{" "}
-              {expenditure.weightPoints} {expenditure.weightPoints === 1 ? "weigh-in" : "weigh-ins"}{" "}
-              on record. It needs 2 weigh-ins spanning at least 10 days, with 10 logged days between
-              them.
-            </p>
-          ) : null}
-          {targetAdjustment ? (
-            <p className="nut-note">
-              Your energy target includes your confirmed{" "}
-              {targetAdjustment.kcalDelta > 0 ? "+" : "−"}
-              {Math.abs(targetAdjustment.kcalDelta).toLocaleString("en-US")} kcal adjustment —
-              maintenance estimated at{" "}
-              {targetAdjustment.basedOn.maintenanceKcal.toLocaleString("en-US")} kcal from{" "}
-              {targetAdjustment.basedOn.loggedDays} logged days over a{" "}
-              {targetAdjustment.basedOn.spanDays}-day window.{" "}
-              <button
-                type="button"
-                className="nut-inline-link"
-                onClick={() => clearTargetAdjustment()}
-              >
-                Remove adjustment
-              </button>
-            </p>
-          ) : null}
+          {/* Anti-document form (brief v3): each learning is an
+              insight card — a headline the data supports, one
+              supporting line with the same numbers the notes carried,
+              at most one action. Dish lists are chips, requirements
+              are meters; nothing here is a paragraph stack. */}
+          <div className="mt-3 grid gap-3">
+            {learning?.adherence ? (
+              <article className="insight">
+                <span className="insight__icon" aria-hidden="true">
+                  <Gauge />
+                </span>
+                <div>
+                  <h3>
+                    {learning.adherence.avgKcal / plan.targets.kcal < 0.9
+                      ? "Intake running under target"
+                      : learning.adherence.avgKcal / plan.targets.kcal > 1.1
+                        ? "Intake running over target"
+                        : "Intake close to target"}
+                  </h3>
+                  <p>
+                    Over your last {learning.adherence.days} logged days you averaged{" "}
+                    {Math.round(learning.adherence.avgKcal).toLocaleString("en-US")} kcal and{" "}
+                    {Math.round(learning.adherence.avgProteinG)} g protein a day, against targets of{" "}
+                    {Math.round(plan.targets.kcal).toLocaleString("en-US")} kcal and{" "}
+                    {fmtGrams(plan.targets.proteinG)} g.
+                  </p>
+                </div>
+              </article>
+            ) : null}
+            {learning && learning.favouredDishes.length > 0 ? (
+              <article className="insight">
+                <span className="insight__icon" aria-hidden="true">
+                  <UtensilsCrossed />
+                </span>
+                <div className="grid gap-1.5">
+                  <h3>Dishes you return to</h3>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {learning.favouredDishes.slice(0, 5).map((d) => (
+                      <li key={d.name} className="nut-badge">
+                        {d.name} (logged {d.count} times)
+                      </li>
+                    ))}
+                    {learning.favouredDishes.length > 5 ? (
+                      <li className="nut-badge">and {learning.favouredDishes.length - 5} more</li>
+                    ) : null}
+                  </ul>
+                  <p>They lead the picks.</p>
+                </div>
+              </article>
+            ) : null}
+            {learning && learning.deprioritisedDishes.length > 0 ? (
+              <article className="insight">
+                <span className="insight__icon" aria-hidden="true">
+                  <EyeOff />
+                </span>
+                <div className="grid gap-1.5">
+                  <h3>Served but never logged</h3>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {learning.deprioritisedDishes.slice(0, 5).map((d) => (
+                      <li key={d.name} className="nut-badge">
+                        {d.name}
+                      </li>
+                    ))}
+                    {learning.deprioritisedDishes.length > 5 ? (
+                      <li className="nut-badge">and {learning.deprioritisedDishes.length - 5} more</li>
+                    ) : null}
+                  </ul>
+                  <p>They sit further back.</p>
+                </div>
+              </article>
+            ) : null}
+            {learning?.microGaps.map((gap) => (
+              <article key={gap.key} className="insight">
+                <span className="insight__icon" aria-hidden="true">
+                  <TrendingDown />
+                </span>
+                <div>
+                  <h3>{gap.label} running low</h3>
+                  <p>
+                    {gap.label} averaged{" "}
+                    {gap.unit === "g" ? Math.round(gap.avg * 10) / 10 : Math.round(gap.avg)}{" "}
+                    {gap.unit} a day over {gap.days} logged days, against the {gap.reference}{" "}
+                    {gap.unit} reference — dishes richer in {gap.label.toLowerCase()} are favoured.
+                  </p>
+                </div>
+              </article>
+            ))}
+            {learning?.portionSignals.map((signal) => (
+              <article key={signal.foodId} className="insight">
+                <span className="insight__icon" aria-hidden="true">
+                  <Scale />
+                </span>
+                <div>
+                  <h3>Your usual portion differs</h3>
+                  <p>
+                    You usually log {signal.typicalGrams} g of {signal.name}; the plan serves{" "}
+                    {signal.plannedGrams} g (from {signal.logs} logs). Portions stay as planned —
+                    the choice is yours.
+                  </p>
+                </div>
+              </article>
+            ))}
+            {estimate && !showProposal && proposalDelta !== null && Math.abs(proposalDelta) < 25 ? (
+              <article className="insight">
+                <span className="insight__icon" aria-hidden="true">
+                  <Flame />
+                </span>
+                <div>
+                  <h3>Maintenance matches your target</h3>
+                  <p>
+                    Your record puts your maintenance near{" "}
+                    {estimate.maintenanceKcal.toLocaleString("en-US")} kcal — in line with your
+                    current target, so no change is proposed.
+                  </p>
+                </div>
+              </article>
+            ) : null}
+            {expenditure.kind === "insufficient" &&
+            (expenditure.loggedDays > 0 || expenditure.weightPoints > 0) ? (
+              <article className="insight">
+                <span className="insight__icon" aria-hidden="true">
+                  <Hourglass />
+                </span>
+                <div className="grid gap-1.5">
+                  <h3>Maintenance estimate still gathering</h3>
+                  <ul className="req">
+                    <li>
+                      <span>Logged days</span>
+                      <div
+                        className="nut-track tile-meter"
+                        role="progressbar"
+                        aria-label="Logged days"
+                        aria-valuenow={expenditure.loggedDays}
+                        aria-valuemin={0}
+                        aria-valuemax={EXPENDITURE_MIN_LOGGED_DAYS}
+                      >
+                        <span
+                          className="nut-track-fill"
+                          style={{
+                            width: `${Math.min(100, (expenditure.loggedDays / EXPENDITURE_MIN_LOGGED_DAYS) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <b>
+                        {expenditure.loggedDays}/{EXPENDITURE_MIN_LOGGED_DAYS}
+                      </b>
+                    </li>
+                    <li>
+                      <span>Weigh-ins</span>
+                      <div
+                        className="nut-track tile-meter"
+                        role="progressbar"
+                        aria-label="Weigh-ins"
+                        aria-valuenow={expenditure.weightPoints}
+                        aria-valuemin={0}
+                        aria-valuemax={2}
+                      >
+                        <span
+                          className="nut-track-fill"
+                          style={{
+                            width: `${Math.min(100, (expenditure.weightPoints / 2) * 100)}%`,
+                          }}
+                        />
+                      </div>
+                      <b>{expenditure.weightPoints}/2</b>
+                    </li>
+                  </ul>
+                  <p>
+                    It needs 2 weigh-ins spanning at least 10 days, with 10 logged days between
+                    them.
+                  </p>
+                </div>
+              </article>
+            ) : null}
+            {targetAdjustment ? (
+              <article className="insight">
+                <span className="insight__icon" aria-hidden="true">
+                  <SlidersHorizontal />
+                </span>
+                <div>
+                  <h3>Target includes your adjustment</h3>
+                  <p>
+                    Your energy target includes your confirmed{" "}
+                    {targetAdjustment.kcalDelta > 0 ? "+" : "−"}
+                    {Math.abs(targetAdjustment.kcalDelta).toLocaleString("en-US")} kcal adjustment —
+                    maintenance estimated at{" "}
+                    {targetAdjustment.basedOn.maintenanceKcal.toLocaleString("en-US")} kcal from{" "}
+                    {targetAdjustment.basedOn.loggedDays} logged days over a{" "}
+                    {targetAdjustment.basedOn.spanDays}-day window.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="nut-btn nut-btn-ghost nut-btn-sm"
+                  onClick={() => clearTargetAdjustment()}
+                >
+                  Remove adjustment
+                </button>
+              </article>
+            ) : null}
+          </div>
         </div>
       ) : null}
 
@@ -1157,11 +1291,17 @@ export function NutritionPlanSection() {
         </p>
       ) : null}
 
-      <p className="nut-note">
-        Plans are built from real dishes in Bloom's library — each dish's numbers are computed from
-        its ingredients' USDA data — topped up with simple foods only where the dishes leave the day
-        short. They are a starting point — log what you actually eat and your totals follow that.
-      </p>
+      <details className="mt-4">
+        <summary className="cursor-pointer text-[length:var(--text-callout)] font-medium text-foreground">
+          How this plan is built
+        </summary>
+        <p className="nut-note">
+          Plans are built from real dishes in Bloom's library — each dish's numbers are computed
+          from its ingredients' USDA data — topped up with simple foods only where the dishes leave
+          the day short. They are a starting point — log what you actually eat and your totals
+          follow that.
+        </p>
+      </details>
 
       {selectedDish ? (
         <DishDetailSheet
