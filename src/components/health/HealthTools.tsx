@@ -253,6 +253,7 @@ export function HealthTools({ className }: { className?: string }) {
   const [editing, setEditing] = useState(false);
   const [weighIn, setWeighIn] = useState("");
   const [saved, setSaved] = useState<string | null>(null);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const todayWater =
     trackers.days.find((day) => day.date === trackers.today)?.waterMl ?? null;
@@ -274,6 +275,21 @@ export function HealthTools({ className }: { className?: string }) {
     setWeighIn("");
     setSaved(`Today's weight saved — ${value} kg.`);
     window.setTimeout(() => setSaved(null), 3200);
+  };
+
+  /* Clearing is destructive, so it takes the house two-tap confirmation
+     (the sign-out-everywhere pattern in SessionsSection): the first tap
+     only arms the button and says what will happen; the second tap,
+     within four seconds, is the one that clears. Walking away disarms. */
+  const clearBodyData = () => {
+    if (!confirmClear) {
+      setConfirmClear(true);
+      window.setTimeout(() => setConfirmClear(false), 4000);
+      return;
+    }
+    body.clear();
+    setWeighIn("");
+    setConfirmClear(false);
   };
 
   return (
@@ -482,21 +498,20 @@ export function HealthTools({ className }: { className?: string }) {
             ) : (
               <p className="bt-note">No weigh-ins yet. One a week is plenty.</p>
             )}
+            {confirmClear ? (
+              <p className="bt-note" role="status">
+                Tapping again resets your body details — height, weight and goal — and deletes
+                every weigh-in you have logged. This cannot be undone.
+              </p>
+            ) : null}
             <div className="bt-weigh__foot">
               <p className="bt-note">
                 <Ruler className="mr-1 inline size-3" aria-hidden />
                 Height {body.profile.heightCm} cm · logged privately on your account.
               </p>
-              <button
-                type="button"
-                className="bt-danger"
-                onClick={() => {
-                  body.clear();
-                  setWeighIn("");
-                }}
-              >
+              <button type="button" className="bt-danger" onClick={clearBodyData}>
                 <Trash2 className="size-3.5" aria-hidden />
-                Clear body data
+                {confirmClear ? "Tap again to confirm" : "Clear body data"}
               </button>
             </div>
           </article>
