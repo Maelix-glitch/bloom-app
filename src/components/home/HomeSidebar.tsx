@@ -242,7 +242,7 @@ function RailProfile() {
         </span>
       </Link>
       <Link
-        to="/profile"
+        to="/settings"
         aria-label="Settings"
         title="Settings"
         className="shrink-0 rounded-lg p-2 text-muted-foreground transition-colors hover:bg-white/[0.06] hover:text-foreground"
@@ -271,6 +271,17 @@ export function HomeMobileBar() {
       <div className="flex items-center gap-2">
         <PointsChip compact />
         <NotificationBell />
+        {/* The rail's settings gear, mirrored in the phone bar (Plan B):
+            the account sections live on /settings now, and phones have
+            no rail to carry the gear. */}
+        <Link
+          to="/settings"
+          aria-label="Settings"
+          title="Settings"
+          className="bloom-icon-btn"
+        >
+          <Settings className="size-[18px]" strokeWidth={1.75} />
+        </Link>
         <Link
           to="/profile"
           aria-label="Your profile"

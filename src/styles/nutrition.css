@@ -542,6 +542,23 @@
   background: color-mix(in oklab, var(--gold) 12%, transparent);
   color: var(--gold);
 }
+/* Sub-navigation (Plan B): anchor chips to the today view's named
+   sections. The chips reuse .nut-chip; as navigation they hold the
+   44px touch floor. Jump targets clear the fixed phone brand bar
+   (60px) with a breath, at every width. */
+.nut-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.nut-subnav .nut-chip {
+  min-height: var(--bloom-touch-min);
+  text-decoration: none;
+}
+.nut-jump {
+  scroll-margin-top: 84px;
+}
 .nut-backlink {
   display: inline-flex;
   align-items: center;
