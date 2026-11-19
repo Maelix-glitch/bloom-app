@@ -15,14 +15,25 @@
  * provenance sentences live in the "How the twin works" disclosure
  * under the grid; no number on a tile differs from the number the
  * rows before them showed.
+ *
+ * Brief v4 Slice 5: above the grid sits the insight strip — the
+ * conclusions of the plan's retired "What your plan learned" block,
+ * absorbed per Part 3.4. At most two rows, conclusions only: the
+ * numbers live in the tiles (intake averages in coverage, the
+ * maintenance figure and its gathering counts in maintenance), and
+ * a conclusion drawn from fewer than 7 logged days carries the
+ * dashed "Early read · N days" badge with a neutral headline.
  */
 
-import { Fragment, useMemo } from "react";
+import { Fragment, useMemo, type ReactNode } from "react";
+import { EyeOff, Flame, Gauge, Scale, SlidersHorizontal, UtensilsCrossed } from "lucide-react";
 
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useHabits } from "@/hooks/useHabits";
 import { useNutrition } from "@/hooks/useNutrition";
+import { usePlan } from "@/hooks/usePlan";
 import { buildTwinSnapshot, type TwinField, type TwinProgress } from "@/lib/twin/twin";
+import { planLearningFor } from "@/lib/nutrition";
 import { pctOfTarget } from "@/lib/nutrition/targets";
 import { fmtCount, fmtGrams } from "@/lib/format";
 
@@ -149,10 +160,52 @@ function GatheringTile({
 
 /* ------------------------------- section -------------------------------- */
 
+/* ------------------------- the insight strip --------------------------- */
+/* Brief v4 Slice 5 (Part 3.4): the Twin absorbs "What your plan
+   learned" as a strip of AT MOST TWO conclusion rows. The strip
+   states conclusions only — every number it once restated lives in
+   the tiles below (the M-83 "say it once" debt: intake averages in
+   the coverage tile, the maintenance figure in the maintenance
+   tile, the gathering counts in the maintenance tile's meters).
+   Rows are built in priority order and capped: the target
+   adjustment first (its Remove action is functional, not
+   decoration), then the adherence conclusion, then the rest. */
+
+const EARLY_READ_MIN_DAYS = 7;
+
+function EarlyReadBadge({ days }: { days: number }) {
+  return (
+    <span className="tile-badge tile-badge--early ml-2 align-middle">
+      Early read · {days} {days === 1 ? "day" : "days"}
+    </span>
+  );
+}
+
+function StripRow({
+  icon,
+  children,
+  action,
+}: {
+  icon: ReactNode;
+  children: ReactNode;
+  action?: ReactNode;
+}) {
+  return (
+    <article className="insight">
+      <span className="insight__icon" aria-hidden="true">
+        {icon}
+      </span>
+      <div className="min-w-0">{children}</div>
+      {action ?? <span />}
+    </article>
+  );
+}
+
 export function MetabolicTwinSection() {
   const nutrition = useNutrition();
   const body = useBodyProfile();
   const habitsStore = useHabits();
+  const planStore = usePlan();
 
   const targets =
     nutrition.targetState.kind === "ready" ? nutrition.targetState.targets : null;
@@ -178,6 +231,152 @@ export function MetabolicTwinSection() {
       targets,
     ],
   );
+
+  /* The absorbed learning (Slice 5): the SAME computation the plan
+     section's retired block rendered — planLearningFor over the
+     stored plan — recomputed here from the same record. It exists
+     only with a current plan, exactly when the old block could
+     render. */
+  const plan = planStore.state.kind === "ready" ? planStore.state.plan : null;
+  const learning = useMemo(
+    () =>
+      plan
+        ? planLearningFor(nutrition.entries, plan.day, plan.targets, {
+            storedPlan: plan,
+            sex: nutrition.spectrumSex,
+          })
+        : null,
+    [plan, nutrition.entries, nutrition.spectrumSex],
+  );
+  /* The maintenance-matches conclusion, on the plan section's own
+     condition: an estimate exists and sits within a hair of the
+     engine target the plan was built against, and it is not the
+     delta already confirmed as the adjustment. */
+  const estimate = twin.expenditure.state === "value" ? twin.expenditure.value : null;
+  const proposalDelta =
+    estimate && planStore.engineTdeeKcal !== null
+      ? estimate.maintenanceKcal - planStore.engineTdeeKcal
+      : null;
+  const maintenanceMatches =
+    plan !== null &&
+    proposalDelta !== null &&
+    Math.abs(proposalDelta) < 25 &&
+    planStore.targetAdjustment?.kcalDelta !== proposalDelta;
+
+  const stripRows: ReactNode[] = [];
+  if (plan && planStore.targetAdjustment) {
+    stripRows.push(
+      <StripRow
+        key="adjustment"
+        icon={<SlidersHorizontal />}
+        action={
+          <button
+            type="button"
+            className="nut-btn nut-btn-ghost nut-btn-sm"
+            onClick={() => planStore.clearTargetAdjustment()}
+          >
+            Remove adjustment
+          </button>
+        }
+      >
+        <h3>Target includes your adjustment</h3>
+        <p>
+          Your energy target includes the adjustment you confirmed. Removing it returns the target
+          to the engine's estimate.
+        </p>
+      </StripRow>,
+    );
+  }
+  if (plan && learning?.adherence) {
+    const { days, avgKcal } = learning.adherence;
+    const ratio = avgKcal / plan.targets.kcal;
+    const headline =
+      ratio < 0.9
+        ? "Intake is below target so far"
+        : ratio > 1.1
+          ? "Intake is above target so far"
+          : "Intake is close to target so far";
+    stripRows.push(
+      <StripRow key="adherence" icon={<Gauge />}>
+        <h3>
+          {headline}
+          {days < EARLY_READ_MIN_DAYS ? <EarlyReadBadge days={days} /> : null}
+        </h3>
+        <p>
+          From your last {days} logged {days === 1 ? "day" : "days"} — the food-log coverage tile
+          holds the averages.
+        </p>
+        <a href="#nut-plan" className="nut-inline-link">
+          Log today's meals
+        </a>
+      </StripRow>,
+    );
+  }
+  if (maintenanceMatches) {
+    stripRows.push(
+      <StripRow key="maintenance-matches" icon={<Flame />}>
+        <h3>Maintenance matches your target</h3>
+        <p>
+          Your record's maintenance estimate is in line with your current target, so no change is
+          proposed. The figure lives in the maintenance tile.
+        </p>
+      </StripRow>,
+    );
+  }
+  if (learning && learning.favouredDishes.length > 0) {
+    stripRows.push(
+      <StripRow key="favoured" icon={<UtensilsCrossed />}>
+        <div className="grid gap-1.5">
+          <h3>Dishes you return to</h3>
+          <ul className="flex flex-wrap gap-1.5">
+            {learning.favouredDishes.slice(0, 5).map((d) => (
+              <li key={d.name} className="nut-badge">
+                {d.name} (logged {d.count} times)
+              </li>
+            ))}
+            {learning.favouredDishes.length > 5 ? (
+              <li className="nut-badge">and {learning.favouredDishes.length - 5} more</li>
+            ) : null}
+          </ul>
+          <p>They lead the picks.</p>
+        </div>
+      </StripRow>,
+    );
+  }
+  if (learning && learning.deprioritisedDishes.length > 0) {
+    stripRows.push(
+      <StripRow key="deprioritised" icon={<EyeOff />}>
+        <div className="grid gap-1.5">
+          <h3>Served but never logged</h3>
+          <ul className="flex flex-wrap gap-1.5">
+            {learning.deprioritisedDishes.slice(0, 5).map((d) => (
+              <li key={d.name} className="nut-badge">
+                {d.name}
+              </li>
+            ))}
+            {learning.deprioritisedDishes.length > 5 ? (
+              <li className="nut-badge">and {learning.deprioritisedDishes.length - 5} more</li>
+            ) : null}
+          </ul>
+          <p>They sit further back.</p>
+        </div>
+      </StripRow>,
+    );
+  }
+  if (learning && learning.portionSignals.length > 0) {
+    const signal = learning.portionSignals[0]!;
+    stripRows.push(
+      <StripRow key="portion" icon={<Scale />}>
+        <h3>Your usual portion differs</h3>
+        <p>
+          You usually log {signal.typicalGrams} g of {signal.name}; the plan serves{" "}
+          {signal.plannedGrams} g (from {signal.logs} logs). Portions stay as planned — the choice
+          is yours.
+        </p>
+      </StripRow>,
+    );
+  }
+  const strip = stripRows.slice(0, 2);
 
   /* Editorial order (brief v3 §1), then ready before gathering —
      a stable partition, so a tile moves up only when its data
@@ -435,6 +634,8 @@ export function MetabolicTwinSection() {
           </span>
         </div>
       </div>
+
+      {strip.length > 0 ? <div className="twin-strip mt-5 grid gap-3">{strip}</div> : null}
 
       <div className="tile-grid mt-5">
         {readyFirst.map((t) => (

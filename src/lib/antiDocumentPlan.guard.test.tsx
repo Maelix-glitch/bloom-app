@@ -1,15 +1,25 @@
 // @vitest-environment jsdom
 /**
- * The anti-document guard for the plan section's "What your plan
- * learned" block (anti-document brief v3, Slice 1) — the companion
- * to antiDocument.guard.test.ts. The block lives inside
- * NutritionPlanSection and is driven by the section's real
- * prefs-backed hooks, so this guard renders the whole section the
- * way its own test does (seeded assessment, seeded food log, the
- * real compose flow) and audits only the learned block's subtree.
- * The four checks and their meaning are defined in
- * antiDocument.guard.test.ts; the small audit helper is duplicated
- * here rather than imported across test files.
+ * The anti-document guard for the plan's learning surface — REWRITTEN
+ * for brief v4 Slice 5, with the reason recorded here as the house
+ * requires: this file used to audit the plan section's "What your
+ * plan learned" block (v3 Slice 1). Slice 5 RETIRED that block —
+ * the Twin absorbed its conclusions as an insight strip (brief 3.4),
+ * its numbers stayed in the Twin's tiles, and the block's label is
+ * gone (M-83/M-84). Auditing a removed block would guard nothing, so
+ * the guard now audits the SUCCESSOR surface to the same four checks
+ * (defined in antiDocument.guard.test.ts; the helper is duplicated
+ * here rather than imported across test files):
+ *
+ *   · the "What your plan learned" label renders NOWHERE;
+ *   · the Twin's insight strip (`.twin-strip`) is insight cards, not
+ *     a stack of notes — no long paragraphs, every card anchored, at
+ *     most one paragraph per card, no form rows;
+ *   · the strip never exceeds two rows (the brief's cap).
+ *
+ * The render is the real prefs-backed flow, as before: seeded
+ * assessment, seeded food log, the real compose, then a remount so
+ * the sections read the stored plan back.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -33,6 +43,7 @@ import { shiftDay, todayLocal } from "@/lib/localDay";
 import { ASSESSMENT_KEY, EMPTY_ANSWERS, type AssessmentState } from "@/lib/assessment/state";
 import { writeFoodLog, type LogEntry } from "@/lib/nutrition";
 import { NutritionPlanSection } from "@/components/nutrition/NutritionPlanSection";
+import { MetabolicTwinSection } from "@/components/nutrition/MetabolicTwinSection";
 
 afterEach(cleanup);
 
@@ -82,7 +93,7 @@ function cardName(card: HTMLElement): string {
 
 /** The card that owns a paragraph: walk up from it; the first card
  *  met owns it, and the audit root is the boundary card of last
- *  resort (the learned block's root is a plain div, not a card). */
+ *  resort (the strip's root is a plain div, not a card). */
 function ownerCard(p: HTMLElement, root: HTMLElement): HTMLElement {
   let el: HTMLElement | null = p.parentElement;
   while (el && el !== root) {
@@ -166,33 +177,56 @@ function logEntry(day: string): LogEntry {
 
 /* -------------------------------- test --------------------------------- */
 
-describe("anti-document guard — What your plan learned (strict)", () => {
-  it("insight cards, not a stack of notes", async () => {
+describe("anti-document guard — the absorbed insight strip (strict)", () => {
+  it("the learned block is retired; its successor strip is insight cards, not notes", async () => {
     seedAssessment();
     const today = todayLocal();
     /* Three logged days before today: enough for the adherence
-       learning (>= 2 recent days) and for the still-gathering
-       maintenance note (> 0 logged days, no weigh-ins) — the two
-       prose notes the old block stacked. */
+       learning (>= 2 recent days) — the conclusion the old block
+       stacked as prose and the strip now carries as a card. */
     writeFoodLog([logEntry(shiftDay(today, -1)), logEntry(shiftDay(today, -2)), logEntry(shiftDay(today, -3))]);
 
-    render(<NutritionPlanSection />);
-    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
-    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 6000 });
-
-    const label = [...document.querySelectorAll("p")].find((p) =>
-      (p.textContent ?? "").includes("What your plan learned"),
+    const first = render(
+      <>
+        <NutritionPlanSection />
+        <MetabolicTwinSection />
+      </>,
     );
-    expect(label, "the learned block renders").toBeTruthy();
-    const block = label!.parentElement!;
-    /* The block's audit scope includes the methodology line that
-       trails it — after the rebuild that line lives in the block's
-       own <details>, so audit the block's parent section subtree
-       scoped to the block plus its details sibling. */
-    const audit = auditSection(block);
+    fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
+    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+    first.unmount();
+
+    /* Remount: both sections read the STORED plan — the state the
+       strip's data (planLearningFor over the stored plan) needs. */
+    const { container } = render(
+      <>
+        <NutritionPlanSection />
+        <MetabolicTwinSection />
+      </>,
+    );
+    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+
+    /* The retired block's label renders nowhere (M-84's remainder
+       dies with the block). */
+    expect(container.textContent).not.toContain("What your plan learned");
+
+    const twinSection = container.querySelector('section[aria-label="Your metabolic twin"]');
+    expect(twinSection, "Twin section renders").not.toBeNull();
+    const strip = twinSection!.querySelector<HTMLElement>(".twin-strip");
+    expect(strip, "the Twin carries the absorbed insight strip").not.toBeNull();
+    expect(
+      strip!.querySelectorAll(".insight").length,
+      "the strip is capped at two rows",
+    ).toBeLessThanOrEqual(2);
+    expect(
+      strip!.querySelectorAll(".insight").length,
+      "the adherence conclusion reaches the strip",
+    ).toBeGreaterThan(0);
+
+    const audit = auditSection(strip!);
     expect(audit.longP, "paragraphs over 200 chars").toEqual([]);
     expect(audit.anchorless, "cards with no visual anchor").toEqual([]);
     expect(audit.manyP, "cards with more than one paragraph").toEqual([]);
     expect(audit.wideGap, "label/value form rows").toBe(0);
-  }, 20000);
+  }, 30000);
 });

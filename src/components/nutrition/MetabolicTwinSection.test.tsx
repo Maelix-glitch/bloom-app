@@ -14,6 +14,11 @@ import { cleanup, render } from "@testing-library/react";
 const nutritionState = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 const bodyState = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 const habitsState = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
+/* Brief v4 Slice 5: the Twin absorbed the plan's learning surface, so
+   it reads the plan store too. Mocked at the same module boundary;
+   the default is "no plan" — the strip stays absent and every
+   pre-Slice-5 fixture renders exactly as it did. */
+const planState = vi.hoisted(() => ({ current: {} as Record<string, unknown> }));
 
 vi.mock("@/hooks/useNutrition", () => ({
   useNutrition: () => nutritionState.current,
@@ -24,8 +29,13 @@ vi.mock("@/hooks/useBodyProfile", () => ({
 vi.mock("@/hooks/useHabits", () => ({
   useHabits: () => habitsState.current,
 }));
+vi.mock("@/hooks/usePlan", () => ({
+  usePlan: () => planState.current,
+}));
 
+import { fireEvent, screen } from "@testing-library/react";
 import type { Habit, HabitLog } from "@/lib/home/habits";
+import type { DailyPlan, TargetAdjustment } from "@/lib/nutrition";
 import type { LogEntry } from "@/lib/nutrition/types";
 import { MetabolicTwinSection } from "./MetabolicTwinSection";
 
@@ -81,6 +91,13 @@ const dailyHabit: Habit = {
   pausedUntil: null,
 };
 
+const noPlan = {
+  state: { kind: "can_generate" },
+  targetAdjustment: null,
+  engineTdeeKcal: null,
+  clearTargetAdjustment: () => {},
+};
+
 function setStores(patch: {
   entries?: LogEntry[];
   weighIns?: { date: string; kg: number }[];
@@ -96,6 +113,29 @@ function setStores(patch: {
   };
   bodyState.current = { weighIns: patch.weighIns ?? [] };
   habitsState.current = { habits: patch.habits ?? [], logs: patch.habitLogs ?? [] };
+  planState.current = { ...noPlan };
+}
+
+/** A minimal stored plan for the strip fixtures: planLearningFor
+ *  reads only its day, targets and meal suggestions (none here, so
+ *  portion signals and deprioritised dishes stay empty — the strip
+ *  rows under test are adherence / maintenance / adjustment). */
+function readyPlan(day: string, targets = { kcal: 2500, proteinG: 100 }): DailyPlan {
+  return { day, targets, meals: [] } as unknown as DailyPlan;
+}
+
+function setPlan(patch: {
+  plan?: DailyPlan;
+  targetAdjustment?: TargetAdjustment | null;
+  engineTdeeKcal?: number | null;
+  clearTargetAdjustment?: () => void;
+}) {
+  planState.current = {
+    state: patch.plan ? { kind: "ready", plan: patch.plan, staleness: null } : { kind: "can_generate" },
+    targetAdjustment: patch.targetAdjustment ?? null,
+    engineTdeeKcal: patch.engineTdeeKcal ?? null,
+    clearTargetAdjustment: patch.clearTargetAdjustment ?? (() => {}),
+  };
 }
 
 describe("MetabolicTwinSection — a record that can speak", () => {
@@ -167,5 +207,132 @@ describe("MetabolicTwinSection — an empty record", () => {
     expect(text).toContain("No active habits");
     expect(text).toContain("Logged");
     expect(text).not.toContain("what your record says your body actually burns");
+  });
+});
+
+describe("MetabolicTwinSection — the absorbed insight strip (brief v4 Slice 5)", () => {
+  it("a 2-day adherence conclusion is an Early read with a neutral headline (M-93)", () => {
+    /* The owner's data shape: two logged days, both under target.
+       The learning reads the last 2–3 logged days by design, so the
+       conclusion's basis is 2 days — under the brief's 7-day line. */
+    setStores({ entries: daysFrom("2026-10-20", 2, 1800) });
+    setPlan({ plan: readyPlan("2026-10-22") });
+    const { container } = render(<MetabolicTwinSection />);
+    const strip = container.querySelector(".twin-strip");
+    expect(strip, "the strip renders with a plan and learning").not.toBeNull();
+    const text = strip!.textContent ?? "";
+    expect(text).toContain("Intake is below target so far");
+    expect(text).not.toContain("running under");
+    const badge = strip!.querySelector(".tile-badge--early");
+    expect(badge, "the Early read badge renders").not.toBeNull();
+    expect(badge!.textContent).toContain("Early read · 2 days");
+    /* Neutral treatment: the badge is the dashed estimated
+       signature, never gold, never success. */
+    expect(badge!.className).not.toMatch(/gold|success/);
+    /* The strip states the conclusion only — the averages stay in
+       the coverage tile (the M-83 debt stays cleared). */
+    expect(text).not.toContain("1,800");
+  });
+
+  it("the adherence basis is the last 3 logged days even on a long record — still an Early read", () => {
+    setStores({
+      entries: daysFrom("2026-10-01", 12, 2500),
+      weighIns: [
+        { date: "2026-10-01", kg: 100 },
+        { date: "2026-10-22", kg: 99 },
+      ],
+    });
+    /* engineTdee == the estimate (2,867) → maintenance matches the
+       target: a ≥10-day-basis conclusion, which renders badge-free. */
+    setPlan({ plan: readyPlan("2026-10-22"), engineTdeeKcal: 2867 });
+    const { container } = render(<MetabolicTwinSection />);
+    const strip = container.querySelector(".twin-strip");
+    expect(strip).not.toBeNull();
+    const rows = [...strip!.querySelectorAll(".insight")];
+    expect(rows.length).toBe(2);
+    const adherence = rows.find((r) => r.textContent?.includes("Intake is"));
+    expect(adherence, "adherence row renders").toBeDefined();
+    expect(adherence!.querySelector(".tile-badge--early")?.textContent).toContain(
+      "Early read · 3 days",
+    );
+    const matches = rows.find((r) => r.textContent?.includes("Maintenance matches your target"));
+    expect(matches, "maintenance-matches row renders").toBeDefined();
+    expect(matches!.querySelector(".tile-badge--early")).toBeNull();
+  });
+
+  it("the target adjustment row carries the Remove adjustment action", () => {
+    const clear = vi.fn();
+    const adjustment: TargetAdjustment = {
+      version: 1 as TargetAdjustment["version"],
+      kcalDelta: 200,
+      confirmedAt: "2026-10-20T03:00:00.000Z",
+      basedOn: {
+        maintenanceKcal: 2867,
+        engineTdeeKcal: 2667,
+        loggedDays: 12,
+        spanDays: 21,
+        weightChangeKg: -1,
+      },
+    };
+    setStores({ entries: daysFrom("2026-10-20", 2, 1800) });
+    setPlan({
+      plan: readyPlan("2026-10-22", { kcal: 2700, proteinG: 100 }),
+      targetAdjustment: adjustment,
+      engineTdeeKcal: 2667,
+      clearTargetAdjustment: clear,
+    });
+    const { container } = render(<MetabolicTwinSection />);
+    const strip = container.querySelector(".twin-strip");
+    expect(strip).not.toBeNull();
+    expect(strip!.textContent).toContain("Target includes your adjustment");
+    /* The adjustment's maintenance basis is not restated as a
+       number in the strip — it lives in the maintenance tile. */
+    expect(strip!.textContent).not.toContain("2,867");
+    fireEvent.click(screen.getByRole("button", { name: "Remove adjustment" }));
+    expect(clear).toHaveBeenCalledTimes(1);
+  });
+
+  it("caps the strip at two rows — the functional and headline conclusions win", () => {
+    const adjustment: TargetAdjustment = {
+      version: 1 as TargetAdjustment["version"],
+      kcalDelta: 200,
+      confirmedAt: "2026-10-20T03:00:00.000Z",
+      basedOn: {
+        maintenanceKcal: 2867,
+        engineTdeeKcal: 2667,
+        loggedDays: 12,
+        spanDays: 21,
+        weightChangeKg: -1,
+      },
+    };
+    setStores({
+      entries: daysFrom("2026-10-01", 12, 2500),
+      weighIns: [
+        { date: "2026-10-01", kg: 100 },
+        { date: "2026-10-22", kg: 99 },
+      ],
+    });
+    /* Adjustment + adherence + maintenance-matches all exist;
+       engineTdee is the estimate so "matches" would qualify — the
+       cap keeps adjustment (functional) and adherence (headline). */
+    setPlan({
+      plan: readyPlan("2026-10-22"),
+      targetAdjustment: adjustment,
+      engineTdeeKcal: 2867,
+    });
+    const { container } = render(<MetabolicTwinSection />);
+    const strip = container.querySelector(".twin-strip");
+    expect(strip).not.toBeNull();
+    const rows = strip!.querySelectorAll(".insight");
+    expect(rows.length).toBe(2);
+    expect(strip!.textContent).toContain("Target includes your adjustment");
+    expect(strip!.textContent).toContain("Intake is close to target so far");
+    expect(strip!.textContent).not.toContain("Maintenance matches your target");
+  });
+
+  it("no plan, no strip — the tiles render exactly as before", () => {
+    setStores({ entries: daysFrom("2026-10-20", 2, 1800) });
+    const { container } = render(<MetabolicTwinSection />);
+    expect(container.querySelector(".twin-strip")).toBeNull();
   });
 });
