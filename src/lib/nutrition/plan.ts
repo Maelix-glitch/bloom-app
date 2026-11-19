@@ -192,6 +192,15 @@ export interface PlanInputsSnapshot {
   eatingSetting?: EatingSetting | null;
   hungerPattern?: HungerPattern | null;
   confidence?: number | null;
+  /** The day timeline's clock anchor (P12): the person's usual
+   *  wake and bed times from their own sleep log, when the log
+   *  could speak. Recorded on the cuisine precedent exactly —
+   *  scheduling-shaping only, never target-bearing, deliberately
+   *  NOT part of the inputs fingerprint — and named by the
+   *  staleness check when they change. Null when the day was
+   *  anchored relatively. Absent on pre-P12 snapshots. */
+  wakeTime?: string | null;
+  bedTime?: string | null;
   safetyClassification: SafetyClass;
   targetsKcal: number;
   targetsProteinG: number;
@@ -287,6 +296,33 @@ export interface PlanHydration {
   totalMl: number;
 }
 
+/** One stop on the day's timeline (P12). The timeline schedules
+ *  the plan the composer already made — it adds no food and moves
+ *  no totals; it says WHEN the day's pieces happen, from waking to
+ *  sleep. */
+export type PlanTimelineKind = "wake" | "meal" | "wind_down" | "sleep";
+
+export interface PlanTimelineItem {
+  kind: PlanTimelineKind;
+  /** The meal slot, on meal items. */
+  meal?: Meal;
+  /** Clock time "HH:MM" on a sleep-log-anchored day; null on a
+   *  relative day — no clock was known, so none is shown. */
+  time: string | null;
+  /** The item's name as the plan states it: "On waking",
+   *  "Breakfast", "Mid-morning snack", "Wind down", "Bedtime". */
+  label: string;
+}
+
+export interface PlanTimeline {
+  /** Where the day's frame came from: the person's own usual wake
+   *  and bed times from their sleep log ("sleep_log"), or no clock
+   *  at all ("relative") — the anchors are then the day's own
+   *  structure, and the labels say so. */
+  anchor: "sleep_log" | "relative";
+  items: PlanTimelineItem[];
+}
+
 export interface DailyPlan {
   id: string;
   /** The day this plan is for (a local day key). */
@@ -318,6 +354,10 @@ export interface DailyPlan {
    *  water target was known at generation time. Absent on pre-P11
    *  plans and on plans whose targets carried no water figure. */
   hydration?: PlanHydration;
+  /** The day's timeline (P12): the composed day laid out from
+   *  waking to sleep. Absent on plans stored before P12 — those
+   *  plans are stale by method and regenerate into it. */
+  timeline?: PlanTimeline;
   meals: PlanMeal[];
   inputs: PlanInputsSnapshot;
   fingerprint: string;
@@ -386,8 +426,22 @@ export interface DailyPlan {
  *  day can be closed by the densest honest food Bloom carries;
  *  and a final trim pulls a protein-overshooting day back toward
  *  its band, with the notes naming any overshoot that remains —
- *  before P11 an overshoot was not even named. */
-export const PLAN_METHOD_VERSION = 11;
+ *  before P11 an overshoot was not even named.
+ *  12 = the full-day timeline pass (P12, owner directive
+ *  2026-11-19): the composed day is laid out from waking to
+ *  sleep — the waking glass, every meal in its place, a wind-down
+ *  and the bedtime — as a stored timeline. When the person's
+ *  sleep log holds a usual wake and bed time (their own logged
+ *  nights, the median the trackers already compute), the items
+ *  carry those clock times and the meals are spaced inside the
+ *  window (>= 90 minutes between eating items, the last eating
+ *  item at least two hours before bed); when no clock is known,
+ *  the timeline is anchored relatively and shows no invented
+ *  times. The timeline schedules the plan — it adds no food and
+ *  moves no totals. The day guard's re-pick also changes: a meal
+ *  is re-picked against the DAY's band cost, not its own split
+ *  alone, so a protein-short day re-picks toward protein. */
+export const PLAN_METHOD_VERSION = 12;
 
 export type PlanRefusal =
   | {
@@ -413,6 +467,7 @@ export function planInputsSnapshotOf(
   profile: HealthProfile,
   safety: SafetyAssessment,
   targets: NutritionTargets,
+  anchor?: { wakeTime?: string | null; bedTime?: string | null },
 ): PlanInputsSnapshot {
   const heightCm = profileHeightCm(profile);
   const weightKg = profileWeightKg(profile);
@@ -441,6 +496,12 @@ export function planInputsSnapshotOf(
     safetyClassification: safety.classification,
     targetsKcal: targets.kcal,
     targetsProteinG: targets.proteinG,
+    /* P12: the day's sleep anchor rides in the snapshot exactly as
+       generatePlan records it (null when the day is relative), so
+       a snapshot built here and one a plan carries agree key for
+       key. */
+    wakeTime: anchor?.wakeTime ?? null,
+    bedTime: anchor?.bedTime ?? null,
   };
 }
 
@@ -507,6 +568,16 @@ export function planStaleness(plan: DailyPlan, current: PlanInputsSnapshot): Pla
   if ((plan.methodVersion ?? 1) < PLAN_METHOD_VERSION) changed.push("the plan method improved");
   for (const [key, label] of CHANGED_LABELS) {
     if (plan.inputs[key] !== current[key]) changed.push(label);
+  }
+  /* P12: the timeline's clock anchor, compared nullish-tolerantly —
+     snapshots stored before P12 carry no anchor keys at all, and
+     "no anchor recorded" and "anchored relatively" are the same
+     fact, not a change. */
+  if (
+    (plan.inputs.wakeTime ?? null) !== (current.wakeTime ?? null) ||
+    (plan.inputs.bedTime ?? null) !== (current.bedTime ?? null)
+  ) {
+    changed.push("your usual sleep times");
   }
   if (
     plan.inputs.targetsKcal !== current.targetsKcal ||
@@ -892,6 +963,31 @@ const groupOf = (food: Food): FoodGroup | null => food.classification?.group ?? 
 const isMilkOrCurd = (food: Food): boolean =>
   groupOf(food) === "dairy" && food.per100g.proteinG < 5;
 
+/** The reference milk-and-curd foods, pinned by id (the
+ *  COOKED_SOY_FORM_IDS pattern): the dairy group's milks and
+ *  curd/yogurts. No nutrient threshold separates them honestly —
+ *  Greek yogurt (hung curd) carries 10.3 g of protein per 100 g,
+ *  more than cottage cheese, yet it IS curd; the cheeses and
+ *  cottage cheese are protein foods. A census test pins this set
+ *  against the reference data so a data refresh cannot drift it. */
+export const MILK_CURD_FOOD_IDS: ReadonlySet<string> = new Set([
+  "usda-322559", // Milk, nonfat, fluid
+  "usda-322892", // Milk, whole, 3.25% milkfat
+  "usda-2259793", // Yogurt, plain, whole milk
+  "usda-330137", // Yogurt, Greek, plain, nonfat (hung curd)
+]);
+
+/** Whether a SERVED portion counts toward the day's milk-and-curd
+ *  floor tally (P12 fix). Composition keeps using isMilkOrCurd —
+ *  Greek yogurt is a protein-layer food when the composer places
+ *  it — but the TALLY measures what the person actually ate, and a
+ *  bowl of curd is curd however it was composed: before this fix a
+ *  day serving the Enriched Fruit and Curd Bowl (125 g of Greek
+ *  yogurt a serving) tallied 0 g and the note said so, falsely.
+ *  Own foods keep the protein heuristic — there are no ids to pin. */
+export const countsTowardMilkCurdFloor = (food: Food): boolean =>
+  MILK_CURD_FOOD_IDS.has(food.id) || isMilkOrCurd(food);
+
 /** Shared composition state for one day: the pool in rotation order, the
  *  foods already suggested (variety prefers the unused), and the running
  *  day-floor totals the later meals can react to. */
@@ -907,6 +1003,13 @@ interface ComposeContext {
    *  ranked by protein density first. Absent/false = the unbiased
    *  composer, exactly as before P6. */
   proteinFirst?: boolean;
+  /** P12: the day's protein guide is dilute (under ~0.055 g per
+   *  kcal — the general-health and maintain guides), so the plate's
+   *  incidental protein (vegetables, the dairy extra, breakfast
+   *  nuts) is a large share of it; the protein layer's aim counts
+   *  those incidentals instead of overshooting the guide by them.
+   *  Absent/false = the layer aims at the bare split, as before. */
+  lowProteinDensity?: boolean;
   /** The craving kinds the person stated (P10, spec §10): the snack
    *  composition reads them — a stated sweet craving makes the
    *  snack's flexible item prefer fruit. Empty = nothing stated. */
@@ -922,7 +1025,7 @@ function recordSuggestion(
   ctx.used.add(food.id);
   if (groupOf(food) === "vegetables") ctx.vegG += portion.grams;
   if (groupOf(food) === "fruits") ctx.fruitG += portion.grams;
-  if (isMilkOrCurd(food)) ctx.milkCurdG += portion.grams;
+  if (countsTowardMilkCurdFloor(food)) ctx.milkCurdG += portion.grams;
   return {
     foodId: food.id,
     name: food.name,
@@ -1104,6 +1207,25 @@ function composeMainMeal(
      the classic 20–40 g serving band — research §4), the meal lands
      under its split honestly rather than breaking a cap to reach it. */
   let proteinLeft = split.proteinG;
+  if (ctx.lowProteinDensity) {
+    /* P12: count the plate's incidental protein in the aim. The
+       vegetables carry ~1.8 g per 100 g toward their gram target;
+       the dairy extra pours toward the day's remaining floor gap
+       at ~3.5 g per 100 g; breakfast's nuts carry ~3 g. On a
+       dilute guide these incidentals are a fifth of the day's
+       protein — sized against the bare split, the layer overshoots
+       the guide by exactly them (the 1000-run census: overshoot
+       worst at the smallest densities). The day's closing passes
+       correct the estimate as they always have; the aim never
+       drops below a real first portion. */
+    const dairyAllowedHere = ctx.pattern === null || PATTERN_ALLOWANCES[ctx.pattern].dairy;
+    const vegProtein = opts.vegTargetG * 0.018;
+    const dairyProtein = dairyAllowedHere
+      ? Math.min(CAP_FINISHING_DAIRY_G, Math.max(0, FLOOR_MILK_CURD_G - ctx.milkCurdG)) * 0.035
+      : 0;
+    const nutsProtein = opts.isBreakfast ? 3 : 0;
+    proteinLeft = Math.max(8, split.proteinG - vegProtein - dairyProtein - nutsProtein);
+  }
   let proteinKcal = 0;
   const kindsUsed = new Set<ProteinKind>();
   for (
@@ -1228,8 +1350,20 @@ function composeMainMeal(
       missing.push("a dairy extra");
     } else {
       const remaining = split.kcal - kcalTally;
-      let portion =
-        remaining >= 60 ? sizedPortion(dairy, { kcal: remaining }, CAP_FINISHING_DAIRY_G) : null;
+      /* P12: the extra is sized toward the DAY's floor gap, not the
+         meal's whole remaining energy. Sized by remaining energy,
+         each meal independently poured up to 250 g — 750 g of milk
+         across a day whose floor is 300 g, carrying ~27 g of
+         protein the day's guide never asked for (the no-cook
+         census: protein overshoot worst exactly where the protein
+         guide is smallest). While the floor is unmet the cap is
+         the gap itself (never under a 100 g glass); once the floor
+         is met, a modest glass is all an extra is. */
+      const dairyCapG =
+        ctx.milkCurdG >= FLOOR_MILK_CURD_G
+          ? 100
+          : Math.min(CAP_FINISHING_DAIRY_G, Math.max(100, FLOOR_MILK_CURD_G - ctx.milkCurdG));
+      let portion = remaining >= 60 ? sizedPortion(dairy, { kcal: remaining }, dairyCapG) : null;
       if (ctx.milkCurdG < FLOOR_MILK_CURD_G && withinTolerance()) {
         const want = Math.min(CAP_FINISHING_DAIRY_G, FLOOR_MILK_CURD_G - ctx.milkCurdG);
         if (!portion || portion.grams < want) {
@@ -1341,16 +1475,21 @@ function applyProteinDominanceCap(
       const suggestion = meal.suggestions[idx]!;
       const cutG = Math.ceil(((excess / food.per100g.proteinG) * 100) / 5) * 5;
       const newGrams = suggestion.grams - cutG;
-      if (newGrams < 10) {
+      /* The snack's last item is trimmed to the floor, never removed
+         (P12) — the same never-empty-the-snack rule as the energy
+         trim. */
+      const keepLastSnackItem = meal.meal === "snack" && meal.suggestions.length === 1;
+      if (newGrams < 10 && !keepLastSnackItem) {
         excess -= suggestion.nutrients.proteinG;
         meal.suggestions.splice(idx, 1);
         if (meal.suggestions.length === 0 && meal.dishes.length === 0) {
           meal.note = EMPTY_MEAL_NOTE;
         }
       } else {
-        const nutrients = nutrientsForGrams(food.per100g, newGrams);
+        const keptGrams = Math.max(10, newGrams);
+        const nutrients = nutrientsForGrams(food.per100g, keptGrams);
         excess -= suggestion.nutrients.proteinG - nutrients.proteinG;
-        meal.suggestions[idx] = { ...suggestion, grams: newGrams, nutrients };
+        meal.suggestions[idx] = { ...suggestion, grams: keptGrams, nutrients };
       }
     }
   }
@@ -1392,20 +1531,90 @@ function trimProteinOvershoot(
         }
       });
     }
-    if (!best) return;
+    if (!best) break;
     const chosen: { meal: PlanMeal; idx: number; s: PlanSuggestion } = best;
     const food = byId.get(chosen.s.foodId);
-    if (!food || food.per100g.proteinG <= 0) return;
+    if (!food || food.per100g.proteinG <= 0) break;
     const wantG = Math.ceil(((over / food.per100g.proteinG) * 100) / 5) * 5;
     let cutG = Math.min(wantG, chosen.s.grams - 15);
     const kcalPerGram = food.per100g.kcal / 100;
     if (kcalPerGram > 0) {
       const kcalRoom = dayKcalOf(meals) - kcalFloor;
-      if (kcalRoom <= 0) return;
+      if (kcalRoom <= 0) break;
       cutG = Math.min(cutG, Math.floor(kcalRoom / kcalPerGram / 5) * 5);
     }
-    if (cutG < 5) return;
+    if (cutG < 5) break;
     setPortion(chosen.meal, chosen.idx, food, chosen.s.grams - cutG);
+  }
+
+  /* Swap-down (P12): portion cuts stall at the energy floor — the
+     day is energy-short AND protein-long, so nothing more can be
+     cut without breaking the energy band. What remains is
+     substitution: a top-up carrying protein the day does not need
+     (nuts and seeds bought for energy carry 0.03–0.06 g per kcal)
+     is exchanged for an equal-energy simple food carrying less —
+     coconut, at ~0.009 g per kcal, is the pool's leanest. Only
+     top-up items swap: they are completing foods by definition,
+     and a composed layer is never unmade. The exchange holds the
+     day's energy within a few kcal, so the energy band the cuts
+     were protecting is not spent by the rescue. */
+  for (let round = 0; round < 6; round++) {
+    if (dayProteinOf(meals) <= ceiling) return;
+    let victimMeal: PlanMeal | null = null;
+    let victimIdx = -1;
+    let victimProtein = 0;
+    for (const meal of meals) {
+      for (let idx = 0; idx < meal.suggestions.length; idx++) {
+        const s = meal.suggestions[idx]!;
+        if (s.layer !== "topup") continue;
+        if (s.nutrients.proteinG > victimProtein) {
+          victimProtein = s.nutrients.proteinG;
+          victimMeal = meal;
+          victimIdx = idx;
+        }
+      }
+    }
+    if (victimMeal === null || victimIdx < 0) return;
+    const victim = victimMeal.suggestions[victimIdx]!;
+    if (victim.nutrients.kcal <= 0) return;
+    const victimDensity = victim.nutrients.proteinG / victim.nutrients.kcal;
+    const inMeal = new Set(victimMeal.suggestions.map((s) => s.foodId));
+    const dayUsed = new Set(meals.flatMap((m) => m.suggestions.map((s) => s.foodId)));
+    const candidates = [...byId.values()]
+      .filter(
+        (f) =>
+          !inMeal.has(f.id) &&
+          !isRawBasisFood(f) &&
+          (isMilkOrCurd(f) || groupOf(f) === "nuts_seeds") &&
+          f.per100g.kcal > 0 &&
+          f.per100g.proteinG / f.per100g.kcal < victimDensity - 0.01,
+      )
+      .sort(
+        (a, b) =>
+          Number(dayUsed.has(a.id)) - Number(dayUsed.has(b.id)) ||
+          a.per100g.proteinG / a.per100g.kcal - b.per100g.proteinG / b.per100g.kcal,
+      );
+    let swapped = false;
+    for (const food of candidates) {
+      const cap = isMilkOrCurd(food) ? CAP_FINISHING_DAIRY_G : CAP_NUTS_G;
+      const portion = sizedPortion(food, { kcal: victim.nutrients.kcal }, cap);
+      if (!portion) continue;
+      if (portion.nutrients.proteinG > victim.nutrients.proteinG - 3) continue;
+      if (Math.abs(portion.nutrients.kcal - victim.nutrients.kcal) > 0.15 * victim.nutrients.kcal) {
+        continue;
+      }
+      victimMeal.suggestions[victimIdx] = {
+        foodId: food.id,
+        name: food.name,
+        grams: portion.grams,
+        nutrients: portion.nutrients,
+        provenance: food.provenance,
+        layer: "topup",
+      };
+      swapped = true;
+      break;
+    }
+    if (!swapped) return;
   }
 }
 
@@ -1451,7 +1660,7 @@ const dayProteinOf = (meals: readonly PlanMeal[]): number =>
  *  ingredient lines' grams (per serving, at the servings the plan
  *  serves) under each line food's group — a vegetable curry's
  *  vegetables are vegetables, wherever they were composed. */
-function floorTotalsOf(
+export function floorTotalsOf(
   meals: readonly PlanMeal[],
   byId: ReadonlyMap<string, Food>,
   dishById: ReadonlyMap<string, Dish> = new Map(),
@@ -1462,7 +1671,7 @@ function floorTotalsOf(
   const addFood = (food: Food, grams: number) => {
     if (groupOf(food) === "vegetables") vegG += grams;
     if (groupOf(food) === "fruits") fruitG += grams;
-    if (isMilkOrCurd(food)) milkCurdG += grams;
+    if (countsTowardMilkCurdFloor(food)) milkCurdG += grams;
   };
   for (const meal of meals) {
     for (const s of meal.suggestions) {
@@ -1837,7 +2046,12 @@ function trimEnergy(
     const wanted = Math.min(maxCutG, ceil5(excess / kcalPerGram(food)));
     if (wanted <= 0) return 0;
     const newGrams = ref.s.grams - wanted;
-    if (newGrams < removeBelowG) {
+    /* The snack never empties (P12): a whole-removal here once took
+       a small snack's only item to settle a few kcal of excess,
+       leaving an empty sitting the composition had honestly
+       filled — the snack's last item is cut to its floor instead. */
+    const keepLastSnackItem = ref.meal.meal === "snack" && ref.meal.suggestions.length <= 1;
+    if (newGrams < removeBelowG && !keepLastSnackItem) {
       const saved = ref.s.nutrients.kcal;
       ref.meal.suggestions.splice(idx, 1);
       if (ref.meal.suggestions.length === 0 && ref.meal.dishes.length === 0) {
@@ -2040,10 +2254,31 @@ function compositionNotes(
     );
   }
   const protein = dayProteinOf(meals);
+  const kcal = dayKcalOf(meals);
   if (protein < PROTEIN_CLOSE_FRACTION * targets.proteinG) {
-    notes.push(
-      `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — the portion caps bind before the target does.`,
-    );
+    if (kcal > (1 + ENERGY_NOTE_BAND) * targets.kcal) {
+      /* P12: when the day is already over its energy guide, the
+         energy is what stopped a top-up, not the portion caps —
+         the note says which, and whether a top-up is in the day
+         (the gap scoop fires exactly into this corner when a
+         powder the pool allows exists). */
+      const powderTopUpInDay = meals.some((m) =>
+        m.suggestions.some((s) => {
+          if (s.layer !== "topup") return false;
+          const food = byId.get(s.foodId);
+          return food !== undefined && isProteinPowder(food);
+        }),
+      );
+      notes.push(
+        powderTopUpInDay
+          ? `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — a protein top-up is in the day, and the day is already over its energy guide, so nothing more was added.`
+          : `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — the day is already over its energy guide, so no top-up was added: more food would push the energy further over.`,
+      );
+    } else {
+      notes.push(
+        `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — the portion caps bind before the target does.`,
+      );
+    }
   } else if (protein > DAY_PROTEIN_MAX * targets.proteinG) {
     /* P11: an overshoot is named too — before this pass the notes
        judged a day under its protein guide but said nothing about
@@ -2052,7 +2287,6 @@ function compositionNotes(
       `Today's suggestions reach about ${Math.round(protein)} g of protein — above your ${Math.round(targets.proteinG)} g protein guide. The day's protein foods add up past it.`,
     );
   }
-  const kcal = dayKcalOf(meals);
   if (kcal > (1 + ENERGY_NOTE_BAND) * targets.kcal) {
     notes.push(
       `Today's suggestions reach about ${fmtCount(kcal)} kcal — above your ${fmtKcalApprox(targets.kcal)} guide. The day's guideline floors and layers add up past it.`,
@@ -2762,13 +2996,21 @@ function dayBandCost(kcal: number, proteinG: number, targets: NutritionTargets):
  * whenever one exists. Zero for food-composed meals — the layered
  * composer has its own portion discipline.
  */
+/** One dish meal's sanity term: its dish's coverage of the
+ *  meal's share, priced as in `mealSanityCost`. */
+function mealSanityTerm(dishKcal: number, mealKcal: number): number {
+  if (mealKcal <= 0) return 0;
+  const cov = dishKcal / mealKcal;
+  if (cov > 1.3) return 0.5 * (cov - 1.3);
+  if (cov < 0.6) return 0.5 * (0.6 - cov);
+  return 0;
+}
+
 function mealSanityCost(meals: readonly PlanMeal[]): number {
   let cost = 0;
   for (const meal of meals) {
-    if (meal.dishes.length !== 1 || meal.kcal <= 0) continue;
-    const cov = meal.dishes[0]!.nutrients.kcal / meal.kcal;
-    if (cov > 1.3) cost += 0.5 * (cov - 1.3);
-    else if (cov < 0.6) cost += 0.5 * (0.6 - cov);
+    if (meal.dishes.length !== 1) continue;
+    cost += mealSanityTerm(meal.dishes[0]!.nutrients.kcal, meal.kcal);
   }
   return cost;
 }
@@ -2872,16 +3114,102 @@ function repairDishScales(
   }
 }
 
+/** The day-aware re-pick's weight on the meal's own pick cost:
+ *  the day's bands lead — they are the promise — and the pick
+ *  cost (the meal's fit plus every ranking term the composer
+ *  holds: scale naturalness, the learning bias, the cuisine
+ *  preference, the served-yesterday penalty) breaks the ties
+ *  among swaps that land the day equally well, at a weight that
+ *  cannot outvote a band fix. */
+const DAY_REPICK_FIT_WEIGHT = 0.3;
+
 /**
- * The day guard (P8): repair the scales; while the day still sits
- * outside its bands and attempts remain, re-pick the worst-fitting
- * dish meal at its slot's optimum (band 0 — no rotation), then
- * repair again. This is what lets the pick band stay generous:
- * variety is tried first, and the day's totals — the numbers the
- * person actually judges the plan by — are enforced after, at the
- * level where they are defined. Bounded at four attempts; a day
- * the pool genuinely cannot land stays at its closest, and the
- * plan's notes name the true figure.
+ * The day-aware re-pick (P12): judge every candidate at every
+ * scale by what the swap does to the DAY — its band cost, with
+ * the swapped meal's sanity term — plus the pick cost at the
+ * tie-break weight. Before P12 the guard re-picked the worst
+ * meal against its own split alone, which is blind to the day's
+ * actual deficit: a protein-short day re-picked its worst meal
+ * toward the meal's protein share even when another slot — or a
+ * denser dish in the same slot — was where the day's protein
+ * could actually be bought. Selection over trimming, judged at
+ * the level the promise is made.
+ */
+/** A day's out-of-band excesses, per band — the components of
+ *  `dayBandCost` before their weights. Zero inside the band. */
+function bandExcesses(
+  kcal: number,
+  proteinG: number,
+  targets: NutritionTargets,
+): { kcal: number; protein: number } {
+  const kcalExcess = Math.max(0, Math.abs(kcal - targets.kcal) / targets.kcal - DAY_KCAL_BAND);
+  let proteinExcess = 0;
+  if (proteinG < DAY_PROTEIN_MIN * targets.proteinG) {
+    proteinExcess = (DAY_PROTEIN_MIN * targets.proteinG - proteinG) / targets.proteinG;
+  } else if (proteinG > DAY_PROTEIN_MAX * targets.proteinG) {
+    proteinExcess = (proteinG - DAY_PROTEIN_MAX * targets.proteinG) / targets.proteinG;
+  }
+  return { kcal: kcalExcess, protein: proteinExcess };
+}
+
+function bestDayAwarePick(
+  cands: readonly DishCandidate[],
+  meal: PlanMeal,
+  meals: readonly PlanMeal[],
+  targets: NutritionTargets,
+  opts: DishPickOpts,
+  day: string,
+): { candidate: DishCandidate; servings: number; judge: number } | null {
+  const current = meal.dishes[0]!;
+  const split: MealSplit = { meal: meal.meal, kcal: meal.kcal, proteinG: meal.proteinG };
+  const restKcal = dayKcalOf(meals) - current.nutrients.kcal;
+  const restProtein = dayProteinOf(meals) - current.nutrients.proteinG;
+  const otherSanity =
+    mealSanityCost(meals) - mealSanityTerm(current.nutrients.kcal, meal.kcal);
+  /* The Pareto guard: a re-pick may trade freely INSIDE the
+     bands, but it may never deepen either band's excess — a
+     protein fix bought with energy, or an energy fix bought
+     with protein, is how the pre-P12 guard's blind re-picks
+     traded one promise against the other. */
+  const currentExcess = bandExcesses(dayKcalOf(meals), dayProteinOf(meals), targets);
+  let best: { candidate: DishCandidate; servings: number; judge: number } | null = null;
+  for (const candidate of cands) {
+    const panels = scaledPanels(candidate);
+    for (let i = 0; i < DISH_SCALE_STEPS.length; i++) {
+      const servings = DISH_SCALE_STEPS[i]!;
+      const panel = panels[i]!;
+      const excess = bandExcesses(restKcal + panel.kcal, restProtein + panel.proteinG, targets);
+      if (
+        excess.kcal > currentExcess.kcal + 1e-9 ||
+        excess.protein > currentExcess.protein + 1e-9
+      ) {
+        continue;
+      }
+      const judge =
+        dayBandCost(restKcal + panel.kcal, restProtein + panel.proteinG, targets) +
+        otherSanity +
+        mealSanityTerm(panel.kcal, meal.kcal) +
+        DAY_REPICK_FIT_WEIGHT * dishPickCost(candidate, panel, servings, split, opts, day);
+      if (best === null || judge < best.judge - 1e-9) {
+        best = { candidate, servings, judge };
+      }
+    }
+  }
+  return best;
+}
+
+/**
+ * The day guard (P8, re-pick P12): repair the scales; while the
+ * day still sits outside its bands and attempts remain, re-pick
+ * the dish meal whose swap most improves the DAY (see
+ * bestDayAwarePick), then repair again. This is what lets the
+ * pick band stay generous: variety is tried first, and the day's
+ * totals — the numbers the person actually judges the plan by —
+ * are enforced after, at the level where they are defined.
+ * Bounded at four attempts; a swap is made only when it improves
+ * the judged day, so the guard never trades a closer day for a
+ * worse one. A day the pool genuinely cannot land stays at its
+ * closest, and the plan's notes name the true figure.
  */
 function enforceDayBands(
   meals: PlanMeal[],
@@ -2894,33 +3222,36 @@ function enforceDayBands(
   for (let attempt = 0; attempt < 4; attempt++) {
     repairDishScales(meals, candidateById, targets);
     if (dayCost(meals, targets) <= 0) return;
-    let worst: PlanMeal | null = null;
-    let worstCost = -Infinity;
+    let bestSwap: {
+      meal: PlanMeal;
+      candidate: DishCandidate;
+      servings: number;
+      judge: number;
+    } | null = null;
     for (const meal of meals) {
       if (meal.dishes.length !== 1) continue;
-      const cost = mealFitCost(meal.dishes[0]!.nutrients, {
-        meal: meal.meal,
-        kcal: meal.kcal,
-        proteinG: meal.proteinG,
-      });
-      if (cost > worstCost) {
-        worstCost = cost;
-        worst = meal;
+      const current = meal.dishes[0]!;
+      const split: MealSplit = { meal: meal.meal, kcal: meal.kcal, proteinG: meal.proteinG };
+      const currentCandidate = candidateById.get(current.dishId);
+      const currentPickCost = currentCandidate
+        ? dishPickCost(currentCandidate, current.nutrients, current.servings, split, opts, day)
+        : mealFitCost(current.nutrients, split);
+      const currentJudge = dayCost(meals, targets) + DAY_REPICK_FIT_WEIGHT * currentPickCost;
+      const usedElsewhere = new Set(
+        meals.filter((m) => m !== meal).flatMap((m) => m.dishes.map((d) => d.dishId)),
+      );
+      const cands = slotCandidates(ordered, meal.meal, usedElsewhere).filter(
+        (c) => c.dish.id !== current.dishId,
+      );
+      const pick = bestDayAwarePick(cands, meal, meals, targets, opts, day);
+      if (!pick) continue;
+      if (pick.judge >= currentJudge - 1e-9) continue;
+      if (bestSwap === null || pick.judge < bestSwap.judge - 1e-9) {
+        bestSwap = { meal, candidate: pick.candidate, servings: pick.servings, judge: pick.judge };
       }
     }
-    if (worst === null) return;
-    const target: PlanMeal = worst;
-    const split: MealSplit = { meal: target.meal, kcal: target.kcal, proteinG: target.proteinG };
-    const usedElsewhere = new Set(
-      meals.filter((m) => m !== target).flatMap((m) => m.dishes.map((d) => d.dishId)),
-    );
-    const currentId = target.dishes[0]!.dishId;
-    const cands = slotCandidates(ordered, target.meal, usedElsewhere).filter(
-      (c) => c.dish.id !== currentId,
-    );
-    const pick = bestDishPick(cands, split, opts, day, 0);
-    if (!pick) return;
-    target.dishes = [toPlanDish(pick.candidate, "anchor", pick.servings)];
+    if (bestSwap === null) return;
+    bestSwap.meal.dishes = [toPlanDish(bestSwap.candidate, "anchor", bestSwap.servings)];
   }
 }
 
@@ -2976,11 +3307,19 @@ function addOneTopUp(
   meal: PlanMeal,
   aim: { kcal?: number; proteinG?: number },
   roomKcal: number,
+  opts?: { powderScoop?: boolean; leanEnergy?: boolean },
 ): boolean {
   if (roomKcal < 25) return false;
+  /* A main meal never grows past ten suggestions (P12): the plate
+     cap trims composition to eight, and top-ups complete a day —
+     they do not stack a meal into a spreadsheet. The gap scoop
+     made the eleventh item reachable on item-heavy days; the
+     ceiling lives here, at the one choke point every top-up
+     passes through. */
+  if (meal.meal !== "snack" && meal.suggestions.length >= 10) return false;
   const inMeal = new Set(meal.suggestions.map((s) => s.foodId));
   const proteinMode = aim.proteinG !== undefined;
-  const eligible = ctx.ordered.filter((food) => {
+  const eligibleAll = ctx.ordered.filter((food) => {
     if (inMeal.has(food.id)) return false;
     const group = groupOf(food);
     if (proteinMode) {
@@ -3001,6 +3340,10 @@ function addOneTopUp(
     }
     return isMilkOrCurd(food) || group === "nuts_seeds";
   });
+  /* The gap scoop (P12) is powder-only by construction: the caller
+     passes the scoop's own kcal cap as roomKcal, and the protein-mode
+     sizing below caps the portion at it. */
+  const eligible = opts?.powderScoop ? eligibleAll.filter((f) => isProteinPowder(f)) : eligibleAll;
   const density = (food: Food): number =>
     food.per100g.kcal > 0 ? food.per100g.proteinG / food.per100g.kcal : 0;
   const bestDensity = eligible.reduce((max, f) => Math.max(max, density(f)), 0);
@@ -3015,6 +3358,18 @@ function addOneTopUp(
       const bandB = density(b) >= 0.8 * bestDensity ? 0 : 1;
       if (bandA !== bandB) return bandA - bandB;
       if (bandA === 1 && density(a) !== density(b)) return density(b) - density(a);
+    }
+    if (!proteinMode && opts?.leanEnergy) {
+      /* Lean energy (P12): when the day's protein already meets
+         its guide, energy is bought with the least protein
+         attached — the energy pool's incidental protein (nuts and
+         seeds carry 0.03–0.06 g per kcal) is what pushed
+         protein-long days over their band while the protein trim
+         sat blocked at the energy floor. Unused still first;
+         density ascending breaks the rest. */
+      const usedDelta = Number(ctx.used.has(a.id)) - Number(ctx.used.has(b.id));
+      if (usedDelta !== 0) return usedDelta;
+      return density(a) - density(b);
     }
     return (
       Number(ctx.used.has(a.id)) - Number(ctx.used.has(b.id)) ||
@@ -3032,6 +3387,15 @@ function addOneTopUp(
       portion = sizedPortion(food, aim, cap);
       if (portion && portion.nutrients.kcal > roomKcal) {
         portion = sizedPortion(food, { kcal: roomKcal }, cap);
+      }
+      if (portion && isProteinPowder(food) && portion.grams < 15) {
+        /* A powder is served as a scoop, never a dusting (P12):
+           gap-sizing a small remainder produced 10 g portions —
+           a third of a scoop nobody measures. The floor is one
+           small scoop (15 g); if that cannot fit the energy room
+           honestly, the candidate is skipped, not shrunk. */
+        const scoop = sizedPortion(food, { proteinG: (food.per100g.proteinG * 15) / 100 }, cap);
+        portion = scoop && scoop.nutrients.kcal <= roomKcal ? scoop : null;
       }
       if (portion && portion.nutrients.proteinG < 3) continue;
     } else {
@@ -3091,6 +3455,60 @@ function addTopUps(
     if (!added) break;
   }
 
+  /* P12 — the gap scoop. The loop above stops when the day has no
+     energy room left, and a day can be protein-short with no room
+     at all when the composed day already runs over its guide: the
+     guideline floors and layers add up past a small guide whose
+     protein demand is dense (the owner's own live day: ~1,616 kcal
+     served on a ~1,350 guide, protein ~8 g short, no top-up
+     served). The room rule exists to stop top-ups overshooting the
+     guide; judged on the ADDITION rather than the day's total, one
+     gap-sized powder portion — the densest protein in the set —
+     whose own energy stays within 5% of the guide closes the
+     protein gap for a few dozen kcal the day's note already names.
+     At most two scoops (one is the usual case), powder only, each
+     sized to the remaining gap and capped at 5% of the guide's
+     energy, the pair together at 8%. When even that cannot fire
+     (no powder the pool allows, or the meal caps are full), the
+     protein note says why nothing was added. */
+  if (dayProteinOf(meals) < targets.proteinG) {
+    const room = (1 + ENERGY_NOTE_BAND) * targets.kcal - dayKcalOf(meals);
+    if (room < 25) {
+      const scoopCapKcal = Math.max(30, Math.round(0.05 * targets.kcal));
+      const scoopBudgetKcal = Math.round(0.08 * targets.kcal);
+      let scoops = 0;
+      let scoopKcal = 0;
+      while (scoops < 2 && dayProteinOf(meals) < targets.proteinG) {
+        const ordered = byDeficit(
+          (m) =>
+            m.proteinG -
+            (m.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0) +
+              m.dishes.reduce((a, d) => a + d.nutrients.proteinG, 0)),
+        );
+        let added = false;
+        for (const meal of ordered) {
+          const beforeKcal = dayKcalOf(meals);
+          if (
+            addOneTopUp(
+              ctx,
+              meal,
+              { proteinG: targets.proteinG - dayProteinOf(meals) },
+              scoopCapKcal,
+              { powderScoop: true },
+            )
+          ) {
+            scoopKcal += dayKcalOf(meals) - beforeKcal;
+            added = true;
+            break;
+          }
+        }
+        if (!added) break;
+        scoops++;
+        if (scoopKcal > scoopBudgetKcal) break;
+      }
+    }
+  }
+
   /* The energy round is skipped whole on an energy-overshoot log
      (P6): the person's logged days already run over the guide, so the
      plan does not spend top-ups pushing a dish day up toward it —
@@ -3111,7 +3529,11 @@ function addTopUps(
     );
     let added = false;
     for (const meal of ordered) {
-      if (addOneTopUp(ctx, meal, { kcal: Math.min(room, meal.kcal) }, room)) {
+      if (
+        addOneTopUp(ctx, meal, { kcal: Math.min(room, meal.kcal) }, room, {
+          leanEnergy: dayProteinOf(meals) >= targets.proteinG,
+        })
+      ) {
         added = true;
         break;
       }
@@ -3167,6 +3589,197 @@ function dayStartFor(
   };
 }
 
+/* ----------------------------- P12 day timeline ---------------------------- */
+
+/** A clock time as the sleep log states it: "HH:MM", 24-hour. */
+const CLOCK_TIME_RE = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+function clockToMinutes(time: string): number {
+  const [h, m] = time.split(":").map(Number);
+  return (h ?? 0) * 60 + (m ?? 0);
+}
+
+function minutesToClock(total: number): string {
+  const wrapped = ((Math.round(total) % 1440) + 1440) % 1440;
+  const h = Math.floor(wrapped / 60);
+  const m = wrapped % 60;
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+const round5Min = (mins: number): number => Math.round(mins / 5) * 5;
+
+/** The awake span a clock anchor must span to be believed: under
+ *  nine hours awake, the fixed points of a four-sitting day cannot
+ *  keep their spacing; over nineteen, the "day" is not a day. An
+ *  anchor outside the span is not argued with — the timeline falls
+ *  back to relative anchors, exactly as when no clock is known. */
+const MIN_AWAKE_MINUTES = 9 * 60;
+const MAX_AWAKE_MINUTES = 19 * 60;
+
+/** Eating items keep at least this much room between them. */
+const MIN_EATING_GAP_MINUTES = 90;
+/** Breakfast follows waking by this much — time to be up and
+ *  about; the waking glass itself is at the wake item. */
+const BREAKFAST_AFTER_WAKE_MINUTES = 45;
+/** Dinner ends the eating day this long before bed. */
+const DINNER_BEFORE_BED_MINUTES = 150;
+/** The last eating item of any kind keeps at least this much
+ *  room before the sleep anchor. */
+const LAST_EATING_BEFORE_BED_MINUTES = 120;
+/** The wind-down sits this long before bed. */
+const WIND_DOWN_BEFORE_BED_MINUTES = 45;
+
+/**
+ * Validate the caller's clock anchor: the person's usual wake and
+ * bed times from their sleep log. Returns the window in minutes —
+ * wake on the morning line, bed after it (a bed past midnight
+ * counts into the next day) — or null when the times are absent,
+ * malformed, or span an awake window no day can be scheduled in.
+ * Null is not an error: it is the relative day.
+ */
+function dayAnchorFor(
+  wakeTime: string | null | undefined,
+  bedTime: string | null | undefined,
+): { wake: number; bed: number } | null {
+  if (!wakeTime || !bedTime) return null;
+  if (!CLOCK_TIME_RE.test(wakeTime) || !CLOCK_TIME_RE.test(bedTime)) return null;
+  const wake = clockToMinutes(wakeTime);
+  let bed = clockToMinutes(bedTime);
+  if (bed <= wake) bed += 1440;
+  const awake = bed - wake;
+  if (awake < MIN_AWAKE_MINUTES || awake > MAX_AWAKE_MINUTES) return null;
+  return { wake, bed };
+}
+
+/** The snack's name from where it lands in the day: a position in
+ *  the day's structure, stated as the part of the day it falls in.
+ *  On a relative day the position comes from the same scheduling
+ *  run over a nominal frame — the words describe position, never
+ *  a clock the person did not give. */
+function snackLabelAt(minutes: number): string {
+  const clock = ((minutes % 1440) + 1440) % 1440;
+  if (clock < 12 * 60) return "Mid-morning snack";
+  if (clock < 17 * 60) return "Afternoon snack";
+  return "Evening snack";
+}
+
+const MEAL_TIMELINE_LABEL: Record<Exclude<Meal, "snack">, string> = {
+  breakfast: "Breakfast",
+  lunch: "Lunch",
+  dinner: "Dinner",
+};
+
+/**
+ * The day's timeline (P12): the composed meals laid out from
+ * waking to sleep. The schedule is presentation — it reads the
+ * finished plan's meals and places them; it adds no food, moves
+ * no portion, and changes no total.
+ *
+ * Placement, on the anchor's window (a nominal 07:00–23:00 frame
+ * stands in when the day is relative — used only to order the
+ * items and name the snack's position, never shown as a time):
+ * breakfast 45 minutes after waking; dinner 2½ hours before bed;
+ * lunch at 44% of the window (a third in, when there is no
+ * breakfast to precede it); the snack at the midpoint of the
+ * widest gap that can hold it — between two eating items, after
+ * waking, or after the last main — keeping 90 minutes from its
+ * neighbours and two hours clear of bed; the wind-down 45 minutes
+ * before bed. Derived times round to five minutes: the plan
+ * schedules a day, it does not pretend to the minute.
+ */
+function dayTimelineFor(
+  meals: readonly PlanMeal[],
+  anchor: { wake: number; bed: number } | null,
+): PlanTimeline {
+  const wake = anchor?.wake ?? 7 * 60;
+  const bed = anchor?.bed ?? 23 * 60;
+  const awake = bed - wake;
+  const present = new Set(meals.map((m) => m.meal));
+  const mains = (["breakfast", "lunch", "dinner"] as const).filter((m) => present.has(m));
+
+  const times = new Map<Meal, number>();
+  if (present.has("breakfast")) times.set("breakfast", wake + BREAKFAST_AFTER_WAKE_MINUTES);
+  if (present.has("dinner")) times.set("dinner", bed - DINNER_BEFORE_BED_MINUTES);
+  if (present.has("lunch")) {
+    let lunch = present.has("breakfast")
+      ? wake + round5Min(awake * 0.44)
+      : wake + Math.max(150, round5Min(awake * 0.32));
+    if (present.has("breakfast")) {
+      lunch = Math.max(lunch, times.get("breakfast")! + MIN_EATING_GAP_MINUTES);
+    }
+    if (present.has("dinner")) {
+      lunch = Math.min(lunch, times.get("dinner")! - MIN_EATING_GAP_MINUTES);
+    }
+    times.set("lunch", lunch);
+  }
+  if (mains.length === 1 && mains[0] !== "dinner" && !present.has("breakfast")) {
+    /* A lunch-only day eats at the day's middle, not its start. */
+    times.set(mains[0]!, wake + round5Min(awake * 0.45));
+  }
+
+  let snackAt: number | null = null;
+  if (present.has("snack")) {
+    const eating = mains.map((m) => times.get(m)!).sort((a, b) => a - b);
+    interface Segment {
+      from: number;
+      to: number;
+      /** Both ends are eating items (or the day's own bounds). */
+      length: number;
+    }
+    const segments: Segment[] = [];
+    if (eating.length > 0) {
+      segments.push({ from: wake + BREAKFAST_AFTER_WAKE_MINUTES, to: eating[0]!, length: eating[0]! - (wake + BREAKFAST_AFTER_WAKE_MINUTES) });
+      for (let i = 0; i + 1 < eating.length; i++) {
+        segments.push({ from: eating[i]!, to: eating[i + 1]!, length: eating[i + 1]! - eating[i]! });
+      }
+      segments.push({
+        from: eating[eating.length - 1]!,
+        to: bed - LAST_EATING_BEFORE_BED_MINUTES,
+        length: bed - LAST_EATING_BEFORE_BED_MINUTES - eating[eating.length - 1]!,
+      });
+    }
+    /* A segment holds the snack when its midpoint keeps the
+       eating gap from both neighbours. The widest such segment
+       wins; if none qualifies (a window at the span's floor with
+       every main placed), the widest segment overall takes it —
+       the spacing assertion in the verification matrix judges the
+       result, so a construction miss would surface, not ship. */
+    const holds = (s: Segment): boolean => {
+      const mid = (s.from + s.to) / 2;
+      return mid - s.from >= MIN_EATING_GAP_MINUTES && s.to - mid >= MIN_EATING_GAP_MINUTES;
+    };
+    const widest = (list: Segment[]): Segment | null =>
+      list.reduce<Segment | null>(
+        (best, s) => (best === null || s.length > best.length ? s : best),
+        null,
+      );
+    const chosen = widest(segments.filter(holds)) ?? widest(segments);
+    if (chosen) snackAt = round5Min((chosen.from + chosen.to) / 2);
+  }
+
+  const items: { at: number; item: PlanTimelineItem }[] = [];
+  const clock = (at: number): string | null => (anchor ? minutesToClock(at) : null);
+  items.push({ at: wake, item: { kind: "wake", time: clock(wake), label: "On waking" } });
+  for (const meal of mains) {
+    const at = times.get(meal)!;
+    items.push({
+      at,
+      item: { kind: "meal", meal, time: clock(at), label: MEAL_TIMELINE_LABEL[meal] },
+    });
+  }
+  if (snackAt !== null) {
+    items.push({
+      at: snackAt,
+      item: { kind: "meal", meal: "snack", time: clock(snackAt), label: snackLabelAt(snackAt) },
+    });
+  }
+  const windDownAt = bed - WIND_DOWN_BEFORE_BED_MINUTES;
+  items.push({ at: windDownAt, item: { kind: "wind_down", time: clock(windDownAt), label: "Wind down" } });
+  items.push({ at: bed, item: { kind: "sleep", time: clock(bed), label: "Bedtime" } });
+  items.sort((a, b) => a.at - b.at);
+  return { anchor: anchor ? "sleep_log" : "relative", items: items.map((e) => e.item) };
+}
+
 /* ------------------------------- generation -------------------------------- */
 
 export interface PlanGenerationInput {
@@ -3219,6 +3832,15 @@ export interface PlanGenerationInput {
    *  same source as its targets. Absent or invalid, the plan still
    *  opens with its morning glass; it simply carries no schedule. */
   waterMl?: number | null;
+  /** The person's usual wake and bed times ("HH:MM") from their
+   *  own sleep log (P12) — the median window the trackers compute
+   *  from their logged nights. When both are present and span a
+   *  schedulable day, the plan's timeline carries clock times;
+   *  absent or unusable, the timeline is anchored relatively and
+   *  shows no times at all. Scheduling only — the anchor never
+   *  touches a target, a split, or a portion. */
+  wakeTime?: string | null;
+  bedTime?: string | null;
   /** The day the plan is for. */
   day: string;
   now: string;
@@ -3321,7 +3943,17 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   }
 
   const goal = profile.goal;
-  const snapshot = planInputsSnapshotOf(profile, safety, targets);
+  /* P12: the timeline's clock anchor — the person's usual wake
+     and bed times, validated once here and recorded on the
+     snapshot on the cuisine precedent (scheduling-shaping only:
+     named by the staleness check when it changes, never part of
+     the fingerprint, never near a target). */
+  const dayAnchor = dayAnchorFor(input.wakeTime, input.bedTime);
+  const snapshot: PlanInputsSnapshot = {
+    ...planInputsSnapshotOf(profile, safety, targets),
+    wakeTime: dayAnchor ? input.wakeTime! : null,
+    bedTime: dayAnchor ? input.bedTime! : null,
+  };
   /* P11: the snack belongs to a complete day. A stated meals-per-day
      below four used to drop the snack slot entirely — the owner's
      own three-meal plan had no snack at all. The slot structure now
@@ -3384,6 +4016,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
     fruitG: 0,
     milkCurdG: 0,
     proteinFirst: adaptation?.proteinShortfall ?? false,
+    lowProteinDensity: targets.proteinG / targets.kcal < 0.055,
     cravingKinds: profile.behavioural.cravingKinds,
   };
   const mainCount = splits.filter((s) => s.meal !== "snack").length;
@@ -3604,6 +4237,10 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       : (input.waterMl ?? gatedWaterMl),
   );
   const dayStart = dayStartFor(waterTargetMl, meals);
+  /* P12: the finished day, laid out from waking to sleep — the
+     timeline schedules the meals as they stand; it is computed
+     last so it describes the plan the passes actually left. */
+  const timeline = dayTimelineFor(meals, dayAnchor);
   /* The adaptation's explanations lead the notes: they say why this
      plan leans the way it does, before the notes judge the result.
      The P7 learning notes follow the P6 ones — what the log taught,
@@ -3636,6 +4273,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       methodVersion: PLAN_METHOD_VERSION,
       morning: dayStart.morning,
       ...(dayStart.hydration ? { hydration: dayStart.hydration } : {}),
+      timeline,
       meals,
       inputs: snapshot,
       fingerprint: fingerprintOfInputs(snapshot),
@@ -3720,6 +4358,8 @@ const PATTERNS: readonly DietaryPattern[] = [
 ];
 const SEXES: readonly Sex[] = ["female", "male", "unspecified"];
 const TARGET_SOURCES: readonly DailyPlan["targetsSource"][] = ["assessment", "body_profile"];
+const TIMELINE_KINDS: readonly PlanTimelineKind[] = ["wake", "meal", "wind_down", "sleep"];
+const TIMELINE_ANCHORS: readonly PlanTimeline["anchor"][] = ["sleep_log", "relative"];
 
 function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
   if (!isRecord(raw)) return null;
@@ -3816,6 +4456,27 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
   if (raw["confidence"] !== undefined && raw["confidence"] !== null && confidence === null) {
     return null;
   }
+  /* The timeline anchor (P12): absent on snapshots stored before
+     P12 — read as unanchored; present-but-invalid is a tamper,
+     exactly like the behavioural fields above. */
+  const wakeTime =
+    raw["wakeTime"] === undefined || raw["wakeTime"] === null
+      ? null
+      : typeof raw["wakeTime"] === "string" && CLOCK_TIME_RE.test(raw["wakeTime"])
+        ? raw["wakeTime"]
+        : null;
+  if (raw["wakeTime"] !== undefined && raw["wakeTime"] !== null && wakeTime === null) {
+    return null;
+  }
+  const bedTime =
+    raw["bedTime"] === undefined || raw["bedTime"] === null
+      ? null
+      : typeof raw["bedTime"] === "string" && CLOCK_TIME_RE.test(raw["bedTime"])
+        ? raw["bedTime"]
+        : null;
+  if (raw["bedTime"] !== undefined && raw["bedTime"] !== null && bedTime === null) {
+    return null;
+  }
   const safetyClassification = oneOf(raw["safetyClassification"], SAFETY_CLASSES);
   if (!safetyClassification) return null;
   const targetsKcal = numIn(raw["targetsKcal"], 0.01, 10000);
@@ -3839,6 +4500,8 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
     eatingSetting,
     hungerPattern,
     confidence: confidence === null ? null : Math.round(confidence),
+    wakeTime,
+    bedTime,
     safetyClassification,
     targetsKcal,
     targetsProteinG,
@@ -4032,6 +4695,62 @@ function parsePlan(raw: unknown): DailyPlan | null {
   /* The fingerprint must be the one the inputs produce — a plan whose
      stated inputs were edited after generation is refused whole. */
   if (!fingerprint || fingerprint !== fingerprintOfInputs(inputs)) return null;
+  /* The day timeline (P12): absent on pre-P12 plans, read as absent.
+     Present-but-invalid is a tamper and refuses the plan, on the
+     same discipline as the hydration schedule: the sequence must
+     open on waking and close at bedtime, its meal items must be
+     exactly the plan's meals, a relative day must carry no clock
+     times, and a timed day's times must run in order. */
+  let timeline: PlanTimeline | undefined;
+  if ("timeline" in raw) {
+    if (!isRecord(raw["timeline"])) return null;
+    const anchor = oneOf(raw["timeline"]["anchor"], TIMELINE_ANCHORS);
+    if (!anchor) return null;
+    const rawItems: unknown = raw["timeline"]["items"];
+    if (!Array.isArray(rawItems) || rawItems.length < 4 || rawItems.length > 7) return null;
+    const items: PlanTimelineItem[] = [];
+    const seenTimelineMeals = new Set<Meal>();
+    let lastKey = -1;
+    for (const rawItem of rawItems) {
+      if (!isRecord(rawItem)) return null;
+      const kind = oneOf(rawItem["kind"], TIMELINE_KINDS);
+      if (!kind) return null;
+      const label = text(rawItem["label"], 40);
+      if (!label) return null;
+      let meal: Meal | undefined;
+      if (kind === "meal") {
+        const parsedMeal = oneOf(rawItem["meal"], MEALS);
+        if (!parsedMeal || seenTimelineMeals.has(parsedMeal)) return null;
+        seenTimelineMeals.add(parsedMeal);
+        meal = parsedMeal;
+      } else if (rawItem["meal"] !== undefined && rawItem["meal"] !== null) {
+        return null;
+      }
+      let time: string | null = null;
+      if (anchor === "sleep_log") {
+        if (typeof rawItem["time"] !== "string" || !CLOCK_TIME_RE.test(rawItem["time"])) {
+          return null;
+        }
+        time = rawItem["time"];
+        let key = clockToMinutes(time);
+        if (lastKey >= 0 && key < lastKey) key += 1440;
+        if (lastKey >= 0 && key <= lastKey) return null;
+        lastKey = key;
+      } else if (rawItem["time"] !== null) {
+        return null;
+      }
+      items.push({ kind, ...(meal ? { meal } : {}), time, label });
+    }
+    if (items[0]!.kind !== "wake" || items[items.length - 1]!.kind !== "sleep") return null;
+    if (items.filter((i) => i.kind === "wake").length !== 1) return null;
+    if (items.filter((i) => i.kind === "sleep").length !== 1) return null;
+    if (items.filter((i) => i.kind === "wind_down").length > 1) return null;
+    if (seenTimelineMeals.size !== meals.length) return null;
+    for (const m of meals) {
+      if (!seenTimelineMeals.has(m.meal)) return null;
+    }
+    timeline = { anchor, items };
+  }
   return {
     id,
     day,
@@ -4046,6 +4765,7 @@ function parsePlan(raw: unknown): DailyPlan | null {
     methodVersion,
     ...(morning ? { morning } : {}),
     ...(hydration ? { hydration } : {}),
+    ...(timeline ? { timeline } : {}),
     meals,
     inputs,
     fingerprint,

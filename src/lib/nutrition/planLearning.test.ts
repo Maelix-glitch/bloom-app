@@ -147,7 +147,7 @@ describe("no usable log — the P5 plan, unchanged", () => {
     /* Method 10 = the behavioural pass (spec §10): the pin moves
        with the version; the behaviour pinned here — no log, no learning
        notes — is unchanged. */
-    expect(base.methodVersion).toBe(11);
+    expect(base.methodVersion).toBe(12);
     expect(base.notes.some((n) => n.startsWith("From your log"))).toBe(false);
   });
 
@@ -220,7 +220,13 @@ describe("a protein-shortfall log", () => {
        three days before it, averaging the same 120 g) swaps the
        breakfast anchor for a denser one and lifts the day from
        220 g to 237 g. The mechanism is what is pinned; the day is
-       the one where it shows. */
+       the one where it shows.
+       P12 re-pin: the lifted total is now 231 g, not 237 g — on a
+       protein-long day P12 buys the day's energy top-ups lean
+       (least incidental protein first), so the same lean lands
+       with less protein attached to its energy. The mechanism
+       assertions below (denser anchors, more protein than the
+       un-leaned day, inside the ceiling) are unchanged. */
     const day = "2026-11-23";
     const log: LogEntry[] = [
       entry("2026-11-20", 3000, 120),
@@ -235,7 +241,7 @@ describe("a protein-shortfall log", () => {
     });
     expect(anchorIds(biasedDay)).not.toEqual(anchorIds(baseDay));
     expect(Math.round(dayTotals(baseDay).proteinG)).toBe(220);
-    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(237);
+    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(231);
     expect(dayTotals(biasedDay).proteinG).toBeGreaterThan(dayTotals(baseDay).proteinG);
     expect(dayTotals(biasedDay).proteinG).toBeLessThanOrEqual(1.1 * 220);
     expect(meanAnchorDensity(biasedDay)).toBeGreaterThan(meanAnchorDensity(baseDay));
