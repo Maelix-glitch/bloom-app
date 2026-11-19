@@ -310,6 +310,13 @@ describe("plan · P8 single-dish composition", () => {
   }, 120_000);
 
   it("a stated budget tier is a hard cap on plan dishes", () => {
+    /* Method 13 note (2026-11-19): the budget is a PREFERENCE in
+       dishPoolFor now, not a cap — but only below the pool floor
+       does it widen (with a note). This cell (eggetarian, tier 1,
+       the largest guide) keeps a viable in-budget pool at the
+       re-banded costs, so the cap-shaped outcome still holds here
+       and the pin stands as written; the widening cell is pinned
+       in planDishFirst.test.ts. */
     const plan = gen(fullProfile("eggetarian", { budgetTier: 1 }), {
       fallbackTargets: { kcal: 3288, proteinG: 220 },
     });

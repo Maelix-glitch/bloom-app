@@ -174,7 +174,12 @@ describe("P11 · the snack belongs to the day", () => {
     const plan = gen(fullProfile("omnivore", { mealsPerDay }));
     const snack = plan.meals.find((m) => m.meal === "snack");
     expect(snack).toBeDefined();
-    expect(snack!.suggestions.length).toBeGreaterThanOrEqual(1);
+    /* Method 13 (2026-11-19): the snack is a real DISH now (a
+       shake / protein snack / breakfast dish) rather than plain
+       foods, so the "real snack" count reads dishes + suggestions
+       — the property pinned is unchanged: the snack slot is never
+       empty. */
+    expect(snack!.dishes.length + snack!.suggestions.length).toBeGreaterThanOrEqual(1);
     expect(
       plan.notes.some((n) => n.includes("this plan adds a snack")),
     ).toBe(true);

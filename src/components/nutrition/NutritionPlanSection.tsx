@@ -79,6 +79,7 @@ import {
   type PlanSuggestion,
   type SuggestionLayer,
 } from "@/lib/nutrition";
+import { rawBasisFraming } from "@/lib/nutrition/preparation";
 import { DishDetailSheet } from "./DishDetailSheet";
 import { DishPhoto } from "./DishPhoto";
 import { ProvenanceBadge } from "./ProvenanceBadge";
@@ -620,6 +621,10 @@ export function NutritionPlanSection() {
                 const names = food
                   ? foodDisplayName(food)
                   : { en: line.foodId, hindi: null as string | null };
+                /* Method 13: a raw-basis line's grams are the dry
+                   weight that goes into the pot — the framing says
+                   so, so they are never read as a cooked portion. */
+                const framing = food ? rawBasisFraming(food) : null;
                 return (
                   <li
                     key={line.foodId}
@@ -628,6 +633,11 @@ export function NutritionPlanSection() {
                     <span className="min-w-0 text-[length:var(--text-callout)] text-foreground">
                       {names.en}
                       {names.hindi ? <span className="nut-hindi"> ({names.hindi})</span> : null}
+                      {framing ? (
+                        <span className="block text-[length:var(--text-caption)] text-muted-foreground">
+                          {framing}
+                        </span>
+                      ) : null}
                     </span>
                     <span className="shrink-0 text-[length:var(--text-callout)] tabular-nums text-muted-foreground">
                       {formatGrams((line.grams / dish.servings) * planDish.servings)} g

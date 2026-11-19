@@ -238,14 +238,21 @@ describe("DishesSection — browsing", () => {
   });
 
   it("a stated budget keeps dishes above the tier off the shelf", () => {
+    /* Method 13 rewrite (2026-11-19, the dish-first repair): the
+       budget no longer keeps anything off the shelf — it was
+       silently hiding most of the library, the protein dishes
+       first (the owner saw 545 of 1,202). The shelf now shows the
+       full pattern pool, in-budget dishes sort first, and the
+       status line names the budget as the preference it is. The
+       title keeps its history; the contract is the new one. */
     seedAnswers({ foodBudget: 1 });
     render(<DishesSection day={todayLocal()} />);
-    expect(screen.getByText(/kept to an everyday ₹ budget/)).toBeTruthy();
-    /* The tier-1 dal stays; the tier-3 curry is off the shelf. */
+    expect(screen.getByText(/your everyday ₹ budget preferred first/)).toBeTruthy();
+    expect(screen.getByText(/1,202 dishes/)).toBeTruthy();
+    /* The tier-1 dal leads; the tier-3 curry is ON the shelf now,
+       further down the order — reachable, not hidden. */
     expect(cardOf(dal)).toBeTruthy();
-    expect(
-      screen.queryByRole("button", { name: `${chickenCurry.name.en} — view recipe` }),
-    ).toBeNull();
+    expect(revealCard(chickenCurry)).toBeTruthy();
   });
 
   it("with no budget stated, every tier is on the shelf", () => {

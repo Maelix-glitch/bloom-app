@@ -28,6 +28,7 @@ import {
   type Meal,
   type Nutrients,
 } from "@/lib/nutrition";
+import { rawBasisFraming } from "@/lib/nutrition/preparation";
 import { DishPhoto } from "./DishPhoto";
 import { ProvenanceBadge } from "./ProvenanceBadge";
 import { MEAL_LABEL, formatGrams, mealForTime } from "./input";
@@ -189,11 +190,20 @@ export function DishDetailSheet({
               const names = food
                 ? foodDisplayName(food)
                 : { en: line.foodId, hindi: null as string | null };
+              /* Method 13: a raw-basis line's grams are the dry
+                 weight that goes into the pot — the framing says
+                 so, so they are never read as a cooked portion. */
+              const framing = food ? rawBasisFraming(food) : null;
               return (
                 <li key={line.foodId} className="flex items-baseline justify-between gap-3 py-2">
                   <span className="min-w-0 text-[length:var(--text-callout)] text-foreground">
                     {names.en}
                     {names.hindi ? <span className="nut-hindi"> ({names.hindi})</span> : null}
+                    {framing ? (
+                      <span className="block text-[length:var(--text-caption)] text-muted-foreground">
+                        {framing}
+                      </span>
+                    ) : null}
                   </span>
                   <span className="shrink-0 text-[length:var(--text-callout)] tabular-nums text-muted-foreground">
                     {formatGrams(line.grams / dish.servings)} g

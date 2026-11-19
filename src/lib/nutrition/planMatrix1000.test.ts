@@ -17,7 +17,7 @@ import { observation } from "@/lib/vitalis/domain/provenance";
 import { quantity } from "@/lib/vitalis/domain/units";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
-import { DISH_LIBRARY } from "./data/dishLibrary";
+import { DISH_LIBRARY, PROTEIN_WAVE_DISH_IDS } from "./data/dishLibrary";
 import { dishPatterns } from "./dishes";
 import {
   floorTotalsOf,
@@ -63,6 +63,14 @@ import type { Food } from "./types";
  * size, cuisine, behaviour, age band, height band, weight band,
  * and anchor — with example runs per failure class.
  * PLAN_MATRIX_MEASURE=1 logs without asserting (iteration mode).
+ *
+ * Method 13 extension (2026-11-19, the dish-first repair): like
+ * the 500 matrix, this suite never set a budget tier — the cells
+ * now rotate the stated budget (unset / 1 / 2 / 3 / 2) and the
+ * report breaks down by it. Each record also carries the day's
+ * composition tallies (protein-wave servings by slot, shakes,
+ * whether the snack carried a dish) so the report can state the
+ * dish-first numbers alongside the band numbers.
  */
 
 const NOW = "2026-11-19T03:00:00.000Z";
@@ -82,6 +90,8 @@ const DAYS = [
   "2026-11-22",
 ];
 const MEALS_PER_DAY: (number | null)[] = [3, null, 4, 2, 3];
+/** Method 13: the stated-budget rotation (see the 500 matrix). */
+const BUDGET_ROTATION: (1 | 2 | 3 | null)[] = [null, 1, 2, 3, 2];
 
 interface Body {
   name: string;
@@ -140,6 +150,7 @@ function buildProfile(
     mealsPerDay?: number | null;
     cuisine?: CuisinePreference | null;
     behaviour?: BehaviouralProfile;
+    budgetTier?: 1 | 2 | 3 | null;
   },
 ): HealthProfile {
   return {
@@ -156,6 +167,7 @@ function buildProfile(
       pattern,
       mealsPerDay: opts.mealsPerDay ?? 3,
       cuisinePreference: opts.cuisine ?? null,
+      budgetTier: opts.budgetTier ?? null,
     },
     constraints: {
       ...EMPTY_CONSTRAINTS,
@@ -217,11 +229,16 @@ interface RunRecord {
   cuisine: string;
   behaviour: string;
   anchor: string;
+  budget: string;
   sizeBand: string;
   composition: "dish" | "food" | "mixed";
   failures: FailureClass[];
   kcalDev: number;
   proteinDev: number;
+  /* Method 13 composition tallies for the day. */
+  pwBySlot: { breakfast: number; lunch: number; dinner: number; snack: number };
+  shakes: number;
+  snackDish: boolean;
 }
 
 const records: RunRecord[] = [];
@@ -329,7 +346,10 @@ function judgeTimeline(
 }
 
 function judgeRun(
-  dims: Omit<RunRecord, "failures" | "kcalDev" | "proteinDev" | "sizeBand" | "composition">,
+  dims: Omit<
+    RunRecord,
+    "failures" | "kcalDev" | "proteinDev" | "sizeBand" | "composition" | "pwBySlot" | "shakes" | "snackDish"
+  >,
   plan: DailyPlan,
   anchor: (typeof ANCHORS)[number],
   expectedWaterMl: number,
@@ -341,7 +361,16 @@ function judgeRun(
   const dishIds: string[] = [];
   let dishMains = 0;
   let mains = 0;
+  /* Method 13 composition tallies. */
+  const pwBySlot = { breakfast: 0, lunch: 0, dinner: 0, snack: 0 };
+  let shakes = 0;
+  let snackDish = false;
   for (const meal of plan.meals) {
+    for (const d of meal.dishes) {
+      if (PROTEIN_WAVE_DISH_IDS.has(d.dishId)) pwBySlot[meal.meal] += 1;
+      if (DISH_BY_ID.get(d.dishId)?.category === "shake") shakes += 1;
+    }
+    if (meal.meal === "snack" && meal.dishes.length > 0) snackDish = true;
     const mealKcal =
       meal.dishes.reduce((a, d) => a + d.nutrients.kcal, 0) +
       meal.suggestions.reduce((a, s) => a + s.nutrients.kcal, 0);
@@ -447,6 +476,9 @@ function judgeRun(
     failures: uniqueFailures,
     kcalDev,
     proteinDev,
+    pwBySlot,
+    shakes,
+    snackDish,
   });
 }
 
@@ -463,12 +495,14 @@ function runBlock(from: number, to: number): void {
             const cuisine = CUISINES[Math.floor(g / 7) % CUISINES.length]!;
             const behaviour = BEHAVIOURS[Math.floor(g / 3) % BEHAVIOURS.length]!;
             const mealsPerDay = MEALS_PER_DAY[Math.floor(g / 5) % MEALS_PER_DAY.length]!;
+            const budgetTier = BUDGET_ROTATION[g % BUDGET_ROTATION.length]!;
             const anchor = ANCHORS[rotation]!;
-            const label = `${pattern}/${goal}/${body.name}/${cuisine ?? "nocuisine"}/${behaviour.name}/mpd${mealsPerDay ?? "null"}/${anchor.name}/${day}`;
+            const label = `${pattern}/${goal}/${body.name}/${cuisine ?? "nocuisine"}/${behaviour.name}/mpd${mealsPerDay ?? "null"}/b${budgetTier ?? "u"}/${anchor.name}/${day}`;
             const profile = buildProfile(pattern, goal, body, {
               mealsPerDay,
               cuisine,
               behaviour: behaviour.profile,
+              budgetTier,
             });
             const safety = classifySafety(toSafetyInput(profile));
             const gated = targetsFor(profile, safety, day);
@@ -495,6 +529,7 @@ function runBlock(from: number, to: number): void {
                 cuisine: cuisine ?? "none",
                 behaviour: behaviour.name,
                 anchor: anchor.name,
+                budget: budgetTier === null ? "unset" : `tier${budgetTier}`,
               },
               outcome.plan,
               anchor,
@@ -544,7 +579,23 @@ function reportAll(): void {
   byDimension("cuisine", (r) => r.cuisine);
   byDimension("behaviour", (r) => r.behaviour);
   byDimension("anchor", (r) => r.anchor);
+  byDimension("budget", (r) => r.budget);
   byDimension("composition", (r) => r.composition);
+  /* Method 13 composition totals across the whole matrix. */
+  const pw = { breakfast: 0, lunch: 0, dinner: 0, snack: 0 };
+  let shakes = 0;
+  let snackDishDays = 0;
+  for (const r of records) {
+    pw.breakfast += r.pwBySlot.breakfast;
+    pw.lunch += r.pwBySlot.lunch;
+    pw.dinner += r.pwBySlot.dinner;
+    pw.snack += r.pwBySlot.snack;
+    shakes += r.shakes;
+    if (r.snackDish) snackDishDays += 1;
+  }
+  console.log(
+    `[m1000 composition] pwBySlot=b${pw.breakfast}/l${pw.lunch}/d${pw.dinner}/s${pw.snack} shakes=${shakes} snackDishDays=${snackDishDays}/${records.length}`,
+  );
   byDimension("age", (r) =>
     r.body.ageYears < 30 ? "18-29" : r.body.ageYears < 45 ? "30-44" : r.body.ageYears < 60 ? "45-59" : "60+",
   );
@@ -608,6 +659,12 @@ describe("plan matrix 1000", () => {
       runBlock(500, 1000);
       expect(records.length).toBe(1000);
       reportAll();
+      /* Method 13: shakes are servable across the matrix (they
+         were structurally unservable before it — the count was 0
+         by construction), and the snack carries a dish on the
+         great majority of days. */
+      const shakes = records.reduce((a, r) => a + r.shakes, 0);
+      expect(shakes).toBeGreaterThan(0);
       if (!MEASURE) expect(hardFailures).toEqual([]);
     },
   );

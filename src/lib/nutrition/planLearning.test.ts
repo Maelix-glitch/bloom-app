@@ -146,8 +146,9 @@ describe("no usable log — the P5 plan, unchanged", () => {
   it("no recentLog field at all", () => {
     /* Method 10 = the behavioural pass (spec §10): the pin moves
        with the version; the behaviour pinned here — no log, no learning
-       notes — is unchanged. */
-    expect(base.methodVersion).toBe(12);
+       notes — is unchanged. (Moved again at method 13, the dish-first
+       repair.) */
+    expect(base.methodVersion).toBe(13);
     expect(base.notes.some((n) => n.startsWith("From your log"))).toBe(false);
   });
 
@@ -226,7 +227,12 @@ describe("a protein-shortfall log", () => {
        (least incidental protein first), so the same lean lands
        with less protein attached to its energy. The mechanism
        assertions below (denser anchors, more protein than the
-       un-leaned day, inside the ceiling) are unchanged. */
+       un-leaned day, inside the ceiling) are unchanged.
+       Method 13 re-pin: the un-leaned day now lands at 221 g, not
+       220 g, and the leaned day at 234 g, not 231 g — the snack
+       slot serves a real dish (a shake) whose protein rides in
+       the day's total where plain snack foods used to sit. The
+       lean's lift and the ceiling below are unchanged. */
     const day = "2026-11-23";
     const log: LogEntry[] = [
       entry("2026-11-20", 3000, 120),
@@ -240,8 +246,8 @@ describe("a protein-shortfall log", () => {
       recentLog: log,
     });
     expect(anchorIds(biasedDay)).not.toEqual(anchorIds(baseDay));
-    expect(Math.round(dayTotals(baseDay).proteinG)).toBe(220);
-    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(231);
+    expect(Math.round(dayTotals(baseDay).proteinG)).toBe(221);
+    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(234);
     expect(dayTotals(biasedDay).proteinG).toBeGreaterThan(dayTotals(baseDay).proteinG);
     expect(dayTotals(biasedDay).proteinG).toBeLessThanOrEqual(1.1 * 220);
     expect(meanAnchorDensity(biasedDay)).toBeGreaterThan(meanAnchorDensity(baseDay));

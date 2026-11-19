@@ -204,6 +204,29 @@ export function dishPatterns(
  * estimate bucketed: ≤ ₹20 → 1, ≤ ₹45 → 2, above → 3. Bands are group
  * averages — cheese costs more than milk, spinach less than capsicum —
  * so a tier is a budgeting hint, never a priced fact.
+ *
+ * Re-banded 2026-11-19 (plan method 13) — the first banding priced
+ * three things by the company they kept, not by what they are:
+ *  · FLESH and FISH sit in the residual "other" group, so chicken
+ *    and fish were priced at the almond band (0.8 ₹/g = ₹800/kg).
+ *    They now carry their own blended bands: flesh 0.25 ₹/g
+ *    (≈ ₹250/kg — whole chicken and the common cuts averaged;
+ *    boneless breast runs dearer, mince and whole birds cheaper),
+ *    fish 0.35 ₹/g (≈ ₹350/kg for the common table fish).
+ *  · The PROTEIN POWDERS (the same census rule `isProteinPowder`
+ *    states in plan.ts) were also in "other" at 0.8; a powder is a
+ *    supplement, priced as one: 1.5 ₹/g (whey isolate ≈ ₹2,000/kg
+ *    and soy isolate ≈ ₹1,000/kg, averaged). Only nine dishes carry
+ *    a powder line, so this band barely moves the census — it is
+ *    stated for honesty, not effect.
+ *  · NUTS_SEEDS was the almond price (0.8) applied to peanuts and
+ *    sesame too; the blended group average is 0.5 ₹/g. The residual
+ *    "other" group (honey, sugar, soy drinks, yeast, sweeteners)
+ *    likewise inherited 0.8; its blended average is 0.3 ₹/g.
+ * Measured effect on the shipped library: the protein wave's tiers
+ * move from 3 / 122 / 174 to 8 / 151 / 140 — the wave is no longer
+ * 58% tier 3, and every dietary pattern has servable protein-wave
+ * dishes at tiers 1 and 2 (census pinned in planDishFirst.test.ts).
  */
 const COST_BAND_PER_GRAM: Record<FoodGroup, number> = {
   cereals_grains: 0.06,
@@ -212,10 +235,36 @@ const COST_BAND_PER_GRAM: Record<FoodGroup, number> = {
   fruits: 0.12,
   dairy: 0.07,
   eggs: 0.15,
-  nuts_seeds: 0.8,
+  nuts_seeds: 0.5,
   fats_oils: 0.2,
-  other: 0.8,
+  other: 0.3,
 };
+
+/** The flesh band: chicken and meat priced as themselves — see the
+ *  re-banding note above. Judged on the classification's flesh flag,
+ *  never on the group the food was filed under. */
+const COST_BAND_FLESH_PER_GRAM = 0.25;
+/** The fish band — as above, on the fish flag (a fish food usually
+ *  carries the flesh flag too; fish is judged first). */
+const COST_BAND_FISH_PER_GRAM = 0.35;
+/** The protein-powder band — the supplement price, on the same
+ *  census rule the plan's powder test states. */
+const COST_BAND_PROTEIN_POWDER_PER_GRAM = 1.5;
+
+/** The per-gram band one food is priced at: identity first (fish,
+ *  flesh, protein powder), the food's group band otherwise. An
+ *  unclassified food (a user's own) prices at the residual band —
+ *  the heuristic claims nothing about what it is. */
+function costBandForFood(food: Food): number {
+  const cls = food.classification;
+  if (!cls) return COST_BAND_PER_GRAM.other;
+  if (cls.isFish) return COST_BAND_FISH_PER_GRAM;
+  if (cls.isFlesh) return COST_BAND_FLESH_PER_GRAM;
+  if (cls.group === "other" && food.per100g.proteinG >= 40) {
+    return COST_BAND_PROTEIN_POWDER_PER_GRAM;
+  }
+  return COST_BAND_PER_GRAM[cls.group];
+}
 
 /** Per-serving ₹ ceilings for budget tiers 1 and 2 (tier 3 is above
  *  the second). Exported so the assessment's budget question quotes
@@ -231,8 +280,7 @@ export function dishCostPerServingEstimate(
   let total = 0;
   for (const line of dish.lines) {
     const food = foodById(foods, dish, line.foodId);
-    const band = COST_BAND_PER_GRAM[food.classification?.group ?? "other"];
-    total += line.grams * band;
+    total += line.grams * costBandForFood(food);
   }
   return total / dish.servings;
 }

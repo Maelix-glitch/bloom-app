@@ -163,7 +163,7 @@ export const PROOF_DISHES: readonly Dish[] = [
       "Rest 5 minutes, then finish with the coriander leaves.",
     ],
     timeMinutes: 35,
-    budgetTier: 2,
+    budgetTier: 1,
     enriched: false,
     equipment: ["stove"],
   },

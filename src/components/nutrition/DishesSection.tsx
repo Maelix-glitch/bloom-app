@@ -8,13 +8,22 @@
  * derives a number: cards read `browseDishes`' labelled bundles.
  *
  * Which dishes are on the shelf is governed silently by the person's
- * assessment answers: their dietary pattern is a hard filter, and a
- * stated meal budget keeps dishes above their tier off the shelf.
+ * assessment answers: their dietary pattern is a hard filter.
  * Pattern and budget are asked in the assessment and nowhere else, so
  * this section offers no controls for them — search, category, cuisine
  * and the enriched toggle are the only filters here, and the status
  * line says what is being shown. Budget tiers are the lib's stated
  * ingredient-cost ESTIMATE and are labelled as one wherever they appear.
+ *
+ * Method 13 (2026-11-19): the meal budget is a PREFERENCE on the
+ * shelf, not a cut. Until method 12 a stated budget kept every dish
+ * above its tier off the shelf entirely — the owner saw 545 of the
+ * library's 1,202 dishes, and the missing ones were
+ * disproportionately the protein dishes (priced into the top tier
+ * by a costing band that priced flesh and fish like almonds). Now
+ * the shelf shows the full pattern pool; in-budget dishes sort
+ * first in the "Best for you" order and the status line says the
+ * budget is a preference.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -82,16 +91,10 @@ export function DishesSection({ day }: { day: string }) {
     [query, category, pattern, enrichedOnly],
   );
   const browsed = useMemo(() => browseDishes(filters), [filters]);
-  /* The budget keeps dishes ABOVE the person's tier off the shelf
-     (at or under it stays) — the lib's budget filter is an exact-tier
-     match for other callers, so the at-or-under rule is applied here. */
-  const shelf = useMemo(
-    () =>
-      budgetTier === null
-        ? browsed
-        : browsed.filter((row) => row.dish.budgetTier <= budgetTier),
-    [browsed, budgetTier],
-  );
+  /* Method 13: the budget no longer cuts the shelf — the shelf is
+     the full pattern pool, and the budget only orders it (in-budget
+     first, inside the "Best for you" sort below). */
+  const shelf = browsed;
   const cuisineCounts = useMemo(() => {
     const counts: Record<DishCuisine, number> = { india: 0, kerala: 0, international: 0 };
     for (const row of shelf) {
@@ -105,10 +108,11 @@ export function DishesSection({ day }: { day: string }) {
       cuisine === null ? shelf : shelf.filter((row) => row.dish.cuisine === cuisine);
     /* The default order is "Best for you" (§M): the lib's stable
        re-ordering by the judgements the app already makes — pattern
-       suitability, then the person's cuisine region — over the
-       browse order. No other ranking exists here. */
-    return sortDishesForYou(filtered, { pattern, cuisinePreference });
-  }, [shelf, cuisine, pattern, cuisinePreference]);
+       suitability, then the person's cuisine region, then their
+       budget as a preference — over the browse order. No other
+       ranking exists here. */
+    return sortDishesForYou(filtered, { pattern, cuisinePreference, budgetTier });
+  }, [shelf, cuisine, pattern, cuisinePreference, budgetTier]);
 
   /* Paged rendering: only the first page of cards mounts; "Show
      more" extends it. Any filter change starts the shelf over at
@@ -228,8 +232,8 @@ export function DishesSection({ day }: { day: string }) {
             <> · showing what suits you — {DIETARY_LABEL[profile.dietary.pattern]} pattern</>
           )
         ) : null}
-        {budgetTier === 1 ? <> · kept to an everyday ₹ budget</> : null}
-        {budgetTier === 2 ? <> · kept to a moderate ₹₹ budget</> : null}
+        {budgetTier === 1 ? <> · your everyday ₹ budget preferred first</> : null}
+        {budgetTier === 2 ? <> · your moderate ₹₹ budget preferred first</> : null}
         {cuisine ? <> · {DISH_CUISINE_LABEL[cuisine]} dishes only</> : null}
         {/* The sort's name, stated only when a personal judgement is
             actually ordering the shelf — with no pattern and no

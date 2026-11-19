@@ -121,6 +121,8 @@ import {
 } from "@/lib/vitalis/domain/safety";
 import { missingBodyFields, type BodyTargetsOutcome } from "@/lib/vitalis/calc/body";
 import {
+  BUDGET_TIER_1_MAX_PER_SERVING,
+  BUDGET_TIER_2_MAX_PER_SERVING,
   dishNutrients,
   dishPatterns,
   dishPreparationNeeds,
@@ -128,6 +130,7 @@ import {
   type Dish,
   type DishCategory,
 } from "./dishes";
+import { PROTEIN_WAVE_DISH_IDS } from "./data/dishLibrary";
 import { newNutritionId } from "./ids";
 import { nutrientsForGrams } from "./math";
 import { dishRegion, type DishRegion } from "./regions";
@@ -440,8 +443,26 @@ export interface DailyPlan {
  *  times. The timeline schedules the plan — it adds no food and
  *  moves no totals. The day guard's re-pick also changes: a meal
  *  is re-picked against the DAY's band cost, not its own split
- *  alone, so a protein-short day re-picks toward protein. */
-export const PLAN_METHOD_VERSION = 12;
+ *  alone, so a protein-short day re-picks toward protein.
+ *  13 = the dish-first repair (owner directive 2026-11-19, after
+ *  the raw-plan diagnosis): the budget stops being a hard filter
+ *  on the dish pool — it is a preference with a floor, widened
+ *  with a named note when the in-budget pool cannot carry a day
+ *  (and the cost heuristic is re-banded so flesh, fish and the
+ *  protein powders price as themselves, not as almonds); the
+ *  snack slot composes a real dish (shakes, protein snacks,
+ *  breakfast dishes) and breakfast accepts the shake category,
+ *  so the protein wave's shakes and snacks are servable at last;
+ *  the kitchen gates relax in named stages (prep-time cap, then
+ *  no-cook as a preference, then equipment) instead of handing
+ *  the day to layered raw foods when an answer set starves the
+ *  pool; at a high-protein guide the dedicated protein wave gets
+ *  a bounded pick preference and the day cost prices the day's
+ *  protein SPREAD across its main meals; and the top-up pass
+ *  closes protein with whole foods before it ever reaches for a
+ *  loose powder. Pattern, allergies, dislikes and Condition
+ *  Modes stay absolute throughout — only preferences relax. */
+export const PLAN_METHOD_VERSION = 13;
 
 export type PlanRefusal =
   | {
@@ -2312,11 +2333,45 @@ interface DishPoolData {
   byId: Map<string, Dish>;
 }
 
+/** Can this candidate carry a main meal — a main or one-pot rice
+ *  dish, or a breakfast dish at the breakfast slot? The count the
+ *  pool floors below are stated in. (MAIN_MEAL_CATEGORIES is
+ *  declared with the slot machinery; it is read here at call time,
+ *  like the kitchen gates read it.) */
+function isMainCapableDish(candidate: DishCandidate): boolean {
+  return (
+    MAIN_MEAL_CATEGORIES.includes(candidate.dish.category) ||
+    candidate.dish.category === "breakfast"
+  );
+}
+
+/** Can this candidate carry a LUNCH or DINNER slot — the slots only
+ *  main and one-pot rice dishes serve? The kitchen gate's floor is
+ *  stated in these, not in isMainCapableDish: the owner's own
+ *  no-cook pool held breakfasts and shakes enough to pass a
+ *  breakfast-inclusive count while offering literally nothing a
+ *  lunch or dinner slot could serve, so the ladder never fired and
+ *  the mains fell back to layered raw foods. A floor that cannot
+ *  see the starving slots is not a floor. */
+function isMainSlotDish(candidate: DishCandidate): boolean {
+  return MAIN_MEAL_CATEGORIES.includes(candidate.dish.category);
+}
+
+/** The budget floor (P13): the in-budget pool is trusted to carry
+ *  the plan alone only while it still offers at least this many
+ *  main-capable dishes — a week of distinct mains, breakfasts and
+ *  rotations cannot be composed from a handful — AND at least this
+ *  many main-capable dishes carrying the anchor protein aim
+ *  (≥25 g a serving, the protein waves' own bar). Below either,
+ *  the budget is widened to the full pool and the plan says so:
+ *  a budget that silently deletes every protein dish is not a
+ *  budget the plan can honour and still feed the person. */
+const BUDGET_POOL_MIN_MAIN_CAPABLE = 24;
+const BUDGET_POOL_MIN_PROTEIN_MAINS = 4;
+
 /**
  * The dishes a plan may serve this person, judged by the plan's own
- * gates — the qualification the plan's dish idea has always used,
- * tightened where a plan (followed daily) must be stricter than an
- * idea (an occasional alternative):
+ * gates — the qualification the plan's dish idea has always used:
  *  · the dish suits the person's dietary pattern — `dishPatterns`,
  *    every ingredient line judged by its classification;
  *  · every ingredient line sits in the eligible pool for the reference
@@ -2324,8 +2379,15 @@ interface DishPoolData {
  *    own allergy / intolerance / dislike name-matching, applied to the
  *    dish's line foods exactly as the plan applies them to foods;
  *  · the budget tier the person stated in the Assessment (and only
- *    there) is a HARD cap — the dish idea treats it as a preference,
- *    but a plan is followed, so it holds.
+ *    there) is a PREFERENCE (P13 — it was a hard cap until method
+ *    12, and the raw-plan diagnosis showed what that did: priced at
+ *    the old bands, a stated budget silently deleted every servable
+ *    protein dish at tier 1 and most of the wave at tier 2). The
+ *    pool prefers dishes at or under the tier; when the in-budget
+ *    pool falls below the floor above, the pool widens to every
+ *    qualifying dish and the returned note names the relaxation.
+ *    The pattern, the eligibility gates and Condition Modes never
+ *    widen — only the budget does.
  * A dish Bloom cannot price — a line naming a food outside the
  * reference set — is skipped, never guessed at.
  */
@@ -2333,30 +2395,57 @@ function dishPoolFor(
   profile: HealthProfile,
   dishes: readonly Dish[],
   activeModes: readonly ModeId[] = [],
-): DishPoolData | null {
+): { data: DishPoolData | null; notes: string[] } {
   const pattern = planPatternOf(profile.dietary.pattern);
   const eligible = new Set(eligiblePool(profile, USDA_REFERENCE_FOODS).map((f) => f.id));
   const budgetTier = profile.dietary.budgetTier;
   const candidates: DishCandidate[] = [];
-  const byId = new Map<string, Dish>();
   for (const dish of dishes) {
-    if (budgetTier !== null && dish.budgetTier > budgetTier) continue;
     if (!dish.lines.every((line) => eligible.has(line.foodId))) continue;
     try {
       if (pattern !== null && !dishPatterns(dish).includes(pattern)) continue;
       const nutrients = dishNutrients(dish).nutrients;
       /* System 14 (Condition Modes): the person's own switched-on
        * modes judge the dish on its computed nutrients, on top of —
-       * never instead of — the pattern and budget gates above. */
+       * never instead of — the gates above. */
       if (activeModes.length > 0 && !dishPassesModes(dish, nutrients, activeModes)) continue;
       candidates.push({ dish, nutrients });
-      byId.set(dish.id, dish);
     } catch {
       /* An unresolvable line — the dish is not planned with. */
       continue;
     }
   }
-  return candidates.length > 0 ? { candidates, byId } : null;
+  if (candidates.length === 0) return { data: null, notes: [] };
+  const poolOf = (list: readonly DishCandidate[]): DishPoolData => ({
+    candidates: [...list],
+    byId: new Map(list.map((c) => [c.dish.id, c.dish])),
+  });
+  if (budgetTier === null) return { data: poolOf(candidates), notes: [] };
+  const inBudget = candidates.filter((c) => c.dish.budgetTier <= budgetTier);
+  const inBudgetMains = inBudget.filter(isMainCapableDish);
+  const inBudgetProteinMains = inBudgetMains.filter(
+    (c) => c.nutrients.proteinG >= ANCHOR_AIM_MAIN_G,
+  );
+  if (
+    inBudgetMains.length >= BUDGET_POOL_MIN_MAIN_CAPABLE &&
+    inBudgetProteinMains.length >= BUDGET_POOL_MIN_PROTEIN_MAINS
+  ) {
+    return { data: poolOf(inBudget), notes: [] };
+  }
+  const ceiling =
+    budgetTier === 1
+      ? BUDGET_TIER_1_MAX_PER_SERVING
+      : budgetTier === 2
+        ? BUDGET_TIER_2_MAX_PER_SERVING
+        : null;
+  return {
+    data: poolOf(candidates),
+    notes: [
+      ceiling === null
+        ? "Your stated meal budget leaves too few dishes that can carry a meal, so today's plan treats it as a preference and also uses dishes above it — your pattern and your avoids still hold exactly."
+        : `Your stated meal budget (about ₹${ceiling} a serving) leaves too few dishes that can carry a meal, so today's plan treats it as a preference and also uses dishes above it — your pattern and your avoids still hold exactly.`,
+    ],
+  };
 }
 
 /* --------------------- P10 behavioural kitchen gates ---------------------- */
@@ -2390,87 +2479,236 @@ function effectivePrepCapMinutes(behavioural: BehaviouralProfile): PrepTimeMaxMi
   return null;
 }
 
+/** The kitchen floor (P13): a gated pool still offering at least
+ *  this many main-SLOT dishes (isMainSlotDish — lunch/dinner
+ *  carriers) can carry a day's mains with rotation to spare.
+ *  Below it, the answer set is starving the plan — the condition
+ *  the relaxation ladder exists for. */
+const KITCHEN_POOL_MIN_MAIN_CAPABLE = 3;
+
+/** The no-cook rotation floor (P13): "no cooking" is the one gate
+ *  whose strict pool can clear the survival floor yet still
+ *  sentence the person to the same dishes forever — the whole
+ *  library holds exactly 3 no-cook main-slot dishes (measured
+ *  2026-11-19), so a literal reading serves those three in
+ *  rotation for every lunch and dinner, indefinitely. When "no
+ *  cooking" is COMPOUNDED by another kitchen answer (a prep cap
+ *  or an equipment list — the owner's own set), the gate is
+ *  judged against this higher floor instead: a week of distinct
+ *  lunches and dinners needs at least this many carriers. Below
+ *  it, the ladder treats "no cooking" as a preference, as F3's
+ *  stage 2 prescribes, and names it. A bare "no cooking" with no
+ *  compounding answer keeps the gate's word exactly — the P10
+ *  promise stands where the answer set leaves a servable pool. */
+const NO_COOK_ROTATION_FLOOR = 8;
+
 /**
- * The P10 kitchen gates over the dish pool (spec §10.2): the factual
- * kitchen answers, applied after the pool's own pattern/budget/mode
- * gates and before any pick — the pool the composer sees is the pool
- * the person's kitchen allows.
+ * The P10 kitchen gates over the dish pool (spec §10.2), with the
+ * P13 relaxation ladder: the factual kitchen answers, applied after
+ * the pool's own pattern/budget/mode gates and before any pick —
+ * the pool the composer sees is the pool the person's kitchen
+ * allows, unless the answers starve it.
  *
- *  · Equipment and cooking ability are hard gates, judged through
- *    the ONE preparation-needs function (`dishPreparationNeeds`):
- *    a dish whose needed equipment is not a subset of the person's
+ *  · Equipment and cooking ability are gates, judged through the
+ *    ONE preparation-needs function (`dishPreparationNeeds`): a
+ *    dish whose needed equipment is not a subset of the person's
  *    set is out, and a person who does not cook gets only no-cook
- *    dishes. Until the §10.4 library pass pins real preparation
- *    data, the needs function answers conservatively (a stove, and
- *    cooking) for every dish — so these gates CAN empty the pool
- *    today, and when they do, the plan falls back to layered foods
- *    with a note naming why, never a silent downgrade.
+ *    dishes.
  *  · The prep-time cap binds WEEKDAY plans only (the answer speaks
  *    about a typical day). It relaxes in the spec's stated order —
  *    the cap rises through the offered bands, then lifts — but
  *    only as far as the first stage that still offers a main-meal
- *    dish, and a relaxation is named in the returned notes. A pool
- *    with no main-meal dish at any stage is not the cap's doing
- *    and is left exactly as it was.
+ *    dish, and a relaxation is named in the returned notes.
+ *  · THE LADDER (P13): when the gated, capped pool still offers
+ *    fewer than KITCHEN_POOL_MIN_MAIN_CAPABLE main-SLOT dishes
+ *    while the UNGATED pool offers at least that many, the answers
+ *    — not the library — are what starve the plan, and the gates
+ *    relax in stages: (1) the prep-time cap rises through its
+ *    bands to the first that restores the floor (set aside
+ *    entirely only when no band does); (2) "no cooking" becomes a
+ *    preference — cooked dishes return and no-cook dishes get a
+ *    bounded pick preference (`preferNoCook`); (3) the equipment
+ *    set widens by one item; (4) the equipment gate lifts. The
+ *    first stage that restores the floor is where the pool stops,
+ *    and one note names every stage that fired.
+ *    Until method 12 the same starvation silently handed the whole
+ *    day to layered plain foods — the raw plan the owner was
+ *    served. When the ungated pool itself is below the floor (a
+ *    small custom dish set, a heavily mode-cut pool), the gates
+ *    keep their word exactly: relaxation recovers dishes the
+ *    library has; it cannot invent dishes a pool does not contain.
+ *    Pattern, allergies, dislikes and Condition Modes are upstream
+ *    of this function and are never relaxed by it.
  */
 function gateDishPoolForKitchen(
   data: DishPoolData,
   behavioural: BehaviouralProfile,
   day: string,
-): { data: DishPoolData | null; notes: string[] } {
-  const notes: string[] = [];
-  let candidates = data.candidates;
-
+): { data: DishPoolData | null; notes: string[]; preferNoCook: boolean } {
   const equipment = effectiveEquipment(behavioural);
   const noCookOnly = behavioural.cookingAbility === "none";
-  if (equipment !== null || noCookOnly) {
-    candidates = candidates.filter((c) => {
-      const needs = dishPreparationNeeds(c.dish);
-      if (noCookOnly && !needs.noCook) return false;
-      if (equipment !== null && !needs.equipment.every((item) => equipment.has(item))) {
-        return false;
-      }
-      return true;
-    });
-    if (candidates.length === 0) {
-      return {
-        data: null,
-        notes: [
-          "No dish in the library fits your kitchen answers yet — the library's preparation details are still being filled in — so today's plan is built from simple foods instead.",
-        ],
-      };
-    }
-  }
-
   const cap = effectivePrepCapMinutes(behavioural);
   const dayOfWeek = new Date(`${day}T12:00:00Z`).getUTCDay();
   const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
-  if (cap !== null && isWeekday) {
-    const mainCapable = (list: readonly DishCandidate[]): boolean =>
-      list.some(
-        (c) => MAIN_MEAL_CATEGORIES.includes(c.dish.category) || c.dish.category === "breakfast",
-      );
-    if (mainCapable(candidates)) {
-      const stages: readonly number[] = [...PREP_TIME_BANDS.filter((b) => b >= cap), Infinity];
-      for (const stage of stages) {
-        const within = candidates.filter((c) => c.dish.timeMinutes <= stage);
-        if (!mainCapable(within)) continue;
-        candidates = within;
-        if (stage !== cap) {
-          notes.push(
-            stage === Infinity
-              ? `Your kitchen answers aim for about ${cap} minutes to cook a main meal, and every main dish in the library takes longer — today uses the quickest there are rather than no plan at all.`
-              : `Your kitchen answers aim for about ${cap} minutes to cook a main meal; today's dishes take up to about ${stage} minutes — the closest fit, rather than no plan at all.`,
-          );
-        }
-        break;
+  const capApplies = cap !== null && isWeekday;
+
+  /* The gate's floor counts main-SLOT dishes (see isMainSlotDish):
+   *  breakfasts and shakes cannot rescue a lunch. */
+  const mainCapableCount = (list: readonly DishCandidate[]): number =>
+    list.filter(isMainSlotDish).length;
+
+  const kitchenFilter = (
+    list: readonly DishCandidate[],
+    opts: { noCook: boolean; maxMissingEquipment: number | null },
+  ): DishCandidate[] =>
+    list.filter((c) => {
+      const needs = dishPreparationNeeds(c.dish);
+      if (opts.noCook && !needs.noCook) return false;
+      if (equipment !== null && opts.maxMissingEquipment !== null) {
+        const missing = needs.equipment.filter((item) => !equipment.has(item)).length;
+        if (missing > opts.maxMissingEquipment) return false;
       }
+      return true;
+    });
+
+  /* The prep-time cap staging (P10's discipline, unchanged): the
+   * first band stage at or above the cap that still offers a
+   * main-capable dish, with its note when the stage moved. */
+  const applyCap = (
+    list: readonly DishCandidate[],
+  ): { list: readonly DishCandidate[]; note: string | null } => {
+    if (!capApplies || cap === null) return { list, note: null };
+    if (!list.some((c) => isMainSlotDish(c))) return { list, note: null };
+    const stages: readonly number[] = [...PREP_TIME_BANDS.filter((b) => b >= cap), Infinity];
+    for (const stage of stages) {
+      const within = list.filter((c) => c.dish.timeMinutes <= stage);
+      if (!within.some((c) => isMainSlotDish(c))) continue;
+      if (stage === cap) return { list: within, note: null };
+      return {
+        list: within,
+        note:
+          stage === Infinity
+            ? `Your kitchen answers aim for about ${cap} minutes to cook a main meal, and every main dish in the library takes longer — today uses the quickest there are rather than no plan at all.`
+            : `Your kitchen answers aim for about ${cap} minutes to cook a main meal; today's dishes take up to about ${stage} minutes — the closest fit, rather than no plan at all.`,
+      };
     }
+    return { list, note: null };
+  };
+
+  const asData = (list: readonly DishCandidate[]): DishPoolData =>
+    list === data.candidates ? data : { candidates: [...list], byId: data.byId };
+
+  /* Level 0 — the gates exactly as stated, then the cap. */
+  const strict = kitchenFilter(data.candidates, {
+    noCook: noCookOnly,
+    maxMissingEquipment: equipment === null ? null : 0,
+  });
+  const strictCapped = applyCap(strict);
+  /* The floor this gate must restore: the survival floor, or —
+   *  for a compounded "no cooking" whose strict pool falls below
+   *  the rotation floor — the rotation floor (see
+   *  NO_COOK_ROTATION_FLOOR). */
+  const floor =
+    noCookOnly &&
+    (capApplies || equipment !== null) &&
+    mainCapableCount(strictCapped.list) < NO_COOK_ROTATION_FLOOR
+      ? NO_COOK_ROTATION_FLOOR
+      : KITCHEN_POOL_MIN_MAIN_CAPABLE;
+  if (mainCapableCount(strictCapped.list) >= floor) {
+    return {
+      data: asData(strictCapped.list),
+      notes: strictCapped.note ? [strictCapped.note] : [],
+      preferNoCook: false,
+    };
+  }
+  /* The ungated pool is itself below the floor: the kitchen
+   * answers are not what starves this plan, and the gates keep
+   * their word — the composer falls back per slot, as it has
+   * since P5, and no relaxation is claimed. */
+  if (mainCapableCount(data.candidates) < floor) {
+    return {
+      data: asData(strictCapped.list),
+      notes: strictCapped.note ? [strictCapped.note] : [],
+      preferNoCook: false,
+    };
   }
 
+  /* The ladder. Stage 1 is the prep-time cap, relaxed P10's own
+   *  way first: rise through the offered bands to the first stage
+   *  whose pool reaches the floor, and name that stage. (At the
+   *  tightest band the library holds ZERO main-slot dishes at all
+   *  — a 10-minute cap can never serve a dish lunch — while the
+   *  20-minute band holds 23.) Only when no band reaches the
+   *  floor is the cap set aside entirely, and that is named when
+   *  the cap had actually cut the pool or P10's staging had
+   *  already relaxed it. */
+  const relaxed: string[] = [];
+  let preferNoCook = false;
+  let pool = strict;
+  if (capApplies && cap !== null) {
+    const stages: readonly number[] = [...PREP_TIME_BANDS.filter((b) => b >= cap), Infinity];
+    let reached = false;
+    for (const stage of stages) {
+      const within = strict.filter((c) => c.dish.timeMinutes <= stage);
+      if (mainCapableCount(within) < floor) continue;
+      pool = within;
+      reached = true;
+      if (stage !== cap) {
+        relaxed.push(
+          stage === Infinity
+            ? "the prep-time aim is set aside"
+            : `dishes taking up to about ${stage} minutes are included`,
+        );
+      }
+      break;
+    }
+    if (!reached && (strictCapped.list.length !== strict.length || strictCapped.note !== null)) {
+      relaxed.push("the prep-time aim is set aside");
+    }
+  }
+  if (mainCapableCount(pool) < floor && noCookOnly) {
+    pool = kitchenFilter(data.candidates, {
+      noCook: false,
+      maxMissingEquipment: equipment === null ? null : 0,
+    });
+    preferNoCook = true;
+    relaxed.push("dishes that need cooking are included, with no-cook dishes preferred");
+  }
+  if (mainCapableCount(pool) < floor && equipment !== null) {
+    pool = kitchenFilter(data.candidates, { noCook: false, maxMissingEquipment: 1 });
+    relaxed.push("dishes needing one more piece of kitchen equipment are included");
+  }
+  if (mainCapableCount(pool) < floor && equipment !== null) {
+    pool = [...data.candidates];
+    relaxed.push("the equipment list is set aside");
+  }
+  /* Stages 2–4 rebuild the pool from the uncapped candidates, so
+   *  the cap may have gone with them even when stage 1 named
+   *  nothing (the cap had no main-slot dish left to cut in the
+   *  strict pool, yet the rebuilt pool serves slower dishes).
+   *  The check is direct: if the pool the plan will use holds any
+   *  dish slower than the stated cap and no prep-time stage was
+   *  named, name it — the note names every relaxation that
+   *  actually happened. */
+  if (
+    capApplies &&
+    cap !== null &&
+    relaxed.length > 0 &&
+    !relaxed.some((r) => r.includes("prep-time") || r.includes("minutes are included")) &&
+    pool.some((c) => c.dish.timeMinutes > cap)
+  ) {
+    relaxed.unshift("the prep-time aim is set aside");
+  }
+  const answers: string[] = [];
+  if (noCookOnly) answers.push("no cooking");
+  if (capApplies && cap !== null) answers.push(`about ${cap} minutes to cook`);
+  if (equipment !== null) answers.push("the equipment you listed");
   return {
-    data: candidates === data.candidates ? data : { candidates, byId: data.byId },
-    notes,
+    data: asData(pool),
+    notes: [
+      `Your kitchen answers (${answers.join(", ")}) leave almost no real dishes, so this plan relaxes them: ${relaxed.join("; ")}. Retake the Assessment if those answers no longer fit — your pattern, allergies and avoids still hold exactly.`,
+    ],
+    preferNoCook,
   };
 }
 
@@ -2502,8 +2740,10 @@ const MAIN_MEAL_CATEGORIES: readonly DishCategory[] = ["main", "rice"];
 
 /** The slot's candidates: dishes not already served today that can
  *  carry a main meal. Breakfast also draws on the breakfast category
- *  (which the fit cost mildly prefers there); lunch and dinner draw
- *  on mains and one-pot rice dishes. */
+ *  (which the fit cost mildly prefers there) and — P13 — on the
+ *  shake category: a protein shake IS a breakfast in the protein
+ *  wave's own terms, and until method 12 no slot would serve one.
+ *  Lunch and dinner draw on mains and one-pot rice dishes. */
 function slotCandidates(
   ordered: readonly DishCandidate[],
   meal: Meal,
@@ -2512,8 +2752,25 @@ function slotCandidates(
   return ordered.filter((c) => {
     if (used.has(c.dish.id)) return false;
     if (MAIN_MEAL_CATEGORIES.includes(c.dish.category)) return true;
-    return meal === "breakfast" && c.dish.category === "breakfast";
+    return meal === "breakfast" && (c.dish.category === "breakfast" || c.dish.category === "shake");
   });
+}
+
+/** The categories that can BE the snack (P13): the protein wave's
+ *  shakes and protein snacks, and breakfast dishes — the small,
+ *  quick, protein-carrying end of the library. Until method 12 the
+ *  snack slot was composed with an empty dish list by construction
+ *  (plain foods only), which is why every shake and protein snack
+ *  in the library was unservable in any plan. */
+const SNACK_DISH_CATEGORIES: readonly DishCategory[] = ["shake", "snack", "breakfast"];
+
+/** The snack slot's dish candidates: unused dishes in the snack
+ *  categories. */
+function snackSlotCandidates(
+  ordered: readonly DishCandidate[],
+  used: ReadonlySet<string>,
+): DishCandidate[] {
+  return ordered.filter((c) => !used.has(c.dish.id) && SNACK_DISH_CATEGORIES.includes(c.dish.category));
 }
 
 /** Within the anchor band, dishes carrying at least this much protein
@@ -2522,6 +2779,15 @@ function slotCandidates(
  *  at 4 g/100 kcal spends it twice as fast as one at 8. The band's
  *  protein aim is never traded away — density only orders the band. */
 const ANCHOR_DENSITY_AIM = 6;
+
+/** The guide density (grams of protein per kcal) at or above which
+ *  a plan counts as a high-protein plan for the protein-wave
+ *  preference (P13): ≈9 g of protein per 100 kcal. The owner's own
+ *  corner (171 g on 1,350 kcal ≈ 12.7) sits far above it; an
+ *  ordinary maintenance guide (120 g on 2,200 kcal ≈ 5.5) far
+ *  below — the preference switches on the guide's own shape, not
+ *  on the goal's name. */
+const PROTEIN_WAVE_GUIDE_DENSITY = 0.09;
 
 /** The P7 dish bias: which dishes the learning pass has an opinion
  *  about. Groups, in the order they lead: dishes the person logs
@@ -2587,6 +2853,14 @@ interface DishPickOpts {
    *  picks lean toward the dishes they already return to and the
    *  variety pressure eases (see the LOW_CONFIDENCE constants). */
   lowConfidence?: boolean | undefined;
+  /** P13: the kitchen ladder relaxed "no cooking" from a gate to
+   *  a preference — no-cook dishes get a bounded pull in the pick
+   *  cost (see the term in dishPickCost). */
+  preferNoCook?: boolean | undefined;
+  /** P13: the guide's protein density is high (≥
+   *  PROTEIN_WAVE_GUIDE_DENSITY), so the dedicated protein wave
+   *  gets its bounded pick preference. */
+  proteinWaveBonus?: boolean | undefined;
 }
 
 /**
@@ -2773,6 +3047,25 @@ function dishPickCost(
   ) {
     cost += BASIC_COMPLEXITY_COST;
   }
+  /* P13: the kitchen ladder's no-cook preference — when "no
+   *  cooking" was relaxed from a gate to a preference, no-cook
+   *  dishes keep this bounded pull: enough to lead among
+   *  near-equals, never enough to crown a bad fit. */
+  if (opts.preferNoCook && dishPreparationNeeds(candidate.dish).noCook) cost -= 0.1;
+  /* P13: the protein-wave preference at a high-protein guide. The
+   *  wave was built for exactly these guides, yet without a named
+   *  preference it drowned among the library's hundreds of other
+   *  ≥25 g dishes — measured at 7.4% of dish mains at the owner's
+   *  corner with the budget unset. This is the second deliberate
+   *  exception to the ranking-term sizing above (the first is the
+   *  served-yesterday penalty): at a guide this dense, protein IS
+   *  the day's binding constraint, and the measured fit gap
+   *  between the wave and the library's standout raw-fish fits is
+   *  ~0.3 — a near-tie-sized bonus never reaches the band at all.
+   *  It is bounded, it switches on the guide's own density alone,
+   *  and the day guard still judges the composed day: a wave pick
+   *  that breaks the day's bands is re-picked like any other. */
+  if (opts.proteinWaveBonus && PROTEIN_WAVE_DISH_IDS.has(candidate.dish.id)) cost -= 0.3;
   /* A breakfast dish at breakfast fits the meal's idiom. */
   if (split.meal === "breakfast" && candidate.dish.category === "breakfast") cost -= 0.04;
   return cost;
@@ -2852,6 +3145,17 @@ function bestDishPick(
   if (opts.cuisine !== null) {
     const regional = inBand.find((p) => dishRegion(p.candidate.dish) === opts.cuisine);
     if (regional) return regional;
+  }
+  /* P13: the protein-wave preference orders the band the same way,
+   *  after cuisine (the person's stated taste outranks the
+   *  nutritional nudge): at a high-protein guide, when a dedicated
+   *  protein dish is among the near-equals, it leads. The cost
+   *  term in dishPickCost does the complementary work — it pulls
+   *  wave dishes into the band and shapes the day guard's
+   *  re-picks, which judge by cost, not by band order. */
+  if (opts.proteinWaveBonus) {
+    const wave = inBand.find((p) => PROTEIN_WAVE_DISH_IDS.has(p.candidate.dish.id));
+    if (wave) return wave;
   }
   return inBand[0] ?? scored[0]!;
 }
@@ -2961,6 +3265,32 @@ function composeSingleDishMeal(
   return toPlanDish(pick.candidate, "anchor", pick.servings);
 }
 
+/**
+ * Compose the snack (P13): ONE dish from the snack categories,
+ * portion-scaled to the snack's share of the day — the same
+ * single-dish discipline as a main meal, at snack scale. This is
+ * also where the top-up discipline (research R24) gets its third
+ * step: a day whose protein needs help has a recognised protein
+ * dish — a shake, a protein snack — served as a dish in its own
+ * slot, ahead of any loose-food top-up. Null when no snack dish
+ * can carry the slot; the caller falls back to the plain-food
+ * snack composition, so the slot is composed, never empty.
+ */
+function composeSnackDish(
+  ordered: readonly DishCandidate[],
+  used: Set<string>,
+  day: string,
+  split: MealSplit,
+  opts: DishPickOpts,
+): PlanDish | null {
+  const cands = snackSlotCandidates(ordered, used);
+  if (cands.length === 0) return null;
+  const pick = bestDishPick(cands, split, opts, day);
+  if (!pick) return null;
+  used.add(pick.candidate.dish.id);
+  return toPlanDish(pick.candidate, "anchor", pick.servings);
+}
+
 /** The day bands the repair aims at: energy within ±5% of the
  *  guide (the band the day's notes judge at), protein within
  *  [95%, 110%] — met, not merely approached, and never bought at
@@ -3015,11 +3345,62 @@ function mealSanityCost(meals: readonly PlanMeal[]): number {
   return cost;
 }
 
+/** One meal's served protein: its dish plus any top-up suggestions
+ *  riding on the meal. */
+const mealProteinServed = (meal: PlanMeal): number =>
+  meal.dishes.reduce((a, d) => a + d.nutrients.proteinG, 0) +
+  meal.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0);
+
+/** The protein-spread shares (P13; research R7/R8): each main meal
+ *  should carry a real share of the day's protein guide — at least
+ *  about a fifth — and no main meal should carry the day — over
+ *  about 45% means the other meals were left thin, the skewed
+ *  pattern the distribution studies measure against. The even
+ *  split the meal shares already aim at (25 / 35 / 30) sits inside
+ *  both bounds; the term prices only the excursions. */
+const PROTEIN_SPREAD_MIN_SHARE = 0.2;
+const PROTEIN_SPREAD_MAX_SHARE = 0.45;
+/** The spread term's weight: below the band terms (1× / 2.5×), so
+ *  it shapes the repair's choices among near-equal days and never
+ *  outvotes landing the day itself. */
+const PROTEIN_SPREAD_WEIGHT = 0.4;
+
+/** One dish-composed main meal's spread term: how far its share of
+ *  the day's protein guide sits outside the spread shares, priced
+ *  relative to the bound it crossed. */
+function proteinSpreadTerm(mealProteinG: number, targets: NutritionTargets): number {
+  if (targets.proteinG <= 0) return 0;
+  const share = mealProteinG / targets.proteinG;
+  if (share < PROTEIN_SPREAD_MIN_SHARE) {
+    return PROTEIN_SPREAD_WEIGHT * ((PROTEIN_SPREAD_MIN_SHARE - share) / PROTEIN_SPREAD_MIN_SHARE);
+  }
+  if (share > PROTEIN_SPREAD_MAX_SHARE) {
+    return PROTEIN_SPREAD_WEIGHT * ((share - PROTEIN_SPREAD_MAX_SHARE) / PROTEIN_SPREAD_MAX_SHARE);
+  }
+  return 0;
+}
+
+/** The day's spread cost over its dish-composed main meals. Zero
+ *  for food-composed meals, like the sanity term — the layered
+ *  composer has its own distribution discipline, and the repair
+ *  cannot move a food-composed meal anyway. */
+function proteinSpreadCost(meals: readonly PlanMeal[], targets: NutritionTargets): number {
+  let cost = 0;
+  for (const meal of meals) {
+    if (meal.meal === "snack" || meal.dishes.length !== 1) continue;
+    cost += proteinSpreadTerm(mealProteinServed(meal), targets);
+  }
+  return cost;
+}
+
 /** The repair/guard objective: the day's band cost plus the
- *  meal-sanity term, judged on the composed meals as they stand. */
+ *  meal-sanity term plus the protein-spread term, judged on the
+ *  composed meals as they stand. */
 function dayCost(meals: readonly PlanMeal[], targets: NutritionTargets): number {
   return (
-    dayBandCost(dayKcalOf(meals), dayProteinOf(meals), targets) + mealSanityCost(meals)
+    dayBandCost(dayKcalOf(meals), dayProteinOf(meals), targets) +
+    mealSanityCost(meals) +
+    proteinSpreadCost(meals, targets)
   );
 }
 
@@ -3166,6 +3547,13 @@ function bestDayAwarePick(
   const restProtein = dayProteinOf(meals) - current.nutrients.proteinG;
   const otherSanity =
     mealSanityCost(meals) - mealSanityTerm(current.nutrients.kcal, meal.kcal);
+  /* P13: the spread term, split the same way — the other meals'
+   *  spread is a constant of the swap; this meal's is re-judged on
+   *  the candidate's panel (its top-up suggestions ride along,
+   *  exactly as mealProteinServed counts them). */
+  const otherSpread =
+    proteinSpreadCost(meals, targets) - proteinSpreadTerm(mealProteinServed(meal), targets);
+  const mealTopUpProtein = meal.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0);
   /* The Pareto guard: a re-pick may trade freely INSIDE the
      bands, but it may never deepen either band's excess — a
      protein fix bought with energy, or an energy fix bought
@@ -3189,6 +3577,8 @@ function bestDayAwarePick(
         dayBandCost(restKcal + panel.kcal, restProtein + panel.proteinG, targets) +
         otherSanity +
         mealSanityTerm(panel.kcal, meal.kcal) +
+        otherSpread +
+        proteinSpreadTerm(panel.proteinG + mealTopUpProtein, targets) +
         DAY_REPICK_FIT_WEIGHT * dishPickCost(candidate, panel, servings, split, opts, day);
       if (best === null || judge < best.judge - 1e-9) {
         best = { candidate, servings, judge };
@@ -3230,6 +3620,10 @@ function enforceDayBands(
     } | null = null;
     for (const meal of meals) {
       if (meal.dishes.length !== 1) continue;
+      /* P13: the snack's dish is the snack slot's own composition
+       *  (shake / snack / breakfast categories) — the guard never
+       *  re-picks it into a main dish; its scale still repairs. */
+      if (meal.meal === "snack") continue;
       const current = meal.dishes[0]!;
       const split: MealSplit = { meal: meal.meal, kcal: meal.kcal, proteinG: meal.proteinG };
       const currentCandidate = candidateById.get(current.dishId);
@@ -3301,6 +3695,17 @@ const MAX_TOPUPS_PER_MEAL = 3;
  * bought at 8 are different purchases. Energy mode draws on
  * milk/curd and nuts/seeds. Unused-today first, the whole egg ahead
  * of its parts. Returns false when nothing honest can be added.
+ *
+ * P13 (research R24): the top-up is the LAST step of the closing
+ * discipline, not the first — the day guard has already scaled
+ * the protein dish (step 1) and re-picked it (step 2), and the
+ * snack slot has served its protein dish (step 3) before this
+ * pass runs. Within the pass, whole foods are tried before the
+ * protein powders on every call: a powder is a loose supplement
+ * top-up, and it closes a gap only when no whole food the pool
+ * allows can. (The P12 gap scoop is powder-only by construction
+ * and stays what it is — the over-guide corner's last resort,
+ * invoked through its own flag below.)
  */
 function addOneTopUp(
   ctx: ComposeContext,
@@ -3376,7 +3781,18 @@ function addOneTopUp(
       Number(isEggPart(a)) - Number(isEggPart(b))
     );
   });
-  for (const food of candidates) {
+  /* P13: whole foods before powders — the ranked order above holds
+   *  within each class, and the classes are tried in R24's order.
+   *  The gap scoop (powderScoop) is powder-only already and skips
+   *  the partition. */
+  const ordered =
+    proteinMode && !opts?.powderScoop
+      ? [
+          ...candidates.filter((f) => !isProteinPowder(f)),
+          ...candidates.filter((f) => isProteinPowder(f)),
+        ]
+      : candidates;
+  for (const food of ordered) {
     let portion: SizedPortion | null;
     if (proteinMode) {
       /* A powder's cap is its own (the scoop cap); every other
@@ -4026,19 +4442,26 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      When it can fill a main meal's anchor slot the meal is composed
      of dishes; where it cannot, the layered food composition fills
      that meal — the two never mix within a meal's main structure. */
-  let dishData =
-    input.dishes && input.dishes.length > 0
-      ? dishPoolFor(profile, input.dishes, input.activeModes ?? [])
-      : null;
+  const behaviourNotes: string[] = [];
+  let dishData: DishPoolData | null = null;
+  if (input.dishes && input.dishes.length > 0) {
+    const pooled = dishPoolFor(profile, input.dishes, input.activeModes ?? []);
+    dishData = pooled.data;
+    /* P13: a budget widening is named before the notes judge the
+       result — the same honesty the kitchen relaxations get. */
+    behaviourNotes.push(...pooled.notes);
+  }
   /* P10: the behavioural kitchen gates narrow the pool further —
      equipment, cooking ability and the weekday prep-time cap, all
      read from the person's own Assessment answers (see
-     gateDishPoolForKitchen). A gate that empties the pool hands
-     the day to the layered food composition, with its note. */
-  const behaviourNotes: string[] = [];
+     gateDishPoolForKitchen). P13: a gate combination that starves
+     the pool relaxes in named stages instead of handing the day
+     to the layered food composition. */
+  let preferNoCook = false;
   if (dishData) {
     const gated = gateDishPoolForKitchen(dishData, profile.behavioural, input.day);
     dishData = gated.data;
+    preferNoCook = gated.preferNoCook;
     behaviourNotes.push(...gated.notes);
   }
   /* P7: the dish bias. Micro-richness is judged here, where the
@@ -4109,10 +4532,34 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
     basicCooking: profile.behavioural.cookingAbility === "basic",
     lowConfidence:
       profile.behavioural.confidence !== null && profile.behavioural.confidence <= 2,
+    /* P13: the kitchen ladder's no-cook preference, when it fired,
+     *  and the protein-wave preference, switched by the resolved
+     *  guide's own protein density. */
+    ...(preferNoCook ? { preferNoCook } : {}),
+    proteinWaveBonus: targets.proteinG / targets.kcal >= PROTEIN_WAVE_GUIDE_DENSITY,
   };
   const usedDishIds = new Set<string>();
   const meals: PlanMeal[] = splits.map((split) => {
     if (split.meal === "snack") {
+      /* P13: the snack composes a real dish first — a shake, a
+         protein snack, a breakfast dish — and plain foods only
+         when the pool offers no snack dish at all. Until method
+         12 this slot was built with an empty dish list by
+         construction, which made the whole shake and protein-
+         snack shelves unservable. */
+      if (dishData) {
+        const dish = composeSnackDish(dishOrdered, usedDishIds, input.day, split, pickOpts);
+        if (dish) {
+          return {
+            meal: split.meal,
+            kcal: split.kcal,
+            proteinG: split.proteinG,
+            dishes: [dish],
+            suggestions: [],
+            note: null,
+          };
+        }
+      }
       const suggestions = composeSnack(ctx, split);
       return {
         meal: split.meal,

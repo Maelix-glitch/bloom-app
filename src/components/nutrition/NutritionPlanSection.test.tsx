@@ -140,28 +140,31 @@ describe("NutritionPlanSection", () => {
     /* P12: the day timeline names each meal too, so "Breakfast" appears
        in the schedule summary as well as the meal card. */
     expect(screen.getAllByText("Breakfast").length).toBeGreaterThan(0);
-    expect(screen.getAllByTestId("provenance-badge").length).toBeGreaterThan(0);
 
     /* P5: main meals are built from dishes — each carries dish rows
        whose tap target unfolds the dish's ingredients. (P2's layer
-       labels survive only on a meal the dish pool could not fill.) */
-    expect(
-      screen.getAllByRole("button", { name: /— show ingredients$/ }).length,
-    ).toBeGreaterThan(0);
+       labels survive only on a meal the dish pool could not fill.)
+       Method 13 (2026-11-19): this profile's day is now FULLY
+       dish-composed — snack included — so no plain-food suggestion
+       rows render at all; the provenance badge lives in the dish
+       expansion, and logging goes through the dish. The test's
+       shape follows the plan's. */
+    const dishRows = screen.getAllByRole("button", { name: /— show ingredients$/ });
+    expect(dishRows.length).toBeGreaterThan(0);
+    fireEvent.click(dishRows[0]!);
+    expect(screen.getAllByTestId("provenance-badge").length).toBeGreaterThan(0);
     const stored = readPlan();
     if (!stored) throw new Error("expected a stored plan");
     expect(stored.meals.some((m) => m.dishes.length > 0)).toBe(true);
 
-    /* Logging a suggestion writes a real entry through the lib. */
-    const logButtons = screen.getAllByRole("button", { name: /^Log .+ to / });
-    expect(logButtons.length).toBeGreaterThan(0);
-    fireEvent.click(logButtons[0]!);
+    /* Logging the plan's dish writes a real entry through the lib. */
+    fireEvent.click(screen.getByRole("button", { name: "Log this dish" }));
 
     const entries = readFoodLog();
     expect(entries).toHaveLength(1);
-    expect(entries[0]!.source).toBe("plan");
+    expect(entries[0]!.source).toBe("dish");
     expect(entries[0]!.day).toBe(todayLocal());
-    expect(entries[0]!.provenance.kind).toBe("usda");
+    expect(entries[0]!.provenance.kind).toBe("recipe");
     expect(screen.getByText("Logged")).toBeTruthy();
   });
 
@@ -348,8 +351,39 @@ describe("NutritionPlanSection", () => {
 describe("NutritionPlanSection — food photographs (P3-R)", () => {
   it("shows the real photograph on exactly the photographed suggestions", async () => {
     seedAssessment(COMPLETE);
+    /* Method 13 (2026-11-19): a plan composed WITH the dish
+       library is dish-first now — its suggestion rows are only
+       top-ups, and this profile's day carries no photographed one,
+       so the photograph path would pass vacuously. The fixture
+       therefore stores a plan composed WITHOUT the library (the
+       layered fallback path, still a real plan shape) so the
+       suggestion rows under test are the day's substance, exactly
+       as this test was written against. */
+    const state: AssessmentState = {
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: { ...EMPTY_ANSWERS, ...COMPLETE },
+      consents: [],
+      startedAt: "2026-11-10T03:00:00.000Z",
+      completedAt: "2026-11-10T03:05:00.000Z",
+      updatedAt: "2026-11-10T03:05:00.000Z",
+    };
+    const profile = toHealthProfile(state, "user-1");
+    const safety = classifySafety(toSafetyInput(profile));
+    const outcome = generatePlan({
+      profile,
+      safety,
+      gatedOutcome: targetsFor(profile, safety, todayLocal()),
+      fallbackTargets: null,
+      foods: USDA_REFERENCE_FOODS,
+      day: todayLocal(),
+      now: "2026-11-16T03:00:00.000Z",
+      id: "plan-photo-fixture",
+    });
+    if (!outcome.ok) throw new Error("expected a plan");
+    writePlan(outcome.plan);
     const { container } = render(<NutritionPlanSection />);
-    await createPlanAndAwait();
 
     const plan = readPlan();
     if (!plan) throw new Error("expected a stored plan");
