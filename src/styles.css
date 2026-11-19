@@ -256,6 +256,8 @@
   --space-8: 2rem;
   --space-10: 2.5rem;
   --space-12: 3rem;
+  /* The section rhythm (brief v4 Part 2): 56px between sections. */
+  --space-14: 3.5rem;
   /* Icon-button geometry (P2-3, R17): two size roles for every icon-only
      control, centred by grid place-items — never by hand padding. The ui
      kit's h-9 / h-10 buttons are the same two steps. */

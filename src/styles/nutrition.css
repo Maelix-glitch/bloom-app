@@ -44,6 +44,50 @@
   }
 }
 
+/* ------------------------- section system (v4) ------------------------ */
+/* Brief v4 Part 2: ONE section anatomy for the whole page. A section is
+   spaced by the 56px rhythm token (never a per-section mt-*), clears
+   the sticky sub-nav by 80px when jumped to, and is headed by a
+   .section-head — an optional name eyebrow (the house `eyebrow`
+   utility) over a REAL serif H2 at the 24px step, an optional one-line
+   subtitle at the 14px secondary step, and optional actions. An
+   eyebrow can never replace the H2 (M-84); the rhythm replaces the
+   16px card margins that fused the page into one scroll (M-87). */
+.section {
+  margin-block-start: var(--space-14);
+  scroll-margin-top: 80px;
+}
+/* The first section on the page (the hero) takes no rhythm margin —
+   the brief's `.section:first-of-type` rule, made explicit because
+   the page's sections sit in different wrappers, where :first-of-type
+   cannot see across. */
+.section--lead {
+  margin-block-start: 0;
+}
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.section-head__main {
+  min-width: 0;
+}
+.section-head__title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+.section-head__sub {
+  margin-top: var(--space-1);
+  font-size: var(--text-callout);
+  line-height: var(--leading-body);
+  color: var(--muted-foreground);
+  max-width: var(--measure);
+}
+
 /* ------------------------------ day totals ------------------------------ */
 
 .nut-day-card {
@@ -87,7 +131,10 @@
 
 .nut-note {
   margin-top: var(--space-3);
-  font-size: var(--text-caption);
+  /* One body style (brief v4 Part 2, M-86): notes carry real
+     sentences — the plan's reasons among them — so they sit at the
+     14px secondary step, never the 12px caption step. */
+  font-size: var(--text-callout);
   line-height: var(--leading-body);
   color: var(--muted-foreground);
   max-width: 58ch;
@@ -878,20 +925,48 @@ a.nut-chip {
 }
 /* Sub-navigation (Plan B): anchor chips to the today view's named
    sections. The chips reuse .nut-chip; as navigation they hold the
-   44px touch floor. Jump targets clear the fixed phone brand bar
-   (60px) with a breath, at every width. */
+   44px touch floor. Since brief v4 Slice 3 the bar is STICKY under
+   the app chrome: it offsets by the shell's own --app-top-bar token
+   (60px below the fixed phone brand bar, 0 at lg where the rail
+   takes over) and carries an opaque page ground, so sections sliding
+   beneath it never show through. Jump targets clear the stuck bar
+   (60px brand bar + the bar itself) at the brief's 80px. */
 .nut-subnav {
+  position: sticky;
+  top: var(--app-top-bar);
+  z-index: 10;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   margin-top: var(--space-4);
+  padding-block: var(--space-2);
+  background: var(--background);
 }
 .nut-subnav .nut-chip {
   min-height: var(--bloom-touch-min);
   text-decoration: none;
 }
+/* The active anchor (set by the page's scrollspy) takes the shell
+   nav's treatment (Slice 2, rulebook §20) adapted to a pill: a solid
+   --surface-2 fill, foreground text, and the accent bar INSIDE the
+   pill — a 3px gold underline — never a ring. */
+.nut-subnav .nut-chip[data-selected] {
+  background: var(--surface-2);
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  color: var(--foreground);
+  box-shadow: inset 0 -3px 0 var(--gold);
+}
+/* Focus (rulebook §20): :focus-visible only — a mouse click on a
+   chip never leaves a ring. */
+.nut-subnav .nut-chip:focus {
+  outline: none;
+}
+.nut-subnav .nut-chip:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 65%, transparent);
+  outline-offset: 2px;
+}
 .nut-jump {
-  scroll-margin-top: 84px;
+  scroll-margin-top: 80px;
 }
 .nut-backlink {
   display: inline-flex;

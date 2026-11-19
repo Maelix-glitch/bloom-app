@@ -186,13 +186,14 @@ export function ProgrammesSection() {
   const pastRuns = history.filter((p) => !activeProgress || p.run.id !== activeProgress.run.id);
 
   return (
-    <section className="nut-card nut-rise mt-4" aria-label="Programmes">
-      <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-        A structure for the weeks ahead
-      </h2>
-      <p className="mt-1.5 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-        Pick a structure for the next few weeks.
-      </p>
+    <section className="nut-card nut-rise section" aria-label="Programmes">
+      <div className="section-head">
+        <div className="section-head__main">
+          <div className="eyebrow">Programmes</div>
+          <h2 className="section-head__title mt-1.5">A structure for the weeks ahead</h2>
+          <p className="section-head__sub">Pick a structure for the next few weeks.</p>
+        </div>
+      </div>
 
       {activeProgress ? (
         <ActiveProgramme progress={activeProgress} onQuit={() => quit(activeProgress.run.id)} />

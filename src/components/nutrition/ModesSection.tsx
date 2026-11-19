@@ -96,10 +96,13 @@ export function ModesSection() {
   };
 
   return (
-    <section className="nut-card nut-rise mt-4" aria-label="Condition modes">
-      <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-        Guardrails you choose for your plan
-      </h2>
+    <section className="nut-card nut-rise section" aria-label="Condition modes">
+      <div className="section-head">
+        <div className="section-head__main">
+          <div className="eyebrow">Condition modes</div>
+          <h2 className="section-head__title mt-1.5">Guardrails you choose for your plan</h2>
+        </div>
+      </div>
 
       {/* The safety sentence is the most important text on this card,
           so it renders as a note (registry M-69): full-contrast text
