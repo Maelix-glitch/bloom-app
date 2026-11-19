@@ -53,6 +53,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { useSession } from "@/hooks/useSession";
 import { GOAL_LABEL, GOAL_OPTIONS } from "@/lib/assessment/questions";
 import { fmtKcalApprox } from "@/lib/format";
+import { formatClock } from "@/lib/smart/usual";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
 import {
@@ -935,6 +936,39 @@ export function NutritionPlanSection() {
                 ).
               </>
             ) : null}
+          </p>
+        </div>
+      ) : null}
+
+      {plan.timeline ? (
+        <div className="mt-5">
+          <p className="nut-group-label">Your day</p>
+          <ul className="nut-timeline">
+            {plan.timeline.items.map((item, i) => (
+              <li
+                key={`${item.kind}-${item.meal ?? "x"}-${i}`}
+                className="nut-timeline-item"
+              >
+                <span className="nut-timeline-time">
+                  {item.time
+                    ? formatClock(
+                        Number(item.time.slice(0, 2)) * 60 + Number(item.time.slice(3, 5)),
+                      )
+                    : "—"}
+                </span>
+                <span>
+                  {item.label}
+                  {item.kind === "wake" && plan.morning
+                    ? ` — a glass of water (${plan.morning.waterMl} ml)`
+                    : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="nut-note">
+            {plan.timeline.anchor === "sleep_log"
+              ? "Times follow your usual wake and bed times, from your sleep log."
+              : "In the day's order — once your sleep log holds a few nights, the plan can put your usual times to it."}
           </p>
         </div>
       ) : null}

@@ -500,7 +500,11 @@ describe("plan · rotation", () => {
       "Today's suggestions reach about 1,855 kcal — above your ~1,650 kcal guide. The day's guideline floors and layers add up past it.",
     );
     /* 2026-11-17 reaches every gram floor and the energy band; only
-       the group-span aim is missed, and named. */
+       the group-span aim is missed, and named. (P12 note: an early
+       P12 build spanned 7 groups here — the extra group rode in on
+       a 10 g powder dusting stacked as an eleventh item; with the
+       scoop floor and the ten-suggestion ceiling in addOneTopUp,
+       the day is back to the six groups it honestly serves.) */
     expect(d17.notes).toEqual([
       "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     ]);

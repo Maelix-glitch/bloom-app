@@ -21,6 +21,8 @@ import { useCallback, useMemo } from "react";
 
 import { EMPTY_MODES_VALUE, MODES_KEY, parseModesValue } from "@/lib/modes/modes";
 import { getPref, setPref } from "@/lib/prefs";
+import { usualDay } from "@/lib/smart/usual";
+import { loadDays } from "@/lib/trackers/store";
 import { usePrefValue } from "@/lib/prefsStore";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
@@ -179,6 +181,19 @@ export function usePlan(): PlanStore {
          targets come from this same fallback source; the gated
          outcome carries its own figure and outranks it. */
       waterMl: body.targets?.waterMl ?? null,
+      /* P12: the timeline's clock anchor — the person's usual wake
+         and bed times, the median window the trackers compute from
+         their own logged nights (usualDay: at least four nights,
+         rounded to 15 minutes). No usual window, no anchor: the
+         plan's timeline is relative and shows no invented times.
+         Read at build time from the device-local tracker store,
+         the same read the Coach system makes. */
+      ...(() => {
+        const sleep = usualDay(loadDays(), today).sleep;
+        return sleep
+          ? { wakeTime: sleep.value.wakeTime, bedTime: sleep.value.bedTime }
+          : {};
+      })(),
       day: today,
       now,
     }),
