@@ -109,3 +109,7 @@ audit file did not preserve.
 | M-74 | Monochrome grey; no semantic colour carrying meaning | OPEN — owner slices SYSTEM/ATOMS (semantic tokens exist; the audited surfaces don't apply them). |
 | M-75 | Oversized radius (24px) and identical card weights, no variants | OPEN — owner slice SYSTEM. |
 | M-76 | Content container too wide (~1,180px; rulebook cap is 1040px) | OPEN — owner slice SYSTEM. |
+| M-77 | Data and status explained in paragraphs (Metabolic twin, What your plan learned) | OPEN — anti-document brief v3: prose-to-component table, paragraph budget. |
+| M-78 | Display screens use form anatomy (label left, value or control far right, dividers) | OPEN — anti-document brief v3: form-vs-display law, value-first tiles. |
+| M-79 | Cards with no visual anchor (all text) | OPEN — anti-document brief v3: anchor law, enforced by the anti-document guard test. |
+| M-80 | Neighbouring cards share one structure, so the page is a wall of identical slabs | OPEN — anti-document brief v3: rhythm law (hero, grid, list, chart). |
