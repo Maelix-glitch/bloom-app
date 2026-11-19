@@ -14,7 +14,7 @@
  */
 
 import { useState } from "react";
-import { Info } from "lucide-react";
+import { FileText, Info } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { fmtDate } from "@/lib/format";
@@ -107,10 +107,18 @@ export function LabReportsSection() {
       </p>
 
       {groups.length === 0 ? (
-        <p className="mt-4 max-w-[var(--measure)] text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
-          No results yet. Add the values from a printed report and Bloom will keep them here,
-          each shown against the range printed on that report.
-        </p>
+        /* The empty state is a row (empty-state slice, diagnosis §C);
+           the Add a result button below it is the action. */
+        <div className="empty-row mt-4">
+          <span className="empty-row-icon" aria-hidden>
+            <FileText className="size-4" />
+          </span>
+          <p className="empty-row-text">
+            <strong>No results yet.</strong> Add the values from a printed report and
+            Bloom will keep them here, each shown against the range printed on that
+            report.
+          </p>
+        </div>
       ) : (
         <div className="mt-4 grid gap-5">
           {groups.map((group) => {

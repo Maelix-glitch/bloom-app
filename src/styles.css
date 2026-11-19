@@ -639,6 +639,48 @@
   color: var(--info);
 }
 
+/* The empty row (empty-state slice, diagnosis §C): the compact sibling
+   of the full EmptyState. When a section is one of several on a page,
+   its empty state is a ROW — a small icon chip, one line of text (lead
+   phrase in full contrast, the rest secondary), and at most one small
+   action — never another full card with its own paragraph. The full
+   EmptyState stays for the one place an empty state IS the page's main
+   content. Anatomy follows the rulebook §9.13: why it is empty and
+   what to do next, in one line. */
+.empty-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-control);
+  font-size: var(--text-callout);
+  line-height: var(--leading-body);
+  color: var(--text-secondary);
+}
+.empty-row-icon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--gold);
+}
+.empty-row-text {
+  min-width: 0;
+  flex: 1;
+}
+.empty-row-text strong {
+  font-weight: 600;
+  color: var(--foreground);
+}
+.empty-row-action {
+  flex: none;
+  margin-left: auto;
+}
+
 /* Ambient app background (Reskin foundation): the prototype's fixed
    light — a gold glow top-right, a sage glow at the left midline, and
    film grain over everything at 3.5%. Static, pointer-transparent, and

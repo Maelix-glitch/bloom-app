@@ -16,6 +16,7 @@
  */
 
 import { useMemo } from "react";
+import { Waves } from "lucide-react";
 
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useHabits } from "@/hooks/useHabits";
@@ -99,12 +100,27 @@ export function WholeLifeInsights({ ready }: { ready: boolean }) {
               More appear as your record grows.
             </p>
           </>
+        ) : !hasRecord ? (
+          /* No record at all: the empty state is a row, not a paragraph
+             (empty-state slice, diagnosis §C) — one line inside the
+             section, while the cards above carry the actual first
+             steps. Once anything is logged, the pending counts below
+             are real data and keep their fuller form. */
+          <div className="empty-row mt-4">
+            <span className="empty-row-icon" aria-hidden>
+              <Waves className="size-4" />
+            </span>
+            <p className="empty-row-text">
+              <strong>Nothing to read yet.</strong> Patterns appear once your days carry
+              two signals at once — a mood check-in next to a night of sleep, a habit
+              tick next to a mood.
+            </p>
+          </div>
         ) : (
           <div className="mt-4 max-w-[62ch]">
             <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-              {hasRecord
-                ? "Not enough paired days yet to name a pattern honestly. A pattern needs at least 8 days where both sides were logged — here's where each one stands:"
-                : "Nothing to read yet. Once your days carry a couple of signals at once — a mood check-in next to a night of sleep, a habit tick next to a mood — the patterns between them appear here."}
+              Not enough paired days yet to name a pattern honestly. A pattern needs at
+              least 8 days where both sides were logged — here's where each one stands:
             </p>
             {result.pending.length > 0 ? (
               <ul className="mt-3 space-y-1.5">

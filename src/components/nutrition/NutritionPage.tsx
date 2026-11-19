@@ -18,9 +18,11 @@ import { useEffect, useMemo, useState } from "react";
 import { Camera, Plus, Sparkles, Undo2, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { useNutrition, yesterdayOf } from "@/hooks/useNutrition";
+import { usePlan } from "@/hooks/usePlan";
 import { shiftDay } from "@/lib/localDay";
 import { aggregateDays } from "@/lib/mood/analytics";
 import { UNDO_WINDOW_MS, type Undoable } from "@/lib/undo";
@@ -55,6 +57,7 @@ interface SheetState {
 export function NutritionPage() {
   const nutrition = useNutrition();
   const body = useBodyProfile();
+  const plan = usePlan();
   const { entries: moodEntries } = useMoodSystem();
   const [day, setDay] = useState(nutrition.today);
   const [sheet, setSheet] = useState<SheetState>({ open: false, meal: null, editing: null });
@@ -130,6 +133,22 @@ export function NutritionPage() {
   const yesterday = yesterdayOf(day);
   const yesterdayCount = nutrition.dayLog(yesterday).entries.length;
 
+  /* The merged empty state (empty-state slice, diagnosis §C): an
+     account that has never logged a food and has no plan does not get
+     a stack of separate empty blocks — the zeroed hero, a "nothing
+     logged" card, four empty meal cards, an empty week, an empty
+     spectrum, an all-insufficient twin, an empty grocery list and an
+     empty pattern lab. It gets ONE empty state with one action. The
+     plan section keeps its own states below (a refusal is a standing
+     state, "create my plan" is a real offer, a ready plan is
+     content), and the dish library, modes and programmes stay —
+     they are content, not empty states. A plan that exists for
+     another day ("outdated") also ends the merged state: the person
+     has a plan history, and the day view is the honest surface. */
+  const freshAccount =
+    nutrition.entries.length === 0 &&
+    (plan.state.kind === "can_generate" || plan.state.kind === "refused");
+
   return (
     <div className="nut-wrap nut-page">
       <header className="nut-rise">
@@ -183,48 +202,67 @@ export function NutritionPage() {
         ) : null}
       </div>
 
-      <NutritionHero
-        day={day}
-        today={nutrition.today}
-        log={dayLog}
-        targetState={nutrition.targetState}
-        comparison={comparison}
-        bmr={body.targets?.bmr ?? null}
-        tdee={body.targets?.tdee ?? null}
-      />
-
-      {dayLog.entries.length === 0 ? (
-        <section className="nut-card nut-rise mt-4 text-center" aria-label="Nothing logged yet">
-          <Sparkles className="mx-auto size-6 text-[var(--gold)]" aria-hidden />
-          <h2 className="mt-3 font-display text-[length:var(--text-title)] text-foreground">
-            Nothing logged yet
-          </h2>
-          <p className="mx-auto mt-1.5 max-w-[46ch] text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
-            When you log a food, it will appear here with its source attached — and your
-            totals above start to move.
-          </p>
-          <button
-            type="button"
-            className="nut-btn nut-btn-ghost nut-btn-sm mt-4"
-            onClick={() => setSheet({ open: true, meal: null, editing: null })}
-          >
-            <Plus className="size-3.5" aria-hidden /> Log your first food
-          </button>
+      {freshAccount ? (
+        <section className="nut-card nut-rise mt-4" aria-label="Nothing logged yet">
+          <EmptyState
+            title="Nothing logged yet"
+            description="When you log a food, this page fills in — your totals, your week and the patterns behind them, every value labelled with its source."
+            action={
+              <Button
+                type="button"
+                onClick={() => setSheet({ open: true, meal: null, editing: null })}
+              >
+                <Plus className="size-4" aria-hidden /> Log your first food
+              </Button>
+            }
+          />
         </section>
-      ) : null}
+      ) : (
+        <>
+          <NutritionHero
+            day={day}
+            today={nutrition.today}
+            log={dayLog}
+            targetState={nutrition.targetState}
+            comparison={comparison}
+            bmr={body.targets?.bmr ?? null}
+            tdee={body.targets?.tdee ?? null}
+          />
 
-      <div className="mt-4 grid items-start gap-4 lg:grid-cols-[1.25fr_1fr]">
-        <NutritionTimeline
-          entries={dayLog.entries}
-          onAdd={(meal) => setSheet({ open: true, meal, editing: null })}
-          onEdit={(entry) => setSheet({ open: true, meal: null, editing: entry })}
-          onRemove={remove}
-        />
-        <div className="space-y-4">
-          <WeekPanel week={week} targets={targets} reportDay={day} />
-          <Spectrum rows={spectrum} sex={nutrition.spectrumSex} />
-        </div>
-      </div>
+          {dayLog.entries.length === 0 ? (
+            <section className="nut-card nut-rise mt-4 text-center" aria-label="Nothing logged yet">
+              <Sparkles className="mx-auto size-6 text-[var(--gold)]" aria-hidden />
+              <h2 className="mt-3 font-display text-[length:var(--text-title)] text-foreground">
+                Nothing logged yet
+              </h2>
+              <p className="mx-auto mt-1.5 max-w-[46ch] text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
+                When you log a food, it will appear here with its source attached — and your
+                totals above start to move.
+              </p>
+              <button
+                type="button"
+                className="nut-btn nut-btn-ghost nut-btn-sm mt-4"
+                onClick={() => setSheet({ open: true, meal: null, editing: null })}
+              >
+                <Plus className="size-3.5" aria-hidden /> Log your first food
+              </button>
+            </section>
+          ) : null}
+
+          <div className="mt-4 grid items-start gap-4 lg:grid-cols-[1.25fr_1fr]">
+            <NutritionTimeline
+              entries={dayLog.entries}
+              onAdd={(meal) => setSheet({ open: true, meal, editing: null })}
+              onEdit={(entry) => setSheet({ open: true, meal: null, editing: entry })}
+              onRemove={remove}
+            />
+            <div className="space-y-4">
+              <WeekPanel week={week} targets={targets} reportDay={day} />
+              <Spectrum rows={spectrum} sex={nutrition.spectrumSex} />
+            </div>
+          </div>
+        </>
+      )}
 
       {isToday && yesterdayCount > 0 ? (
         <div className="mt-4 flex justify-end">
@@ -245,12 +283,15 @@ export function NutritionPage() {
 
       {/* The metabolic twin — a standing model of the person, computed
           from the record as of today; it belongs to every day's view
-          because it describes the person, not the day being viewed. */}
-      <MetabolicTwinSection />
+          because it describes the person, not the day being viewed.
+          In the merged empty state it steps aside: every one of its
+          fields would only read "insufficient". */}
+      {!freshAccount ? <MetabolicTwinSection /> : null}
       {/* The grocery list + pantry (System 5) — derived from the same
           stored plan the section above renders, so it belongs to the
-          today view beside it. */}
-      {isToday ? <GrocerySection /> : null}
+          today view beside it. With no plan and no logs it has nothing
+          to derive, so the merged empty state covers it too. */}
+      {isToday && !freshAccount ? <GrocerySection /> : null}
       {/* Condition modes (System 14) — the person's own guardrails on
           the plan above; they belong with the plan, on the today view. */}
       {isToday ? <ModesSection /> : null}
@@ -264,7 +305,9 @@ export function NutritionPage() {
           being viewed. */}
       <DishesSection day={day} />
 
-      <PatternLab patterns={patterns} />
+      {/* The pattern lab reads the log, so on a fresh account it is
+          one more empty block — the merged state above covers it. */}
+      {!freshAccount ? <PatternLab patterns={patterns} /> : null}
 
       {/* Photo credits — the reference foods' photographs are real
           photographs from Wikimedia Commons; their authors and licences
