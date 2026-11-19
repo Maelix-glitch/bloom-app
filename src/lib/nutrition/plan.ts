@@ -88,6 +88,13 @@
 
 import { fmtCount, fmtGrams, fmtKcalApprox } from "@/lib/format";
 import { dishPassesModes, type ModeId } from "@/lib/modes/modes";
+import {
+  PLAN_REASON_KINDS,
+  reasonDetail,
+  reasonDetails,
+  type KitchenRelaxationStage,
+  type PlanReason,
+} from "@/lib/reasons";
 import { getPref, setPref } from "@/lib/prefs";
 import {
   COOKING_ABILITIES,
@@ -269,8 +276,14 @@ export interface PlanMeal {
    *  every plan stored before P5). */
   dishes: PlanDish[];
   suggestions: PlanSuggestion[];
-  /** Set when no clean food fits this meal — the honest empty state. */
+  /** Set when no clean food fits this meal — the honest empty state.
+   *  The string is DERIVED from `noteReason` through reasons.ts at
+   *  compose time (brief v4); it is kept on the stored shape so
+   *  older readers keep working. */
   note: string | null;
+  /** The meal note as structured data (brief v4). Absent on plans
+   *  stored before reasons existed — those carry only `note`. */
+  noteReason?: PlanReason | null;
 }
 
 /** The day's opening element (P11): what the plan asks first, before
@@ -345,8 +358,20 @@ export interface DailyPlan {
    * could not reach — a vegetable/fruit/milk floor missed, too few
    * protein sources or food groups — named in plain words. A plan that
    * meets every aim carries none. Absent (read as empty) on P1 plans.
+   * Since brief v4 these strings are DERIVED from `reasons` through
+   * src/lib/reasons.ts at compose time; they remain on the shape for
+   * every existing consumer (the Vitalis context among them).
    */
   notes: string[];
+  /**
+   * The plan's reasons as structured data (brief v4): adaptation,
+   * learning, kitchen/budget relaxations, day structure and the
+   * composition judgements, in that order. The composer emits data;
+   * reasons.ts owns the words. Absent on plans stored before
+   * reasons existed — those carry only `notes`, which the surfaces
+   * fall back to.
+   */
+  reasons?: PlanReason[];
   /** The composition method that built this plan. Plans from an older
    *  method read as stale — see `planStaleness`. */
   methodVersion: number;
@@ -932,8 +957,27 @@ const MAX_PROTEIN_ITEMS_PER_MEAL = 4;
 /** Within this many grams, a meal's protein counts as landed. */
 const PROTEIN_CLOSE_ENOUGH_G = 3;
 
-const EMPTY_MEAL_NOTE =
-  "No food with known values fits this meal yet. Add a food you eat, then regenerate the plan.";
+/** The empty-meal reason (brief v4): the composer records the
+ *  structured reason; the meal's stored `note` string is derived
+ *  from it through reasons.ts, so the words live in one file. */
+const EMPTY_MEAL_REASON: PlanReason = { kind: "meal-empty" };
+
+/** A meal note as the pair the meal carries: the structured reason
+ *  and its derived text (null when there is no note). */
+function mealNoteFields(reason: PlanReason | null): {
+  note: string | null;
+  noteReason: PlanReason | null;
+} {
+  return { note: reason ? reasonDetail(reason) : null, noteReason: reason };
+}
+
+/** Set a meal's note from its reason (the trim passes use this when
+ *  they empty a meal after composition). */
+function setMealNote(meal: PlanMeal, reason: PlanReason | null): void {
+  const fields = mealNoteFields(reason);
+  meal.note = fields.note;
+  meal.noteReason = fields.noteReason;
+}
 
 /* --------------------------------- sizing --------------------------------- */
 
@@ -1504,7 +1548,7 @@ function applyProteinDominanceCap(
         excess -= suggestion.nutrients.proteinG;
         meal.suggestions.splice(idx, 1);
         if (meal.suggestions.length === 0 && meal.dishes.length === 0) {
-          meal.note = EMPTY_MEAL_NOTE;
+          setMealNote(meal, EMPTY_MEAL_REASON);
         }
       } else {
         const keptGrams = Math.max(10, newGrams);
@@ -1748,7 +1792,7 @@ function applyItemCap(
       meal.suggestions.splice(victim, 1);
     }
     if (meal.suggestions.length === 0 && meal.dishes.length === 0) {
-      meal.note = EMPTY_MEAL_NOTE;
+      setMealNote(meal, EMPTY_MEAL_REASON);
     }
   }
 }
@@ -2076,7 +2120,7 @@ function trimEnergy(
       const saved = ref.s.nutrients.kcal;
       ref.meal.suggestions.splice(idx, 1);
       if (ref.meal.suggestions.length === 0 && ref.meal.dishes.length === 0) {
-        ref.meal.note = EMPTY_MEAL_NOTE;
+        setMealNote(ref.meal, EMPTY_MEAL_REASON);
       }
       return saved;
     }
@@ -2192,41 +2236,40 @@ function addEnergy(
 }
 
 /**
- * The plan's composition notes: every day-level aim the suggestions
- * could not reach, named in plain words with the guideline it comes
- * from. Floors are ICMR-NIN My Plate amounts (held, not scaled — §1);
+ * The plan's composition reasons: every day-level aim the suggestions
+ * could not reach, as STRUCTURED data (brief v4 — the words live in
+ * src/lib/reasons.ts; this pass returns the numbers it measured).
+ * Floors are ICMR-NIN My Plate amounts (held, not scaled — §1);
  * the diversity aims are the research's operationalisation (§7). A pool
- * that simply does not contain a group is a pool fact and is worded as
- * one — noted, never faked. Since P3 the notes also judge the day's
+ * that simply does not contain a group is a pool fact and is stated as
+ * one — noted, never faked. Since P3 the reasons also judge the day's
  * own targets: a protein total still under 95% of the guide after
  * closing, or an energy total outside ±5% after reconciliation, is
  * named with its true figure. Every number here is recomputed from
- * the final suggestions — the notes describe the plan as it stands,
+ * the final suggestions — the reasons describe the plan as it stands,
  * never as it was first composed.
  */
-function compositionNotes(
+function compositionReasons(
   meals: readonly PlanMeal[],
   pool: readonly Food[],
   targets: NutritionTargets,
   dishById: ReadonlyMap<string, Dish> = new Map(),
-): string[] {
-  const notes: string[] = [];
+): PlanReason[] {
+  const reasons: PlanReason[] = [];
   const byId = new Map(pool.map((f) => [f.id, f]));
   const totals = floorTotalsOf(meals, byId, dishById);
   if (totals.vegG < FLOOR_VEGETABLES_G) {
-    notes.push(
-      `Today's suggestions reach ${fmtGrams(totals.vegG)} g of vegetables — the ICMR-NIN guideline aims for at least 400 g across the day.`,
-    );
+    reasons.push({ kind: "veg-shortfall", actualG: totals.vegG, guidelineG: FLOOR_VEGETABLES_G });
   }
   if (totals.fruitG < FLOOR_FRUIT_G) {
-    notes.push(
-      `Today's suggestions reach ${fmtGrams(totals.fruitG)} g of fruit — the ICMR-NIN guideline aims for at least 100 g across the day.`,
-    );
+    reasons.push({ kind: "fruit-shortfall", actualG: totals.fruitG, guidelineG: FLOOR_FRUIT_G });
   }
   if (totals.milkCurdG < FLOOR_MILK_CURD_G) {
-    notes.push(
-      `Today's suggestions reach ${fmtGrams(totals.milkCurdG)} g of milk and curd — the ICMR-NIN guideline aims for at least 300 g across the day.`,
-    );
+    reasons.push({
+      kind: "milk-curd-shortfall",
+      actualG: totals.milkCurdG,
+      guidelineG: FLOOR_MILK_CURD_G,
+    });
   }
   const proteinSources = new Set<string>();
   const poolGroups = new Set<FoodGroup>();
@@ -2263,15 +2306,13 @@ function compositionNotes(
     }
   }
   if (proteinSources.size < AIM_DISTINCT_PROTEIN_SOURCES) {
-    notes.push(
-      `Today's protein comes from ${proteinSources.size} source${proteinSources.size === 1 ? "" : "s"} — three or more across the day is the aim, for variety.`,
-    );
+    reasons.push({ kind: "protein-sources-few", count: proteinSources.size });
   }
   if (suggestedGroups.size < AIM_FOOD_GROUPS) {
-    notes.push(
+    reasons.push(
       poolGroups.size < AIM_FOOD_GROUPS
-        ? `The foods Bloom can plan with today span ${poolGroups.size} food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.`
-        : `Today's suggestions span ${suggestedGroups.size} food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.`,
+        ? { kind: "food-groups-few", count: suggestedGroups.size, poolCount: poolGroups.size }
+        : { kind: "food-groups-few", count: suggestedGroups.size, poolCount: null },
     );
   }
   const protein = dayProteinOf(meals);
@@ -2290,34 +2331,42 @@ function compositionNotes(
           return food !== undefined && isProteinPowder(food);
         }),
       );
-      notes.push(
-        powderTopUpInDay
-          ? `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — a protein top-up is in the day, and the day is already over its energy guide, so nothing more was added.`
-          : `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — the day is already over its energy guide, so no top-up was added: more food would push the energy further over.`,
-      );
+      reasons.push({
+        kind: "protein-under",
+        actualG: protein,
+        targetG: targets.proteinG,
+        blocker: powderTopUpInDay ? "energy-topup-in-day" : "energy-no-topup",
+      });
     } else {
-      notes.push(
-        `Today's suggestions reach about ${Math.round(protein)} g of your ${Math.round(targets.proteinG)} g protein guide — the portion caps bind before the target does.`,
-      );
+      reasons.push({
+        kind: "protein-under",
+        actualG: protein,
+        targetG: targets.proteinG,
+        blocker: "caps",
+      });
     }
   } else if (protein > DAY_PROTEIN_MAX * targets.proteinG) {
-    /* P11: an overshoot is named too — before this pass the notes
+    /* P11: an overshoot is named too — before this pass the reasons
        judged a day under its protein guide but said nothing about
        a day over it, so the imbalance the owner saw had no words. */
-    notes.push(
-      `Today's suggestions reach about ${Math.round(protein)} g of protein — above your ${Math.round(targets.proteinG)} g protein guide. The day's protein foods add up past it.`,
-    );
+    reasons.push({ kind: "protein-over", actualG: protein, targetG: targets.proteinG });
   }
   if (kcal > (1 + ENERGY_NOTE_BAND) * targets.kcal) {
-    notes.push(
-      `Today's suggestions reach about ${fmtCount(kcal)} kcal — above your ${fmtKcalApprox(targets.kcal)} guide. The day's guideline floors and layers add up past it.`,
-    );
+    reasons.push({
+      kind: "kcal-off-guide",
+      actualKcal: kcal,
+      targetKcal: targets.kcal,
+      direction: "over",
+    });
   } else if (kcal < (1 - ENERGY_NOTE_BAND) * targets.kcal) {
-    notes.push(
-      `Today's suggestions reach about ${fmtCount(kcal)} kcal — below your ${fmtKcalApprox(targets.kcal)} guide. The portion caps bind before the target does.`,
-    );
+    reasons.push({
+      kind: "kcal-off-guide",
+      actualKcal: kcal,
+      targetKcal: targets.kcal,
+      direction: "under",
+    });
   }
-  return notes;
+  return reasons;
 }
 
 /* ------------------------- P5 dish-first composition ----------------------- */
@@ -2395,7 +2444,7 @@ function dishPoolFor(
   profile: HealthProfile,
   dishes: readonly Dish[],
   activeModes: readonly ModeId[] = [],
-): { data: DishPoolData | null; notes: string[] } {
+): { data: DishPoolData | null; reasons: PlanReason[] } {
   const pattern = planPatternOf(profile.dietary.pattern);
   const eligible = new Set(eligiblePool(profile, USDA_REFERENCE_FOODS).map((f) => f.id));
   const budgetTier = profile.dietary.budgetTier;
@@ -2415,12 +2464,12 @@ function dishPoolFor(
       continue;
     }
   }
-  if (candidates.length === 0) return { data: null, notes: [] };
+  if (candidates.length === 0) return { data: null, reasons: [] };
   const poolOf = (list: readonly DishCandidate[]): DishPoolData => ({
     candidates: [...list],
     byId: new Map(list.map((c) => [c.dish.id, c.dish])),
   });
-  if (budgetTier === null) return { data: poolOf(candidates), notes: [] };
+  if (budgetTier === null) return { data: poolOf(candidates), reasons: [] };
   const inBudget = candidates.filter((c) => c.dish.budgetTier <= budgetTier);
   const inBudgetMains = inBudget.filter(isMainCapableDish);
   const inBudgetProteinMains = inBudgetMains.filter(
@@ -2430,7 +2479,7 @@ function dishPoolFor(
     inBudgetMains.length >= BUDGET_POOL_MIN_MAIN_CAPABLE &&
     inBudgetProteinMains.length >= BUDGET_POOL_MIN_PROTEIN_MAINS
   ) {
-    return { data: poolOf(inBudget), notes: [] };
+    return { data: poolOf(inBudget), reasons: [] };
   }
   const ceiling =
     budgetTier === 1
@@ -2440,11 +2489,7 @@ function dishPoolFor(
         : null;
   return {
     data: poolOf(candidates),
-    notes: [
-      ceiling === null
-        ? "Your stated meal budget leaves too few dishes that can carry a meal, so today's plan treats it as a preference and also uses dishes above it — your pattern and your avoids still hold exactly."
-        : `Your stated meal budget (about ₹${ceiling} a serving) leaves too few dishes that can carry a meal, so today's plan treats it as a preference and also uses dishes above it — your pattern and your avoids still hold exactly.`,
-    ],
+    reasons: [{ kind: "budget-widened", ceilingRupees: ceiling }],
   };
 }
 
@@ -2544,7 +2589,7 @@ function gateDishPoolForKitchen(
   data: DishPoolData,
   behavioural: BehaviouralProfile,
   day: string,
-): { data: DishPoolData | null; notes: string[]; preferNoCook: boolean } {
+): { data: DishPoolData | null; reasons: PlanReason[]; preferNoCook: boolean } {
   const equipment = effectiveEquipment(behavioural);
   const noCookOnly = behavioural.cookingAbility === "none";
   const cap = effectivePrepCapMinutes(behavioural);
@@ -2576,23 +2621,23 @@ function gateDishPoolForKitchen(
    * main-capable dish, with its note when the stage moved. */
   const applyCap = (
     list: readonly DishCandidate[],
-  ): { list: readonly DishCandidate[]; note: string | null } => {
-    if (!capApplies || cap === null) return { list, note: null };
-    if (!list.some((c) => isMainSlotDish(c))) return { list, note: null };
+  ): { list: readonly DishCandidate[]; reason: PlanReason | null } => {
+    if (!capApplies || cap === null) return { list, reason: null };
+    if (!list.some((c) => isMainSlotDish(c))) return { list, reason: null };
     const stages: readonly number[] = [...PREP_TIME_BANDS.filter((b) => b >= cap), Infinity];
     for (const stage of stages) {
       const within = list.filter((c) => c.dish.timeMinutes <= stage);
       if (!within.some((c) => isMainSlotDish(c))) continue;
-      if (stage === cap) return { list: within, note: null };
+      if (stage === cap) return { list: within, reason: null };
       return {
         list: within,
-        note:
+        reason:
           stage === Infinity
-            ? `Your kitchen answers aim for about ${cap} minutes to cook a main meal, and every main dish in the library takes longer — today uses the quickest there are rather than no plan at all.`
-            : `Your kitchen answers aim for about ${cap} minutes to cook a main meal; today's dishes take up to about ${stage} minutes — the closest fit, rather than no plan at all.`,
+            ? { kind: "kitchen-cap-quickest", capMinutes: cap }
+            : { kind: "kitchen-cap-raised", capMinutes: cap, stageMinutes: stage },
       };
     }
-    return { list, note: null };
+    return { list, reason: null };
   };
 
   const asData = (list: readonly DishCandidate[]): DishPoolData =>
@@ -2617,7 +2662,7 @@ function gateDishPoolForKitchen(
   if (mainCapableCount(strictCapped.list) >= floor) {
     return {
       data: asData(strictCapped.list),
-      notes: strictCapped.note ? [strictCapped.note] : [],
+      reasons: strictCapped.reason ? [strictCapped.reason] : [],
       preferNoCook: false,
     };
   }
@@ -2628,7 +2673,7 @@ function gateDishPoolForKitchen(
   if (mainCapableCount(data.candidates) < floor) {
     return {
       data: asData(strictCapped.list),
-      notes: strictCapped.note ? [strictCapped.note] : [],
+      reasons: strictCapped.reason ? [strictCapped.reason] : [],
       preferNoCook: false,
     };
   }
@@ -2642,7 +2687,7 @@ function gateDishPoolForKitchen(
    *  floor is the cap set aside entirely, and that is named when
    *  the cap had actually cut the pool or P10's staging had
    *  already relaxed it. */
-  const relaxed: string[] = [];
+  const stagesFired: KitchenRelaxationStage[] = [];
   let preferNoCook = false;
   let pool = strict;
   if (capApplies && cap !== null) {
@@ -2654,16 +2699,16 @@ function gateDishPoolForKitchen(
       pool = within;
       reached = true;
       if (stage !== cap) {
-        relaxed.push(
+        stagesFired.push(
           stage === Infinity
-            ? "the prep-time aim is set aside"
-            : `dishes taking up to about ${stage} minutes are included`,
+            ? { stage: "prep-time-set-aside" }
+            : { stage: "prep-cap-raised", minutes: stage },
         );
       }
       break;
     }
-    if (!reached && (strictCapped.list.length !== strict.length || strictCapped.note !== null)) {
-      relaxed.push("the prep-time aim is set aside");
+    if (!reached && (strictCapped.list.length !== strict.length || strictCapped.reason !== null)) {
+      stagesFired.push({ stage: "prep-time-set-aside" });
     }
   }
   if (mainCapableCount(pool) < floor && noCookOnly) {
@@ -2672,15 +2717,15 @@ function gateDishPoolForKitchen(
       maxMissingEquipment: equipment === null ? null : 0,
     });
     preferNoCook = true;
-    relaxed.push("dishes that need cooking are included, with no-cook dishes preferred");
+    stagesFired.push({ stage: "cooking-included" });
   }
   if (mainCapableCount(pool) < floor && equipment !== null) {
     pool = kitchenFilter(data.candidates, { noCook: false, maxMissingEquipment: 1 });
-    relaxed.push("dishes needing one more piece of kitchen equipment are included");
+    stagesFired.push({ stage: "extra-equipment" });
   }
   if (mainCapableCount(pool) < floor && equipment !== null) {
     pool = [...data.candidates];
-    relaxed.push("the equipment list is set aside");
+    stagesFired.push({ stage: "equipment-set-aside" });
   }
   /* Stages 2–4 rebuild the pool from the uncapped candidates, so
    *  the cap may have gone with them even when stage 1 named
@@ -2688,25 +2733,29 @@ function gateDishPoolForKitchen(
    *  strict pool, yet the rebuilt pool serves slower dishes).
    *  The check is direct: if the pool the plan will use holds any
    *  dish slower than the stated cap and no prep-time stage was
-   *  named, name it — the note names every relaxation that
-   *  actually happened. */
+   *  named, name it — the reason names every relaxation that
+   *  actually happened (as stage codes; reasons.ts owns the words). */
   if (
     capApplies &&
     cap !== null &&
-    relaxed.length > 0 &&
-    !relaxed.some((r) => r.includes("prep-time") || r.includes("minutes are included")) &&
+    stagesFired.length > 0 &&
+    !stagesFired.some((s) => s.stage === "prep-time-set-aside" || s.stage === "prep-cap-raised") &&
     pool.some((c) => c.dish.timeMinutes > cap)
   ) {
-    relaxed.unshift("the prep-time aim is set aside");
+    stagesFired.unshift({ stage: "prep-time-set-aside" });
   }
-  const answers: string[] = [];
-  if (noCookOnly) answers.push("no cooking");
-  if (capApplies && cap !== null) answers.push(`about ${cap} minutes to cook`);
-  if (equipment !== null) answers.push("the equipment you listed");
   return {
     data: asData(pool),
-    notes: [
-      `Your kitchen answers (${answers.join(", ")}) leave almost no real dishes, so this plan relaxes them: ${relaxed.join("; ")}. Retake the Assessment if those answers no longer fit — your pattern, allergies and avoids still hold exactly.`,
+    reasons: [
+      {
+        kind: "kitchen-relaxed",
+        answers: {
+          noCook: noCookOnly,
+          capMinutes: capApplies && cap !== null ? cap : null,
+          equipmentListed: equipment !== null,
+        },
+        stages: stagesFired,
+      },
     ],
     preferNoCook,
   };
@@ -4381,12 +4430,9 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   const slots = snackAdded
     ? MEALS.filter((meal) => meal === "snack" || statedSlots.includes(meal))
     : statedSlots;
-  const structureNotes: string[] = [];
+  const structureReasons: PlanReason[] = [];
   if (snackAdded && profile.dietary.mealsPerDay !== null) {
-    const n = profile.dietary.mealsPerDay;
-    structureNotes.push(
-      `Your Assessment lists ${n} meal${n === 1 ? "" : "s"} a day; this plan adds a snack, so the day's food spreads across one more sitting.`,
-    );
+    structureReasons.push({ kind: "snack-added", mealsPerDay: profile.dietary.mealsPerDay });
   }
   /* P10: the stated hunger pattern tilts the split toward the hungry
      part of the day — shares move, totals never do. */
@@ -4442,14 +4488,14 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      When it can fill a main meal's anchor slot the meal is composed
      of dishes; where it cannot, the layered food composition fills
      that meal — the two never mix within a meal's main structure. */
-  const behaviourNotes: string[] = [];
+  const behaviourReasons: PlanReason[] = [];
   let dishData: DishPoolData | null = null;
   if (input.dishes && input.dishes.length > 0) {
     const pooled = dishPoolFor(profile, input.dishes, input.activeModes ?? []);
     dishData = pooled.data;
-    /* P13: a budget widening is named before the notes judge the
+    /* P13: a budget widening is named before the reasons judge the
        result — the same honesty the kitchen relaxations get. */
-    behaviourNotes.push(...pooled.notes);
+    behaviourReasons.push(...pooled.reasons);
   }
   /* P10: the behavioural kitchen gates narrow the pool further —
      equipment, cooking ability and the weekday prep-time cap, all
@@ -4462,7 +4508,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
     const gated = gateDishPoolForKitchen(dishData, profile.behavioural, input.day);
     dishData = gated.data;
     preferNoCook = gated.preferNoCook;
-    behaviourNotes.push(...gated.notes);
+    behaviourReasons.push(...gated.reasons);
   }
   /* P7: the dish bias. Micro-richness is judged here, where the
      candidates' computed panels exist: a dish is rich in a gap
@@ -4567,7 +4613,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
         proteinG: split.proteinG,
         dishes: [],
         suggestions,
-        note: suggestions.length === 0 ? EMPTY_MEAL_NOTE : null,
+        ...mealNoteFields(suggestions.length === 0 ? EMPTY_MEAL_REASON : null),
       };
     }
     if (dishData) {
@@ -4594,12 +4640,13 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       proteinG: split.proteinG,
       dishes: [],
       suggestions,
-      note:
+      ...mealNoteFields(
         suggestions.length === 0
-          ? EMPTY_MEAL_NOTE
+          ? EMPTY_MEAL_REASON
           : missingLayers.length > 0
-            ? `Part of this meal is missing: ${missingLayers.join(", ")} — no food with known values fits yet. Add a food you eat, then regenerate the plan.`
+            ? { kind: "meal-missing-layers", layers: missingLayers }
             : null,
+      ),
     };
   });
   const byId = new Map(pool.map((f) => [f.id, f]));
@@ -4623,12 +4670,13 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       proteinG: split.proteinG,
       dishes: [],
       suggestions,
-      note:
+      ...mealNoteFields(
         suggestions.length === 0
-          ? EMPTY_MEAL_NOTE
+          ? EMPTY_MEAL_REASON
           : missingLayers.length > 0
-            ? `Part of this meal is missing: ${missingLayers.join(", ")} — no food with known values fits yet. Add a food you eat, then regenerate the plan.`
+            ? { kind: "meal-missing-layers", layers: missingLayers }
             : null,
+      ),
     };
   }
   /* P8: the day guard — dish scales are repaired toward the day's
@@ -4688,21 +4736,25 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      timeline schedules the meals as they stand; it is computed
      last so it describes the plan the passes actually left. */
   const timeline = dayTimelineFor(meals, dayAnchor);
-  /* The adaptation's explanations lead the notes: they say why this
-     plan leans the way it does, before the notes judge the result.
-     The P7 learning notes follow the P6 ones — what the log taught,
-     in the order it was learned. */
-  const notes = [
-    ...(adaptation?.notes ?? []),
-    ...(learning?.notes ?? []),
+  /* The adaptation's explanations lead the reasons: they say why this
+     plan leans the way it does, before the reasons judge the result.
+     The P7 learning reasons follow the P6 ones — what the log taught,
+     in the order it was learned. The plan's `notes` strings are
+     DERIVED from these reasons through reasons.ts (brief v4: the
+     planner returns data, the copy module owns the words), so the
+     stored text and the structured reasons can never disagree. */
+  const reasons: PlanReason[] = [
+    ...(adaptation?.reasons ?? []),
+    ...(learning?.reasons ?? []),
     /* P10: the behavioural gates' explanations — a relaxation or a
-       kitchen fallback is named before the notes judge the result. */
-    ...behaviourNotes,
-    /* P11: the day-structure note — a snack added beyond the stated
+       kitchen fallback is named before the reasons judge the result. */
+    ...behaviourReasons,
+    /* P11: the day-structure reason — a snack added beyond the stated
        meal count is named, never silent. */
-    ...structureNotes,
-    ...compositionNotes(meals, pool, targets, dishById),
+    ...structureReasons,
+    ...compositionReasons(meals, pool, targets, dishById),
   ];
+  const notes = reasonDetails(reasons);
 
   return {
     ok: true,
@@ -4717,6 +4769,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
       safetyClassification: safety.classification,
       cautions: safety.findings.filter((f) => !f.blocking).map((f) => f.summary),
       notes,
+      reasons,
       methodVersion: PLAN_METHOD_VERSION,
       morning: dayStart.morning,
       ...(dayStart.hydration ? { hydration: dayStart.hydration } : {}),
@@ -5002,6 +5055,205 @@ function parsePlanDish(raw: unknown): PlanDish | null {
   return { dishId, name, hindi, role, servings, nutrients, provenance };
 }
 
+/* --------------------- reason parsing (brief v4) ---------------------- */
+
+/**
+ * A stored reason, validated field by field. Reasons are DATA the
+ * composer measured; a stored reason whose numbers are out of the
+ * ranges the composer can produce is not one of ours and is dropped
+ * (never fatal — the plan itself is judged by its own invariants).
+ * Unknown kinds are dropped the same way: a newer build's reason
+ * must never break an older build's plan, and reasonCopy renders
+ * nothing for a kind it does not know.
+ */
+function parseKitchenStage(raw: unknown): KitchenRelaxationStage | null {
+  if (!isRecord(raw)) return null;
+  switch (raw["stage"]) {
+    case "prep-cap-raised": {
+      const minutes = numIn(raw["minutes"], 1, 600);
+      return minutes === null ? null : { stage: "prep-cap-raised", minutes };
+    }
+    case "prep-time-set-aside":
+      return { stage: "prep-time-set-aside" };
+    case "cooking-included":
+      return { stage: "cooking-included" };
+    case "extra-equipment":
+      return { stage: "extra-equipment" };
+    case "equipment-set-aside":
+      return { stage: "equipment-set-aside" };
+    default:
+      return null;
+  }
+}
+
+function parseReason(raw: unknown): PlanReason | null {
+  if (!isRecord(raw)) return null;
+  const rawKind = raw["kind"];
+  if (typeof rawKind !== "string" || !(PLAN_REASON_KINDS as readonly string[]).includes(rawKind)) {
+    return null;
+  }
+  const kind = rawKind as PlanReason["kind"];
+  const num = (key: string, min: number, max: number): number | null =>
+    numIn(raw[key], min, max);
+  switch (kind) {
+    case "log-protein-shortfall": {
+      const days = num("days", 1, 31);
+      const avgProteinG = num("avgProteinG", 0, 1000);
+      const targetProteinG = num("targetProteinG", 0.01, 1000);
+      return days === null || avgProteinG === null || targetProteinG === null
+        ? null
+        : { kind, days: Math.round(days), avgProteinG, targetProteinG };
+    }
+    case "log-energy-overshoot": {
+      const days = num("days", 1, 31);
+      const avgKcal = num("avgKcal", 0, 10000);
+      const targetKcal = num("targetKcal", 0.01, 10000);
+      return days === null || avgKcal === null || targetKcal === null
+        ? null
+        : { kind, days: Math.round(days), avgKcal, targetKcal };
+    }
+    case "favoured-dishes": {
+      const windowDays = num("windowDays", 1, 365);
+      if (windowDays === null || !Array.isArray(raw["dishes"])) return null;
+      const dishes: { name: string; count: number }[] = [];
+      for (const item of raw["dishes"].slice(0, 3)) {
+        if (!isRecord(item)) return null;
+        const name = text(item["name"], 120);
+        const count = numIn(item["count"], 1, 10000);
+        if (!name || count === null) return null;
+        dishes.push({ name, count: Math.round(count) });
+      }
+      return dishes.length === 0 ? null : { kind, dishes, windowDays: Math.round(windowDays) };
+    }
+    case "deprioritised-dishes": {
+      const windowDays = num("windowDays", 1, 365);
+      const planDay = text(raw["planDay"], 10);
+      if (windowDays === null || !/^\d{4}-\d{2}-\d{2}$/.test(planDay)) return null;
+      if (!Array.isArray(raw["names"])) return null;
+      const names: string[] = [];
+      for (const item of raw["names"].slice(0, 3)) {
+        const name = text(item, 120);
+        if (!name) return null;
+        names.push(name);
+      }
+      return names.length === 0
+        ? null
+        : { kind, names, planDay, windowDays: Math.round(windowDays) };
+    }
+    case "micro-gap": {
+      const label = text(raw["label"], 60);
+      const days = num("days", 1, 365);
+      const avg = num("avg", 0, 100000);
+      const reference = num("reference", 0.01, 100000);
+      const unit = raw["unit"];
+      if (!label || days === null || avg === null || reference === null) return null;
+      if (unit !== "g" && unit !== "mg") return null;
+      return { kind, label, days: Math.round(days), avg, unit, reference };
+    }
+    case "budget-widened": {
+      if (raw["ceilingRupees"] === null) return { kind, ceilingRupees: null };
+      const ceilingRupees = num("ceilingRupees", 1, 100000);
+      return ceilingRupees === null ? null : { kind, ceilingRupees };
+    }
+    case "kitchen-relaxed": {
+      if (!isRecord(raw["answers"]) || !Array.isArray(raw["stages"])) return null;
+      const answers = raw["answers"];
+      if (typeof answers["noCook"] !== "boolean") return null;
+      if (typeof answers["equipmentListed"] !== "boolean") return null;
+      const capMinutes =
+        answers["capMinutes"] === null ? null : numIn(answers["capMinutes"], 1, 600);
+      if (answers["capMinutes"] !== null && capMinutes === null) return null;
+      const stages: KitchenRelaxationStage[] = [];
+      for (const item of raw["stages"].slice(0, 8)) {
+        const stage = parseKitchenStage(item);
+        if (!stage) return null;
+        stages.push(stage);
+      }
+      return {
+        kind,
+        answers: {
+          noCook: answers["noCook"],
+          capMinutes,
+          equipmentListed: answers["equipmentListed"],
+        },
+        stages,
+      };
+    }
+    case "kitchen-cap-raised": {
+      const capMinutes = num("capMinutes", 1, 600);
+      const stageMinutes = num("stageMinutes", 1, 600);
+      return capMinutes === null || stageMinutes === null
+        ? null
+        : { kind, capMinutes, stageMinutes };
+    }
+    case "kitchen-cap-quickest": {
+      const capMinutes = num("capMinutes", 1, 600);
+      return capMinutes === null ? null : { kind, capMinutes };
+    }
+    case "snack-added": {
+      const mealsPerDay = num("mealsPerDay", 1, 6);
+      return mealsPerDay === null ? null : { kind, mealsPerDay: Math.round(mealsPerDay) };
+    }
+    case "veg-shortfall":
+    case "fruit-shortfall":
+    case "milk-curd-shortfall": {
+      const actualG = num("actualG", 0, 100000);
+      const guidelineG = num("guidelineG", 0.01, 100000);
+      return actualG === null || guidelineG === null ? null : { kind, actualG, guidelineG };
+    }
+    case "protein-sources-few": {
+      const count = num("count", 0, 1000);
+      return count === null ? null : { kind, count: Math.round(count) };
+    }
+    case "food-groups-few": {
+      const count = num("count", 0, 100);
+      if (count === null) return null;
+      if (raw["poolCount"] === null) return { kind, count: Math.round(count), poolCount: null };
+      const poolCount = num("poolCount", 0, 100);
+      return poolCount === null
+        ? null
+        : { kind, count: Math.round(count), poolCount: Math.round(poolCount) };
+    }
+    case "protein-under": {
+      const actualG = num("actualG", 0, 1000);
+      const targetG = num("targetG", 0.01, 1000);
+      const blocker = raw["blocker"];
+      if (actualG === null || targetG === null) return null;
+      if (blocker !== "caps" && blocker !== "energy-topup-in-day" && blocker !== "energy-no-topup") {
+        return null;
+      }
+      return { kind, actualG, targetG, blocker };
+    }
+    case "protein-over": {
+      const actualG = num("actualG", 0, 1000);
+      const targetG = num("targetG", 0.01, 1000);
+      return actualG === null || targetG === null ? null : { kind, actualG, targetG };
+    }
+    case "kcal-off-guide": {
+      const actualKcal = num("actualKcal", 0, 10000);
+      const targetKcal = num("targetKcal", 0.01, 10000);
+      const direction = raw["direction"];
+      if (actualKcal === null || targetKcal === null) return null;
+      if (direction !== "over" && direction !== "under") return null;
+      return { kind, actualKcal, targetKcal, direction };
+    }
+    case "meal-empty":
+      return { kind };
+    case "meal-missing-layers": {
+      if (!Array.isArray(raw["layers"])) return null;
+      const layers: string[] = [];
+      for (const item of raw["layers"].slice(0, 8)) {
+        const layer = text(item, 60);
+        if (!layer) return null;
+        layers.push(layer);
+      }
+      return layers.length === 0 ? null : { kind, layers };
+    }
+    default:
+      return null;
+  }
+}
+
 function parsePlan(raw: unknown): DailyPlan | null {
   if (!isRecord(raw)) return null;
   const id = text(raw["id"], 80);
@@ -5031,12 +5283,29 @@ function parsePlan(raw: unknown): DailyPlan | null {
       if (line) cautions.push(line);
     }
   }
-  /* Composition notes (P2): absent on P1 plans, read as empty. */
+  /* Composition notes (P2): absent on P1 plans, read as empty. The
+     length bound is a TAMPER bound on stored data, not an editor:
+     it once sat at 300 and cut the composer's own kitchen note
+     mid-word on every read (M-81) — 2,000 sits far above any note
+     the composer can produce (the longest is ~370 chars) while
+     still bounding a forged value. Sentences are never sliced to
+     fit a display; brief v4's reasons carry the copy now. */
   const notes: string[] = [];
   if (Array.isArray(raw["notes"])) {
     for (const item of raw["notes"].slice(0, 8)) {
-      const line = text(item, 300);
+      const line = text(item, 2000);
       if (line) notes.push(line);
+    }
+  }
+  /* The structured reasons (brief v4): absent on plans stored
+     before they existed, read as empty — those plans render their
+     `notes` strings, which now arrive whole. An entry that does
+     not validate is dropped, never fatal. */
+  const reasons: PlanReason[] = [];
+  if (Array.isArray(raw["reasons"])) {
+    for (const item of raw["reasons"].slice(0, 24)) {
+      const reason = parseReason(item);
+      if (reason) reasons.push(reason);
     }
   }
   /* The composition method (P2): absent on P1 plans, which are method 1
@@ -5128,7 +5397,18 @@ function parsePlan(raw: unknown): DailyPlan | null {
       proteinG: round1(mealProtein),
       dishes,
       suggestions,
-      note: item["note"] === null ? null : text(item["note"], 240) || null,
+      /* Same M-81 discipline as the plan notes: the bound is a
+         tamper bound (2,000), never an editor. */
+      note: item["note"] === null ? null : text(item["note"], 2000) || null,
+      /* noteReason rides along only when the stored meal carries
+         the key at all — plans stored before reasons existed (and
+         dish meals, which never carry one) round-trip byte-equal. */
+      ...(Object.prototype.hasOwnProperty.call(item, "noteReason")
+        ? {
+            noteReason:
+              item["noteReason"] === null ? null : parseReason(item["noteReason"]),
+          }
+        : {}),
     });
   }
   /* The split invariant is part of the plan's identity: meals that do not
@@ -5209,6 +5489,7 @@ function parsePlan(raw: unknown): DailyPlan | null {
     safetyClassification,
     cautions,
     notes,
+    reasons,
     methodVersion,
     ...(morning ? { morning } : {}),
     ...(hydration ? { hydration } : {}),

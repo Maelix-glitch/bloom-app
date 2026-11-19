@@ -23,6 +23,7 @@ import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useHabits } from "@/hooks/useHabits";
 import { useNutrition } from "@/hooks/useNutrition";
 import { buildTwinSnapshot, type TwinField, type TwinProgress } from "@/lib/twin/twin";
+import { pctOfTarget } from "@/lib/nutrition/targets";
 import { fmtCount, fmtGrams } from "@/lib/format";
 
 const signed1 = (n: number) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(1)}`;
@@ -62,9 +63,15 @@ function Meter({
   );
 }
 
-function ReqMeters({ progress }: { progress: readonly TwinProgress[] }) {
+function ReqMeters({
+  progress,
+  metric,
+}: {
+  progress: readonly TwinProgress[];
+  metric?: string | undefined;
+}) {
   return (
-    <ul className="req">
+    <ul className="req" data-metric={metric}>
       {progress.slice(0, 3).map((req) => (
         <li key={req.label}>
           <span>{req.label}</span>
@@ -112,12 +119,14 @@ function GatheringTile({
   badge,
   hint,
   progress,
+  progressMetric,
   chip,
 }: {
   title: string;
   badge: React.ReactNode;
   hint?: string | undefined;
   progress?: readonly TwinProgress[] | undefined;
+  progressMetric?: string | undefined;
   chip: React.ReactNode;
 }) {
   return (
@@ -126,7 +135,9 @@ function GatheringTile({
       <div className="tile__figure">
         <strong>—</strong>
       </div>
-      {progress && progress.length > 0 ? <ReqMeters progress={progress} /> : null}
+      {progress && progress.length > 0 ? (
+        <ReqMeters progress={progress} metric={progressMetric} />
+      ) : null}
       {hint ? <p className="tile__hint">{hint}</p> : null}
       <footer className="tile__foot">
         <span />
@@ -234,19 +245,35 @@ export function MetabolicTwinSection() {
         {cov.avgKcal !== null && cov.avgProteinG !== null ? (
           <div className="vstats">
             <div className="vstat">
-              <b>{fmtCount(cov.avgKcal)} kcal</b>
+              <b data-metric="intake-kcal-avg">{fmtCount(cov.avgKcal)} kcal</b>
               <span>
-                {cov.kcalVsTarget !== null
-                  ? `avg · ${Math.round(cov.kcalVsTarget * 100)}% of your energy target`
-                  : "daily average"}
+                {cov.kcalVsTarget !== null && targets ? (
+                  <>
+                    avg ·{" "}
+                    <span data-metric="intake-kcal-pct">
+                      {pctOfTarget(cov.avgKcal, targets.kcal)}%
+                    </span>{" "}
+                    of your energy target
+                  </>
+                ) : (
+                  "daily average"
+                )}
               </span>
             </div>
             <div className="vstat">
-              <b>{fmtGrams(cov.avgProteinG)} g</b>
+              <b data-metric="intake-protein-avg">{fmtGrams(cov.avgProteinG)} g</b>
               <span>
-                {cov.proteinVsTarget !== null
-                  ? `avg · ${Math.round(cov.proteinVsTarget * 100)}% of your protein target`
-                  : "daily average"}
+                {cov.proteinVsTarget !== null && targets ? (
+                  <>
+                    avg ·{" "}
+                    <span data-metric="intake-protein-pct">
+                      {pctOfTarget(cov.avgProteinG, targets.proteinG)}%
+                    </span>{" "}
+                    of your protein target
+                  </>
+                ) : (
+                  "daily average"
+                )}
               </span>
             </div>
           </div>
@@ -267,7 +294,9 @@ export function MetabolicTwinSection() {
       <article className="tile" data-state="ready">
         <TileHead title="Maintenance energy" badge={<ReadyBadge />} />
         <div className="tile__figure" data-gold={goldKey === "expenditure" ? true : undefined}>
-          <strong>{fmtCount(twin.expenditure.value.maintenanceKcal)} kcal</strong>
+          <strong data-metric="maintenance-kcal">
+            {fmtCount(twin.expenditure.value.maintenanceKcal)} kcal
+          </strong>
           <span>a day</span>
         </div>
         <footer className="tile__foot">
@@ -284,6 +313,7 @@ export function MetabolicTwinSection() {
         badge={<GatheringBadge />}
         hint="Needs two weigh-ins 10+ days apart."
         progress={twin.expenditure.progress}
+        progressMetric="maintenance-requirements"
         chip={<SrcChip label="Food log and weigh-ins" estimate />}
       />
     );

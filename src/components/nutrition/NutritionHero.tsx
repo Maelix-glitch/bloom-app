@@ -30,6 +30,7 @@ import {
   type NutritionTargets,
   type TotalsComparison,
 } from "@/lib/nutrition";
+import { pctOfTarget } from "@/lib/nutrition/targets";
 import type { NutritionTargetState } from "@/hooks/useNutrition";
 import { Bar, Rings } from "./NutritionPrimitives";
 import { EstimateChip } from "./ProvenanceBadge";
@@ -196,10 +197,12 @@ export function NutritionHero({
     value: string;
     targetText?: string;
     fraction: number | null;
+    metric?: string;
   }[] = [
     {
       label: "Protein",
       color: "var(--sage)",
+      metric: "day-protein-vs-target",
       /* Computed day totals go through the shared display formatter
          (whole, grouped) — the input module's formatGrams is for the
          person's own entered amounts, where their decimal is theirs. */
@@ -237,7 +240,7 @@ export function NutritionHero({
                 "aria-label": "Calories against target",
                 "aria-valuemin": 0,
                 "aria-valuemax": 100,
-                "aria-valuenow": Math.round((comparison.kcalFraction ?? 0) * 100),
+                "aria-valuenow": pctOfTarget(totals.kcal, targets.kcal),
               }
             : {})}
         >
@@ -258,13 +261,19 @@ export function NutritionHero({
                 stays the day's logged total, plainly captioned. */}
             {targets && comparison.kcalRemaining !== null ? (
               <>
-                <span className="font-display text-[44px] leading-none text-foreground tabular-nums">
+                <span
+                  className="font-display text-[44px] leading-none text-foreground tabular-nums"
+                  data-metric="day-kcal-headline"
+                >
                   {fmtCount(Math.abs(comparison.kcalRemaining))}
                 </span>
                 <span className="mt-1.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
                   {comparison.kcalRemaining < 0 ? "kcal past your guide" : "kcal left"}
                 </span>
-                <span className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums">
+                <span
+                  className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground tabular-nums"
+                  data-metric="day-kcal-vs-target"
+                >
                   {fmtCount(totals.kcal)} of {fmtKcalApprox(targets.kcal)} eaten
                 </span>
               </>
@@ -296,7 +305,10 @@ export function NutritionHero({
                     aria-hidden
                   />
                   <span className="text-muted-foreground">{macro.label}</span>
-                  <span className="ml-auto font-semibold text-foreground tabular-nums">
+                  <span
+                    className="ml-auto font-semibold text-foreground tabular-nums"
+                    data-metric={macro.metric}
+                  >
                     {macro.value}
                     {macro.targetText ? (
                       <span className="font-normal text-muted-foreground">{macro.targetText}</span>

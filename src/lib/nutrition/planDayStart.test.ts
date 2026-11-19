@@ -180,9 +180,9 @@ describe("P11 · the snack belongs to the day", () => {
        — the property pinned is unchanged: the snack slot is never
        empty. */
     expect(snack!.dishes.length + snack!.suggestions.length).toBeGreaterThanOrEqual(1);
-    expect(
-      plan.notes.some((n) => n.includes("this plan adds a snack")),
-    ).toBe(true);
+    /* Brief v4 (Slice 1): the addition is named as the snack-added
+       reason carrying the stated meal count. */
+    expect(plan.reasons).toContainEqual({ kind: "snack-added", mealsPerDay });
     /* The day's splits still sum exactly to the targets. */
     expect(plan.meals.reduce((a, m) => a + m.kcal, 0)).toBe(Math.round(plan.targets.kcal));
   });
@@ -190,7 +190,8 @@ describe("P11 · the snack belongs to the day", () => {
   it("an unanswered meals-per-day carries the snack with no addition note", () => {
     const plan = gen(fullProfile("omnivore", { mealsPerDay: null }));
     expect(plan.meals.some((m) => m.meal === "snack")).toBe(true);
-    expect(plan.notes.some((n) => n.includes("this plan adds a snack"))).toBe(false);
+    /* Brief v4 (Slice 1): no snack-added reason is emitted either. */
+    expect(plan.reasons?.some((r) => r.kind === "snack-added")).toBe(false);
   });
 });
 

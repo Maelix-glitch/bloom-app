@@ -403,8 +403,12 @@ describe("plan · day floors", () => {
        counting toward ICMR food-group diversity was always a
        stretch; the note now states the span the day's real foods
        reach. */
+    /* Brief v4 update (Slice 1): the strings are reasons.ts's
+       derived details now (snack-added + food-groups-few reasons);
+       the facts pinned — a snack beyond the stated 3 meals, a
+       7-group span — are unchanged. */
     expect(plan.notes).toEqual([
-      "Your Assessment lists 3 meals a day; this plan adds a snack, so the day's food spreads across one more sitting.",
+      "You listed 3 meals a day; a snack spreads today across 4 sittings.",
       "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     ]);
     const veg = allSuggestions(plan)
@@ -508,8 +512,10 @@ describe("plan · rotation", () => {
     expect(d16.notes).toContain(
       "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     );
+    /* Brief v4 (Slice 1): the kcal-off-guide reason's derived
+       detail — same numbers, reasons.ts's shorter second clause. */
     expect(d16.notes).toContain(
-      "Today's suggestions reach about 1,855 kcal — above your ~1,650 kcal guide. The day's guideline floors and layers add up past it.",
+      "Today's suggestions reach about 1,855 kcal — above your ~1,650 kcal guide. The day's guideline floors add up past it.",
     );
     /* 2026-11-17 reaches every gram floor and the energy band; only
        the group-span aim is missed, and named. (P12 note: an early

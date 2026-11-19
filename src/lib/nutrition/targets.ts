@@ -43,6 +43,43 @@ export function nutritionTargetsFromOutcome(outcome: BodyTargetsOutcome): Nutrit
   return validTargets(outcome.targets.calorieTargetKcal, outcome.targets.proteinG);
 }
 
+/**
+ * The ONE "% of target" computation (brief v4 Part 3.5 / rulebook
+ * §22: health targets come from one function). Every surface that
+ * states an intake as a percentage of its target — the Twin's
+ * coverage tile, the hero's ring — divides through here, so the
+ * percentages can never disagree (the M-57 discipline, made a
+ * single function instead of a convention).
+ */
+export function pctOfTarget(actual: number, target: number): number {
+  return Math.round((actual / target) * 100);
+}
+
+/**
+ * The plausibility gate on a target pair (brief v4 Part 3.5 /
+ * rulebook §22). A day's target is implausible when the energy sits
+ * under the 1,200 kcal adult floor-of-floors, or when protein would
+ * have to supply more than 35% of the day's energy — a share no
+ * ordinary diet reaches. This ASSERTS and WARNS; it never rewrites
+ * a target. Whether the engine's bands or floors should change is
+ * a human nutrition-review decision (M-82, flagged 2026-11-19: the
+ * owner's pair {1,350 kcal, 171 g} fails this check at ~51% —
+ * the kcal side is the safety floor binding while the protein side
+ * is an unfloored 1.8 g/kg band; see the trace in the slice log).
+ */
+export function assertPlausibleTargets(targets: { kcal: number; proteinG: number }): boolean {
+  const share = (targets.proteinG * 4) / targets.kcal;
+  const ok = targets.kcal >= 1200 && share <= 0.35;
+  if (!ok) {
+    console.warn("Implausible targets", {
+      kcal: targets.kcal,
+      proteinG: targets.proteinG,
+      proteinShare: +share.toFixed(2),
+    });
+  }
+  return ok;
+}
+
 export interface TotalsComparison {
   totals: Nutrients;
   targets: NutritionTargets | null;

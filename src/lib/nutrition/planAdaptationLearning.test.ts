@@ -224,7 +224,7 @@ describe("planLearningFor", () => {
     expect(planLearningFor([], DAY, TARGETS)).toBeNull();
   });
 
-  it("a repeated dish leads, with the count in the note", () => {
+  it("a repeated dish leads, with the count in the reason", () => {
     const entries = [
       dishEntry("2026-11-12", "dish-intl-tempeh-taco-cups"),
       dishEntry("2026-11-14", "dish-intl-tempeh-taco-cups"),
@@ -234,9 +234,14 @@ describe("planLearningFor", () => {
     expect(learning?.favouredDishes).toEqual([
       { dishId: "dish-intl-tempeh-taco-cups", name: "Tempeh Taco Cabbage Cups", count: 3 },
     ]);
-    expect(
-      learning?.notes.some((n) => n.includes("Tempeh Taco Cabbage Cups (logged 3 times)")),
-    ).toBe(true);
+    /* Brief v4 (Slice 1): the learning returns a structured
+       favoured-dishes reason carrying the name and count; the
+       rendered sentence is reasons.ts's, pinned there. */
+    expect(learning?.reasons).toContainEqual({
+      kind: "favoured-dishes",
+      dishes: [{ name: "Tempeh Taco Cabbage Cups", count: 3 }],
+      windowDays: 28,
+    });
   });
 
   it("the same inputs give the same learning, object for object", () => {

@@ -66,6 +66,7 @@ import { usePlan } from "@/hooks/usePlan";
 import { useSession } from "@/hooks/useSession";
 import { GOAL_LABEL, GOAL_OPTIONS } from "@/lib/assessment/questions";
 import { fmtGrams, fmtKcalApprox } from "@/lib/format";
+import { reasonCopy, reasonDetail } from "@/lib/reasons";
 import { formatClock } from "@/lib/smart/usual";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
@@ -712,6 +713,10 @@ export function NutritionPlanSection() {
       ? meal.suggestions.filter((s) => s.layer !== "topup")
       : meal.suggestions;
     const empty = meal.dishes.length === 0 && meal.suggestions.length === 0;
+    /* The meal note's words come from reasons.ts when the meal
+       carries its structured reason (brief v4); plans stored before
+       reasons existed fall back to the stored string. */
+    const mealNoteText = meal.noteReason ? reasonDetail(meal.noteReason) : meal.note;
     return (
       <article key={meal.meal} className="nut-card" aria-label={`${MEAL_LABEL[meal.meal]} plan`}>
         <div className="flex items-start justify-between gap-3">
@@ -739,7 +744,7 @@ export function NutritionPlanSection() {
         </div>
 
         {empty ? (
-          <p className="nut-note">{meal.note}</p>
+          <p className="nut-note">{mealNoteText}</p>
         ) : (
           <>
             {dishComposed ? (
@@ -781,7 +786,7 @@ export function NutritionPlanSection() {
                 {meal.suggestions.map((s) => suggestionRow(meal, s))}
               </ul>
             )}
-            {meal.note ? <p className="nut-note">{meal.note}</p> : null}
+            {mealNoteText ? <p className="nut-note">{mealNoteText}</p> : null}
             <div className="mt-4 flex items-center justify-between gap-3 border-t border-border-subtle pt-3.5">
               <p className="text-[length:var(--text-callout)] text-muted-foreground tabular-nums">
                 <span className="font-semibold text-[var(--sage)]">
@@ -886,6 +891,16 @@ export function NutritionPlanSection() {
     logDishIdea(meal, dish);
   };
 
+  /* The plan's reasons rendered through the one copy module (brief
+     v4): a reason whose kind reasons.ts does not know renders
+     nothing here (null) — the stored note string stays as the
+     fallback text for that slot. Plans stored before reasons
+     existed carry only notes, which render as before. */
+  const planReasons =
+    plan.reasons && plan.reasons.length > 0
+      ? plan.reasons.map((reason) => reasonCopy(reason))
+      : plan.notes.map(() => null);
+
   return (
     <section className="nut-card nut-rise mt-4" aria-label="Your plan for today">
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -896,11 +911,11 @@ export function NutritionPlanSection() {
           </h2>
           <p className="mt-1 text-[length:var(--text-callout)] tabular-nums text-muted-foreground">
             Composed to land near{" "}
-            <span className="font-semibold text-foreground">
+            <span className="font-semibold text-foreground" data-metric="plan-kcal-guide">
               {Math.round(plan.targets.kcal)} kcal
             </span>{" "}
             and{" "}
-            <span className="font-semibold text-foreground">
+            <span className="font-semibold text-foreground" data-metric="plan-protein-guide">
               {fmtGrams(plan.targets.proteinG)} g protein
             </span>{" "}
             across the day — your guide is {fmtKcalApprox(plan.targets.kcal)} and ~
@@ -1013,11 +1028,18 @@ export function NutritionPlanSection() {
       {plan.notes.length > 0 ? (
         <div className="mt-4">
           <p className="nut-group-label">Today's mix</p>
-          {plan.notes.map((note) => (
-            <p key={note} className="nut-note">
-              {note}
-            </p>
-          ))}
+          {plan.notes.map((note, i) => {
+            const copy = planReasons[i];
+            return copy ? (
+              <p key={i} className="nut-note">
+                <strong className="text-foreground">{copy.title}.</strong> {copy.detail}
+              </p>
+            ) : (
+              <p key={i} className="nut-note">
+                {note}
+              </p>
+            );
+          })}
         </div>
       ) : null}
 
@@ -1102,8 +1124,14 @@ export function NutritionPlanSection() {
                   </h3>
                   <p>
                     Over your last {learning.adherence.days} logged days you averaged{" "}
-                    {Math.round(learning.adherence.avgKcal).toLocaleString("en-US")} kcal and{" "}
-                    {Math.round(learning.adherence.avgProteinG)} g protein a day, against targets of{" "}
+                    <span data-metric="intake-kcal-avg">
+                      {Math.round(learning.adherence.avgKcal).toLocaleString("en-US")}
+                    </span>{" "}
+                    kcal and{" "}
+                    <span data-metric="intake-protein-avg">
+                      {Math.round(learning.adherence.avgProteinG)}
+                    </span>{" "}
+                    g protein a day, against targets of{" "}
                     {Math.round(plan.targets.kcal).toLocaleString("en-US")} kcal and{" "}
                     {fmtGrams(plan.targets.proteinG)} g.
                   </p>
@@ -1206,7 +1234,7 @@ export function NutritionPlanSection() {
                 </span>
                 <div className="grid gap-1.5">
                   <h3>Maintenance estimate still gathering</h3>
-                  <ul className="req">
+                  <ul className="req" data-metric="maintenance-requirements">
                     <li>
                       <span>Logged days</span>
                       <div

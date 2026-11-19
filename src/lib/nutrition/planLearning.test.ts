@@ -189,8 +189,10 @@ describe("a protein-shortfall log", () => {
   });
 
   it("leads the notes with the adaptation, numbers from the log itself", () => {
+    /* Brief v4 (Slice 1): notes[0] is the log-protein-shortfall
+       reason's derived detail (reasons.ts) — same log numbers. */
     expect(biased.notes[0]).toBe(
-      "From your log: your last 3 logged days averaged 120 g protein against your 220 g target, so this plan leans on higher-protein dishes and top-ups. Your target itself is unchanged.",
+      "Your last 3 logged days averaged 120 g protein against a 220 g target. Target unchanged.",
     );
   });
 
@@ -282,8 +284,10 @@ describe("an energy-overshoot log", () => {
   it("the overshoot plan leaves them out and says why, with the numbers", () => {
     expect(topUps(biased)).toEqual([]);
     expect(dayTotals(biased).kcal).toBeLessThan(dayTotals(base).kcal);
+    /* Brief v4 (Slice 1): the log-energy-overshoot reason's derived
+       detail (reasons.ts) — same log numbers. */
     expect(biased.notes[0]).toBe(
-      "From your log: your last 2 logged days averaged 2,300 kcal against your 2,000 kcal target, so this plan leaves the energy top-ups out and lets the dishes carry the day. Your target itself is unchanged.",
+      "Your last 2 logged days averaged 2,300 kcal against a 2,000 kcal target, so energy top-ups stay out.",
     );
     expect(biased.targets).toEqual(targets);
   });

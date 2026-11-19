@@ -305,11 +305,18 @@ describe("P10 · kitchen gates", () => {
       const beyond = needs.equipment.filter((item) => item !== "fridge");
       expect(beyond.length, s.dishId).toBeLessThanOrEqual(1);
     }
+    /* Brief v4 (Slice 1): the relaxation is a structured
+       kitchen-relaxed reason now; the note string is reasons.ts's
+       derived detail. The pin follows the data, then the words. */
+    expect(
+      plan.reasons?.some(
+        (r) => r.kind === "kitchen-relaxed" && r.stages.some((s) => s.stage === "extra-equipment"),
+      ),
+    ).toBe(true);
     expect(
       plan.notes.some(
         (n) =>
-          n.includes("leave almost no real dishes") &&
-          n.includes("one more piece of kitchen equipment"),
+          n.includes("leave almost no real dishes") && n.includes("one more piece of equipment"),
       ),
     ).toBe(true);
     expect(
@@ -402,9 +409,10 @@ describe("P10 · prep-time cap", () => {
     const slow = cloneDish({ id: "test-90", timeMinutes: 90 });
     const plan = gen(profileWith({ prepTimeMaxMinutes: 20 }), { dishes: [slow] });
     expect(servedDishes(plan).map((d) => d.dishId)).toEqual(["test-90"]);
-    expect(plan.notes.some((n) => n.includes("every main dish in the library takes longer"))).toBe(
-      true,
-    );
+    /* Brief v4 (Slice 1): the naming is the kitchen-cap-quickest
+       reason; its derived detail carries the same fact. */
+    expect(plan.reasons).toContainEqual({ kind: "kitchen-cap-quickest", capMinutes: 20 });
+    expect(plan.notes.some((n) => n.includes("every main dish takes longer"))).toBe(true);
   });
 
   it("an explicit prep answer overrides the hostel default", () => {

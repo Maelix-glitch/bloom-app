@@ -173,6 +173,9 @@ describe("method 13 · the owner's corner (D3/F9)", () => {
   });
 
   it("the kitchen relaxation is named, never silent", () => {
+    /* Brief v4 (Slice 1): named as the kitchen-relaxed reason; the
+       note is reasons.ts's derived detail for it. */
+    expect(plan.reasons?.some((r) => r.kind === "kitchen-relaxed")).toBe(true);
     expect(plan.notes.some((n) => n.includes("leave almost no real dishes"))).toBe(true);
   });
 
@@ -267,7 +270,10 @@ describe("method 13 · the budget is a preference (F1)", () => {
       },
     };
     const plan = gen(veganTier1, "2026-11-19", 2000, 120);
-    expect(plan.notes.some((n) => n.includes("treats it as a preference"))).toBe(true);
+    /* Brief v4 (Slice 1): the widening is the budget-widened reason;
+       its derived detail names the budget as a preference. */
+    expect(plan.reasons?.some((r) => r.kind === "budget-widened")).toBe(true);
+    expect(plan.notes.some((n) => n.includes("leaves too few main dishes"))).toBe(true);
     const served = plan.meals.flatMap((m) => m.dishes.map((d) => DISH_BY_ID.get(d.dishId)!));
     expect(served.some((d) => d.budgetTier > 1)).toBe(true);
   });

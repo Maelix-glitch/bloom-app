@@ -295,11 +295,16 @@ describe("§10.4 · the kitchen gates, after the pass", () => {
       const beyond = needs.equipment.filter((item) => item !== "fridge");
       expect(beyond.length, s.dishId).toBeLessThanOrEqual(1);
     }
+    /* Brief v4 (Slice 1): the naming is the kitchen-relaxed reason
+       (stage extra-equipment); the note is reasons.ts's detail. */
+    expect(
+      plan.reasons?.some(
+        (r) => r.kind === "kitchen-relaxed" && r.stages.some((s) => s.stage === "extra-equipment"),
+      ),
+    ).toBe(true);
     expect(
       plan.notes.some(
-        (n) =>
-          n.includes("leave almost no real dishes") &&
-          n.includes("one more piece of kitchen equipment"),
+        (n) => n.includes("leave almost no real dishes") && n.includes("one more piece of equipment"),
       ),
     ).toBe(true);
     expect(plan.notes.some((n) => n.startsWith(KITCHEN_NOTE))).toBe(false);
@@ -320,11 +325,16 @@ describe("§10.4 · the kitchen gates, after the pass", () => {
       const beyond = needs.equipment.filter((item) => item !== "mixer_grinder");
       expect(beyond.length, s.dishId).toBeLessThanOrEqual(1);
     }
+    /* Brief v4 (Slice 1): as the fridge test above — the naming is
+       the kitchen-relaxed reason; the note is its derived detail. */
+    expect(
+      plan.reasons?.some(
+        (r) => r.kind === "kitchen-relaxed" && r.stages.some((s) => s.stage === "extra-equipment"),
+      ),
+    ).toBe(true);
     expect(
       plan.notes.some(
-        (n) =>
-          n.includes("leave almost no real dishes") &&
-          n.includes("one more piece of kitchen equipment"),
+        (n) => n.includes("leave almost no real dishes") && n.includes("one more piece of equipment"),
       ),
     ).toBe(true);
   });
