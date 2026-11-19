@@ -239,6 +239,18 @@ export function AccessGate() {
         >
           Terms
         </Link>
+        <Link
+          to="/refund"
+          className="underline underline-offset-2 opacity-70 transition-opacity hover:opacity-100"
+        >
+          Refunds
+        </Link>
+        <Link
+          to="/contact"
+          className="underline underline-offset-2 opacity-70 transition-opacity hover:opacity-100"
+        >
+          Contact
+        </Link>
       </p>
     </div>
   );

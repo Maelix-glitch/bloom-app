@@ -18,7 +18,7 @@
  *     Settings (Plan B, senior diagnosis slice 5 — the account sections'
  *     own route since then), the weekly Report, and the admin
  *     progression page;
- *   · NOT the public surfaces — /privacy, /terms and the /@handle public
+ *   · NOT the public surfaces — /privacy, /terms, /refund, /contact and the /@handle public
  *     profile — nor /dashboard and /admin/rewards, which carry their
  *     own headers, nor any unmatched path (the branded 404 stands alone,
  *     as it did when pages owned the chrome).

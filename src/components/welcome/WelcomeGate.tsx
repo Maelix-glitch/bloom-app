@@ -29,7 +29,11 @@ export function WelcomeGate() {
   /* Legal pages are public by definition: someone reading the privacy page
      must never be covered by onboarding first. */
   const onLegalPage = useRouterState({
-    select: (s) => s.location.pathname === "/privacy" || s.location.pathname === "/terms",
+    select: (s) =>
+      s.location.pathname === "/privacy" ||
+      s.location.pathname === "/terms" ||
+      s.location.pathname === "/refund" ||
+      s.location.pathname === "/contact",
   });
 
   return (

@@ -124,7 +124,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
  *     the lesser evil. The server-side trigger is the real enforcement.
  */
 /* Legal pages are public in every deployment, configured or not. */
-const PUBLIC_ROUTES = ["/privacy", "/terms"];
+const PUBLIC_ROUTES = ["/privacy", "/terms", "/refund", "/contact"];
 
 function AccessControl({ children }: { children: ReactNode }) {
   const session = useSession();
