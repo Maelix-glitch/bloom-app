@@ -7,8 +7,8 @@ import { routeShowsAppNav } from "@/lib/appNav";
 import botanical from "@/assets/home/sidebar-botanical.jpg";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
-import { useWallet } from "@/hooks/useWallet";
-import { rankFor } from "@/lib/progression/ranks";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { PLANS } from "@/lib/billing/plans";
 import { verificationStatus } from "@/lib/profile/verification";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
@@ -47,14 +47,16 @@ export const HOME_NAV: {
  * Bloom's base palette so the rail is identical on every route, even ones
  * that retint the shared tokens (Rewards).
  *
- * Composition (Reskin slice 2, after the owner's prototype): the brand at
- * the top; the destinations as pills — the active one on a white-alpha fill
- * with a gold tick on the rail's left edge and a gold glyph; the points
- * card in its richer form (RailPointsCard: balance, percent to the next
- * rank, gold-gradient track); Profile below it; and at the foot, over
- * Bloom's own botanical photograph, the serif-italic tagline above the
- * identity strip. (Sync state lives in the Today TopBar pill alone —
- * the rail used to repeat it, and the duplicate was removed.)
+ * Composition (Reskin slice 2, after the owner's prototype; shell form
+ * since brief v4): the brand at the top; the destinations as pills — the
+ * active one on a filled --surface-2 with a 3px gold bar INSIDE the
+ * pill's left edge and a gold glyph; the Level card (RailPointsCard:
+ * balance, current → next rank, a labelled meter, points to the next
+ * rank); Profile below it; and at the foot, in a fixed-height botanical
+ * band, the serif-italic tagline above the identity strip. The brand /
+ * nav / card region scrolls on short screens; the footer stays pinned.
+ * (Sync state lives in the Today TopBar pill alone — the rail used to
+ * repeat it, and the duplicate was removed.)
  *
  * Alignment: the brand row is laid out exactly like a nav link (the same
  * 17px icon slot at the same x, the same gap), so the mark sits on the icon
@@ -76,7 +78,7 @@ export function HomeSidebar() {
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
   return (
     <aside className="app-nav app-sidebar z-[2] hidden w-[220px] shrink-0 flex-col overflow-clip border-r border-border lg:fixed lg:inset-y-0 lg:left-0 lg:flex">
-      <div className="relative">
+      <div className="relative min-h-0 flex-1 overflow-y-auto">
         <Link
           to="/"
           className="mx-4 flex h-[64px] items-center gap-3 px-3 text-foreground"
@@ -100,10 +102,12 @@ export function HomeSidebar() {
                   active ? "app-nav-link-active" : ""
                 }`}
               >
-                {/* The gold tick on the rail's left edge marks the active
-                    destination (the prototype's signature); the pill fill
-                    and the gold glyph ride in .app-nav-link-active and
-                    .app-nav-glyph (see src/styles.css). */}
+                {/* The gold bar inside the pill's left edge marks the
+                    active destination (brief v4 §20 — it used to sit on
+                    the rail's outer edge, detached from the pill); the
+                    pill fill and the gold glyph ride in
+                    .app-nav-link-active and .app-nav-glyph (see
+                    src/styles.css). */}
                 {active ? <span aria-hidden="true" className="app-nav-tick" /> : null}
                 {/* The glyph rides in .app-nav-glyph: the wrapper carries
                     the colour, the grow/settle transform and the glow disc,
@@ -140,9 +144,13 @@ export function HomeSidebar() {
 
       {/* Botanical footer: Bloom's own fern photograph, local to the foot
           of the rail now (it spanned the whole rail before the reskin),
-          under a dark gradient scrim. Over it: the serif-italic tagline,
-          then the identity strip on a blurred dark band. */}
-      <div className="relative mt-auto overflow-hidden">
+          under a dark gradient scrim. Since brief v4 (M-49) the band is
+          a FIXED height (`.app-sidebar-footer`, 200px): the photograph
+          is masked to dissolve upward instead of cropping at a hard
+          line, the tagline sits over the scrim's strengthened band, and
+          the identity strip is pinned at the foot — the old auto-height
+          footer carried an 80px dead gap (pt-20) above the tagline. */}
+      <div className="app-sidebar-footer relative shrink-0 overflow-hidden">
         <div
           aria-hidden="true"
           className="app-sidebar-botanical pointer-events-none absolute inset-0"
@@ -157,36 +165,43 @@ export function HomeSidebar() {
           />
         </div>
         <div aria-hidden="true" className="app-sidebar-scrim absolute inset-0" />
-        <div className="app-sidebar-quote relative px-7 pb-5 pt-20">
-          <p className="font-display text-[length:var(--text-section)] italic leading-snug text-muted-foreground">
-            A calmer you, a brighter tomorrow.
-          </p>
+        <div className="relative flex h-full flex-col justify-end">
+          <div className="app-sidebar-quote px-7 pb-3">
+            <p className="font-display text-[length:var(--text-section)] italic leading-snug text-muted-foreground">
+              A calmer you, a brighter tomorrow.
+            </p>
+          </div>
+          <RailProfile />
         </div>
-        <RailProfile />
       </div>
     </aside>
   );
 }
 
 /**
- * The identity block at the foot of the rail, on the botanical footer's
- * blurred dark band: the avatar (with the sage dot while the account is
- * signed in), the name, the current rank from the real progression
- * balance, and the settings affordance. Signed out it invites you in,
- * as before.
+ * The identity block at the foot of the rail, pinned at the botanical
+ * footer's base: the avatar, the name, the member's PLAN, and the
+ * settings affordance. Since brief v4 (M-91) the sub-line is the plan —
+ * the level lives in the Level card alone, so it is stated once in the
+ * rail, never twice — and the avatar carries no presence dot (a device
+ * cannot know whether its owner is "online"; the dot claimed a state
+ * nothing measured). Signed out it invites you in, as before.
  */
 function RailProfile() {
   const id = useRailIdentity();
-  const wallet = useWallet();
+  const entitlement = useEntitlement();
   const signedIn = id.status === "signed-in";
-  /* The blue tick beside the rail name, from the same status as the
+  /* The verified tick beside the rail name, from the same status as the
      Profile hero — verification v2: an invite-gated record in
      account_verifications plus the confirmed email and name + @username
      it was granted for. The badge component itself renders nothing
-     unless the status is verified. The rail already maps a missing or
-     placeholder name to null, which the criteria read as "no name yet"
-     — the conservative direction, as are the unproven invite/record
-     facts the identity carries until its verification read lands. */
+     unless the status is verified, so the tick MEANS something real;
+     the rail wears it in Bloom gold (tone="gold") because the blue read
+     as an off-palette import inside the rail (brief v4; M-91). The rail
+     already maps a missing or placeholder name to null, which the
+     criteria read as "no name yet" — the conservative direction, as
+     are the unproven invite/record facts the identity carries until
+     its verification read lands. */
   const verification = verificationStatus({
     invited: id.verification.invited,
     emailConfirmed: id.emailConfirmed,
@@ -202,10 +217,17 @@ function RailProfile() {
     : id.status === "checking"
       ? "…"
       : "Sign in";
+  /* The plan line: the real entitlement's plan name. While it loads,
+     the neutral ellipsis; when billing is unavailable the row falls
+     back to the member's @username rather than inventing a plan. */
   const line = signedIn
-    ? wallet.loading
+    ? entitlement.kind === "loading"
       ? "…"
-      : rankFor(wallet.balance).rank.name
+      : entitlement.kind === "ready"
+        ? PLANS[entitlement.entitlement.tier].name
+        : id.username
+          ? `@${id.username}`
+          : "Bloom account"
     : id.status === "checking"
       ? "…"
       : "Sync across your devices";
@@ -224,17 +246,11 @@ function RailProfile() {
             accent={id.accent}
             size={40}
           />
-          {signedIn ? (
-            <span
-              aria-hidden="true"
-              className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-[var(--sidebar)] bg-sage"
-            />
-          ) : null}
         </span>
         <span className="min-w-0">
           <span className="flex items-center gap-1.5 text-[length:var(--text-callout)] font-medium leading-[var(--leading-callout)] text-foreground">
             <span className="truncate">{name}</span>
-            {signedIn ? <VerifiedBadge status={verification} size={14} /> : null}
+            {signedIn ? <VerifiedBadge status={verification} size={14} tone="gold" /> : null}
           </span>
           <span className="block truncate text-[length:var(--text-caption)] leading-[var(--leading-caption)] text-muted-foreground">
             {line}

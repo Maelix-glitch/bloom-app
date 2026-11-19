@@ -2,12 +2,12 @@
  * The Vitalis orb — the floating Bloom mark and its Vitalis window.
  *
  * Geometry, stated once:
- *   · The button is 56px, 20–24px in from the right. Below the lg
- *     breakpoint the phone tab bar owns the bottom of the screen, so
- *     the button rides the same measure the chrome reserves for it —
- *     76px of bar + air (the `--app-bottom-nav` value) plus the
- *     safe-area inset — with 16px of air above that. At lg there is no
- *     bottom bar and the button settles 24px off the corner.
+ *   · The button is 48px and lives in the shell's floating dock
+ *     (`.dock`, src/styles.css; brief v4 Part 4 / rulebook §21): one
+ *     fixed container at the bottom-right, the back-to-top fab above
+ *     the orb, same size, same chrome, same x. The dock owns placement
+ *     — including the below-lg ride over the phone tab bar and the
+ *     collision lifts — so this sheet only styles the button itself.
  *   · The button's z-index (60) sits above the tab bar (20), Today's
  *     dormant FAB tier (30) and the Trackers dock (40), and below every
  *     sheet (2000/2001): an open sheet simply covers the orb, which is
@@ -17,13 +17,6 @@
  *     full-screen takeover — and a 400px floating panel anchored above
  *     the button on wider screens.
  *
- * Collision lifts: two bottom-anchored controls can share the right
- * side on narrow screens — Today's "Add habit" FAB (`.home-fab`, whose
- * styles outlive its current markup) and the Trackers action dock
- * (centred, but wide enough on a small phone to reach the corner).
- * When either is on screen below lg, the orb steps one control-height
- * up rather than overlapping it.
- *
  * Motion: the idle breath is the boot splash's own (2.6s, soft) on the
  * halo only — the mark itself never moves. Reduced motion — by media
  * query or by the component's `data-reduced-motion` mirror of it —
@@ -31,18 +24,17 @@
  */
 
 .coach-orb {
-  position: fixed;
-  right: 20px;
-  bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px);
+  position: relative;
   z-index: 60;
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
+  flex: none;
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
-  background: var(--panel);
-  border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
-  box-shadow: var(--elevation-float);
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
   color: var(--gold);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -54,7 +46,7 @@
 
 .coach-orb:hover {
   transform: translateY(-2px);
-  border-color: color-mix(in oklab, var(--gold) 70%, transparent);
+  border-color: var(--border-strong);
 }
 
 .coach-orb:active {
@@ -93,22 +85,9 @@
   }
 }
 
-@media (min-width: 64rem) {
-  .coach-orb {
-    right: 24px;
-    bottom: 24px;
-  }
-}
-
-/* Collision lifts (see the header note): one control-height + air. */
-@media (max-width: 63.99rem) {
-  body:has(.home-fab) .coach-orb {
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px + 72px);
-  }
-  body:has(.premium-action-dock) .coach-orb {
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px + 76px);
-  }
-}
+/* Placement — the dock's bottom offset, the below-lg tab-bar ride and
+   the collision lifts — lives with `.dock` in src/styles.css (brief v4
+   Slice 2). The button itself carries no position here any more. */
 
 /* ------------------------------------------------------------- panel */
 
@@ -169,8 +148,9 @@
   .coach-orb-panel {
     left: auto;
     right: 20px;
-    /* Above the button: its bottom offset + 56px of button + 12px air. */
-    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 84px);
+    /* Above the button: the dock's bottom offset (16px of air over the
+       tab-bar measure) + 48px of button + 12px air. */
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 76px);
     width: min(400px, calc(100vw - 40px));
     height: min(620px, calc(100vh - 150px));
     height: min(620px, calc(100dvh - 150px));
@@ -184,7 +164,8 @@
 @media (min-width: 64rem) {
   .coach-orb-panel {
     right: 24px;
-    bottom: 92px;
+    /* The dock's 24px corner offset + 48px of button + 12px air. */
+    bottom: 84px;
   }
 }
 

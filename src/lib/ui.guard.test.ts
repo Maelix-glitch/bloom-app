@@ -1195,20 +1195,32 @@ describe("UI guard: reskin chrome (R-2)", () => {
   const blockFor = (text: string, selector: string) =>
     blocks(text).find((b) => b.selector.trim().endsWith(selector) || b.selector.includes(selector));
 
-  it("marks the active rail item with the gold edge tick and the white 7% pill", () => {
+  it("marks the active rail item with the gold bar inside the pill and the filled surface", () => {
+    /* Pin updated for brief v4 Slice 2 (M-46/M-89): the reskin's white-7%
+       pill and the tick at the rail's outer edge (left:-1rem) are
+       superseded by the brief's §20 form — active = filled --surface-2,
+       the 3px gold bar INSIDE the pill at its left edge. The brief
+       outranks the older pin; the tick's width and gold stay pinned. */
     expect(SIDEBAR.text).toContain("app-nav-tick");
     const tick = blockFor(STYLES.text, ".app-nav-tick")!;
     expect(tick.body).toContain("width: 3px");
     expect(tick.body).toContain("background: var(--gold)");
+    expect(tick.body).toContain("left: 0");
     const active = blockFor(STYLES.text, ".app-nav-link-active")!;
-    expect(active.body).toContain("color-mix(in oklab, var(--foreground) 7%, transparent)");
+    expect(active.body).toContain("background: var(--surface-2)");
   });
 
   it("derives the points card from Bloom's wallet and rank ladder, never hardcoded maths", () => {
+    /* Pin updated for brief v4 Slice 2 (M-47): the card's label is now
+       the brief's "{current} → {next}" form with a "points to {next}"
+       line — the reskin's "Next level ·" wording and its bare percent
+       are gone by design. The derivation pins (wallet + rankFor, no
+       hardcoded thresholds) are unchanged. */
     expect(CARD.text).toContain('data-testid="rail-points-card"');
     expect(CARD.text).toContain("useWallet");
     expect(CARD.text).toContain("rankFor");
-    expect(CARD.text).toContain("Next level ·");
+    expect(CARD.text).toContain("→");
+    expect(CARD.text).toContain("points to");
     expect(CARD.text).not.toContain("SPROUT_AT");
     const fill = blockFor(STYLES.text, ".rail-points-fill")!;
     expect(fill.body).toContain("linear-gradient(90deg, var(--gold-soft), var(--gold))");
