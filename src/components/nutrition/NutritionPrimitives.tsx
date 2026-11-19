@@ -60,8 +60,10 @@ export function Rings({
                   className="nut-ring-arc"
                   style={
                     {
+                      /* No glow (OTT pass): a permanent coloured
+                         drop-shadow is decoration, not depth — the
+                         arc reads by colour and width alone. */
                       stroke: ring.color,
-                      filter: `drop-shadow(0 0 10px ${ring.color})`,
                       "--circ": circ,
                       "--len": circ * (1 - fraction),
                       "--d": `${i * 140}ms`,

@@ -186,7 +186,7 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  height: 42px;
+  height: 44px;
   padding: 0 14px;
   border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--coach-lav) 22%, transparent);
@@ -382,8 +382,8 @@
 
 .coach-conv-more {
   display: grid;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border-radius: 8px;
   border: 0;
@@ -1345,6 +1345,15 @@
   color: var(--coach-lav);
   margin-bottom: 22px;
   filter: drop-shadow(0 0 24px rgb(185 167 233 / 0.45));
+  /* the seal: the welcome mark sits in a thin lavender ring — a designed
+     medallion, not a floating icon (OTT creative pass, 2026-11-19) */
+  display: grid;
+  place-items: center;
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--coach-lav) 25%, transparent);
+  background: var(--coach-lav-dim);
 }
 
 .coach-welcome-kicker {
@@ -1364,6 +1373,12 @@
   line-height: 1.06;
   letter-spacing: var(--tracking-display);
   color: var(--foreground);
+}
+
+/* the second line leans into Fraunces italic — the editorial signature
+   of the welcome (OTT creative pass, 2026-11-19) */
+.coach-welcome-title em {
+  font-style: italic;
 }
 
 .coach-welcome-greeting {
@@ -1525,7 +1540,7 @@
   border-radius: var(--radius-card);
   border: 1px solid color-mix(in oklab, var(--foreground) 5%, transparent);
   background: linear-gradient(180deg, rgb(255 255 255 / 0.022), rgb(255 255 255 / 0.008));
-  padding: 15px 17px;
+  padding: var(--space-4);
 }
 
 .coach-block + .coach-block {
@@ -1973,6 +1988,9 @@
   background: rgb(156 195 230 / 0.06);
   color: var(--muted-foreground);
   font-size: var(--text-caption);
+  /* arrives with the same rise as the follow-up chips, never a pop
+     (OTT creative pass, 2026-11-19) */
+  animation: coach-rise var(--motion-standard) var(--ease-out-expo) both;
 }
 
 .coach-notice.is-signin {
@@ -2008,8 +2026,8 @@
 
 .coach-notice-dismiss {
   display: grid;
-  width: 22px;
-  height: 22px;
+  width: 28px;
+  height: 28px;
   place-items: center;
   border-radius: 6px;
   border: 0;
@@ -2247,6 +2265,13 @@
 .coach-send-icon {
   width: 16px;
   height: 16px;
+  transition: transform var(--motion-micro) var(--ease-out-expo);
+}
+
+/* the plane lifts a breath on press — the send moment, kept to 1.5px so
+   it reads as touch, not theatre (OTT creative pass, 2026-11-19) */
+.coach-send.can-send:active .coach-send-icon {
+  transform: translate(1.5px, -1.5px);
 }
 
 .coach-send.can-send {
@@ -2381,6 +2406,32 @@
   animation: coach-blink 1.3s ease-in-out infinite;
 }
 
+/* a three-bar equaliser beside the live dot — a live microphone should
+   read as live (OTT creative pass, 2026-11-19) */
+.coach-recording-eq {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 12px;
+}
+
+.coach-recording-eq i {
+  width: 3px;
+  height: 100%;
+  border-radius: 2px;
+  background: var(--coach-rose);
+  transform-origin: bottom;
+  animation: coach-eq 0.9s ease-in-out infinite;
+}
+
+.coach-recording-eq i:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.coach-recording-eq i:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
 .coach-recording-label {
   font-size: var(--text-support);
   color: var(--muted-foreground);
@@ -2467,8 +2518,8 @@
 
 .coach-panel-close {
   display: grid;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border-radius: 11px;
   border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
@@ -2737,14 +2788,14 @@
 
 .coach-memory-actions {
   display: flex;
-  gap: 2px;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
 .coach-memory-action {
   display: grid;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   place-items: center;
   border-radius: 8px;
   border: 0;
@@ -3352,6 +3403,16 @@
   }
 }
 
+@keyframes coach-eq {
+  0%,
+  100% {
+    transform: scaleY(0.35);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
 @keyframes coach-blink {
   0%,
   100% {
@@ -3453,11 +3514,6 @@
     /* 16px: below this iOS auto-zooms on focus and the dock jumps */
     font-size: var(--text-card);
     padding: var(--space-1) 2px 2px;
-  }
-
-  .coach-composer-icon {
-    width: 34px;
-    height: 34px;
   }
 
   .coach-composer-foot {

@@ -148,6 +148,37 @@
   opacity: 0.9;
 }
 
+/* The line draws itself in once, on the signature duration — the same
+   draw motif the loading skeleton's avatar arc uses (pf-load-draw), so
+   the wait and the arrival speak one language: Bloom draws your line
+   while it loads, then draws it for real. The path carries
+   pathLength=1, so a 1-unit dash is the whole line. It runs once and
+   is stilled under reduced motion (see the reduce block below). */
+.pf-cover-pulse .pf-pulse-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  animation: pf-pulse-draw var(--motion-signature) var(--ease-out-expo) both;
+}
+@keyframes pf-pulse-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.pf-cover-pulse .pf-pulse-fill {
+  animation: pf-pulse-fade var(--motion-signature) var(--ease-out-expo) both;
+}
+@keyframes pf-pulse-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .pf-cover-tags {
   position: absolute;
   left: 18px;
@@ -465,7 +496,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: var(--space-2);
-  margin-top: 22px;
+  margin-top: var(--space-6);
   padding-inline: var(--space-5);
 }
 @media (max-width: 640px) {
@@ -497,7 +528,9 @@ button.pf-number:hover {
 .pf-number-value {
   font-family: var(--font-display);
   font-weight: 500;
-  font-size: 26px;
+  /* the stat floor (rulebook --fs-stat: 30–40px) — the number is the
+     tile's whole point, so it sits on the scale's stat step */
+  font-size: 30px;
   line-height: 1;
   letter-spacing: var(--tracking-display);
   font-variant-numeric: tabular-nums;
@@ -513,13 +546,13 @@ button.pf-number:hover {
   color: var(--muted-foreground);
 }
 /* The loading placeholder inside a stat tile: a block sized like the
-   number it stands in for (26px line), so the tile's shape never moves
+   number it stands in for (30px line), so the tile's shape never moves
    when the real figure arrives. Pulse and reduced-motion behaviour come
    from .pf-skel. */
 .pf-number-skel {
   display: block;
   width: 46px;
-  height: 26px;
+  height: 30px;
   border-radius: 8px;
 }
 .pf-number-label {
@@ -537,7 +570,7 @@ button.pf-number:hover {
 /* ------------------------------- sections -------------------------------- */
 
 .pf-section {
-  margin-top: 26px;
+  margin-top: var(--space-6);
   padding-inline: var(--space-5);
 }
 @media (max-width: 640px) {
@@ -657,7 +690,7 @@ button.pf-number:hover {
   z-index: 5;
   display: flex;
   gap: var(--space-1);
-  margin-top: 26px;
+  margin-top: var(--space-6);
   padding: 6px var(--space-5) 0;
   border-bottom: 1px solid var(--pf-line);
   background: color-mix(in oklab, var(--background) 86%, transparent);
@@ -1079,7 +1112,7 @@ button.pf-row:hover {
 
 .pf-footer {
   margin-top: var(--space-10);
-  padding: 22px var(--space-5) 0;
+  padding: var(--space-6) var(--space-5) 0;
   border-top: 1px solid var(--pf-line);
   text-align: center;
 }
@@ -1221,7 +1254,9 @@ button.pf-row:hover {
 @media (prefers-reduced-motion: reduce) {
   .pf-rise,
   .story-ring-enter,
-  .pf-skel {
+  .pf-skel,
+  .pf-cover-pulse .pf-pulse-line,
+  .pf-cover-pulse .pf-pulse-fill {
     animation: none;
   }
   .pf-cell,
@@ -1726,9 +1761,9 @@ button.pf-row:hover {
   font-size: var(--text-caption);
   color: var(--muted-foreground);
   transition:
-    color var(--motion-fast) linear,
-    border-color var(--motion-fast) linear,
-    opacity var(--motion-fast) linear;
+    color var(--motion-fast) var(--ease-out-expo),
+    border-color var(--motion-fast) var(--ease-out-expo),
+    opacity var(--motion-fast) var(--ease-out-expo);
 }
 .pf-note-btn:hover:not(:disabled) {
   color: var(--foreground);
@@ -1745,7 +1780,7 @@ button.pf-row:hover {
   height: 24px;
   border-radius: var(--radius-pill);
   color: var(--faint);
-  transition: color var(--motion-fast) linear;
+  transition: color var(--motion-fast) var(--ease-out-expo);
 }
 .pf-note-close:hover {
   color: var(--foreground);
@@ -1833,7 +1868,7 @@ button.pf-row:hover {
   font-weight: 500;
   transition:
     transform var(--motion-fast) var(--ease-out-expo),
-    opacity var(--motion-fast) linear;
+    opacity var(--motion-fast) var(--ease-out-expo);
 }
 .pf-out-btn:hover:not(:disabled) {
   transform: translateY(-1px);

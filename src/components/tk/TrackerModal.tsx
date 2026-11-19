@@ -345,7 +345,7 @@ export function TrackerModal({
           onKeyDown={(event) => {
             if (event.key === "Enter") commit(draft);
           }}
-          className="mt-4 h-[60px] text-center font-mono text-[28px] font-light"
+          className="mt-4 h-[60px] text-center font-mono text-[28px] font-normal"
         />
         <p className="mt-2 text-center text-xs text-muted-foreground">{prompt}</p>
 

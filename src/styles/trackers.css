@@ -1507,7 +1507,10 @@
 /* Small labels go to tracked capitals; the units drop to 40% so the figures
    themselves carry the weight. */
 
-.tk2-root .at-kicker, .tk2-root .at-sectionhead, .tk2-root .at-coord, .tk2-root .at-key span, .tk2-root .at-legend li, .tk2-root .tk2-sync, .tk2-root .tk2-badges-count, .tk2-root .tk2-targets-grid label {
+/* OTT pass: .at-coord left this list — it carries live figures ("8h 30m",
+   "2,200 ml") and the caps + tracking rendered them "8H 30M". Figures are
+   not eyebrows; the coord's own mono/tabular rule above carries it. */
+.tk2-root .at-kicker, .tk2-root .at-sectionhead, .tk2-root .at-key span, .tk2-root .at-legend li, .tk2-root .tk2-sync, .tk2-root .tk2-badges-count, .tk2-root .tk2-targets-grid label {
   text-transform: uppercase;
   letter-spacing: var(--tracking-meta);
 }
@@ -1611,8 +1614,11 @@
 /* Micro-metadata sits in tracked capitals; the figures themselves stay in
    platinum while the units drop to 35% so the number is what you read. */
 
-.tk2-root .at-kicker, .tk2-root .at-sectionhead, .tk2-root .at-coord, .tk2-root .at-key span, .tk2-root .at-legend li, .tk2-root .at-fine, .tk2-root .at-territory-foot span, .tk2-root .tk2-sync, .tk2-root .tk2-badges-count, .tk2-root .tk2-badge-detail, .tk2-root .tk2-targets-grid label {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+/* OTT pass: .at-coord left this list too (figures are not eyebrows), and
+   the -apple-system stack came off — a third font family the rest of the
+   app never loads. The labels keep their size/tracking/caps from here and
+   their family from their own rules (Inter / IBM Plex Mono). */
+.tk2-root .at-kicker, .tk2-root .at-sectionhead, .tk2-root .at-key span, .tk2-root .at-legend li, .tk2-root .at-fine, .tk2-root .at-territory-foot span, .tk2-root .tk2-sync, .tk2-root .tk2-badges-count, .tk2-root .tk2-badge-detail, .tk2-root .tk2-targets-grid label {
   font-size: 0.68rem;
   letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
@@ -1638,31 +1644,38 @@
 
 /* ------------------------- 7. quick-add counters ------------------------- */
 
-/* ----------------------- 6. glassmorphic containers ---------------------- */
+/* ----------------------- 6. solid containers ------------------------------ */
 
+/* OTT pass: the glass treatment came off the content layer. These containers
+   were rgba(18,18,21,0.7) + backdrop blur + a drop shadow; content surfaces
+   are opaque by house rule (glass belongs to navigation/controls only), and
+   a dark card is a lightness step + hairline, never a shadow. The territory
+   card's own later block carries the same solid ground. */
 .tk2-root .ci-card, .tk2-root .tk2-targets-grid li, .tk2-root .tk2-badges-grid li, .at-territory {
-  background: rgba(18, 18, 21, 0.7);
-  backdrop-filter: blur(20px) saturate(120%);
-  -webkit-backdrop-filter: blur(20px) saturate(120%);
+  background: var(--surface);
+  /* explicit none: the finishing pass above still declares a blur for
+     these containers, and an omitted property would let it back in */
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   border: 1px solid var(--card-border);
   border-radius: var(--radius-card);
-  box-shadow:
-  inset 0px 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
-  0px 12px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0px 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent);
 }
 
 /* --------------------------- 3. active surfaces -------------------------- */
 
 /* Anything selected or primary is champagne with hard-contrast type. */
 
+/* OTT pass: flat gold, like every other primary in the app — the
+   gold→violet gradient, the cream label and the glow came off (violet is
+   off-palette here, and cream on gold fails the pairing). */
 .tk2-root .ci-btn--primary {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
-  background-color: var(--gold);
-  border-color: color-mix(in oklab, var(--gold) 0.8, transparent);
-  color: var(--foreground) !important;
+  background: var(--gold);
+  border-color: var(--gold);
+  color: var(--primary-foreground);
   font-weight: 600;
   text-shadow: none;
-  box-shadow: 0 10px 26px -6px color-mix(in oklab, var(--gold) 0.6, transparent);
+  box-shadow: none;
 }
 
 .tk2-root .ci-btn--primary:hover:not(:disabled) {
@@ -1747,10 +1760,12 @@
 }
 
 .tk2-number[data-active="true"] {
-  background: linear-gradient(135deg, var(--gold) 0%, var(--violet) 100%);
-  color: var(--foreground);
+  /* OTT pass: flat gold + ink, matching the primary buttons (was a
+     gold→violet gradient with a glow and a cream label). */
+  background: var(--gold);
+  color: var(--primary-foreground);
   font-weight: 600;
-  box-shadow: 0 0 16px color-mix(in oklab, var(--gold) 0.5, transparent);
+  box-shadow: none;
 }
 
 /* the energy number that is this person's usual — a quiet ring, set
@@ -2075,12 +2090,15 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 /* ------------------------- the insight dock ------------------------------ */
 
 .tk2-insight {
-  background: linear-gradient(180deg, rgba(18, 18, 22, 0.4) 0%, rgba(8, 8, 10, 0.6) 100%);
+  /* OTT pass: solid ground — this panel wore a 0.4→0.6 alpha gradient
+     (the most see-through content surface on the page) plus a drop
+     shadow. Opaque surface + hairline, like every other card. */
+  background: var(--surface);
   border: 1px solid var(--glass-border-rim);
   border-radius: var(--radius-dialog);
   padding: var(--space-8);
   margin: var(--space-8) 0;
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+  box-shadow: inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent);
 }
 
 .tk2-insight-caption {
@@ -2107,7 +2125,9 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.03, transparent);
   color: var(--text-ultra-white);
   font-size: 0.88rem;
-  font-weight: 300;
+  /* OTT pass: 400, not 300 — light-weight prose was the readability trap
+     on the panel's old translucent ground and stays one on any ground. */
+  font-weight: 400;
   line-height: var(--leading-body);
 }
 
@@ -2119,7 +2139,8 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .tk2-insight-index {
   color: var(--foreground);
   font-weight: 500;
-  font-family: "SF Mono", Menlo, Monaco, Consolas, monospace;
+  /* OTT pass: the house mono (IBM Plex Mono), not a foreign SF Mono stack. */
+  font-family: var(--ci-font-mono);
   font-size: 0.8rem;
 }
 
@@ -2134,14 +2155,11 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   padding: var(--space-6);
   border: 1px solid var(--glass-border-rim);
   border-radius: var(--radius-dialog);
-  background:
-  linear-gradient(135deg, color-mix(in oklab, var(--gold) 0.03, transparent) 0%, rgba(138, 43, 226, 0.03) 100%),
-  var(--panel-glass-bg);
-  backdrop-filter: blur(24px) saturate(120%);
-  -webkit-backdrop-filter: blur(24px) saturate(120%);
-  box-shadow:
-  inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
-  0 10px 30px rgba(0, 0, 0, 0.35);
+  /* OTT pass: solid ground — the panel-glass fill, the gold→violet tint
+     gradient, the backdrop blur and the drop shadow came off, matching
+     the container rule above. Hover keeps the border + lift only. */
+  background: var(--surface);
+  box-shadow: inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent);
   transition:
   border-color var(--motion-page) var(--ease-out-expo),
   transform var(--motion-page) var(--ease-out-expo),
@@ -2151,10 +2169,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .at-territory:hover {
   border-color: color-mix(in oklab, var(--gold) 0.5, transparent);
   transform: translateY(-2px);
-  box-shadow:
-  inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent),
-  0 10px 30px rgba(0, 0, 0, 0.35),
-  0 0 20px color-mix(in oklab, var(--gold) 0.2, transparent);
+  box-shadow: inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent);
 }
 
 .at-place {
@@ -2191,12 +2206,12 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 /* --------------------------- the record ---------------------------------- */
 
+/* OTT pass: the table no longer carries its own translucent ground,
+   border and shadow inside the History card — that was a see-through
+   card-in-card. The card provides the chrome; the table keeps its row
+   hairlines and header tint. */
 .tk2-root .ci-table-wrap, .ci-table {
-  border: 1px solid var(--glass-border-rim);
-  border-radius: var(--radius-card);
-  overflow: hidden;
-  background: rgba(12, 12, 15, 0.4);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.4);
+  background: transparent;
 }
 
 .ci-table thead tr {
@@ -2205,7 +2220,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .ci-table th {
-  padding: 18px var(--space-6);
+  padding: var(--space-4) var(--space-6);
   color: var(--text-cool-silver);
   font-size: 0.68rem;
   text-transform: uppercase;
@@ -2319,6 +2334,45 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   .tk2-number {
     width: 44px;
     height: 44px;
+  }
+}
+
+/* OTT pass: the same 44px floor for every touch pointer (tablets included,
+   not just ≤639px phones), for the targets the phone pass never covered —
+   the tracker toggle chips (~29px), the body-tools pill link (38px), the
+   record table's delete button (~20px) and small buttons (~34px), the
+   reset-goals text button, and the target fields. Adjacent toggle chips
+   also move to the 8px minimum gap. Desktop density is untouched. */
+@media (pointer: coarse) {
+  .tk2-active-toggle {
+    min-height: 44px;
+  }
+
+  .tk2-active-list {
+    gap: var(--space-2);
+  }
+
+  .at-body-link {
+    min-height: 44px;
+  }
+
+  .tk2-row-action {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
+  }
+
+  .tk2-root .ci-btn--sm {
+    min-height: 44px;
+  }
+
+  .tk2-targets-foot button {
+    min-height: 44px;
+  }
+
+  .tk2-target-field {
+    min-height: 44px;
+    align-items: center;
   }
 }
 

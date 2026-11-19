@@ -83,7 +83,7 @@ export function MoodCard({
               aria-pressed={isSelected}
               data-testid={`home-mood-face-${face}`}
               className={cn(
-                "group flex flex-col items-center gap-2 rounded-2xl border px-1 py-3.5 transition-all duration-[var(--motion-standard)] hover:-translate-y-1 sm:py-4",
+                "group flex flex-col items-center gap-2 rounded-2xl border px-1 py-3.5 transition-[transform,background-color,border-color] duration-[var(--motion-standard)] ease-[var(--ease-out-expo)] hover:-translate-y-1 sm:py-4",
                 isSelected
                   ? "bg-white/[0.07]"
                   : "border-white/[0.06] bg-white/[0.02] hover:bg-white/[0.05]",
@@ -99,7 +99,7 @@ export function MoodCard({
             >
               <span
                 className={cn(
-                  "transition-transform duration-[var(--motion-standard)]",
+                  "transition-transform duration-[var(--motion-standard)] ease-[var(--ease-out-expo)]",
                   isSelected && "scale-110",
                 )}
               >
@@ -121,7 +121,7 @@ export function MoodCard({
       <button
         type="button"
         onClick={onOpenComposer}
-        className="mt-4 self-start text-[length:var(--text-meta)] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+        className="mt-4 inline-flex min-h-9 items-center self-start text-[length:var(--text-caption)] text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
         data-testid="home-mood-more"
       >
         {selected ? "Add words or detail" : "More than a face? Add words"}

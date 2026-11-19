@@ -108,7 +108,10 @@ function GoldRing({
           strokeDasharray={c}
           strokeDashoffset={c * (1 - clamped)}
           style={{
-            transition: "stroke-dashoffset 1.4s cubic-bezier(0.2,0.7,0.2,1)",
+            /* The house curve at the signature step — the one-off bezier
+               and 1.4s sweep sat outside the motion system (rulebook
+               §12.2: progress fills land in the 360–600ms band). */
+            transition: "stroke-dashoffset var(--motion-signature) var(--ease-out-expo)",
           }}
         />
       </svg>

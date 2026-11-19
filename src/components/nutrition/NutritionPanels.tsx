@@ -181,7 +181,7 @@ export function Spectrum({
 
 export function PatternLab({ patterns }: { patterns: MoodPattern[] }) {
   return (
-    <section className="nut-card nut-card-gold nut-rise mt-4" aria-label="Pattern lab" style={{ "--d": "240ms" } as CSSProperties}>
+    <section className="nut-card nut-rise mt-4" aria-label="Pattern lab" style={{ "--d": "240ms" } as CSSProperties}>
       <p className="eyebrow">Pattern lab</p>
       <h3 className="mt-1.5 font-display text-[30px] leading-tight text-foreground">
         How food and mood <em className="nut-gold-text">move together</em>

@@ -695,7 +695,7 @@ export function NutritionPlanSection() {
             <p className="eyebrow">{MEAL_LABEL[meal.meal]}</p>
             {title ? (
               <h3
-                className="mt-1.5 truncate font-display text-[21px] leading-tight text-foreground"
+                className="mt-1.5 truncate font-display text-[length:var(--text-title)] leading-tight text-foreground"
                 title={title}
               >
                 {title}

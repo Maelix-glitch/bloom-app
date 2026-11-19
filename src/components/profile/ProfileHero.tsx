@@ -101,11 +101,13 @@ export function CoverPulse({ values, className }: { values: number[]; className?
           <stop offset="1" stopColor="var(--gold-soft)" />
         </linearGradient>
       </defs>
-      <path d={area} fill="url(#pf-pulse-fill)" />
+      <path d={area} fill="url(#pf-pulse-fill)" className="pf-pulse-fill" />
       <path
         d={d}
         fill="none"
         stroke="url(#pf-pulse-line)"
+        pathLength={1}
+        className="pf-pulse-line"
         strokeWidth="1.6"
         vectorEffect="non-scaling-stroke"
         strokeLinejoin="round"
