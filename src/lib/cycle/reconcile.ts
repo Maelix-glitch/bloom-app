@@ -104,12 +104,6 @@ export interface ReconcileOptions {
   snoozeDays?: number;
   /** An open period this many days past its usual length asks to be closed. */
   openGraceDays?: number;
-  /**
-   * …and stops asking this many days past it. Beyond that the period is
-   * plainly over; the estimate assumes the usual length and the question
-   * would only be noise.
-   */
-  openAskUntilDays?: number;
   /** Days past the predicted start before we ask "has it started?". */
   lateAfterDays?: number;
   /** A bleed day this many days (or fewer) after a period counts as the same one. */
@@ -133,7 +127,6 @@ function defaults(): Required<ReconcileOptions> {
   return (cachedDefaults ??= {
     snoozeDays: 2,
     openGraceDays: 2,
-    openAskUntilDays: 10,
     lateAfterDays: CYCLE_DEFAULTS.lateAfterDays,
     samePeriodWithinDays: 3,
     maxBleedDays: 14,
@@ -533,14 +526,16 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
     }
 
     /* c) STILL OPEN — no last day, and today is well past the usual length
-          with nothing in the daily log to settle it. Asked inside a window:
-          past the grace days, but not weeks later when the answer is obvious
-          and the question would only be noise. */
-    if (
-      !end &&
-      dayOfPeriod > usual + o.openGraceDays &&
-      dayOfPeriod <= usual + o.openAskUntilDays
-    ) {
+          with nothing in the daily log to settle it. Asked from the grace
+          days on, WITHOUT an expiry: this question used to stop after
+          `usual + 10` days on the theory that the answer was obvious and
+          the estimate assumes the usual length anyway — but the entry
+          itself stayed open, and once the question expired no surface
+          offered to close it (the reported "can't stop my period" bug).
+          The estimate may assume; the record must stay closable. Cadence
+          is governed by the answers themselves: "Still going" snoozes,
+          "Don't ask about this one" dismisses for good. */
+    if (!end && dayOfPeriod > usual + o.openGraceDays) {
       const guess = lastBleed ?? addDays(last.start, usual - 1);
       const since = lastBleed ? diffDays(lastBleed, today) : null;
       ask({
