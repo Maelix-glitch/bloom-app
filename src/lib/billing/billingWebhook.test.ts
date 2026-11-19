@@ -5,7 +5,7 @@
  * mapping. Money moves only on a verified signature, and attribution
  * comes only from the notes the checkout itself wrote.
  */
-import { createHmac } from "node:crypto";
+import { createHash, createHmac } from "node:crypto";
 
 import { describe, expect, it } from "vitest";
 
@@ -17,6 +17,7 @@ import {
   razorpayConfigFromEnv,
   verifyRazorpaySignature,
   webhookConfigured,
+  webhookEventKey,
 } from "../../../supabase/functions/billing/billing-core";
 
 const FULL_ENV = {
@@ -81,6 +82,24 @@ describe("verifyRazorpaySignature (HMAC-SHA256 over the raw body)", () => {
     await expect(verifyRazorpaySignature(body, null, secret)).resolves.toBe(false);
     await expect(verifyRazorpaySignature(body, sign(body, secret), "")).resolves.toBe(false);
     await expect(verifyRazorpaySignature(body, "deadbeef", secret)).resolves.toBe(false);
+  });
+});
+
+describe("webhookEventKey — replay dedupe (pentest 2026-11-19, M4)", () => {
+  const body = JSON.stringify({ event: "subscription.activated", payload: {} });
+
+  it("is the SHA-256 of the raw body", async () => {
+    await expect(webhookEventKey(body)).resolves.toBe(
+      createHash("sha256").update(body).digest("hex"),
+    );
+  });
+
+  it("a verbatim replay hashes identically; any new event hashes differently", async () => {
+    await expect(webhookEventKey(body)).resolves.toBe(await webhookEventKey(body));
+    await expect(webhookEventKey(body + " ")).resolves.not.toBe(await webhookEventKey(body));
+    await expect(
+      webhookEventKey(JSON.stringify({ event: "subscription.charged", payload: {} })),
+    ).resolves.not.toBe(await webhookEventKey(body));
   });
 });
 

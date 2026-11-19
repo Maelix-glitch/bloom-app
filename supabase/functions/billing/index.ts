@@ -16,7 +16,9 @@
  *
  *   · webhook (any POST carrying x-razorpay-signature): the raw body
  *     is HMAC-verified against RAZORPAY_WEBHOOK_SECRET before a byte
- *     of it is trusted. Verified subscription events write through
+ *     of it is trusted, and recorded in billing_webhook_events
+ *     (SHA-256 of the raw body) before it is acted on, so a replayed
+ *     delivery is ignored. Verified subscription events write through
  *     the service-role RPCs (activate_subscription /
  *     set_subscription_status) — the ONLY path that can make someone
  *     Premium. A checkout click, a client claim, a returned browser:
@@ -46,6 +48,7 @@ import {
   razorpayConfigFromEnv,
   verifyRazorpaySignature,
   webhookConfigured,
+  webhookEventKey,
 } from "./billing-core.ts";
 
 const CORS = {
@@ -103,15 +106,46 @@ async function handleWebhook(req: Request, rawBody: string): Promise<Response> {
     return json({ error: "invalid_payload" }, 400);
   }
 
+  const admin = adminClient();
+  if (!admin) return json({ error: "server_unconfigured" }, 503);
+
+  /* Replay protection (M4): record this verified event BEFORE acting
+     on it. The key is the SHA-256 of the raw body, so a verbatim
+     re-delivery — the provider's own retry, or a captured webhook
+     replayed later (the signature scheme has no timestamp) — hits
+     the primary key and is answered as a duplicate without touching
+     entitlement state. If the receipt cannot be recorded we fail
+     closed with a 500: the provider retries, and no event is ever
+     honoured twice because its receipt was lost. */
+  const eventKey = await webhookEventKey(rawBody);
+  const eventName =
+    payload && typeof payload === "object" && typeof (payload as Record<string, unknown>)["event"] === "string"
+      ? ((payload as Record<string, unknown>)["event"] as string)
+      : "";
+  const { error: receiptError } = await admin
+    .from("billing_webhook_events")
+    .insert({ event_key: eventKey, provider: "razorpay", event: eventName });
+  if (receiptError) {
+    if ((receiptError as { code?: string }).code === "23505") {
+      return json({ ok: true, handled: "duplicate" }, 200);
+    }
+    console.error(`billing webhook: event receipt failed: ${receiptError.message}`);
+    return json({ error: "receipt_failed" }, 500);
+  }
+  /* If the entitlement write below fails, the receipt is removed
+     again before answering 500 — otherwise the provider's retry
+     would be swallowed as a duplicate and the event lost. */
+  const dropReceipt = async () => {
+    await admin.from("billing_webhook_events").delete().eq("event_key", eventKey);
+  };
+
   const action = mapRazorpayEvent(payload);
   if (action.kind === "ignore") {
     /* Answered 200 on purpose: the provider retries non-200s, and an
-       event we do not act on is not an error. */
+       event we do not act on is not an error. The receipt stays —
+       the event WAS handled, by deciding to ignore it. */
     return json({ ok: true, handled: "ignore", event: action.event }, 200);
   }
-
-  const admin = adminClient();
-  if (!admin) return json({ error: "server_unconfigured" }, 503);
 
   if (action.kind === "activate") {
     const { error } = await admin.rpc("activate_subscription", {
@@ -125,6 +159,7 @@ async function handleWebhook(req: Request, rawBody: string): Promise<Response> {
     });
     if (error) {
       console.error(`billing webhook: activate failed: ${error.message}`);
+      await dropReceipt();
       return json({ error: "write_failed" }, 500);
     }
     return json({ ok: true, handled: "activate" }, 200);
@@ -137,6 +172,7 @@ async function handleWebhook(req: Request, rawBody: string): Promise<Response> {
   });
   if (error) {
     console.error(`billing webhook: status write failed: ${error.message}`);
+    await dropReceipt();
     return json({ error: "write_failed" }, 500);
   }
   return json({ ok: true, handled: "status" }, 200);

@@ -288,12 +288,16 @@ describe("the Money System's enforcement facts", () => {
   it("the coach gate runs BEFORE any provider call", () => {
     const coach = readFileSync(resolve(process.cwd(), "supabase/functions/coach/index.ts"), "utf8");
 
-    /* Chat paths (Coach + Vitalis): gate, then the 402 refusal, then —
-       only after both — the provider chain. */
+    /* Chat paths (Coach + Vitalis): gate, then the refusal, then —
+       only after both — the provider chain. PIN UPDATED 2026-11-19
+       (pentest M2): the refusal status is now decision-driven via
+       gateErrorStatus — 402 for entitlement denials, 503 when the
+       entitlement RPC did not answer (fail closed). The ordering
+       this pin exists to protect is unchanged. */
     const gateAt = coach.indexOf('billingGateCheck(req, isVitalis ? "vitalis" : "coach"');
     expect(gateAt, "chat-path gate call").toBeGreaterThan(-1);
-    const refusalAt = coach.indexOf("if (gateError) return json(gateError, 402);", gateAt);
-    expect(refusalAt, "402 refusal after the gate").toBeGreaterThan(gateAt);
+    const refusalAt = coach.indexOf("if (gateError) return json(gateError, gateErrorStatus(gate) ?? 402);", gateAt);
+    expect(refusalAt, "gate refusal after the gate").toBeGreaterThan(gateAt);
     const providerAt = coach.indexOf("runProviderChain({", refusalAt);
     expect(providerAt, "provider chain after the refusal").toBeGreaterThan(refusalAt);
 

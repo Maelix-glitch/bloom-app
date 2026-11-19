@@ -23,13 +23,17 @@
  *     never for a failure. A completed answer is never withheld
  *     because a deduct raced an empty balance (the spend is
  *     best-effort at that point and logged; the NEXT request gates).
- *   · When the entitlement RPC does not answer — the billing
- *     migration not yet applied, or no caller token — the gate is
- *     INACTIVE: the request proceeds uncharged. That is a deliberate
- *     dark-launch seam, not a bypass: it exists so this code can be
- *     deployed before the database migration lands without breaking
- *     the Coach for everyone. The moment the RPC answers, enforcement
- *     is total — there is no client-controlled input to the decision.
+ *   · When the entitlement RPC does not answer, the gate FAILS
+ *     CLOSED: the request is refused with a retryable 503
+ *     (`billing_unavailable`) instead of proceeding uncharged. The
+ *     billing migration has been live since 2026-11-18, so an
+ *     unanswered RPC is an outage, not a launch state — and an
+ *     outage must never silently become free AI (pentest 2026-11-19,
+ *     finding M2). The old dark-launch behaviour survives ONLY
+ *     behind the explicit env flag BLOOM_BILLING_DARK_LAUNCH=1,
+ *     which index.ts reads and passes in as `darkLaunch`; it
+ *     defaults off, and there is no client-controlled input to the
+ *     decision either way.
  */
 
 export type BillingTier = "free" | "premium" | "premium_plus";
@@ -59,7 +63,8 @@ export const TIER_ALLOWANCES: Record<BillingTier, number> = {
 
 /** What the entitlement RPC told us about the caller. `null` (handled
  *  by decideGate's caller, not a value here) means the RPC did not
- *  answer and the gate is inactive. */
+ *  answer — the gate then fails closed unless the dark-launch flag
+ *  was explicitly set (see decideGate). */
 export interface EntitlementSnapshot {
   tier: BillingTier;
   status: string;
@@ -72,7 +77,8 @@ export type GateDecision =
   | { kind: "allow"; cost: number; reason: CreditReason }
   | { kind: "allow_uncharged" }
   | { kind: "deny_insufficient"; cost: number; balance: number; tier: BillingTier }
-  | { kind: "deny_premium"; feature: "food_photo_analysis"; tier: BillingTier };
+  | { kind: "deny_premium"; feature: "food_photo_analysis"; tier: BillingTier }
+  | { kind: "deny_unavailable" };
 
 function asTier(value: unknown): BillingTier {
   return value === "premium" || value === "premium_plus" ? value : "free";
@@ -86,8 +92,8 @@ function asCount(value: unknown): number {
 /**
  * Parse the get_my_entitlement() RPC result (a PostgREST array of one
  * row) into a snapshot. Anything malformed returns null — the caller
- * treats that as "billing inactive", never as a paying or a blocked
- * user invented by a parse guess.
+ * treats that as "entitlement unknown" and the gate fails closed,
+ * never as a paying or a blocked user invented by a parse guess.
  */
 export function parseEntitlementRows(rows: unknown): EntitlementSnapshot | null {
   if (!Array.isArray(rows) || rows.length === 0) return null;
@@ -116,7 +122,12 @@ export function costFor(action: BillingAction, hasMedia: boolean): { cost: numbe
 
 /**
  * THE gate. Pure and total over its inputs:
- *   entitlement null  → allow_uncharged (billing inactive, see header)
+ *   entitlement null  → deny_unavailable (fail closed — billing is
+ *                       live; an unanswered RPC is an outage, and an
+ *                       outage is not a free tier). ONLY when the
+ *                       operator explicitly set the dark-launch flag
+ *                       (a future pre-migration deploy) does null
+ *                       still mean allow_uncharged.
  *   free + photo      → deny_premium (feature gate, balance irrelevant)
  *   balance < cost    → deny_insufficient
  *   otherwise         → allow with the flat cost to deduct on success
@@ -125,9 +136,12 @@ export function decideGate(input: {
   entitlement: EntitlementSnapshot | null;
   action: BillingAction;
   hasMedia: boolean;
+  darkLaunch?: boolean;
 }): GateDecision {
-  const { entitlement, action, hasMedia } = input;
-  if (!entitlement) return { kind: "allow_uncharged" };
+  const { entitlement, action, hasMedia, darkLaunch } = input;
+  if (!entitlement) {
+    return darkLaunch ? { kind: "allow_uncharged" } : { kind: "deny_unavailable" };
+  }
   if (action === "coach" && hasMedia && entitlement.tier === "free") {
     return { kind: "deny_premium", feature: "food_photo_analysis", tier: entitlement.tier };
   }
@@ -138,7 +152,7 @@ export function decideGate(input: {
   return { kind: "allow", cost, reason };
 }
 
-/** The 402 body for a denied gate — the client keys its upgrade
+/** The error body for a denied gate — the client keys its upgrade
  *  prompt off `error`, and shows the numbers honestly. */
 export function gateErrorBody(
   decision: GateDecision,
@@ -161,5 +175,21 @@ export function gateErrorBody(
       requestId,
     };
   }
+  if (decision.kind === "deny_unavailable") {
+    return {
+      error: "billing_unavailable",
+      requestId,
+    };
+  }
+  return null;
+}
+
+/** The HTTP status for a denied gate: entitlement denials are 402
+ *  (the client's upgrade prompt), but an unanswered entitlement RPC
+ *  is a retryable 503 — the person has done nothing wrong and their
+ *  balance was never read. Allows carry no error, hence null. */
+export function gateErrorStatus(decision: GateDecision): number | null {
+  if (decision.kind === "deny_unavailable") return 503;
+  if (decision.kind === "deny_insufficient" || decision.kind === "deny_premium") return 402;
   return null;
 }
