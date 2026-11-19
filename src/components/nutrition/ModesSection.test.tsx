@@ -40,6 +40,20 @@ describe("ModesSection", () => {
     expect(pressure.getAttribute("data-disabled")).toBeNull();
   });
 
+  it("rules render as chips and every filtering mode states its effect, on or off", () => {
+    const { container } = render(<ModesSection />);
+    /* The rule data as chips (anti-document slice 4, M-68). */
+    expect(screen.getByText("Added sugar")).toBeTruthy();
+    expect(screen.getByText("Carbs > 75 g")).toBeTruthy();
+    expect(screen.getByText("Sodium > 800 mg")).toBeTruthy();
+    /* Both filtering modes carry the "Would hide N of 1,202 dishes"
+       footer while OFF — the effect is a fact about the rules and
+       the library, not about the switch. (The count is a <strong>
+       inside the footer line, so match on the footers' full text.) */
+    const footers = [...container.querySelectorAll(".tile__foot")].map((f) => f.textContent ?? "");
+    expect(footers.filter((t) => /Would hide [\d,]+ of [\d,]+ dishes/.test(t))).toHaveLength(2);
+  });
+
   it("a stored 'thyroid on' still renders disabled and off — the display never lies", () => {
     writeModes(["thyroid"]);
     resetPrefCache();

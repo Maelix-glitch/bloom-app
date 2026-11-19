@@ -63,15 +63,32 @@ export const TWIN_TREND_WINDOW_DAYS = 35;
  *  one — one day is an anecdote (the plan adaptation's rule). */
 export const TWIN_MIN_AVERAGE_DAYS = 2;
 
+/** One requirement behind an insufficient field, as counts — the
+ *  meter form of the prose unlock (anti-document brief v3: a
+ *  requirement is a meter with X/Y, never only a sentence). */
+export interface TwinProgress {
+  label: string;
+  have: number;
+  need: number;
+}
+
 /**
  * One field of the Twin. A `value` always travels with the provenance
  * of the computation that produced it; an `insufficient` says what
  * the record holds, why no honest value can be stated, and the
- * concrete thing that would unlock it.
+ * concrete thing that would unlock it. Where the unlock is countable,
+ * `progress` carries the same counts in structured form so a surface
+ * can meter them instead of restating the sentence.
  */
 export type TwinField<T> =
   | { state: "value"; value: T; provenance: string }
-  | { state: "insufficient"; reason: string; unlock: string; provenance: string };
+  | {
+      state: "insufficient";
+      reason: string;
+      unlock: string;
+      provenance: string;
+      progress?: readonly TwinProgress[];
+    };
 
 export interface WeightTrend {
   fromDate: string;
@@ -171,6 +188,7 @@ function weightTrendFor(weighIns: readonly WeighIn[], day: string): TwinField<We
       reason: "No weigh-ins on record yet.",
       unlock: "Log your weight on two different days and the trend appears.",
       provenance: "From your weigh-ins — none recorded",
+      progress: [{ label: "Weigh-ins", have: 0, need: 2 }],
     };
   }
   const last = points[points.length - 1]!;
@@ -180,6 +198,7 @@ function weightTrendFor(weighIns: readonly WeighIn[], day: string): TwinField<We
       reason: `One weigh-in on record: ${last.kg} kg on ${last.date}.`,
       unlock: "One more weigh-in on a different day starts the trend.",
       provenance: "From your weigh-ins — 1 recorded",
+      progress: [{ label: "Weigh-ins", have: 1, need: 2 }],
     };
   }
   /* The judged window ends at the latest weigh-in (not today: a
@@ -317,6 +336,7 @@ function nutrientGapsFor(
       reason: `${loggedDays.size} ${plural(loggedDays.size, "logged day", "logged days")} on record — a nutrient pattern needs at least ${MICRO_MIN_DAYS}.`,
       unlock: `Log ${MICRO_MIN_DAYS} or more days and the nutrients your foods report can be judged against their references.`,
       provenance: "From your food log's nutrient panels",
+      progress: [{ label: "Logged days", have: loggedDays.size, need: MICRO_MIN_DAYS }],
     };
   }
   return {
@@ -349,6 +369,14 @@ export function buildTwinSnapshot(inputs: TwinInputs): TwinSnapshot {
           reason: `${expenditureResult.loggedDays} of the ${EXPENDITURE_MIN_LOGGED_DAYS} logged days, and ${expenditureResult.weightPoints} ${plural(expenditureResult.weightPoints, "weigh-in", "weigh-ins")} spanning ${expenditureResult.spanDays} ${plural(expenditureResult.spanDays, "day", "days")}, are on record.`,
           unlock: `Log food on ${EXPENDITURE_MIN_LOGGED_DAYS} days between two weigh-ins at least 10 days apart and your maintenance estimate appears — no formula guess in the meantime.`,
           provenance: "From your food log and weigh-ins so far",
+          progress: [
+            {
+              label: "Logged days",
+              have: expenditureResult.loggedDays,
+              need: EXPENDITURE_MIN_LOGGED_DAYS,
+            },
+            { label: "Weigh-ins", have: expenditureResult.weightPoints, need: 2 },
+          ],
         };
 
   const weightTrend = weightTrendFor(weighIns, day);

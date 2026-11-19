@@ -40,6 +40,13 @@ export interface ProgrammeDefinition {
   name: string;
   /** Plain description — structure only, no outcome promises. */
   blurb: string;
+  /**
+   * The card's one closing line: the blurb's own final clause,
+   * promoted to data so the comparison card can show it without
+   * reprinting the whole blurb. A purpose, never a promised result —
+   * the same copy discipline as the blurb.
+   */
+  outcome: string;
   weeks: ProgrammeWeek[];
   /**
    * The assessment goals this programme is built for, when it is built
@@ -59,6 +66,7 @@ export const STRONG_START: ProgrammeDefinition = {
   blurb:
     "Four weeks of getting the basics recorded: food in the log, habits ticked, " +
     "one weigh-in a week. A structure for your next 4 weeks — the record itself is the point.",
+  outcome: "The record itself is the point.",
   weeks: [
     {
       focus: "Start small, start recording",
@@ -89,6 +97,7 @@ export const BUILD_AND_FUEL: ProgrammeDefinition = {
     "Twelve weeks built around your plan: follow it on more days, log what you " +
     "actually ate, keep habits loading up, and weigh in weekly so the plan can " +
     "adapt. A structure for your next 12 weeks, aligned to a build-strength goal.",
+  outcome: "Aligned to a build-strength goal.",
   weeks: [
     { focus: "Set the base", targets: [t("plan_days", 3), t("food_log_days", 4), t("habit_tick_days", 4), t("weigh_in_count", 1)] },
     { focus: "Follow the plan", targets: [t("plan_days", 4), t("food_log_days", 5), t("habit_tick_days", 4), t("weigh_in_count", 1)] },

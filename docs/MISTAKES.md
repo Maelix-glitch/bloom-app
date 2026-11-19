@@ -83,12 +83,12 @@ audit file did not preserve.
 | M-47 | Unlabelled 66% on the points card; no "points to Sprout" | OPEN — owner slice SYSTEM (Level card). |
 | M-48 | White rainbow assistant bubble | STALE — not reproducible in current code: the orb is a dark panel circle with a gold border/glyph (src/styles/orb.css). Residual: 56px vs the brief's 48px and z-index 60 — SYSTEM. |
 | M-49 | Clipped tagline artwork (fern) and dead zone in the sidebar footer | OPEN — owner slice SYSTEM. (The companion ask, an account row pinned at the bottom, already exists: RailProfile.) |
-| M-51 | Eyebrow repeats the H2 ("METABOLIC TWIN" / "Your metabolic twin") | OPEN — owner slice PATTERNS. |
-| M-52 | Mixed measures in one card (intro 58ch, rows full width) | OPEN — owner slice PATTERNS. |
-| M-53 | Ready and gathering signals indistinguishable (status in prose) | OPEN — owner slice PATTERNS. |
-| M-54 | Requirements written as sentences, not meters | OPEN — owner slice PATTERNS. |
-| M-55 | Source lines as small grey text, not the solid/dashed source chip | OPEN — owner slice ATOMS. (Size is 12px, not ~11px as audited.) |
-| M-56 | H2 (18px) smaller than the row numerals (22px) inside its card | OPEN — owner slices PATTERNS/SYSTEM. |
+| M-51 | Eyebrow repeats the H2 ("METABOLIC TWIN" / "Your metabolic twin") | FIXED — antidoc-twin slice (anti-document v3, slices 1–3): the eyebrow is deleted; the header is H2 + one subtitle line + readiness dots. |
+| M-52 | Mixed measures in one card (intro 58ch, rows full width) | FIXED — antidoc-twin slice: the intro paragraph is deleted; the five signals are tiles in one grid, each carrying only its own value, hint and footer. |
+| M-53 | Ready and gathering signals indistinguishable (status in prose) | FIXED — antidoc-twin slice: state is structural — Ready / Gathering data / No data yet badges, sage-vs-dashed readiness dots, gathering tiles dashed with figure "—". |
+| M-54 | Requirements written as sentences, not meters | FIXED — antidoc-twin slice: requirements render as .req meters built from counts twin.ts now returns (TwinField.progress: Logged days x/10, Weigh-ins x/2, Logged days x/4). |
+| M-55 | Source lines as small grey text, not the solid/dashed source chip | FIXED — antidoc-twin slice: provenance is a source chip in each tile footer (nut-badge src-chip; solid = measured, dashed = estimated); the full provenance sentences moved into the "How the twin works" details. |
+| M-56 | H2 (18px) smaller than the row numerals (22px) inside its card | FIXED — antidoc-twin slice: tile titles are 14px and the H2 sits at the house section size above them; the old 22px mid-paragraph numerals are gone — figures are the tiles' sanctioned anchors. |
 | M-57 | Energy-target maths contradicts (458 kcal = "34% of target" vs ~2,950 kcal elsewhere) | **NOT A BUG** — traced 2026-11-19: the Twin divides by `targets.kcal` from the same targetState the Nutrition hero uses; they cannot diverge. The ~2,950 figure is the maintenance (burn) estimate, a different labelled quantity. Pinned by unit tests (lib twin.test.ts; section pin added in the rulebook-v2-trust slice). |
 | M-58 | Shopping quantities can render "0 g" | FIXED — rulebook-v2-trust slice (fmtShoppingQty: under 5 g renders "a pinch"). |
 | M-59 | Unrounded, gram-precise spice quantities (358 g, 103 g, 263 g) | FIXED — rulebook-v2-trust slice (fmtShoppingQty rounding steps). |
@@ -98,18 +98,18 @@ audit file did not preserve.
 | M-63 | No progress ("0 of 22 bought") and no Copy/Share on the shopping list | OPEN — owner slice PATTERNS. |
 | M-64 | Confusing shopping footnote ("…set in the Assessment, nowhere else") | OPEN — owner slice COPY. |
 | M-65 | Pantry sits below the list it changes; no "Covered by your pantry (N)" | OPEN — owner slice PATTERNS. |
-| M-66 | Condition-mode switches float mid-card, not at the row's right edge | OPEN — owner slice PATTERNS (setting row). Conflicts with a shipped system-slice choice; rulebook v2 wins per the brief. |
-| M-67 | Switch track nearly invisible; off knob is the brightest element | OPEN — owner slice ATOMS. |
-| M-68 | Mode rules as paragraphs, not chips | PARTIAL — the computed "hides N of 1,202 dishes" exists but only in the on-state; chips missing: PATTERNS. |
-| M-69 | Safety disclaimer is plain intro text, not the `.note` component | OPEN — owner slice PATTERNS. |
-| M-70 | Inverted hierarchy in Programmes (H2 and programme titles both 18px; no intro line) | OPEN — owner slice PATTERNS. |
+| M-66 | Condition-mode switches float mid-card, not at the row's right edge | FIXED — antidoc-modes slice (anti-document v3, slice 4): modes are tiles; the switch sits inside the tile's head at its top-right. The system-slice mid-card choice is superseded per rulebook v2. |
+| M-67 | Switch track nearly invisible; off knob is the brightest element | FIXED — antidoc-modes slice: the shared ui/switch track carries a 1px --border-strong rim in both states (gold when on) and the off thumb is muted-foreground, not cream. Every switch consumer inherits it (Assessment, Home, Modes, Profile data sheets, Trainer). |
+| M-68 | Mode rules as paragraphs, not chips | FIXED — antidoc-modes slice: rules are chips derived from the mode rule data ("Added sugar", "Carbs > 75 g", "Sodium > 800 mg"), and the computed footer "Would hide N of 1,202 dishes" shows in BOTH switch states (blood-sugar 201, blood-pressure 265 on the current library). |
+| M-69 | Safety disclaimer is plain intro text, not the `.note` component | FIXED — antidoc-modes slice: the safety line is a single `.note` with an info icon above the mode tile grid. |
+| M-70 | Inverted hierarchy in Programmes (H2 and programme titles both 18px; no intro line) | FIXED — antidoc-modes slice: section H2 stays the serif house section size; programme card titles are --text-body semibold sans inside comparison cards, and the section gained the subtitle "Pick a structure for the next few weeks." |
 | M-71 | No recommended programme ("Matches your goal") | FIXED — PR #183 (goal-match data + badge + sole primary). No badge shows when neither programme declares the user's goal — by design. |
-| M-72 | Past-run row: label/value ~1,100px apart, "Quit" wording, no status component | OPEN — owner slices COPY (word) + PATTERNS (row). |
+| M-72 | Past-run row: label/value ~1,100px apart, "Quit" wording, no status component | FIXED — antidoc-modes slice: past runs are compact rows inside a "Past runs (N)" disclosure — name, fmtDate, neutral "Ended early" badge (completed runs keep "Completed") and an adjacent "X of Y weeks" progressbar meter. The word "Quit" no longer renders anywhere in the section (the active run's button is "End programme"); the guard test proves it. |
 | M-73 | Half-empty cards (full-width cards, measure-capped text) | OPEN — owner slice SYSTEM (container). |
 | M-74 | Monochrome grey; no semantic colour carrying meaning | OPEN — owner slices SYSTEM/ATOMS (semantic tokens exist; the audited surfaces don't apply them). |
 | M-75 | Oversized radius (24px) and identical card weights, no variants | OPEN — owner slice SYSTEM. |
 | M-76 | Content container too wide (~1,180px; rulebook cap is 1040px) | OPEN — owner slice SYSTEM. |
-| M-77 | Data and status explained in paragraphs (Metabolic twin, What your plan learned) | OPEN — anti-document brief v3: prose-to-component table, paragraph budget. |
-| M-78 | Display screens use form anatomy (label left, value or control far right, dividers) | OPEN — anti-document brief v3: form-vs-display law, value-first tiles. |
-| M-79 | Cards with no visual anchor (all text) | OPEN — anti-document brief v3: anchor law, enforced by the anti-document guard test. |
+| M-77 | Data and status explained in paragraphs (Metabolic twin, What your plan learned) | FIXED — antidoc-twin slice (anti-document v3, slices 1–3): both named sections rebuilt to tiles and insight cards; every value byte-identical, enforced by the anti-document guard + the M-57 pin. |
+| M-78 | Display screens use form anatomy (label left, value or control far right, dividers) | PARTIAL — antidoc slices 3–4: the form anatomy is gone on the Metabolic Twin, What-your-plan-learned, Condition Modes and Programmes (tiles and comparison cards, guard-enforced). Remaining display screens keep their rows until the sweep slice (anti-document slice 6). |
+| M-79 | Cards with no visual anchor (all text) | FIXED for the audited sections — antidoc-twin slice anchored the Twin and plan-learned cards; antidoc-modes slice anchored Modes (chips, badges) and Programmes (duration/match badges, meters), and the anti-document guard's census pins for both were flipped to strict. The sweep slice extends the guard route by route; un-audited screens are not claimed here. |
 | M-80 | Neighbouring cards share one structure, so the page is a wall of identical slabs | OPEN — anti-document brief v3: rhythm law (hero, grid, list, chart). |
