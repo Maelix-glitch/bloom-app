@@ -6,7 +6,9 @@
  * a grid) and fills every slot with the record: twelve weeks of logged days,
  * what is being tracked, streaks and milestones. Under the new skin, every
  * feature of the first profile is intact — identity editing, stories,
- * highlights, featured moment, privacy, preview, share, export, sign-in/out.
+ * highlights, featured moment, privacy, preview, share, sign-in/out.
+ * The account sections (Account & data, Membership, Trainer, Household,
+ * Sessions) live on /settings now (Plan B, senior diagnosis slice 5).
  *
  * Data: `useProfileSpace` (profiles / stories / highlights / privacy in
  * Supabase) + `useProfileRecord` (the same local-first tracker, mood, habit
@@ -16,7 +18,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { Archive, FileUp, Pin, Plus, Sparkles } from "lucide-react";
+import { Archive, Pin, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -43,7 +45,6 @@ import {
 } from "@/lib/profile/verificationService";
 import { useAvatarAmbient } from "@/lib/profile/ambient";
 import { isStoryActive, type Milestone, type Story } from "@/lib/profile/types";
-import { StorySettings } from "@/components/stories/StorySettings";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
 import { buildViewModel, resolveFeatured } from "@/components/profile/ProfileView";
 import type { ProfileEditorSave } from "@/components/profile/ProfileEditor";
@@ -57,22 +58,13 @@ import {
 } from "@/components/profile/ProfileLoading";
 import { ProfileEditor } from "@/components/profile/ProfileEditor";
 import { PrivacySheet } from "@/components/profile/PrivacySheet";
-import { RestoreSheet } from "@/components/profile/RestoreSheet";
-import { SessionsSection } from "@/components/profile/SessionsSection";
-import { PremiumSection } from "@/components/billing/PremiumSection";
-import { TrainerSection } from "@/components/trainer/TrainerSection";
 import { LabReportsSection } from "@/components/profile/LabReportsSection";
-import { HouseholdSection } from "@/components/household/HouseholdSection";
+import { GettingStartedCard } from "@/components/profile/GettingStartedCard";
 import { PublicProfileView } from "@/components/profile/PublicProfileView";
 import { RecordGrid, RecordNumbers, TrackedThings } from "@/components/profile/RecordBlock";
 import { MomentsGrid } from "@/components/profile/MomentsGrid";
 import { JourneyCard } from "@/components/profile/JourneyCard";
-import { AccountRow } from "@/components/profile/AccountRow";
 import { RankPill } from "@/components/progression/RankPill";
-import { EraseSheet, ExportSheet, RemindersSheet } from "@/components/profile/DataSheets";
-import { useExportBundle } from "@/hooks/useExportBundle";
-import { useReminders } from "@/hooks/useReminders";
-import { useInstallPrompt } from "@/hooks/useInstallPrompt";
 import { FeaturedCard, FeaturePrompt, FeaturedPicker } from "@/components/profile/FeaturedMoment";
 import { ProfileShareSheet } from "@/components/profile/ProfileShareSheet";
 import { UserSearchSheet } from "@/components/profile/UserSearchSheet";
@@ -122,19 +114,6 @@ const TABS: { id: ProfileTab; label: string }[] = [
   { id: "journey", label: "Journey" },
 ];
 
-/* Plan A (senior audit slice C): the settings half of the page, in its real
-   order, named as the sections name themselves. Each entry is a plain
-   anchor to the section's id — the sections carry .pf-jump, whose
-   scroll-margin clears the sticky tabs bar. Privacy has no section of its
-   own (it lives in Account & data's rows); security is Sessions & devices. */
-const ACCOUNT_NAV: { id: string; label: string }[] = [
-  { id: "pf-account-data", label: "Account & data" },
-  { id: "pf-membership", label: "Membership" },
-  { id: "pf-trainer", label: "Trainer & clinician" },
-  { id: "pf-household", label: "Household" },
-  { id: "pf-sessions", label: "Sessions & devices" },
-];
-
 function ProfilePage() {
   const { story: storyParam, view: viewParam } = Route.useSearch();
   const navigate = useNavigate();
@@ -153,14 +132,9 @@ function ProfilePage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [privacyOpen, setPrivacyOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
-  const [storySettingsOpen, setStorySettingsOpen] = useState(false);
   const [composerOpen, setComposerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
-  const [exportOpen, setExportOpen] = useState(false);
-  const [remindersOpen, setRemindersOpen] = useState(false);
-  const [eraseOpen, setEraseOpen] = useState(false);
-  const [restoreOpen, setRestoreOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [userSearchOpen, setUserSearchOpen] = useState(false);
@@ -308,10 +282,6 @@ function ProfilePage() {
   const moodSettled = moodBlock != null && moodBlock.status !== "loading";
   const record = useProfileRecord(moodEntries, { moodSettled });
   const habits = useHabits();
-
-  /* Tier B part 2 — reminders, install, one export, one erase */
-  const reminders = useReminders();
-  const install = useInstallPrompt();
 
   /* deep link from Mood: "share as story" */
   const [composerSource, setComposerSource] = useState<{
@@ -470,51 +440,6 @@ function ProfilePage() {
 
   const highlights = highlightsBlock?.status === "ready" ? highlightsBlock.data : [];
 
-  /* B7 — the bundle is assembled only when the sheet asks for it */
-  const exportBundle = useExportBundle({
-    ...(identity
-      ? {
-          profile: {
-            displayName: identity.identity.displayName,
-            username: identity.identity.username,
-            bio: identity.identity.bio,
-            accent: identity.identity.accent,
-            email: identity.email,
-            memberSince: identity.memberSince,
-          },
-        }
-      : {}),
-    stories: allStories.map((s) => ({
-      kind: s.kind,
-      title: s.title,
-      body: s.body,
-      createdAt: s.createdAt,
-      expiresAt: s.expiresAt,
-      visibility: s.visibility,
-    })),
-    highlights: highlights.map((h) => ({
-      name: h.name,
-      accent: h.accent,
-      icon: h.icon,
-      stories: h.stories.map((st) => ({ title: st.title, createdAt: st.createdAt })),
-    })),
-    moodEntries,
-    userId,
-  });
-
-  const remindersValue = !reminders.settings.enabled
-    ? "off"
-    : reminders.permission === "granted"
-      ? "on"
-      : "needs permission";
-  const installValue = install.installed
-    ? "installed"
-    : install.canInstall
-      ? "add to home screen"
-      : install.ios
-        ? "share → add to home screen"
-        : null;
-
   /* tapping a day in the grid goes to the page that can show it */
   const openDay = useCallback(
     (date: string) => {
@@ -645,24 +570,48 @@ function ProfilePage() {
                 loading={!record.settled || journey.status === "loading"}
               />
 
-              {/* W4-1: the assessment's permanent home — take, continue,
-                  read the summary, retake. */}
-              <section className="pf-section" aria-label="Assessment">
-                <AssessmentProfileCard />
+              {/* Getting started (empty-state slice): the three first
+                  steps in ONE card, each read from the real record —
+                  it renders nothing once all three are done, so a new
+                  account meets one card here instead of an empty
+                  paragraph inside every section below. */}
+              <section className="pf-section" aria-label="Getting started">
+                <GettingStartedCard />
               </section>
 
-              {/* W4-3: Nutrition's permanent home on Profile, beside the
-                  assessment's — today's log against the target, or the
-                  invitation to start. */}
-              <section className="pf-section" aria-label="Nutrition">
-                <NutritionProfileCard />
-              </section>
+              {/* Health (Plan B): the health content grouped as health,
+                  under one named region — the assessment and its
+                  starting point, nutrition, and lab reports. The
+                  assessment keeps its id: the getting-started card's
+                  first step anchors to #pf-assessment. */}
+              <section aria-label="Health">
+                <div className="pf-section pf-section-head">
+                  <div>
+                    <p className="pf-eyebrow">Health</p>
+                    <h2 className="pf-title">Your health</h2>
+                  </div>
+                </div>
 
-              {/* Lab reports: the values from the person's own printed
-                  reports, each shown only against the range printed on
-                  that report — a record, never an interpretation. */}
-              <section className="pf-section" aria-label="Lab reports">
-                <LabReportsSection />
+                {/* W4-1: the assessment's permanent home — take, continue,
+                    read the summary, retake. The getting-started card's
+                    first step anchors here. */}
+                <section id="pf-assessment" className="pf-section pf-anchor-jump" aria-label="Assessment">
+                  <AssessmentProfileCard />
+                </section>
+
+                {/* W4-3: Nutrition's permanent home on Profile, beside the
+                    assessment's — today's log against the target, or the
+                    invitation to start. */}
+                <section className="pf-section" aria-label="Nutrition">
+                  <NutritionProfileCard />
+                </section>
+
+                {/* Lab reports: the values from the person's own printed
+                    reports, each shown only against the range printed on
+                    that report — a record, never an interpretation. */}
+                <section className="pf-section" aria-label="Lab reports">
+                  <LabReportsSection />
+                </section>
               </section>
 
               {/* the record: 12 weeks + what's being tracked */}
@@ -956,132 +905,11 @@ function ProfilePage() {
                 </section>
               ) : null}
 
-              {/* account — the settings half of the page, set apart from
-                  the profile content above (Plan A, senior audit slice C):
-                  a region heading of its own plus a local nav, so the tabs
-                  no longer appear to govern settings they don't govern. */}
-              <section className="pf-section mt-10" aria-label="Account">
-                <div className="pf-section-head">
-                  <div>
-                    <p className="pf-eyebrow">Settings</p>
-                    <h2 className="pf-title">Account</h2>
-                  </div>
-                </div>
-                <nav className="pf-account-nav" aria-label="Account sections">
-                  {ACCOUNT_NAV.map((item) => (
-                    <a key={item.id} className="pf-account-chip" href={`#${item.id}`}>
-                      {item.label}
-                    </a>
-                  ))}
-                </nav>
-              </section>
-
-              {/* account + data — settings rows */}
-              <section
-                id="pf-account-data"
-                className="pf-section pf-jump mt-10"
-                aria-label="Account and data"
-              >
-                <div className="pf-section-head">
-                  <div>
-                    <p className="pf-eyebrow">Account</p>
-                    <h2 className="pf-title">Account &amp; data</h2>
-                  </div>
-                </div>
-                <AccountRow
-                  identity={identity.identity}
-                  account={{ email: identity.email, memberSince: identity.memberSince }}
-                  verification={
-                    verification ??
-                    verificationStatus({
-                      invited: false,
-                      emailConfirmed: false,
-                      displayName: null,
-                      username: null,
-                      hasRecord: false,
-                    })
-                  }
-                  privacy={identity.privacy}
-                  stories={allStories}
-                  highlights={highlights}
-                  isSignedIn={authState === "signed-in"}
-                  onOpenPrivacy={() => setPrivacyOpen(true)}
-                  onShare={() => void handleShare()}
-                  onPreview={() => setPreviewOpen(true)}
-                  onOpenArchive={() => setArchiveOpen(true)}
-                  onOpenStorySettings={() => setStorySettingsOpen(true)}
-                  onEdit={() => setEditorOpen(true)}
-                  onSignOut={() => {
-                    void space.actions.signOut();
-                  }}
-                  onSignIn={() => setSignInOpen(true)}
-                  onExportAll={() => setExportOpen(true)}
-                  onOpenReminders={() => setRemindersOpen(true)}
-                  onOpenErase={() => setEraseOpen(true)}
-                  {...(install.canInstall ? { onInstall: () => void install.install() } : {})}
-                  remindersValue={remindersValue}
-                  installValue={installValue}
-                />
-
-                {/* The other half of "Download everything". */}
-                <section aria-label="Backup" className="pf-group mt-6">
-                  <h2 className="pf-group-label">Backup</h2>
-                  <div className="pf-group-rows">
-                    <button type="button" className="pf-row" onClick={() => setRestoreOpen(true)}>
-                      <span className="pf-row-icon" aria-hidden>
-                        <FileUp className="size-4" />
-                      </span>
-                      <span className="pf-row-text">
-                        <span className="pf-row-label">Restore from backup</span>
-                        <span className="pf-row-hint">
-                          Reads a “Download everything” file into this browser
-                        </span>
-                      </span>
-                      <span className="pf-row-value">json</span>
-                      <span />
-                    </button>
-                  </div>
-                </section>
-              </section>
-
-              {/* Money System: the membership card — plan, AI credits,
-                  and the door to Premium. */}
-              <section id="pf-membership" className="pf-section pf-jump mt-10" aria-label="Membership">
-                <PremiumSection />
-              </section>
-
-              {/* Trainer & Clinician Pro: referral code, the consent-gated
-                  share summary, and trainer-proposed targets. */}
-              <section
-                id="pf-trainer"
-                className="pf-section pf-jump mt-10"
-                aria-label="Trainer and clinician"
-              >
-                <TrainerSection userId={userId} />
-              </section>
-              {/* One-Kitchen Family: the household the person cooks for,
-                  and the dishes that suit everyone at the table. */}
-              <section id="pf-household" className="pf-section pf-jump mt-10" aria-label="Household">
-                <HouseholdSection />
-              </section>
-
-              {/* Launch compliance: where you're signed in, and how to end it. */}
-              <section
-                id="pf-sessions"
-                className="pf-section pf-jump mt-10"
-                aria-label="Sessions and devices settings"
-              >
-                <div className="pf-section-head">
-                  <div>
-                    <p className="pf-eyebrow">Control</p>
-                    <h2 className="pf-title">Sessions &amp; devices</h2>
-                  </div>
-                </div>
-                <SessionsSection
-                  isSignedIn={authState === "signed-in"}
-                  onOpenErase={() => setEraseOpen(true)}
-                />
-              </section>
+              {/* Plan B (senior diagnosis slice 5): the account half
+                  of this page — Account & data, Membership, Trainer,
+                  Household, Sessions — moved to its own route,
+                  /settings (components/profile/AccountSettings.tsx).
+                  Profile is identity, story, record and health now. */}
 
               <footer className="pf-footer">
                 <p className="display text-[length:var(--text-body)] text-muted-foreground">Bloom</p>
@@ -1116,27 +944,6 @@ function ProfilePage() {
             onCommitAvatar={space.actions.commitAvatar}
             onRemoveAvatar={space.actions.clearAvatar}
           />
-          <ExportSheet
-            open={exportOpen}
-            onClose={() => setExportOpen(false)}
-            build={exportBundle.build}
-          />
-          <RemindersSheet
-            open={remindersOpen}
-            onClose={() => setRemindersOpen(false)}
-            reminders={reminders}
-            install={install}
-          />
-          <EraseSheet
-            open={eraseOpen}
-            onClose={() => setEraseOpen(false)}
-            isSignedIn={authState === "signed-in"}
-            counts={exportBundle.counts}
-            onErased={() => {
-              setEraseOpen(false);
-              window.location.assign("/");
-            }}
-          />
           <PrivacySheet
             open={privacyOpen}
             onClose={() => setPrivacyOpen(false)}
@@ -1165,7 +972,6 @@ function ProfilePage() {
             onPreview={() => setPreviewOpen(true)}
             onEditUsername={() => setEditorOpen(true)}
           />
-          <RestoreSheet open={restoreOpen} onClose={() => setRestoreOpen(false)} />
           {userId ? (
             <StoryComposer
               open={composerOpen}
@@ -1227,9 +1033,6 @@ function ProfilePage() {
             onDelete={space.actions.removeHighlight}
             onClose={() => setHighlightEditor(null)}
           />
-          {storySettingsOpen ? (
-            <StorySettings userId={userId} onClose={() => setStorySettingsOpen(false)} />
-          ) : null}
           <FeaturedPicker
             open={featuredOpen}
             onClose={() => setFeaturedOpen(false)}

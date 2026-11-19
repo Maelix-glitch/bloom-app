@@ -98,6 +98,32 @@
   text-underline-offset: 3px;
 }
 
+/* The day timeline (P12): the plan's stops from waking to bedtime,
+   a time column (tabular, the person's own usual times) beside the
+   stop's name; a relative day shows an em dash where a clock time
+   would be invented. */
+.nut-timeline {
+  margin-top: var(--space-2);
+  max-width: 58ch;
+}
+.nut-timeline-item {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-1) 0;
+  font-size: var(--text-caption);
+  line-height: var(--leading-body);
+  color: var(--foreground);
+}
+.nut-timeline-item + .nut-timeline-item {
+  border-top: 1px solid var(--border);
+}
+.nut-timeline-time {
+  flex: 0 0 5.5rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+
 /* ------------------------------- meal list ------------------------------ */
 
 .nut-meal {
@@ -515,6 +541,23 @@
   border-color: color-mix(in oklab, var(--gold) 55%, transparent);
   background: color-mix(in oklab, var(--gold) 12%, transparent);
   color: var(--gold);
+}
+/* Sub-navigation (Plan B): anchor chips to the today view's named
+   sections. The chips reuse .nut-chip; as navigation they hold the
+   44px touch floor. Jump targets clear the fixed phone brand bar
+   (60px) with a breath, at every width. */
+.nut-subnav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.nut-subnav .nut-chip {
+  min-height: var(--bloom-touch-min);
+  text-decoration: none;
+}
+.nut-jump {
+  scroll-margin-top: 84px;
 }
 .nut-backlink {
   display: inline-flex;

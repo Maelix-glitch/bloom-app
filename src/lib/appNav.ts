@@ -14,8 +14,10 @@
  * The set below reproduces exactly the routes that rendered the chrome
  * when it lived in the pages:
  *   · the main sections — Today, Trackers, Nutrition, Cycle, Mood (incl.
- *     intelligence), Rewards (incl. the Atelier), Coach, Profile, the
- *     weekly Report, and the admin progression page;
+ *     intelligence), Rewards (incl. the Atelier), Coach, Profile,
+ *     Settings (Plan B, senior diagnosis slice 5 — the account sections'
+ *     own route since then), the weekly Report, and the admin
+ *     progression page;
  *   · NOT the public surfaces — /privacy, /terms and the /@handle public
  *     profile — nor /dashboard and /admin/rewards, which carry their
  *     own headers, nor any unmatched path (the branded 404 stands alone,
@@ -29,6 +31,7 @@ const APP_NAV_SECTIONS = [
   "/rewards",
   "/coach",
   "/profile",
+  "/settings",
   "/report",
 ] as const;
 
