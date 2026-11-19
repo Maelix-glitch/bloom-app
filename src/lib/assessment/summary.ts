@@ -50,6 +50,19 @@ import {
 } from "./questions";
 import { readAssessmentState, toHealthProfile, type AssessmentState } from "./state";
 
+/** One scalar answer as a value-first stat (anti-document Slice 5):
+ *  the figure the summary view leads with, its label, and the exact
+ *  line it presents — the line list itself is unchanged (the stats
+ *  are a second reading of the same answers, never a second source),
+ *  and the view shows the stat INSTEAD of that line. List-shaped and
+ *  sentence-shaped answers (allergies, equipment, the safety
+ *  statements) have no stat; they stay lines. */
+export interface AssessmentStat {
+  label: string;
+  value: string;
+  line: string;
+}
+
 export interface AssessmentSectionSummary {
   /** A domain section id, "sleep" for the extension step, or
    *  "behaviour" for the behavioural-profile step (spec §10). */
@@ -57,6 +70,7 @@ export interface AssessmentSectionSummary {
   title: string;
   state: SectionState;
   lines: string[];
+  stats: AssessmentStat[];
 }
 
 export interface AssessmentSummary {
@@ -131,20 +145,49 @@ export function summaryOf(
   const bmi = bodyMassIndex(profile);
   const missing = missingSections(completeness);
 
+  /* A scalar answer earns both readings in one place: the prose line
+     (the record every consumer already reads) and the stat that
+     presents it value-first. One push, one string — the two can
+     never drift apart. */
+  const stat = (
+    stats: AssessmentStat[],
+    lines: string[],
+    label: string,
+    value: string,
+    line: string,
+  ) => {
+    lines.push(line);
+    stats.push({ label, value, line });
+  };
+
   const identityLines: string[] = [];
-  if (a.ageYears !== null) identityLines.push(`Age ${a.ageYears}.`);
-  if (a.heightCm !== null) identityLines.push(`Height ${a.heightCm} cm.`);
-  if (a.weightKg !== null) identityLines.push(`Weight ${a.weightKg} kg.`);
-  if (a.waistCm !== null) identityLines.push(`Waist ${a.waistCm} cm.`);
+  const identityStats: AssessmentStat[] = [];
+  if (a.ageYears !== null)
+    stat(identityStats, identityLines, "Age", `${a.ageYears}`, `Age ${a.ageYears}.`);
+  if (a.heightCm !== null)
+    stat(identityStats, identityLines, "Height", `${a.heightCm} cm`, `Height ${a.heightCm} cm.`);
+  if (a.weightKg !== null)
+    stat(identityStats, identityLines, "Weight", `${a.weightKg} kg`, `Weight ${a.weightKg} kg.`);
+  if (a.waistCm !== null)
+    stat(identityStats, identityLines, "Waist", `${a.waistCm} cm`, `Waist ${a.waistCm} cm.`);
   if (bmi !== null) {
-    identityLines.push(`BMI ${bmi.toFixed(1)}, calculated from the height and weight you gave.`);
+    stat(
+      identityStats,
+      identityLines,
+      "BMI — calculated from your height and weight",
+      bmi.toFixed(1),
+      `BMI ${bmi.toFixed(1)}, calculated from the height and weight you gave.`,
+    );
   }
 
   const goalLines: string[] = [];
-  if (a.goal !== null) goalLines.push(`Your goal: ${GOAL_LABEL[a.goal].toLowerCase()}.`);
-  if (a.targetWeightKg !== null) goalLines.push(`Target weight ${a.targetWeightKg} kg.`);
+  const goalStats: AssessmentStat[] = [];
+  if (a.goal !== null)
+    stat(goalStats, goalLines, "Goal", GOAL_LABEL[a.goal], `Your goal: ${GOAL_LABEL[a.goal].toLowerCase()}.`);
+  if (a.targetWeightKg !== null)
+    stat(goalStats, goalLines, "Target weight", `${a.targetWeightKg} kg`, `Target weight ${a.targetWeightKg} kg.`);
   if ((a.goal === "lose" || a.goal === "gain") && a.rateKgPerWeek !== null) {
-    goalLines.push(`Pace: ${a.rateKgPerWeek} kg a week.`);
+    stat(goalStats, goalLines, "Pace", `${a.rateKgPerWeek} kg a week`, `Pace: ${a.rateKgPerWeek} kg a week.`);
   }
 
   const safetyLines: string[] = [];
@@ -187,28 +230,61 @@ export function summaryOf(
   }
 
   const nutritionLines: string[] = [];
+  const nutritionStats: AssessmentStat[] = [];
   if (a.dietaryPattern !== null) {
-    nutritionLines.push(`You eat ${DIETARY_LABEL[a.dietaryPattern].toLowerCase()}.`);
+    stat(
+      nutritionStats,
+      nutritionLines,
+      "Eating pattern",
+      DIETARY_LABEL[a.dietaryPattern],
+      `You eat ${DIETARY_LABEL[a.dietaryPattern].toLowerCase()}.`,
+    );
   }
   if (a.mealsPerDay !== null) {
-    nutritionLines.push(
+    stat(
+      nutritionStats,
+      nutritionLines,
+      "Meals a day",
+      `${a.mealsPerDay}`,
       a.mealsPerDay === 1 ? "Usually 1 meal a day." : `Usually ${a.mealsPerDay} meals a day.`,
     );
   }
   if (a.foodBudget !== null) {
-    nutritionLines.push(`Meal budget: ${BUDGET_LABEL[a.foodBudget].toLowerCase()}.`);
+    stat(
+      nutritionStats,
+      nutritionLines,
+      "Meal budget",
+      BUDGET_LABEL[a.foodBudget],
+      `Meal budget: ${BUDGET_LABEL[a.foodBudget].toLowerCase()}.`,
+    );
   }
   if (a.cuisinePreference !== null) {
-    nutritionLines.push(
+    stat(
+      nutritionStats,
+      nutritionLines,
+      "Cuisine preference",
+      CUISINE_PREFERENCE_LABEL[a.cuisinePreference],
       `Cuisine preference: ${CUISINE_PREFERENCE_LABEL[a.cuisinePreference].toLowerCase()}.`,
     );
   }
   /* The kitchen facts (§10) sit with the rest of the food facts. */
   if (a.eatingSetting !== null) {
-    nutritionLines.push(`Meals: ${EATING_SETTING_LABEL[a.eatingSetting].toLowerCase()}.`);
+    stat(
+      nutritionStats,
+      nutritionLines,
+      "Meals",
+      EATING_SETTING_LABEL[a.eatingSetting],
+      `Meals: ${EATING_SETTING_LABEL[a.eatingSetting].toLowerCase()}.`,
+    );
   }
   if (a.cookingAbility !== null) {
-    nutritionLines.push(`Cooking: ${COOKING_LABEL[a.cookingAbility].toLowerCase()}.`);
+    stat(
+      nutritionStats,
+      nutritionLines,
+      "Cooking",
+      COOKING_LABEL[a.cookingAbility],
+      `Cooking: ${COOKING_LABEL[a.cookingAbility].toLowerCase()}.`,
+    );
   }
   if (a.equipment.length > 0) {
     nutritionLines.push(
@@ -216,7 +292,11 @@ export function summaryOf(
     );
   }
   if (a.prepTimeMaxMinutes !== null) {
-    nutritionLines.push(
+    stat(
+      nutritionStats,
+      nutritionLines,
+      "Time to cook a main meal",
+      PREP_TIME_LABEL[a.prepTimeMaxMinutes],
       `Time to cook a main meal: ${PREP_TIME_LABEL[a.prepTimeMaxMinutes].toLowerCase()}.`,
     );
   }
@@ -275,8 +355,17 @@ export function summaryOf(
   }
 
   const sleepLines: string[] = [];
+  const sleepStats: AssessmentStat[] = [];
   if (a.sleepHoursTypical !== null) {
-    sleepLines.push(
+    stat(
+      sleepStats,
+      sleepLines,
+      "Typical sleep",
+      a.sleepHoursTypical <= 5
+        ? "Under 6 hours"
+        : a.sleepHoursTypical >= 9
+          ? "9 hours or more"
+          : `About ${a.sleepHoursTypical} hours`,
       a.sleepHoursTypical <= 5
         ? "You usually sleep under 6 hours."
         : a.sleepHoursTypical >= 9
@@ -285,25 +374,44 @@ export function summaryOf(
     );
   }
   if (a.sleepQuality !== null) {
-    sleepLines.push(`Sleep quality: ${SLEEP_QUALITY_LABEL[a.sleepQuality].toLowerCase()}.`);
+    stat(
+      sleepStats,
+      sleepLines,
+      "Sleep quality",
+      SLEEP_QUALITY_LABEL[a.sleepQuality],
+      `Sleep quality: ${SLEEP_QUALITY_LABEL[a.sleepQuality].toLowerCase()}.`,
+    );
   }
   if (a.morningRestedness !== null) {
-    sleepLines.push(
+    stat(
+      sleepStats,
+      sleepLines,
+      "Feeling on waking",
+      RESTEDNESS_LABEL[a.morningRestedness] ?? "",
       `You wake feeling rested: ${(RESTEDNESS_LABEL[a.morningRestedness] ?? "").toLowerCase()}.`,
     );
   }
 
   const activityLines: string[] = [];
+  const activityStats: AssessmentStat[] = [];
   if (a.activity !== null) {
-    activityLines.push(`Activity level: ${ACTIVITY_LABEL[a.activity].toLowerCase()}.`);
+    stat(
+      activityStats,
+      activityLines,
+      "Activity level",
+      ACTIVITY_LABEL[a.activity],
+      `Activity level: ${ACTIVITY_LABEL[a.activity].toLowerCase()}.`,
+    );
   }
 
+  const NO_STATS: AssessmentStat[] = [];
   const section = (
     id: AssessmentSectionSummary["section"],
     title: string,
     sectionState: SectionState,
     lines: string[],
-  ): AssessmentSectionSummary => ({ section: id, title, state: sectionState, lines });
+    stats: AssessmentStat[] = NO_STATS,
+  ): AssessmentSectionSummary => ({ section: id, title, state: sectionState, lines, stats });
 
   const sections: AssessmentSectionSummary[] = [
     section(
@@ -311,14 +419,16 @@ export function summaryOf(
       ASSESSMENT_SECTION_COPY.identity,
       completeness.sections.identity,
       identityLines,
+      identityStats,
     ),
-    section("goals", ASSESSMENT_SECTION_COPY.goals, completeness.sections.goals, goalLines),
+    section("goals", ASSESSMENT_SECTION_COPY.goals, completeness.sections.goals, goalLines, goalStats),
     section("safety", ASSESSMENT_SECTION_COPY.safety, completeness.sections.safety, safetyLines),
     section(
       "nutrition",
       ASSESSMENT_SECTION_COPY.nutrition,
       completeness.sections.nutrition,
       nutritionLines,
+      nutritionStats,
     ),
     section(
       "preferences",
@@ -327,12 +437,13 @@ export function summaryOf(
       preferenceLines,
     ),
     section("behaviour", "Habits and history", behaviourState(state), behaviourLines),
-    section("sleep", "Sleep and recovery", sleepState(state), sleepLines),
+    section("sleep", "Sleep and recovery", sleepState(state), sleepLines, sleepStats),
     section(
       "activity",
       ASSESSMENT_SECTION_COPY.activity,
       completeness.sections.activity,
       activityLines,
+      activityStats,
     ),
   ];
 

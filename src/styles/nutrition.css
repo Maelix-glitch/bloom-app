@@ -492,28 +492,11 @@
   color: var(--foreground);
 }
 
-/* Value-first mini stats (the Apple Health pattern): the value on
-   top, the label beneath — never label-left / value-far-right. */
-.vstats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
-  gap: var(--space-4);
-}
-.vstat {
-  display: grid;
-  gap: 2px;
-}
-.vstat b {
-  font-size: var(--text-title);
-  font-weight: 600;
-  line-height: var(--leading-tight);
-  color: var(--foreground);
-  font-variant-numeric: tabular-nums;
-}
-.vstat span {
-  font-size: var(--text-caption);
-  color: var(--muted-foreground);
-}
+/* Value-first mini stats (.vstats/.vstat) moved to src/styles.css in
+   anti-document Slice 5: the atom is cross-surface now (the Twin here,
+   the assessment summary and lab reports on Profile, which never load
+   this route-scoped stylesheet). Single source, in the global sheet
+   beside .note and .empty-row. */
 
 /* Insight cards ("What your plan learned"): a headline conclusion,
    one supporting line, at most one action. */
