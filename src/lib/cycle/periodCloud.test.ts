@@ -47,10 +47,23 @@ describe("rows ↔ records", () => {
       end_date: "2026-08-05",
       flow: "medium",
       notes: "ok",
+      /* Wave B8: the row now carries the excluded mark (column added by
+         migration 20261119_cycle_record_detail). */
+      excluded: false,
       updated_at: T1,
       deleted_at: null,
     });
     expect(rowToPeriod(row)).toEqual(r);
+  });
+
+  it("round-trips an excluded entry through the table shape", () => {
+    const r = rec(log({ id: "a", start: "2026-08-01", end: "2026-08-05", excluded: true }), T1);
+    const row = periodToRow(r, "p1");
+    expect(row["excluded"]).toBe(true);
+    expect(rowToPeriod(row)).toEqual(r);
+    /* …and an older row without the column reads back as not excluded. */
+    const legacy = rowToPeriod({ id: "a", start_date: "2026-08-01", end_date: "2026-08-05" });
+    expect(legacy?.log.excluded).toBeUndefined();
   });
 
   it("drops rows it cannot trust and tolerates a missing stamp", () => {

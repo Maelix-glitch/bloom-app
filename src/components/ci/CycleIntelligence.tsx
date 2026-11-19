@@ -36,7 +36,15 @@ import { SyncLine } from "./SyncLine";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { daysToCsv, logsToCsv } from "@/lib/cycle/periodStore";
 import { DEFAULT_THEME_ID } from "@/lib/cycle/themes";
-import { PHASE_LABEL, formatDate, type LogDraft, type PeriodLog } from "@/lib/cycle/predict";
+import {
+  CYCLE_DEFAULTS,
+  PHASE_LABEL,
+  formatDate,
+  type LogDraft,
+  type PeriodLog,
+} from "@/lib/cycle/predict";
+import { PatternGuidanceCard } from "./PatternGuidanceCard";
+import { PmsPatternCard } from "./PmsPatternCard";
 import {
   Collapse,
   CollapsibleSection,
@@ -74,8 +82,9 @@ export function CycleIntelligence({
   const [importOpen, setImportOpen] = useState(false);
   const formRef = useRef<HTMLDivElement>(null);
   const hasEntries = analysis.entryCount > 0;
-  /* paused / off: history and the daily log stay, everything forward-looking goes quiet */
-  const expecting = store.mode === "tracking";
+  /* paused / off / predictions hidden by choice: history and the daily log
+     stay, everything forward-looking goes quiet */
+  const expecting = store.mode === "tracking" && !store.predictionsOff;
 
   /* One engine result for the whole page — see src/lib/cycle/canonical.ts. */
   const intel = store.intel;
@@ -242,6 +251,8 @@ export function CycleIntelligence({
             today={today}
             disabled={preview}
             onChange={store.setMode}
+            predictionsOff={store.predictionsOff}
+            onTogglePredictions={store.setPredictionsOff}
           />
         ) : null}
 
@@ -343,6 +354,21 @@ export function CycleIntelligence({
                           <TipsCard analysis={analysis} dayAnalysis={store.dayAnalysis} />
                         </Reveal>
                       </>
+                    ) : store.mode === "tracking" && store.predictionsOff ? (
+                      <Card data-testid="cycle-predictions-off-note">
+                        <p className="ci-eyebrow">Predictions off</p>
+                        <h2 className="ci-display mt-2 text-[19px] leading-tight sm:text-[22px]">
+                          Estimates hidden — logging as usual.
+                        </h2>
+                        <p className="mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                          Your {analysis.entryCount} logged{" "}
+                          {analysis.entryCount === 1 ? "period is" : "periods are"} kept below, and
+                          the daily log still works — log bleeding or symptoms any day. Bloom is
+                          still learning from your record; it just isn't showing you dates, phases
+                          or fertile estimates. Turn predictions back on above whenever you want
+                          them.
+                        </p>
+                      </Card>
                     ) : (
                       <Card data-testid="cycle-paused-note">
                         <p className="ci-eyebrow">Predictions paused</p>
@@ -360,6 +386,19 @@ export function CycleIntelligence({
                     )}
 
                     <PersonalPatternPanel intel={intel} />
+
+                    <PatternGuidanceCard
+                      logs={logs}
+                      days={store.days}
+                      analysis={analysis}
+                      expecting={expecting}
+                      personalMaxPlausible={
+                        /* Unset means no vouched extension: the population
+                           ceiling the engine itself starts from. */
+                        store.settings.personalMaxPlausible ?? CYCLE_DEFAULTS.maxPlausible
+                      }
+                      today={today}
+                    />
 
                     <div ref={formRef}>
                       <Reveal>{logPanel}</Reveal>
@@ -644,6 +683,13 @@ export function CycleIntelligence({
                     </Collapse>
 
                     <Collapse
+                      title="Before your period"
+                      hint="What repeats in the five days before each period, counted across your cycles."
+                    >
+                      <PmsPatternCard logs={logs} days={store.days} />
+                    </Collapse>
+
+                    <Collapse
                       title="Day-by-day records"
                       hint="Every logged day, with its flow, symptoms and readings."
                     >
@@ -670,6 +716,9 @@ export function CycleIntelligence({
                         focusForm();
                       }}
                       onDelete={(id) => store.remove(id)}
+                      onToggleExcluded={(entry) =>
+                        store.setPeriodExcluded(entry.id, entry.excluded !== true)
+                      }
                       onClearAll={() => {
                         store.clearAll();
                         store.clearDays();
@@ -681,6 +730,14 @@ export function CycleIntelligence({
                         store.sync.signedIn && !store.sync.periodsOnDevice ? "account" : "device"
                       }
                     />
+                    <p className="text-[12.5px] ci-soft">
+                      Taking this to a doctor?{" "}
+                      <a href="/cycle-report" className="ci-link">
+                        Open the one-page summary of your last twelve months
+                      </a>{" "}
+                      — dates, lengths, symptoms and the patterns Bloom noticed, ready to print.
+                      Free, always.
+                    </p>
                     <ModelNote intel={intel} />
                   </div>
                 ) : null}

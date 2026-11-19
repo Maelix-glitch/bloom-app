@@ -11,7 +11,14 @@
  * pruned, and event-driven so any open bell updates live.
  */
 
-export type NoticeKind = "habit" | "period" | "fertile" | "evening" | "insight" | "system";
+export type NoticeKind =
+  | "habit"
+  | "period"
+  | "fertile"
+  | "evening"
+  | "open-entry"
+  | "insight"
+  | "system";
 
 export interface Notice {
   id: string;

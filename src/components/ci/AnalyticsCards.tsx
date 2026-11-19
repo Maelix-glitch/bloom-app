@@ -24,7 +24,12 @@ export function StatsStrip({ analysis }: { analysis: CycleAnalysis }) {
     {
       label: "Cycles logged",
       value: String(stats.cyclesLogged),
-      sub: stats.excludedGaps > 0 ? `${stats.excludedGaps} gap left out` : "usable cycles",
+      sub: [
+        stats.excludedGaps > 0 ? `${stats.excludedGaps} gap left out` : "usable cycles",
+        ...(stats.excludedCycles > 0
+          ? [`${stats.excludedCycles} excluded by you`]
+          : []),
+      ].join(" · "),
     },
     {
       label: "Average",
@@ -268,14 +273,22 @@ export function ForecastStrip({
             <p className="text-[12.5px] font-medium">
               {c.index === 1 ? "Next cycle" : `Cycle +${c.index - 1}`}
             </p>
+            {/* A predicted start is a window, never a bare date — the same
+                range style the brief and the hero use. Ovulation is never
+                printed as a single date; the fertile window is the
+                estimate, and it disappears entirely (with the reason
+                below) when the record is too variable to support one. */}
             <p className="ci-num text-[11.5px] ci-muted">
-              {formatDate(c.start)} – {formatDate(c.end)} · ovulation {formatDate(c.ovulation)}
+              predicted {formatDate(c.startFrom)} – {formatDate(c.startTo)}
+              {c.fertileStart && c.fertileEnd
+                ? ` · fertile window estimated ${formatDate(c.fertileStart)} – ${formatDate(c.fertileEnd)}`
+                : ""}
             </p>
           </div>
           <div
             className="mt-1.5 flex h-[10px] w-full gap-[2px] overflow-hidden rounded-full"
             role="img"
-            aria-label={`Cycle starting ${formatDate(c.start)}: ${c.phases
+            aria-label={`Cycle predicted to start between ${formatDate(c.startFrom)} and ${formatDate(c.startTo)}: ${c.phases
               .map((p) => `${PHASE_LABEL[p.phase]} days ${p.fromDay} to ${p.toDay}`)
               .join(", ")}`}
           >
@@ -293,10 +306,14 @@ export function ForecastStrip({
             ))}
           </div>
           {!compact && c.index === 1 ? (
-            <p className="mt-1.5 text-[11.5px] ci-muted">
-              Berry is the bleed, gold is the fertile window around {formatDate(c.fertileStart)} –
-              {formatDate(c.fertileEnd)}.
-            </p>
+            analysis.fertileSuppressed && analysis.fertileNote ? (
+              <p className="mt-1.5 text-[11.5px] ci-muted">{analysis.fertileNote}</p>
+            ) : (
+              <p className="mt-1.5 text-[11.5px] ci-muted">
+                Berry is the predicted bleed, gold is the estimated fertile window. Fertile dates
+                are estimated from your logged dates only — they move as your record grows.
+              </p>
+            )
           ) : null}
         </div>
       ))}

@@ -228,6 +228,50 @@ describe("irregular cycles", () => {
   });
 });
 
+describe("forecast windows and the fertile-estimate gate", () => {
+  it("projects the engine's own start windows, not bare point dates", () => {
+    const starts = startsFrom("2026-01-01", [28, 28, 28, 28]);
+    const state = build(addDays(starts[starts.length - 1]!, 9), starts.map((s) => log(s)));
+    expect(state.analysis.forecast).toHaveLength(3);
+    for (const [i, c] of state.analysis.forecast.entries()) {
+      const up = state.intel.forecast.upcoming[i]!;
+      expect(c.start).toBe(up.start);
+      expect(c.startFrom).toBe(up.from);
+      expect(c.startTo).toBe(up.to);
+      expect(c.startFrom < c.start && c.start < c.startTo).toBe(true);
+    }
+    // a steady record keeps its fertile estimates
+    expect(state.analysis.fertileSuppressed).toBe(false);
+    expect(state.analysis.fertileStart).not.toBeNull();
+    expect(state.analysis.forecast[0]!.fertileStart).not.toBeNull();
+  });
+
+  it("withholds fertile dates when the person's cycles vary too much", () => {
+    /* lengths 26, 33, 24, 35, 27, 34 — an 11-day spread. Calendar fertile
+       maths would be a guess dressed as a date, so the dates are withheld
+       and the reason is carried on the analysis for the surfaces. */
+    const starts = startsFrom("2026-01-01", [26, 33, 24, 35, 27, 34]);
+    const state = build("2026-07-01", starts.map((s) => log(s)));
+    expect(state.analysis.fertileSuppressed).toBe(true);
+    expect(state.analysis.fertileNote).toMatch(/24 to 35 days/);
+    expect(state.analysis.ovulationDate).toBeNull();
+    expect(state.analysis.fertileStart).toBeNull();
+    expect(state.analysis.fertileEnd).toBeNull();
+    expect(state.analysis.forecast[0]!.fertileStart).toBeNull();
+    // period predictions are NOT withheld — they are windows, honestly sized
+    expect(state.analysis.nextStart).not.toBeNull();
+    expect(state.analysis.forecast).toHaveLength(3);
+  });
+
+  it("withholds fertile dates when cycles sit mostly outside 21–35 days", () => {
+    const starts = startsFrom("2026-01-01", [38, 39, 38, 39]);
+    const state = build(addDays(starts[starts.length - 1]!, 9), starts.map((s) => log(s)));
+    expect(state.analysis.fertileSuppressed).toBe(true);
+    expect(state.analysis.fertileNote).toMatch(/21–35/);
+    expect(state.analysis.fertileStart).toBeNull();
+  });
+});
+
 describe("a date crossing a daylight-saving boundary", () => {
   /* US DST begins 2026-03-08; a calendar-day count must not lose or gain a day. */
   const state = build("2026-03-15", [log("2026-02-01"), log("2026-03-01")]);
@@ -322,5 +366,36 @@ describe("flow mix denominators", () => {
     for (const count of Object.values(counts)) {
       expect(count).toBeLessThanOrEqual(analysis.entryCount);
     }
+  });
+});
+
+describe("exclude-a-cycle (Wave B8) — the canonical projection", () => {
+  it("skips the intervals and bleed of an excluded period, and says so", () => {
+    const starts = startsFrom("2026-01-05", [28, 28, 28]);
+    const logs: PeriodLog[] = starts.map((start, i) => ({
+      id: `p-${start}`,
+      start,
+      end: addDays(start, 4),
+      ...(i === 1 ? { excluded: true } : {}),
+    }));
+    const { intel, analysis } = buildCanonicalCycle({
+      today: "2026-04-10",
+      logs,
+      days: [],
+      expecting: true,
+    });
+    /* Only the last interval (untouched by the excluded period) counts. */
+    expect(intel.baseline.excludedCount).toBe(1);
+    expect(intel.baseline.plausible).toEqual([28]);
+    expect(intel.baseline.unusual).toEqual([]);
+    expect(intel.baseline.bleedingCount).toBe(3);
+    expect(analysis.cycleLengths).toEqual([28]);
+    expect(analysis.stats.excludedCycles).toBe(1);
+    const touching = analysis.gaps.filter((g) => !g.plausible);
+    expect(touching).toHaveLength(2);
+    expect(touching[0]!.reason).toMatch(/excluded/);
+    expect(touching[0]!.suggestedMissedDate).toBeNull();
+    /* The record itself is whole: all four periods still logged. */
+    expect(analysis.entryCount).toBe(4);
   });
 });

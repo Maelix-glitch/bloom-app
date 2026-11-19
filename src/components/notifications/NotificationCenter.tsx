@@ -19,6 +19,7 @@ import {
   ChevronRight,
   Droplet,
   MoonStar,
+  NotebookPen,
   Sparkles,
   Sprout,
   Trash2,
@@ -28,11 +29,11 @@ import {
 
 import candle from "@/assets/mood/candle.jpg";
 import { BloomSheet, SheetBody, SheetItem } from "@/components/ui/bloom-sheet";
-import { useCycleSystem } from "@/hooks/useCycleSystem";
 import { useReminders } from "@/hooks/useReminders";
 import { longDate } from "@/lib/home/today";
 import { cn } from "@/lib/utils";
-import { buildObservations, buildPersonalInsight } from "@/lib/cycle/intelligence";
+import { cycleCenterInsights, type CenterInsight } from "@/lib/cycle/centerInsights";
+import { CYCLE_SETTINGS_CHANGED, PERIODS_CHANGED } from "@/lib/cycle/periodStore";
 import {
   CENTER_CHANGED,
   clearNotices,
@@ -101,6 +102,9 @@ const KIND_META: Record<Notice["kind"], { label: string; icon: LucideIcon; tint:
   period: { label: "Cycle", icon: Droplet, tint: "rose" },
   fertile: { label: "Cycle", icon: Droplet, tint: "amber" },
   evening: { label: "Evening", icon: MoonStar, tint: "sky" },
+  /* The discreet finish-the-entry reminder keeps a neutral label here too —
+     the row's own title/body already say everything, in safe words. */
+  "open-entry": { label: "Reminder", icon: NotebookPen, tint: "gold" },
   insight: { label: "Insight", icon: Sparkles, tint: "violet" },
   system: { label: "Bloom", icon: BellRing, tint: "gold" },
 };
@@ -163,8 +167,30 @@ function Empty({
 export function NotificationCenter({ open, onClose }: { open: boolean; onClose: () => void }) {
   /* Readings for "Due now" — delivery itself is owned by RemindersEngine. */
   const reminders = useReminders();
-  const cycle = useCycleSystem();
   const [notices, setNotices] = useState<Notice[]>(() => listNotices());
+
+  /*
+   * The cycle read comes from the real cycle system (periodStore +
+   * canonical engine, read on this device by cycleCenterInsights) — NOT
+   * the legacy cycle_entries engine this sheet used before, which the
+   * current app never writes and which therefore showed every current
+   * user a silently empty or frozen record. Refreshed whenever the sheet
+   * opens and whenever the cycle record or its settings change.
+   */
+  const [insights, setInsights] = useState<CenterInsight[]>(() => cycleCenterInsights());
+  useEffect(() => {
+    if (!open) return;
+    const refresh = () => setInsights(cycleCenterInsights());
+    refresh();
+    window.addEventListener(PERIODS_CHANGED, refresh);
+    window.addEventListener(CYCLE_SETTINGS_CHANGED, refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener(PERIODS_CHANGED, refresh);
+      window.removeEventListener(CYCLE_SETTINGS_CHANGED, refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, [open ]);
 
   useEffect(() => {
     const sync = () => setNotices(listNotices());
@@ -186,19 +212,6 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
     markAllRead();
     onClose();
   };
-
-  const insights = useMemo(() => {
-    if (cycle.loading || !cycle.model || !cycle.context) {
-      return [] as { id: string; text: string; why?: string }[];
-    }
-    const out: { id: string; text: string; why?: string }[] = [];
-    const personal = buildPersonalInsight(cycle.model, cycle.context);
-    if (personal) out.push(personal);
-    for (const o of buildObservations(cycle.model, cycle.entries).slice(0, 3)) {
-      out.push({ id: o.id, text: o.text });
-    }
-    return out;
-  }, [cycle.loading, cycle.model, cycle.context, cycle.entries]);
 
   const due = reminders.preview;
   const waiting = notices.filter((n) => !n.read).length;

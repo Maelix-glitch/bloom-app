@@ -30,6 +30,8 @@ export function CycleModeCard({
   today,
   disabled = false,
   onChange,
+  predictionsOff = false,
+  onTogglePredictions,
 }: {
   /** The mode as it applies today. */
   mode: CycleMode;
@@ -37,6 +39,9 @@ export function CycleModeCard({
   today: string;
   disabled?: boolean;
   onChange: (mode: CycleMode, pause?: Partial<Omit<CyclePause, "since">>) => void;
+  /** Predictions hidden by choice — separate from pausing (see periodStore). */
+  predictionsOff?: boolean;
+  onTogglePredictions?: (off: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [until, setUntil] = useState<string>(settings.pause?.until ?? "");
@@ -45,7 +50,9 @@ export function CycleModeCard({
   if (mode === "tracking" && !open) {
     return (
       <p className="mt-3 text-[11.5px] ci-muted" data-testid="cycle-mode">
-        Expecting periods — predictions on.{" "}
+        {predictionsOff
+          ? "Expecting periods — predictions hidden by you. "
+          : "Expecting periods — predictions on. "}
         <button
           type="button"
           className="underline underline-offset-2 hover:text-[var(--ci-text)]"
@@ -53,7 +60,7 @@ export function CycleModeCard({
           disabled={disabled}
           data-testid="cycle-mode-open"
         >
-          Not right now?
+          {predictionsOff ? "Change" : "Not right now?"}
         </button>
       </p>
     );
@@ -169,6 +176,30 @@ export function CycleModeCard({
               </Button>
             ) : null}
           </div>
+        </div>
+      ) : null}
+
+      {mode === "tracking" && onTogglePredictions ? (
+        <div
+          className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t pt-4"
+          style={{ borderColor: "var(--ci-line)" }}
+        >
+          <div className="max-w-[58ch]">
+            <p className="text-[13px] font-medium">Predictions</p>
+            <p className="mt-1 text-[12.5px] leading-relaxed ci-soft">
+              {predictionsOff
+                ? "Hidden — no dates, phases or fertile estimates anywhere, and no cycle reminders. Logging works exactly as before, and your record keeps learning."
+                : "Shown — next period, phases and fertile estimates, all from your record. You can hide them without pausing if you'd rather just log."}
+            </p>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => onTogglePredictions(!predictionsOff)}
+            disabled={disabled}
+            data-testid="cycle-predictions-toggle"
+          >
+            {predictionsOff ? "Show predictions" : "Hide predictions"}
+          </Button>
         </div>
       ) : null}
 

@@ -14,6 +14,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 import { analyzeCycle, type PeriodLog } from "@/lib/cycle/predict";
+import type { DayLog } from "@/lib/cycle/dayLogs";
 import { LogPanel } from "./LogPanel";
 
 /* Two completed 5-day periods, then the current one. Usual bleed = 5. */
@@ -82,5 +83,67 @@ describe("LogPanel · closing an ended period", () => {
     renderPanel({ logs: baseLogs("2026-11-06"), today: "2026-11-07", date: "2026-11-07" });
     fireEvent.click(screen.getByRole("button", { name: "None" }));
     expect(screen.queryByTestId("log-close-period")).toBeNull();
+  });
+});
+
+describe("LogPanel · symptom severity + clots (Wave B10)", () => {
+  it("saves severity for a picked symptom and the clots mark with the day", () => {
+    let saved: DayLog | null = null;
+    const onSaveDay = vi.fn((draft: DayLog) => {
+      saved = draft;
+      return { ok: true as const };
+    });
+    const logs = baseLogs("2026-11-06");
+    render(
+      <LogPanel
+        logs={logs}
+        days={[]}
+        today="2026-11-07"
+        analysis={analyzeCycle(logs, "2026-11-07")}
+        date="2026-11-07"
+        onDateChange={() => {}}
+        onSavePeriod={() => ({ ok: true as const, id: "p3" })}
+        onSaveDay={onSaveDay}
+        onDeleteDay={() => {}}
+      />,
+    );
+    fireEvent.click(screen.getByRole("button", { name: /Advanced log/ }));
+    fireEvent.click(screen.getByRole("button", { name: "cramps" }));
+    fireEvent.click(screen.getByRole("button", { name: "Severe" }));
+    fireEvent.click(screen.getByTestId("clots-toggle"));
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    expect(onSaveDay).toHaveBeenCalledTimes(1);
+    expect(saved).not.toBeNull();
+    expect(saved!.clots).toBe(true);
+    expect(saved!.symptomSeverity).toEqual({ cramps: 3 });
+  });
+
+  it("loads an existing day's clots and severity back into the form", () => {
+    const logs = baseLogs("2026-11-06");
+    render(
+      <LogPanel
+        logs={logs}
+        days={[
+          {
+            date: "2026-11-07",
+            symptoms: ["acne"],
+            symptomSeverity: { acne: 2 },
+            clots: true,
+          },
+        ]}
+        today="2026-11-07"
+        analysis={analyzeCycle(logs, "2026-11-07")}
+        date="2026-11-07"
+        onDateChange={() => {}}
+        onSavePeriod={() => ({ ok: true as const, id: "p3" })}
+        onSaveDay={() => ({ ok: true as const })}
+        onDeleteDay={() => {}}
+      />,
+    );
+    /* A day with advanced content opens the advanced section itself. */
+    expect(screen.getByTestId("clots-toggle").getAttribute("aria-pressed")).toBe("true");
+    expect(screen.getByRole("button", { name: "Moderate" }).getAttribute("aria-pressed")).toBe(
+      "true",
+    );
   });
 });

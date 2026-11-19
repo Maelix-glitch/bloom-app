@@ -19,19 +19,15 @@ import { NotificationCenter } from "./NotificationCenter";
 import { listNotices } from "@/lib/notifications/center";
 
 const { mockPreview } = vi.hoisted(() => ({ mockPreview: { items: [] as Reminder[] } }));
-const { mockCycle } = vi.hoisted(() => ({
-  mockCycle: { value: { loading: true } as Record<string, unknown> },
+const { mockInsights } = vi.hoisted(() => ({
+  mockInsights: { rows: [] as { id: string; text: string; why?: string }[] },
 }));
 
 vi.mock("@/hooks/useReminders", () => ({ useReminders: () => ({ preview: mockPreview.items }) }));
-vi.mock("@/hooks/useCycleSystem", () => ({ useCycleSystem: () => mockCycle.value }));
-vi.mock("@/lib/cycle/intelligence", () => ({
-  buildPersonalInsight: () => ({
-    id: "p1",
-    text: "Your cycle is settling into its rhythm.",
-    why: "Read from your last three cycles.",
-  }),
-  buildObservations: () => [{ id: "o1", text: "Logging stays steadier mid-week." }],
+/* The insights source is the real cycle system now (centerInsights) — the
+   sheet's contract is that it renders what that source returns. */
+vi.mock("@/lib/cycle/centerInsights", () => ({
+  cycleCenterInsights: () => mockInsights.rows,
 }));
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
@@ -78,7 +74,7 @@ beforeEach(() => {
   window.localStorage.clear();
   mockMatchMedia();
   mockPreview.items = [];
-  mockCycle.value = { loading: true };
+  mockInsights.rows = [];
 });
 
 const STORE_KEY = "bloom.notifications.v1";
@@ -178,7 +174,14 @@ describe("NotificationCenter", () => {
   });
 
   it("lists insights with their provenance", () => {
-    mockCycle.value = { loading: false, model: {}, context: {}, entries: [] };
+    mockInsights.rows = [
+      {
+        id: "p1",
+        text: "Your cycle is settling into its rhythm.",
+        why: "Read from your last three cycles.",
+      },
+      { id: "o1", text: "Logging stays steadier mid-week." },
+    ];
     render(<NotificationCenter open onClose={() => {}} />);
     const section = sectionById("nc-insights");
     expect(within(section).getByText("Your cycle is settling into its rhythm.")).toBeDefined();

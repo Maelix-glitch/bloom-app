@@ -132,6 +132,42 @@ describe("reminders · cycle", () => {
     );
     expect(out[0]!.kind).toBe("fertile");
   });
+
+  it("offers the discreet finish-the-entry reminder just past an open entry's usual end (Wave C11)", () => {
+    for (const openPastDays of [1, 2, 3]) {
+      const out = dueReminders(
+        input({
+          ...cycleOnly,
+          cycle: {
+            mode: "tracking",
+            nextStart: null,
+            daysLate: null,
+            fertileStart: null,
+            openPastDays,
+          },
+        }),
+      );
+      expect(out).toHaveLength(1);
+      expect(out[0]).toMatchObject({ kind: "open-entry", url: "/cycle" });
+      /* Discretion is the feature: no cycle vocabulary on a lock screen. */
+      expect(`${out[0]!.title} ${out[0]!.body}`).not.toMatch(/period|cycle|bleed|menstrual|fertile/i);
+    }
+  });
+
+  it("stays silent before the usual end, after the short window, and when paused", () => {
+    const base = { mode: "tracking", nextStart: null, daysLate: null, fertileStart: null } as const;
+    for (const openPastDays of [0, 4, 12]) {
+      expect(
+        dueReminders(input({ ...cycleOnly, cycle: { ...base, openPastDays } })),
+      ).toEqual([]);
+    }
+    expect(
+      dueReminders(input({ ...cycleOnly, cycle: { ...base, mode: "paused", openPastDays: 2 } })),
+    ).toEqual([]);
+    expect(dueReminders(input({ ...cycleOnly, cycle: { ...base, openPastDays: null } }))).toEqual(
+      [],
+    );
+  });
 });
 
 describe("reminders · the evening nudge", () => {

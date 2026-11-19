@@ -1998,3 +1998,21 @@ textarea.ci-input {
     transition: none;
   }
 }
+
+/* ------------------------- doctor summary (print) ------------------------ */
+/* The /cycle/report page, printed: ink on paper, toolbar gone — the same
+   treatment the Nutrition report gets in nutrition.css. */
+@media print {
+  .ci-report {
+    --ci-text: #17150f;
+    --ci-text-soft: #3d3a33;
+    --ci-text-mute: #5c584f;
+    --ci-line: #d8d2c4;
+    --ci-report-bg: #ffffff;
+    background: var(--ci-report-bg);
+    color: var(--ci-text);
+  }
+  .ci-report-print-hide {
+    display: none !important;
+  }
+}

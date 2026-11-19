@@ -77,12 +77,23 @@ export const FLOW_SCORE: Record<DayFlow, number> = {
   heavy: 3,
 };
 
+/** How bad a symptom felt that day: 1 mild · 2 moderate · 3 severe. */
+export type SymptomSeverity = 1 | 2 | 3;
+
+export const SEVERITY_LABEL: Record<SymptomSeverity, string> = {
+  1: "Mild",
+  2: "Moderate",
+  3: "Severe",
+};
+
 /** What the user logs about one calendar day. Everything is optional. */
 export interface DayLog {
   /** YYYY-MM-DD — the identity of the entry. */
   date: string;
   flow?: DayFlow | null;
   symptoms?: string[] | null;
+  /** Per-symptom severity, keyed by the symptom name as logged that day. */
+  symptomSeverity?: Record<string, SymptomSeverity> | null;
   mood?: MoodValue | null;
   energy?: number | null; // 1–5
   pain?: number | null; // 0–5
@@ -90,6 +101,8 @@ export interface DayLog {
   temperature?: number | null; // °C
   mucus?: MucusValue | null;
   lh?: LhValue | null;
+  /** Clots passed today — one of the two heavy-flow signals the log can hold. */
+  clots?: boolean | null;
   notes?: string | null;
   updatedAt?: string | null;
 }
@@ -193,6 +206,7 @@ export function isEmptyDay(draft: DayLog): boolean {
     blank(draft.temperature) &&
     !draft.mucus &&
     !draft.lh &&
+    draft.clots !== true &&
     !(draft.notes ?? "").trim()
   );
 }

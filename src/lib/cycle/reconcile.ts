@@ -28,6 +28,7 @@ import {
   formatDateShort,
   isValidDateKey,
   LONG_BLEED_DAYS,
+  MAX_BLEED_DAYS,
   type CycleAnalysis,
   type FlowLevel,
   type PeriodLog,
@@ -44,6 +45,7 @@ export type CheckInKind =
   | "same-period" // a bleed day sits right after a period, not a new one
   | "new-period" // bleeding logged well after the last period, no start recorded
   | "still-open" // an open period has run past its usual length with no news
+  | "superseded-open" // an older open period a newer start has overtaken — never closed
   | "long-bleed" // many bleeding days in a row — recorded, gently noted
   | "late" // predicted start has passed
   | "missed-log"; // an implausibly long gap that probably hides a period
@@ -280,6 +282,7 @@ const ORDER: Record<CheckInKind, number> = {
   "new-period": 3,
   late: 4,
   "still-open": 5,
+  "superseded-open": 5,
   "long-bleed": 6,
   "missed-log": 7,
 };
@@ -534,8 +537,12 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
           offered to close it (the reported "can't stop my period" bug).
           The estimate may assume; the record must stay closable. Cadence
           is governed by the answers themselves: "Still going" snoozes,
-          "Don't ask about this one" dismisses for good. */
-    if (!end && dayOfPeriod > usual + o.openGraceDays) {
+          "Don't ask about this one" dismisses for good.
+          Gated on `analysis.expecting` like the late and missed-log
+          sections: while tracking is paused (or the mode says periods
+          aren't expected), an unclosed entry is the person's business,
+          not a prompt — the question returns when tracking resumes. */
+    if (!end && analysis.expecting && dayOfPeriod > usual + o.openGraceDays) {
       const guess = lastBleed ?? addDays(last.start, usual - 1);
       const since = lastBleed ? diffDays(lastBleed, today) : null;
       ask({
@@ -582,6 +589,64 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
         title: `${run.length} days of bleeding logged so far`,
         body: "That's longer than most periods. Bloom records it exactly as you logged it — it can't tell you why. If bleeds this long are new for you, or it's heavy throughout, that's worth raising with a doctor or nurse.",
         actions: [{ id: "ok", label: "Understood", resolution: { type: "dismiss" } }],
+      });
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* 1e · an older period that was never closed, now superseded          */
+  /* ------------------------------------------------------------------ */
+  /* Section 1 reasons about the LATEST entry only, so an entry left open
+     and then overtaken by a newer start was never asked about again — it
+     just stayed open forever, silently unable to count toward the
+     bleed-length average. Ask about each one, newest first. The guessed
+     last day is the last bleeding the daily log holds for it, else the
+     usual length — and it never reaches into the next period's start.
+     The one-tap answer is offered only when the span is one validation
+     would accept; a longer span goes through the editor instead.
+     Gated on `expecting` like missed-log: while periods aren't expected,
+     an old unclosed entry is not a prompt. */
+  if (analysis.expecting) {
+    for (let i = logs.length - 2; i >= 0; i -= 1) {
+      const entry = logs[i]!;
+      if (recordedEnd(entry)) continue;
+      const next = logs[i + 1]!;
+      const dayBeforeNext = addDays(next.start, -1);
+      const run = bleedRunFrom(entry.start, byDate, today);
+      const lastBleed = run.length > 0 ? run[run.length - 1]!.date : null;
+      let guess = lastBleed ?? addDays(entry.start, usual - 1);
+      if (guess > dayBeforeNext) guess = dayBeforeNext;
+      if (guess < entry.start) guess = entry.start;
+      const span = diffDays(entry.start, guess) + 1;
+      const oneTap = span <= MAX_BLEED_DAYS;
+      ask({
+        id: `superseded-open:${entry.id}`,
+        kind: "superseded-open",
+        tone: "calm",
+        periodId: entry.id,
+        date: guess,
+        title: `The period that started ${formatDateShort(entry.start)} was never closed`,
+        body: `A newer period starts ${formatDate(next.start)}, but this one has no last day, so it can't count toward your bleed-length average. If it ended before the new one began, recording the last day keeps your record honest.`,
+        actions: [
+          ...(oneTap
+            ? [
+                {
+                  id: "yes",
+                  label: `It ended ${formatDateShort(guess)}`,
+                  primary: true,
+                  resolution: { type: "set-end" as const, periodId: entry.id, end: guess },
+                },
+              ]
+            : []),
+          {
+            id: "pick",
+            label: "Pick the last day",
+            ...(oneTap ? {} : { primary: true }),
+            resolution: { type: "edit-period", periodId: entry.id },
+          },
+          { id: "leave", label: "Leave it open", resolution: { type: "dismiss" } },
+          { id: "later", label: "Not now", resolution: { type: "snooze" } },
+        ],
       });
     }
   }

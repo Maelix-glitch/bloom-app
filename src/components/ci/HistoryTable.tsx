@@ -5,7 +5,7 @@
  */
 
 import { useState } from "react";
-import { Download, Pencil, Trash2, TriangleAlert, Upload } from "lucide-react";
+import { Download, Eye, EyeOff, Pencil, Trash2, TriangleAlert, Upload } from "lucide-react";
 
 import { Button, Card, SectionHead } from "./primitives";
 import {
@@ -21,6 +21,7 @@ export function HistoryTable({
   disabled = false,
   onEdit,
   onDelete,
+  onToggleExcluded,
   onClearAll,
   onExport,
   onImport,
@@ -31,6 +32,8 @@ export function HistoryTable({
   disabled?: boolean;
   onEdit: (log: PeriodLog) => void;
   onDelete: (id: string) => void;
+  /** "Exclude from calculations" — the record stays; the maths skips it. */
+  onToggleExcluded?: ((log: PeriodLog) => void) | undefined;
   onClearAll: () => void;
   onExport?: () => void;
   /** B8 — paste or drop history from another app. */
@@ -49,7 +52,7 @@ export function HistoryTable({
       <SectionHead
         eyebrow="Your record"
         title="Every entry you've logged"
-        note="Lengths marked as not counted were too short or too long to be a real cycle, so they stay out of the average — fix the gap and the average corrects itself."
+        note="Lengths marked as not counted stay out of the average — too short or too long to be a real cycle, or a cycle you excluded yourself (illness, travel, stress). Fix the gap, or include the cycle again, and the average corrects itself."
         aside={
           onExport || onImport ? (
             <span className="flex flex-wrap items-center gap-1.5">
@@ -121,6 +124,15 @@ export function HistoryTable({
                             no last day logged
                           </span>
                         )}
+                        {entry.excluded ? (
+                          <span
+                            className="ci-badge mt-1.5"
+                            data-testid="cycle-excluded-badge"
+                            title="Kept in your history, left out of your averages and predictions. Include it again any time."
+                          >
+                            excluded from averages
+                          </span>
+                        ) : null}
                       </td>
                       <td>
                         {isFirst ? (
@@ -162,6 +174,32 @@ export function HistoryTable({
                             <Pencil size={13} aria-hidden />
                             Edit
                           </Button>
+                          {onToggleExcluded ? (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onToggleExcluded(entry)}
+                              disabled={disabled}
+                              aria-label={
+                                entry.excluded
+                                  ? `Include the period starting ${formatDate(entry.start)} in your averages again`
+                                  : `Exclude the period starting ${formatDate(entry.start)} from your averages`
+                              }
+                              title={
+                                entry.excluded
+                                  ? "Include in your averages again"
+                                  : "This cycle was illness, travel or stress? Keep the record, leave it out of your averages"
+                              }
+                              data-testid="cycle-exclude-toggle"
+                            >
+                              {entry.excluded ? (
+                                <Eye size={13} aria-hidden />
+                              ) : (
+                                <EyeOff size={13} aria-hidden />
+                              )}
+                              {entry.excluded ? "Include" : "Exclude"}
+                            </Button>
+                          ) : null}
                           {confirmId === entry.id ? (
                             <span className="flex items-center gap-1">
                               <Button
@@ -240,6 +278,11 @@ export function HistoryTable({
                       <span>no last day logged</span>
                     )}
                     {entry.flow ? <span className="capitalize">{entry.flow}</span> : null}
+                    {entry.excluded ? (
+                      <span className="ci-badge" data-testid="cycle-excluded-badge">
+                        excluded from averages
+                      </span>
+                    ) : null}
                     {entry.notes ? (
                       <span className="line-clamp-2 basis-full">{entry.notes}</span>
                     ) : null}
@@ -254,6 +297,22 @@ export function HistoryTable({
                       <Pencil size={12} aria-hidden />
                       Edit
                     </Button>
+                    {onToggleExcluded ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onToggleExcluded(entry)}
+                        disabled={disabled}
+                        data-testid="cycle-exclude-toggle"
+                      >
+                        {entry.excluded ? (
+                          <Eye size={12} aria-hidden />
+                        ) : (
+                          <EyeOff size={12} aria-hidden />
+                        )}
+                        {entry.excluded ? "Include" : "Exclude"}
+                      </Button>
+                    ) : null}
                     {confirmId === entry.id ? (
                       <>
                         <Button

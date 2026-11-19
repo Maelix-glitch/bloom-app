@@ -27,7 +27,7 @@ import type { CycleMode } from "@/lib/cycle/periodStore";
 
 import { reminderCopy } from "./copy.ts";
 
-export type ReminderKind = "habit" | "period" | "fertile" | "evening";
+export type ReminderKind = "habit" | "period" | "fertile" | "evening" | "open-entry";
 
 export interface Reminder {
   /** Stable per reason per day — the dedupe key. */
@@ -119,6 +119,10 @@ export interface ReminderInput {
     fertileStart: string | null;
     /** Current cycle day, when the engine knows it. */
     cycleDay?: number | null;
+    /** Days past the usual end of a period that is still open (no last day
+        recorded), when there is one. Drives the discreet "finish the entry"
+        reminder — its copy names nothing about cycles (see copy.ts). */
+    openPastDays?: number | null;
   };
   /** How many things have been logged today (habits + trackers + cycle). */
   loggedToday: number;
@@ -192,6 +196,15 @@ export function dueReminders(input: ReminderInput): Reminder[] {
         at: "09:00",
         url: "/cycle",
       });
+    }
+    /* An entry left open past its usual end: nudge briefly (the first three
+       days past), then stop — the in-app check-in keeps asking with its own
+       snooze cadence; a notification must not become a daily nag. */
+    const openPast = input.cycle.openPastDays;
+    if (openPast !== null && openPast !== undefined && openPast >= 1 && openPast <= 3) {
+      const key = `open-entry:${today}`;
+      const copy = reminderCopy({ kind: "open-entry" }, key);
+      push({ key, kind: "open-entry", title: copy.title, body: copy.body, at: "09:00", url: "/cycle" });
     }
   }
 

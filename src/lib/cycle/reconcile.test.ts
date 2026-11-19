@@ -304,6 +304,75 @@ describe("reconcile · still open · late · missed", () => {
   });
 });
 
+describe("reconcile · superseded open periods · paused tracking", () => {
+  it("asks about an open period a newer start has overtaken", () => {
+    /* Census fix: section 1 only ever examines the latest entry, so an
+       entry left open and then superseded was never asked about again. */
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(90), end: ago(86), flow: "medium" },
+      { id: "b", start: ago(61), end: null, flow: "medium" }, // never closed
+      { id: "c", start: ago(32), end: ago(28), flow: "medium" },
+      { id: "d", start: ago(3), end: ago(0), flow: "medium" },
+    ];
+    const q = find(reconcile({ logs, days: [], today: TODAY }), "superseded-open");
+    expect(q).toBeDefined();
+    expect(q!.periodId).toBe("b");
+    // the guess is the usual length (5 days), well before the next start
+    expect(q!.actions[0]!.resolution).toEqual({ type: "set-end", periodId: "b", end: ago(57) });
+    expect(q!.actions.some((a) => a.resolution.type === "edit-period")).toBe(true);
+    // and the latest period is NOT asked about as superseded
+    expect(
+      reconcile({ logs, days: [], today: TODAY }).filter((c) => c.kind === "superseded-open"),
+    ).toHaveLength(1);
+  });
+
+  it("never guesses a last day that reaches into the next period", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(40), end: null }, // open; usual length would overshoot
+      { id: "b", start: ago(36), end: ago(33) }, // starts 4 days later
+    ];
+    const analysis = analyzeCycle(
+      [
+        { id: "p", start: ago(120), end: ago(111) }, // 10-day bleeds are this person's usual
+        { id: "q", start: ago(90), end: ago(81) },
+        ...logs,
+      ],
+      TODAY,
+    );
+    const q = find(
+      reconcile({ logs, days: [], today: TODAY, analysis }),
+      "superseded-open",
+    );
+    expect(q).toBeDefined();
+    const yes = q!.actions.find((a) => a.id === "yes");
+    expect(yes?.resolution).toEqual({ type: "set-end", periodId: "a", end: ago(37) });
+  });
+
+  it("does not ask about a superseded period that was closed", () => {
+    const logs = history(3, ago(0));
+    expect(find(reconcile({ logs, days: [], today: TODAY }), "superseded-open")).toBeUndefined();
+  });
+
+  it("stays quiet about open periods while tracking is paused", () => {
+    /* Census fix: the still-open prompt fired even when the mode said
+       periods aren't expected. `expecting: false` is what a pause (or the
+       off mode) hands the engine via the analysis. */
+    const logs = history(19); // would normally draw a still-open question
+    const paused = analyzeCycle(logs, TODAY, { expecting: false });
+    const list = reconcile({ logs, days: [], today: TODAY, analysis: paused });
+    expect(find(list, "still-open")).toBeUndefined();
+    // and a superseded open entry is not prompted about either
+    const logs2: PeriodLog[] = [
+      { id: "a", start: ago(61), end: null },
+      { id: "b", start: ago(32), end: ago(28) },
+    ];
+    const paused2 = analyzeCycle(logs2, TODAY, { expecting: false });
+    expect(
+      find(reconcile({ logs: logs2, days: [], today: TODAY, analysis: paused2 }), "superseded-open"),
+    ).toBeUndefined();
+  });
+});
+
 describe("classifyBleedDay — what pre-ticks 'first day of a period'", () => {
   const logs = history(10, ago(6));
   const analysis = analyzeCycle(logs, TODAY);

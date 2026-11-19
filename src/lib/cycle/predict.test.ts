@@ -7,6 +7,7 @@ import {
   describeNextPeriod,
   describeNextPeriodShort,
   effectiveMaxPlausible,
+  fertileEstimateGate,
   MAX_BLEED_DAYS,
   validateLogDraft,
   type PeriodLog,
@@ -49,8 +50,16 @@ describe("validateLogDraft — the hard walls", () => {
       /future/,
     );
     expect(
-      validateLogDraft({ start: ago(40), end: ago(40 - MAX_BLEED_DAYS) }, [], TODAY).end,
+      validateLogDraft({ start: ago(140), end: ago(140 - MAX_BLEED_DAYS - 1) }, [], TODAY).end,
     ).toMatch(/more than/);
+  });
+
+  it("allows a real long bleed past the old 30-day cap", () => {
+    /* Census fix: a true end more than 30 days after the start used to be
+       refused on every path, so a long episode could never be closed. The
+       ceiling is now the engine's hard cycle bound (90 days). */
+    expect(validateLogDraft({ start: ago(45), end: ago(1) }, [], TODAY)).toEqual({});
+    expect(validateLogDraft({ start: ago(100), end: ago(11) }, [], TODAY)).toEqual({});
   });
 
   it("allows a long-but-real bleed of 12 days", () => {
@@ -114,6 +123,19 @@ describe("assessLogDraft — soft margins that still save", () => {
 });
 
 describe("analyzeCycle — what the check-ins rely on", () => {
+  it("a genuinely long last bleed does not redefine the usual period length", () => {
+    /* A 20-day episode is recorded truth, but the averaged history (<= 15
+       day bound) stays the "usual length" — one episode must not stretch
+       every phase window. */
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(90), end: ago(86) }, // 5 days
+      { id: "b", start: ago(61), end: ago(57) }, // 5 days
+      { id: "c", start: ago(32), end: ago(13) }, // 20 days
+    ];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.periodLength).toBe(5);
+  });
+
   it("excludes implausible gaps and flags them with a midpoint suggestion", () => {
     const logs: PeriodLog[] = [
       { id: "x", start: ago(100) },
@@ -206,6 +228,47 @@ describe("analyzeCycle — what the check-ins rely on", () => {
     expect(low.nextWindow!.spread).toBeGreaterThanOrEqual(3);
     expect(low.nextWindow!.from < low.nextStart!).toBe(true);
     expect(low.nextWindow!.to > low.nextStart!).toBe(true);
+  });
+});
+
+describe("fertileEstimateGate — when a calendar estimate would be a guess", () => {
+  it("never judges on fewer than three measured cycles", () => {
+    expect(fertileEstimateGate([]).suppressed).toBe(false);
+    expect(fertileEstimateGate([21, 40]).suppressed).toBe(false);
+  });
+
+  it("suppresses when recent cycles spread over more than 9 days", () => {
+    const g = fertileEstimateGate([26, 33, 24, 35]);
+    expect(g.suppressed).toBe(true);
+    expect(g.reason).toMatch(/24 to 35 days/);
+  });
+
+  it("suppresses when most recent cycles sit outside 21–35 days", () => {
+    expect(fertileEstimateGate([38, 39, 38]).suppressed).toBe(true);
+    expect(fertileEstimateGate([19, 20, 28]).suppressed).toBe(true);
+  });
+
+  it("keeps estimates for a steady record inside the range", () => {
+    expect(fertileEstimateGate([27, 29, 28, 30]).suppressed).toBe(false);
+    expect(fertileEstimateGate([27, 29, 28, 30]).reason).toBeNull();
+  });
+
+  it("analyzeCycle withholds the fertile dates and says why", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(140) },
+      { id: "b", start: ago(114) }, // 26
+      { id: "c", start: ago(81) }, // 33
+      { id: "d", start: ago(57) }, // 24
+      { id: "e", start: ago(22) }, // 35
+    ];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.fertileSuppressed).toBe(true);
+    expect(a.ovulationDate).toBeNull();
+    expect(a.fertileStart).toBeNull();
+    expect(a.fertileEnd).toBeNull();
+    expect(a.forecast[0]!.fertileStart).toBeNull();
+    // the next-period window still stands — it is a range, not a date claim
+    expect(a.nextStart).not.toBeNull();
   });
 });
 
@@ -336,5 +399,49 @@ describe("describeNextPeriod — one sentence every surface can quote", () => {
   it("has nothing to say with nothing logged", () => {
     expect(describeNextPeriod(analyzeCycle([], TODAY))).toBeNull();
     expect(describeNextPeriodShort(analyzeCycle([], TODAY))).toBeNull();
+  });
+});
+
+describe("analyzeCycle — exclude-a-cycle (Wave B8)", () => {
+  const fourSteady = (excludedId?: string): PeriodLog[] =>
+    [112, 84, 56, 28].map((n, i) => ({
+      id: `p${i}`,
+      start: ago(n),
+      end: ago(n - 4),
+      ...(excludedId === `p${i}` ? { excluded: true } : {}),
+    }));
+
+  it("drops the intervals touching an excluded period from the lengths", () => {
+    expect(analyzeCycle(fourSteady(), TODAY).cycleLengths).toEqual([28, 28, 28]);
+    const a = analyzeCycle(fourSteady("p1"), TODAY);
+    /* p1 sits between p0 and p2: both touching intervals leave the maths,
+       only p2 → p3 still counts. The record itself is untouched. */
+    expect(a.cycleLengths).toEqual([28]);
+    expect(a.stats.excludedCycles).toBe(1);
+    /* The predict-path "cycles logged" stat counts counted lengths (the
+       canonical projection counts entries instead — a pre-existing
+       divergence between the two producers, not this change). */
+    expect(a.stats.cyclesLogged).toBe(1);
+  });
+
+  it("explains an excluded-adjacent gap instead of suggesting a missed period", () => {
+    const logs: PeriodLog[] = [
+      { id: "x", start: ago(100) },
+      { id: "y", start: ago(10), excluded: true },
+    ];
+    const a = analyzeCycle(logs, TODAY);
+    expect(a.gaps[0]!.plausible).toBe(false);
+    expect(a.gaps[0]!.suggestedMissedDate).toBeNull();
+    expect(a.gaps[0]!.reason).toMatch(/excluded/);
+  });
+
+  it("keeps an excluded period's bleed out of the bleed average", () => {
+    const logs: PeriodLog[] = [
+      { id: "a", start: ago(90), end: ago(86) }, // 5 days
+      { id: "b", start: ago(61), end: ago(50), excluded: true }, // 12 days, excluded
+      { id: "c", start: ago(32), end: ago(28) }, // 5 days
+    ];
+    /* Counted, the 12-day bleed would pull the average to ~7.3. */
+    expect(analyzeCycle(logs, TODAY).stats.averageBleed).toBe(5);
   });
 });

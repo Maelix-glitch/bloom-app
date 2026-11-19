@@ -62,10 +62,24 @@ function coverageFor(record: CycleRecord): number {
 export function buildBaseline(record: CycleRecord): Baseline {
   const starts = periodStarts(record);
   const intervals = intervalsFrom(starts);
-  const plausible = intervals.filter((d) => d >= PLAUSIBLE_MIN && d <= PLAUSIBLE_MAX);
-  const unusual = intervals.filter((d) => d > UNUSUAL_MAX || d < PLAUSIBLE_MIN);
+  /* A period the person excluded ("illness, travel — not my rhythm") keeps
+     its place in history and still delimits its neighbours, but the two
+     intervals touching it and its bleed length leave the statistics
+     entirely: not plausible, not unusual, just explained. */
+  const excludedStarts = new Set(
+    record.periods.filter((p) => p.excluded === true).map((p) => p.start),
+  );
+  const touchesExcluded = (i: number) =>
+    excludedStarts.has(starts[i]!) || excludedStarts.has(starts[i + 1]!);
+  const plausible = intervals.filter(
+    (d, i) => !touchesExcluded(i) && d >= PLAUSIBLE_MIN && d <= PLAUSIBLE_MAX,
+  );
+  const unusual = intervals.filter(
+    (d, i) => !touchesExcluded(i) && (d > UNUSUAL_MAX || d < PLAUSIBLE_MIN),
+  );
 
-  const bleeds = record.periods
+  const countedPeriods = record.periods.filter((p) => p.excluded !== true);
+  const bleeds = countedPeriods
     .map(bleedingDaysFor)
     .filter((d): d is number => d !== null && d >= 1 && d <= 15);
 
@@ -88,7 +102,8 @@ export function buildBaseline(record: CycleRecord): Baseline {
     recencyWeighted: recencyWeighted(plausible),
     bleedingMedian: median(bleeds),
     bleedingCount: bleeds.length,
-    completeness: record.periods.length > 0 ? bleeds.length / record.periods.length : 0,
+    excludedCount: excludedStarts.size,
+    completeness: countedPeriods.length > 0 ? bleeds.length / countedPeriods.length : 0,
     coverage: coverageFor(record),
     lastStart,
     daysSinceLastStart: lastStart ? diffDays(lastStart, record.today) : null,
