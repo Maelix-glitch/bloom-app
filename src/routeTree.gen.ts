@@ -19,6 +19,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as RewardsRouteImport } from './routes/rewards'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackersRouteImport } from './routes/trackers'
 import { Route as AdminProgressionRouteImport } from './routes/admin/progression'
@@ -78,6 +79,11 @@ const ReportRoute = ReportRouteImport.update({
 const RewardsRoute = RewardsRouteImport.update({
   id: '/rewards',
   path: '/rewards',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/rewards': typeof RewardsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/admin/progression': typeof AdminProgressionRoute
@@ -162,6 +169,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
+  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/admin/progression': typeof AdminProgressionRoute
@@ -185,6 +193,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/report': typeof ReportRoute
   '/rewards': typeof RewardsRouteWithChildren
+  '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/admin/progression': typeof AdminProgressionRoute
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/report'
     | '/rewards'
+    | '/settings'
     | '/terms'
     | '/trackers'
     | '/admin/progression'
@@ -229,6 +239,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/profile'
     | '/report'
+    | '/settings'
     | '/terms'
     | '/trackers'
     | '/admin/progression'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/report'
     | '/rewards'
+    | '/settings'
     | '/terms'
     | '/trackers'
     | '/admin/progression'
@@ -274,6 +286,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   ReportRoute: typeof ReportRoute
   RewardsRoute: typeof RewardsRouteWithChildren
+  SettingsRoute: typeof SettingsRoute
   TermsRoute: typeof TermsRoute
   TrackersRoute: typeof TrackersRoute
   AdminProgressionRoute: typeof AdminProgressionRoute
@@ -352,6 +365,13 @@ declare module '@tanstack/react-router' {
       path: '/rewards'
       fullPath: '/rewards'
       preLoaderRoute: typeof RewardsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -465,6 +485,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   ReportRoute: ReportRoute,
   RewardsRoute: RewardsRouteWithChildren,
+  SettingsRoute: SettingsRoute,
   TermsRoute: TermsRoute,
   TrackersRoute: TrackersRoute,
   AdminProgressionRoute: AdminProgressionRoute,

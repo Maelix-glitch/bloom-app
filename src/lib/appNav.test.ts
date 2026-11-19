@@ -20,6 +20,10 @@ describe("routeShowsAppNav", () => {
       "/rewards",
       "/coach",
       "/profile",
+      /* Plan B (IA slice): /settings is a main section now — the route
+         the account sections moved to; a main section with no
+         navigation is exactly what this pin exists to catch. */
+      "/settings",
       "/report",
     ]) {
       expect(routeShowsAppNav(p), p).toBe(true);

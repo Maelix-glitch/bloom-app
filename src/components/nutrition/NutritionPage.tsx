@@ -202,6 +202,37 @@ export function NutritionPage() {
         ) : null}
       </div>
 
+      {/* Sub-navigation (Plan B, senior diagnosis slice 5): the today
+          view is a long stack of named sections — plan, grocery, modes,
+          programmes, dishes. The chips are plain anchors to the section
+          ids below, named as the sections name themselves; the entries
+          follow the sections' own render conditions exactly, so a chip
+          never points at a section that is not on the page. Dishes stay
+          a section here rather than a route of their own: the library
+          is day-coupled — a dish logged from it lands on the day being
+          viewed, which is this page's state. */}
+      {isToday ? (
+        <nav className="nut-subnav" aria-label="Nutrition sections">
+          <a className="nut-chip" href="#nut-plan">
+            Plan
+          </a>
+          {!freshAccount ? (
+            <a className="nut-chip" href="#nut-grocery">
+              Grocery &amp; pantry
+            </a>
+          ) : null}
+          <a className="nut-chip" href="#nut-modes">
+            Condition modes
+          </a>
+          <a className="nut-chip" href="#nut-programmes">
+            Programmes
+          </a>
+          <a className="nut-chip" href="#nut-dishes">
+            Dishes
+          </a>
+        </nav>
+      ) : null}
+
       {freshAccount ? (
         <section className="nut-card nut-rise mt-4" aria-label="Nothing logged yet">
           <EmptyState
@@ -279,7 +310,11 @@ export function NutritionPage() {
 
       {/* Today's plan — a plan is built for a day, so it belongs to the
           today view; other days are the record, not the plan. */}
-      {isToday ? <NutritionPlanSection /> : null}
+      {isToday ? (
+        <div id="nut-plan" className="nut-jump">
+          <NutritionPlanSection />
+        </div>
+      ) : null}
 
       {/* The metabolic twin — a standing model of the person, computed
           from the record as of today; it belongs to every day's view
@@ -291,19 +326,33 @@ export function NutritionPage() {
           stored plan the section above renders, so it belongs to the
           today view beside it. With no plan and no logs it has nothing
           to derive, so the merged empty state covers it too. */}
-      {isToday && !freshAccount ? <GrocerySection /> : null}
+      {isToday && !freshAccount ? (
+        <div id="nut-grocery" className="nut-jump">
+          <GrocerySection />
+        </div>
+      ) : null}
       {/* Condition modes (System 14) — the person's own guardrails on
           the plan above; they belong with the plan, on the today view. */}
-      {isToday ? <ModesSection /> : null}
+      {isToday ? (
+        <div id="nut-modes" className="nut-jump">
+          <ModesSection />
+        </div>
+      ) : null}
       {/* Programmes — a multi-week arc over the plan, the log and
           the weigh-ins; like the plan, it belongs to the today
           view, other days are the record. */}
-      {isToday ? <ProgrammesSection /> : null}
+      {isToday ? (
+        <div id="nut-programmes" className="nut-jump">
+          <ProgrammesSection />
+        </div>
+      ) : null}
 
       {/* The dish library (D4) — browsing and logging a recipe belong
           to every day's view; a dish logged from here lands on the day
           being viewed. */}
-      <DishesSection day={day} />
+      <div id="nut-dishes" className="nut-jump">
+        <DishesSection day={day} />
+      </div>
 
       {/* The pattern lab reads the log, so on a fresh account it is
           one more empty block — the merged state above covers it. */}
