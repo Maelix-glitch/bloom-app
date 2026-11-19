@@ -44,6 +44,17 @@ vi.mock("@/hooks/useBodyProfile", () => ({
 vi.mock("@/hooks/useHabits", () => ({
   useHabits: () => habitsState.current,
 }));
+/* Brief v4 Slice 5: the Twin reads the plan store for its absorbed
+   insight strip. No plan in these fixtures → no strip; the tiles
+   render exactly as the pre-Slice-5 fixtures expect. */
+vi.mock("@/hooks/usePlan", () => ({
+  usePlan: () => ({
+    state: { kind: "can_generate" },
+    targetAdjustment: null,
+    engineTdeeKcal: null,
+    clearTargetAdjustment: () => {},
+  }),
+}));
 /* ProgrammesSection's useAssessment reads the body profile and
    throws on an empty record; the census renders the section with a
    completed assessment (the state it has for every real user who

@@ -47,16 +47,10 @@ import {
   ChevronDown,
   Clock,
   Cookie,
-  EyeOff,
   Flame,
-  Gauge,
-  Hourglass,
   Plus,
   RefreshCw,
-  Scale,
   SlidersHorizontal,
-  TrendingDown,
-  UtensilsCrossed,
   Wallet,
 } from "lucide-react";
 
@@ -89,14 +83,12 @@ import {
   dishIdeaFor,
   dishNutrients,
   displayNameForFoodId,
-  EXPENDITURE_MIN_LOGGED_DAYS,
   estimateExpenditure,
   findDish,
   findUsdaReference,
   foodDisplayName,
   goalProfileOf,
   logDish,
-  planLearningFor,
   provenanceLabel,
   sumNutrients,
   type Dish,
@@ -337,7 +329,6 @@ export function NutritionPlanSection() {
     setGoal,
     engineTdeeKcal,
     targetAdjustment,
-    clearTargetAdjustment,
   } = usePlan();
   const assessment = useAssessment();
   const session = useSession();
@@ -630,16 +621,12 @@ export function NutritionPlanSection() {
 
   const { plan, staleness } = state;
 
-  /* P7: what the log has taught, and the expenditure proposal. The
-     learning is recomputed from the same log the composer read, so
-     the surface explains the plan above it — and the proposal is a
-     proposal: it renders numbers and two buttons, and only the
-     Confirm button writes anything (the confirmed delta, through
-     targetAdjustment's strict path). */
-  const learning = planLearningFor(nutrition.entries, plan.day, plan.targets, {
-    storedPlan: plan,
-    sex: profile.sex === "unspecified" ? null : profile.sex,
-  });
+  /* P7: the expenditure proposal. It is a proposal: it renders
+     numbers and two buttons, and only the Confirm button writes
+     anything (the confirmed delta, through targetAdjustment's
+     strict path). (The learning the composer read is no longer
+     rendered here — brief v4 Slice 5 moved its conclusions into
+     the Metabolic Twin's insight strip.) */
   const expenditure = estimateExpenditure(nutrition.entries, body.weighIns, plan.day);
   const estimate = expenditure.kind === "ready" ? expenditure.estimate : null;
   const activeDelta = targetAdjustment?.kcalDelta ?? 0;
@@ -1348,222 +1335,13 @@ export function NutritionPlanSection() {
         </div>
       ) : null}
 
-      {learning ||
-      targetAdjustment ||
-      (expenditure.kind === "insufficient" &&
-        (expenditure.loggedDays > 0 || expenditure.weightPoints > 0)) ||
-      (estimate && !showProposal && proposalDelta !== null && Math.abs(proposalDelta) < 25) ? (
-        <div className="mt-5">
-          <p className="nut-group-label">What your plan learned</p>
-          {/* Anti-document form (brief v3): each learning is an
-              insight card — a headline the data supports, one
-              supporting line with the same numbers the notes carried,
-              at most one action. Dish lists are chips, requirements
-              are meters; nothing here is a paragraph stack. */}
-          <div className="mt-3 grid gap-3">
-            {learning?.adherence ? (
-              <article className="insight">
-                <span className="insight__icon" aria-hidden="true">
-                  <Gauge />
-                </span>
-                <div>
-                  <h3>
-                    {learning.adherence.avgKcal / plan.targets.kcal < 0.9
-                      ? "Intake running under target"
-                      : learning.adherence.avgKcal / plan.targets.kcal > 1.1
-                        ? "Intake running over target"
-                        : "Intake close to target"}
-                  </h3>
-                  <p>
-                    Over your last {learning.adherence.days} logged days you averaged{" "}
-                    <span data-metric="intake-kcal-avg">
-                      {Math.round(learning.adherence.avgKcal).toLocaleString("en-US")}
-                    </span>{" "}
-                    kcal and{" "}
-                    <span data-metric="intake-protein-avg">
-                      {Math.round(learning.adherence.avgProteinG)}
-                    </span>{" "}
-                    g protein a day, against targets of{" "}
-                    {Math.round(plan.targets.kcal).toLocaleString("en-US")} kcal and{" "}
-                    {fmtGrams(plan.targets.proteinG)} g.
-                  </p>
-                </div>
-              </article>
-            ) : null}
-            {learning && learning.favouredDishes.length > 0 ? (
-              <article className="insight">
-                <span className="insight__icon" aria-hidden="true">
-                  <UtensilsCrossed />
-                </span>
-                <div className="grid gap-1.5">
-                  <h3>Dishes you return to</h3>
-                  <ul className="flex flex-wrap gap-1.5">
-                    {learning.favouredDishes.slice(0, 5).map((d) => (
-                      <li key={d.name} className="nut-badge">
-                        {d.name} (logged {d.count} times)
-                      </li>
-                    ))}
-                    {learning.favouredDishes.length > 5 ? (
-                      <li className="nut-badge">and {learning.favouredDishes.length - 5} more</li>
-                    ) : null}
-                  </ul>
-                  <p>They lead the picks.</p>
-                </div>
-              </article>
-            ) : null}
-            {learning && learning.deprioritisedDishes.length > 0 ? (
-              <article className="insight">
-                <span className="insight__icon" aria-hidden="true">
-                  <EyeOff />
-                </span>
-                <div className="grid gap-1.5">
-                  <h3>Served but never logged</h3>
-                  <ul className="flex flex-wrap gap-1.5">
-                    {learning.deprioritisedDishes.slice(0, 5).map((d) => (
-                      <li key={d.name} className="nut-badge">
-                        {d.name}
-                      </li>
-                    ))}
-                    {learning.deprioritisedDishes.length > 5 ? (
-                      <li className="nut-badge">and {learning.deprioritisedDishes.length - 5} more</li>
-                    ) : null}
-                  </ul>
-                  <p>They sit further back.</p>
-                </div>
-              </article>
-            ) : null}
-            {learning?.microGaps.map((gap) => (
-              <article key={gap.key} className="insight">
-                <span className="insight__icon" aria-hidden="true">
-                  <TrendingDown />
-                </span>
-                <div>
-                  <h3>{gap.label} running low</h3>
-                  <p>
-                    {gap.label} averaged{" "}
-                    {gap.unit === "g" ? Math.round(gap.avg * 10) / 10 : Math.round(gap.avg)}{" "}
-                    {gap.unit} a day over {gap.days} logged days, against the {gap.reference}{" "}
-                    {gap.unit} reference — dishes richer in {gap.label.toLowerCase()} are favoured.
-                  </p>
-                </div>
-              </article>
-            ))}
-            {learning?.portionSignals.map((signal) => (
-              <article key={signal.foodId} className="insight">
-                <span className="insight__icon" aria-hidden="true">
-                  <Scale />
-                </span>
-                <div>
-                  <h3>Your usual portion differs</h3>
-                  <p>
-                    You usually log {signal.typicalGrams} g of {signal.name}; the plan serves{" "}
-                    {signal.plannedGrams} g (from {signal.logs} logs). Portions stay as planned —
-                    the choice is yours.
-                  </p>
-                </div>
-              </article>
-            ))}
-            {estimate && !showProposal && proposalDelta !== null && Math.abs(proposalDelta) < 25 ? (
-              <article className="insight">
-                <span className="insight__icon" aria-hidden="true">
-                  <Flame />
-                </span>
-                <div>
-                  <h3>Maintenance matches your target</h3>
-                  <p>
-                    Your record puts your maintenance near{" "}
-                    {estimate.maintenanceKcal.toLocaleString("en-US")} kcal — in line with your
-                    current target, so no change is proposed.
-                  </p>
-                </div>
-              </article>
-            ) : null}
-            {expenditure.kind === "insufficient" &&
-            (expenditure.loggedDays > 0 || expenditure.weightPoints > 0) ? (
-              <article className="insight">
-                <span className="insight__icon" aria-hidden="true">
-                  <Hourglass />
-                </span>
-                <div className="grid gap-1.5">
-                  <h3>Maintenance estimate still gathering</h3>
-                  <ul className="req" data-metric="maintenance-requirements">
-                    <li>
-                      <span>Logged days</span>
-                      <div
-                        className="nut-track tile-meter"
-                        role="progressbar"
-                        aria-label="Logged days"
-                        aria-valuenow={expenditure.loggedDays}
-                        aria-valuemin={0}
-                        aria-valuemax={EXPENDITURE_MIN_LOGGED_DAYS}
-                      >
-                        <span
-                          className="nut-track-fill"
-                          style={{
-                            width: `${Math.min(100, (expenditure.loggedDays / EXPENDITURE_MIN_LOGGED_DAYS) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                      <b>
-                        {expenditure.loggedDays}/{EXPENDITURE_MIN_LOGGED_DAYS}
-                      </b>
-                    </li>
-                    <li>
-                      <span>Weigh-ins</span>
-                      <div
-                        className="nut-track tile-meter"
-                        role="progressbar"
-                        aria-label="Weigh-ins"
-                        aria-valuenow={expenditure.weightPoints}
-                        aria-valuemin={0}
-                        aria-valuemax={2}
-                      >
-                        <span
-                          className="nut-track-fill"
-                          style={{
-                            width: `${Math.min(100, (expenditure.weightPoints / 2) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                      <b>{expenditure.weightPoints}/2</b>
-                    </li>
-                  </ul>
-                  <p>
-                    It needs 2 weigh-ins spanning at least 10 days, with 10 logged days between
-                    them.
-                  </p>
-                </div>
-              </article>
-            ) : null}
-            {targetAdjustment ? (
-              <article className="insight">
-                <span className="insight__icon" aria-hidden="true">
-                  <SlidersHorizontal />
-                </span>
-                <div>
-                  <h3>Target includes your adjustment</h3>
-                  <p>
-                    Your energy target includes your confirmed{" "}
-                    {targetAdjustment.kcalDelta > 0 ? "+" : "−"}
-                    {Math.abs(targetAdjustment.kcalDelta).toLocaleString("en-US")} kcal adjustment —
-                    maintenance estimated at{" "}
-                    {targetAdjustment.basedOn.maintenanceKcal.toLocaleString("en-US")} kcal from{" "}
-                    {targetAdjustment.basedOn.loggedDays} logged days over a{" "}
-                    {targetAdjustment.basedOn.spanDays}-day window.
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  className="nut-btn nut-btn-ghost nut-btn-sm"
-                  onClick={() => clearTargetAdjustment()}
-                >
-                  Remove adjustment
-                </button>
-              </article>
-            ) : null}
-          </div>
-        </div>
-      ) : null}
+      {/* Brief v4 Slice 5: the "What your plan learned" block that
+          lived here is retired — the Metabolic Twin absorbed its
+          conclusions as an insight strip (Part 3.4), its numbers
+          live in the Twin's tiles, and its one action (Remove
+          adjustment) moved with the adjustment row. The plan's
+          learning still feeds composition exactly as before;
+          only this second rendering of it is gone (M-83/M-84). */}
 
       {logError ? (
         <p className="nut-error mt-3" role="alert">

@@ -501,6 +501,15 @@
   background: transparent;
   color: var(--muted-foreground);
 }
+/* Early read (brief v4 Part 3.4 / §22): a conclusion drawn from
+   fewer than 7 logged days is an estimate-in-progress — the dashed
+   signature again, in the neutral muted tone. Never gold (that is
+   the one ready figure's), never success (nothing is proven yet). */
+.tile-badge--early {
+  border-style: dashed;
+  background: transparent;
+  color: var(--muted-foreground);
+}
 
 /* Meters: the house .nut-track/.nut-track-fill pair, sized for tiles.
    Requirement meters stay neutral; only the gold figure's own meter
@@ -516,7 +525,11 @@
 }
 
 /* Requirement meters inside gathering tiles (v2 rulebook §7 .req,
-   Bloom tokens): label, meter, X/Y — never a sentence. */
+   Bloom tokens): label, meter, X/Y — never a sentence. Capped per
+   brief v4 Part 3.4 (M-92): the label column is 7rem, the bar at
+   most 20rem (320px) however wide the tile grows, and the count
+   sits in the column immediately beside its bar — left-aligned
+   against it, never floated to the row's far edge. */
 .req {
   list-style: none;
   margin: 0;
@@ -526,14 +539,14 @@
 }
 .req li {
   display: grid;
-  grid-template-columns: 6.5rem 1fr 2.75rem;
+  grid-template-columns: 7rem minmax(0, 20rem) 3rem;
   gap: var(--space-3);
   align-items: center;
   font-size: var(--text-support);
   color: var(--text-secondary);
 }
 .req b {
-  text-align: end;
+  text-align: start;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
   color: var(--foreground);
@@ -545,8 +558,10 @@
    this route-scoped stylesheet). Single source, in the global sheet
    beside .note and .empty-row. */
 
-/* Insight cards ("What your plan learned"): a headline conclusion,
-   one supporting line, at most one action. */
+/* Insight cards: a headline conclusion, one supporting line, at
+   most one action. Used by the adjusted section's rows and, since
+   brief v4 Slice 5, the Metabolic Twin's insight strip (the absorbed
+   "What your plan learned" conclusions, capped at two rows). */
 .insight {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr) auto;

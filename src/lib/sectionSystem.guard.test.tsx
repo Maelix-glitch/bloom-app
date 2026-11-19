@@ -21,6 +21,9 @@
  *   (d) ONE BODY STYLE — `.nut-note`, the 12px grey paragraph style
  *       that carried the plan's sentences, is pinned to the 14px
  *       secondary step (M-86).
+ *   (e) METER CAPS (Slice 5, M-92) — `.req li` carries the brief's
+ *       grid verbatim: 7rem label, `minmax(0, 20rem)` bar, count in
+ *       the adjacent column, left-aligned beside its bar.
  *
  * Scope: the whole Nutrition page rendered through the real
  * prefs-backed flow (seeded assessment, a real composed plan written
@@ -171,6 +174,21 @@ describe("section system — stylesheet pins", () => {
     const body = note.map((b) => b.body).join("\n");
     expect(body).toContain("font-size: var(--text-callout)");
     expect(body).not.toContain("--text-caption");
+  });
+
+  /* Brief v4 Slice 5 (M-92): requirement meters are capped — the
+     brief's grid verbatim (label 7rem, bar at most 20rem, count in
+     the adjacent 3rem column). jsdom has no layout, so the cap is
+     pinned on the stylesheet: a 1fr bar or a label over 7rem fails
+     here, and the count's column follows the bar directly. */
+  it("requirement meters are capped: 7rem label, bar ≤ 20rem, count adjacent (M-92)", () => {
+    const req = rulesFor("styles/nutrition.css", ".req li");
+    expect(req.length, ".req li rule exists").toBeGreaterThan(0);
+    const body = req.map((b) => b.body).join("\n");
+    expect(body).toContain("grid-template-columns: 7rem minmax(0, 20rem) 3rem");
+    const count = rulesFor("styles/nutrition.css", ".req b");
+    expect(count.length, ".req b rule exists").toBeGreaterThan(0);
+    expect(count.map((b) => b.body).join("\n")).toContain("text-align: start");
   });
 });
 

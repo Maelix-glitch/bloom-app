@@ -144,16 +144,17 @@ export function withinSectionDuplicates(scope: HTMLElement): string[] {
 
 /**
  * The M-83 debt, recorded 2026-11-19 (brief v4 Slice 1): facts the
- * plan section and the Twin BOTH state today. v4 Slice 5 (Twin
- * absorbs "What your plan learned") clears this list to empty —
- * removing an entry without removing the duplicate fails the
- * within-page assertion below, and adding a duplicate fails it too.
+ * plan section and the Twin BOTH stated — intake-kcal-avg,
+ * intake-protein-avg (Twin coverage tile + plan-learned adherence)
+ * and maintenance-requirements (Twin maintenance tile + plan-learned
+ * gathering insight). CLEARED by brief v4 Slice 5 (2026-11-19): the
+ * Twin absorbed "What your plan learned" as a conclusions-only
+ * insight strip, the plan block was removed, and each fact now
+ * renders exactly once, in its tile. The list stays as the guard's
+ * assertion target: it must remain EMPTY — any duplicate, old or
+ * new, fails the render test below.
  */
-export const KNOWN_DUPLICATE_METRICS: readonly string[] = [
-  "intake-kcal-avg",
-  "intake-protein-avg",
-  "maintenance-requirements",
-];
+export const KNOWN_DUPLICATE_METRICS: readonly string[] = [];
 
 /* ------------------------------ fixtures ------------------------------- */
 
@@ -297,7 +298,7 @@ describe("polish guard — storage round-trip (the M-81 pin)", () => {
 });
 
 describe("polish guard — Nutrition render (plan + Twin)", () => {
-  it("no truncated sentences; data-metric duplicates are exactly the recorded M-83 debt", async () => {
+  it("no truncated sentences; the M-83 debt is cleared — every metric renders once", async () => {
     seedOwnerAssessment();
     seedLog();
 
@@ -325,7 +326,42 @@ describe("polish guard — Nutrition render (plan + Twin)", () => {
     expect(withinSectionDuplicates(container), "duplicates inside one section").toEqual([]);
     expect(
       duplicateMetrics(container),
-      "cross-section duplicates beyond the recorded M-83 debt",
+      "cross-section duplicates — the M-83 debt is cleared and must stay cleared",
     ).toEqual([...KNOWN_DUPLICATE_METRICS]);
+
+    /* Brief v4 Slice 5 close-out (M-83/M-84/M-93): the plan section's
+       "What your plan learned" block is retired — its label renders
+       nowhere, and none of the three ex-debt metrics survives in the
+       plan section's subtree (each lives once, in its Twin tile). */
+    expect(container.textContent).not.toContain("What your plan learned");
+    const planSection = container.querySelector('section[aria-label="Your plan for today"]');
+    expect(planSection, "plan section renders").not.toBeNull();
+    for (const key of ["intake-kcal-avg", "intake-protein-avg", "maintenance-requirements"]) {
+      expect(
+        planSection!.querySelectorAll(`[data-metric="${key}"]`),
+        `${key} must not render in the plan section`,
+      ).toHaveLength(0);
+    }
+
+    /* The Twin's insight strip: at most two conclusion rows, and on
+       this fixture (3 logged days averaging 1,800 kcal against the
+       1,350 guide) the adherence conclusion is an EARLY READ — the
+       dashed badge names its basis, the headline is the brief's
+       neutral wording, and the strip restates none of the tile's
+       numbers (no averages, no target figures). */
+    const twinSection = container.querySelector('section[aria-label="Your metabolic twin"]');
+    expect(twinSection, "Twin section renders").not.toBeNull();
+    const strip = twinSection!.querySelector(".twin-strip");
+    expect(strip, "the Twin carries the absorbed insight strip").not.toBeNull();
+    const rows = strip!.querySelectorAll(".insight");
+    expect(rows.length, "insight strip is capped at two rows").toBeLessThanOrEqual(2);
+    expect(rows.length, "the adherence conclusion reaches the strip").toBeGreaterThan(0);
+    expect(strip!.textContent).toContain("Intake is above target so far");
+    const badge = strip!.querySelector(".tile-badge--early");
+    expect(badge, "a sub-7-day conclusion carries the Early read badge").not.toBeNull();
+    expect(badge!.textContent).toContain("Early read · 3 days");
+    expect(badge!.className).not.toMatch(/gold|success/);
+    expect(strip!.textContent, "the strip restates no tile numbers").not.toContain("1,800");
+    expect(strip!.textContent, "the strip restates no tile numbers").not.toContain("1,350");
   }, 30000);
 });
