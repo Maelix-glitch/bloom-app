@@ -61,7 +61,7 @@ export function LegalPage({
             {s.paras.map((p) => (
               <p
                 key={p.slice(0, 24)}
-                className="mt-3 text-[13.5px] leading-relaxed text-muted-foreground"
+                className="mt-3 text-[14px] leading-relaxed text-muted-foreground"
               >
                 {p}
               </p>
@@ -71,16 +71,28 @@ export function LegalPage({
 
         <footer className="mt-14 border-t border-border pt-6">
           <p className="text-[11.5px] leading-relaxed text-muted-foreground">
-            Questions about this page belong to whoever runs the Bloom instance you are using. This
-            copy of the policy ships with the app itself, so what you read here is what the code
-            does.
+            Bloom Vitalis runs this app, and this copy of the page ships with the app itself — so
+            what you read here is what the code does. Questions about anything on it:{" "}
+            <a
+              href="mailto:maelix67@gmail.com"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              maelix67@gmail.com
+            </a>
+            .
           </p>
-          <p className="mt-4 flex gap-4 text-[11.5px]">
+          <p className="mt-4 flex flex-wrap gap-4 text-[11.5px]">
             <Link to="/privacy" className="underline underline-offset-2 hover:text-foreground">
               Privacy
             </Link>
             <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">
               Terms
+            </Link>
+            <Link to="/refund" className="underline underline-offset-2 hover:text-foreground">
+              Refunds
+            </Link>
+            <Link to="/contact" className="underline underline-offset-2 hover:text-foreground">
+              Contact
             </Link>
           </p>
         </footer>

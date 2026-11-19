@@ -12,11 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HandleRouteImport } from './routes/$handle'
 import { Route as CoachRouteImport } from './routes/coach'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CycleRouteImport } from './routes/cycle'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as NutritionRouteImport } from './routes/nutrition'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as RefundRouteImport } from './routes/refund'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as SettingsRouteImport } from './routes/settings'
@@ -46,6 +48,11 @@ const CoachRoute = CoachRouteImport.update({
   path: '/coach',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CycleRoute = CycleRouteImport.update({
   id: '/cycle',
   path: '/cycle',
@@ -69,6 +76,11 @@ const PrivacyRoute = PrivacyRouteImport.update({
 const ProfileRoute = ProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RefundRoute = RefundRouteImport.update({
+  id: '/refund',
+  path: '/refund',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ReportRoute = ReportRouteImport.update({
@@ -141,11 +153,13 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
   '/coach': typeof CoachRoute
+  '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
   '/dashboard': typeof DashboardRoute
   '/nutrition': typeof NutritionRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/refund': typeof RefundRoute
   '/report': typeof ReportRoute
   '/rewards': typeof RewardsRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -164,10 +178,12 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
   '/coach': typeof CoachRoute
+  '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
   '/dashboard': typeof DashboardRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/refund': typeof RefundRoute
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
   '/terms': typeof TermsRoute
@@ -186,11 +202,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
   '/coach': typeof CoachRoute
+  '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
   '/dashboard': typeof DashboardRoute
   '/nutrition': typeof NutritionRouteWithChildren
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
+  '/refund': typeof RefundRoute
   '/report': typeof ReportRoute
   '/rewards': typeof RewardsRouteWithChildren
   '/settings': typeof SettingsRoute
@@ -211,11 +229,13 @@ export interface FileRouteTypes {
     | '/'
     | '/$handle'
     | '/coach'
+    | '/contact'
     | '/cycle'
     | '/dashboard'
     | '/nutrition'
     | '/privacy'
     | '/profile'
+    | '/refund'
     | '/report'
     | '/rewards'
     | '/settings'
@@ -234,10 +254,12 @@ export interface FileRouteTypes {
     | '/'
     | '/$handle'
     | '/coach'
+    | '/contact'
     | '/cycle'
     | '/dashboard'
     | '/privacy'
     | '/profile'
+    | '/refund'
     | '/report'
     | '/settings'
     | '/terms'
@@ -255,11 +277,13 @@ export interface FileRouteTypes {
     | '/'
     | '/$handle'
     | '/coach'
+    | '/contact'
     | '/cycle'
     | '/dashboard'
     | '/nutrition'
     | '/privacy'
     | '/profile'
+    | '/refund'
     | '/report'
     | '/rewards'
     | '/settings'
@@ -279,11 +303,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HandleRoute: typeof HandleRoute
   CoachRoute: typeof CoachRoute
+  ContactRoute: typeof ContactRoute
   CycleRoute: typeof CycleRoute
   DashboardRoute: typeof DashboardRoute
   NutritionRoute: typeof NutritionRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
   ProfileRoute: typeof ProfileRoute
+  RefundRoute: typeof RefundRoute
   ReportRoute: typeof ReportRoute
   RewardsRoute: typeof RewardsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
@@ -316,6 +342,13 @@ declare module '@tanstack/react-router' {
       path: '/coach'
       fullPath: '/coach'
       preLoaderRoute: typeof CoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/cycle': {
@@ -351,6 +384,13 @@ declare module '@tanstack/react-router' {
       path: '/profile'
       fullPath: '/profile'
       preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/refund': {
+      id: '/refund'
+      path: '/refund'
+      fullPath: '/refund'
+      preLoaderRoute: typeof RefundRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/report': {
@@ -478,11 +518,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HandleRoute: HandleRoute,
   CoachRoute: CoachRoute,
+  ContactRoute: ContactRoute,
   CycleRoute: CycleRoute,
   DashboardRoute: DashboardRoute,
   NutritionRoute: NutritionRouteWithChildren,
   PrivacyRoute: PrivacyRoute,
   ProfileRoute: ProfileRoute,
+  RefundRoute: RefundRoute,
   ReportRoute: ReportRoute,
   RewardsRoute: RewardsRouteWithChildren,
   SettingsRoute: SettingsRoute,

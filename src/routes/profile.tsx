@@ -926,6 +926,12 @@ function ProfilePage() {
                   <Link to="/terms" className="underline underline-offset-2 hover:text-foreground">
                     Terms
                   </Link>
+                  <Link to="/refund" className="underline underline-offset-2 hover:text-foreground">
+                    Refunds
+                  </Link>
+                  <Link to="/contact" className="underline underline-offset-2 hover:text-foreground">
+                    Contact
+                  </Link>
                 </p>
               </footer>
             </div>
