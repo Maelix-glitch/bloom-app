@@ -5,9 +5,10 @@
  * the gate decides BEFORE any provider call, failures are never
  * charged (the charge happens in index.ts only after success), a
  * free photo is refused as a feature regardless of balance, and an
- * unanswered entitlement RPC leaves the gate INACTIVE — the
- * deliberate dark-launch seam, pinned here so it can never quietly
- * become a client-controlled bypass.
+ * unanswered entitlement RPC FAILS CLOSED (pentest 2026-11-19, M2 —
+ * billing has been live since 2026-11-18, so the original dark-launch
+ * seam now survives only behind the explicit operator flag, pinned
+ * here so it can never quietly become a client-controlled bypass).
  */
 import { describe, expect, it } from "vitest";
 
@@ -17,6 +18,7 @@ import {
   costFor,
   decideGate,
   gateErrorBody,
+  gateErrorStatus,
   parseEntitlementRows,
   type EntitlementSnapshot,
 } from "../../../supabase/functions/coach/billing-core";
@@ -54,15 +56,34 @@ describe("flat credit costs", () => {
 });
 
 describe("decideGate", () => {
-  it("billing inactive (RPC silent) → allow uncharged, every action", () => {
+  /* PIN CHANGED 2026-11-19 (pentest M2): this used to pin "RPC silent
+     → allow uncharged" — the dark-launch seam from before the billing
+     migration landed. Billing went live 2026-11-18, so the seam's
+     reason expired: an unanswered RPC is now an outage and the gate
+     fails CLOSED by default. allow_uncharged survives only behind
+     the operator's explicit darkLaunch flag. */
+  it("billing RPC silent → fail closed (deny_unavailable), every action", () => {
     for (const action of ["coach", "vitalis", "tts"] as const) {
       expect(decideGate({ entitlement: null, action, hasMedia: false })).toEqual({
-        kind: "allow_uncharged",
+        kind: "deny_unavailable",
       });
     }
     expect(decideGate({ entitlement: null, action: "coach", hasMedia: true })).toEqual({
-      kind: "allow_uncharged",
+      kind: "deny_unavailable",
     });
+  });
+
+  it("dark-launch flag explicitly set → the old uncharged seam, and only then", () => {
+    for (const action of ["coach", "vitalis", "tts"] as const) {
+      expect(decideGate({ entitlement: null, action, hasMedia: false, darkLaunch: true })).toEqual({
+        kind: "allow_uncharged",
+      });
+    }
+    /* The flag changes nothing once the RPC answers. */
+    expect(
+      decideGate({ entitlement: snap({ creditBalance: 0 }), action: "coach", hasMedia: false, darkLaunch: true })
+        .kind,
+    ).toBe("deny_insufficient");
   });
 
   it("free + photo → premium_required no matter the balance", () => {
@@ -154,6 +175,21 @@ describe("gateErrorBody — the 402 the client renders as an upgrade prompt", ()
   it("allows produce no error body", () => {
     expect(gateErrorBody({ kind: "allow", cost: 1, reason: "coach_message" }, "r")).toBeNull();
     expect(gateErrorBody({ kind: "allow_uncharged" }, "r")).toBeNull();
+  });
+
+  it("billing unavailable carries the honest error shape, no invented numbers", () => {
+    expect(gateErrorBody({ kind: "deny_unavailable" }, "req-3")).toEqual({
+      error: "billing_unavailable",
+      requestId: "req-3",
+    });
+  });
+
+  it("statuses: entitlement denials are 402, an unanswered RPC is a retryable 503", () => {
+    expect(gateErrorStatus({ kind: "deny_insufficient", cost: 1, balance: 0, tier: "free" })).toBe(402);
+    expect(gateErrorStatus({ kind: "deny_premium", feature: "food_photo_analysis", tier: "free" })).toBe(402);
+    expect(gateErrorStatus({ kind: "deny_unavailable" })).toBe(503);
+    expect(gateErrorStatus({ kind: "allow", cost: 1, reason: "coach_message" })).toBeNull();
+    expect(gateErrorStatus({ kind: "allow_uncharged" })).toBeNull();
   });
 });
 

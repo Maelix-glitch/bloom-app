@@ -24,7 +24,9 @@
  * ONLY from a webhook event whose HMAC signature verified against
  * the webhook secret, and the tier comes from the notes the checkout
  * itself wrote at creation — never from anything in the event the
- * client could influence.
+ * client could influence. Verified events are also recorded in
+ * billing_webhook_events (keyed by the SHA-256 of the raw body)
+ * before they are acted on, so a replayed delivery is ignored.
  */
 
 export type PaidTier = "premium" | "premium_plus";
@@ -114,6 +116,29 @@ export async function verifyRazorpaySignature(
   if (!signature || !secret) return false;
   const expected = await hmacSha256Hex(secret, rawBody);
   return timingSafeEqual(expected, signature.trim().toLowerCase());
+}
+
+/* ------------------------------------------------------------------ */
+/* Webhook replay protection                                          */
+/*                                                                    */
+/* Razorpay's signature scheme carries no timestamp and its payloads */
+/* no unique event id, so a captured genuine webhook (body +          */
+/* signature) could otherwise be replayed verbatim and honoured       */
+/* again (pentest 2026-11-19, M4). The dedupe key is the SHA-256 of   */
+/* the RAW body: a verbatim replay hashes identically, while every    */
+/* genuine new event (a fresh charge, a later lifecycle change) has   */
+/* a different body and a different key. The function records the     */
+/* key in billing_webhook_events BEFORE acting on the event; a        */
+/* primary-key collision means "already processed — ignore".          */
+/* ------------------------------------------------------------------ */
+
+async function sha256Hex(message: string): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(message));
+  return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+export async function webhookEventKey(rawBody: string): Promise<string> {
+  return sha256Hex(rawBody);
 }
 
 /* ------------------------------------------------------------------ */

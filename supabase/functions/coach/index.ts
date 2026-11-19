@@ -106,9 +106,12 @@
  *   JWT. Insufficient credits or a Premium-only feature on the free
  *   tier answer 402 ({ error: "insufficient_credits" |
  *   "premium_required" }) and no provider is ever called. When the
- *   billing RPC does not answer (migration not yet applied) the gate
- *   is inactive and requests proceed uncharged — a dark-launch seam,
- *   logged as billing=inactive.
+ *   billing RPC does not answer, the gate FAILS CLOSED with a
+ *   retryable 503 ({ error: "billing_unavailable" }) — billing has
+ *   been live since 2026-11-18, so an unanswered RPC is an outage,
+ *   never a free tier (pentest 2026-11-19, M2). The old uncharged
+ *   seam survives only behind BLOOM_BILLING_DARK_LAUNCH=1, for a
+ *   future pre-migration deploy; it defaults off.
  *
  * Optional tuning (all server-side secrets):
  *   COACH_PROVIDER_ORDER=apinex,grok,huggingface-qwen   # gemini = Google-direct, optional
@@ -139,6 +142,7 @@ import {
 import {
   decideGate,
   gateErrorBody,
+  gateErrorStatus,
   parseEntitlementRows,
   type BillingAction,
   type EntitlementSnapshot,
@@ -337,7 +341,7 @@ async function handleTts(body: Body, req: Request, rid: string): Promise<Respons
      the chat path, whose gate is where the upgrade prompt lives. */
   const gate = await billingGateCheck(req, "tts", false, rid);
   const gateError = gateErrorBody(gate, rid);
-  if (gateError) return json(gateError, 402);
+  if (gateError) return json(gateError, gateErrorStatus(gate) ?? 402);
   const voiceId =
     typeof body.voiceId === "string" && /^[A-Za-z0-9_-]{8,64}$/.test(body.voiceId)
       ? body.voiceId
@@ -390,9 +394,11 @@ async function handleTts(body: Body, req: Request, rid: string): Promise<Respons
    is only the transport: the caller's own JWT drives the RPCs, so
    auth.uid() inside them is always the person being charged — there
    is no service-role key in this function and no client-sent input
-   to the decision. When the RPC does not answer (the billing
-   migration not yet applied) the gate is inactive and requests
-   proceed uncharged — see billing-core.ts for why that seam exists.
+   to the decision. When the RPC does not answer, the gate fails
+   closed (503 billing_unavailable) — see billing-core.ts; the
+   uncharged dark-launch seam survives only behind the explicit
+   BLOOM_BILLING_DARK_LAUNCH=1 env flag, for a future deploy that
+   must land before its billing migration.
    ========================================================================== */
 async function billingRpc(
   req: Request,
@@ -433,9 +439,14 @@ async function billingGateCheck(
   rid: string,
 ): Promise<GateDecision> {
   const entitlement = await billingEntitlement(req);
-  const decision = decideGate({ entitlement, action, hasMedia });
+  const darkLaunch = (Deno.env.get("BLOOM_BILLING_DARK_LAUNCH") ?? "") === "1";
+  const decision = decideGate({ entitlement, action, hasMedia, darkLaunch });
   if (!entitlement) {
-    console.info(`coach request=${rid} billing=inactive action=${action}`);
+    console.info(
+      darkLaunch
+        ? `coach request=${rid} billing=inactive_dark_launch action=${action}`
+        : `coach request=${rid} billing=unavailable_fail_closed action=${action}`,
+    );
   }
   return decision;
 }
@@ -1542,12 +1553,14 @@ Deno.serve(async (req: Request) => {
         : null;
 
     /* Money System gate — BEFORE any provider is called, for both
-       chat paths. A denial is a clean 402 the client turns into an
-       upgrade prompt; the deduct happens only after a real answer
-       exists (Coach: below; Vitalis: its onSuccess callback). */
+       chat paths. An entitlement denial is a clean 402 the client
+       turns into an upgrade prompt; an unanswered entitlement RPC
+       is a retryable 503 (fail closed, M2). The deduct happens only
+       after a real answer exists (Coach: below; Vitalis: its
+       onSuccess callback). */
     const gate = await billingGateCheck(req, isVitalis ? "vitalis" : "coach", Boolean(media), rid);
     const gateError = gateErrorBody(gate, rid);
-    if (gateError) return json(gateError, 402);
+    if (gateError) return json(gateError, gateErrorStatus(gate) ?? 402);
 
     /* Vitalis chat runs its own pipeline (lockdown, validation,
        deliberation) and returns from there. */
