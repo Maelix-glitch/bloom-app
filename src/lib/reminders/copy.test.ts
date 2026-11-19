@@ -11,11 +11,20 @@ const ctx = (over: Partial<ReminderContext>): ReminderContext => ({ kind: "habit
 
 describe("reminder copy", () => {
   it("produces a non-empty title and body for every kind", () => {
-    const kinds = ["habit", "period", "fertile", "evening"] as const;
+    const kinds = ["habit", "period", "fertile", "evening", "open-entry"] as const;
     for (const kind of kinds) {
       const { title, body } = reminderCopy({ kind }, `k-${kind}`);
       expect(title.length, `${kind} title`).toBeGreaterThan(0);
       expect(body.length, `${kind} body`).toBeGreaterThan(0);
+    }
+  });
+
+  it("keeps the open-entry reminder discreet across every variant (Wave C11)", () => {
+    /* This notification can land on a shared phone's lock screen. No cycle
+       vocabulary may appear in any title or body it can produce. */
+    for (let i = 0; i < 40; i += 1) {
+      const { title, body } = reminderCopy({ kind: "open-entry" }, `seed-${i}`);
+      expect(`${title} ${body}`).not.toMatch(/period|cycle|bleed|menstrual|fertile|ovulat/i);
     }
   });
 

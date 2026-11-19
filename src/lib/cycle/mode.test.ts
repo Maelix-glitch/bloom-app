@@ -98,6 +98,16 @@ describe("settings · mode + pause", () => {
     expect(normalizeSettings({ mode: "paused" }).pause).not.toBeNull();
   });
 
+  it("predictionsOff survives normalisation only as a literal true", () => {
+    /* The predictions-off toggle is a settings field like easeBeforePeriod:
+       absent means off (predictions shown), junk never turns it on, and it
+       is independent of the mode — pausing is a different statement. */
+    expect(normalizeSettings({}).predictionsOff).toBeUndefined();
+    expect(normalizeSettings({ predictionsOff: true }).predictionsOff).toBe(true);
+    expect(normalizeSettings({ predictionsOff: "yes" }).predictionsOff).toBeUndefined();
+    expect(normalizeSettings({ predictionsOff: true }).mode).toBe("tracking");
+  });
+
   it("a dated pause that has passed reads as tracking again", () => {
     const paused: CycleSettings = {
       personalMaxPlausible: null,

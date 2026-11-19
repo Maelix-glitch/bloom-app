@@ -14,6 +14,7 @@ import { Route as HandleRouteImport } from './routes/$handle'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CycleRouteImport } from './routes/cycle'
+import { Route as CycleReportRouteImport } from './routes/cycle-report'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as NutritionRouteImport } from './routes/nutrition'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -56,6 +57,11 @@ const ContactRoute = ContactRouteImport.update({
 const CycleRoute = CycleRouteImport.update({
   id: '/cycle',
   path: '/cycle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CycleReportRoute = CycleReportRouteImport.update({
+  id: '/cycle-report',
+  path: '/cycle-report',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardRoute = DashboardRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/coach': typeof CoachRoute
   '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
+  '/cycle-report': typeof CycleReportRoute
   '/dashboard': typeof DashboardRoute
   '/nutrition': typeof NutritionRouteWithChildren
   '/privacy': typeof PrivacyRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/coach': typeof CoachRoute
   '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
+  '/cycle-report': typeof CycleReportRoute
   '/dashboard': typeof DashboardRoute
   '/privacy': typeof PrivacyRoute
   '/profile': typeof ProfileRoute
@@ -204,6 +212,7 @@ export interface FileRoutesById {
   '/coach': typeof CoachRoute
   '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
+  '/cycle-report': typeof CycleReportRoute
   '/dashboard': typeof DashboardRoute
   '/nutrition': typeof NutritionRouteWithChildren
   '/privacy': typeof PrivacyRoute
@@ -231,6 +240,7 @@ export interface FileRouteTypes {
     | '/coach'
     | '/contact'
     | '/cycle'
+    | '/cycle-report'
     | '/dashboard'
     | '/nutrition'
     | '/privacy'
@@ -256,6 +266,7 @@ export interface FileRouteTypes {
     | '/coach'
     | '/contact'
     | '/cycle'
+    | '/cycle-report'
     | '/dashboard'
     | '/privacy'
     | '/profile'
@@ -279,6 +290,7 @@ export interface FileRouteTypes {
     | '/coach'
     | '/contact'
     | '/cycle'
+    | '/cycle-report'
     | '/dashboard'
     | '/nutrition'
     | '/privacy'
@@ -305,6 +317,7 @@ export interface RootRouteChildren {
   CoachRoute: typeof CoachRoute
   ContactRoute: typeof ContactRoute
   CycleRoute: typeof CycleRoute
+  CycleReportRoute: typeof CycleReportRoute
   DashboardRoute: typeof DashboardRoute
   NutritionRoute: typeof NutritionRouteWithChildren
   PrivacyRoute: typeof PrivacyRoute
@@ -356,6 +369,13 @@ declare module '@tanstack/react-router' {
       path: '/cycle'
       fullPath: '/cycle'
       preLoaderRoute: typeof CycleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cycle-report': {
+      id: '/cycle-report'
+      path: '/cycle-report'
+      fullPath: '/cycle-report'
+      preLoaderRoute: typeof CycleReportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dashboard': {
@@ -520,6 +540,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoachRoute: CoachRoute,
   ContactRoute: ContactRoute,
   CycleRoute: CycleRoute,
+  CycleReportRoute: CycleReportRoute,
   DashboardRoute: DashboardRoute,
   NutritionRoute: NutritionRouteWithChildren,
   PrivacyRoute: PrivacyRoute,

@@ -50,6 +50,7 @@ export function normalizeLog(raw: unknown): PeriodLog | null {
     end,
     flow: isFlow(row["flow"]) ? row["flow"] : null,
     notes: typeof row["notes"] === "string" && row["notes"].trim() ? row["notes"] : null,
+    ...(row["excluded"] === true ? { excluded: true } : {}),
   };
 }
 
@@ -107,6 +108,16 @@ export function normalizeDayLog(raw: unknown): DayLog | null {
     ? (row["symptoms"] as unknown[]).filter((s): s is string => typeof s === "string").slice(0, 12)
     : [];
   const notes = typeof row["notes"] === "string" && row["notes"].trim() ? row["notes"] : null;
+  /* Severity only ever describes a symptom logged that same day, on the
+     1–3 scale the form offers; anything else is dropped, never guessed. */
+  const severityRaw = row["symptomSeverity"];
+  const symptomSeverity: Record<string, 1 | 2 | 3> = {};
+  if (severityRaw && typeof severityRaw === "object" && !Array.isArray(severityRaw)) {
+    for (const [key, value] of Object.entries(severityRaw as Record<string, unknown>)) {
+      if (!symptoms.includes(key)) continue;
+      if (value === 1 || value === 2 || value === 3) symptomSeverity[key] = value;
+    }
+  }
   return {
     date,
     flow: isDayFlow(row["flow"]) ? row["flow"] : null,
@@ -118,6 +129,8 @@ export function normalizeDayLog(raw: unknown): DayLog | null {
     temperature: inRange(row["temperature"], 34, 42) ? row["temperature"] : null,
     mucus: isMucus(row["mucus"]) ? row["mucus"] : null,
     lh: isLh(row["lh"]) ? row["lh"] : null,
+    clots: row["clots"] === true ? true : null,
+    ...(Object.keys(symptomSeverity).length > 0 ? { symptomSeverity } : {}),
     notes,
     updatedAt: typeof row["updatedAt"] === "string" ? row["updatedAt"] : null,
   };
@@ -166,12 +179,16 @@ export function daysToCsv(days: DayLog[]): string {
         d.mucus ?? "",
         d.lh ?? "",
         d.notes ?? "",
+        d.clots === true ? "yes" : "",
+        Object.entries(d.symptomSeverity ?? {})
+          .map(([k, v]) => `${k}:${v}`)
+          .join("; "),
       ]
         .map(esc)
         .join(","),
     );
   return [
-    "date,flow,symptoms,mood,energy,pain,sleep_hours,temperature_c,cervical_mucus,lh_test,notes",
+    "date,flow,symptoms,mood,energy,pain,sleep_hours,temperature_c,cervical_mucus,lh_test,notes,clots,symptom_severity",
     ...rows,
   ].join("\n");
 }
@@ -308,6 +325,14 @@ export interface CycleSettings {
    * habits page is unchanged.
    */
   easeBeforePeriod?: boolean | undefined;
+  /**
+   * Predictions hidden — a display choice, separate from pausing. Pausing
+   * says "I'm not expecting periods"; this says "I am, but don't show me
+   * estimates" (the Clue pattern). Every prediction surface and cycle
+   * reminder goes quiet; logging, history and averages are untouched, and
+   * the record keeps learning in the background.
+   */
+  predictionsOff?: boolean | undefined;
 }
 
 export const DEFAULT_CYCLE_SETTINGS: CycleSettings = {
@@ -353,6 +378,7 @@ export function normalizeSettings(v: unknown): CycleSettings {
   const stamp = v["modeChangedAt"];
   if (typeof stamp === "string" && !Number.isNaN(Date.parse(stamp))) out.modeChangedAt = stamp;
   if (v["easeBeforePeriod"] === true) out.easeBeforePeriod = true;
+  if (v["predictionsOff"] === true) out.predictionsOff = true;
   return out;
 }
 

@@ -30,6 +30,7 @@ import {
   type Reminder,
   type ReminderSettings,
 } from "@/lib/reminders/schedule";
+import { diffDays } from "@/lib/cycle/predict";
 
 export type PermissionState = "unsupported" | "default" | "granted" | "denied";
 
@@ -154,11 +155,24 @@ export function useReminders(): RemindersStore {
         streak: habitStreak(datesByHabit.get(h.id) ?? empty, today),
       })),
       cycle: {
-        mode: cycle.mode,
+        /* predictions hidden by choice quiets cycle reminders exactly like
+           a pause does — the schedule only asks "is the cycle predicting?" */
+        mode: cycle.mode === "tracking" && cycle.predictionsOff ? "paused" : cycle.mode,
         nextStart: cycle.analysis.nextStart,
         daysLate: cycle.analysis.isLate ? cycle.analysis.lateBy : null,
         fertileStart: cycle.analysis.fertileStart,
         cycleDay: cycle.analysis.cycleDay,
+        /* A period still open past its usual length: days past that usual
+           end, so the schedule can offer the discreet finish-the-entry
+           reminder. The latest entry only — an older open entry is the
+           in-app check-in's job (superseded-open). */
+        openPastDays: (() => {
+          const last = cycle.logs[cycle.logs.length - 1];
+          if (!last || last.end) return null;
+          const dayOfPeriod = diffDays(last.start, today) + 1;
+          const past = dayOfPeriod - cycle.analysis.periodLength;
+          return past >= 1 ? past : null;
+        })(),
       },
       loggedToday,
     };
@@ -170,7 +184,9 @@ export function useReminders(): RemindersStore {
     habitsStore.todayHabits,
     habitsStore.logs,
     cycle.mode,
+    cycle.predictionsOff,
     cycle.analysis,
+    cycle.logs,
     loggedToday,
     tick,
   ]);

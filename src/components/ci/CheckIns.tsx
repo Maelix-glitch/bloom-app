@@ -28,6 +28,7 @@ const ICON: Record<CheckInKind, LucideIcon> = {
   "same-period": Droplets,
   "new-period": CalendarPlus,
   "still-open": CalendarCheck,
+  "superseded-open": CalendarClock,
   "long-bleed": HeartPulse,
   late: CalendarClock,
   "missed-log": CalendarSearch,

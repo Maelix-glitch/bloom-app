@@ -29,7 +29,7 @@ export const PERIODS_TABLE = "cycle_periods";
 export const PERIODS_CONFLICT = "profile_id,id";
 export const STATE_TABLE = "cycle_state";
 
-const PERIOD_COLUMNS = "id, start_date, end_date, flow, notes, updated_at, deleted_at";
+const PERIOD_COLUMNS = "id, start_date, end_date, flow, notes, excluded, updated_at, deleted_at";
 
 /** A period entry as the sync layer sees it: the entry plus when it changed. */
 export interface PeriodRecord {
@@ -73,6 +73,7 @@ export function rowToPeriod(row: unknown): PeriodRecord | null {
     end: r["end_date"] ?? r["end"],
     flow: r["flow"],
     notes: r["notes"],
+    excluded: r["excluded"],
   });
   if (!log || typeof r["id"] !== "string" || !r["id"]) return null;
   return {
@@ -91,6 +92,7 @@ export function periodToRow(rec: PeriodRecord, profileId: string): Record<string
     end_date: rec.log.end ?? null,
     flow: rec.log.flow ?? null,
     notes: rec.log.notes ?? null,
+    excluded: rec.log.excluded === true,
     updated_at: rec.updatedAt,
     deleted_at: rec.deletedAt,
   };
@@ -210,7 +212,8 @@ export function sameLog(a: PeriodLog, b: PeriodLog): boolean {
     a.start === b.start &&
     (a.end ?? null) === (b.end ?? null) &&
     (a.flow ?? null) === (b.flow ?? null) &&
-    (a.notes ?? null) === (b.notes ?? null)
+    (a.notes ?? null) === (b.notes ?? null) &&
+    (a.excluded === true) === (b.excluded === true)
   );
 }
 

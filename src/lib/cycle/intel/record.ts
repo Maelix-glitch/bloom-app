@@ -15,6 +15,8 @@ export interface RawPeriod {
   end?: string | null | undefined;
   /** Present when the caller already knows the closed duration. */
   bleedingDays?: number | null | undefined;
+  /** The person's "exclude from calculations" mark, carried through untouched. */
+  excluded?: boolean | undefined;
 }
 
 export interface RawDay {
@@ -34,7 +36,12 @@ function normalizePeriod(period: RawPeriod): CyclePeriodRecord | null {
     typeof period.bleedingDays === "number" && period.bleedingDays >= 1
       ? Math.round(period.bleedingDays)
       : null;
-  return { start: period.start, end, bleedingDays };
+  return {
+    start: period.start,
+    end,
+    bleedingDays,
+    ...(period.excluded === true ? { excluded: true } : {}),
+  };
 }
 
 function normalizeDay(day: RawDay): CycleDayRecord | null {

@@ -26,6 +26,13 @@ export interface PeriodLog {
   end?: string | null | undefined;
   flow?: FlowLevel | null | undefined;
   notes?: string | null | undefined;
+  /**
+   * The person's own call: "this cycle was illness / travel / stress —
+   * keep the record, but leave it out of my averages and predictions."
+   * The entry stays in history and still delimits its neighbours; the two
+   * intervals touching it and its bleed length simply don't count.
+   */
+  excluded?: boolean | undefined;
 }
 
 export type Phase = "menstrual" | "follicular" | "ovulation" | "luteal" | "late";
@@ -268,11 +275,16 @@ export interface PhaseWindow {
 export interface ForecastCycle {
   /** 1 = the next cycle, 2 = the one after. */
   index: number;
+  /** The engine's central estimate for the first day. */
   start: string;
+  /** The honest version of `start`: the window the start is predicted in. */
+  startFrom: string;
+  startTo: string;
   end: string;
   ovulation: string;
-  fertileStart: string;
-  fertileEnd: string;
+  /** Null when fertile estimates are suppressed for this record (see the gate). */
+  fertileStart: string | null;
+  fertileEnd: string | null;
   phases: PhaseWindow[];
 }
 
@@ -294,6 +306,8 @@ export interface CycleStats {
   mostCommonFlow: FlowLevel | "unspecified" | null;
   /** Entries carrying a note — a small nudge that notes make patterns visible. */
   entriesWithNotes: number;
+  /** Periods the person marked "exclude from calculations" (kept, uncounted). */
+  excludedCycles: number;
 }
 
 export interface CycleAnalysis {
@@ -370,6 +384,15 @@ export interface CycleAnalysis {
   ovulationDate: string | null;
   fertileStart: string | null;
   fertileEnd: string | null;
+  /**
+   * True when the fertile/ovulation date estimates are withheld because the
+   * record is too variable (or too far outside 21–35 days) for a calendar
+   * estimate to mean anything — see `fertileEstimateGate`. The three date
+   * fields above are null then, and `fertileNote` says why, in words meant
+   * to be shown wherever the estimate would have appeared.
+   */
+  fertileSuppressed: boolean;
+  fertileNote: string | null;
   /** Day-of-cycle number of the ovulation estimate, for the phase map. */
   ovulationDay: number | null;
 
@@ -399,6 +422,54 @@ export function stdDev(xs: readonly number[]): number {
   const m = mean(xs);
   const variance = xs.reduce((acc, x) => acc + (x - m) ** 2, 0) / xs.length;
   return Math.sqrt(variance);
+}
+
+/* ------------------------- the fertile-estimate gate ---------------------- */
+
+/**
+ * When a calendar fertile/ovulation estimate must NOT be shown.
+ *
+ * Calendar maths pins ovulation by counting back from the next period, but
+ * cycle variation lives almost entirely in the follicular half — so the
+ * more a person's cycles vary, the more a single "fertile window" is a
+ * guess dressed as a date (in irregular cycles, calendar methods misplace
+ * fertile days more often than not). The rule, from the clinical ranges
+ * the rest of this file already uses:
+ *
+ *   · fewer than 3 measured cycles → too little to judge; estimates show,
+ *     under the low-confidence framing the surfaces already carry;
+ *   · recent cycles spread over more than 9 days (max − min), or a
+ *     standard deviation over 7 days → suppressed for variability;
+ *   · at least 2 of the last 3 cycles shorter than 21 or longer than 35
+ *     days → suppressed as outside the range calendar estimates assume.
+ *
+ * Suppression is not silence: `reason` is written to be shown where the
+ * estimate would have been, and predictions of the next PERIOD (a window,
+ * sized by the same variance) are unaffected.
+ */
+export function fertileEstimateGate(lengths: readonly number[]): {
+  suppressed: boolean;
+  reason: string | null;
+} {
+  if (lengths.length < 3) return { suppressed: false, reason: null };
+  const min = Math.min(...lengths);
+  const max = Math.max(...lengths);
+  if (max - min > 9 || stdDev(lengths) > 7) {
+    return {
+      suppressed: true,
+      reason: `Your recent cycles range from ${min} to ${max} days. When cycles vary this much, a calendar fertile estimate would be a guess dressed up as a date, so Bloom isn't showing one — the phases and period predictions still use your record as usual.`,
+    };
+  }
+  const recent = lengths.slice(-3);
+  const outside = recent.filter((d) => d < 21 || d > 35).length;
+  if (outside >= 2) {
+    return {
+      suppressed: true,
+      reason:
+        "Most of your recent cycles sit outside the usual 21–35 day range, where calendar fertile estimates stop being reliable, so Bloom isn't showing one. Your period predictions still come from your own record.",
+    };
+  }
+  return { suppressed: false, reason: null };
 }
 
 /**
@@ -583,9 +654,15 @@ export function analyzeCycle(
     const cur = sorted[i];
     if (!prev || !cur) continue;
     const days = diffDays(prev.start, cur.start);
-    const plausible = days >= o.minPlausible && days <= maxPlausible;
+    /* A gap touching a cycle the person excluded isn't counted either —
+       and it is never read as a missed period: they explained it. */
+    const touchesExcluded = prev.excluded === true || cur.excluded === true;
+    const plausible = !touchesExcluded && days >= o.minPlausible && days <= maxPlausible;
     let reason: string | null = null;
-    if (days < o.minPlausible) {
+    if (touchesExcluded) {
+      reason =
+        "Next to a cycle you've excluded from your averages, so this stretch isn't counted either. The record itself is unchanged.";
+    } else if (days < o.minPlausible) {
       reason = `${days} ${plural(days, "day", "days")} apart — too short for a cycle. Usually a duplicate or a mistyped date rather than a real cycle.`;
     } else if (days > maxPlausible) {
       reason = longCyclesAccepted
@@ -601,7 +678,8 @@ export function analyzeCycle(
       days,
       plausible,
       reason,
-      suggestedMissedDate: days > maxPlausible ? addDays(prev.start, Math.round(days / 2)) : null,
+      suggestedMissedDate:
+        !touchesExcluded && days > maxPlausible ? addDays(prev.start, Math.round(days / 2)) : null,
     });
   }
 
@@ -646,10 +724,21 @@ export function analyzeCycle(
 
   /* --- bleed length: logged first, then averaged history, then default --- */
   const loggedDurations = sorted
-    .map((l) => (l.end && isValidDateKey(l.end) ? diffDays(l.start, l.end) + 1 : null))
+    .map((l) =>
+      l.excluded !== true && l.end && isValidDateKey(l.end)
+        ? diffDays(l.start, l.end) + 1
+        : null,
+    )
     .filter((d): d is number => d !== null && d > 0 && d <= 15);
-  const lastDuration =
-    last?.end && isValidDateKey(last.end) ? diffDays(last.start, last.end) + 1 : null;
+  /* The last bleed only sets the "usual length" inside the same bound the
+     averaged history uses (<= 15 days): a genuinely long bleed is recorded
+     and answered by the long-bleed check-in, but one episode must not
+     redefine what a usual period means for every phase and prediction. */
+  const lastDurationRaw =
+    last?.excluded !== true && last?.end && isValidDateKey(last.end)
+      ? diffDays(last.start, last.end) + 1
+      : null;
+  const lastDuration = lastDurationRaw !== null && lastDurationRaw <= 15 ? lastDurationRaw : null;
   const periodLength =
     lastDuration ??
     (loggedDurations.length > 0 ? Math.round(mean(loggedDurations)) : o.defaultPeriodLength);
@@ -710,7 +799,12 @@ export function analyzeCycle(
   // Ovulation is counted *backwards* from the next period: the luteal phase
   // (ovulation → bleed) is the steadier half, the follicular half is what
   // actually stretches and shrinks.
-  const ovulationDate = nextStart ? addDays(nextStart, -o.lutealLength) : null;
+  /* When the record is too variable (or outside 21–35) for a calendar
+     fertile estimate to mean anything, the dates are withheld entirely —
+     see fertileEstimateGate. The phase layout still uses ovulationDay:
+     a phase is a stage, not a date claim. */
+  const gate = fertileEstimateGate(cycleLengths);
+  const ovulationDate = !gate.suppressed && nextStart ? addDays(nextStart, -o.lutealLength) : null;
   const fertileStart = ovulationDate ? addDays(ovulationDate, -o.fertileBefore) : null;
   const fertileEnd = ovulationDate ? addDays(ovulationDate, o.fertileAfter) : null;
   const ovulationDay = Math.max(1, cycleLength - o.lutealLength);
@@ -786,10 +880,12 @@ export function analyzeCycle(
       forecast.push({
         index: i + 1,
         start,
+        startFrom: addDays(start, -spread),
+        startTo: addDays(start, spread),
         end: addDays(start, cycleLength - 1),
         ovulation,
-        fertileStart: addDays(ovulation, -o.fertileBefore),
-        fertileEnd: addDays(ovulation, o.fertileAfter),
+        fertileStart: gate.suppressed ? null : addDays(ovulation, -o.fertileBefore),
+        fertileEnd: gate.suppressed ? null : addDays(ovulation, o.fertileAfter),
         phases: layoutPhases(start).map((w) => ({ ...w, current: false })),
       });
     }
@@ -831,6 +927,7 @@ export function analyzeCycle(
     flowCounts,
     mostCommonFlow,
     entriesWithNotes,
+    excludedCycles: sorted.filter((l) => l.excluded === true).length,
   };
 
   /* --- flags (the loopholes, each with its own message) ------------------ */
@@ -990,6 +1087,8 @@ export function analyzeCycle(
     ovulationDate,
     fertileStart,
     fertileEnd,
+    fertileSuppressed: gate.suppressed,
+    fertileNote: gate.reason,
     ovulationDay: lastStart ? ovulationDay : null,
     trend,
     irregular,
@@ -1086,8 +1185,17 @@ export function validateLogDraft(
   return errors;
 }
 
-/** Hard ceiling for a logged bleed — beyond this it is almost certainly a typo. */
-export const MAX_BLEED_DAYS = 30;
+/**
+ * Hard ceiling for a logged bleed — beyond this it is almost certainly a typo.
+ * The ceiling is the engine's own hard plausibility bound for a whole cycle
+ * (CYCLE_DEFAULTS.hardMaxPlausible, 90): a bleed can genuinely run for weeks
+ * (perimenopause, a long irregular episode), and the record must be able to
+ * hold the truth — the long-bleed check-in and the pattern guidance are what
+ * respond to it, not a form refusal. What the cap still refuses is an end
+ * date so far from the start that no cycle this engine reasons about could
+ * contain it, which in practice is a mistyped year or month.
+ */
+export const MAX_BLEED_DAYS = 90;
 /** A bleed longer than this is allowed, but worth a gentle note. */
 export const LONG_BLEED_DAYS = 10;
 /** Entries further back than this are refused (a wrong year, not a memory). */

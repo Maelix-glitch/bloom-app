@@ -148,6 +148,9 @@ export interface PeriodLogStore {
   answerCheckIn: (checkIn: CheckIn, actionId: string) => CheckInFollowUp;
   /** Change just the last day of an entry (used by check-ins and the form). */
   setPeriodEnd: (id: string, end: string | null) => SaveResult;
+  /** Mark a period "exclude from calculations" (or include it again). The
+   *  record is kept whole; averages and predictions skip it. */
+  setPeriodExcluded: (id: string, excluded: boolean) => void;
   /** What the person has told the engine about their own body. */
   settings: CycleSettings;
   /** "It really was that long" — count gaps up to `days` as real cycles from now on. */
@@ -161,6 +164,13 @@ export interface PeriodLogStore {
   mode: CycleMode;
   /** "I'm not expecting periods right now / I don't track a cycle." */
   setMode: (mode: CycleMode, pause?: Partial<Omit<CyclePause, "since">>) => void;
+  /**
+   * Predictions hidden by choice (settings.predictionsOff) — separate from
+   * pausing: periods are still expected, logging is untouched, but no
+   * estimate is shown and no cycle reminder fires.
+   */
+  predictionsOff: boolean;
+  setPredictionsOff: (off: boolean) => void;
   /** The most recent delete / clear that can still be taken back. */
   undoable: Undoable | null;
   undo: () => void;
@@ -636,6 +646,12 @@ export function usePeriodLog(): PeriodLogStore {
     return { ok: true, id };
   }, []);
 
+  const setPeriodExcluded = useCallback((id: string, excluded: boolean) => {
+    setLogs((prev) =>
+      prev.map((l) => (l.id === id ? { ...l, excluded: excluded ? true : undefined } : l)),
+    );
+  }, []);
+
   /** Move a period's first day. The recorded end is kept when it still makes sense. */
   const setPeriodStart = useCallback((id: string, start: string): SaveResult => {
     const current = loadLogs();
@@ -699,17 +715,20 @@ export function usePeriodLog(): PeriodLogStore {
   }, [keepForUndo]);
 
   const mode = effectiveMode(settings, today);
+  const predictionsOff = settings.predictionsOff === true;
   /* One normalise -> analyse -> project pass. Every view reads this result, so
-     editing or deleting a record changes all of them together. */
+     editing or deleting a record changes all of them together. Predictions
+     hidden by choice quiet the forward-looking analysis exactly like a
+     pause does — the record and its averages are computed either way. */
   const canonical = useMemo(
     () =>
       buildCanonicalCycle({
         today,
         logs,
         days,
-        expecting: mode === "tracking",
+        expecting: mode === "tracking" && !predictionsOff,
       }),
-    [logs, days, today, mode],
+    [logs, days, today, mode, predictionsOff],
   );
   const { analysis, intel } = canonical;
 
@@ -748,6 +767,14 @@ export function usePeriodLog(): PeriodLogStore {
         ...prev,
         personalMaxPlausible: Math.max(prev.personalMaxPlausible ?? 0, Math.round(days)),
       };
+      saveCycleSettings(next);
+      return next;
+    });
+  }, []);
+
+  const setPredictionsOff = useCallback((off: boolean) => {
+    setSettings((prev) => {
+      const next: CycleSettings = { ...prev, predictionsOff: off ? true : undefined };
       saveCycleSettings(next);
       return next;
     });
@@ -883,10 +910,13 @@ export function usePeriodLog(): PeriodLogStore {
     checkIns,
     answerCheckIn,
     setPeriodEnd,
+    setPeriodExcluded,
     settings,
     acceptLongCycles,
     mode,
     setMode,
+    predictionsOff,
+    setPredictionsOff,
     undoable,
     undo,
     dismissUndo,

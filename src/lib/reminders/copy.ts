@@ -219,6 +219,25 @@ function periodCopy(ctx: ReminderContext, seed: string): ReminderCopy {
   };
 }
 
+/* ------------------------------------------------------------- open-entry */
+
+/* The discreet one. This reminder exists so a period entry that was never
+   closed gets its last day — but its words must be safe on a shared phone's
+   lock screen: no cycle vocabulary at all, nothing that says what the entry
+   is. A test pins the absence of those words across every variant. */
+const OPEN_ENTRY_TITLE = [
+  "A small thing in Bloom",
+  "One entry is still open",
+  "A quick finish, when you're ready",
+  "Something's waiting to be wrapped up",
+];
+
+const OPEN_ENTRY_BODY = [
+  "One of your entries is still open. When you have a moment, tap to finish it — or leave it as it is. Nothing is wrong either way.",
+  "There's an entry in your tracker waiting for its last day. A ten-second tap whenever you're ready.",
+  "An entry you started is still open. Finishing it keeps your record tidy — and it's fine to do it later.",
+];
+
 /* ---------------------------------------------------------------- fertile */
 
 const FERTILE_TITLE = [
@@ -345,6 +364,11 @@ export function reminderCopy(ctx: ReminderContext, key: string): ReminderCopy {
       };
     case "evening":
       return eveningCopy(ctx, seed);
+    case "open-entry":
+      return {
+        title: compose(seed, "ot", OPEN_ENTRY_TITLE, {}),
+        body: compose(seed, "ob", OPEN_ENTRY_BODY, {}),
+      };
     default:
       return { title: "A nudge from Bloom", body: "Something's waiting for you." };
   }
@@ -370,6 +394,8 @@ export function distinctMessageCount(): number {
   total += n(PERIOD_SOON_TITLE) * n(PERIOD_SOON_BODY);
   // fertile
   total += n(FERTILE_TITLE) * n(FERTILE_BODY);
+  // open-entry (the discreet finish-the-entry reminder)
+  total += n(OPEN_ENTRY_TITLE) * n(OPEN_ENTRY_BODY);
   // evening · nothing / some / done
   total += n(EVENING_NOTHING_TITLE) * n(EVENING_NOTHING_BODY);
   total += n(EVENING_SOME_TITLE) * n(EVENING_SOME_BODY);

@@ -35,6 +35,8 @@ export interface CyclePeriodRecord {
   start: string;
   end: string | null;
   bleedingDays: number | null;
+  /** The person's own "keep the record, skip the maths" mark — see PeriodLog. */
+  excluded?: boolean | undefined;
 }
 
 /** The normalised input every engine reads. */
@@ -64,6 +66,8 @@ export interface Baseline {
   recencyWeighted: number | null;
   bleedingMedian: number | null;
   bleedingCount: number;
+  /** Periods marked excluded — their intervals and bleed lengths don't count. */
+  excludedCount: number;
   /** Share of periods with a recorded end, 0–1. */
   completeness: number;
   /** Share of the last 90 days carrying a daily record, 0–1. */

@@ -19,6 +19,7 @@ import {
   MOOD_LABEL,
   MOOD_VALUES,
   MUCUS_LABEL,
+  SEVERITY_LABEL,
   SYMPTOMS,
   isEmptyDay,
   placeDate,
@@ -29,6 +30,7 @@ import {
   type LhValue,
   type MoodValue,
   type MucusValue,
+  type SymptomSeverity,
 } from "@/lib/cycle/dayLogs";
 import {
   FLOW_LABEL,
@@ -121,6 +123,8 @@ export function LogPanel({
   const [startPeriod, setStartPeriod] = useState(false);
   const [end, setEnd] = useState("");
   const [symptoms, setSymptoms] = useState<string[]>([]);
+  const [severity, setSeverity] = useState<Record<string, SymptomSeverity>>({});
+  const [clots, setClots] = useState(false);
   const [mood, setMood] = useState<MoodValue | null>(null);
   const [energy, setEnergy] = useState<number | null>(null);
   const [pain, setPain] = useState<number | null>(null);
@@ -155,6 +159,8 @@ export function LogPanel({
       return;
     }
     setSymptoms(existing?.symptoms ?? []);
+    setSeverity(existing?.symptomSeverity ?? {});
+    setClots(existing?.clots === true);
     setMood(existing?.mood ?? null);
     setEnergy(existing?.energy ?? null);
     setPain(existing?.pain ?? null);
@@ -176,7 +182,10 @@ export function LogPanel({
     setExtendPeriod(false);
     setStatus(null);
     setConfirmDelete(false);
-    if (existing && ((existing.symptoms ?? []).length > 0 || existing.mood !== null)) {
+    if (
+      existing &&
+      ((existing.symptoms ?? []).length > 0 || existing.mood !== null || existing.clots === true)
+    ) {
       setOpen(true);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -269,10 +278,15 @@ export function LogPanel({
     [startPeriod, bleed, date, end, logs, today, editing, analysis],
   );
 
+  /* Severity only ever rides along with a symptom still selected. */
+  const severityPicked = Object.fromEntries(
+    Object.entries(severity).filter(([key]) => symptoms.includes(key)),
+  ) as Record<string, SymptomSeverity>;
   const dayDraft: DayLog = {
     date,
     flow: bleed,
     symptoms,
+    symptomSeverity: Object.keys(severityPicked).length > 0 ? severityPicked : null,
     mood,
     energy,
     pain,
@@ -280,6 +294,7 @@ export function LogPanel({
     temperature: numOrNull(temperature),
     mucus,
     lh,
+    clots: clots ? true : null,
     notes: notes.trim() === "" ? null : notes.trim(),
   };
   const dayHasContent = !isEmptyDay({ ...dayDraft, flow: bleed ?? null });
@@ -291,7 +306,8 @@ export function LogPanel({
     sleep !== "" ||
     temperature !== "" ||
     mucus !== null ||
-    lh !== null;
+    lh !== null ||
+    clots;
 
   const submit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -400,13 +416,17 @@ export function LogPanel({
   };
 
   const toggleSymptom = (key: string) => {
-    setSymptoms((prev) =>
-      prev.includes(key)
-        ? prev.filter((s) => s !== key)
-        : prev.length >= 12
-          ? prev
-          : [...prev, key],
-    );
+    setSymptoms((prev) => {
+      if (prev.includes(key)) {
+        setSeverity((sev) => {
+          const next = { ...sev };
+          delete next[key];
+          return next;
+        });
+        return prev.filter((s) => s !== key);
+      }
+      return prev.length >= 12 ? prev : [...prev, key];
+    });
   };
 
   const addCustom = () => {
@@ -812,6 +832,57 @@ export function LogPanel({
                   Add
                 </Button>
               </div>
+              {/* How bad each picked symptom felt — optional, per symptom. */}
+              {symptoms.length > 0 ? (
+                <div className="mt-3 space-y-2" data-testid="symptom-severity">
+                  {symptoms.map((s) => (
+                    <div key={s} className="flex flex-wrap items-center gap-2">
+                      <span className="text-[12.5px] capitalize" style={{ color: "var(--ci-text)" }}>
+                        {s}
+                      </span>
+                      <div className="ci-seg" role="group" aria-label={`How severe was ${s}?`}>
+                        {([1, 2, 3] as const).map((level) => (
+                          <button
+                            key={level}
+                            type="button"
+                            className="ci-seg-item"
+                            aria-pressed={severity[s] === level}
+                            onClick={() =>
+                              setSeverity((prev) => {
+                                const next = { ...prev };
+                                if (next[s] === level) delete next[s];
+                                else next[s] = level;
+                                return next;
+                              })
+                            }
+                          >
+                            {SEVERITY_LABEL[level]}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </fieldset>
+
+            {/* bleeding detail — clots feed the heavy-flow pattern check */}
+            <fieldset className="ci-field mt-4" disabled={disabled}>
+              <legend className="ci-label mb-1.5">Bleeding detail</legend>
+              <div className="ci-seg">
+                <button
+                  type="button"
+                  className="ci-seg-item"
+                  aria-pressed={clots}
+                  onClick={() => setClots((v) => !v)}
+                  data-testid="clots-toggle"
+                >
+                  Clots today
+                </button>
+              </div>
+              <p className="ci-hint mt-1.5">
+                Only if you noticed them — it helps Bloom spot a heavy-flow pattern over time.
+              </p>
             </fieldset>
 
             {/* mood · energy */}

@@ -13,7 +13,7 @@ import { NotificationBell } from "./NotificationCenter";
 import { CENTER_CHANGED, recordNotice } from "@/lib/notifications/center";
 
 vi.mock("@/hooks/useReminders", () => ({ useReminders: () => ({ preview: [] }) }));
-vi.mock("@/hooks/useCycleSystem", () => ({ useCycleSystem: () => ({ loading: true }) }));
+vi.mock("@/lib/cycle/centerInsights", () => ({ cycleCenterInsights: () => [] }));
 vi.mock("@tanstack/react-router", () => ({
   Link: ({
     to,

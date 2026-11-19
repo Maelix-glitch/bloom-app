@@ -15,7 +15,7 @@
 
 import { addDays, diffDays } from "./intel/dates";
 import { PLAUSIBLE_MAX, toCycleRecord, analyseCycle } from "./intel";
-import { PHASE_TIPS } from "./predict";
+import { fertileEstimateGate, PHASE_TIPS } from "./predict";
 import type {
   Confidence,
   CycleAnalysis,
@@ -88,10 +88,14 @@ function windowsFor(start: string, expectedLength: number, bleedDays: number): P
 function gapsFor(intel: IntelligenceResult, logs: readonly PeriodLog[]): CycleGap[] {
   const byStart = new Map(logs.map((log) => [log.start, log.id]));
   const starts = intel.baseline.starts;
+  const excludedStarts = new Set(
+    intel.record.periods.filter((p) => p.excluded === true).map((p) => p.start),
+  );
   return intel.baseline.intervals.map((days, i) => {
     const fromStart = starts[i]!;
     const toStart = starts[i + 1]!;
-    const plausible = days >= 15 && days <= PLAUSIBLE_MAX;
+    const touchesExcluded = excludedStarts.has(fromStart) || excludedStarts.has(toStart);
+    const plausible = !touchesExcluded && days >= 15 && days <= PLAUSIBLE_MAX;
     return {
       index: i + 1,
       fromId: byStart.get(fromStart) ?? fromStart,
@@ -102,9 +106,11 @@ function gapsFor(intel: IntelligenceResult, logs: readonly PeriodLog[]): CycleGa
       plausible,
       reason: plausible
         ? null
-        : days > PLAUSIBLE_MAX
-          ? `Longer than ${PLAUSIBLE_MAX} days — kept in your history, left out of the median.`
-          : "Shorter than 15 days — kept in your history, left out of the median.",
+        : touchesExcluded
+          ? "Next to a cycle you've excluded from your averages, so this stretch isn't counted either. The record itself is unchanged."
+          : days > PLAUSIBLE_MAX
+            ? `Longer than ${PLAUSIBLE_MAX} days — kept in your history, left out of the median.`
+            : "Shorter than 15 days — kept in your history, left out of the median.",
       suggestedMissedDate: null,
     };
   });
@@ -148,6 +154,7 @@ function statsFor(intel: IntelligenceResult, logs: readonly PeriodLog[]): CycleS
     flowCounts,
     mostCommonFlow,
     entriesWithNotes: notes,
+    excludedCycles: intel.baseline.excludedCount,
   };
 }
 
@@ -213,19 +220,35 @@ export function toCycleAnalysis(
 
   const ovulationDay =
     lastStart !== null ? clamp(Math.max(bleedDays + 3, expectedCycleLength - 14), 2, expectedCycleLength) : null;
-  const ovulationDate = lastStart !== null && ovulationDay !== null ? addDays(lastStart, ovulationDay - 1) : null;
+  /* The fertile-estimate gate (predict.ts): when the person's own cycles
+     vary too much — or sit mostly outside 21–35 days — a calendar fertile
+     window would be a guess dressed as a date, so the dates are withheld
+     and the reason travels with the analysis to be shown instead. The
+     phase layout still uses ovulationDay: a phase is a stage, not a
+     date claim. */
+  const gate = fertileEstimateGate(baseline.plausible);
+  const ovulationDate =
+    !gate.suppressed && lastStart !== null && ovulationDay !== null
+      ? addDays(lastStart, ovulationDay - 1)
+      : null;
 
   const forward: ForecastCycle[] = forecast.available
     ? Array.from({ length: 3 }, (_, i) => {
-        const start = addDays(forecast.next!.point, expectedCycleLength * i);
+        /* The start is the engine's own window (forecast.upcoming), not a
+           bare point date: the strip renders the range, in the same style
+           as every other prediction surface. */
+        const up = forecast.upcoming[i];
+        const start = up?.start ?? addDays(forecast.next!.point, expectedCycleLength * i);
         const ovulation = ovulationDay !== null ? addDays(start, ovulationDay - 1) : start;
         return {
           index: i + 1,
           start,
+          startFrom: up?.from ?? start,
+          startTo: up?.to ?? start,
           end: addDays(start, expectedCycleLength - 1),
           ovulation,
-          fertileStart: addDays(ovulation, -5),
-          fertileEnd: addDays(ovulation, 1),
+          fertileStart: gate.suppressed ? null : addDays(ovulation, -5),
+          fertileEnd: gate.suppressed ? null : addDays(ovulation, 1),
           phases: windowsFor(start, expectedCycleLength, bleedDays),
         };
       })
@@ -274,6 +297,8 @@ export function toCycleAnalysis(
     ovulationDate,
     fertileStart: ovulationDate !== null ? addDays(ovulationDate, -5) : null,
     fertileEnd: ovulationDate !== null ? addDays(ovulationDate, 1) : null,
+    fertileSuppressed: gate.suppressed,
+    fertileNote: gate.reason,
     ovulationDay,
     trend:
       lengthChange && lengthChange.deltaDays !== null
@@ -298,7 +323,11 @@ export function toCycleAnalysis(
 export function buildCanonicalCycle(input: CanonicalInput): CanonicalCycle {
   const record = toCycleRecord({
     today: input.today,
-    periods: input.logs.map((log) => ({ start: log.start, end: log.end ?? null })),
+    periods: input.logs.map((log) => ({
+      start: log.start,
+      end: log.end ?? null,
+      excluded: log.excluded,
+    })),
     days: input.days.map((day) => ({
       date: day.date,
       flow: day.flow ?? null,
