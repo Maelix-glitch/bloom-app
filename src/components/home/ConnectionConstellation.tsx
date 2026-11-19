@@ -338,12 +338,19 @@ export function ConnectionConstellationView({
                   }}
                   aria-hidden
                 />
-                <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                <p className="min-w-0 flex-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                   <span className="font-medium text-foreground">
                     {SIGNAL_LABEL[link.from]} · {SIGNAL_LABEL[link.to]}
                   </span>{" "}
                   — {link.sentence}
                 </p>
+                {/* The link's day-count as the row's structured figure
+                    (diagnosis §G): the shared days behind this exact
+                    correlation, from the engine's own `n` — not the
+                    section's total logged days in the header chip. */}
+                <span className="shrink-0 whitespace-nowrap text-[length:var(--text-meta)] tabular-nums text-faint-strong">
+                  {link.days} shared {link.days === 1 ? "day" : "days"}
+                </span>
               </li>
             );
           })}

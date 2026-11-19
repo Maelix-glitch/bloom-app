@@ -18,7 +18,7 @@
  * id — the same dish all day, a different pick across days.
  */
 
-import type { HealthProfile } from "@/lib/vitalis/domain/profile";
+import type { CuisinePreference, HealthProfile } from "@/lib/vitalis/domain/profile";
 import { DISH_LIBRARY } from "./data/dishLibrary";
 import {
   DISH_CATEGORIES,
@@ -29,6 +29,7 @@ import {
 } from "./dishes";
 import type { LabelledNutrients } from "./labels";
 import { eligiblePool, planPatternOf, type PlanPattern } from "./plan";
+import { dishRegion } from "./regions";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
 import type { Meal } from "./types";
 
@@ -115,6 +116,54 @@ export function browseDishes(
     return a.dish.name.en < b.dish.name.en ? -1 : a.dish.name.en > b.dish.name.en ? 1 : 0;
   });
   return rows;
+}
+
+/**
+ * "Best for you" — the browse shelf's default order (diagnosis §M).
+ *
+ * A stable re-ordering of browse rows built ONLY from judgements the
+ * app already makes — no new ranking is invented here:
+ *
+ *   1. Pattern-suitable first: a row whose derived `patterns` (the
+ *      dishPatterns judgement every row already carries) include the
+ *      person's pattern leads. On the Dishes shelf the pattern also
+ *      filters, so this key usually ties — it is stated anyway, so
+ *      the order stays honest if a caller browses unfiltered.
+ *   2. The person's cuisine preference: when the Assessment answer
+ *      names a region (north_indian / south_indian), dishes of that
+ *      region (the existing `dishRegion` derivation) come next —
+ *      the same bonus-not-filter semantics the plan composer uses.
+ *      "both" / "no_preference" / unanswered: no regional key.
+ *   3. Everything else keeps browseDishes' deterministic category /
+ *      name order exactly (the sort is stable).
+ */
+export function sortDishesForYou(
+  rows: readonly DishBrowseRow[],
+  context: {
+    pattern: PlanPattern | null;
+    cuisinePreference: CuisinePreference | null;
+  },
+): DishBrowseRow[] {
+  const region =
+    context.cuisinePreference === "north_indian" ||
+    context.cuisinePreference === "south_indian"
+      ? context.cuisinePreference
+      : null;
+  if (context.pattern === null && region === null) return [...rows];
+  return [...rows].sort((a, b) => {
+    if (context.pattern !== null) {
+      const bySuitability =
+        (a.patterns.includes(context.pattern) ? 0 : 1) -
+        (b.patterns.includes(context.pattern) ? 0 : 1);
+      if (bySuitability !== 0) return bySuitability;
+    }
+    if (region !== null) {
+      const byRegion =
+        (dishRegion(a.dish) === region ? 0 : 1) - (dishRegion(b.dish) === region ? 0 : 1);
+      if (byRegion !== 0) return byRegion;
+    }
+    return 0;
+  });
 }
 
 export const DISH_CATEGORY_LABEL: Record<DishCategory, string> = {

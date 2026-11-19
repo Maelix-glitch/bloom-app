@@ -40,7 +40,7 @@ vi.mock("@/hooks/useNutrition", () => ({
 
 import { GrocerySection } from "./GrocerySection";
 import { PANTRY_KEY, type PantryItem } from "@/lib/grocery/pantry";
-import { PLAN_KEY } from "@/lib/nutrition";
+import { PLAN_KEY, foodDisplayName } from "@/lib/nutrition";
 import { findDish } from "@/lib/nutrition/data/dishLibrary";
 import { USDA_REFERENCE_FOODS } from "@/lib/nutrition/usdaReference";
 import { loadDoc } from "@/lib/prefs";
@@ -91,11 +91,28 @@ describe("GrocerySection", () => {
   it("a plan dish renders as its aggregated ingredients", () => {
     store.values[PLAN_KEY] = planWith([planDish(dal.id, dal.name.en)]);
     render(<GrocerySection />);
-    expect(screen.getByText(dalFirstFood.name)).toBeTruthy();
+    /* Component slice (§J): rows carry the app's display name, never
+       the raw USDA description — that text is the provenance record,
+       not a name a person shops by. (This pin used to read the raw
+       food.name; it now reads the display name and forbids the raw
+       one.) */
+    expect(screen.getByText(foodDisplayName(dalFirstFood).en)).toBeTruthy();
+    expect(screen.queryByText(dalFirstFood.name)).toBeNull();
     /* The plan day renders in the house date format — never the raw
        ISO key (M-30). */
     expect(screen.getByText(/from your plan for 18 Nov 2026/i)).toBeTruthy();
     expect(screen.queryByText(/2026-11-18/)).toBeNull();
+  });
+
+  it("a row can be ticked off while shopping", () => {
+    store.values[PLAN_KEY] = planWith([planDish(dal.id, dal.name.en)]);
+    render(<GrocerySection />);
+    const box = screen.getByRole("checkbox", {
+      name: `Mark ${foodDisplayName(dalFirstFood).en} as bought`,
+    });
+    expect(box.getAttribute("aria-checked")).toBe("false");
+    fireEvent.click(box);
+    expect(box.getAttribute("aria-checked")).toBe("true");
   });
 
   it("the pantry deduction is shown in plain words", () => {

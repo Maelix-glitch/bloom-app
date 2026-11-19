@@ -55,7 +55,7 @@ import {
 } from "@/lib/nutrition";
 import { NutritionPage } from "./NutritionPage";
 import { MEAL_LABEL } from "./input";
-import { fmtKcalApprox } from "@/lib/format";
+import { fmtCount, fmtKcalApprox } from "@/lib/format";
 
 afterEach(cleanup);
 
@@ -250,12 +250,23 @@ describe("NutritionPage — totals vs targets", () => {
   it("measures the day against the same target Trackers computes", () => {
     const profile = seedBodyProfile();
     const oats = seedOats();
-    logDirect(oats, 100, todayLocal());
+    const entry = logDirect(oats, 100, todayLocal());
     const targets = bodyTargetsOf(profile, todayLocal());
     if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    expect(screen.getByText(`of ${fmtKcalApprox(targets.calories)}`)).toBeTruthy();
+    /* Component slice (§H): the ring centre now leads with the
+       REMAINING figure; the consumed-vs-target pair moved into its
+       caption ("380 of ~2,950 kcal eaten"), replacing the old
+       consumed-numeral + "of ~target" centre these pins used to read. */
+    const consumed = entry.nutrients.kcal;
+    expect(
+      screen.getByText(`${fmtCount(consumed)} of ${fmtKcalApprox(targets.calories)} eaten`),
+    ).toBeTruthy();
+    expect(screen.getByText("kcal left")).toBeTruthy();
+    expect(
+      screen.getByText(fmtCount(Math.round(targets.calories - consumed))),
+    ).toBeTruthy();
     expect(screen.getByText(/Targets are estimates/)).toBeTruthy();
     expect(screen.getByRole("progressbar", { name: "Calories against target" })).toBeTruthy();
   });
@@ -297,7 +308,10 @@ describe("NutritionPage — totals vs targets", () => {
     if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    expect(screen.getByText(`of ${fmtKcalApprox(targets.calories)}`)).toBeTruthy();
+    /* Same §H centre caption as the test above (reason recorded there). */
+    expect(
+      screen.getByText(`380 of ${fmtKcalApprox(targets.calories)} eaten`),
+    ).toBeTruthy();
     expect(screen.queryByText(/doesn't set calorie targets/)).toBeNull();
   });
 

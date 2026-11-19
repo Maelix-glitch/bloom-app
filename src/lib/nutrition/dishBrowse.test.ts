@@ -3,7 +3,14 @@ import { describe, expect, it } from "vitest";
 import { EMPTY_DIETARY, emptyProfile, type HealthProfile } from "@/lib/vitalis/domain/profile";
 import { DISH_LIBRARY, findDish } from "./data/dishLibrary";
 import { dishNutrients, dishPatterns } from "./dishes";
-import { NO_DISH_FILTERS, browseDishes, dishIdeaFor, type DishBrowseFilters } from "./dishBrowse";
+import {
+  NO_DISH_FILTERS,
+  browseDishes,
+  dishIdeaFor,
+  sortDishesForYou,
+  type DishBrowseFilters,
+} from "./dishBrowse";
+import { dishRegion } from "./regions";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
 
 const filters = (over: Partial<DishBrowseFilters>): DishBrowseFilters => ({
@@ -82,6 +89,56 @@ describe("browseDishes — the Dishes section's filter logic", () => {
     const enriched = browseDishes(filters({ enrichedOnly: true }));
     expect(enriched.length).toBeGreaterThan(0);
     expect(enriched.every((r) => r.dish.enriched)).toBe(true);
+  });
+
+  describe("sortDishesForYou — the 'Best for you' default order (§M)", () => {
+    const all = browseDishes(NO_DISH_FILTERS);
+
+    it("with no pattern and no cuisine preference, the browse order stands", () => {
+      const sorted = sortDishesForYou(all, { pattern: null, cuisinePreference: null });
+      expect(sorted.map((r) => r.dish.id)).toEqual(all.map((r) => r.dish.id));
+      const both = sortDishesForYou(all, { pattern: null, cuisinePreference: "both" });
+      expect(both.map((r) => r.dish.id)).toEqual(all.map((r) => r.dish.id));
+    });
+
+    it("pattern-suitable dishes lead, in their original relative order", () => {
+      const sorted = sortDishesForYou(all, { pattern: "vegan", cuisinePreference: null });
+      const flags = sorted.map((r) => r.patterns.includes("vegan"));
+      const firstUnsuitable = flags.indexOf(false);
+      expect(firstUnsuitable).toBeGreaterThan(0);
+      expect(flags.slice(firstUnsuitable)).not.toContain(true);
+      /* Stability: within the suitable group, browse order is kept. */
+      const suitableIds = sorted.filter((r) => r.patterns.includes("vegan")).map((r) => r.dish.id);
+      const browseSuitableIds = all.filter((r) => r.patterns.includes("vegan")).map((r) => r.dish.id);
+      expect(suitableIds).toEqual(browseSuitableIds);
+    });
+
+    it("the cuisine preference brings its region forward — a bonus, never a filter", () => {
+      const sorted = sortDishesForYou(all, { pattern: null, cuisinePreference: "south_indian" });
+      expect(sorted).toHaveLength(all.length);
+      const regions = sorted.map((r) => dishRegion(r.dish) === "south_indian");
+      const firstNonSouth = regions.indexOf(false);
+      expect(firstNonSouth).toBeGreaterThan(0);
+      expect(regions.slice(firstNonSouth)).not.toContain(true);
+    });
+
+    it("suitability outranks region when both are stated", () => {
+      const sorted = sortDishesForYou(all, {
+        pattern: "vegan",
+        cuisinePreference: "south_indian",
+      });
+      /* The first row that does NOT suit the pattern may only appear
+         after every suitable row, whatever its region. */
+      const firstUnsuitable = sorted.findIndex((r) => !r.patterns.includes("vegan"));
+      expect(sorted.slice(0, firstUnsuitable).every((r) => r.patterns.includes("vegan"))).toBe(
+        true,
+      );
+      /* And within the suitable rows, the south leads. */
+      const suitable = sorted.slice(0, firstUnsuitable);
+      const regions = suitable.map((r) => dishRegion(r.dish) === "south_indian");
+      const firstNonSouth = regions.indexOf(false);
+      if (firstNonSouth > 0) expect(regions.slice(firstNonSouth)).not.toContain(true);
+    });
   });
 
   it("combines filters — and an impossible combination is honestly empty", () => {

@@ -45,7 +45,9 @@
  * Pure: no storage, no React. The section assembles the inputs.
  */
 
+import { fmtGrams } from "@/lib/format";
 import type { Dish } from "@/lib/nutrition/dishes";
+import { foodDisplayName } from "@/lib/nutrition/displayName";
 import type { DailyPlan } from "@/lib/nutrition/plan";
 import type { Food, FoodGroup, Meal } from "@/lib/nutrition/types";
 import { normalisePantryName, type PantryItem } from "./pantry";
@@ -134,13 +136,15 @@ export interface GroceryListInput {
 
 const MEAL_ORDER: readonly Meal[] = ["breakfast", "lunch", "dinner", "snack"];
 
-/** "250 g" under a kilo, "1.25 kg" at and above it. Display only —
- *  the stored numbers are grams, always. */
+/**
+ * A quantity as the shop list prints it: whole grams, grouped, via
+ * the shared formatter ("250 g", "1,250 g"). DISPLAY ONLY — the
+ * numbers on the items are the plan's own sums (accumulated raw,
+ * rounded once at the item boundary); this string never feeds back
+ * into any math, and no decimal gram or kilo fraction ever prints.
+ */
 export function formatGramAmount(grams: number): string {
-  const rounded = Math.round(grams);
-  if (Math.abs(rounded) < 1000) return `${rounded} g`;
-  const kg = rounded / 1000;
-  return `${Number.isInteger(kg) ? String(kg) : kg.toFixed(2).replace(/0$/, "")} kg`;
+  return `${fmtGrams(grams)} g`;
 }
 
 interface AccumulatingItem {
@@ -202,7 +206,10 @@ export function buildGroceryList(input: GroceryListInput): GroceryListResult {
           }
           addFood(
             line.foodId,
-            food.name,
+            /* The display name the rest of the app cooks with — the
+               raw USDA description is the provenance record and stays
+               in the data layer, never on a shopping list (§J). */
+            foodDisplayName(food).en,
             groceryCategoryForGroup(food.classification?.group),
             (line.grams / servings) * planDish.servings,
           );
@@ -219,7 +226,7 @@ export function buildGroceryList(input: GroceryListInput): GroceryListResult {
         const food = foodById.get(suggestion.foodId);
         addFood(
           suggestion.foodId,
-          food?.name ?? suggestion.name,
+          food ? foodDisplayName(food).en : suggestion.name,
           groceryCategoryForGroup(food?.classification?.group),
           suggestion.grams,
         );

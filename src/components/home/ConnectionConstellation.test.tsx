@@ -89,8 +89,15 @@ const LINKS: CrossLink[] = [
     to: "sleep",
     weight: 0.8,
     sentence: "On better-slept nights, your mood runs higher.",
+    days: 21,
   },
-  { from: "habits", to: "mood", weight: 0.5, sentence: "Habit-complete days lift your mood." },
+  {
+    from: "habits",
+    to: "mood",
+    weight: 0.5,
+    sentence: "Habit-complete days lift your mood.",
+    days: 14,
+  },
 ];
 
 describe("ConnectionConstellationView — populated", () => {
@@ -105,6 +112,11 @@ describe("ConnectionConstellationView — populated", () => {
       true,
     );
     expect(rows.some((t) => t.includes("Habit-complete days lift your mood."))).toBe(true);
+    /* Each row carries its own link's shared-days count (diagnosis §G)
+       — the sample behind that correlation, distinct from the header's
+       total logged days. */
+    expect(screen.getByText("21 shared days")).toBeTruthy();
+    expect(screen.getByText("14 shared days")).toBeTruthy();
     expect(screen.getByText("26 logged days")).toBeTruthy();
     expect(screen.getByText("Last 30 days · from your own logs")).toBeTruthy();
   });

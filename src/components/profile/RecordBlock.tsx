@@ -81,8 +81,13 @@ export function RecordNumbers({
       key: "streak",
       value: totals?.streak ?? 0,
       label: "Day streak",
-      sub:
-        totals && totals.bestStreak > (totals.streak ?? 0)
+      /* No sub until the totals exist: "your best yet" is a claim about
+         the record, and the tile may not state it before the record has
+         settled — the week and points tiles already hold their subs
+         empty in that window; the streak tile now does the same. */
+      sub: !totals
+        ? ""
+        : totals.bestStreak > totals.streak
           ? `best ${totals.bestStreak}`
           : "your best yet",
       icon: Flame,

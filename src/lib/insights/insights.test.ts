@@ -158,6 +158,12 @@ describe("minimum sample — the count is shown, not dressed up", () => {
     expect(insight.headline).toBe("Mood tends to run higher after longer sleep");
     expect(insight.detail).toContain("8.5 hours");
     expect(insight.detail).toContain("5.5 hours");
+    /* The structured figures carry the same two averages the prose
+       states — the card renders these rows, so they are pinned too. */
+    expect(insight.figures).toEqual([
+      { label: "Longer nights · about 8.5 hours", value: "Mood 9/10" },
+      { label: "Shorter nights · about 5.5 hours", value: "Mood 5/10" },
+    ]);
     expect(Math.abs(insight.strength)).toBeGreaterThanOrEqual(MIN_EFFECT);
     expect(result.pending.find((p) => p.kind === "sleep-mood")).toBeUndefined();
   });
@@ -268,6 +274,10 @@ describe("habit ticks & food logging pairs", () => {
     const insight = result.insights.find((i) => i.kind === "food-mood")!;
     expect(insight.headline).toBe("Mood tends to run higher on days you log your food");
     expect(insight.detail).toContain("6 days you logged food");
+    expect(insight.figures).toEqual([
+      { label: "Days you logged food · 6 days", value: "Mood 8/10" },
+      { label: "Days you didn't · 6 days", value: "Mood 5/10" },
+    ]);
     expect(insight.sampleDays).toBe(12);
   });
 
@@ -301,6 +311,10 @@ describe("weight trend — its own bar", () => {
     expect(insight.sampleDays).toBe(6);
     expect(insight.detail).toContain("83 kg");
     expect(insight.detail).toContain("80 kg");
+    expect(insight.figures).toEqual([
+      { label: "Earlier half", value: "83 kg" },
+      { label: "Later half", value: "80 kg" },
+    ]);
   });
 
   it("stays silent below half a kilo of shift — scale noise is not a trend", () => {
