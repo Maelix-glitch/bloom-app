@@ -22,7 +22,7 @@ import { ArrowLeft, Printer } from "lucide-react";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
-import { fmtKcalApprox } from "@/lib/format";
+import { fmtDate, fmtGrams, fmtKcalApprox } from "@/lib/format";
 import { ACTIVITY_LABEL, GOAL_LABEL } from "@/lib/health/body";
 import { shiftDay } from "@/lib/localDay";
 import {
@@ -33,19 +33,14 @@ import {
   weekAggregates,
   type LogEntry,
 } from "@/lib/nutrition";
-import { formatGrams } from "./input";
 
 function longDate(day: string): string {
-  return new Date(`${day}T12:00:00`).toLocaleDateString(undefined, {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
+  const weekday = new Date(`${day}T12:00:00`).toLocaleDateString("en-IN", { weekday: "long" });
+  return `${weekday}, ${fmtDate(day)}`;
 }
 
 function dayShort(day: string): string {
-  return new Date(`${day}T12:00:00`).toLocaleDateString(undefined, {
+  return new Date(`${day}T12:00:00`).toLocaleDateString("en-IN", {
     weekday: "short",
     day: "numeric",
     month: "short",
@@ -94,7 +89,7 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
     },
     {
       label: "Protein guide",
-      value: targets ? `~${formatGrams(targets.proteinG)} g / day` : "Not set",
+      value: targets ? `~${fmtGrams(targets.proteinG)} g / day` : "Not set",
     },
     { label: "Fibre guide", value: `${FIBRE_REFERENCE_G} g / day` },
     { label: "Sodium ceiling", value: `${SODIUM_CEILING_MG.toLocaleString("en-IN")} mg / day` },
@@ -207,11 +202,11 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
                   <tr key={weekDay.day}>
                     <td>{dayShort(weekDay.day)}</td>
                     <td>{Math.round(totals.kcal)}</td>
-                    <td>{formatGrams(totals.proteinG)}</td>
-                    <td>{formatGrams(totals.carbsG)}</td>
-                    <td>{formatGrams(totals.fatG)}</td>
+                    <td>{fmtGrams(totals.proteinG)}</td>
+                    <td>{fmtGrams(totals.carbsG)}</td>
+                    <td>{fmtGrams(totals.fatG)}</td>
                     <td>
-                      {totals.fibreG !== undefined ? formatGrams(totals.fibreG) : "—"}
+                      {totals.fibreG !== undefined ? fmtGrams(totals.fibreG) : "—"}
                       {incomplete.has("fibreG") ? "*" : ""}
                     </td>
                     <td>
@@ -233,9 +228,9 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
               <tr>
                 <td>Average of {loggedDays.length} logged days</td>
                 <td>{week.avgKcal ?? "—"}</td>
-                <td>{week.avgProteinG !== null ? formatGrams(week.avgProteinG) : "—"}</td>
-                <td>{week.avgCarbsG !== null ? formatGrams(week.avgCarbsG) : "—"}</td>
-                <td>{week.avgFatG !== null ? formatGrams(week.avgFatG) : "—"}</td>
+                <td>{week.avgProteinG !== null ? fmtGrams(week.avgProteinG) : "—"}</td>
+                <td>{week.avgCarbsG !== null ? fmtGrams(week.avgCarbsG) : "—"}</td>
+                <td>{week.avgFatG !== null ? fmtGrams(week.avgFatG) : "—"}</td>
                 <td>—</td>
                 <td>—</td>
                 <td>

@@ -114,7 +114,7 @@ describe("NutritionPlanSection", () => {
   it("refuses on a substantive safety answer, in the classifier's words", () => {
     seedAssessment({ ...COMPLETE, eatingDisorderHistory: true });
     render(<NutritionPlanSection />);
-    expect(screen.getByText(/won't build a diet plan/)).toBeTruthy();
+    expect(screen.getByText(/won't build a plan/)).toBeTruthy();
     expect(screen.getByText(/history of disordered eating/)).toBeTruthy();
     expect(screen.getByText(/qualified professional/)).toBeTruthy();
     expect(screen.queryByRole("button", { name: /Create my plan/ })).toBeNull();

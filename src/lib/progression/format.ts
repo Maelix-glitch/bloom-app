@@ -15,14 +15,14 @@ export function formatDelta(n: number): string {
 export function formatShortDate(iso: string): string {
   const ms = Date.parse(iso.length <= 10 ? `${iso}T12:00:00` : iso);
   if (Number.isNaN(ms)) return iso;
-  return new Date(ms).toLocaleDateString(undefined, { day: "numeric", month: "short" });
+  return new Date(ms).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
 }
 
 /** "10 Sep 2026" for the archive. */
 export function formatLongDate(iso: string): string {
   const ms = Date.parse(iso.length <= 10 ? `${iso}T12:00:00` : iso);
   if (Number.isNaN(ms)) return iso;
-  return new Date(ms).toLocaleDateString(undefined, {
+  return new Date(ms).toLocaleDateString("en-IN", {
     day: "numeric",
     month: "short",
     year: "numeric",

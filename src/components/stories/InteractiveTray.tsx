@@ -348,9 +348,9 @@ function DateBuilder({ onAdd }: { onAdd: (el: StoryElement) => void }) {
       </div>
       <div className="grid place-items-center rounded-2xl border border-border bg-surface/60 py-5">
         <span className="sx-date" data-style={style}>
-          {new Date().toLocaleDateString(undefined, {
+          {new Date().toLocaleDateString("en-IN", {
             day: "numeric",
-            month: "long",
+            month: "short",
             year: "numeric",
           })}
         </span>

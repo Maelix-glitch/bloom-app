@@ -197,7 +197,7 @@ export function ColorField({
             type="button"
             role="radio"
             aria-checked={value === null}
-            aria-label="No color"
+            aria-label="No colour"
             onClick={() => onChange(null)}
             className="se-swatch se-swatch-none"
             data-active={value === null}
@@ -244,9 +244,9 @@ export function ColorField({
           style={{
             background: `conic-gradient(from 0deg, ${current}, #e0a3b8, #eed9a4, #9db89a, #9fb6cf, #b7a6e8, ${current})`,
           }}
-          title="Custom color"
+          title="Custom colour"
         >
-          <span className="sr-only">Custom color</span>
+          <span className="sr-only">Custom colour</span>
           <input
             type="color"
             value={isValidHex(current) ? (current.length === 7 ? current : "#ffffff") : "#ffffff"}
@@ -275,7 +275,7 @@ export function ColorField({
             setTick((t) => t + 1);
           }}
           className="se-mini-btn"
-          title="Save this color"
+          title="Save this colour"
         >
           Save
         </button>

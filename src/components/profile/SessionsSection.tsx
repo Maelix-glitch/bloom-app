@@ -11,6 +11,7 @@ import { useEffect, useState } from "react";
 import { Eraser, Laptop, LogOut, MonitorSmartphone } from "lucide-react";
 
 import { bloomKeys } from "@/lib/data/erase";
+import { fmtDate } from "@/lib/format";
 import { hasSupabaseConfig, supabase, watchAuth } from "@/lib/supabase";
 
 interface SessionInfo {
@@ -108,7 +109,7 @@ export function SessionsSection({
             <span className="pf-row-text">
               <span className="pf-row-label">{session.email ?? "Your account"}</span>
               <span className="pf-row-hint">
-                {session.since ? `account since ${session.since}` : "signed in on this device"}
+                {session.since ? `account since ${fmtDate(session.since)}` : "signed in on this device"}
               </span>
             </span>
             <span className="pf-row-value">active here</span>

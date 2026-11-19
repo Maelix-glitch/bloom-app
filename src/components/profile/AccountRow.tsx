@@ -456,7 +456,7 @@ export function AccountRow({
           label="Tracking since"
           value={
             account.memberSince
-              ? new Date(account.memberSince).toLocaleDateString(undefined, {
+              ? new Date(account.memberSince).toLocaleDateString("en-IN", {
                   day: "numeric",
                   month: "short",
                   year: "numeric",

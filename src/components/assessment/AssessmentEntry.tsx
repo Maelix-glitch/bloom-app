@@ -235,10 +235,10 @@ function joinNames(names: string[]): string {
 }
 
 const formatPlanDay = (day: string) =>
-  new Date(`${day}T12:00:00`).toLocaleDateString(undefined, {
+  new Date(`${day}T12:00:00`).toLocaleDateString("en-IN", {
     weekday: "long",
     day: "numeric",
-    month: "long",
+    month: "short",
   });
 
 /**

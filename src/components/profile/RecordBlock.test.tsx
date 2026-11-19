@@ -95,7 +95,9 @@ describe("RecordGrid", () => {
     const { container } = render(<RecordGrid days={days} today="2026-11-18" />);
     const todayCell = container.querySelector('[data-today="true"]');
     expect(todayCell).not.toBeNull();
-    expect(todayCell!.getAttribute("title")).toMatch(/^Wed, Nov 18/);
+    /* House date order ("Wed, 18 Nov") — the copy slice pinned the grid's
+       locale to en-IN; the pin previously expected the US order. */
+    expect(todayCell!.getAttribute("title")).toMatch(/^Wed, 18 Nov/);
     expect(container.querySelectorAll('[data-future="true"]')).toHaveLength(4);
     /* No second count under a different window inside the grid. */
     expect(screen.queryByText(/of \d+ days$/)).toBeNull();

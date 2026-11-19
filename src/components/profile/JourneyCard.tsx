@@ -109,7 +109,7 @@ export function JourneyCard({
                   {shareable
                     ? "tap to share"
                     : got?.achievedAt
-                      ? new Date(got.achievedAt).toLocaleDateString(undefined, {
+                      ? new Date(got.achievedAt).toLocaleDateString("en-IN", {
                           day: "numeric",
                           month: "short",
                         })

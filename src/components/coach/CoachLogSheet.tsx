@@ -173,7 +173,7 @@ export function CoachLogSheet({
         <p className="coach-log-parse" aria-live="polite">
           {totals
             ? `≈ ${totals.kcal} kcal · ${totals.proteinG} g protein · ${totals.carbsG} g carbs · ${totals.fatG} g fat`
-            : "Numbers need to be plain values — kcal above zero, each macro zero or more."}
+            : "Numbers need to be plain values — kcal above zero, protein, carbs and fat zero or more."}
         </p>
 
         <div className="coach-log-field">

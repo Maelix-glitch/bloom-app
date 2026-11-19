@@ -14,8 +14,7 @@ import { Link } from "@tanstack/react-router";
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { Button } from "@/components/ui/button";
 import { useNutrition } from "@/hooks/useNutrition";
-import { fmtCount, fmtKcalApprox } from "@/lib/format";
-import { formatGrams } from "./input";
+import { fmtCount, fmtGrams, fmtKcalApprox } from "@/lib/format";
 
 function useTodaySummary() {
   const nutrition = useNutrition();
@@ -26,7 +25,7 @@ function useTodaySummary() {
 
 function summaryLine(count: number, kcal: number, proteinG: number): string {
   if (count === 0) return "";
-  return `${Math.round(kcal)} kcal · ${formatGrams(proteinG)} g protein · ${count} ${
+  return `${Math.round(kcal)} kcal · ${fmtGrams(proteinG)} g protein · ${count} ${
     count === 1 ? "food" : "foods"
   } logged`;
 }

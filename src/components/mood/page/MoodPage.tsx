@@ -334,9 +334,9 @@ function Hero({
   onCompose: () => void;
   onEdit: (entry: MoodEntry) => void;
 }) {
-  const dateLine = new Intl.DateTimeFormat("en-US", {
+  const dateLine = new Intl.DateTimeFormat("en-IN", {
     weekday: "long",
-    month: "long",
+    month: "short",
     day: "numeric",
     year: "numeric",
   }).format(new Date());
