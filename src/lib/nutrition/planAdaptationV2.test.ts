@@ -156,8 +156,11 @@ describe("behavioural learning", () => {
     const anchors = anchorsOf(plan);
     expect(anchors.some((a) => a !== null && FAVOURED.includes(a))).toBe(true);
     expect(dishIdsOf(plan).some((id) => FAVOURED.includes(id))).toBe(true);
+    /* Brief v4 (Slice 1): the naming is the favoured-dishes reason;
+       its derived detail leads with the same fact and counts. */
+    expect(plan.reasons?.some((r) => r.kind === "favoured-dishes")).toBe(true);
     expect(
-      plan.notes.some((n) => n.startsWith("From your log: dishes you return to lead this plan")),
+      plan.notes.some((n) => n.startsWith("Dishes you return to lead this plan")),
     ).toBe(true);
     expect(plan.notes.some((n) => n.includes("(logged 3 times)"))).toBe(true);
     /* The learning never moves the aim. */

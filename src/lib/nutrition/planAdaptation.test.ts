@@ -77,13 +77,17 @@ describe("planAdaptationFor", () => {
     expect(adaptation.avgProteinG).toBe(90);
   });
 
+  /* Brief v4 (Slice 1): the adaptation returns STRUCTURED reasons,
+     not prose — the words live in src/lib/reasons.ts. These pins
+     changed from note strings to reason objects for that reason;
+     the numbers they carry are the same ones the strings named. */
   it("flags a protein shortfall and names the log's real numbers", () => {
     const entries = [entry("2026-11-16", 1500, 80), entry("2026-11-17", 1700, 100)];
     const adaptation = planAdaptationFor(entries, DAY, TARGETS)!;
     expect(adaptation.proteinShortfall).toBe(true);
     expect(adaptation.energyOvershoot).toBe(false);
-    expect(adaptation.notes).toEqual([
-      "From your log: your last 2 logged days averaged 90 g protein against your 120 g target, so this plan leans on higher-protein dishes and top-ups. Your target itself is unchanged.",
+    expect(adaptation.reasons).toEqual([
+      { kind: "log-protein-shortfall", days: 2, avgProteinG: 90, targetProteinG: 120 },
     ]);
   });
 
@@ -92,8 +96,8 @@ describe("planAdaptationFor", () => {
     const adaptation = planAdaptationFor(entries, DAY, TARGETS)!;
     expect(adaptation.energyOvershoot).toBe(true);
     expect(adaptation.proteinShortfall).toBe(false);
-    expect(adaptation.notes).toEqual([
-      "From your log: your last 2 logged days averaged 2,400 kcal against your 2,000 kcal target, so this plan leaves the energy top-ups out and lets the dishes carry the day. Your target itself is unchanged.",
+    expect(adaptation.reasons).toEqual([
+      { kind: "log-energy-overshoot", days: 2, avgKcal: 2400, targetKcal: 2000 },
     ]);
   });
 
@@ -102,9 +106,9 @@ describe("planAdaptationFor", () => {
     const adaptation = planAdaptationFor(entries, DAY, TARGETS)!;
     expect(adaptation.proteinShortfall).toBe(true);
     expect(adaptation.energyOvershoot).toBe(true);
-    expect(adaptation.notes).toHaveLength(2);
-    expect(adaptation.notes[0]).toContain("protein");
-    expect(adaptation.notes[1]).toContain("kcal");
+    expect(adaptation.reasons).toHaveLength(2);
+    expect(adaptation.reasons[0]!.kind).toBe("log-protein-shortfall");
+    expect(adaptation.reasons[1]!.kind).toBe("log-energy-overshoot");
   });
 
   it("holds the thresholds: exactly at the line is not a signal", () => {

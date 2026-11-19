@@ -33,6 +33,7 @@
  */
 
 import { shiftDay } from "@/lib/localDay";
+import type { PlanReason } from "@/lib/reasons";
 import { spectrumForDay, type SpectrumSex } from "./dayView";
 import type { DailyPlan } from "./plan";
 import type { NutritionTargets } from "./targets";
@@ -60,9 +61,10 @@ export interface PlanAdaptation {
   proteinShortfall: boolean;
   /** Leave the energy top-ups out; the dishes carry the day. */
   energyOvershoot: boolean;
-  /** The human-readable explanations, with the real numbers. These
-   *  join the plan's composition notes verbatim. */
-  notes: string[];
+  /** The explanations, as STRUCTURED reasons (brief v4: the words
+   *  live in src/lib/reasons.ts; this module returns the numbers).
+   *  They lead the plan's reasons. */
+  reasons: PlanReason[];
 }
 
 interface DayTotals {
@@ -107,18 +109,24 @@ export function planAdaptationFor(
   const energyOvershoot = avgKcal > ENERGY_OVERSHOOT_RATIO * targets.kcal;
   if (!proteinShortfall && !energyOvershoot) return null;
 
-  const notes: string[] = [];
+  const reasons: PlanReason[] = [];
   if (proteinShortfall) {
-    notes.push(
-      `From your log: your last ${days.length} logged days averaged ${whole(avgProteinG)} g protein against your ${whole(targets.proteinG)} g target, so this plan leans on higher-protein dishes and top-ups. Your target itself is unchanged.`,
-    );
+    reasons.push({
+      kind: "log-protein-shortfall",
+      days: days.length,
+      avgProteinG,
+      targetProteinG: targets.proteinG,
+    });
   }
   if (energyOvershoot) {
-    notes.push(
-      `From your log: your last ${days.length} logged days averaged ${whole(avgKcal)} kcal against your ${whole(targets.kcal)} kcal target, so this plan leaves the energy top-ups out and lets the dishes carry the day. Your target itself is unchanged.`,
-    );
+    reasons.push({
+      kind: "log-energy-overshoot",
+      days: days.length,
+      avgKcal,
+      targetKcal: targets.kcal,
+    });
   }
-  return { days: days.length, avgKcal, avgProteinG, proteinShortfall, energyOvershoot, notes };
+  return { days: days.length, avgKcal, avgProteinG, proteinShortfall, energyOvershoot, reasons };
 }
 
 /* ============================ v2: deeper learning ============================
@@ -394,11 +402,11 @@ export interface PlanLearning {
   deprioritisedDishes: DeprioritisedDish[];
   microGaps: MicroGap[];
   portionSignals: PortionSignal[];
-  /** Explanations for the behavioural and micronutrient biases, with
-   *  the real counts and averages. These join the plan's notes after
-   *  the P6 adaptation notes. (Portion signals are surface-only and
-   *  carry no note here.) */
-  notes: string[];
+  /** Explanations for the behavioural and micronutrient biases, as
+   *  STRUCTURED reasons (brief v4: words live in src/lib/reasons.ts).
+   *  They join the plan's reasons after the P6 adaptation reasons.
+   *  (Portion signals are surface-only and carry no reason here.) */
+  reasons: PlanReason[];
 }
 
 const lowerFirst = (s: string) => (s.length > 0 ? s[0]!.toLowerCase() + s.slice(1) : s);
@@ -442,31 +450,31 @@ export function planLearningFor(
   ) {
     return null;
   }
-  const notes: string[] = [];
+  const reasons: PlanReason[] = [];
   if (favouredDishes.length > 0) {
-    const named = favouredDishes
-      .slice(0, 3)
-      .map((d) => `${d.name} (logged ${d.count} times)`)
-      .join(", ");
-    notes.push(
-      `From your log: dishes you return to lead this plan — ${named} in the last ${LEARNING_WINDOW_DAYS} days.`,
-    );
+    reasons.push({
+      kind: "favoured-dishes",
+      dishes: favouredDishes.slice(0, 3).map((d) => ({ name: d.name, count: d.count })),
+      windowDays: LEARNING_WINDOW_DAYS,
+    });
   }
   if (deprioritisedDishes.length > 0 && opts.storedPlan) {
-    const named = deprioritisedDishes
-      .slice(0, 3)
-      .map((d) => d.name)
-      .join(", ");
-    notes.push(
-      deprioritisedDishes.length === 1
-        ? `From your log: ${named} was in your ${opts.storedPlan.day} plan but has not been logged in the last ${LEARNING_WINDOW_DAYS} days, so it sits further back today.`
-        : `From your log: ${named} were in your ${opts.storedPlan.day} plan but have not been logged in the last ${LEARNING_WINDOW_DAYS} days, so they sit further back today.`,
-    );
+    reasons.push({
+      kind: "deprioritised-dishes",
+      names: deprioritisedDishes.slice(0, 3).map((d) => d.name),
+      planDay: opts.storedPlan.day,
+      windowDays: LEARNING_WINDOW_DAYS,
+    });
   }
   for (const gap of microGaps) {
-    notes.push(
-      `From your log: over your last ${gap.days} logged days, ${lowerFirst(gap.label)} from the foods that report it averaged ${avgText(gap)} ${gap.unit} a day, against the ${gap.reference} ${gap.unit} reference — this plan favours dishes richer in ${lowerFirst(gap.label)}.`,
-    );
+    reasons.push({
+      kind: "micro-gap",
+      label: gap.label,
+      days: gap.days,
+      avg: gap.avg,
+      unit: gap.unit,
+      reference: gap.reference,
+    });
   }
   return {
     adaptation,
@@ -475,6 +483,6 @@ export function planLearningFor(
     deprioritisedDishes,
     microGaps,
     portionSignals,
-    notes,
+    reasons,
   };
 }

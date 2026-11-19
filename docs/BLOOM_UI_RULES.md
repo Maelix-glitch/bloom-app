@@ -446,3 +446,50 @@ placeholder as label · render "Nothing yet" as a full card · use serif for dat
 inline date or number formatting · build a custom modal · explain a card with a paragraph
 when a component fits · put a switch anywhere but the row's right edge · let a card be
 half-empty without reason · show "0 g" · call a user's choice "Quit".
+
+## §16 Heading system
+Every section has a real `<h2>` (serif 24) and at most one subtitle line (≤ 90 chars).
+Eyebrows only appear in page heroes and never replace a heading. 56px between sections,
+16px between cards, 24px inside cards. Readable text is never below 12px, body is 15px,
+secondary is 14px.
+
+## §17 Data visualisation
+1. Every chart shows its denominator and unit ("360 / 400 g"), never a bare fill.
+2. A target is a tick on the track. Fill is neutral until the target is met, then success.
+   Amber is only for under 50%.
+3. Direct labels beat legends. Zero baseline. No pies, 3D, or rainbow palettes (two hues
+   per chart at most).
+4. Tabular numbers. A text alternative for every chart (`role="img"` + `aria-label`, or
+   `role="progressbar"` with values).
+5. The solid/dashed confidence rule is reserved for measured vs estimated data. "Missing"
+   or "empty" uses a neutral fill, never dashes.
+6. **Signature viz: the Bloom flower.** One petal per category, filled = covered, plus chips
+   naming what is missing. Use it for coverage-type data where the whole is a set (food
+   groups, daily habits), and don't overuse it.
+
+## §18 Category colour
+Category colours (macros) appear only as 8px dots and thin bars. Never as text colour,
+badges or backgrounds. Status colours (success, warning, danger, info) are for status only.
+Verify dot contrast ≥3:1 on `--surface`.
+
+## §19 Buttons in repeated lists
+Only the next-up item gets `btn--primary`. The rest are secondary. Done items show a badge.
+Buttons are 10px-radius rectangles and pills are reserved for badges and chips.
+
+## §20 Focus and active
+`:focus-visible` only, never `:focus`. Active nav = filled `--surface-2` + a 3px accent bar
+**inside** the pill. A ring that appears after a mouse click is a bug.
+
+## §21 Floating controls
+One `.dock`, same size (48px), same style, same x. Back-to-top appears after 1.5 viewports
+via an IntersectionObserver (no scroll listeners), using an arrow icon. The assistant uses
+a gold glyph on `--surface-2`. No white fills, rainbow rings or logos as icons.
+
+## §22 Say it once, and the planner returns data
+- One fact, one home. Every rendered metric has `data-metric`, and duplicates fail CI.
+- Business logic returns structured data. All user-facing words live in one copy module with
+  length assertions. Sentences are never sliced.
+- Conclusions drawn from thin data carry a dashed "Early read · N days" badge and neutral
+  wording.
+- Health targets come from one function, pass `assertPlausibleTargets`, and any formula
+  change requires human nutrition review.
