@@ -1466,6 +1466,289 @@ a.nut-chip {
   color: var(--foreground);
 }
 
+/* ------------------ brief v4 Slice 4: TODAY ------------------ */
+
+/* Macro dots (rulebook §18): category colour lives ONLY in the
+   8px dot; the number is neutral, always. Contrast against the
+   card surface is ≥3:1 with margin (worst pair: the fat dot on
+   --surface-2 at 6.79:1 — computed for the slice, in its log). */
+:root {
+  --macro-protein: #8fbf9f;
+  --macro-carb: #c9b8a0;
+  --macro-fat: #8aa4c4;
+  --macro-fibre: #a99bc9;
+}
+.meal__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.macros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-4);
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-callout);
+}
+.macros b {
+  color: var(--foreground);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.dot {
+  display: inline-block;
+  inline-size: 8px;
+  block-size: 8px;
+  border-radius: 50%;
+  margin-inline-end: 6px;
+  background: var(--text-secondary);
+}
+.dot--protein {
+  background: var(--macro-protein);
+}
+.dot--carb {
+  background: var(--macro-carb);
+}
+.dot--fat {
+  background: var(--macro-fat);
+}
+.dot--fibre {
+  background: var(--macro-fibre);
+}
+/* Buttons inside a meal card are 10px-radius rectangles (§19);
+   pills stay for badges and chips. The press dip is 1px (Part 5),
+   not the pill scale, and hover lifts the card's border colour
+   only — the layout never moves. */
+.meal .nut-btn {
+  border-radius: var(--radius-control);
+}
+.meal .nut-btn:active {
+  transform: translateY(1px);
+}
+.meal {
+  transition: border-color var(--motion-standard) var(--ease-out-expo);
+}
+.meal:hover {
+  border-color: var(--border-strong);
+}
+
+/* Today's balance (brief 3.2): the flower beside the goal
+   meters, the missing groups as chips under it. */
+.balance {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: center;
+}
+.balance__flower {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+}
+.balance__count {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  margin: 0;
+  text-align: center;
+}
+.balance__count b {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 1.875rem;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+.balance__count span {
+  font-size: var(--text-caption);
+  color: var(--muted-foreground);
+}
+.balance__bars {
+  display: grid;
+  gap: var(--space-5);
+  max-inline-size: 28rem;
+}
+.balance__missing {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  list-style: none;
+  margin: var(--space-4) 0 0;
+  padding: 0;
+}
+@media (max-width: 720px) {
+  .balance {
+    grid-template-columns: 1fr;
+  }
+  .balance__bars {
+    max-inline-size: none;
+  }
+}
+
+/* The Bloom flower (rulebook §17.6): filled = covered, in the
+   gold family; missing is the neutral surface fill — dashed
+   stays reserved for estimated. Filled petals draw in once,
+   staggered, growing from their base at the heart. */
+.flower {
+  position: relative;
+  flex: none;
+}
+.flower__svg {
+  display: block;
+  inline-size: 100%;
+  block-size: 100%;
+}
+.flower__mark {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.petal {
+  fill: var(--surface-3);
+  stroke: var(--border);
+  stroke-width: 1;
+}
+.petal.is-on {
+  fill: var(--gold-soft);
+  stroke: var(--gold);
+  stroke-width: 1.25;
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: petal-in 0.55s var(--ease-out-expo) both;
+  animation-delay: calc(var(--i) * 55ms);
+}
+.flower__core {
+  fill: var(--surface-2);
+  stroke: var(--gold);
+  stroke-width: 1.25;
+}
+@keyframes petal-in {
+  from {
+    opacity: 0;
+    transform: scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Goal meters (brief 3.2 + Part 5): the global .meter atom, its
+   fill re-expressed as a scaleX transform in this scope — --v
+   is a DECIMAL 0–1 here — animating 0 → value once when the
+   meter scrolls into view (600ms, the house curve). The fill
+   is neutral; success when the guideline is met; warning only
+   under half. The tick at the track's end is the goal itself. */
+.cover {
+  display: grid;
+  gap: var(--space-2);
+}
+.cover__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+}
+.cover__row span {
+  font-weight: 500;
+  font-size: var(--text-callout);
+  color: var(--text-secondary);
+}
+.cover__row b {
+  font-weight: 600;
+  font-size: var(--text-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+.cover__row b small {
+  font-size: var(--text-caption);
+  color: var(--muted-foreground);
+  font-weight: 400;
+}
+.cover__hint {
+  font-size: var(--text-caption);
+  color: var(--muted-foreground);
+  margin: 0;
+}
+.cover .meter {
+  position: relative;
+  --fill: var(--text-secondary);
+}
+.cover .meter::after {
+  inline-size: 100%;
+  transform-origin: left;
+  transform: scaleX(0);
+  background: var(--fill);
+  transition: transform 0.6s var(--ease-out-expo);
+}
+.cover .meter.is-in::after {
+  transform: scaleX(var(--v, 0));
+}
+.cover .meter.is-met {
+  --fill: var(--success);
+}
+.cover .meter.is-low {
+  --fill: var(--warning);
+}
+.cover .meter--goal::before {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  inset-inline-end: 0;
+  inline-size: 2px;
+  background: var(--border-strong);
+  z-index: 1;
+}
+
+/* Adjusted rows (brief 3.3): the detail clamps at two lines —
+   the sentence is never cut; the whole of it is one More tap
+   away, and rides the title attribute throughout. */
+.adj-detail {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.adj-detail.is-open {
+  -webkit-line-clamp: unset;
+}
+.adj-more {
+  margin-top: var(--space-1);
+  padding: 0;
+  font-size: var(--text-caption);
+  font-weight: 600;
+  color: var(--gold);
+}
+.adj-more:active {
+  transform: translateY(1px);
+}
+.adj-action {
+  display: inline-block;
+  margin-top: var(--space-1);
+  font-size: var(--text-callout);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .petal.is-on {
+    animation: none;
+  }
+  .cover .meter::after {
+    transition: none;
+  }
+  .meal .nut-btn:active,
+  .adj-more:active {
+    transform: none;
+  }
+}
+
 @media print {
   .nut-report {
     --report-ink: #17150f;

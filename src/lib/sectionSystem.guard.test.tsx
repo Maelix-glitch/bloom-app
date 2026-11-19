@@ -291,19 +291,25 @@ describe("section system — Nutrition page render", () => {
     expectShelled(container, "Pattern lab");
 
     /* The balance section: its own top-level section with the H2 the
-       brief names, holding the guideline note — and the plan section
-       no longer holds it (the mix block is retired). */
+       brief names — and the plan section no longer holds the
+       guideline judgement (the mix block is retired).
+       Slice 4 update (brief 3.2): the fruit-guideline SENTENCE this
+       guard pinned became the fruit goal meter — the same fact,
+       rendered as the viz the brief mandates. The pin follows it:
+       the meter's goal (aria-valuemax) and its "to go" hint, and
+       the old sentence gone everywhere. */
     const balance = expectShelled(container, "Today's balance");
     expect(within(balance).getByRole("heading", { level: 2 }).textContent).toBe(
       "Today's balance",
     );
+    const fruitMeter = within(balance)
+      .getAllByRole("progressbar")
+      .find((m) => m.getAttribute("aria-label")?.startsWith("Fruit:"));
+    expect(fruitMeter, "the fruit goal meter").toBeTruthy();
+    expect(fruitMeter!.getAttribute("aria-valuemax")).toBe("100");
+    expect(within(balance).getAllByText(/g to go · ICMR-NIN guideline/).length).toBeGreaterThan(0);
     expect(
-      within(balance).getByText(
-        /fruit — the ICMR-NIN guideline aims for at least 100 g across the day/,
-      ),
-    ).toBeTruthy();
-    expect(
-      within(plan).queryByText(
+      within(container).queryByText(
         /fruit — the ICMR-NIN guideline aims for at least 100 g across the day/,
       ),
     ).toBeNull();

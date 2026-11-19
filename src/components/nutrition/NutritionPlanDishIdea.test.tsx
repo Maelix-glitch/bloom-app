@@ -178,8 +178,11 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
     expect(entry.name).toBe(dish.name.en);
     expect(entry.nutrients).toEqual(dishNutrients(dish).nutrients);
 
-    /* The unfolded dish now reads Logged. */
-    expect(within(lunch).getByText("Logged")).toBeTruthy();
+    /* The unfolded dish now reads Logged. (Slice 4: the meal badge
+       reads "Logged" too once the meal is fully logged, so the word
+       can appear twice within the card — the dish's chip and the
+       meal's badge.) */
+    expect(within(lunch).getAllByText("Logged").length).toBeGreaterThan(0);
     expect(within(lunch).queryByRole("button", { name: "Log this dish" })).toBeNull();
   });
 
