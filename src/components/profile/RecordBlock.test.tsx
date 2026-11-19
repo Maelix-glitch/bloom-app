@@ -66,6 +66,16 @@ describe("RecordNumbers", () => {
     expect(within(week).getByText("7 of the last 30 days")).toBeTruthy();
   });
 
+  it("no tile states a record claim before the totals have settled", () => {
+    render(<RecordNumbers totals={null} points={null} loading />);
+    /* The streak tile used to read "your best yet" under its skeleton —
+       a claim about a record that had not loaded. Every tile's sub now
+       waits for the same source its numeral reads. */
+    expect(screen.queryByText("your best yet")).toBeNull();
+    const streak = screen.getByTestId("pf-number-streak");
+    expect(within(streak).getByText("Day streak")).toBeTruthy();
+  });
+
   it("the days tile dates the record from its first day, in full", () => {
     render(<RecordNumbers totals={totals} points={945} loading={false} />);
     expect(within(screen.getByTestId("pf-number-days")).getByText("since 13 Aug 2026")).toBeTruthy();

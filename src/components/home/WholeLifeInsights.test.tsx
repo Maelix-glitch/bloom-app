@@ -82,6 +82,19 @@ describe("WholeLifeInsights", () => {
     expect(container.textContent).toContain("never what causes what");
   });
 
+  it("shows the numbers behind the pattern as figure rows, not prose", () => {
+    setRecord(10);
+    const { container } = render(<WholeLifeInsights ready />);
+    /* The two group averages stand as data rows (diagnosis §G): the
+       longer nights averaged mood 9, the shorter nights mood 5 — the
+       same figures the lib's prose detail states, rendered as rows. */
+    expect(container.textContent).toContain("Longer nights · about 8.5 hours");
+    expect(container.textContent).toContain("Mood 9/10");
+    expect(container.textContent).toContain("Shorter nights · about 5.5 hours");
+    expect(container.textContent).toContain("Mood 5/10");
+    expect(container.textContent).not.toContain("your mood averaged");
+  });
+
   it("shows the honest pending state with real counts when data is thin", () => {
     setRecord(5);
     const { container } = render(<WholeLifeInsights ready />);

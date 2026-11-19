@@ -10,7 +10,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 
 import { setPref } from "@/lib/prefs";
 import { resetPrefCache } from "@/lib/prefsStore";
@@ -34,6 +34,21 @@ const base: LabResult = {
 };
 
 beforeEach(() => {
+  /* The entry form now lives in a BloomSheet (component slice §I);
+     the sheet asks matchMedia whether this is a phone, and jsdom
+     ships none — the same stub the other sheet tests install. */
+  window.matchMedia =
+    window.matchMedia ??
+    ((query: string) =>
+      ({
+        matches: false,
+        media: query,
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        addListener: () => {},
+        onchange: null,
+        dispatchEvent: () => false,
+      }) as unknown as MediaQueryList);
   window.localStorage.clear();
   resetPrefCache();
 });
@@ -74,6 +89,25 @@ describe("LabReportsSection", () => {
     expect(screen.getAllByText("Glucose")).toHaveLength(2);
     expect(screen.getByText(/100 mg\/dL/)).toBeTruthy();
     expect(screen.getByText(/5.5 mmol\/L/)).toBeTruthy();
+  });
+
+  it("adds a result through the sheet form, flagged against its own entered range", () => {
+    render(<LabReportsSection />);
+    /* No form on the card itself — the sheet carries it (§I). */
+    expect(screen.queryByLabelText(/Test name/)).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Add a result" }));
+    fireEvent.change(screen.getByLabelText(/Test name/), { target: { value: "HbA1c" } });
+    fireEvent.change(screen.getByLabelText("Value"), { target: { value: "7.2" } });
+    fireEvent.change(screen.getByLabelText(/Unit/), { target: { value: "%" } });
+    fireEvent.change(screen.getByLabelText(/Range on the report — low/), {
+      target: { value: "4" },
+    });
+    fireEvent.change(screen.getByLabelText(/Range on the report — high/), {
+      target: { value: "6" },
+    });
+    fireEvent.click(screen.getByRole("button", { name: "Save result" }));
+    expect(screen.getByText("Above the range printed on your report")).toBeTruthy();
+    expect(screen.getByText(/Range on your report:/)).toBeTruthy();
   });
 
   it("shows the trend change against the previous result in the same series", () => {
