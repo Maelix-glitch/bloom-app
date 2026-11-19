@@ -1211,16 +1211,22 @@ describe("UI guard: reskin chrome (R-2)", () => {
   });
 
   it("derives the points card from Bloom's wallet and rank ladder, never hardcoded maths", () => {
-    /* Pin updated for brief v4 Slice 2 (M-47): the card's label is now
-       the brief's "{current} → {next}" form with a "points to {next}"
-       line — the reskin's "Next level ·" wording and its bare percent
-       are gone by design. The derivation pins (wallet + rankFor, no
-       hardcoded thresholds) are unchanged. */
+    /* Pin RESTORED to the pre-v4 form by owner directive 2026-11-19:
+       the brief v4 Slice 2 redesign of this card ("{current} → {next}",
+       the labelled "N of M" meter, "N points to {next}") was rejected
+       by the owner ("not looking good this version") and the card is
+       back to the Reskin slice 2 form — balance, bare percent of the
+       way through the rank, gold-gradient track, "Next level · {next}".
+       The negative pins below keep the rejected form off this card. */
     expect(CARD.text).toContain('data-testid="rail-points-card"');
     expect(CARD.text).toContain("useWallet");
     expect(CARD.text).toContain("rankFor");
-    expect(CARD.text).toContain("→");
-    expect(CARD.text).toContain("points to");
+    expect(CARD.text).toContain("Next level ·");
+    expect(CARD.text).not.toContain("→");
+    expect(CARD.text).not.toContain("points to");
+    expect(CARD.text).not.toContain("model.intoRank");
+    expect(CARD.text).not.toContain("model.span");
+    expect(CARD.text).not.toContain("model.pointsToNext");
     expect(CARD.text).not.toContain("SPROUT_AT");
     const fill = blockFor(STYLES.text, ".rail-points-fill")!;
     expect(fill.body).toContain("linear-gradient(90deg, var(--gold-soft), var(--gold))");

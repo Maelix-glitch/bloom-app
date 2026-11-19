@@ -50,9 +50,10 @@ export const HOME_NAV: {
  * Composition (Reskin slice 2, after the owner's prototype; shell form
  * since brief v4): the brand at the top; the destinations as pills — the
  * active one on a filled --surface-2 with a 3px gold bar INSIDE the
- * pill's left edge and a gold glyph; the Level card (RailPointsCard:
- * balance, current → next rank, a labelled meter, points to the next
- * rank); Profile below it; and at the foot, in a fixed-height botanical
+ * pill's left edge and a gold glyph; the points card (RailPointsCard:
+ * balance, percent of the way to the next rank, gold-gradient track —
+ * the pre-v4 form, restored by owner directive 2026-11-19); Profile
+ * below it; and at the foot, in a fixed-height botanical
  * band, the serif-italic tagline above the identity strip. The brand /
  * nav / card region scrolls on short screens; the footer stays pinned.
  * (Sync state lives in the Today TopBar pill alone — the rail used to
