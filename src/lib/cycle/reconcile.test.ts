@@ -218,15 +218,20 @@ describe("reconcile · still open · late · missed", () => {
     expect(q!.title).toMatch(/roughly expected/);
   });
 
-  it("stops asking whether an open period has finished once it is plainly over", () => {
-    // day 10 with no end: asked (usual 5 + grace 2 < 10 <= 5 + 10)
+  it("keeps asking whether an open period has finished until it is closed", () => {
+    // day 10 with no end: asked (usual 5 + grace 2 < 10)
     expect(
       find(reconcile({ logs: history(9), days: [], today: TODAY }), "still-open"),
     ).toBeDefined();
-    // day 20: no longer asked — the answer is obvious and the estimate assumes the usual length
+    // day 20: STILL asked. This pin used to expect silence after day
+    // usual+10 ("the estimate assumes the usual length") — but the entry
+    // itself stays open, and once the question expired there was no
+    // surface left that offered to close it: the reported "I can't stop
+    // my period" bug. The estimate may assume; the record must stay
+    // closable. Snooze/dismiss still govern how often it appears.
     expect(
       find(reconcile({ logs: history(19), days: [], today: TODAY }), "still-open"),
-    ).toBeUndefined();
+    ).toBeDefined();
   });
 
   it("does not ask 'has it finished?' alongside 'has it started?' for the same period", () => {

@@ -216,19 +216,34 @@ export function LogPanel({
     () => (editing ? null : classifyBleedDay(date, logs, analysis)),
     [editing, date, logs, analysis],
   );
-  /** The period this date sits inside or right after, if any. */
+  /** The period this date sits inside or right after, if any. A "soon-after"
+      day also counts when that period is still OPEN — it is the day she
+      comes back to the app after the period ended, and the close offer
+      below is the one place that can end it from this form. */
   const nearPeriod =
-    context && (context.kind === "inside" || context.kind === "adjacent") ? context.period : null;
+    context &&
+    (context.kind === "inside" ||
+      context.kind === "adjacent" ||
+      (context.kind === "soon-after" && recordedEnd(context.period) === null))
+      ? context.period
+      : null;
   const nearPeriodEnd = nearPeriod ? recordedEnd(nearPeriod) : null;
   const usual = usualBleedLength(analysis);
   /** "None" on day ≥2 of a period that is open (or recorded as still running) → can close it. */
   const canCloseHere =
     !!nearPeriod &&
-    context?.kind === "inside" &&
-    context.dayOfPeriod >= 2 &&
     bleed === "none" &&
-    (nearPeriodEnd === null || nearPeriodEnd >= date) &&
-    !!onSetPeriodEnd;
+    !!onSetPeriodEnd &&
+    ((context?.kind === "inside" &&
+      context.dayOfPeriod >= 2 &&
+      (nearPeriodEnd === null || nearPeriodEnd >= date)) ||
+      /* Past the guessed usual end the day no longer classifies "inside" —
+         but that guess is exactly where a normal period ends, so the close
+         offer must survive into "adjacent"/"soon-after" while the entry is
+         OPEN. (A recorded end means there is nothing left to close.) This
+         was the form half of the "can't stop my period" bug. */
+      ((context?.kind === "adjacent" || context?.kind === "soon-after") &&
+        nearPeriodEnd === null));
   /** A bleed that continues a period → can extend it to this day. */
   const canExtendHere =
     !!nearPeriod &&
@@ -428,9 +443,13 @@ export function LogPanel({
     );
     setClosePeriod(
       next === "none" &&
-        ctx.kind === "inside" &&
-        ctx.dayOfPeriod >= 2 &&
-        (recordedEnd(ctx.period) === null || recordedEnd(ctx.period)! >= date),
+        ((ctx.kind === "inside" &&
+          ctx.dayOfPeriod >= 2 &&
+          (recordedEnd(ctx.period) === null || recordedEnd(ctx.period)! >= date)) ||
+          /* mirrors canCloseHere: past the guessed end, an open period can
+             still be closed from the first dry day she logs */
+          ((ctx.kind === "adjacent" || ctx.kind === "soon-after") &&
+            recordedEnd(ctx.period) === null)),
     );
   };
 
@@ -534,7 +553,9 @@ export function LogPanel({
                       ? ` ended (${formatDateShort(nearPeriodEnd)})`
                       : ` would usually have ended (about ${usual} days)`
                   }.`
-                : null}
+                : context?.kind === "soon-after"
+                  ? `Day ${context.daysSinceStart + 1} since the period that started ${formatDateShort(nearPeriod.start)} — no last day logged yet.`
+                  : null}
           </p>
         ) : null}
         {!editing && context?.kind === "soon-after" && isPeriodBleed(bleed) ? (
@@ -591,6 +612,22 @@ export function LogPanel({
               </span>
             </label>
           </div>
+        ) : null}
+
+        {/* a refused close/extend must say why HERE — the end/start messages
+            otherwise only render inside the start-period box, which close
+            mode never shows, leaving a bare "fields need fixing" banner */}
+        {!startPeriod && periodError("end") ? (
+          <p className="ci-error mt-2">
+            <AlertCircle size={13} aria-hidden />
+            {periodError("end")}
+          </p>
+        ) : null}
+        {closePeriod && periodError("start") ? (
+          <p className="ci-error mt-2">
+            <AlertCircle size={13} aria-hidden />
+            {periodError("start")}
+          </p>
         ) : null}
 
         {/* ---------------------------- period start ----------------------------- */}
