@@ -181,11 +181,15 @@ export function Spectrum({
 
 export function PatternLab({ patterns }: { patterns: MoodPattern[] }) {
   return (
-    <section className="nut-card nut-rise mt-4" aria-label="Pattern lab" style={{ "--d": "240ms" } as CSSProperties}>
-      <p className="eyebrow">Pattern lab</p>
-      <h3 className="mt-1.5 font-display text-[30px] leading-tight text-foreground">
-        How food and mood <em className="nut-gold-text">move together</em>
-      </h3>
+    <section className="nut-card nut-rise section" aria-label="Pattern lab" style={{ "--d": "240ms" } as CSSProperties}>
+      <div className="section-head">
+        <div className="section-head__main">
+          <div className="eyebrow">Pattern lab</div>
+          <h2 className="section-head__title mt-1.5">
+            How food and mood <em className="nut-gold-text">move together</em>
+          </h2>
+        </div>
+      </div>
       <p className="mt-2 max-w-[62ch] text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
         These are patterns in your data — not proof of cause — and each shows how many days
         stand behind it.

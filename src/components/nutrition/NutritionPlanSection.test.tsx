@@ -130,11 +130,11 @@ describe("NutritionPlanSection", () => {
        day's targets, meal sections. The targets query names the header
        sentence itself ("…across the day — your guide is…"): the bare
        phrase "across the day" also ends the day notes under "Today's
-       mix" whenever a rotation misses an ICMR floor — for this profile
+       balance" whenever a rotation misses an ICMR floor — for this profile
        the 2026-11-16 rotation falls short on milk and curd, so the
        unscoped query matched two correct elements and threw. The notes
        are pinned per-day in planComposition.test.ts, and their rendering
-       is pinned in the "Today's mix" test below. */
+       is pinned in the "Today's balance" test below. */
     expect(screen.getAllByText("Lose weight").length).toBeGreaterThan(0);
     expect(screen.getByText(/across the day — your guide is/)).toBeTruthy();
     /* P12: the day timeline names each meal too, so "Breakfast" appears
@@ -229,7 +229,7 @@ describe("NutritionPlanSection", () => {
     }
   });
 
-  it("renders the plan's day notes under Today's mix, apart from the targets line", () => {
+  it("renders the plan's day notes under Today's balance, apart from the targets line", () => {
     seedAssessment(COMPLETE);
     const state = {
       version: 1 as const,
@@ -268,9 +268,16 @@ describe("NutritionPlanSection", () => {
     writePlan({ ...outcome.plan, day: todayLocal() });
 
     render(<NutritionPlanSection />);
-    const mix = screen.getByText("Today's mix").parentElement!;
+    /* Pin updated for brief v4 Slice 3: the "Today's mix" label block
+       is retired — the guideline notes now render in their own
+       top-level section under a real H2, "Today's balance" (brief
+       Part 1). The note text and its separation from the targets
+       line are what this test has always pinned; both are unchanged. */
+    const balance = screen
+      .getByRole("heading", { name: "Today's balance" })
+      .closest("section")!;
     expect(
-      within(mix).getByText(
+      within(balance).getByText(
         /fruit — the ICMR-NIN guideline aims for at least 100 g across the day/,
       ),
     ).toBeTruthy();

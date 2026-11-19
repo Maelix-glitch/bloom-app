@@ -318,12 +318,14 @@ export function NutritionPlanSection() {
      completes. Section-scoped: the rest of the page never moves. */
   if (composeStep !== null) {
     return (
-      <section className="nut-card nut-rise mt-4" aria-label="Your plan for today">
-        <p className="eyebrow">Your plan</p>
+      <section className="nut-card nut-rise section" aria-label="Your plan for today">
+        <div className="section-head">
+          <div className="section-head__main">
+            <div className="eyebrow">Your plan</div>
+            <h2 className="section-head__title mt-1.5">Building your plan</h2>
+          </div>
+        </div>
         <div className="mt-2">
-          <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-            Building your plan
-          </h2>
           <ul className="nut-compose-steps" role="status" aria-label="Building your plan">
             {COMPOSE_STEPS.map((label, i) => (
               <li
@@ -351,23 +353,27 @@ export function NutritionPlanSection() {
   if (state.kind === "refused") {
     const refusal = state.refusal;
     return (
-      <section className="nut-card nut-rise mt-4" aria-label="Your plan for today">
-        <p className="eyebrow">Your plan</p>
+      <section className="nut-card nut-rise section" aria-label="Your plan for today">
         {refusal.kind === "safety_blocked" ? (
           <div className="mt-2">
-            <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-              Bloom won't build a plan from these answers
-            </h2>
+            <div className="section-head">
+              <div className="section-head__main">
+                <div className="eyebrow">Your plan</div>
+                <h2 className="section-head__title mt-1.5">
+                  Bloom won't build a plan from these answers
+                </h2>
+              </div>
+            </div>
             {refusal.findings.map((finding) => (
               <p
                 key={finding.ruleId}
-                className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground"
+                className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground"
               >
                 {finding.summary}
               </p>
             ))}
             {refusal.requiresProfessionalReview ? (
-              <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+              <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
                 The right next step is a conversation with a qualified professional — your doctor or
                 a registered dietitian — who can set targets with your full picture in view.
               </p>
@@ -383,14 +389,19 @@ export function NutritionPlanSection() {
           </div>
         ) : (
           <div className="mt-2">
-            <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-              Not enough to build a plan Bloom can stand behind
-            </h2>
-            <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+            <div className="section-head">
+              <div className="section-head__main">
+                <div className="eyebrow">Your plan</div>
+                <h2 className="section-head__title mt-1.5">
+                  Not enough to build a plan Bloom can stand behind
+                </h2>
+              </div>
+            </div>
+            <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
               A plan is only worth following if every number in it is really yours. Bloom still
               needs:
             </p>
-            <ul className="mt-2 list-disc pl-5 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+            <ul className="mt-2 list-disc pl-5 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
               {refusal.missing.map((item) => (
                 <li key={item}>{item}</li>
               ))}
@@ -414,13 +425,17 @@ export function NutritionPlanSection() {
 
   if (state.kind === "can_generate") {
     return (
-      <section className="nut-card nut-rise mt-4" aria-label="Your plan for today">
-        <p className="eyebrow">Your plan</p>
+      <section className="nut-card nut-rise section" aria-label="Your plan for today">
         <div className="mt-2">
-          <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-            A plan for your goal, built from your numbers
-          </h2>
-          <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+          <div className="section-head">
+            <div className="section-head__main">
+              <div className="eyebrow">Your plan</div>
+              <h2 className="section-head__title mt-1.5">
+                A plan for your goal, built from your numbers
+              </h2>
+            </div>
+          </div>
+          <p className="mt-2 max-w-[56ch] text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
             Bloom computes your daily targets deterministically — no AI, no invented numbers —
             splits them across your meals, and builds each meal around a real dish from the dish
             library, its numbers computed from its ingredients and labelled with their source.
@@ -439,13 +454,17 @@ export function NutritionPlanSection() {
   if (state.kind === "outdated") {
     const plan = state.plan;
     return (
-      <section className="nut-card nut-rise mt-4" aria-label="Your plan for today">
-        <p className="eyebrow">Your plan</p>
+      <section className="nut-card nut-rise section" aria-label="Your plan for today">
         <div className="mt-2">
-          <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-            This plan was made for {formatPlanDay(plan.day)}
-          </h2>
-          <p className="mt-2 max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+          <div className="section-head">
+            <div className="section-head__main">
+              <div className="eyebrow">Your plan</div>
+              <h2 className="section-head__title mt-1.5">
+                This plan was made for {formatPlanDay(plan.day)}
+              </h2>
+            </div>
+          </div>
+          <p className="mt-2 max-w-[56ch] text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
             It aimed at {fmtKcalApprox(plan.targets.kcal)} and{" "}
             {fmtGrams(plan.targets.proteinG)} g of protein for{" "}
             {GOAL_LABEL[plan.goal].toLowerCase()}. Plans are built for a single day — create today's
@@ -901,12 +920,47 @@ export function NutritionPlanSection() {
       ? plan.reasons.map((reason) => reasonCopy(reason))
       : plan.notes.map(() => null);
 
+  /* Brief v4 Slice 3: the day notes leave the plan card. The old
+     "Today's mix" list mixed two kinds of sentence — how the composed
+     day balances against the guidelines and the guide, and what the
+     planner adjusted because of this person's answers and record.
+     Part 1 gives them separate top-level sections ("Today's balance",
+     "How today's plan was adjusted"), so the notes are partitioned
+     by reason kind at render; the copy and the notes themselves are
+     unchanged (Slice 4 rebuilds both interiors). Only the planner's
+     own adjustments move out — the behavioural gates, the day
+     structure and the adaptation biases (brief 3.3's examples).
+     Everything else (composition judgements, learning notes, and
+     notes with no reason — plans stored before reasons existed)
+     stays with the balance, the mix's direct successor. */
+  const ADJUSTED_KINDS: ReadonlySet<string> = new Set([
+    "budget-widened",
+    "kitchen-relaxed",
+    "kitchen-cap-raised",
+    "kitchen-cap-quickest",
+    "snack-added",
+    "log-protein-shortfall",
+    "log-energy-overshoot",
+  ]);
+  const noteEntries = plan.notes.map((note, i) => ({
+    note,
+    copy: planReasons[i] ?? null,
+    reason: plan.reasons?.[i] ?? null,
+  }));
+  const adjustedNotes = noteEntries.filter(
+    (e) => e.reason !== null && ADJUSTED_KINDS.has(e.reason.kind),
+  );
+  const balanceNotes = noteEntries.filter(
+    (e) => e.reason === null || !ADJUSTED_KINDS.has(e.reason.kind),
+  );
+
   return (
-    <section className="nut-card nut-rise mt-4" aria-label="Your plan for today">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <p className="eyebrow">Your plan</p>
-          <h2 className="mt-1.5 font-display text-[30px] leading-tight text-foreground">
+    <>
+    <section className="nut-card nut-rise section" aria-label="Your plan for today">
+      <div className="section-head">
+        <div className="section-head__main">
+          <div className="eyebrow">Your plan</div>
+          <h2 className="section-head__title mt-1.5">
             {GOAL_LABEL[plan.goal]}
           </h2>
           <p className="mt-1 text-[length:var(--text-callout)] tabular-nums text-muted-foreground">
@@ -936,13 +990,13 @@ export function NutritionPlanSection() {
       {staleness.stale ? (
         <div className="nut-plan-stale" role="status">
           {staleness.changed.includes("the plan method improved") ? (
-            <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+            <p className="text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
               The plan method improved since this plan was made — regenerate to get the new
               composition.
             </p>
           ) : null}
           {staleness.changed.filter((c) => c !== "the plan method improved").length > 0 ? (
-            <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+            <p className="text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
               Since this plan was made,{" "}
               {joinNames(staleness.changed.filter((c) => c !== "the plan method improved"))} changed
               — the plan below still uses the older numbers. Regenerate to bring it up to date.
@@ -1025,28 +1079,10 @@ export function NutritionPlanSection() {
         </div>
       ) : null}
 
-      {plan.notes.length > 0 ? (
-        <div className="mt-4">
-          <p className="nut-group-label">Today's mix</p>
-          {plan.notes.map((note, i) => {
-            const copy = planReasons[i];
-            return copy ? (
-              <p key={i} className="nut-note">
-                <strong className="text-foreground">{copy.title}.</strong> {copy.detail}
-              </p>
-            ) : (
-              <p key={i} className="nut-note">
-                {note}
-              </p>
-            );
-          })}
-        </div>
-      ) : null}
-
       {showProposal && estimate && proposalDelta !== null && engineTdeeKcal !== null ? (
         <div className="nut-proposal" role="status">
           <p className="nut-group-label">Your real maintenance, from your record</p>
-          <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+          <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
             Over {estimate.spanDays} days ({shortDay(estimate.fromDate)} –{" "}
             {shortDay(estimate.toDate)}) you logged {estimate.loggedDays} days averaging{" "}
             {Math.round(estimate.avgIntakeKcal).toLocaleString("en-US")} kcal, and your weight{" "}
@@ -1059,14 +1095,14 @@ export function NutritionPlanSection() {
             kcal formula estimate behind your plan.
           </p>
           {proposalApplicable && proposedTargetKcal !== null ? (
-            <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+            <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
               Confirming shifts your daily target by {proposalDelta > 0 ? "+" : "−"}
               {Math.abs(proposalDelta).toLocaleString("en-US")} kcal, to{" "}
               {proposedTargetKcal.toLocaleString("en-US")} kcal — your goal pace stays the same, and
               the plan above keeps its current numbers until you compose again.
             </p>
           ) : (
-            <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+            <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
               That gap is too large to apply with one tap. It is worth checking your body numbers in
               Trackers first — if they are right, a fresh plan can be built from them.
             </p>
@@ -1340,5 +1376,60 @@ export function NutritionPlanSection() {
         />
       ) : null}
     </section>
+
+    {/* Today's balance (brief v4 Part 1): the guideline and guide
+        judgements on the composed day — the section the old
+        "Today's mix" label headed, now a top-level section with a
+        real H2. Slice 4 replaces these note paragraphs with the
+        Bloom flower and the goal meters. */}
+    {balanceNotes.length > 0 ? (
+      <section className="nut-card nut-rise section" aria-label="Today's balance">
+        <div className="section-head">
+          <div className="section-head__main">
+            <h2 className="section-head__title">Today's balance</h2>
+          </div>
+        </div>
+        <div className="mt-2">
+          {balanceNotes.map((entry, i) =>
+            entry.copy ? (
+              <p key={i} className="nut-note">
+                <strong className="text-foreground">{entry.copy.title}.</strong> {entry.copy.detail}
+              </p>
+            ) : (
+              <p key={i} className="nut-note">
+                {entry.note}
+              </p>
+            ),
+          )}
+        </div>
+      </section>
+    ) : null}
+
+    {/* How today's plan was adjusted (brief v4 Part 1): the planner's
+        own adjustments, apart from the balance. Slice 4 rebuilds
+        these as insight rows from reasons.ts (max 3). */}
+    {adjustedNotes.length > 0 ? (
+      <section className="nut-card nut-rise section" aria-label="How today's plan was adjusted">
+        <div className="section-head">
+          <div className="section-head__main">
+            <h2 className="section-head__title">How today's plan was adjusted</h2>
+          </div>
+        </div>
+        <div className="mt-2">
+          {adjustedNotes.map((entry, i) =>
+            entry.copy ? (
+              <p key={i} className="nut-note">
+                <strong className="text-foreground">{entry.copy.title}.</strong> {entry.copy.detail}
+              </p>
+            ) : (
+              <p key={i} className="nut-note">
+                {entry.note}
+              </p>
+            ),
+          )}
+        </div>
+      </section>
+    ) : null}
+    </>
   );
 }

@@ -231,7 +231,7 @@ export function NutritionHero({
   ].filter((row) => row.kcal > 0);
 
   return (
-    <section className="nut-card nut-card-gold nut-rise mt-5" aria-label="Day totals" style={{ "--d": "80ms" } as CSSProperties}>
+    <section className="nut-card nut-card-gold nut-rise section section--lead" aria-label="Day totals" style={{ "--d": "80ms" } as CSSProperties}>
       <div className="flex flex-col items-center gap-7 sm:flex-row sm:items-center">
         <div
           {...(targets

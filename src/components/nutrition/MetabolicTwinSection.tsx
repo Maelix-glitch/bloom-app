@@ -416,13 +416,11 @@ export function MetabolicTwinSection() {
   ];
 
   return (
-    <section className="nut-card nut-rise mt-4" aria-label="Your metabolic twin">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-            Your metabolic twin
-          </h2>
-          <p className="mt-1.5 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+    <section className="nut-card nut-rise section" aria-label="Your metabolic twin">
+      <div className="section-head">
+        <div className="section-head__main">
+          <h2 className="section-head__title">Your metabolic twin</h2>
+          <p className="section-head__sub">
             Computed fresh from your record. Nothing stored, nothing guessed.
           </p>
         </div>

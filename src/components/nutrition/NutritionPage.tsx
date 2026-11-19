@@ -64,6 +64,7 @@ export function NutritionPage() {
   const [captureOpen, setCaptureOpen] = useState(false);
   const [creditsOpen, setCreditsOpen] = useState(false);
   const [undoable, setUndoable] = useState<(Undoable & { entry: LogEntry }) | null>(null);
+  const [activeAnchor, setActiveAnchor] = useState<string | null>(null);
 
   const isToday = day === nutrition.today;
   const dayLog = nutrition.dayLog(day);
@@ -149,6 +150,31 @@ export function NutritionPage() {
     nutrition.entries.length === 0 &&
     (plan.state.kind === "can_generate" || plan.state.kind === "refused");
 
+  /* Sub-nav scrollspy (brief v4 Slice 3): the sticky bar marks the
+     section in view. IntersectionObserver in the house pattern — no
+     scroll listeners, and where IO is absent (jsdom, very old
+     webviews) no chip is marked, which is the honest state. The band
+     is the strip just under the stuck bar: a section counts as
+     current when it crosses it. */
+  useEffect(() => {
+    if (!isToday || typeof IntersectionObserver === "undefined") return;
+    const ids = ["nut-plan", "nut-grocery", "nut-modes", "nut-programmes", "nut-dishes"];
+    const targets = ids
+      .map((id) => document.getElementById(id))
+      .filter((el): el is HTMLElement => el !== null);
+    if (targets.length === 0) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) setActiveAnchor(entry.target.id);
+        }
+      },
+      { rootMargin: "-88px 0px -55% 0px" },
+    );
+    targets.forEach((t) => io.observe(t));
+    return () => io.disconnect();
+  }, [isToday, freshAccount]);
+
   return (
     <div className="nut-wrap nut-page">
       <header className="nut-rise">
@@ -213,21 +239,46 @@ export function NutritionPage() {
           viewed, which is this page's state. */}
       {isToday ? (
         <nav className="nut-subnav" aria-label="Nutrition sections">
-          <a className="nut-chip" href="#nut-plan">
+          <a
+            className="nut-chip"
+            href="#nut-plan"
+            data-selected={activeAnchor === "nut-plan" ? true : undefined}
+            aria-current={activeAnchor === "nut-plan" ? "true" : undefined}
+          >
             Plan
           </a>
           {!freshAccount ? (
-            <a className="nut-chip" href="#nut-grocery">
+            <a
+              className="nut-chip"
+              href="#nut-grocery"
+              data-selected={activeAnchor === "nut-grocery" ? true : undefined}
+              aria-current={activeAnchor === "nut-grocery" ? "true" : undefined}
+            >
               Grocery &amp; pantry
             </a>
           ) : null}
-          <a className="nut-chip" href="#nut-modes">
+          <a
+            className="nut-chip"
+            href="#nut-modes"
+            data-selected={activeAnchor === "nut-modes" ? true : undefined}
+            aria-current={activeAnchor === "nut-modes" ? "true" : undefined}
+          >
             Condition modes
           </a>
-          <a className="nut-chip" href="#nut-programmes">
+          <a
+            className="nut-chip"
+            href="#nut-programmes"
+            data-selected={activeAnchor === "nut-programmes" ? true : undefined}
+            aria-current={activeAnchor === "nut-programmes" ? "true" : undefined}
+          >
             Programmes
           </a>
-          <a className="nut-chip" href="#nut-dishes">
+          <a
+            className="nut-chip"
+            href="#nut-dishes"
+            data-selected={activeAnchor === "nut-dishes" ? true : undefined}
+            aria-current={activeAnchor === "nut-dishes" ? "true" : undefined}
+          >
             Dishes
           </a>
         </nav>

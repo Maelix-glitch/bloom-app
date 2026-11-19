@@ -254,12 +254,12 @@ export function GrocerySection() {
   };
 
   return (
-    <section className="nut-card nut-rise mt-4" aria-label="Grocery list and pantry">
-      <div className="eyebrow">Grocery &amp; pantry</div>
-      <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
-        <h2 className="font-display text-[length:var(--text-section)] text-foreground">
-          Shopping for your plan
-        </h2>
+    <section className="nut-card nut-rise section" aria-label="Grocery list and pantry">
+      <div className="section-head">
+        <div className="section-head__main">
+          <div className="eyebrow">Grocery &amp; pantry</div>
+          <h2 className="section-head__title mt-1.5">Shopping for your plan</h2>
+        </div>
         {ok && ok.totalItems > 0 ? (
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-[length:var(--text-caption)] tabular-nums text-muted-foreground">

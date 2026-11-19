@@ -154,11 +154,13 @@ export function DishesSection({ day }: { day: string }) {
   );
 
   return (
-    <section className="nut-card nut-rise mt-4" aria-label="Dishes">
-      <p className="eyebrow">Dishes</p>
-      <h2 className="mt-1.5 font-display text-[30px] leading-tight text-foreground">
-        Cook it, then log it
-      </h2>
+    <section className="nut-card nut-rise section" aria-label="Dishes">
+      <div className="section-head">
+        <div className="section-head__main">
+          <div className="eyebrow">Dishes</div>
+          <h2 className="section-head__title mt-1.5">Cook it, then log it</h2>
+        </div>
+      </div>
       <p className="mt-1 max-w-[58ch] text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
         Real recipes, Indian first. Every dish is built from USDA-verified ingredients, so
         its numbers are computed from the recipe itself and labelled as such. Budget marks
