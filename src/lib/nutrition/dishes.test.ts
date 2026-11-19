@@ -182,11 +182,18 @@ describe("the budget heuristic", () => {
     }
   });
 
-  it("prices a dal as an everyday dish and a two-vegetable sabzi a tier up", () => {
-    expect(dishCostPerServingEstimate(byId("dish-masoor-dal-tadka"))).toBeCloseTo(18.23, 1);
+  it("prices a dal and a two-vegetable sabzi as everyday dishes", () => {
+    /* Figures updated 2026-11-19 for the method-13 re-band (see the
+       note at COST_BAND_PER_GRAM in dishes.ts): both dishes' spice
+       and aromatics lines sat in the residual "other" group at the
+       old almond band (0.8 ₹/g); at the blended 0.3 ₹/g the dal
+       prices at 12.98 (was 18.23) and the sabzi at 19.45 (was
+       25.08) — the sabzi's tier moves 2 → 1 with them, which is the
+       re-band working as stated, not a pricing error. */
+    expect(dishCostPerServingEstimate(byId("dish-masoor-dal-tadka"))).toBeCloseTo(12.98, 1);
     expect(computeBudgetTier(byId("dish-masoor-dal-tadka"))).toBe(1);
-    expect(dishCostPerServingEstimate(byId("dish-aloo-gobi"))).toBeCloseTo(25.08, 1);
-    expect(computeBudgetTier(byId("dish-aloo-gobi"))).toBe(2);
+    expect(dishCostPerServingEstimate(byId("dish-aloo-gobi"))).toBeCloseTo(19.45, 1);
+    expect(computeBudgetTier(byId("dish-aloo-gobi"))).toBe(1);
   });
 });
 

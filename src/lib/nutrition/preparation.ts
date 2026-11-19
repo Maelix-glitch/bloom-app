@@ -56,3 +56,17 @@ export function isRawBasisFood(food: Food): boolean {
   const group = food.classification?.group;
   return group === "pulses_legumes" || group === "cereals_grains";
 }
+
+/**
+ * The preparation framing an ingredient line carries when its grams
+ * are a raw/dry-basis weight (method 13, presentation only): the
+ * line's grams are what goes INTO the pot, never the cooked portion
+ * on the plate — lentils roughly triple in weight as they cook, and
+ * a bare "55 g" beside a cooked dish reads as a serving of cooked
+ * lentils. Returns null for every food whose record is on an
+ * as-eaten basis, so the framing appears exactly where the basis
+ * could mislead and nowhere else.
+ */
+export function rawBasisFraming(food: Food): string | null {
+  return isRawBasisFood(food) ? "dry — weighed before cooking" : null;
+}

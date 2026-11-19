@@ -119,8 +119,9 @@ describe("no usable learning — the P6 plan, unchanged", () => {
     const withEmpty = gen({ day: OWNER_DAY, recentLog: [], storedPlan: null });
     expect(withEmpty).toEqual(base);
     /* Method 10 = the behavioural pass (spec §10): version pin
-       moved; the inertness pinned here is unchanged. */
-    expect(base.methodVersion).toBe(12);
+       moved; the inertness pinned here is unchanged. (Moved again
+       at method 13, the dish-first repair.) */
+    expect(base.methodVersion).toBe(13);
   });
 
   it("an on-target log with no dish history changes nothing", () => {

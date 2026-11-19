@@ -227,13 +227,22 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
   });
 
   it("the snack card carries no dishes and no dish idea", async () => {
+    /* Method 13 rewrite (2026-11-19, the dish-first repair): the
+       snack slot composes a real dish now — a shake, a protein
+       snack, a breakfast dish — so the snack card DOES carry a
+       dish row. What it still never carries is the "Dish idea"
+       adjunct: that belongs to food-composed main meals the dish
+       pool could not fill, and the snack is not one. The title
+       keeps its history; the assertions pin the new shape. */
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
     await createPlanAndAwait();
     const snack = screen.queryByLabelText("Snack plan");
     if (snack) {
       expect(within(snack).queryByText("Dish idea")).toBeNull();
-      expect(within(snack).queryByRole("button", { name: /— show ingredients$/ })).toBeNull();
+      expect(
+        within(snack).queryByRole("button", { name: /— show ingredients$/ }),
+      ).toBeTruthy();
     }
   });
 });

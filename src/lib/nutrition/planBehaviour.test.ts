@@ -119,9 +119,9 @@ function cloneDish(over: Partial<Dish> & { id: string }): Dish {
 /* ------------------------------ the record ------------------------------ */
 
 describe("P10 · method and record", () => {
-  it("plans carry method version 11", () => {
-    expect(PLAN_METHOD_VERSION).toBe(12);
-    expect(gen(profileWith({})).methodVersion).toBe(12);
+  it("plans carry method version 13", () => {
+    expect(PLAN_METHOD_VERSION).toBe(13);
+    expect(gen(profileWith({})).methodVersion).toBe(13);
   });
 
   it("the snapshot records the behavioural answers, outside the fingerprint", () => {
@@ -287,14 +287,31 @@ describe("P10 · kitchen gates", () => {
        reason as the test above: a fridge-only kitchen previously
        emptied the pool (every dish defaulted to needing a stove);
        now it is served the dishes whose methods need no more than a
-       fridge — and nothing whose method needs more. */
+       fridge — and nothing whose method needs more.
+       Rewritten again 2026-11-19 (method 13, the dish-first
+       repair): measured against the tagged library, the fridge-only
+       pool holds only TWO dishes that can carry a lunch or dinner —
+       below the kitchen floor of three — so the relaxation ladder
+       widens the equipment gate by one item and NAMES it in the
+       plan. The contract this pin now holds is the method-13 one:
+       the gate relaxes only across the floor, only by the named
+       stage (never more than one extra item here), and never
+       silently. */
     const plan = gen(profileWith({ equipment: ["fridge"] }));
     const served = servedDishes(plan);
     expect(served.length).toBeGreaterThan(0);
     for (const s of served) {
       const needs = dishPreparationNeeds(findDish(s.dishId)!);
-      expect(needs.equipment.every((item) => item === "fridge"), s.dishId).toBe(true);
+      const beyond = needs.equipment.filter((item) => item !== "fridge");
+      expect(beyond.length, s.dishId).toBeLessThanOrEqual(1);
     }
+    expect(
+      plan.notes.some(
+        (n) =>
+          n.includes("leave almost no real dishes") &&
+          n.includes("one more piece of kitchen equipment"),
+      ),
+    ).toBe(true);
     expect(
       plan.notes.some((n) => n.startsWith("No dish in the library fits your kitchen answers yet")),
     ).toBe(false);
@@ -313,15 +330,36 @@ describe("P10 · kitchen gates", () => {
 
 describe("P10 · prep-time cap", () => {
   it("a weekday plan at the tightest band serves only dishes inside it (full library)", () => {
+    /* Rewritten 2026-11-19 (method 13, the dish-first repair): the
+       old pin asserted every served dish inside 10 minutes — true
+       only vacuously, because the tagged library holds ZERO dishes
+       that can carry a lunch or dinner inside 10 minutes (measured:
+       0 at ≤10 min, 23 at ≤20). The old plan's mains were layered
+       plain foods and only its breakfasts were dishes. What
+       changed in method 13 is the measure: the cap staging and the
+       kitchen floor now count main-SLOT dishes, so the staging
+       rises one band — to the first band that can actually serve
+       mains (20 minutes, 23 dishes) — and P10's own note names it.
+       The contract now pinned: every served dish inside 20
+       minutes, at least one main-slot dish served, and the
+       widening named in the plan's notes. */
     const plan = gen(profileWith({ prepTimeMaxMinutes: 10 }), { day: MONDAY });
     const dishes = servedDishes(plan);
     expect(dishes.length).toBeGreaterThan(0);
     for (const d of dishes) {
-      expect(findDish(d.dishId)?.timeMinutes).toBeLessThanOrEqual(10);
+      expect(findDish(d.dishId)?.timeMinutes).toBeLessThanOrEqual(20);
     }
-    /* The cap held at its own stage — no relaxation was needed, so
-       none is claimed. */
-    expect(plan.notes.some((n) => n.includes("aim for about 10 minutes"))).toBe(false);
+    expect(
+      dishes.some((d) => {
+        const category = findDish(d.dishId)?.category;
+        return category === "main" || category === "rice";
+      }),
+    ).toBe(true);
+    expect(
+      plan.notes.some(
+        (n) => n.includes("aim for about 10 minutes") && n.includes("up to about 20 minutes"),
+      ),
+    ).toBe(true);
   });
 
   it("the cap does not bind a weekend plan", () => {
@@ -332,10 +370,22 @@ describe("P10 · prep-time cap", () => {
   });
 
   it("a hostel setting supplies the tightest cap by default on a weekday", () => {
+    /* Method 13 (2026-11-19): the hostel default cap is still the
+       tightest band (10 minutes) — and, as the census in the test
+       above records, no main-slot dish in the library fits inside
+       it, so the cap staging widens to the 20-minute band and
+       names it, exactly as for an explicit 10-minute answer. The
+       pin follows the same contract: nothing served takes longer
+       than the widened band, and the widening is named. */
     const plan = gen(profileWith({ eatingSetting: "hostel" }), { day: MONDAY });
     for (const d of servedDishes(plan)) {
-      expect(findDish(d.dishId)?.timeMinutes).toBeLessThanOrEqual(10);
+      expect(findDish(d.dishId)?.timeMinutes).toBeLessThanOrEqual(20);
     }
+    expect(
+      plan.notes.some(
+        (n) => n.includes("aim for about 10 minutes") && n.includes("up to about 20 minutes"),
+      ),
+    ).toBe(true);
   });
 
   it("relaxes to the next band that still offers a main dish — and names it", () => {

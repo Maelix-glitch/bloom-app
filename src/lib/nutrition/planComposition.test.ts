@@ -394,9 +394,18 @@ describe("plan · day floors", () => {
        protein — inside both bands. The only note left is the
        day-structure note (the plan adds a snack beyond the stated
        3 meals). The title keeps its history; the misses are gone,
-       and if they return, this exact-notes pin fails again. */
+       and if they return, this exact-notes pin fails again.
+       Method 13 update (2026-11-19): one miss honestly returns.
+       The whole-food-first top-up order (R24) closes this day's
+       protein with dairy and egg foods instead of a protein
+       powder — and the powder was the day's only "other"-group
+       item, so the span is 7 groups, named below. A supplement
+       counting toward ICMR food-group diversity was always a
+       stretch; the note now states the span the day's real foods
+       reach. */
     expect(plan.notes).toEqual([
       "Your Assessment lists 3 meals a day; this plan adds a snack, so the day's food spreads across one more sitting.",
+      "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     ]);
     const veg = allSuggestions(plan)
       .filter((s) => groupOf(s) === "vegetables")
@@ -407,7 +416,10 @@ describe("plan · day floors", () => {
       .reduce((sum, s) => sum + s.grams, 0);
     expect(fruit).toBeGreaterThanOrEqual(100);
     const groups = new Set(allSuggestions(plan).map((s) => groupOf(s)));
-    expect(groups.size).toBe(8);
+    /* 7, not 8, since method 13 — see the note history above: the
+       powder that used to stand in for the eighth group no longer
+       closes this day. */
+    expect(groups.size).toBe(7);
     const proteinSources = new Set(
       plan.meals.flatMap((m) =>
         m.suggestions.filter((s) => s.layer === "protein").map((s) => s.foodId),
@@ -504,9 +516,14 @@ describe("plan · rotation", () => {
        P12 build spanned 7 groups here — the extra group rode in on
        a 10 g powder dusting stacked as an eleventh item; with the
        scoop floor and the ten-suggestion ceiling in addOneTopUp,
-       the day is back to the six groups it honestly serves.) */
+       the day is back to the six groups it honestly serves.)
+       (Method 13 note, 2026-11-19: the day spans 7 groups again —
+       this time honestly. The whole-food-first top-up order closes
+       the day's protein with a whole food from a group the day had
+       not served, where a powder used to close it; the count is
+       the day's real foods either way, and the note names it.) */
     expect(d17.notes).toEqual([
-      "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+      "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     ]);
   });
 });

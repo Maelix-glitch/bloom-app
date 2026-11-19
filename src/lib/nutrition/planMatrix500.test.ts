@@ -49,6 +49,18 @@ import type { Food } from "./types";
  * protein-wave dishes carry the mains, and whether the protein
  * powders (PW-1) close the days the dishes leave protein-short.
  * Stats are logged as one summary line per block.
+ *
+ * Method 13 extension (2026-11-19, the dish-first repair): the
+ * shipped matrix never set a budget tier and never counted
+ * dish-vs-food composition — the two blind spots the raw-plan
+ * diagnosis walked through. The dish blocks now rotate the stated
+ * budget (unset / 1 / 2 / 3 / 2) across cells, and the judge counts
+ * composition: dish-main share, protein-wave servings BY SLOT
+ * (breakfast / lunch / dinner / snack — shakes included), snack
+ * dishes, and food-composed mains, which may appear only on plans
+ * whose notes label the relaxation that caused them. A dedicated
+ * block pins the owner's exact corner across a week × four budget
+ * states.
  */
 
 const NOW = "2026-11-19T03:00:00.000Z";
@@ -74,6 +86,9 @@ const DAYS = [
   "2026-11-22",
 ];
 const MEALS_PER_DAY: (number | null)[] = [3, 3, null, 4, 2];
+/** Method 13: the stated-budget rotation — unset, then each tier,
+ *  tier 2 twice (the owner's own tier, and the commonest answer). */
+const BUDGET_ROTATION: (1 | 2 | 3 | null)[] = [null, 1, 2, 3, 2];
 
 const BEHAVIOURS: { name: string; profile: BehaviouralProfile }[] = [
   { name: "plain", profile: EMPTY_BEHAVIOURAL },
@@ -116,6 +131,7 @@ function buildProfile(
     behaviour?: BehaviouralProfile;
     answered?: boolean;
     weightKg?: number;
+    budgetTier?: 1 | 2 | 3 | null;
   } = {},
 ): HealthProfile {
   return {
@@ -132,6 +148,7 @@ function buildProfile(
       pattern,
       mealsPerDay: opts.mealsPerDay ?? 3,
       cuisinePreference: opts.cuisine ?? null,
+      budgetTier: opts.budgetTier ?? null,
     },
     constraints: {
       ...EMPTY_CONSTRAINTS,
@@ -184,6 +201,13 @@ interface Stats {
   proteinShortDishDays: number;
   powderTopUpDays: number;
   powderOnShortDays: number;
+  /* Method 13 composition counters. */
+  mains: number;
+  foodMains: number;
+  pwBySlot: { breakfast: number; lunch: number; dinner: number; snack: number };
+  shakeServings: number;
+  snackDishDays: number;
+  unlabelledFoodMainPlans: number;
 }
 
 function newStats(): Stats {
@@ -209,6 +233,12 @@ function newStats(): Stats {
     proteinShortDishDays: 0,
     powderTopUpDays: 0,
     powderOnShortDays: 0,
+    mains: 0,
+    foodMains: 0,
+    pwBySlot: { breakfast: 0, lunch: 0, dinner: 0, snack: 0 },
+    shakeServings: 0,
+    snackDishDays: 0,
+    unlabelledFoodMainPlans: 0,
   };
 }
 
@@ -226,12 +256,31 @@ const proteinNamed = (plan: DailyPlan, over: boolean) =>
     ? plan.notes.some((n) => n.includes("g of protein — above your"))
     : plan.notes.some((n) => n.includes("protein guide — the portion caps bind"));
 
-function judge(stats: Stats, label: string, plan: DailyPlan, opts: { expectHydration: boolean }) {
+/** Method 13: the notes that honestly label a plan whose mains
+ *  could not all be dish-composed — a kitchen relaxation, a budget
+ *  widening, or a prep-cap widening. A food-composed main on a plan
+ *  carrying none of these is a silent fallback: the exact failure
+ *  the owner was served. */
+const relaxationLabelled = (plan: DailyPlan) =>
+  plan.notes.some(
+    (n) =>
+      n.includes("leave almost no real dishes") ||
+      n.includes("treats it as a preference") ||
+      n.includes("aim for about"),
+  );
+
+function judge(
+  stats: Stats,
+  label: string,
+  plan: DailyPlan,
+  opts: { expectHydration: boolean; expectDishComposition?: boolean },
+) {
   stats.n += 1;
   const t = plan.targets;
   let kcal = 0;
   let protein = 0;
   let dishProtein = 0;
+  let planHasFoodMain = false;
   const dishIds: string[] = [];
   for (const meal of plan.meals) {
     const mealKcal =
@@ -242,7 +291,21 @@ function judge(stats: Stats, label: string, plan: DailyPlan, opts: { expectHydra
       meal.dishes.reduce((a, d) => a + d.nutrients.proteinG, 0) +
       meal.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0);
     dishProtein += meal.dishes.reduce((a, d) => a + d.nutrients.proteinG, 0);
+    /* Method 13 composition counting: every dish served counts
+       toward its slot's protein-wave tally; shakes count wherever
+       they land; a main meal with no dish is a food-composed main. */
+    for (const d of meal.dishes) {
+      const dish = DISH_BY_ID.get(d.dishId);
+      if (PROTEIN_DISH_IDS.has(d.dishId)) stats.pwBySlot[meal.meal] += 1;
+      if (dish?.category === "shake") stats.shakeServings += 1;
+    }
+    if (meal.meal === "snack" && meal.dishes.length > 0) stats.snackDishDays += 1;
     if (meal.meal !== "snack") {
+      stats.mains += 1;
+      if (meal.dishes.length === 0 && meal.suggestions.length > 0) {
+        stats.foodMains += 1;
+        planHasFoodMain = true;
+      }
       if (meal.dishes.length > 1) stats.multiDishMains += 1;
       if (meal.dishes.length === 1) {
         stats.mainDishes += 1;
@@ -262,6 +325,14 @@ function judge(stats: Stats, label: string, plan: DailyPlan, opts: { expectHydra
     for (const d of meal.dishes) dishIds.push(d.dishId);
   }
   if (dishIds.length > 0) stats.dishDays += 1;
+  /* Method 13: a food-composed main is a labelled last resort,
+     never a silent one. (The food-composed fallback block below
+     opts out via expectDishComposition: false — there the layered
+     composer IS the subject under test.) */
+  if (planHasFoodMain && opts.expectDishComposition !== false && !relaxationLabelled(plan)) {
+    stats.unlabelledFoodMainPlans += 1;
+    if (!MEASURE) failures.push(`${label}: food-composed main with no relaxation note`);
+  }
   if (new Set(dishIds).size !== dishIds.length) {
     stats.repeatDays += 1;
     if (!MEASURE) failures.push(`${label}: a dish repeats within the day`);
@@ -349,7 +420,10 @@ function report(name: string, s: Stats) {
       `patternViol=${s.patternViolations} multiDish=${s.multiDishMains} repeatDays=${s.repeatDays} ` +
       `snack=${s.snackPresent} morning=${s.morningPresent} hydration=${s.hydrationPresent}/${s.hydrationExact} ` +
       `sanityBad=${s.mealSanityBad} proteinDishShare=${s.mainDishes ? ((s.proteinDishes / s.mainDishes) * 100).toFixed(1) : "0"}% ` +
-      `shortDishDays=${s.proteinShortDishDays} powderDays=${s.powderTopUpDays} powderOnShort=${s.powderOnShortDays}`,
+      `shortDishDays=${s.proteinShortDishDays} powderDays=${s.powderTopUpDays} powderOnShort=${s.powderOnShortDays} ` +
+      `dishMainShare=${s.mains ? ((s.mainDishes / s.mains) * 100).toFixed(1) : "0"}% foodMains=${s.foodMains} ` +
+      `pwBySlot=b${s.pwBySlot.breakfast}/l${s.pwBySlot.lunch}/d${s.pwBySlot.dinner}/s${s.pwBySlot.snack} ` +
+      `shakes=${s.shakeServings} snackDishDays=${s.snackDishDays} unlabelledFoodMainPlans=${s.unlabelledFoodMainPlans}`,
   );
 }
 
@@ -369,11 +443,13 @@ function dishMatrixBlock(offset: number, count: number): Stats {
             const cuisine = CUISINES[Math.floor(g / 7) % CUISINES.length]!;
             const behaviour = BEHAVIOURS[Math.floor(g / 3) % BEHAVIOURS.length]!;
             const mealsPerDay = MEALS_PER_DAY[Math.floor(g / 5) % MEALS_PER_DAY.length]!;
-            const label = `${pattern}/${goal}/${size.kcal}k/${cuisine ?? "nocuisine"}/${behaviour.name}/mpd${mealsPerDay ?? "null"}/${day}`;
+            const budgetTier = BUDGET_ROTATION[g % BUDGET_ROTATION.length]!;
+            const label = `${pattern}/${goal}/${size.kcal}k/${cuisine ?? "nocuisine"}/${behaviour.name}/mpd${mealsPerDay ?? "null"}/b${budgetTier ?? "u"}/${day}`;
             const profile = buildProfile(pattern, goal, {
               mealsPerDay,
               cuisine,
               behaviour: behaviour.profile,
+              budgetTier,
             });
             const plan = gen(profile, day, { size, waterMl: 2800 });
             judge(stats, label, plan, { expectHydration: true });
@@ -395,6 +471,15 @@ describe("plan matrix 500", () => {
       const s = dishMatrixBlock(0, 250);
       report("dish A", s);
       expect(s.n).toBe(250);
+      /* Method 13 composition pins: shakes are servable and served
+         (45 in this half at first measurement — the pin is > 0, the
+         structural fact, not the census), and every snack carries
+         a dish. Food-composed mains appear only on labelled plans
+         (the judge's failures above) — at first measurement there
+         were none at all: dish-main share 100%. */
+      expect(s.shakeServings).toBeGreaterThan(0);
+      expect(s.snackDishDays).toBe(250);
+      expect(s.unlabelledFoodMainPlans).toBe(0);
       if (!MEASURE) expect(failures).toEqual([]);
     },
   );
@@ -407,7 +492,91 @@ describe("plan matrix 500", () => {
       const s = dishMatrixBlock(250, 250);
       report("dish B", s);
       expect(s.n).toBe(250);
+      expect(s.shakeServings).toBeGreaterThan(0);
+      expect(s.snackDishDays).toBe(250);
+      expect(s.unlabelledFoodMainPlans).toBe(0);
       if (!MEASURE) expect(failures.slice(before)).toEqual([]);
+    },
+  );
+
+  it(
+    "the owner's corner across a week × budget states, 28",
+    { timeout: 300_000 },
+    () => {
+      /* The exact corner the diagnosis measured (omnivore, south
+         indian, cooking "none", prep 10, his equipment, guide
+         1,350 kcal / 171 g): at method 12 its dish mains were
+         73.4% dish-composed and the protein wave's share of them
+         was 7.4% with the budget unset and 81.1% at tier 2 (the
+         hard cap let nothing else in). Method 13's contract: every
+         main dish-composed at every budget state, the relaxation
+         named, shakes served, and — F4 — the wave's share of dish
+         mains at least 40% at tier 2 AND unset, where the pick
+         preference (guide density 171/1350 ≈ 0.127) is active. */
+      const ownerBehaviour: BehaviouralProfile = {
+        ...EMPTY_BEHAVIOURAL,
+        cookingAbility: "none",
+        equipment: ["stove", "pressure_cooker", "mixer_grinder", "fridge"],
+        prepTimeMaxMinutes: 10,
+      };
+      const shares = new Map<string, { mains: number; pw: number }>();
+      let shakes = 0;
+      for (const budgetTier of [null, 1, 2, 3] as const) {
+        const key = budgetTier === null ? "unset" : `tier${budgetTier}`;
+        shares.set(key, { mains: 0, pw: 0 });
+        for (const day of DAYS) {
+          const profile = buildProfile("omnivore", "lose", {
+            cuisine: "south_indian",
+            behaviour: ownerBehaviour,
+            budgetTier,
+          });
+          const safety = classifySafety(toSafetyInput(profile));
+          const outcome = generatePlan({
+            profile,
+            safety,
+            gatedOutcome: { ok: false, reason: "profile_incomplete", missing: [] },
+            fallbackTargets: { kcal: 1350, proteinG: 171 },
+            foods: USDA_REFERENCE_FOODS,
+            dishes: DISH_LIBRARY,
+            day,
+            now: NOW,
+            id: "plan-matrix-owner",
+          });
+          if (!outcome.ok) throw new Error(`owner corner refused: ${key}/${day}`);
+          const plan = outcome.plan;
+          /* The relaxation note is owed on WEEKDAYS, where the
+             10-minute cap binds: at the weekend the cap lifts by
+             the Assessment's own terms and his no-cook + equipment
+             pool holds exactly enough main dishes (3) to serve
+             unrelaxed — no relaxation, no claim of one. */
+          const dow = new Date(`${day}T12:00:00Z`).getUTCDay();
+          if (dow >= 1 && dow <= 5) {
+            expect(
+              plan.notes.some((n) => n.includes("leave almost no real dishes")),
+              `${key}/${day}: relaxation unlabelled`,
+            ).toBe(true);
+          }
+          const acc = shares.get(key)!;
+          for (const meal of plan.meals) {
+            for (const d of meal.dishes) {
+              if (DISH_BY_ID.get(d.dishId)?.category === "shake") shakes += 1;
+            }
+            if (meal.meal === "snack") continue;
+            expect(meal.dishes.length, `${key}/${day}/${meal.meal}`).toBe(1);
+            acc.mains += 1;
+            if (PROTEIN_DISH_IDS.has(meal.dishes[0]!.dishId)) acc.pw += 1;
+          }
+        }
+      }
+      for (const key of ["unset", "tier2"]) {
+        const acc = shares.get(key)!;
+        console.log(
+          `[matrix owner ${key}] dishMains=${acc.mains} pwShare=${((acc.pw / acc.mains) * 100).toFixed(1)}%`,
+        );
+        expect(acc.pw / acc.mains, `owner ${key} PW share`).toBeGreaterThanOrEqual(0.4);
+      }
+      console.log(`[matrix owner] shakes across 28 days=${shakes}`);
+      expect(shakes).toBeGreaterThan(0);
     },
   );
 
@@ -424,7 +593,7 @@ describe("plan matrix 500", () => {
             const label = `food/${pattern}/${size.kcal}k/${day}`;
             const profile = buildProfile(pattern, "maintain", {});
             const plan = gen(profile, day, { size, dishes: false, waterMl: 2800 });
-            judge(stats, label, plan, { expectHydration: true });
+            judge(stats, label, plan, { expectHydration: true, expectDishComposition: false });
             judgePattern(stats, label, plan, pattern);
             i += 1;
           }

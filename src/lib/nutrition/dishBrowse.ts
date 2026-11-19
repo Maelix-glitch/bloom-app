@@ -134,7 +134,13 @@ export function browseDishes(
  *      region (the existing `dishRegion` derivation) come next —
  *      the same bonus-not-filter semantics the plan composer uses.
  *      "both" / "no_preference" / unanswered: no regional key.
- *   3. Everything else keeps browseDishes' deterministic category /
+ *   3. The person's meal budget, as a PREFERENCE (method 13): when
+ *      a tier is stated, dishes at or under it come before dishes
+ *      above it. The budget never removes a dish from the shelf —
+ *      until method 12 it silently cut the shelf from the library's
+ *      1,202 dishes to the in-budget subset, protein dishes first
+ *      among the missing. Unstated: no budget key.
+ *   4. Everything else keeps browseDishes' deterministic category /
  *      name order exactly (the sort is stable).
  */
 export function sortDishesForYou(
@@ -142,6 +148,7 @@ export function sortDishesForYou(
   context: {
     pattern: PlanPattern | null;
     cuisinePreference: CuisinePreference | null;
+    budgetTier?: 1 | 2 | 3 | null;
   },
 ): DishBrowseRow[] {
   const region =
@@ -149,7 +156,8 @@ export function sortDishesForYou(
     context.cuisinePreference === "south_indian"
       ? context.cuisinePreference
       : null;
-  if (context.pattern === null && region === null) return [...rows];
+  const budgetTier = context.budgetTier ?? null;
+  if (context.pattern === null && region === null && budgetTier === null) return [...rows];
   return [...rows].sort((a, b) => {
     if (context.pattern !== null) {
       const bySuitability =
@@ -161,6 +169,11 @@ export function sortDishesForYou(
       const byRegion =
         (dishRegion(a.dish) === region ? 0 : 1) - (dishRegion(b.dish) === region ? 0 : 1);
       if (byRegion !== 0) return byRegion;
+    }
+    if (budgetTier !== null) {
+      const byBudget =
+        (a.dish.budgetTier <= budgetTier ? 0 : 1) - (b.dish.budgetTier <= budgetTier ? 0 : 1);
+      if (byBudget !== 0) return byBudget;
     }
     return 0;
   });

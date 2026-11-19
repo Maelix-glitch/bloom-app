@@ -88,3 +88,19 @@ const BY_ID = new Map(DISH_LIBRARY.map((d) => [d.id, d]));
 export function findDish(id: string): Dish | null {
   return BY_ID.get(id) ?? null;
 }
+
+/**
+ * The dedicated protein wave (PW-1..PW-4): the shakes, protein
+ * breakfasts and snacks, and the protein-first India and
+ * international mains added by the owner's protein mandate — every
+ * one computed at ≥25 g of protein a serving and pinned so by its
+ * wave's tests. The plan composer (method 13) holds this set so a
+ * high-protein guide can prefer the wave by name; membership is a
+ * fact about which wave a dish shipped in, so it is stated here,
+ * where the library is assembled, and nowhere else.
+ */
+export const PROTEIN_WAVE_DISH_IDS: ReadonlySet<string> = new Set(
+  [...SHAKES_DISHES, ...PW2_DISHES, ...PROTEIN_INDIA_DISHES, ...PROTEIN_INTL_DISHES].map(
+    (d) => d.id,
+  ),
+);

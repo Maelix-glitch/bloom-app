@@ -277,23 +277,55 @@ describe("§10.4 · the kitchen gates, after the pass", () => {
   });
 
   it("a kitchen with only a fridge is served — and only what a fridge covers", () => {
+    /* Method 13 rewrite (2026-11-19, the dish-first repair): the
+       fridge-only pool holds only TWO dishes that can carry a
+       lunch or dinner (measured against the tagged library) —
+       below the kitchen floor of three — so the relaxation ladder
+       widens the equipment gate by one item and NAMES it. The
+       contract now pinned is the method-13 one: no served dish
+       needs more than one item beyond the fridge, and the
+       widening is named in the plan's notes, never silent. (The
+       same contract is pinned at plan level in
+       planBehaviour.test.ts.) */
     const plan = gen({ equipment: ["fridge"] });
     const served = plan.meals.flatMap((m) => m.dishes);
     expect(served.length).toBeGreaterThan(0);
     for (const s of served) {
       const needs = dishPreparationNeeds(dish(s.dishId));
-      expect(needs.equipment.every((item) => item === "fridge"), s.dishId).toBe(true);
+      const beyond = needs.equipment.filter((item) => item !== "fridge");
+      expect(beyond.length, s.dishId).toBeLessThanOrEqual(1);
     }
+    expect(
+      plan.notes.some(
+        (n) =>
+          n.includes("leave almost no real dishes") &&
+          n.includes("one more piece of kitchen equipment"),
+      ),
+    ).toBe(true);
     expect(plan.notes.some((n) => n.startsWith(KITCHEN_NOTE))).toBe(false);
   });
 
   it("a kitchen with only a mixer is served only what a mixer covers", () => {
+    /* Method 13 rewrite (2026-11-19): a mixer-only kitchen can
+       blend shakes but holds no dish that can carry a lunch or
+       dinner at all, so the ladder widens by one equipment item
+       and names it — the same contract as the fridge test above:
+       at most one item beyond the stated kitchen, named in the
+       notes. */
     const plan = gen({ equipment: ["mixer_grinder"] });
     const served = plan.meals.flatMap((m) => m.dishes);
     expect(served.length).toBeGreaterThan(0);
     for (const s of served) {
       const needs = dishPreparationNeeds(dish(s.dishId));
-      expect(needs.equipment.every((item) => item === "mixer_grinder"), s.dishId).toBe(true);
+      const beyond = needs.equipment.filter((item) => item !== "mixer_grinder");
+      expect(beyond.length, s.dishId).toBeLessThanOrEqual(1);
     }
+    expect(
+      plan.notes.some(
+        (n) =>
+          n.includes("leave almost no real dishes") &&
+          n.includes("one more piece of kitchen equipment"),
+      ),
+    ).toBe(true);
   });
 });
