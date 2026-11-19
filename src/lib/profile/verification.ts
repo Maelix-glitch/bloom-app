@@ -36,6 +36,16 @@
  */
 export const VERIFIED_BLUE = "#1d9bf0";
 
+/**
+ * Bloom gold — the rail's tone for the same badge (brief v4 Part 4;
+ * M-91). The tick's MEANING is unchanged (it renders only when the
+ * criteria below are met); inside the sidebar's gold palette the blue
+ * read as an off-palette social-media import, so the rail wears the
+ * badge in the app's own gold. Profile surfaces keep the blue, pending
+ * the roll-out decision.
+ */
+export const VERIFIED_GOLD = "#dcc08f";
+
 export type VerificationStepId = "invite" | "email" | "profile";
 
 export interface VerificationStep {

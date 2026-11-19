@@ -47,6 +47,7 @@ import { Check, Lock, Mic, Send, Volume2, VolumeX } from "lucide-react";
 
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomLogo } from "@/components/BloomLogo";
+import { BackToTop } from "@/components/system/BackToTop";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
@@ -694,19 +695,27 @@ export function CoachOrb() {
 
   return (
     <>
-      <button
-        ref={orbRef}
-        type="button"
-        className="coach-orb"
-        data-reduced-motion={reducedMotion ? "true" : undefined}
-        aria-label="Ask Vitalis"
-        aria-haspopup="dialog"
-        aria-expanded={open}
-        onClick={() => setOpen(true)}
-      >
-        <span className="coach-orb-halo" aria-hidden="true" />
-        <BloomLogo size={26} />
-      </button>
+      {/* The floating dock (brief v4 Part 4; rulebook §21): one fixed
+          container holds the back-to-top fab and this orb — same 48px
+          chrome, same x. The dock owns placement (orb.css styles the
+          button only); the panel and backdrop below are portalled and
+          keep their own stacking. */}
+      <div className="dock">
+        <BackToTop />
+        <button
+          ref={orbRef}
+          type="button"
+          className="coach-orb"
+          data-reduced-motion={reducedMotion ? "true" : undefined}
+          aria-label="Ask Vitalis"
+          aria-haspopup="dialog"
+          aria-expanded={open}
+          onClick={() => setOpen(true)}
+        >
+          <span className="coach-orb-halo" aria-hidden="true" />
+          <BloomLogo size={22} />
+        </button>
+      </div>
 
       <DialogPrimitive.Root
         open={open}

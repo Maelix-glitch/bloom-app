@@ -2022,25 +2022,43 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   color: color-mix(in oklab, var(--foreground) 85%, transparent);
 }
 .app-nav-link-active {
-  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  /* Brief v4 §20 / rulebook §8: the active destination is a filled
+     --surface-2 pill — never an outline or a ring. */
+  background: var(--surface-2);
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
 }
 .app-sidebar .app-nav-link-active,
 .app-sidebar .app-nav-link-active:hover {
   color: var(--foreground);
 }
-/* The gold tick: 3px wide, rounded on its outer edge, centred on the
-   active pill and flush with the rail's left edge — the link sits in the
-   nav's 16px gutter, so -1rem lands the tick exactly on the edge. */
+/* The gold tick: 3px wide, rounded on its outer edge, sitting INSIDE the
+   active pill at its left edge (brief v4 Part 4; rulebook §20 — the bar
+   lives inside the pill, inset 10px from its ends). It used to sit at
+   left:-1rem, flush with the rail's outer edge and detached from the
+   pill it marks (M-46/M-89); the fix is at the source — the tick is the
+   link's own child, so left:0 is the pill's edge. */
 .app-nav-tick {
   position: absolute;
-  left: -1rem;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 0;
+  top: 10px;
+  bottom: 10px;
   width: 3px;
-  height: 20px;
-  border-radius: 0 var(--radius-pill) var(--radius-pill) 0;
+  border-radius: 0 3px 3px 0;
   background: var(--gold);
+}
+/* Focus (brief v4 §20): :focus-visible only, never :focus. The shell's
+   nav links drop the global outline entirely and take an INSET shadow
+   ring on keyboard focus — inside the pill, so it can never read as a
+   stuck outer ring after a mouse click (the M-89 screenshot). A mouse
+   click matches neither selector and leaves nothing behind. */
+.app-sidebar .app-nav-link:focus,
+.app-mobile-nav > a:focus {
+  outline: none;
+}
+.app-sidebar .app-nav-link:focus-visible,
+.app-mobile-nav > a:focus-visible {
+  outline: none;
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--gold) 65%, transparent);
 }
 
 /* The sidebar points card (Reskin slice 2): the prototype's glass card —
@@ -2071,15 +2089,123 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   }
 }
 
-/* The botanical footer's dark gradient scrim (Reskin slice 2): the rail's
-   panel tone at the top (the photograph fades in from the rail above),
-   55% through the middle, and solid again at the foot so the tagline and
-   the identity strip stay legible over the fern. */
+/* ---------------------------------------------------------------------------
+ * The floating dock (brief v4 Part 4 / rulebook §21; M-90). ONE fixed
+ * container at the bottom-right holds every persistent floating control:
+ * the back-to-top fab above the Vitalis orb (.coach-orb, whose own sheet
+ * — orb.css — now only styles the button; the dock owns placement).
+ * Same size (48px), same chrome family, same x, a 12px gap. Below lg the
+ * phone tab bar owns the bottom of the screen, so the dock rides the
+ * measure the chrome reserves for it — the --app-bottom-nav total (76px
+ * of bar + air) plus 16px of air — exactly where the orb has always sat;
+ * at lg it settles 24px off the corner. The collision lifts that used to
+ * target the orb now lift the whole dock.
+ * ------------------------------------------------------------------------- */
+.dock {
+  position: fixed;
+  right: 20px;
+  bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+@media (min-width: 64rem) {
+  .dock {
+    right: 24px;
+    bottom: 24px;
+  }
+}
+@media (max-width: 63.99rem) {
+  body:has(.home-fab) .dock {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px + 72px);
+  }
+  body:has(.premium-action-dock) .dock {
+    bottom: calc(76px + env(safe-area-inset-bottom, 0px) + 16px + 76px);
+  }
+}
+/* The back-to-top fab: an 18px up-arrow on the shared fab chrome — no
+   logo, no white fill. Hidden at scroll 0; the IntersectionObserver in
+   BackToTop flips data-show once the 150vh sentinel leaves the viewport
+   (≈1.5 viewports scrolled). Visibility transitions with a delay so it
+   fades out before it leaves the tab order, and in with no delay. */
+.dock__top {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-pill);
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--muted-foreground);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity var(--motion-standard) var(--ease-out-expo),
+    transform var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo),
+    visibility 0s var(--motion-standard);
+}
+.dock__top[data-show="true"] {
+  visibility: visible;
+  opacity: 1;
+  transform: none;
+  transition-delay: 0s;
+}
+.dock__top:hover {
+  border-color: var(--border-strong);
+  color: var(--foreground);
+}
+.dock__top:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 70%, transparent);
+  outline-offset: 2px;
+}
+/* The scroll sentinel: a 150vh strip at the document's top-left. It is
+   observed, never seen; when it leaves the viewport the dock's
+   back-to-top appears. */
+.dock-sentinel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 150vh;
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dock__top {
+    transition: none;
+  }
+}
+
+/* The sidebar's botanical footer is a FIXED-HEIGHT band (brief v4
+   Part 4; M-49): the fern is contained in it, masked so it dissolves
+   into the rail instead of cropping at a hard line, and the account row
+   is pinned at its foot. The old footer was auto-height with an 80px
+   dead gap (pt-20) above the tagline. */
+.app-sidebar-footer {
+  height: 200px;
+}
+.app-sidebar-botanical {
+  -webkit-mask-image: linear-gradient(to top, black 60%, transparent 99%);
+  mask-image: linear-gradient(to top, black 60%, transparent 99%);
+}
+/* The botanical footer's dark gradient scrim: solid at the foot and at
+   the top edge (where it meets the rail), and — since brief v4 — at
+   least 88% panel through the band the tagline sits in, so the quote
+   keeps ≥4.5:1 over any part of the fern (it sat over a 55% band
+   before, which guaranteed nothing). */
 .app-sidebar-scrim {
   background: linear-gradient(
     to top,
-    var(--sidebar) 4%,
-    color-mix(in oklab, var(--sidebar) 55%, transparent) 55%,
+    var(--sidebar) 0%,
+    color-mix(in oklab, var(--sidebar) 88%, transparent) 38%,
+    color-mix(in oklab, var(--sidebar) 72%, transparent) 68%,
     var(--sidebar) 100%
   );
 }

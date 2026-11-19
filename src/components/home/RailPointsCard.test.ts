@@ -3,12 +3,14 @@ import { describe, expect, it } from "vitest";
 import { railPointsModel } from "./RailPointsCard";
 
 /**
- * The rail points card's derivation (Reskin slice 2): the percentage and
- * the "next level" must come from Bloom's real rank ladder (rankFor) —
- * never from the prototype's hardcoded threshold maths. Expected values
- * below are read straight off lib/progression/ranks: Seedling 0,
- * First Bloom 500, Sprout 1,200, Budding 2,200 … Bloomkeeper 25,000,
- * then cycle seasons every 6,000.
+ * The rail Level card's derivation: every figure must come from Bloom's
+ * real rank ladder (rankFor) — never from hardcoded threshold maths.
+ * Expected values below are read straight off lib/progression/ranks:
+ * Seedling 0, First Bloom 500, Sprout 1,200, Budding 2,200 …
+ * Bloomkeeper 25,000, then cycle seasons every 6,000. Since brief v4
+ * (M-47) the model also carries the meter's label values (intoRank of
+ * span) and the points still needed for the next rank — the card
+ * prints no bare percentage.
  */
 describe("railPointsModel", () => {
   it("starts at Seedling with First Bloom next and no progress", () => {
@@ -16,6 +18,9 @@ describe("railPointsModel", () => {
       rankName: "Seedling",
       nextName: "First Bloom",
       pct: 0,
+      intoRank: 0,
+      span: 500,
+      pointsToNext: 500,
     });
   });
 
@@ -26,6 +31,22 @@ describe("railPointsModel", () => {
       rankName: "First Bloom",
       nextName: "Sprout",
       pct: 52,
+      intoRank: 365,
+      span: 700,
+      pointsToNext: 335,
+    });
+  });
+
+  it("matches the live account's shape: 965 is First Bloom, 235 to Sprout", () => {
+    // Sprout's threshold is 1,200 (not the 1,000 sometimes quoted):
+    // 965 − 500 = 465 into the rank, 1,200 − 965 = 235 remaining.
+    expect(railPointsModel(965)).toEqual({
+      rankName: "First Bloom",
+      nextName: "Sprout",
+      pct: 66,
+      intoRank: 465,
+      span: 700,
+      pointsToNext: 235,
     });
   });
 
@@ -34,6 +55,9 @@ describe("railPointsModel", () => {
       rankName: "Sprout",
       nextName: "Budding",
       pct: 0,
+      intoRank: 0,
+      span: 1000,
+      pointsToNext: 1000,
     });
   });
 
@@ -42,8 +66,12 @@ describe("railPointsModel", () => {
       rankName: "Bloomkeeper",
       nextName: "Season of Light",
       pct: 0,
+      intoRank: 0,
+      span: 6000,
+      pointsToNext: 6000,
     });
     // Halfway through the first season's 6,000-point span.
     expect(railPointsModel(28000).pct).toBe(50);
+    expect(railPointsModel(28000).pointsToNext).toBe(3000);
   });
 });
