@@ -19,7 +19,7 @@ import { USDA_REFERENCE_FOODS } from "@/lib/nutrition/usdaReference";
 import {
   buildGroceryList,
   formatGramAmount,
-  groceryCategoryForGroup,
+  groceryCategoryForFood,
   type GroceryListResult,
 } from "./groceryList";
 import type { PantryItem } from "./pantry";
@@ -190,16 +190,43 @@ describe("buildGroceryList — the plan's math, backwards to the shop", () => {
 
 describe("buildGroceryList — categories come from the food data, never a name", () => {
   it("maps every food group to its aisle", () => {
-    expect(groceryCategoryForGroup("vegetables")).toBe("produce");
-    expect(groceryCategoryForGroup("fruits")).toBe("produce");
-    expect(groceryCategoryForGroup("dairy")).toBe("dairy_eggs");
-    expect(groceryCategoryForGroup("eggs")).toBe("dairy_eggs");
-    expect(groceryCategoryForGroup("cereals_grains")).toBe("pantry_staples");
-    expect(groceryCategoryForGroup("pulses_legumes")).toBe("pantry_staples");
-    expect(groceryCategoryForGroup("nuts_seeds")).toBe("pantry_staples");
-    expect(groceryCategoryForGroup("fats_oils")).toBe("pantry_staples");
-    expect(groceryCategoryForGroup("other")).toBe("other");
-    expect(groceryCategoryForGroup(undefined)).toBe("other");
+    /* Rulebook v2 §7 (M-60): the aisle derives from the whole
+       classification, not the group alone — eggs moved from the old
+       combined "Dairy & eggs" aisle to Protein, and the combined
+       aisle split into Dairy and Pantry. */
+    const byGroup = (group: FoodGroup) => groceryCategoryForFood(food(`f-${group}`, group, group));
+    expect(byGroup("vegetables")).toBe("produce");
+    expect(byGroup("fruits")).toBe("produce");
+    expect(byGroup("dairy")).toBe("dairy");
+    expect(byGroup("eggs")).toBe("protein");
+    expect(byGroup("cereals_grains")).toBe("pantry");
+    expect(byGroup("pulses_legumes")).toBe("pantry");
+    expect(byGroup("nuts_seeds")).toBe("pantry");
+    expect(byGroup("fats_oils")).toBe("pantry");
+    expect(byGroup("other")).toBe("other");
+    expect(groceryCategoryForFood(MYSTERY)).toBe("other");
+    expect(groceryCategoryForFood(undefined)).toBe("other");
+  });
+
+  it("shelves the audited items in their real aisles (M-60)", () => {
+    const real = (id: string) => USDA_REFERENCE_FOODS.find((f) => f.id === id)!;
+    // Flesh and fish sit in ICMR group "other" — the flags carry them to Protein.
+    expect(groceryCategoryForFood(real("usda-2646170"))).toBe("protein"); // chicken breast
+    expect(groceryCategoryForFood(real("usda-2684441"))).toBe("protein"); // salmon
+    // Aromatics are Produce in a shop, whatever their tally group.
+    expect(groceryCategoryForFood(real("usda-1104647"))).toBe("produce"); // garlic
+    expect(groceryCategoryForFood(real("usda-169231"))).toBe("produce"); // ginger
+    expect(groceryCategoryForFood(real("usda-169997"))).toBe("produce"); // fresh coriander leaves
+    // Dry spices get their own aisle.
+    expect(groceryCategoryForFood(real("usda-170917"))).toBe("spices"); // bay leaf
+    expect(groceryCategoryForFood(real("usda-171320"))).toBe("spices"); // cinnamon
+    // The soy proteins and the powders are bought as protein.
+    expect(groceryCategoryForFood(real("usda-172448"))).toBe("protein"); // tofu
+    expect(groceryCategoryForFood(real("usda-174272"))).toBe("protein"); // tempeh
+    expect(groceryCategoryForFood(real("usda-168410"))).toBe("protein"); // edamame
+    expect(groceryCategoryForFood(real("usda-173177"))).toBe("protein"); // whey isolate
+    // Named staples in group "other" are pantry goods.
+    expect(groceryCategoryForFood(real("usda-169640"))).toBe("pantry"); // honey
   });
 
   it("groups the list, unclassified foods in Other", () => {
@@ -218,7 +245,7 @@ describe("buildGroceryList — categories come from the food data, never a name"
         pantry: [],
       }),
     );
-    expect(result.groups.map((g) => g.category)).toEqual(["produce", "dairy_eggs", "pantry_staples", "other"]);
+    expect(result.groups.map((g) => g.category)).toEqual(["produce", "dairy", "pantry", "other"]);
     expect(itemOf(result, "f-mystery").category).toBe("other");
   });
 });
@@ -366,18 +393,21 @@ describe("buildGroceryList — real data: a library dish against the USDA pool",
 });
 
 describe("formatGramAmount", () => {
-  it("whole grams, grouped, at every size", () => {
-    /* Component slice (§J): quantities print as whole grams via the
-       shared formatter — the kilo conversion these pins used to read
-       ("1.25 kg") is retired, so a quantity is the same unit and the
-       same rounding everywhere on the list. Display only: the sums
-       underneath are untouched. */
-    expect(formatGramAmount(250)).toBe("250 g");
-    expect(formatGramAmount(999)).toBe("999 g");
-    expect(formatGramAmount(1000)).toBe("1,000 g");
-    expect(formatGramAmount(1250)).toBe("1,250 g");
-    expect(formatGramAmount(1500)).toBe("1,500 g");
-    expect(formatGramAmount(206.25)).toBe("206 g");
+  it("shopping quantities, rounded to a step a shopper can act on", () => {
+    /* Rulebook v2 §7 (M-58, M-59) supersedes the §J whole-grams pins
+       below them in history: a shopping quantity is an instruction
+       to buy, so it rounds (5 / 25 / 50 g steps, kilos at a kilo),
+       and a sub-5 g need renders "a pinch" — never "0 g". Display
+       only: the sums underneath are untouched. */
+    expect(formatGramAmount(0.4)).toBe("a pinch");
+    expect(formatGramAmount(103)).toBe("~100 g");
+    expect(formatGramAmount(250)).toBe("~250 g");
+    expect(formatGramAmount(358)).toBe("~350 g");
+    expect(formatGramAmount(206.25)).toBe("~200 g");
+    expect(formatGramAmount(999)).toBe("~1 kg");
+    expect(formatGramAmount(1000)).toBe("~1 kg");
+    expect(formatGramAmount(1250)).toBe("~1.25 kg");
+    expect(formatGramAmount(1500)).toBe("~1.5 kg");
   });
 
   it("a reference food is listed under its display name, not the raw USDA description", () => {

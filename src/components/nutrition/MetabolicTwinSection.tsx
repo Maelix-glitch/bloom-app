@@ -20,9 +20,11 @@ import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useHabits } from "@/hooks/useHabits";
 import { useNutrition } from "@/hooks/useNutrition";
 import { buildTwinSnapshot, type TwinField } from "@/lib/twin/twin";
-import { fmtGrams } from "@/lib/format";
+import { fmtCount, fmtGrams } from "@/lib/format";
 
-const whole = (n: number) => Math.round(n).toLocaleString("en-US");
+/* Counts render through the shared formatter (fmtCount, en-IN) —
+   a local en-US grouping helper here was a format.ts bypass on a
+   Slice-1 surface (rulebook v2 §11: one format module). */
 const signed1 = (n: number) => `${n > 0 ? "+" : n < 0 ? "−" : ""}${Math.abs(n).toFixed(1)}`;
 
 function shortDay(dayKey: string): string {
@@ -111,10 +113,10 @@ export function MetabolicTwinSection() {
           {twin.expenditure.state === "value" ? (
             <>
               <span className="font-display text-[length:var(--text-title)] text-foreground">
-                {whole(twin.expenditure.value.maintenanceKcal)} kcal
+                {fmtCount(twin.expenditure.value.maintenanceKcal)} kcal
               </span>{" "}
               a day — what your record says your body actually burns. Your logged intake
-              averaged {whole(twin.expenditure.value.avgIntakeKcal)} kcal over that window,
+              averaged {fmtCount(twin.expenditure.value.avgIntakeKcal)} kcal over that window,
               with your weight moving {signed1(twin.expenditure.value.weightChangeKg)} kg.
             </>
           ) : (
@@ -168,7 +170,7 @@ export function MetabolicTwinSection() {
               twin.logCoverage.value.avgProteinG !== null ? (
                 <>
                   {" "}
-                  On those days you averaged {whole(twin.logCoverage.value.avgKcal)} kcal and{" "}
+                  On those days you averaged {fmtCount(twin.logCoverage.value.avgKcal)} kcal and{" "}
                   {fmtGrams(twin.logCoverage.value.avgProteinG)} g protein
                   {twin.logCoverage.value.kcalVsTarget !== null &&
                   twin.logCoverage.value.proteinVsTarget !== null

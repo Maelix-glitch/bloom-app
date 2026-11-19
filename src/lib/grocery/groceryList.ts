@@ -26,9 +26,15 @@
  *   · a dish whose lines name a food outside the pool is listed for
  *     its known lines AND named in `unlisted` for the missing ones;
  *   · categories come from the food's data-layer classification
- *     (`Food.classification.group`) — never guessed from a name. A
- *     food with no classification (the person's own foods) lands in
- *     "other", labelled as exactly that.
+ *     facts — never guessed from a name. The classification GROUPS
+ *     are the ICMR tally framework (flesh, fish and the aromatics
+ *     deliberately sit in "other" there, with `isFlesh`/`isFish`
+ *     carrying the pattern facts), so the shop aisle is derived
+ *     from the whole classification: the flags, the group, and the
+ *     small seed-pinned sets below for the foods whose group alone
+ *     mis-shelves them (M-60). A food with no classification (the
+ *     person's own foods) lands in "other", labelled as exactly
+ *     that.
  *
  * The pantry deduction is transparent: a pantry item matches a list
  * item by food id, else by normalised name. A recorded quantity
@@ -45,39 +51,103 @@
  * Pure: no storage, no React. The section assembles the inputs.
  */
 
-import { fmtGrams } from "@/lib/format";
+import { fmtShoppingQty } from "@/lib/format";
 import type { Dish } from "@/lib/nutrition/dishes";
 import { foodDisplayName } from "@/lib/nutrition/displayName";
 import type { DailyPlan } from "@/lib/nutrition/plan";
-import type { Food, FoodGroup, Meal } from "@/lib/nutrition/types";
+import type { Food, Meal } from "@/lib/nutrition/types";
 import { normalisePantryName, type PantryItem } from "./pantry";
 
-export type GroceryCategory = "produce" | "dairy_eggs" | "pantry_staples" | "other";
+export type GroceryCategory = "produce" | "protein" | "dairy" | "pantry" | "spices" | "other";
 
 export const GROCERY_CATEGORIES: readonly { id: GroceryCategory; label: string }[] = [
   { id: "produce", label: "Produce" },
-  { id: "dairy_eggs", label: "Dairy & eggs" },
-  { id: "pantry_staples", label: "Pantry staples" },
+  { id: "protein", label: "Protein" },
+  { id: "dairy", label: "Dairy" },
+  { id: "pantry", label: "Pantry" },
+  { id: "spices", label: "Spices & herbs" },
   { id: "other", label: "Other" },
 ];
 
-/** The shop-aisle grouping of a data-layer food group. `other` and
- *  unclassified foods stay "other" — the honest bucket. */
-export function groceryCategoryForGroup(group: FoodGroup | undefined): GroceryCategory {
-  switch (group) {
+/* The seed-pinned sets (M-60): foods whose ICMR group alone would
+   mis-shelf them in a shop. The ids mirror the groupings the seed
+   script itself pins in scripts/nutrition-usda-reference.mjs —
+   aromatics are "other" there because they are never a vegetable
+   PORTION, not because they are not produce; the dry spices are the
+   seed's spice run; tofu/tempeh/edamame sit with the pulses there
+   because that is what they are made of, but a shopper buys them as
+   protein. The classification DATA is untouched — only the aisle
+   derivation reads more of it. */
+const AROMATIC_PRODUCE_IDS: ReadonlySet<string> = new Set([
+  "usda-1104647", // garlic
+  "usda-169231", // ginger root
+  "usda-169997", // coriander (cilantro) leaves
+  "usda-173475", // spearmint, fresh
+]);
+const DRY_SPICE_IDS: ReadonlySet<string> = new Set([
+  "usda-170917", // bay leaf
+  "usda-171320", // cinnamon
+  "usda-171321", // cloves
+  "usda-170919", // cardamom
+  "usda-170929", // mustard seed
+  "usda-170922", // coriander seed
+  "usda-172231", // turmeric
+  "usda-170923", // cumin seed
+  "usda-170932", // pepper, red or cayenne
+  "usda-171319", // chili powder
+  "usda-170924", // curry powder
+  "usda-171324", // fenugreek seed
+  "usda-171323", // fennel seed
+  "usda-170931", // pepper, black
+  "usda-171330", // poppy seed
+]);
+const SOY_PROTEIN_IDS: ReadonlySet<string> = new Set([
+  "usda-172448", // tofu
+  "usda-174272", // tempeh
+  "usda-168410", // edamame
+]);
+const PROTEIN_POWDER_IDS: ReadonlySet<string> = new Set([
+  "usda-173177", // whey protein powder isolate
+  "usda-173181", // soy protein powder
+]);
+const PANTRY_OTHER_IDS: ReadonlySet<string> = new Set([
+  "usda-169640", // honey
+  "usda-334247", // granulated sugar
+  "usda-173468", // table salt
+  "usda-173469", // cider vinegar
+]);
+
+/**
+ * The shop aisle for a food (rulebook v2 §7, M-60), derived from its
+ * data-layer classification: flesh and fish are Protein (their ICMR
+ * group is "other" by design — the flags carry the fact); eggs are
+ * Protein; the seed-pinned aromatics are Produce and the dry spices
+ * are Spices & herbs; tofu, tempeh, edamame and the protein powders
+ * are Protein. Unclassified foods (the person's own) stay "other" —
+ * the honest bucket.
+ */
+export function groceryCategoryForFood(food: Food | undefined): GroceryCategory {
+  const classification = food?.classification;
+  if (!food || !classification) return "other";
+  if (classification.isFlesh || classification.isFish) return "protein";
+  if (SOY_PROTEIN_IDS.has(food.id) || PROTEIN_POWDER_IDS.has(food.id)) return "protein";
+  if (DRY_SPICE_IDS.has(food.id)) return "spices";
+  if (AROMATIC_PRODUCE_IDS.has(food.id)) return "produce";
+  switch (classification.group) {
+    case "eggs":
+      return "protein";
+    case "dairy":
+      return "dairy";
     case "vegetables":
     case "fruits":
       return "produce";
-    case "dairy":
-    case "eggs":
-      return "dairy_eggs";
     case "cereals_grains":
     case "pulses_legumes":
     case "nuts_seeds":
     case "fats_oils":
-      return "pantry_staples";
+      return "pantry";
     default:
-      return "other";
+      return PANTRY_OTHER_IDS.has(food.id) ? "pantry" : "other";
   }
 }
 
@@ -137,14 +207,16 @@ export interface GroceryListInput {
 const MEAL_ORDER: readonly Meal[] = ["breakfast", "lunch", "dinner", "snack"];
 
 /**
- * A quantity as the shop list prints it: whole grams, grouped, via
- * the shared formatter ("250 g", "1,250 g"). DISPLAY ONLY — the
- * numbers on the items are the plan's own sums (accumulated raw,
+ * A quantity as the shop list prints it: the shared shopping
+ * formatter (rulebook v2 §7) — rounded to the step a shopper can act
+ * on, "a pinch" under 5 g, kilos at a kilo or more. DISPLAY ONLY —
+ * the numbers on the items are the plan's own sums (accumulated raw,
  * rounded once at the item boundary); this string never feeds back
- * into any math, and no decimal gram or kilo fraction ever prints.
+ * into any math. (M-58, M-59: "0 g" and gram-precise quantities like
+ * "358 g" can no longer render.)
  */
 export function formatGramAmount(grams: number): string {
-  return `${fmtGrams(grams)} g`;
+  return fmtShoppingQty(grams);
 }
 
 interface AccumulatingItem {
@@ -210,7 +282,7 @@ export function buildGroceryList(input: GroceryListInput): GroceryListResult {
                raw USDA description is the provenance record and stays
                in the data layer, never on a shopping list (§J). */
             foodDisplayName(food).en,
-            groceryCategoryForGroup(food.classification?.group),
+            groceryCategoryForFood(food),
             (line.grams / servings) * planDish.servings,
           );
         }
@@ -227,7 +299,7 @@ export function buildGroceryList(input: GroceryListInput): GroceryListResult {
         addFood(
           suggestion.foodId,
           food ? foodDisplayName(food).en : suggestion.name,
-          groceryCategoryForGroup(food?.classification?.group),
+          groceryCategoryForFood(food),
           suggestion.grams,
         );
       }

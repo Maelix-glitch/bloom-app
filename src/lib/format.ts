@@ -14,7 +14,10 @@
  *     tilde and four exact digits contradict each other, and the
  *     underlying estimate (Mifflin–St Jeor over self-reported inputs)
  *     does not know the day to within 50 kcal anyway. Exact logged
- *     values never pass through here — they stay exact.
+ *     values never pass through here — they stay exact;
+ *   · a SHOPPING quantity (rulebook v2 §7) is an instruction to buy,
+ *     not a measurement: it rounds to the step a shopper can act on
+ *     and never prints "0 g" for something the plan needs.
  */
 
 /** "18 Nov 2026" for a `YYYY-MM-DD` day key (or any Date-parseable string). */
@@ -32,6 +35,23 @@ export function fmtCount(n: number): string {
 /** Whole grams, grouped — "206", "1,250". Never a decimal gram in the UI. */
 export function fmtGrams(n: number): string {
   return Math.round(n).toLocaleString("en-IN");
+}
+
+/**
+ * A shopping quantity (rulebook v2 §7) — what to buy, rounded to the
+ * step a shopper can act on: under 5 g is "a pinch" (never "0 g" for
+ * something the plan needs), under 50 g rounds to 5, under 500 g to
+ * 25, above that to 50, and a kilo or more prints as kilos. Display
+ * only — the plan's sums underneath stay exact.
+ */
+export function fmtShoppingQty(g: number): string {
+  const roundTo = (step: number) => Math.round(g / step) * step;
+  if (!Number.isFinite(g) || g < 5) return "a pinch";
+  if (g < 50) return `~${roundTo(5)} g`;
+  if (g < 500) return `~${roundTo(25)} g`;
+  const r = roundTo(50);
+  if (r >= 1000) return `~${+(r / 1000).toFixed(2)} kg`;
+  return `~${r} g`;
 }
 
 /** An approximate energy target — "~2,950 kcal" (nearest 50, grouped). */

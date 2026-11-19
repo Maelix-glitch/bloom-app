@@ -26,7 +26,7 @@ export {
   GROCERY_CATEGORIES,
   buildGroceryList,
   formatGramAmount,
-  groceryCategoryForGroup,
+  groceryCategoryForFood,
   type GroceryCategory,
   type GroceryGroup,
   type GroceryItem,
