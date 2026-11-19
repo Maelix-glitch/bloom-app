@@ -165,7 +165,10 @@ describe("NutritionPlanSection", () => {
     expect(entries[0]!.source).toBe("dish");
     expect(entries[0]!.day).toBe(todayLocal());
     expect(entries[0]!.provenance.kind).toBe("recipe");
-    expect(screen.getByText("Logged")).toBeTruthy();
+    /* Slice 4: the meal badge also reads "Logged" once the meal is
+       fully logged (brief 3.1) — a single-dish meal reaches that
+       with this one tap, so the logged state can read twice. */
+    expect(screen.getAllByText("Logged").length).toBeGreaterThan(0);
   });
 
   it("shows the building steps while a plan composes, then reveals the plan (P8)", () => {
@@ -269,18 +272,28 @@ describe("NutritionPlanSection", () => {
 
     render(<NutritionPlanSection />);
     /* Pin updated for brief v4 Slice 3: the "Today's mix" label block
-       is retired — the guideline notes now render in their own
-       top-level section under a real H2, "Today's balance" (brief
-       Part 1). The note text and its separation from the targets
-       line are what this test has always pinned; both are unchanged. */
+       is retired — the guideline notes render in their own top-level
+       section under a real H2, "Today's balance" (brief Part 1).
+       Pin updated again for Slice 4 (brief 3.2): the fruit guideline
+       note is the fruit GOAL METER now — the sentence the collision
+       below was about no longer renders as text at all, which ends
+       the collision at its source; the targets line still matches on
+       its own sentence alone, which is the separation this test has
+       always pinned. */
     const balance = screen
       .getByRole("heading", { name: "Today's balance" })
       .closest("section")!;
+    const fruitMeter = within(balance)
+      .getAllByRole("progressbar")
+      .find((m) => m.getAttribute("aria-label")?.startsWith("Fruit:"));
+    expect(fruitMeter, "the fruit goal meter").toBeTruthy();
+    expect(fruitMeter!.getAttribute("aria-valuemax")).toBe("100");
+    expect(within(balance).getAllByText(/g to go · ICMR-NIN guideline/).length).toBeGreaterThan(0);
     expect(
-      within(balance).getByText(
+      screen.queryByText(
         /fruit — the ICMR-NIN guideline aims for at least 100 g across the day/,
       ),
-    ).toBeTruthy();
+    ).toBeNull();
     /* The targets line still matches on its own sentence alone. */
     expect(screen.getByText(/across the day — your guide is/)).toBeTruthy();
   });
@@ -433,7 +446,11 @@ describe("NutritionPlanSection — N-UI plan panel", () => {
     ).toBe("true");
   });
 
-  it("'Log this meal' bulk-logs the meal's dishes and foods once, then reads as logged", async () => {
+  /* Slice 4 (brief 3.1, M-88): the meal button is "Log meal"
+     everywhere — the old "Log this meal" label is retired — and a
+     logged meal reads as the "Logged" badge, not "Already logged".
+     The bulk-log behaviour this test pins is unchanged. */
+  it("'Log meal' bulk-logs the meal's dishes and foods once, then reads as logged", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
     await createPlanAndAwait();
@@ -445,16 +462,16 @@ describe("NutritionPlanSection — N-UI plan panel", () => {
        plus its food suggestions (through the plan path). */
     const expected = firstMeal.suggestions.length + firstMeal.dishes.length;
     expect(expected).toBeGreaterThan(0);
-    expect(screen.getAllByRole("button", { name: "Log this meal" })).toHaveLength(4);
+    expect(screen.getAllByRole("button", { name: "Log meal" })).toHaveLength(4);
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Log this meal" })[0]!);
+    fireEvent.click(screen.getAllByRole("button", { name: "Log meal" })[0]!);
 
     const entries = readFoodLog().filter((e) => e.day === todayLocal());
     expect(entries).toHaveLength(expected);
     expect(entries.filter((e) => e.source === "dish")).toHaveLength(firstMeal.dishes.length);
     expect(entries.filter((e) => e.source === "plan")).toHaveLength(firstMeal.suggestions.length);
     expect(entries.every((e) => e.meal === firstMeal.meal)).toBe(true);
-    expect(screen.getByText("Already logged")).toBeTruthy();
-    expect(screen.getAllByRole("button", { name: "Log this meal" })).toHaveLength(3);
+    expect(screen.getByText("Logged")).toBeTruthy();
+    expect(screen.getAllByRole("button", { name: "Log meal" })).toHaveLength(3);
   });
 });

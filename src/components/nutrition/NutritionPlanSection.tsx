@@ -38,11 +38,15 @@
  * is claimed to happen that does not.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import {
+  Beef,
   Check,
+  ChefHat,
   ChevronDown,
+  Clock,
+  Cookie,
   EyeOff,
   Flame,
   Gauge,
@@ -53,6 +57,7 @@ import {
   SlidersHorizontal,
   TrendingDown,
   UtensilsCrossed,
+  Wallet,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -66,12 +71,19 @@ import { usePlan } from "@/hooks/usePlan";
 import { useSession } from "@/hooks/useSession";
 import { GOAL_LABEL, GOAL_OPTIONS } from "@/lib/assessment/questions";
 import { fmtGrams, fmtKcalApprox } from "@/lib/format";
-import { reasonCopy, reasonDetail } from "@/lib/reasons";
+import { reasonCopy, reasonDetail, type ReasonCopy } from "@/lib/reasons";
+import { useInView } from "@/components/ci/motion";
 import { formatClock } from "@/lib/smart/usual";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
 import {
+  coverage,
+  dayBalance,
+  DISH_LIBRARY,
+  GUIDELINE_FRUIT_G,
+  GUIDELINE_VEGETABLES_G,
   MAX_TARGET_ADJUSTMENT_KCAL,
+  USDA_REFERENCE_FOODS,
   adjustedTargets,
   confirmTargetAdjustment,
   dishIdeaFor,
@@ -95,6 +107,7 @@ import {
   type SuggestionLayer,
 } from "@/lib/nutrition";
 import { rawBasisFraming } from "@/lib/nutrition/preparation";
+import { BloomFlower } from "./BloomFlower";
 import { DishDetailSheet } from "./DishDetailSheet";
 import { DishPhoto } from "./DishPhoto";
 import { ProvenanceBadge } from "./ProvenanceBadge";
@@ -190,6 +203,129 @@ function GoalChips({
   );
 }
 
+/**
+ * One guideline goal meter (brief v4 Part 3.2): the group's grams
+ * against its ICMR-NIN guideline, the fill animating from 0 once
+ * when scrolled into view (Part 5 — a scaleX transform over the
+ * decimal --v, never a width). A guideline is a target, not a
+ * verdict: the fill is neutral, turns success when met, and is
+ * amber only under half. The words say "to go", never "short".
+ */
+function GoalMeter({
+  label,
+  actualG,
+  goalG,
+  metric,
+}: {
+  label: string;
+  actualG: number;
+  goalG: number;
+  metric: string;
+}) {
+  const { ref, inView } = useInView<HTMLDivElement>();
+  const cov = coverage(actualG, goalG);
+  const share = Math.min(1, actualG / goalG);
+  const tone = cov.met ? " is-met" : share < 0.5 ? " is-low" : "";
+  return (
+    <div className="cover">
+      <div className="cover__row">
+        <span>{label}</span>
+        <b data-metric={metric}>
+          {fmtGrams(actualG)} <small>/ {fmtGrams(goalG)} g</small>
+        </b>
+      </div>
+      <div
+        ref={ref}
+        className={`meter meter--goal${tone}${inView ? " is-in" : ""}`}
+        role="progressbar"
+        aria-label={`${label}: ${Math.round(actualG)} of ${goalG} grams`}
+        aria-valuenow={Math.round(actualG)}
+        aria-valuemin={0}
+        aria-valuemax={goalG}
+        style={{ "--v": share } as CSSProperties}
+      />
+      <p className="cover__hint">
+        {cov.met ? "Guideline met" : `${fmtGrams(cov.gap)} g to go`} · ICMR-NIN guideline
+      </p>
+    </div>
+  );
+}
+
+/** The adjusted section's priority (brief 3.3): the planner's
+ *  gates first — the answers that bent the plan — then what it
+ *  learned from the log, then the day's structure. */
+const ADJUSTED_TIER: Record<string, number> = {
+  "budget-widened": 0,
+  "kitchen-relaxed": 0,
+  "kitchen-cap-raised": 0,
+  "kitchen-cap-quickest": 0,
+  "log-protein-shortfall": 1,
+  "log-energy-overshoot": 1,
+  "snack-added": 2,
+};
+
+const ADJUSTED_ICON: Record<string, ReactNode> = {
+  "budget-widened": <Wallet />,
+  "kitchen-relaxed": <ChefHat />,
+  "kitchen-cap-raised": <Clock />,
+  "kitchen-cap-quickest": <Clock />,
+  "log-protein-shortfall": <Beef />,
+  "log-energy-overshoot": <Flame />,
+  "snack-added": <Cookie />,
+};
+
+/**
+ * One adjustment row (brief 3.3): an .insight whose words are
+ * reasons.ts's alone — icon, title, the detail clamped at two
+ * lines by CSS (never a cut string: the whole sentence rides
+ * the title attribute and one More tap unclamps it), the source
+ * chip, and the reason's action when it carries one.
+ */
+function AdjustedRow({ copy, kind }: { copy: ReasonCopy; kind: string }) {
+  const [open, setOpen] = useState(false);
+  const long = copy.detail.length > 100;
+  const actionTo = copy.action ? copy.action.href.split("#")[0] : undefined;
+  const actionHash = copy.action ? copy.action.href.split("#")[1] : undefined;
+  return (
+    <article className="insight">
+      <span className="insight__icon" aria-hidden="true">
+        {ADJUSTED_ICON[kind] ?? <SlidersHorizontal />}
+      </span>
+      <div className="min-w-0">
+        <h3>{copy.title}</h3>
+        <p className={`adj-detail${open ? " is-open" : ""}`} title={copy.detail}>
+          {copy.detail}
+        </p>
+        {copy.action && actionTo ? (
+          <Link
+            to={actionTo}
+            {...(actionHash ? { hash: actionHash } : {})}
+            className="nut-inline-link adj-action"
+          >
+            {copy.action.label}
+          </Link>
+        ) : null}
+        {long ? (
+          <button
+            type="button"
+            className="adj-more"
+            aria-expanded={open}
+            onClick={() => setOpen(!open)}
+          >
+            {open ? "Less" : "More"}
+          </button>
+        ) : null}
+      </div>
+      <span
+        className="nut-badge src-chip"
+        data-estimate={copy.source.kind === "estimated" ? true : undefined}
+      >
+        {copy.source.label}
+      </span>
+    </article>
+  );
+}
+
 export function NutritionPlanSection() {
   const {
     state,
@@ -249,6 +385,18 @@ export function NutritionPlanSection() {
   };
   const nutrition = useNutrition();
   const body = useBodyProfile();
+  /* The balance tally's lookup maps — the same food universe the
+     composer planned over (the person's foods + the USDA reference
+     set) and the shipped dish library, so the flower counts the
+     plan's real ingredients, exactly as floorTotalsOf counts them. */
+  const foodById = useMemo(
+    () =>
+      new Map(
+        [...nutrition.foods, ...USDA_REFERENCE_FOODS].map((f) => [f.id, f] as const),
+      ),
+    [nutrition.foods],
+  );
+  const dishById = useMemo(() => new Map(DISH_LIBRARY.map((d) => [d.id, d] as const)), []);
   const [logError, setLogError] = useState<string | null>(null);
   /* P7: the dismissed expenditure proposal's fingerprint — dismissing
      stores nothing; the card simply stays away while the estimate
@@ -562,6 +710,21 @@ export function NutritionPlanSection() {
     }
   }
 
+  /* Brief v4 Slice 4 (M-88): a meal counts as logged when every
+     dish and food on it is in the log — the test the card footer
+     always used, hoisted so the day can name its NEXT meal: the
+     first in the plan's order with something left to log. That
+     meal alone carries the primary button (§19); every other
+     unlogged meal is secondary, and a logged meal shows a badge. */
+  const mealAllLogged = (meal: PlanMeal): boolean =>
+    (meal.suggestions.length > 0 || meal.dishes.length > 0) &&
+    meal.suggestions.every((s) => suggestionLogged(meal, s)) &&
+    meal.dishes.every((d) => planDishLogged(meal, d));
+  const nextMeal =
+    plan.meals.find(
+      (m) => (m.suggestions.length > 0 || m.dishes.length > 0) && !mealAllLogged(m),
+    )?.meal ?? null;
+
   const suggestionRow = (meal: PlanMeal, suggestion: PlanSuggestion) => {
     const isLogged = suggestionLogged(meal, suggestion);
     const display = displayNameForFoodId(suggestion.foodId, suggestion.name);
@@ -694,7 +857,7 @@ export function NutritionPlanSection() {
               ) : (
                 <button
                   type="button"
-                  className="nut-btn nut-btn-gold nut-btn-sm"
+                  className="nut-btn nut-btn-ghost nut-btn-sm"
                   onClick={() => logPlanDish(meal, planDish)}
                 >
                   Log this dish
@@ -722,10 +885,7 @@ export function NutritionPlanSection() {
       ...meal.suggestions.map((s) => s.nutrients),
       ...meal.dishes.map((d) => d.nutrients),
     ]);
-    const allLogged =
-      (meal.suggestions.length > 0 || meal.dishes.length > 0) &&
-      meal.suggestions.every((s) => suggestionLogged(meal, s)) &&
-      meal.dishes.every((d) => planDishLogged(meal, d));
+    const allLogged = mealAllLogged(meal);
     const layered = !dishComposed && meal.meal !== "snack" && meal.suggestions.some((s) => s.layer);
     const topups = meal.suggestions.filter((s) => s.layer === "topup");
     const foodSuggestions = dishComposed
@@ -737,7 +897,11 @@ export function NutritionPlanSection() {
        reasons existed fall back to the stored string. */
     const mealNoteText = meal.noteReason ? reasonDetail(meal.noteReason) : meal.note;
     return (
-      <article key={meal.meal} className="nut-card" aria-label={`${MEAL_LABEL[meal.meal]} plan`}>
+      <article
+        key={meal.meal}
+        className="nut-card meal"
+        aria-label={`${MEAL_LABEL[meal.meal]} plan`}
+      >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="eyebrow">{MEAL_LABEL[meal.meal]}</p>
@@ -806,25 +970,45 @@ export function NutritionPlanSection() {
               </ul>
             )}
             {mealNoteText ? <p className="nut-note">{mealNoteText}</p> : null}
-            <div className="mt-4 flex items-center justify-between gap-3 border-t border-border-subtle pt-3.5">
-              <p className="text-[length:var(--text-callout)] text-muted-foreground tabular-nums">
-                <span className="font-semibold text-[var(--sage)]">
-                  {fmtGrams(sums.proteinG)} g
-                </span>{" "}
-                protein
-                {sums.fibreG !== undefined ? <> · {fmtGrams(sums.fibreG)} g fibre</> : null}
-              </p>
+            {/* Brief v4 Part 3.1 (M-88): the macros are 8px
+                category dots with neutral numbers — colour means
+                the category in the dot alone, never in text — and
+                the day's one primary button lives on the next
+                unlogged meal; a logged meal wears its badge. */}
+            <div className="meal__foot mt-4 border-t border-border-subtle pt-3.5">
+              <ul className="macros">
+                <li>
+                  <i className="dot dot--protein" aria-hidden="true" />
+                  <b>{fmtGrams(sums.proteinG)} g</b> protein
+                </li>
+                <li>
+                  <i className="dot dot--carb" aria-hidden="true" />
+                  <b>{fmtGrams(sums.carbsG)} g</b> carbs
+                </li>
+                <li>
+                  <i className="dot dot--fat" aria-hidden="true" />
+                  <b>{fmtGrams(sums.fatG)} g</b> fat
+                </li>
+                {sums.fibreG !== undefined ? (
+                  <li>
+                    <i className="dot dot--fibre" aria-hidden="true" />
+                    <b>{fmtGrams(sums.fibreG)} g</b> fibre
+                  </li>
+                ) : null}
+              </ul>
               {allLogged ? (
-                <span className="inline-flex items-center gap-1.5 text-[length:var(--text-callout)] font-medium text-[var(--sage)]">
-                  <Check className="size-4" aria-hidden /> Already logged
+                <span className="nut-chip" data-selected>
+                  <Check className="size-3.5" aria-hidden /> Logged
                 </span>
               ) : (
                 <button
                   type="button"
-                  className="nut-btn nut-btn-gold nut-btn-sm"
+                  className={`nut-btn nut-btn-sm ${
+                    meal.meal === nextMeal ? "nut-btn-gold" : "nut-btn-ghost"
+                  }`}
                   onClick={() => logWholeMeal(meal)}
                 >
-                  Log this meal
+                  Log meal
                 </button>
               )}
             </div>
@@ -875,7 +1059,7 @@ export function NutritionPlanSection() {
           ) : (
             <button
               type="button"
-              className="nut-btn nut-btn-gold nut-btn-sm"
+              className="nut-btn nut-btn-ghost nut-btn-sm"
               onClick={() => logDishIdea(meal, idea)}
             >
               Log this dish
@@ -933,26 +1117,58 @@ export function NutritionPlanSection() {
      Everything else (composition judgements, learning notes, and
      notes with no reason — plans stored before reasons existed)
      stays with the balance, the mix's direct successor. */
-  const ADJUSTED_KINDS: ReadonlySet<string> = new Set([
-    "budget-widened",
-    "kitchen-relaxed",
-    "kitchen-cap-raised",
-    "kitchen-cap-quickest",
-    "snack-added",
-    "log-protein-shortfall",
-    "log-energy-overshoot",
-  ]);
   const noteEntries = plan.notes.map((note, i) => ({
     note,
     copy: planReasons[i] ?? null,
     reason: plan.reasons?.[i] ?? null,
   }));
-  const adjustedNotes = noteEntries.filter(
-    (e) => e.reason !== null && ADJUSTED_KINDS.has(e.reason.kind),
-  );
   const balanceNotes = noteEntries.filter(
-    (e) => e.reason === null || !ADJUSTED_KINDS.has(e.reason.kind),
+    (e) => e.reason === null || !(e.reason.kind in ADJUSTED_TIER),
   );
+
+  /* Brief v4 Slice 4: the balance's GUIDELINE judgements are the
+     flower and the meters now — the veg/fruit/milk-curd shortfall
+     sentences and the group-span sentence are carried by the viz
+     (petals, goal meters, the covered count, the missing chips),
+     so they no longer render as paragraphs. Every other balance
+     note (the day's protein/energy judgements, the learning
+     notes, and notes with no reason — plans stored before
+     reasons existed) renders exactly as before, below the viz. */
+  const GUIDELINE_KINDS: ReadonlySet<string> = new Set([
+    "veg-shortfall",
+    "fruit-shortfall",
+    "milk-curd-shortfall",
+    "food-groups-few",
+  ]);
+  const otherBalanceNotes = balanceNotes.filter(
+    (e) => e.reason === null || !GUIDELINE_KINDS.has(e.reason.kind),
+  );
+
+  /* The adjusted rows (brief 3.3): at most three, in the tier
+     order — gates, then adaptation, then the day's structure —
+     stable by plan order inside a tier. A reason whose kind
+     reasons.ts does not know renders nothing (its copy is null);
+     the rest stay in the stored plan, unrendered here. */
+  const adjustedRows = noteEntries
+    .map((entry, index) => ({ entry, index }))
+    .filter(
+      ({ entry }) =>
+        entry.reason !== null && entry.copy !== null && entry.reason.kind in ADJUSTED_TIER,
+    )
+    .sort(
+      (a, b) =>
+        ADJUSTED_TIER[a.entry.reason!.kind]! - ADJUSTED_TIER[b.entry.reason!.kind]! ||
+        a.index - b.index,
+    )
+    .slice(0, 3);
+
+  /* The day's balance, tallied from the plan's own meals — the
+     same walk the composer's floor tally makes (balance.ts). */
+  const balanceGroups = dayBalance(plan.meals, foodById, dishById);
+  const balanceCovered = balanceGroups.filter((g) => g.covered).length;
+  const missingGroups = balanceGroups.filter((g) => !g.covered);
+  const vegGroup = balanceGroups.find((g) => g.key === "vegetables")!;
+  const fruitGroup = balanceGroups.find((g) => g.key === "fruits")!;
 
   return (
     <>
@@ -1115,7 +1331,7 @@ export function NutritionPlanSection() {
             {proposalApplicable ? (
               <button
                 type="button"
-                className="nut-btn nut-btn-gold nut-btn-sm"
+                className="nut-btn nut-btn-ghost nut-btn-sm"
                 onClick={confirmProposal}
               >
                 Confirm new target
@@ -1377,20 +1593,56 @@ export function NutritionPlanSection() {
       ) : null}
     </section>
 
-    {/* Today's balance (brief v4 Part 1): the guideline and guide
-        judgements on the composed day — the section the old
-        "Today's mix" label headed, now a top-level section with a
-        real H2. Slice 4 replaces these note paragraphs with the
-        Bloom flower and the goal meters. */}
-    {balanceNotes.length > 0 ? (
-      <section className="nut-card nut-rise section" aria-label="Today's balance">
-        <div className="section-head">
-          <div className="section-head__main">
-            <h2 className="section-head__title">Today's balance</h2>
-          </div>
+    {/* Today's balance (brief v4 Part 1 + 3.2): the day's balance
+        as the signature viz — the Bloom flower (one petal per
+        coverage group, filled = covered) beside the vegetables
+        and fruit goal meters, the missing groups as chips. The
+        guideline sentences the old "Today's mix" carried became
+        this viz; the day's remaining judgements keep their words
+        below it. The section always renders with a plan — the
+        flower is the day's balance whether or not anything fell
+        short. */}
+    <section className="nut-card nut-rise section" aria-label="Today's balance">
+      <div className="section-head">
+        <div className="section-head__main">
+          <h2 className="section-head__title">Today's balance</h2>
         </div>
-        <div className="mt-2">
-          {balanceNotes.map((entry, i) =>
+      </div>
+      <div className="balance mt-3">
+        <div className="balance__flower">
+          <BloomFlower groups={balanceGroups} />
+          <p className="balance__count">
+            <b>{balanceCovered}</b>
+            <span>of {balanceGroups.length} food groups covered</span>
+          </p>
+        </div>
+        <div className="balance__bars">
+          <GoalMeter
+            label="Vegetables"
+            actualG={vegGroup.grams}
+            goalG={GUIDELINE_VEGETABLES_G}
+            metric="guideline-veg-grams"
+          />
+          <GoalMeter
+            label="Fruit"
+            actualG={fruitGroup.grams}
+            goalG={GUIDELINE_FRUIT_G}
+            metric="guideline-fruit-grams"
+          />
+        </div>
+      </div>
+      {missingGroups.length > 0 ? (
+        <ul className="balance__missing">
+          {missingGroups.map((g) => (
+            <li key={g.key} className="nut-badge">
+              {g.missing}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {otherBalanceNotes.length > 0 ? (
+        <div className="mt-4">
+          {otherBalanceNotes.map((entry, i) =>
             entry.copy ? (
               <p key={i} className="nut-note">
                 <strong className="text-foreground">{entry.copy.title}.</strong> {entry.copy.detail}
@@ -1402,34 +1654,36 @@ export function NutritionPlanSection() {
             ),
           )}
         </div>
-      </section>
-    ) : null}
+      ) : null}
+    </section>
 
-    {/* How today's plan was adjusted (brief v4 Part 1): the planner's
-        own adjustments, apart from the balance. Slice 4 rebuilds
-        these as insight rows from reasons.ts (max 3). */}
-    {adjustedNotes.length > 0 ? (
-      <section className="nut-card nut-rise section" aria-label="How today's plan was adjusted">
-        <div className="section-head">
-          <div className="section-head__main">
-            <h2 className="section-head__title">How today's plan was adjusted</h2>
-          </div>
+    {/* How today's plan was adjusted (brief v4 Part 1 + 3.3):
+        the planner's own adjustments as insight rows from
+        reasons.ts — at most three, gates first. With none, the
+        section states the empty case in one quiet line rather
+        than vanishing: the page's structure holds day to day. */}
+    <section className="nut-card nut-rise section" aria-label="How today's plan was adjusted">
+      <div className="section-head">
+        <div className="section-head__main">
+          <h2 className="section-head__title">How today's plan was adjusted</h2>
         </div>
-        <div className="mt-2">
-          {adjustedNotes.map((entry, i) =>
-            entry.copy ? (
-              <p key={i} className="nut-note">
-                <strong className="text-foreground">{entry.copy.title}.</strong> {entry.copy.detail}
-              </p>
-            ) : (
-              <p key={i} className="nut-note">
-                {entry.note}
-              </p>
-            ),
-          )}
+      </div>
+      {adjustedRows.length > 0 ? (
+        <div className="mt-3 grid gap-3">
+          {adjustedRows.map(({ entry, index }) => (
+            <AdjustedRow
+              key={`${entry.reason!.kind}-${index}`}
+              copy={entry.copy!}
+              kind={entry.reason!.kind}
+            />
+          ))}
         </div>
-      </section>
-    ) : null}
+      ) : (
+        <p className="nut-note mt-2">
+          No adjustments today — the plan follows your Assessment as set.
+        </p>
+      )}
+    </section>
     </>
   );
 }
