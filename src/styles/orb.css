@@ -99,8 +99,6 @@
      never vanishes whole on an engine without color-mix */
   background: rgba(10, 11, 14, 0.72);
   background: color-mix(in oklab, var(--background) 72%, transparent);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   animation: coach-orb-fade var(--motion-standard) var(--ease-out-expo);
 }
 

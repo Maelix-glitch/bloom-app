@@ -164,6 +164,45 @@ describe("sheet guard: every sheet family has a real backdrop", () => {
     }
   });
 
+  /* Owner rule (2026-11-20, the bleed-through class raised again from
+   * his own screenshots of the Trackers sheets): a backdrop is a FLAT
+   * DIM, never a blur scrim — blur lets page text ghost through and
+   * stay readable around the panel. Every family's backdrop, and every
+   * scoped BloomSheet backdrop override, must carry no backdrop-filter. */
+  it("no sheet backdrop blurs the page behind it", () => {
+    const cases: [string, string][] = [
+      ["styles/bloom-sheet.css", ".bsheet-backdrop"],
+      ["styles/nutrition.css", ".nut-dialog-backdrop"],
+      ["styles/stories.css", ".ssheet-backdrop"],
+      ["styles/orb.css", ".coach-orb-backdrop"],
+      ["styles/coach.css", ".coach-palette-backdrop"],
+      ["styles/admin-panel.css", ".adm-scrim"],
+      ["styles/add-habit-modal.css", ".bloom-add-habit .backdrop"],
+    ];
+    for (const [rel, sel] of cases) {
+      for (const b of blocksFor(rel, sel)) {
+        expect(
+          b.body.includes("backdrop-filter"),
+          `${sel} in ${rel} must dim flat, never blur`,
+        ).toBe(false);
+      }
+    }
+    for (const scope of [
+      "body:has(.assess-sheet)",
+      "body:has(.tk2-log-sheet)",
+      "body:has(.tk2-snap-sheet)",
+      "body:has(.tk2-targets-sheet)",
+    ]) {
+      const rel = scope.includes("assess") ? "styles/bloom-sheet.css" : "styles/trackers.css";
+      const b = blockWith(rel, scope);
+      expect(b, `${rel} must define the ${scope} backdrop override`).toBeTruthy();
+      expect(
+        b!.body.includes("backdrop-filter"),
+        `${scope} backdrop must dim flat, never blur`,
+      ).toBe(false);
+    }
+  });
+
   it("the Radix primitives render their overlay with the panel", () => {
     expect(read("components/ui/dialog.tsx")).toContain("bg-background/70");
     const sheet = read("components/ui/sheet.tsx");
@@ -519,5 +558,14 @@ describe("sheet guard: dialog census", () => {
     expect(offenders, `sheet files must cap below the viewport: ${offenders.join(", ")}`).toEqual(
       [],
     );
+  });
+});
+
+/* A target's unit is one phrase — "of 5" must sit whole beside its
+ * figure, never wrap mid-phrase (owner screenshot, 2026-11-20: the
+ * Energy target in the Trackers targets sheet wrapped as "of / 5"). */
+describe("sheet guard: tracker target units never wrap mid-phrase", () => {
+  it(".tk2-unit is nowrap", () => {
+    expect(someBlock("styles/trackers.css", ".tk2-unit", "white-space: nowrap")).toBe(true);
   });
 });
