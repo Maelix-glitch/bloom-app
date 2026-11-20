@@ -31,6 +31,7 @@ export * from "./planAdaptation";
 export * from "./expenditure";
 export * from "./targetAdjustment";
 export * from "./snackPlacement";
+export * from "./dayRhythm";
 export * from "./dayView";
 export * from "./swaps";
 export * from "./patterns";

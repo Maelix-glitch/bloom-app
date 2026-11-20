@@ -166,6 +166,7 @@ describe("every health prefs key is covered by export and erasure", () => {
     "health.assessmentPrompt.v1",
     "health.body.v1",
     "health.coachlog.v1",
+    "health.dayRhythm.v1",
     "health.foodlog.v1",
     "health.foods.v1",
     "health.household.v1",

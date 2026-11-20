@@ -139,6 +139,21 @@
   color: var(--muted-foreground);
   max-width: 58ch;
 }
+/* The whole-day section's care lines (M-162): the note's own body
+   style as a plain list — no markers, no boxes, the words carry it. */
+.nut-care-list {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: var(--space-1);
+}
+.nut-care-list li {
+  font-size: var(--text-callout);
+  line-height: var(--leading-body);
+  color: var(--muted-foreground);
+  max-width: 58ch;
+}
 .nut-inline-link {
   color: var(--gold);
   text-decoration: underline;
