@@ -115,6 +115,7 @@ import {
   type KitchenAnswers,
 } from "./PlanPrimitives";
 import { DishDetailSheet } from "./DishDetailSheet";
+import { DayCaretakerSection } from "./DayCaretakerSection";
 import { WaterBloomPanel } from "./WaterBloom";
 import { DishPhoto } from "./DishPhoto";
 import { ProvenanceBadge } from "./ProvenanceBadge";
@@ -1489,6 +1490,15 @@ export function NutritionPlanSection() {
         />
       ) : null}
     </section>
+
+    {/* Your whole day (M-162): the plan's caretaker section — the
+        sleep window, the movement target and the evening's care
+        lines, derived from the Trackers goals, the wake-time
+        preference and this plan's own meals and timeline (see
+        DayCaretakerSection). It sits beside the day card whose
+        "How this plan is built" disclosure explains the food;
+        every §7.1 relative order the shell guard pins stands. */}
+    <DayCaretakerSection plan={plan} />
 
     {/* Today's balance (brief v7 N4): the day's balance as the
         signature viz ONLY — the Bloom flower fed by planView's ONE
