@@ -138,7 +138,7 @@ export function browseDishes(
  *      a tier is stated, dishes at or under it come before dishes
  *      above it. The budget never removes a dish from the shelf —
  *      until method 12 it silently cut the shelf from the library's
- *      1,202 dishes to the in-budget subset, protein dishes first
+ *      1,203 dishes to the in-budget subset, protein dishes first
  *      among the missing. Unstated: no budget key.
  *   4. Everything else keeps browseDishes' deterministic category /
  *      name order exactly (the sort is stable).

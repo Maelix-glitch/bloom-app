@@ -141,6 +141,7 @@ import { PROTEIN_WAVE_DISH_IDS } from "./data/dishLibrary";
 import { newNutritionId } from "./ids";
 import { nutrientsForGrams } from "./math";
 import { dishRegion, type DishRegion } from "./regions";
+import { dishIsGravyStyle } from "./gravyStyle";
 import { isRealDayKey, parseEntryNutrients, parseFoodProvenance } from "./parse";
 import { MICRO_RICH_SHARE, planLearningFor, type PlanLearning } from "./planAdaptation";
 import { isRawBasisFood } from "./preparation";
@@ -211,6 +212,14 @@ export interface PlanInputsSnapshot {
    *  anchored relatively. Absent on pre-P12 snapshots. */
   wakeTime?: string | null;
   bedTime?: string | null;
+  /** The snack-placement preference the day was composed under
+   *  (P14), recorded on the wake/bed precedent exactly —
+   *  scheduling-shaping only, never target-bearing, deliberately
+   *  NOT part of the inputs fingerprint — and named by the
+   *  staleness check when it changes. Absent on pre-P14
+   *  snapshots, which read as the default they were composed
+   *  under ("widest_gap"). */
+  snackPlacement?: SnackPlacement | null;
   safetyClassification: SafetyClass;
   targetsKcal: number;
   targetsProteinG: number;
@@ -235,10 +244,13 @@ export interface PlanSuggestion {
 }
 
 /** The role a dish plays in a dish-composed meal. Since P8 the one
- *  dish of a main meal is always the `anchor` — it IS the meal. The
- *  `base` and `side` roles remain in the type because plans stored
- *  by the P5–P7 composers carry them and must keep parsing and
- *  rendering exactly as they were written. */
+ *  dish of a main meal is always the `anchor` — it IS the meal.
+ *  The `side` role remains in the type because plans stored by
+ *  the P5–P7 composers carry it and must keep parsing and
+ *  rendering exactly as they were written. The `base` role is
+ *  live again since method 14 — not the P5 stack revived, but
+ *  the one accompaniment a gravy anchor is served (see
+ *  accompanimentFor). */
 export type PlanDishRole = "anchor" | "base" | "side";
 
 /**
@@ -338,6 +350,15 @@ export interface PlanTimeline {
   anchor: "sleep_log" | "relative";
   items: PlanTimelineItem[];
 }
+
+/** Where the day's snack sits (P14): the widest-gap rule that has
+ *  placed it since P12 ("widest_gap", the default), or the
+ *  person's morning preference ("morning") — the snack in the
+ *  breakfast→lunch gap when that gap can hold it. A day-structure
+ *  preference, stored in the prefs document like every other
+ *  preference (see snackPlacement.ts); it shapes the timeline
+ *  only — never a target, a split, or a portion. */
+export type SnackPlacement = "widest_gap" | "morning";
 
 export interface DailyPlan {
   id: string;
@@ -486,8 +507,23 @@ export interface DailyPlan {
  *  protein SPREAD across its main meals; and the top-up pass
  *  closes protein with whole foods before it ever reaches for a
  *  loose powder. Pattern, allergies, dislikes and Condition
- *  Modes stay absolute throughout — only preferences relax. */
-export const PLAN_METHOD_VERSION = 13;
+ *  Modes stay absolute throughout — only preferences relax.
+ *  14 = the accompaniment pass (owner directive 2026-11-20,
+ *  M-160/M-161): a lunch or dinner whose anchor arrives in a
+ *  sauce — gravy-style, derived from the dish's own recipe by
+ *  dishIsGravyStyle (./gravyStyle) — is served ONE base beside
+ *  it at a fixed half serving (steamed rice, or phulka where
+ *  the anchor's region is the North's), counted in the meal and
+ *  the day; the day repair then works over the based meals
+ *  too, scaling anchors only, so the bands are re-struck with
+ *  the base on the plate. Dry anchors (kebab / fry / roast
+ *  style), one-pot anchors that already carry their grain,
+ *  breakfast and the snack never take a base. The snack's
+ *  place in the day also becomes the person's choice: the
+ *  widest-gap rule stays the default, and a "morning"
+ *  preference places the snack in the breakfast→lunch gap
+ *  when that gap can hold it (see dayTimelineFor). */
+export const PLAN_METHOD_VERSION = 14;
 
 export type PlanRefusal =
   | {
@@ -513,7 +549,11 @@ export function planInputsSnapshotOf(
   profile: HealthProfile,
   safety: SafetyAssessment,
   targets: NutritionTargets,
-  anchor?: { wakeTime?: string | null; bedTime?: string | null },
+  anchor?: {
+    wakeTime?: string | null;
+    bedTime?: string | null;
+    snackPlacement?: SnackPlacement | null;
+  },
 ): PlanInputsSnapshot {
   const heightCm = profileHeightCm(profile);
   const weightKg = profileWeightKg(profile);
@@ -548,6 +588,10 @@ export function planInputsSnapshotOf(
        key. */
     wakeTime: anchor?.wakeTime ?? null,
     bedTime: anchor?.bedTime ?? null,
+    /* P14: the snack placement, on the same terms — the effective
+       value (the default when no preference was passed), so the
+       two snapshot builders agree here too. */
+    snackPlacement: anchor?.snackPlacement ?? "widest_gap",
   };
 }
 
@@ -624,6 +668,14 @@ export function planStaleness(plan: DailyPlan, current: PlanInputsSnapshot): Pla
     (plan.inputs.bedTime ?? null) !== (current.bedTime ?? null)
   ) {
     changed.push("your usual sleep times");
+  }
+  /* P14: the snack placement, compared on the same nullish-
+     tolerant terms — a pre-P14 snapshot carries no key, which is
+     the default it was composed under, not a change. */
+  if (
+    (plan.inputs.snackPlacement ?? "widest_gap") !== (current.snackPlacement ?? "widest_gap")
+  ) {
+    changed.push("where your snack sits");
   }
   if (
     plan.inputs.targetsKcal !== current.targetsKcal ||
@@ -3340,6 +3392,67 @@ function composeSnackDish(
   return toPlanDish(pick.candidate, "anchor", pick.servings);
 }
 
+/* -------------------- P14 accompaniment (the base) -------------------- */
+
+/** The base dishes (P14): the plain steamed rice the library
+ *  gained for this rule, and the phulka — the two accompaniments
+ *  the plates this rule completes actually use. A base is served
+ *  from the person's own gated pool or not at all: the pattern,
+ *  budget and kitchen gates judge a base exactly as they judge
+ *  an anchor. A base is NOT under the day's no-repeat discipline,
+ *  which exists for anchors: plain rice beside two different
+ *  curries is what a kitchen actually serves. */
+const STEAMED_RICE_DISH_ID = "dish-steamed-rice";
+const PHULKA_DISH_ID = "dish-phulka-roti";
+
+/** The base's serving: a fixed half serving — a modest mound of
+ *  rice (~135 kcal) or one phulka (~100 kcal) at the library's
+ *  own serving sizes. Fixed, and never a repair lever: the day's
+ *  bands are re-struck by scaling the anchor around it (see
+ *  repairDishScales), so the base a person is served is the same
+ *  base every day. */
+const BASE_SERVINGS = 0.5;
+
+/**
+ * The accompaniment (P14, M-160): the base a gravy anchor is
+ * served, or null. ONE base, beside a lunch or dinner anchor
+ * that arrives in a sauce — gravy-style by the recipe derivation
+ * (./gravyStyle) — and never anywhere else: not at breakfast,
+ * not at the snack, not beside a dry anchor (a kebab, a fry, a
+ * roast), and not beside a one-pot anchor, which the derivation
+ * already refuses (a rice dish IS its base; a curry carrying its
+ * own grain is a complete plate).
+ *
+ * Which base is cuisine fit, decided by the anchor's own region
+ * (the same derivation the cuisine preference reads): a North
+ * Indian anchor takes the phulka first — the roti is that
+ * kitchen's accompaniment — and every other anchor takes the
+ * steamed rice first, the South's and the pan-Indian default.
+ * The other base is the fallback when the first is gated out of
+ * the pool. The base is counted in the
+ * meal and the day like any dish; the passes that follow (the
+ * day guard's scale repair above all) judge the day WITH it on
+ * the plate, and may shrink the anchor to hold the bands — the
+ * protein band's priority is unchanged.
+ */
+function accompanimentFor(
+  anchor: Dish,
+  meal: Meal,
+  ordered: readonly DishCandidate[],
+): PlanDish | null {
+  if (meal !== "lunch" && meal !== "dinner") return null;
+  if (!dishIsGravyStyle(anchor)) return null;
+  const order =
+    dishRegion(anchor) === "north_indian"
+      ? [PHULKA_DISH_ID, STEAMED_RICE_DISH_ID]
+      : [STEAMED_RICE_DISH_ID, PHULKA_DISH_ID];
+  for (const id of order) {
+    const candidate = ordered.find((c) => c.dish.id === id);
+    if (candidate) return toPlanDish(candidate, "base", BASE_SERVINGS);
+  }
+  return null;
+}
+
 /** The day bands the repair aims at: energy within ±5% of the
  *  guide (the band the day's notes judge at), protein within
  *  [95%, 110%] — met, not merely approached, and never bought at
@@ -3364,8 +3477,8 @@ function dayBandCost(kcal: number, proteinG: number, targets: NutritionTargets):
 }
 
 /**
- * The meal-sanity term of the day cost: a single-dish meal whose
- * dish lands far outside its share — under 60% (a garnish, not a
+ * The meal-sanity term of the day cost: a dish-composed meal whose
+ * plate lands far outside its share — under 60% (a garnish, not a
  * meal) or over 130% (two bowls of soup where a plate belongs) —
  * is a plan a person would not eat, however well the day sums.
  * Weighted below the band terms (0.5 per unit of excess, against
@@ -3375,7 +3488,30 @@ function dayBandCost(kcal: number, proteinG: number, targets: NutritionTargets):
  * whenever one exists. Zero for food-composed meals — the layered
  * composer has its own portion discipline.
  */
-/** One dish meal's sanity term: its dish's coverage of the
+/** The meals the dish machinery composes and can move (P8,
+ *  generalised P14): one anchor dish, or — since the
+ *  accompaniment pass — an anchor with its base beside it. The
+ *  repair scales the ANCHOR (dishes[0]); the base's fixed half
+ *  serving is part of the plate, never a lever. The legacy P5–P7
+ *  stack (anchor + base + side) is not this shape: stored plans
+ *  carrying it are history, read and rendered, never repaired. */
+function isDishMeal(meal: PlanMeal): boolean {
+  if (meal.dishes.length === 1) return meal.dishes[0]!.role === "anchor";
+  return (
+    meal.dishes.length === 2 &&
+    meal.dishes[0]!.role === "anchor" &&
+    meal.dishes[1]!.role === "base"
+  );
+}
+
+/** A dish-composed meal's whole plate, in kcal: the anchor plus
+ *  its base when it carries one. For a single-dish meal this is
+ *  the dish's own figure, exactly as before P14. */
+function plateKcalOf(meal: PlanMeal): number {
+  return meal.dishes.reduce((a, d) => a + d.nutrients.kcal, 0);
+}
+
+/** One dish meal's sanity term: its plate's coverage of the
  *  meal's share, priced as in `mealSanityCost`. */
 function mealSanityTerm(dishKcal: number, mealKcal: number): number {
   if (mealKcal <= 0) return 0;
@@ -3388,8 +3524,8 @@ function mealSanityTerm(dishKcal: number, mealKcal: number): number {
 function mealSanityCost(meals: readonly PlanMeal[]): number {
   let cost = 0;
   for (const meal of meals) {
-    if (meal.dishes.length !== 1) continue;
-    cost += mealSanityTerm(meal.dishes[0]!.nutrients.kcal, meal.kcal);
+    if (!isDishMeal(meal)) continue;
+    cost += mealSanityTerm(plateKcalOf(meal), meal.kcal);
   }
   return cost;
 }
@@ -3432,11 +3568,13 @@ function proteinSpreadTerm(mealProteinG: number, targets: NutritionTargets): num
 /** The day's spread cost over its dish-composed main meals. Zero
  *  for food-composed meals, like the sanity term — the layered
  *  composer has its own distribution discipline, and the repair
- *  cannot move a food-composed meal anyway. */
+ *  cannot move a food-composed meal anyway. A based meal counts
+ *  its whole served protein (anchor + base + top-ups, as
+ *  mealProteinServed already sums it). */
 function proteinSpreadCost(meals: readonly PlanMeal[], targets: NutritionTargets): number {
   let cost = 0;
   for (const meal of meals) {
-    if (meal.meal === "snack" || meal.dishes.length !== 1) continue;
+    if (meal.meal === "snack" || !isDishMeal(meal)) continue;
     cost += proteinSpreadTerm(mealProteinServed(meal), targets);
   }
   return cost;
@@ -3468,13 +3606,21 @@ function dayCost(meals: readonly PlanMeal[], targets: NutritionTargets): number 
  * repair reads, never levers it pulls. What the pool cannot land,
  * the repair leaves at its closest, and the plan's notes name the
  * true figure — the P3 honesty, unchanged.
+ *
+ * P14: a based meal (anchor + base) repairs like any dish meal,
+ * over its ANCHOR's scale alone — the base's fixed half serving
+ * is a constant of the plate, read in every measurement and
+ * never moved. This is the pass that re-strikes the day's bands
+ * with the base on the plate: an anchor composed against its
+ * full share shrinks by a step or two once the base's kcal are
+ * counted beside it.
  */
 function repairDishScales(
   meals: PlanMeal[],
   candidateById: ReadonlyMap<string, DishCandidate>,
   targets: NutritionTargets,
 ): void {
-  const dishMeals = meals.filter((m) => m.dishes.length === 1);
+  const dishMeals = meals.filter(isDishMeal);
   if (dishMeals.length === 0) return;
   interface Move {
     changes: { meal: PlanMeal; servings: number }[];
@@ -3589,7 +3735,8 @@ function bestDayAwarePick(
   targets: NutritionTargets,
   opts: DishPickOpts,
   day: string,
-): { candidate: DishCandidate; servings: number; judge: number } | null {
+  ordered: readonly DishCandidate[],
+): { candidate: DishCandidate; servings: number; judge: number; base: PlanDish | null } | null {
   const current = meal.dishes[0]!;
   const split: MealSplit = { meal: meal.meal, kcal: meal.kcal, proteinG: meal.proteinG };
   const restKcal = dayKcalOf(meals) - current.nutrients.kcal;
@@ -3609,13 +3756,24 @@ function bestDayAwarePick(
      with protein, is how the pre-P12 guard's blind re-picks
      traded one promise against the other. */
   const currentExcess = bandExcesses(dayKcalOf(meals), dayProteinOf(meals), targets);
-  let best: { candidate: DishCandidate; servings: number; judge: number } | null = null;
+  let best: { candidate: DishCandidate; servings: number; judge: number; base: PlanDish | null } | null =
+    null;
   for (const candidate of cands) {
+    /* P14: the candidate is judged as the plate it would actually
+     *  be served as — a gravy lunch/dinner candidate carries its
+     *  accompaniment (fixed serving, candidate-independent), so
+     *  the base's nutrients ride in every total below, and the
+     *  base the judge counted is the base the swap serves. */
+    const base = accompanimentFor(candidate.dish, meal.meal, ordered);
+    const baseKcal = base?.nutrients.kcal ?? 0;
+    const baseProtein = base?.nutrients.proteinG ?? 0;
     const panels = scaledPanels(candidate);
     for (let i = 0; i < DISH_SCALE_STEPS.length; i++) {
       const servings = DISH_SCALE_STEPS[i]!;
       const panel = panels[i]!;
-      const excess = bandExcesses(restKcal + panel.kcal, restProtein + panel.proteinG, targets);
+      const plateKcal = panel.kcal + baseKcal;
+      const plateProtein = panel.proteinG + baseProtein;
+      const excess = bandExcesses(restKcal + plateKcal, restProtein + plateProtein, targets);
       if (
         excess.kcal > currentExcess.kcal + 1e-9 ||
         excess.protein > currentExcess.protein + 1e-9
@@ -3623,14 +3781,14 @@ function bestDayAwarePick(
         continue;
       }
       const judge =
-        dayBandCost(restKcal + panel.kcal, restProtein + panel.proteinG, targets) +
+        dayBandCost(restKcal + plateKcal, restProtein + plateProtein, targets) +
         otherSanity +
-        mealSanityTerm(panel.kcal, meal.kcal) +
+        mealSanityTerm(plateKcal, meal.kcal) +
         otherSpread +
-        proteinSpreadTerm(panel.proteinG + mealTopUpProtein, targets) +
+        proteinSpreadTerm(plateProtein + mealTopUpProtein, targets) +
         DAY_REPICK_FIT_WEIGHT * dishPickCost(candidate, panel, servings, split, opts, day);
       if (best === null || judge < best.judge - 1e-9) {
-        best = { candidate, servings, judge };
+        best = { candidate, servings, judge, base };
       }
     }
   }
@@ -3649,6 +3807,17 @@ function bestDayAwarePick(
  * the judged day, so the guard never trades a closer day for a
  * worse one. A day the pool genuinely cannot land stays at its
  * closest, and the plan's notes name the true figure.
+ *
+ * P14: a based meal is never re-picked — swapping its anchor
+ * would re-open the accompaniment question (is the new anchor
+ * still a gravy dish, and which base fits it?) inside a pass
+ * whose discipline is totals. Its anchor's scale still repairs
+ * on every attempt, and the day's other meals re-pick around
+ * it; the loop below keeps its single-dish shape test for
+ * exactly this reason. The converse is accompaniment-aware: a
+ * re-pick INTO a gravy anchor is judged as the whole plate
+ * (anchor + base) and serves the base it was judged with, so a
+ * swap can complete a plate but never strip one bare.
  */
 function enforceDayBands(
   meals: PlanMeal[],
@@ -3666,6 +3835,7 @@ function enforceDayBands(
       candidate: DishCandidate;
       servings: number;
       judge: number;
+      base: PlanDish | null;
     } | null = null;
     for (const meal of meals) {
       if (meal.dishes.length !== 1) continue;
@@ -3686,15 +3856,24 @@ function enforceDayBands(
       const cands = slotCandidates(ordered, meal.meal, usedElsewhere).filter(
         (c) => c.dish.id !== current.dishId,
       );
-      const pick = bestDayAwarePick(cands, meal, meals, targets, opts, day);
+      const pick = bestDayAwarePick(cands, meal, meals, targets, opts, day, ordered);
       if (!pick) continue;
       if (pick.judge >= currentJudge - 1e-9) continue;
       if (bestSwap === null || pick.judge < bestSwap.judge - 1e-9) {
-        bestSwap = { meal, candidate: pick.candidate, servings: pick.servings, judge: pick.judge };
+        bestSwap = {
+          meal,
+          candidate: pick.candidate,
+          servings: pick.servings,
+          judge: pick.judge,
+          base: pick.base,
+        };
       }
     }
     if (bestSwap === null) return;
-    bestSwap.meal.dishes = [toPlanDish(bestSwap.candidate, "anchor", bestSwap.servings)];
+    /* P14: the swap serves the plate the judge counted — the new
+       anchor, plus its accompaniment when it earns one. */
+    const anchor = toPlanDish(bestSwap.candidate, "anchor", bestSwap.servings);
+    bestSwap.meal.dishes = bestSwap.base ? [anchor, bestSwap.base] : [anchor];
   }
 }
 
@@ -4151,10 +4330,16 @@ const MEAL_TIMELINE_LABEL: Record<Exclude<Meal, "snack">, string> = {
  * neighbours and two hours clear of bed; the wind-down 45 minutes
  * before bed. Derived times round to five minutes: the plan
  * schedules a day, it does not pretend to the minute.
+ *
+ * P14: under the person's "morning" snack preference the snack
+ * takes the breakfast→lunch gap instead, when that gap can hold
+ * it by the same 90-minute rule; the widest-gap placement above
+ * is the default and the fallback, unchanged.
  */
 function dayTimelineFor(
   meals: readonly PlanMeal[],
   anchor: { wake: number; bed: number } | null,
+  snackPlacement: SnackPlacement = "widest_gap",
 ): PlanTimeline {
   const wake = anchor?.wake ?? 7 * 60;
   const bed = anchor?.bed ?? 23 * 60;
@@ -4218,7 +4403,26 @@ function dayTimelineFor(
         (best, s) => (best === null || s.length > best.length ? s : best),
         null,
       );
-    const chosen = widest(segments.filter(holds)) ?? widest(segments);
+    /* P14: the person's snack-placement preference. "morning"
+       asks for the breakfast→lunch gap itself: when both meals
+       are placed and that gap holds the snack (its midpoint
+       keeps the same 90 minutes from both neighbours), the
+       snack sits there, whatever the wider gaps are doing.
+       When the gap cannot hold it — a short morning, a missing
+       breakfast or lunch — the widest-gap rule decides, exactly
+       as it does by default: the preference is honoured where
+       the day allows it and never forces a spacing the day's
+       own rules forbid. */
+    let chosen: Segment | null = null;
+    if (snackPlacement === "morning" && times.has("breakfast") && times.has("lunch")) {
+      const gap: Segment = {
+        from: times.get("breakfast")!,
+        to: times.get("lunch")!,
+        length: times.get("lunch")! - times.get("breakfast")!,
+      };
+      if (holds(gap)) chosen = gap;
+    }
+    chosen ??= widest(segments.filter(holds)) ?? widest(segments);
     if (chosen) snackAt = round5Min((chosen.from + chosen.to) / 2);
   }
 
@@ -4306,6 +4510,17 @@ export interface PlanGenerationInput {
    *  touches a target, a split, or a portion. */
   wakeTime?: string | null;
   bedTime?: string | null;
+  /** The person's snack-placement preference (P14): "widest_gap"
+   *  (the default — the P12 widest-gap rule, unchanged) or
+   *  "morning" (the snack sits in the breakfast→lunch gap when
+   *  that gap can hold it). Scheduling only, like the day anchor:
+   *  it moves no target, split or portion — only where the snack
+   *  lands on the timeline. Recorded on the inputs snapshot on
+   *  the anchor's precedent, so changing it names the stored plan
+   *  stale ("where your snack sits") and the person's own
+   *  regenerate tap re-composes under it. Absent, the default
+   *  applies and the output is the pre-P14 composer's exactly. */
+  snackPlacement?: SnackPlacement;
   /** The day the plan is for. */
   day: string;
   now: string;
@@ -4414,10 +4629,16 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      named by the staleness check when it changes, never part of
      the fingerprint, never near a target). */
   const dayAnchor = dayAnchorFor(input.wakeTime, input.bedTime);
+  /* P14: the snack placement the day is composed under — the
+     person's preference, or the widest-gap default the timeline
+     has always used. Recorded on the snapshot beside the anchor
+     (scheduling-shaping only, on its precedent). */
+  const snackPlacement: SnackPlacement = input.snackPlacement ?? "widest_gap";
   const snapshot: PlanInputsSnapshot = {
     ...planInputsSnapshotOf(profile, safety, targets),
     wakeTime: dayAnchor ? input.wakeTime! : null,
     bedTime: dayAnchor ? input.bedTime! : null,
+    snackPlacement,
   };
   /* P11: the snack belongs to a complete day. A stated meals-per-day
      below four used to drop the snack slot entirely — the owner's
@@ -4619,11 +4840,23 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
     if (dishData) {
       const dish = composeSingleDishMeal(dishOrdered, usedDishIds, input.day, split, pickOpts);
       if (dish) {
+        /* P14: the accompaniment — a gravy anchor at lunch or
+           dinner is served its base beside it, as a second dish
+           in the same meal. The base is on the plate from the
+           first composition, so every pass that follows (the day
+           guard, the top-ups, the reconciliation) judges the day
+           the person will actually eat. */
+        const dishes = [dish];
+        const anchorDish = dishData.byId.get(dish.dishId);
+        if (anchorDish) {
+          const base = accompanimentFor(anchorDish, split.meal, dishOrdered);
+          if (base) dishes.push(base);
+        }
         return {
           meal: split.meal,
           kcal: split.kcal,
           proteinG: split.proteinG,
-          dishes: [dish],
+          dishes,
           suggestions: [],
           note: null,
         };
@@ -4735,7 +4968,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   /* P12: the finished day, laid out from waking to sleep — the
      timeline schedules the meals as they stand; it is computed
      last so it describes the plan the passes actually left. */
-  const timeline = dayTimelineFor(meals, dayAnchor);
+  const timeline = dayTimelineFor(meals, dayAnchor, snackPlacement);
   /* The adaptation's explanations lead the reasons: they say why this
      plan leans the way it does, before the reasons judge the result.
      The P7 learning reasons follow the P6 ones — what the log taught,
@@ -4860,6 +5093,7 @@ const SEXES: readonly Sex[] = ["female", "male", "unspecified"];
 const TARGET_SOURCES: readonly DailyPlan["targetsSource"][] = ["assessment", "body_profile"];
 const TIMELINE_KINDS: readonly PlanTimelineKind[] = ["wake", "meal", "wind_down", "sleep"];
 const TIMELINE_ANCHORS: readonly PlanTimeline["anchor"][] = ["sleep_log", "relative"];
+const SNACK_PLACEMENTS: readonly SnackPlacement[] = ["widest_gap", "morning"];
 
 function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
   if (!isRecord(raw)) return null;
@@ -4977,6 +5211,20 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
   if (raw["bedTime"] !== undefined && raw["bedTime"] !== null && bedTime === null) {
     return null;
   }
+  /* The snack placement (P14): absent on snapshots stored before
+     P14 — read as the default they were composed under; present-
+     but-invalid is a tamper, exactly like the anchor above. */
+  const snackPlacement =
+    raw["snackPlacement"] === undefined || raw["snackPlacement"] === null
+      ? null
+      : oneOf(raw["snackPlacement"], SNACK_PLACEMENTS);
+  if (
+    raw["snackPlacement"] !== undefined &&
+    raw["snackPlacement"] !== null &&
+    snackPlacement === null
+  ) {
+    return null;
+  }
   const safetyClassification = oneOf(raw["safetyClassification"], SAFETY_CLASSES);
   if (!safetyClassification) return null;
   const targetsKcal = numIn(raw["targetsKcal"], 0.01, 10000);
@@ -5002,6 +5250,7 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
     confidence: confidence === null ? null : Math.round(confidence),
     wakeTime,
     bedTime,
+    snackPlacement,
     safetyClassification,
     targetsKcal,
     targetsProteinG,

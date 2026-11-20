@@ -15,7 +15,10 @@ import { DISH_LIBRARY, findDish } from "./data/dishLibrary";
  */
 describe("the dish library", () => {
   it("clears the owner's 200-dish bar", () => {
-    /* 1,202 after the 2026-11-17 protein waves added 300 dishes (PW-1
+    /* 1,203 after method 14 (2026-11-20) added the plain Steamed
+       Rice — the base dish the accompaniment rule serves beside a
+       gravy (M-160); before that, 1,202 after the 2026-11-17 protein
+       waves added 300 dishes (PW-1
        shakes, PW-2 breakfasts & snacks, PW-3 Indian/Kerala mains, PW-4
        international mains) to the cleaned 903, minus one cross-wave
        duplicate found at integration (PW-2's bacalhau à brás duplicated
@@ -24,7 +27,7 @@ describe("the dish library", () => {
        condiments and deep-fried breads); 910 before that, after the same
        day's duplicate audit removed 31 twice-authored dishes (941 before
        the dedupe). */
-    expect(DISH_LIBRARY.length).toBe(1202);
+    expect(DISH_LIBRARY.length).toBe(1203);
     expect(DISH_LIBRARY.length).toBeGreaterThanOrEqual(200);
   });
 
@@ -70,7 +73,7 @@ describe("the dish library", () => {
       const tag = dish.cuisine as string;
       counts[tag] = (counts[tag] ?? 0) + 1;
     }
-    expect(counts).toEqual({ india: 375, kerala: 125, international: 702 });
+    expect(counts).toEqual({ india: 376, kerala: 125, international: 702 });
   });
 
   it("covers every category", () => {

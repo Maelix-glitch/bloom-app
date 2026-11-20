@@ -35,12 +35,15 @@ import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor, type BodyTargetsOutcome } from "@/lib/vitalis/calc/body";
 import type { SafetyAssessment } from "@/lib/vitalis/domain/safety";
 import {
+  DEFAULT_SNACK_PLACEMENT,
   DISH_LIBRARY,
   PLAN_KEY,
   PLAN_LOG_KEY,
+  SNACK_PLACEMENT_KEY,
   TARGET_ADJUSTMENT_KEY,
   USDA_REFERENCE_FOODS,
   clearTargetAdjustment,
+  parseSnackPlacement,
   parseTargetAdjustment,
   generatePlan,
   nutritionTargetsFromBodyTargets,
@@ -63,6 +66,7 @@ import {
   type PlanRefusal,
   type PlanStaleness,
   type PlanSuggestion,
+  type SnackPlacement,
   type TargetAdjustment,
 } from "@/lib/nutrition";
 
@@ -117,6 +121,14 @@ export interface PlanStore {
   /** Remove the confirmed adjustment: targets return to the
    *  engine's, and an existing plan goes stale by name. */
   clearTargetAdjustment: () => void;
+  /** Where the day's snack sits (P14): the person's placement
+   *  preference, or the widest-gap default they have always had. */
+  snackPlacement: SnackPlacement;
+  /** Set the snack placement. The stored plan is NOT regenerated:
+   *  it goes stale by name ("where your snack sits"), and the
+   *  person's own tap on "Suggest different meals" rebuilds it —
+   *  the same no-silent-changes rule as setGoal. */
+  setSnackPlacement: (placement: SnackPlacement) => void;
 }
 
 interface AssembledInputs {
@@ -134,6 +146,11 @@ export function usePlan(): PlanStore {
   const plan = usePrefValue(PLAN_KEY, parsePlanValue, null);
   const planLog = usePrefValue(PLAN_LOG_KEY, parsePlanLogValue, NO_PLAN_LOG);
   const targetAdjustment = usePrefValue(TARGET_ADJUSTMENT_KEY, parseTargetAdjustment, null);
+  const snackPlacement = usePrefValue(
+    SNACK_PLACEMENT_KEY,
+    parseSnackPlacement,
+    DEFAULT_SNACK_PLACEMENT,
+  );
   const modes = usePrefValue(MODES_KEY, parseModesValue, EMPTY_MODES_VALUE);
   const today = todayLocal();
 
@@ -194,10 +211,15 @@ export function usePlan(): PlanStore {
           ? { wakeTime: sleep.value.wakeTime, bedTime: sleep.value.bedTime }
           : {};
       })(),
+      /* P14: the person's snack-placement preference rides along
+         the same way — a scheduling input the composer records on
+         the plan's snapshot, so the preview and the saved plan are
+         composed under the same placement the person chose. */
+      snackPlacement,
       day: today,
       now,
     }),
-    [assembled, nutrition.foods, nutrition.entries, plan, targetAdjustment, modes, today],
+    [assembled, nutrition.foods, nutrition.entries, plan, targetAdjustment, modes, snackPlacement, today],
   );
 
   /* The preview runs the real generator and discards the plan — the
@@ -216,7 +238,9 @@ export function usePlan(): PlanStore {
          by the fields that actually moved, not by their consequence. */
       const current = preview.ok
         ? preview.plan.inputs
-        : planInputsSnapshotOf(assembled.profile, assembled.safety, plan.targets);
+        : planInputsSnapshotOf(assembled.profile, assembled.safety, plan.targets, {
+            snackPlacement,
+          });
       return { kind: "ready", plan, staleness: planStaleness(plan, current) };
     }
     if (plan) {
@@ -225,7 +249,7 @@ export function usePlan(): PlanStore {
         : { kind: "refused", refusal: preview.refusal };
     }
     return preview.ok ? { kind: "can_generate" } : { kind: "refused", refusal: preview.refusal };
-  }, [preview, plan, today, assembled]);
+  }, [preview, plan, today, assembled, snackPlacement]);
 
   const generate = useCallback((): PlanOutcome => {
     const outcome = generatePlan(buildInput(new Date().toISOString()));
@@ -264,6 +288,10 @@ export function usePlan(): PlanStore {
     },
     [body],
   );
+
+  const setSnackPlacement = useCallback<PlanStore["setSnackPlacement"]>((placement) => {
+    setPref(SNACK_PLACEMENT_KEY, placement);
+  }, []);
 
   const logSuggestion = useCallback<PlanStore["logSuggestion"]>(
     (meal, suggestion) => {
@@ -322,6 +350,8 @@ export function usePlan(): PlanStore {
     engineTdeeKcal,
     targetAdjustment,
     clearTargetAdjustment,
+    snackPlacement,
+    setSnackPlacement,
   };
 }
 

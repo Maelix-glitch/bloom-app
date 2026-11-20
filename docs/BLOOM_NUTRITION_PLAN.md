@@ -116,6 +116,33 @@ alignment, colour, type, data viz, consistency, interaction, brand), 1–5 each.
 Target ≥ 4 on all. Attach scores and the three-account screenshots to the PR.
 Do not grade leniently: the reviewer will compare.
 
+## Method 14 addendum (2026-11-20 — M-160, M-161; PLAN_METHOD_VERSION 14)
+
+Two composer rules the owner asked for on the live page; they bind every
+future slice that touches composition:
+
+- **A curry gets its base.** A lunch/dinner anchor the gravy derivation
+  (`dishIsGravyStyle`, recipe structure only — ingredient lines + method
+  text, never the dish's name) calls gravy-style is served ONE base at a
+  fixed half serving: phulka for a North Indian anchor, steamed rice
+  otherwise, each the fallback for the other when gated out of the pool.
+  The base is counted in the meal and the day; the repair re-strikes the
+  day around it (re-picks judge whole plates; a based meal is never
+  re-picked). Never a base at breakfast, at the snack, beside a dry
+  anchor, or beside a one-pot/rice/bread anchor. The plain Steamed Rice
+  is a library dish like any other (recipe provenance, honestly
+  photo-less); the library is 1,203 dishes.
+- **The snack's seat is the person's choice.** Preference
+  `health.snackPlacement.v1`: "In the longest gap" (default — the P12
+  widest-gap rule, unchanged) or "In the morning" (the breakfast→lunch
+  gap's midpoint when it holds the snack by the 90-minute rule; the
+  widest gap otherwise). It is a composition input recorded on the
+  plan's snapshot: changing it names the plan stale ("where your snack
+  sits") and rebuilds only on the person's own regenerate tap. The one
+  control is a quiet two-choice row inside "How this plan is built" —
+  no new section, §7.1 order untouched. Labels follow the clock
+  ("Mid-morning snack" at 10:55 on a 07:00–23:00 frame).
+
 ## Acceptance (every slice)
 - No horizontal scroll at 360/768/1280/1920 (guard proxies in vitest/jsdom;
   geometry verified live by the parent after deploy).

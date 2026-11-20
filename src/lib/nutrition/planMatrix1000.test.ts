@@ -19,6 +19,7 @@ import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
 import { DISH_LIBRARY, PROTEIN_WAVE_DISH_IDS } from "./data/dishLibrary";
 import { dishPatterns } from "./dishes";
+import { dishIsGravyStyle } from "./gravyStyle";
 import {
   floorTotalsOf,
   generatePlan,
@@ -48,7 +49,12 @@ import type { Food } from "./types";
  *     band miss, never as a contract failure; an UNNAMED miss is
  *     a failure of the honesty contract itself);
  *   · zero dietary-pattern violations (dishes AND plain foods);
- *   · at most one dish in a main meal, no dish repeated in a day;
+ *   · one dish in a main meal — plus, since method 14, the ONE
+ *     legal second dish: the accompaniment (role "base", the
+ *     fixed half serving, steamed rice or phulka, beside a
+ *     gravy-style anchor at lunch or dinner only); no dish
+ *     repeated in a day, the base excepted (it may serve at
+ *     lunch AND dinner, never more);
  *   · a real snack, a morning element, and a hydration schedule
  *     summing exactly to the gated outcome's own water figure;
  *   · main meals sanely proportioned against their share;
@@ -71,6 +77,18 @@ import type { Food } from "./types";
  * composition tallies (protein-wave servings by slot, shakes,
  * whether the snack carried a dish) so the report can state the
  * dish-first numbers alongside the band numbers.
+ *
+ * Method 14 extension (2026-11-20, M-160/M-161): the composer now
+ * serves ONE base beside a gravy lunch/dinner anchor, so two of
+ * this suite's shape invariants move to the method-14 contract —
+ * at equal strictness, not less. "multi_dish_main" still fails
+ * any main meal carrying a second dish that is not the
+ * accompaniment; the new hard class "bad_base" fails a base that
+ * is malformed in any particular (wrong seat, wrong serving,
+ * wrong dish, wrong meal, or a non-gravy anchor). "dish_repeat"
+ * still fails any repeated non-base dish; a base dish may appear
+ * at most twice (lunch and dinner), as bases only. Every other
+ * invariant — bands, shares, spacing, pattern — is untouched.
  */
 
 const NOW = "2026-11-19T03:00:00.000Z";
@@ -188,6 +206,7 @@ type FailureClass =
   | "unnamed_miss"
   | "pattern_violation"
   | "multi_dish_main"
+  | "bad_base"
   | "dish_repeat"
   | "snack_missing"
   | "morning_missing"
@@ -206,6 +225,7 @@ const HARD_CLASSES: ReadonlySet<FailureClass> = new Set([
   "unnamed_miss",
   "pattern_violation",
   "multi_dish_main",
+  "bad_base",
   "dish_repeat",
   "snack_missing",
   "morning_missing",
@@ -359,6 +379,7 @@ function judgeRun(
   let kcal = 0;
   let protein = 0;
   const dishIds: string[] = [];
+  const baseIds: string[] = [];
   let dishMains = 0;
   let mains = 0;
   /* Method 13 composition tallies. */
@@ -378,18 +399,46 @@ function judgeRun(
     protein +=
       meal.dishes.reduce((a, d) => a + d.nutrients.proteinG, 0) +
       meal.suggestions.reduce((a, s) => a + s.nutrients.proteinG, 0);
+    /* Method 14: the accompaniment is the one legal second dish —
+       role "base" in the second seat, the fixed half serving, one
+       of the two base dishes, at lunch or dinner, beside an anchor
+       the gravy derivation (the composer's own) calls gravy-style.
+       A base failing any particular is its own hard class; a
+       second dish that is not a base at all is the old defect. */
+    const base = meal.dishes.find((d) => d.role === "base");
+    if (base) {
+      const anchorDish = DISH_BY_ID.get(meal.dishes[0]!.dishId);
+      const wellFormed =
+        meal.dishes.length === 2 &&
+        meal.dishes[1] === base &&
+        (meal.meal === "lunch" || meal.meal === "dinner") &&
+        base.servings === 0.5 &&
+        (base.dishId === "dish-steamed-rice" || base.dishId === "dish-phulka-roti") &&
+        anchorDish !== undefined &&
+        dishIsGravyStyle(anchorDish);
+      if (!wellFormed) failures.push("bad_base");
+    }
     if (meal.meal !== "snack") {
       mains += 1;
-      if (meal.dishes.length > 1) failures.push("multi_dish_main");
-      if (meal.dishes.length === 1) dishMains += 1;
+      if (meal.dishes.length > 2 || (meal.dishes.length > 1 && !base)) {
+        failures.push("multi_dish_main");
+      }
+      if (meal.dishes.length >= 1) dishMains += 1;
       const ratio = meal.kcal > 0 ? mealKcal / meal.kcal : 0;
       if (meal.dishes.length + meal.suggestions.length > 0 && (ratio < 0.45 || ratio > 1.6)) {
         failures.push("meal_share");
       }
     }
-    for (const d of meal.dishes) dishIds.push(d.dishId);
+    for (const d of meal.dishes) {
+      if (d.role === "base") baseIds.push(d.dishId);
+      else dishIds.push(d.dishId);
+    }
   }
   if (new Set(dishIds).size !== dishIds.length) failures.push("dish_repeat");
+  /* The base exception to the repeat rule: a base may serve at
+     lunch AND dinner (rice beside two curries) — at most two
+     base servings in a day, one per eligible meal. */
+  if (baseIds.length > 2) failures.push("dish_repeat");
 
   const planPattern = planPatternOf(dims.pattern);
   if (planPattern) {

@@ -60,13 +60,14 @@ describe("wave X-1 — international high-protein dishes", () => {
       /* The only library entries carrying a wave id are the wave itself. */
       expect(INTL1_DISHES).toContain(dish);
     }
-    /* Base 297 = mains + rice/bread + sides (195) + Kerala (97) +
+    /* Base 298 = mains + rice/bread + sides (196) + Kerala (97) +
        proof (5); 308 originally, 301 after the dedupe took 7 dishes
-       from the base files, and 297 after the 2026-11-17 borderline
+       from the base files, 297 after the 2026-11-17 borderline
        removal took poori, bhatura and mango chutney from the base
-       files and injipuli from Kerala. */
+       files and injipuli from Kerala, and 298 after method 14
+       (2026-11-20) added the plain Steamed Rice to the rice shelf. */
     expect(DISH_LIBRARY.length).toBe(
-      297 +
+      298 +
         INTL1_DISHES.length +
         INTL2_DISHES.length +
         INTL3_DISHES.length +

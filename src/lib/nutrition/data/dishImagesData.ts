@@ -1681,6 +1681,7 @@ export interface DishImagePhotoless {
 
 /** Library dishes with no suitable free photograph, and why. */
 export const DISH_IMAGE_PHOTOLESS: readonly DishImagePhotoless[] = [
+  { "dishId": "dish-steamed-rice", "dishName": "Steamed Rice", "reason": "Added as the plan's plain base dish (method 14, M-160) and shipped photo-less: no Commons photograph has been reviewed for it yet, and none is invented in the meantime." },
   { "dishId": "dish-arhar-dal", "dishName": "Arhar Dal", "reason": "Commons search returns only the pigeon-pea plant and its fields — no photograph of the cooked dal under a free licence was found." },
   { "dishId": "dish-black-bean-masala", "dishName": "Black Bean Masala", "reason": "Every free-licence 'black bean curry' photograph on Commons proved to be lobia (black-eyed peas) on inspection — no verifiable black-bean curry photograph." },
   { "dishId": "dish-pinto-bean-curry", "dishName": "Pinto Bean Curry", "reason": "No free-licence photograph of a pinto bean curry was found on Commons." },

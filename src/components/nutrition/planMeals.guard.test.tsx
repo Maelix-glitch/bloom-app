@@ -438,6 +438,40 @@ describe("N3 — the cooking badge (M-139, display only)", () => {
     expect(badge!.hasAttribute("data-conflict")).toBe(false);
   });
 
+  it("a stored plan whose snapshot lacks the kitchen answers is judged by the current Assessment answers", () => {
+    /* The live shape (PR #210 sweep): the plan on the account was
+       composed before its inputs snapshot carried the kitchen fields,
+       so plan.inputs reads null for both — while the person's
+       Assessment answers say "no cooking, ~10 min" outright. The
+       badge must fall back to those answers (display only). */
+    makePlan((plan) => ({
+      ...plan,
+      inputs: { ...plan.inputs, cookingAbility: null, prepTimeMaxMinutes: null },
+      meals: plan.meals.map((m) =>
+        m.meal === "lunch" ? { ...m, dishes: [planDishFor(rezala())] } : m,
+      ),
+    }));
+    const state: AssessmentState = {
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: { ...EMPTY_ANSWERS, ...COMPLETE, cookingAbility: "none", prepTimeMaxMinutes: 10 },
+      consents: [],
+      startedAt: null,
+      completedAt: "2026-11-10T03:05:00.000Z",
+      updatedAt: "2026-11-10T03:05:00.000Z",
+    };
+    setPref(ASSESSMENT_KEY, state);
+    resetPrefCache();
+
+    const { container } = render(<NutritionPlanSection />);
+    const lunch = mealRow(container, "lunch");
+    const badge = lunch.querySelector(".meal-row__meta [data-cooking-badge]");
+    expect(badge, "the row's meta carries the anchor's badge").not.toBeNull();
+    expect(badge!.textContent).toContain("Cooked");
+    expect(badge!.getAttribute("data-conflict")).toBe("true");
+  });
+
   it("CSS: the conflict badge is amber with a dashed underline", () => {
     const body = ruleBody('.cook-badge[data-conflict="true"]');
     expect(body).toContain("var(--amber)");

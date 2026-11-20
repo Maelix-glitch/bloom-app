@@ -50,7 +50,13 @@ import {
   parseBodyProfile,
   type BodyProfile,
 } from "@/lib/health/body";
-import { goalsWithWaterTarget, waterTargetMlOf } from "@/lib/trackers/waterTarget";
+import { goalsWithWaterTarget, planWaterTargetMlOf } from "@/lib/trackers/waterTarget";
+import {
+  ASSESSMENT_KEY,
+  EMPTY_ASSESSMENT_STATE,
+  parseAssessmentState,
+  type AssessmentState,
+} from "@/lib/assessment/state";
 
 export type SaveDayResult = { ok: true } | { ok: false; errors: DayFieldErrors };
 
@@ -71,10 +77,11 @@ export interface TrackerStore {
   days: DayEntry[];
   goals: Goals;
   /**
-   * The day's water target from the plan's guide (body targets), when
-   * the body profile can produce one. While set, it — not the stored
-   * manual goal — is what the analysis (and so the tile, the flower
-   * and the Targets list) measures water against. Optional in the type
+   * The day's water target from the plan's guide, resolved from the
+   * same assembled profile the plan uses (the Assessment, goal-filled
+   * from the body profile). While set, it — not the stored manual
+   * goal — is what the analysis (and so the tile, the flower and the
+   * Targets list) measures water against. Optional in the type
    * because test fixtures construct stores; the real hook always sets
    * it (null when there is no guide value).
    */
@@ -106,11 +113,19 @@ export interface TrackerStore {
 export function useTrackers(): TrackerStore {
   const [days, setDays] = useState<DayEntry[]>([]);
   const [goals, setGoals] = useState<Goals>(() => ({ ...loadGoals() }));
-  /* The body profile rides along for one reason: its guide owns the
-     day's water target (see waterTargetMl below). Read through the
-     same pref useBodyProfile reads, refreshed on the same event. */
+  /* The body profile and the Assessment ride along for one reason:
+     together they are the resolved profile the plan's guide — and so
+     the day's water target — is computed from (see waterTargetMl
+     below). Read through the same prefs useBodyProfile and
+     useAssessment read, refreshed on the same event. The Assessment
+     leg is the one that matters on most accounts: it is where Bloom
+     asks for the numbers, and a person who answered there may never
+     have touched the Trackers body form at all. */
   const [bodyProfile, setBodyProfile] = useState<BodyProfile>(() =>
     getPref(BODY_KEY, parseBodyProfile, DEFAULT_BODY),
+  );
+  const [assessmentState, setAssessmentState] = useState<AssessmentState>(() =>
+    getPref(ASSESSMENT_KEY, parseAssessmentState, EMPTY_ASSESSMENT_STATE),
   );
   const [active, setActiveState] = useState<TrackerId[]>(() => loadActiveTrackers());
   const [customSubjects, setCustomSubjects] = useState<string[]>(() => loadCustomSubjects());
@@ -155,9 +170,14 @@ export function useTrackers(): TrackerStore {
         (Object.keys(g) as (keyof Goals)[]).every((k) => g[k] === prev[k]) ? prev : g,
       );
       const bp = getPref(BODY_KEY, parseBodyProfile, DEFAULT_BODY);
+      const as = getPref(ASSESSMENT_KEY, parseAssessmentState, EMPTY_ASSESSMENT_STATE);
+      setAssessmentState((prev) =>
+        as.updatedAt === prev.updatedAt && as.status === prev.status ? prev : as,
+      );
       setBodyProfile((prev) =>
         bp.updatedAt === prev.updatedAt &&
-        waterTargetMlOf(bp, todayKey()) === waterTargetMlOf(prev, todayKey())
+        planWaterTargetMlOf({ assessmentState: as, bodyProfile: bp, today: todayKey() }) ===
+          planWaterTargetMlOf({ assessmentState: as, bodyProfile: prev, today: todayKey() })
           ? prev
           : bp,
       );
@@ -422,10 +442,14 @@ export function useTrackers(): TrackerStore {
      the plan's guide sets it, and the analysis measures water against
      the guide's figure whenever one exists. The stored manual goal is
      left in the record untouched — superseded, never rewritten — and
-     returns if the body profile is cleared. */
+     returns if the guide stops producing a figure. The figure is
+     resolved from the SAME assembled profile the plan uses
+     (planWaterTargetMlOf: the Assessment, goal-filled from the body
+     profile) — the first cut read the body pref alone and returned
+     null on Assessment-only accounts, which is most accounts. */
   const waterTargetMl = useMemo(
-    () => waterTargetMlOf(bodyProfile, today),
-    [bodyProfile, today],
+    () => planWaterTargetMlOf({ assessmentState, bodyProfile, today }),
+    [assessmentState, bodyProfile, today],
   );
   const effectiveGoals = useMemo(
     () => goalsWithWaterTarget(goals, waterTargetMl),

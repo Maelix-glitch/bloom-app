@@ -110,6 +110,7 @@ import {
   DayPath,
   MoreDisclosure,
   SegmentedGoalControl,
+  SegmentedSnackControl,
   StatStrip,
   type KitchenAnswers,
 } from "./PlanPrimitives";
@@ -340,6 +341,8 @@ export function NutritionPlanSection() {
     setGoal,
     engineTdeeKcal,
     targetAdjustment,
+    snackPlacement,
+    setSnackPlacement,
   } = usePlan();
   const assessment = useAssessment();
   const session = useSession();
@@ -743,12 +746,23 @@ export function NutritionPlanSection() {
   const kcalText = (kcal: number): string =>
     showKcal ? `${fmtInt(Math.round(kcal))} kcal` : "••• kcal";
 
-  /* The kitchen answers this plan was composed against — the
-     snapshot on the plan itself — which the dishes' cooking badges
-     are judged by (M-139, display only). */
+  /* The kitchen answers the dishes' cooking badges are judged by
+     (M-139, display only): the snapshot on the plan itself first —
+     the answers this plan was composed against — and, for any field
+     the snapshot lacks, the person's CURRENT Assessment answers. A
+     stored plan composed before the snapshot carried the kitchen
+     fields parses them as null; judging from the snapshot alone
+     meant such a plan could never show a conflict, however cooked
+     its dishes and however plainly the Assessment says "no cooking"
+     (live, PR #210 sweep). The composer is untouched — this only
+     decides what the badge compares against. */
   const kitchenAnswers: KitchenAnswers = {
-    cookingAbility: plan.inputs.cookingAbility ?? null,
-    prepTimeMaxMinutes: plan.inputs.prepTimeMaxMinutes ?? null,
+    cookingAbility:
+      plan.inputs.cookingAbility ?? assessment.state.answers.cookingAbility ?? null,
+    prepTimeMaxMinutes:
+      plan.inputs.prepTimeMaxMinutes ??
+      assessment.state.answers.prepTimeMaxMinutes ??
+      null,
   };
 
   /* The expanded meal row: the person's own tap once they make
@@ -1456,6 +1470,14 @@ export function NutritionPlanSection() {
           the day short. They are a starting point — log what you actually eat and your totals
           follow that.
         </p>
+        {/* P14 (M-161): the one part of the plan's structure the
+            person chooses — where the snack sits. One quiet row:
+            a group label and the two-segment control. Changing it
+            writes the preference; the plan above goes stale by
+            name ("where your snack sits") and rebuilds on the
+            "Suggest different meals" tap — never silently. */}
+        <p className="nut-group-label mt-4">Snack sits</p>
+        <SegmentedSnackControl current={snackPlacement} onSelect={setSnackPlacement} />
       </MoreDisclosure>
 
       {selectedDish ? (

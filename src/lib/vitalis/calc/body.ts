@@ -51,7 +51,7 @@ const LEGACY_ACTIVITY: Record<ActivityLevel, LegacyActivityLevel> = {
  * since P1 — maintenance energy at the highest protein band (see
  * `bodyTargetsOf`), not maintenance values with a note.
  */
-function legacyGoal(goal: VitalisGoal | null): BodyGoal {
+export function legacyGoal(goal: VitalisGoal | null): BodyGoal {
   if (goal === "lose" || goal === "gain" || goal === "maintain" || goal === "recomp") return goal;
   return "maintain";
 }

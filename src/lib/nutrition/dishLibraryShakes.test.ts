@@ -78,8 +78,9 @@ describe("protein wave PW-1 — shakes & smoothies", () => {
       expect(SHAKES_DISHES).toContain(dish);
     }
     /* Rest of library at integration: 903 cleaned base + PW-2 (74 after
-       the bacalhau dedupe) + PW-3 (75) + PW-4 (75) = 1,127. */
-    expect(DISH_LIBRARY.length).toBe(1127 + SHAKES_DISHES.length);
+       the bacalhau dedupe) + PW-3 (75) + PW-4 (75) = 1,127; 1,128 after
+       method 14 (2026-11-20) added the plain Steamed Rice. */
+    expect(DISH_LIBRARY.length).toBe(1128 + SHAKES_DISHES.length);
   });
 
   it("is complete against the reference set — every dish validates clean", () => {
