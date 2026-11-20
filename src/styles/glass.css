@@ -1,0 +1,245 @@
+/*
+ * Liquid Glass — the Night Glass material (M-169, 2026-11-21).
+ *
+ * The owner's Apple "Liquid Glass" spec, web path, in Bloom's tokens:
+ * dark ink glass over a living scene — strong optical blur with high
+ * saturation, a specular rim (crisp bright top-left, soft bottom-right),
+ * a wide ambient shadow so the glass floats, and interactive pieces that
+ * illuminate and flex under the finger, tinting gold when chosen.
+ *
+ * ONE material, defined once. Surfaces opt in two ways:
+ *   · the utility classes below (.glass-panel / .glass-pill / .glass-cap /
+ *     .glass-field / .glass-cta) for elements whose styling lives with
+ *     the glass system (the Welcome flow);
+ *   · the --lg-* tokens, consumed by chrome whose rules live in other
+ *     sheets (the dock's fabs in styles.css / orb.css, the phone brand
+ *     bar in styles.css) so the material stays single-sourced.
+ *
+ * Where it may live is a hard owner rule, not a taste: onboarding, the
+ * floating dock, floating navigation and floating popovers ONLY. Sheets
+ * and modals stay fully opaque slabs (the bleed-through rule, pinned by
+ * sheet.guard) — no --lg-* token and no .glass-* class may ever reach a
+ * sheet panel, and glass.guard pins that. Glass never stacks on glass:
+ * in the Welcome the panel holds text and the pills sit on the scene
+ * beside it, never on the panel.
+ *
+ * Legacy engines: every tint is a color-mix line PAINTED OVER a plain
+ * rgba fallback declared first, so an engine without color-mix or
+ * backdrop-filter still gets a solid, legible dark surface — never a
+ * transparent one (the Vivo Y70 lesson, ui.guard's layered-surfaces
+ * rule). Without backdrop-filter the tint strengthens (see the
+ * @supports block) so text keeps its contrast.
+ */
+
+:root {
+  /* The optical recipe: 20px of blur, 180% saturation (owner spec). */
+  --lg-blur: blur(20px) saturate(180%);
+  /* Ink-tinted bases — Bloom's panel tone at glass strengths.
+     Panel text rides the strong tint (WCAG AA over the brightest mesh);
+     pills and capsules ride the lighter one. */
+  --lg-tint: color-mix(in oklab, var(--surface) 50%, transparent);
+  --lg-tint-strong: color-mix(in oklab, var(--surface) 68%, transparent);
+  /* Plain fallbacks, declared before every color-mix line. */
+  --lg-fallback: rgba(17, 19, 24, 0.52);
+  --lg-fallback-strong: rgba(17, 19, 24, 0.72);
+  --lg-border: rgba(255, 255, 255, 0.14);
+  /* The specular rim: light catching a curved bevel — a crisp bright
+     top-left, a softer reflection bottom-right. */
+  --lg-rim:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 1px 0 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.15), inset -1px 0 0 rgba(255, 255, 255, 0.05);
+  /* The same rim at capsule scale, where the full strength would shout. */
+  --lg-rim-soft: inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  /* Elevation: a soft, wide ambient shadow — the glass floats. */
+  --lg-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.55), 0 4px 16px rgba(0, 0, 0, 0.32);
+  /* A quiet sheen across the face, brightest where the light lands. */
+  --lg-sheen: linear-gradient(
+    165deg,
+    rgba(255, 255, 255, 0.13),
+    rgba(255, 255, 255, 0.03) 52%,
+    rgba(255, 255, 255, 0.07)
+  );
+  /* Gold, the chosen state's tint (Night Glass: gold is the light). */
+  --lg-gold-wash: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--gold) 24%, transparent),
+    color-mix(in oklab, var(--gold) 9%, transparent) 58%,
+    color-mix(in oklab, var(--gold) 16%, transparent)
+  );
+}
+
+/* ------------------------------------------------------------- the panel */
+
+/* The floating container: headline and copy live here. Text contrast is
+   carried by the strong tint over the blur — over the brightest mesh
+   stop the composite stays dark enough for cream at AA. */
+.glass-panel {
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  border: 1px solid var(--lg-border);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--lg-rim), var(--lg-shadow);
+}
+
+/* -------------------------------------------------------------- the pill */
+
+/* An interactive selection: illuminates on hover, flexes on press, and
+   tints gold when chosen. Brightness and transform only — the feel
+   layer's currency — at press speed while pressed. */
+.glass-pill {
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  background-image: var(--lg-sheen);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  border: 1px solid var(--lg-border);
+  box-shadow:
+    var(--lg-rim-soft),
+    0 10px 28px -12px rgba(0, 0, 0, 0.5);
+  transition:
+    transform var(--motion-standard) var(--ease-out-expo),
+    filter var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo);
+}
+.glass-pill:hover {
+  filter: brightness(1.14);
+}
+.glass-pill:active {
+  transform: scale(0.99);
+  filter: brightness(1.24);
+  transition-duration: var(--motion-micro);
+}
+.glass-pill[data-on="true"],
+.glass-pill[aria-pressed="true"] {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background-color: rgba(24, 20, 12, 0.6);
+  background-color: color-mix(in oklab, var(--surface) 44%, transparent);
+  background-image: var(--lg-gold-wash), var(--lg-sheen);
+}
+
+/* ------------------------------------------------------------ the capsule */
+
+/* Small floating chrome: the step rail's wrap, the back and admin
+   capsules in the Welcome, and any future floating popover shell. */
+.glass-cap {
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  background-image: var(--lg-sheen);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  border: 1px solid var(--lg-border);
+  border-radius: var(--radius-pill);
+  box-shadow:
+    var(--lg-rim-soft),
+    0 10px 28px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* -------------------------------------------------------------- the field */
+
+/* A text field in glass: the material, with the rim turned inward —
+   a field is a well in the glass, not a slab on it. */
+.glass-field {
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  border: 1px solid var(--lg-border);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.07),
+    0 10px 28px -12px rgba(0, 0, 0, 0.5);
+}
+
+/* ---------------------------------------------------------------- the CTA */
+
+/* The primary action in glass: the gold wash over the material, so the
+   one way forward glows with the accent instead of sitting flat. */
+.glass-cta {
+  background-color: rgba(24, 20, 12, 0.55);
+  background-color: color-mix(in oklab, var(--surface) 46%, transparent);
+  background-image: var(--lg-gold-wash), var(--lg-sheen);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  border: 1px solid color-mix(in oklab, var(--gold) 42%, transparent);
+  box-shadow:
+    var(--lg-rim-soft),
+    0 14px 32px -12px rgba(0, 0, 0, 0.55);
+  transition:
+    transform var(--motion-standard) var(--ease-out-expo),
+    filter var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo),
+    opacity var(--motion-standard) var(--ease-out-expo);
+}
+.glass-cta:hover:not(:disabled) {
+  filter: brightness(1.13);
+}
+.glass-cta:active:not(:disabled) {
+  transform: scale(0.99);
+  filter: brightness(1.22);
+  transition-duration: var(--motion-micro);
+}
+
+/* ------------------------------------------------------------ refraction */
+
+/*
+ * Edge refraction (owner spec, web path): an SVG feDisplacementMap that
+ * slightly warps the backdrop passing under the glass. It is an
+ * ENHANCEMENT layered over the plain material, gated three ways —
+ *   · @supports: only an engine that accepts an SVG filter reference in
+ *     backdrop-filter ever sees it; everyone else keeps the plain blur
+ *     declared on the base classes (the fallback is the rule above,
+ *     this block only overrides where support is real);
+ *   · prefers-reduced-motion: no warp for a reader who asked for calm;
+ *   · the displacement is small (scale 7) and immediately softened by
+ *     the same 20px blur, so it reads as edge shimmer, never as a warp
+ *     of the words the panel carries.
+ * The filter itself is defined once, in the Welcome's DOM (.glass-defs).
+ */
+@supports (backdrop-filter: url("#lg-refract")) {
+  @media (prefers-reduced-motion: no-preference) {
+    .glass-refract {
+      backdrop-filter: url("#lg-refract") blur(20px) saturate(180%);
+    }
+  }
+}
+
+/* The hidden SVG host for the refraction filter: present in the DOM,
+   never painted. */
+.glass-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* ------------------------------------------- no-blur engines stay legible */
+
+/* Without backdrop-filter there is no optical mixing, so the tint
+   itself must do the darkening: every glass surface strengthens to the
+   strong fallback rather than floating pale over a busy scene. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .glass-panel,
+  .glass-pill,
+  .glass-cap,
+  .glass-field,
+  .glass-cta {
+    background-color: var(--lg-fallback-strong);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-pill,
+  .glass-cap,
+  .glass-cta {
+    transition-duration: 1ms;
+  }
+  .glass-pill:active,
+  .glass-cta:active:not(:disabled) {
+    transform: none;
+  }
+}

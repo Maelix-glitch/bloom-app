@@ -4,12 +4,16 @@
  * This used to be built around photography: a different blurred picture behind
  * glass on every screen, with the type laid over it. It looked like an app
  * trying to feel premium by borrowing a mood from a stock image, and the
- * picture always fought the question sitting on top of it.
+ * picture always fought the question sitting on top of it. A typography-only
+ * pass followed.
  *
- * What replaces it is built on typography and space instead. One deep ground,
- * a single whisper of colour, a hairline or two, and nothing that competes with
- * the question. The atmosphere comes from one very soft accent bloom that
- * breathes as you move — not from a scene behind the glass.
+ * The current look is Night Glass (M-169): the scene is a slow mesh of gold,
+ * cream and sage light on the ink ground, and everything the reader touches
+ * or reads is the shared Liquid Glass material (src/styles/glass.css) —
+ * this sheet owns only the flow's layout, type and rhythm, never the
+ * material itself. Structure per screen: the words in one glass panel, the
+ * answers as glass pills on the scene below it. Glass never stacks on
+ * glass, and the mesh is decoration behind the material, never a surface.
  *
  * Nothing here is reused elsewhere, so it is all scoped under .wl.
  */
@@ -28,25 +32,51 @@
 /* ------------------------------------------------------------ atmosphere */
 
 /*
- * One soft bloom of colour near the top, and a hairline of light along the very
- * edge so the panel separates from the page. Deliberately static in position —
- * it breathes in intensity, it doesn't wander, because movement here reads as
- * decoration rather than atmosphere.
+ * The mesh: four soft pools of the palette's light — gold high right,
+ * cream high left, sage low left, a second gold low right — laid over the
+ * ink ground and drifting a few percent over half a minute, so the glass
+ * above it always has something living to refract. Transform only, and
+ * still under reduced motion (the gradients remain; only the drift goes).
+ * The plain ground is declared first: an engine without color-mix drops
+ * the layered line whole and keeps a correct ink scene.
  */
-.wl-glow {
+.wl-mesh {
   position: absolute;
-  inset: -30% -20% auto -20%;
-  height: 70%;
+  inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: radial-gradient(
-    46% 56% at 50% 42%,
-    color-mix(in oklab, var(--wl-accent, var(--violet)) 20%, transparent),
-    transparent 72%
-  );
-  filter: blur(46px);
-  opacity: 0.62;
-  transition: opacity var(--motion-signature) var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+  background: var(--background);
+  background:
+    radial-gradient(
+      58% 44% at 82% 6%,
+      color-mix(in oklab, var(--gold) 26%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      50% 40% at 8% 22%,
+      color-mix(in oklab, var(--gold-soft) 13%, transparent),
+      transparent 70%
+    ),
+    radial-gradient(
+      64% 52% at 12% 96%,
+      color-mix(in oklab, var(--sage) 17%, transparent),
+      transparent 72%
+    ),
+    radial-gradient(
+      40% 34% at 92% 88%,
+      color-mix(in oklab, var(--gold) 10%, transparent),
+      transparent 70%
+    );
+  animation: wl-drift 30s ease-in-out infinite alternate;
+}
+
+@keyframes wl-drift {
+  from {
+    transform: translate3d(-1.5%, -1%, 0) scale(1.02);
+  }
+  to {
+    transform: translate3d(1.5%, 1.5%, 0) scale(1.07);
+  }
 }
 
 /* A hairline of light along the top edge — the only edge treatment. */
@@ -92,13 +122,16 @@
 /* ------------------------------------------------------ the progress rail */
 
 /*
- * Four hairline segments that fill as you go. Thinner and quieter than a
- * typical stepper: the point is to prove how short this is, not to add chrome.
+ * Four hairline segments that fill as you go, riding in a glass capsule
+ * (the material is .glass-cap). Thinner and quieter than a typical
+ * stepper: the point is to prove how short this is, not to add chrome.
  */
 .wl-rail {
   display: flex;
   flex: 1;
+  align-items: center;
   gap: 5px;
+  padding: var(--space-2) var(--space-3);
 }
 
 .wl-seg {
@@ -128,22 +161,18 @@
   align-items: center;
   height: 28px;
   padding: 0 11px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
-  border-radius: var(--radius-pill);
-  background: transparent;
+  /* Surface and rim are the glass capsule's (.glass-cap); this rule
+     owns only the label's dress. */
   color: color-mix(in oklab, var(--foreground) 60%, transparent);
   font-family: var(--font-mono);
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;
   white-space: nowrap;
-  transition:
-    color var(--motion-fast) var(--ease-out-expo),
-    border-color var(--motion-fast) var(--ease-out-expo);
+  transition: color var(--motion-fast) var(--ease-out-expo);
 }
 .wl-skip:hover {
   color: var(--foreground);
-  border-color: color-mix(in oklab, var(--foreground) 26%, transparent);
 }
 
 .wl-body {
@@ -159,6 +188,20 @@
 }
 .wl-body::-webkit-scrollbar {
   display: none;
+}
+
+/* One screen of the flow: the glass panel of words, then the answers on
+   the scene. A column, so the panel and the pills can never overlap —
+   glass on glass is structurally impossible here, not just unlikely. */
+.wl-step {
+  display: flex;
+  flex-direction: column;
+}
+
+/* The panel holds text only (the material itself is .glass-panel). Its
+   padding is the reading room the old open layout got from the page. */
+.wl-panel {
+  padding: var(--space-5) var(--space-5) var(--space-6);
 }
 
 /* ------------------------------------------------------------- type scale */
@@ -216,24 +259,8 @@
   padding: var(--space-4);
   text-align: left;
   border-radius: var(--radius-card);
-  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
-  background: color-mix(in oklab, var(--surface) 46%, transparent);
-  transition:
-    border-color var(--motion-standard) var(--ease-out-expo),
-    background-color var(--motion-standard) var(--ease-out-expo);
-}
-
-.wl-card:hover {
-  border-color: color-mix(in oklab, var(--foreground) 20%, transparent);
-  background: color-mix(in oklab, var(--surface-2) 52%, transparent);
-}
-.wl-card:active {
-  background: color-mix(in oklab, var(--surface-2) 70%, transparent);
-}
-
-.wl-card[data-on="true"] {
-  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 48%, transparent);
-  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 9%, transparent);
+  /* Surface, rim, illumination, press and the gold chosen state are the
+     glass pill's (.glass-pill); this rule owns the row's layout only. */
 }
 
 /* The radio dot: an empty ring that fills when chosen. */
@@ -320,7 +347,9 @@
 .wl-card-sub {
   font-size: var(--text-caption);
   line-height: var(--leading-caption);
-  color: color-mix(in oklab, var(--foreground) 52%, transparent);
+  /* 60%, lifted from 52%: the pill's glass can sit over the mesh's
+     brightest stop, and the sub must hold AA there, not just on ink. */
+  color: color-mix(in oklab, var(--foreground) 60%, transparent);
 }
 
 /*
@@ -336,12 +365,8 @@
 
 .wl-card--decline {
   padding: 13px var(--space-4);
-  border-color: transparent;
-  background: transparent;
-}
-.wl-card--decline:hover {
-  border-color: color-mix(in oklab, var(--foreground) 12%, transparent);
-  background: color-mix(in oklab, var(--surface) 40%, transparent);
+  /* The same glass as the answers above it — what makes it the decline
+     is its place apart and its quieter title, not a lesser surface. */
 }
 .wl-card--decline .wl-card-title {
   font-weight: 400;
@@ -365,23 +390,12 @@
   gap: 9px;
   height: 50px;
   border-radius: 14px;
-  border: 1px solid color-mix(in oklab, var(--wl-accent, var(--violet)) 34%, transparent);
-  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 16%, transparent);
+  /* Surface and gold wash are the glass CTA's (.glass-cta); this rule
+     owns the button's size and voice. */
   color: var(--foreground);
   font-size: var(--text-callout);
   font-weight: 500;
   letter-spacing: var(--tracking-heading);
-  transition:
-    background-color var(--motion-standard) var(--ease-out-expo),
-    border-color var(--motion-standard) var(--ease-out-expo),
-    opacity var(--motion-standard) var(--ease-out-expo);
-}
-.wl-next:hover:not(:disabled) {
-  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 24%, transparent);
-  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 48%, transparent);
-}
-.wl-next:active:not(:disabled) {
-  background: color-mix(in oklab, var(--wl-accent, var(--violet)) 30%, transparent);
 }
 .wl-next:disabled {
   opacity: 0.38;
@@ -394,20 +408,12 @@
   flex: none;
   width: 50px;
   height: 50px;
-  border-radius: 14px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
-  background: transparent;
+  /* Surface, rim and the pill radius are the glass capsule's (.glass-cap). */
   color: color-mix(in oklab, var(--foreground) 66%, transparent);
-  transition:
-    color var(--motion-fast) var(--ease-out-expo),
-    border-color var(--motion-fast) var(--ease-out-expo);
+  transition: color var(--motion-fast) var(--ease-out-expo);
 }
 .wl-back:hover {
   color: var(--foreground);
-  border-color: color-mix(in oklab, var(--foreground) 24%, transparent);
-}
-.wl-back:active {
-  background: color-mix(in oklab, var(--surface-2) 60%, transparent);
 }
 
 /* ------------------------------------------------------------ name + recap */
@@ -418,22 +424,19 @@
   margin-top: 22px;
   padding: 0 var(--space-4);
   border-radius: 14px;
-  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
-  background: color-mix(in oklab, var(--surface) 50%, transparent);
+  /* Surface is the glass field's (.glass-field); this rule owns the
+     field's size, type and focus voice. */
   color: var(--foreground);
   font-size: var(--text-card); /* 16px, not smaller: below this iOS zooms the page on focus */
   letter-spacing: var(--tracking-heading);
-  transition:
-    border-color var(--motion-standard) var(--ease-out-expo),
-    background-color var(--motion-standard) var(--ease-out-expo);
+  transition: border-color var(--motion-standard) var(--ease-out-expo);
 }
 .wl-input::placeholder {
   color: color-mix(in oklab, var(--foreground) 53%, transparent);
 }
 .wl-input:focus {
   outline: none;
-  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 46%, transparent);
-  background: color-mix(in oklab, var(--surface-2) 58%, transparent);
+  border-color: color-mix(in oklab, var(--wl-accent, var(--gold)) 46%, transparent);
 }
 
 /* The recap before entering: what the answers mean, in two quiet lines. */
@@ -463,7 +466,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wl-glow,
+  .wl-mesh {
+    animation: none;
+  }
   .wl-seg::after,
   .wl-radio::after,
   .wl-card,
@@ -479,6 +484,9 @@
 @media (max-height: 680px) {
   .wl-body {
     padding-top: var(--space-4);
+  }
+  .wl-panel {
+    padding: var(--space-4) var(--space-5) var(--space-5);
   }
   .wl-title {
     font-size: clamp(25px, 6.6vw, 32px);
