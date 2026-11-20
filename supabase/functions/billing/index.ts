@@ -103,7 +103,7 @@ function envAll(): Record<string, string | undefined> {
 function adminClient() {
   const url = Deno.env.get("SUPABASE_URL") ?? "";
   const secret =
-    Deno.env.get("SUPABASE_SECRET_KEY") ?? Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? Deno.env.get("SUPABASE_SECRET_KEY") ?? "";
   if (!url || !secret) return null;
   return createClient(url, secret, {
     auth: { autoRefreshToken: false, persistSession: false },
