@@ -36,6 +36,16 @@
  * plan re-stamped to today over a seeded complete Assessment,
  * with its timeline's clock times set by the fixture so the
  * last-meal verdict is deterministic.
+ *
+ * M-164 re-contract (presentation only): the section's sleep and
+ * movement readings are composed figures, not sentences, so the
+ * pins that read those two sentences now read the same values in
+ * the labelled figures that state them (data-care) — the facts
+ * and their strictness are unchanged. The truthfulness pins —
+ * the last-meal lines (c), the Tonight lines, the goals
+ * derivation (b) — are untouched, and (a) gains the rhythm
+ * legend's pins: every named moment with its clock, up first and
+ * in bed last.
  */
 
 import { readFileSync } from "node:fs";
@@ -200,6 +210,15 @@ function follows(a: Element, b: Element): boolean {
   return (a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING) !== 0;
 }
 
+/** A composed figure's full text (label + value), by its
+ *  data-care name — the M-164 pins read the figures, where the
+ *  M-162 pins read the sentences the figures replaced. */
+function figureText(section: HTMLElement, name: string): string {
+  const el = section.querySelector<HTMLElement>(`[data-care="${name}"]`);
+  expect(el, `figure "${name}" renders`).not.toBeNull();
+  return el!.textContent ?? "";
+}
+
 describe("whole-day guard — the plan as caretaker (M-162)", () => {
   it("(a) the section stands after the day card, before the balance — defaults' arithmetic, the plan's own largest meal", () => {
     seedAndStore((plan) =>
@@ -220,8 +239,32 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     expect(follows(whole, balance)).toBe(true);
 
     const text = whole.textContent ?? "";
-    expect(text).toContain("In bed by 10:30 PM · Up at 6:30 AM · 8 hours");
-    expect(text).toContain("Your movement target is 30 minutes in the day.");
+    /* The sleep window and the movement target are composed
+       figures now (M-164): the same defaults' arithmetic, read in
+       the labelled figures that state them. */
+    expect(figureText(whole, "bedtime")).toContain("In bed by");
+    expect(figureText(whole, "bedtime")).toContain("10:30 PM");
+    expect(figureText(whole, "wake")).toContain("Up at");
+    expect(figureText(whole, "wake")).toContain("6:30 AM");
+    expect(figureText(whole, "sleep-duration")).toContain("8 hours");
+    expect(figureText(whole, "movement-target")).toContain("30 minutes");
+
+    /* The rhythm legend decodes the line: up first, in bed last,
+       every named moment between with its own clock. */
+    const legend = whole.querySelector<HTMLElement>(".nut-care-rhythm__legend");
+    expect(legend, "the rhythm legend renders").not.toBeNull();
+    const legendText = legend!.textContent ?? "";
+    expect(legendText).toContain("Caffeine ends");
+    expect(legendText).toContain("2:30 PM");
+    expect(legendText).toContain("Last meal by");
+    expect(legendText).toContain("8:30 PM");
+    expect(legendText).toContain("Wind-down");
+    expect(legendText).toContain("9:30 PM");
+    const legendItems = [...legend!.querySelectorAll("li")];
+    expect(legendItems[0]?.textContent).toContain("Up");
+    expect(legendItems[0]?.textContent).toContain("6:30 AM");
+    expect(legendItems[legendItems.length - 1]?.textContent).toContain("In bed");
+    expect(legendItems[legendItems.length - 1]?.textContent).toContain("10:30 PM");
     expect(text).toContain("From 9:30 PM — screens dim, then off.");
     expect(text).toContain("Your screen target for the day is 3 hours.");
     expect(text).toContain("Caffeine after 2:30 PM.");
@@ -231,6 +274,8 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     const largest = stored.meals.reduce((a, b) => (b.kcal > a.kcal ? b : a));
     const item = stored.timeline?.items.find((i) => i.kind === "meal" && i.meal === largest.meal);
     expect(text).toContain(`The day’s largest meal is ${item?.label ?? largest.meal}`);
+    /* …and the same meal stands on the rhythm line, walk and all. */
+    expect(legendText).toContain(`${item?.label ?? largest.meal} · walk after`);
 
     /* No energy figure is stated anywhere in the section. */
     expect(text).not.toMatch(/kcal/);
@@ -247,9 +292,12 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
       screenMinutes: 240,
     });
     const { container } = render(<NutritionPlanSection />);
-    const text = sectionByLabel(container, "Your whole day").textContent ?? "";
-    expect(text).toContain("In bed by 11:00 PM · Up at 6:30 AM · 7 hours 30 minutes");
-    expect(text).toContain("Your movement target is 45 minutes in the day.");
+    const whole = sectionByLabel(container, "Your whole day");
+    const text = whole.textContent ?? "";
+    expect(figureText(whole, "bedtime")).toContain("11:00 PM");
+    expect(figureText(whole, "wake")).toContain("6:30 AM");
+    expect(figureText(whole, "sleep-duration")).toContain("7 hours 30 minutes");
+    expect(figureText(whole, "movement-target")).toContain("45 minutes");
     expect(text).toContain("Your screen target for the day is 4 hours.");
     expect(text).toContain("Caffeine after 3:00 PM.");
     expect(text).toContain("From 10:00 PM — screens dim, then off.");
@@ -299,7 +347,9 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     const storedBefore = readPlan();
     const { container } = render(<NutritionPlanSection />);
     const whole = sectionByLabel(container, "Your whole day");
-    expect(whole.textContent).toContain("In bed by 10:30 PM · Up at 6:30 AM · 8 hours");
+    expect(figureText(whole, "bedtime")).toContain("10:30 PM");
+    expect(figureText(whole, "wake")).toContain("6:30 AM");
+    expect(figureText(whole, "sleep-duration")).toContain("8 hours");
     expect(container.textContent).not.toContain("the plan below still uses the older numbers");
 
     const input = whole.querySelector<HTMLInputElement>('input[type="time"]');
@@ -307,7 +357,9 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     fireEvent.change(input!, { target: { value: "07:30" } });
 
     expect(getPref(DAY_RHYTHM_KEY, parseDayRhythm, null)).toEqual({ wakeTime: "07:30" });
-    expect(whole.textContent).toContain("In bed by 11:30 PM · Up at 7:30 AM · 8 hours");
+    expect(figureText(whole, "bedtime")).toContain("11:30 PM");
+    expect(figureText(whole, "wake")).toContain("7:30 AM");
+    expect(figureText(whole, "sleep-duration")).toContain("8 hours");
     expect(readPlan()).toEqual(storedBefore);
     expect(container.textContent).not.toContain("the plan below still uses the older numbers");
   });
