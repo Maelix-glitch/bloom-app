@@ -15,7 +15,6 @@
 import type { CSSProperties } from "react";
 
 import { BloomLogo } from "@/components/BloomLogo";
-import type { BalanceGroup } from "@/lib/nutrition";
 
 /** One petal, drawn pointing up from the centre of a 120 box:
  *  base at the heart (60,60), tip at (60,6), the two cubic edges
@@ -27,7 +26,12 @@ export function BloomFlower({
   groups,
   size = 128,
 }: {
-  groups: readonly BalanceGroup[];
+  /* The flower reads exactly two facts per group — its key and
+     whether its petal is filled — so its input is that shape
+     (brief v7 N4: the caller projects planView's ONE groups array
+     onto it, `covered` = the group is eaten or planned, never a
+     second tally). */
+  groups: readonly { key: string; covered: boolean }[];
   size?: number;
 }) {
   const covered = groups.filter((g) => g.covered).length;

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { reasonCopy, reasonDetail, type PlanReason } from "./reasons";
+import { adjustmentCopy, reasonCopy, reasonDetail, type PlanReason } from "./reasons";
 
 /**
  * Brief v4 Part 6, unit side: every kind's detail is a complete
@@ -103,5 +103,123 @@ describe("reasons — the copy contract (brief v4 Part 6)", () => {
     expect(reasonDetail({ kind: "snack-added", mealsPerDay: 3 })).toBe(
       "You listed 3 meals a day; a snack spreads today across 4 sittings.",
     );
+  });
+});
+
+/**
+ * Brief v7 N1: `adjustmentCopy` — the words for the plan's
+ * adjustments array (planView.ts). Same contract as reasonCopy
+ * (detail ≤ 140 chars, one sentence), plus the v7 rules: an
+ * under-a-week protein read carries its "Early read" badge as
+ * data, and the deficit words ("to go", "left", "failed") never
+ * appear.
+ */
+describe("reasons — adjustmentCopy (brief v7)", () => {
+  const BANNED = /\bto go\b|\bleft\b|\bfailed\b/i;
+
+  it("protein-lean under 7 days carries the Early read badge as data", () => {
+    const copy = adjustmentCopy({
+      kind: "protein-lean",
+      days: 2,
+      avgG: 23,
+      targetG: 171,
+    });
+    expect(copy).not.toBeNull();
+    expect(copy!.title).toBe("Leaning protein-rich");
+    expect(copy!.badge).toBe("Early read · 2 days");
+    expect(copy!.detail).toBe(
+      "Your last 2 logged days averaged 23 g, against a guide of 171 g. Your guide is unchanged.",
+    );
+  });
+
+  it("protein-lean at 7+ days has no badge", () => {
+    const copy = adjustmentCopy({ kind: "protein-lean", days: 7, avgG: 90, targetG: 171 });
+    expect(copy).not.toBeNull();
+    expect(copy!.badge).toBeUndefined();
+  });
+
+  it("kitchen-relaxed and meal-added render their kinds", () => {
+    const kitchen = adjustmentCopy({ kind: "kitchen-relaxed" });
+    expect(kitchen!.title).toBe("Some dishes need cooking");
+    expect(kitchen!.badge).toBeUndefined();
+    expect(kitchen!.detail).toBe(
+      "Your answers leave very few no-cook dishes, so we included some that cook.",
+    );
+    const meal = adjustmentCopy({ kind: "meal-added", slot: "snack", assessmentMeals: 3 });
+    expect(meal!.title).toBe("Added a snack");
+    expect(meal!.detail).toBe(
+      "Your Assessment lists 3 meals a day. A snack spreads the food across one more sitting.",
+    );
+  });
+
+  it("the gate and energy kinds render their rows (brief v7 N4)", () => {
+    /* N4: the adjusted section renders from `adjustmentCopy` alone,
+       so the four kinds `adjustmentsOf` also returns — worded by
+       `reasonCopy` until now — carry their row copy here, with the
+       same facts. */
+    const budget = adjustmentCopy({ kind: "budget-widened", ceilingRupees: 45 });
+    expect(budget!.title).toBe("Budget treated as a preference");
+    expect(budget!.detail).toBe(
+      "Your budget (about ₹45 a serving) leaves too few main dishes, so the plan includes dishes above it.",
+    );
+    const budgetOpen = adjustmentCopy({ kind: "budget-widened", ceilingRupees: null });
+    expect(budgetOpen!.detail).toBe(
+      "Your meal budget leaves too few main dishes, so the plan includes dishes above it.",
+    );
+    const raised = adjustmentCopy({
+      kind: "kitchen-cap-raised",
+      capMinutes: 10,
+      stageMinutes: 25,
+    });
+    expect(raised!.title).toBe("Prep time stretched");
+    expect(raised!.detail).toBe(
+      "Your answers aim for about 10 minutes a main; today's dishes take up to about 25 minutes — the closest fit.",
+    );
+    const quickest = adjustmentCopy({ kind: "kitchen-cap-quickest", capMinutes: 10 });
+    expect(quickest!.detail).toBe(
+      "Your answers aim for about 10 minutes, and every main dish takes longer — today uses the quickest there are.",
+    );
+    const energy = adjustmentCopy({
+      kind: "log-energy-overshoot",
+      days: 3,
+      avgKcal: 2400,
+      targetKcal: 1350,
+    });
+    expect(energy!.title).toBe("Lighter energy picks");
+    expect(energy!.detail).toBe(
+      "Your last 3 logged days averaged 2,400 kcal against a 1,350 kcal target, so energy top-ups stay out.",
+    );
+    /* Missing data drops the row, exactly like the brief kinds. */
+    expect(adjustmentCopy({ kind: "budget-widened" })).toBeNull();
+    expect(adjustmentCopy({ kind: "kitchen-cap-raised", capMinutes: 10 })).toBeNull();
+    expect(adjustmentCopy({ kind: "kitchen-cap-quickest" })).toBeNull();
+    expect(adjustmentCopy({ kind: "log-energy-overshoot", days: 3 })).toBeNull();
+  });
+
+  it("every detail is ≤ 140 chars and no banned word appears in any output", () => {
+    const outputs = [
+      adjustmentCopy({ kind: "protein-lean", days: 2, avgG: 23, targetG: 171 }),
+      adjustmentCopy({ kind: "protein-lean", days: 9, avgG: 140, targetG: 171 }),
+      adjustmentCopy({ kind: "kitchen-relaxed" }),
+      adjustmentCopy({ kind: "meal-added", slot: "snack", assessmentMeals: 1 }),
+      adjustmentCopy({ kind: "budget-widened", ceilingRupees: 45 }),
+      adjustmentCopy({ kind: "budget-widened", ceilingRupees: null }),
+      adjustmentCopy({ kind: "kitchen-cap-raised", capMinutes: 10, stageMinutes: 25 }),
+      adjustmentCopy({ kind: "kitchen-cap-quickest", capMinutes: 10 }),
+      adjustmentCopy({ kind: "log-energy-overshoot", days: 3, avgKcal: 2400, targetKcal: 1350 }),
+    ];
+    for (const copy of outputs) {
+      expect(copy).not.toBeNull();
+      expect(copy!.detail.length).toBeLessThanOrEqual(140);
+      expect(copy!.detail.endsWith(".")).toBe(true);
+      expect(`${copy!.title} ${copy!.detail}`).not.toMatch(BANNED);
+    }
+  });
+
+  it("unknown kinds are dropped, never rendered raw", () => {
+    expect(adjustmentCopy({ kind: "not-a-real-kind" })).toBeNull();
+    expect(adjustmentCopy({ kind: "protein-lean" })).toBeNull();
+    expect(adjustmentCopy(null)).toBeNull();
+    expect(adjustmentCopy(undefined)).toBeNull();
   });
 });

@@ -309,7 +309,7 @@ describe("polish guard — Nutrition render (plan + Twin)", () => {
       </>,
     );
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
-    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+    await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 8000 });
     first.unmount();
 
     /* Remount: the sections now read the STORED plan back through
@@ -320,7 +320,7 @@ describe("polish guard — Nutrition render (plan + Twin)", () => {
         <MetabolicTwinSection />
       </>,
     );
-    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+    await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 8000 });
 
     expect(truncatedTexts(container), "rendered sentences cut mid-thought").toEqual([]);
     expect(withinSectionDuplicates(container), "duplicates inside one section").toEqual([]);

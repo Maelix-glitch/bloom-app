@@ -32,6 +32,17 @@ export function fmtCount(n: number): string {
   return Math.round(n).toLocaleString("en-IN");
 }
 
+/**
+ * A grouped integer — "1,350" (brief v7: the name the Plan page's
+ * figures route through, so a target can never render as a raw
+ * "1350" again, M-143). The same implementation as `fmtCount` —
+ * one grouping rule for the whole app, two names where the briefs
+ * named them.
+ */
+export function fmtInt(n: number): string {
+  return fmtCount(n);
+}
+
 /** Whole grams, grouped — "206", "1,250". Never a decimal gram in the UI. */
 export function fmtGrams(n: number): string {
   return Math.round(n).toLocaleString("en-IN");

@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useProgrammes } from "@/hooks/useProgrammes";
 import { fmtCount, fmtDate } from "@/lib/format";
+import { MoreDisclosure } from "./PlanPrimitives";
 import {
   PROGRAMMES,
   programmeMatchesGoal,
@@ -242,16 +243,13 @@ export function ProgrammesSection() {
       )}
 
       {pastRuns.length > 0 ? (
-        <details open className="mt-5">
-          <summary className="nut-group-title cursor-pointer">
-            Past runs ({fmtCount(pastRuns.length)})
-          </summary>
+        <MoreDisclosure label={`Past runs (${fmtCount(pastRuns.length)})`} defaultOpen className="mt-5">
           <ul className="mt-3 space-y-2.5">
             {pastRuns.map((p) => (
               <PastRunRow key={p.run.id} progress={p} />
             ))}
           </ul>
-        </details>
+        </MoreDisclosure>
       ) : null}
     </section>
   );

@@ -12,16 +12,18 @@
  *   (b) THE FLOWER (M-85) — Today's balance renders one petal per
  *       coverage group of the app's classifier (dayBalance's eight),
  *       covered state matching the tally of the stored plan; the
- *       missing groups are chips; vegetables and fruit are goal
+ *       open groups are dashed chips carrying their labels (never
+ *       "No X yet today" — M-152); vegetables and fruit are goal
  *       meters with the guideline as their max; and NO guideline
  *       sentence survives as a paragraph — the sentences became
  *       the viz.
  *   (c) ADJUSTED, CAPPED (Part 3.3) — "How today's plan was
  *       adjusted" renders AT MOST 3 insight rows, in the priority
  *       order gates → adaptation → snack-added, and every row's
- *       words are reasons.ts's own output for the stored plan's
- *       reasons (asserted against the module, never hard-coded).
- *       A plan with no adjustments shows the one quiet line.
+ *       words are `adjustmentCopy`'s output for the stored plan's
+ *       ONE adjustments array (brief v7 N4: asserted against the
+ *       copy module, never hard-coded). A plan with no adjustments
+ *       shows one `.empty-row`.
  *
  * Scope: the whole Nutrition page through the real prefs-backed
  * flow, on the two established fixtures — the owner's corner
@@ -57,6 +59,7 @@ import {
 import {
   dayBalance,
   generatePlan,
+  pickPrimaryMeal,
   readPlan,
   writeFoodLog,
   writePlan,
@@ -67,7 +70,7 @@ import { USDA_REFERENCE_FOODS } from "@/lib/nutrition/usdaReference";
 import { toSafetyInput } from "@/lib/vitalis/domain/profile";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
-import { reasonCopy, type PlanReason } from "@/lib/reasons";
+import { adjustmentCopy, type PlanReason } from "@/lib/reasons";
 import { NutritionPage } from "@/components/nutrition/NutritionPage";
 
 afterEach(cleanup);
@@ -162,6 +165,50 @@ const ADJUSTED_TIER: Record<string, number> = {
   "snack-added": 2,
 };
 
+/** The row copy a stored reason earns, through the same mapping
+ *  planView's `adjustmentsOf` documents (composer kind → adjustment
+ *  kind + data), worded by `adjustmentCopy` — brief v7 N4: the rows
+ *  render from the adjustments array through this copy module
+ *  alone, so the guard derives its expectations the same way. */
+function expectedCopyFor(reason: PlanReason) {
+  switch (reason.kind) {
+    case "log-protein-shortfall":
+      return adjustmentCopy({
+        kind: "protein-lean",
+        days: reason.days,
+        avgG: reason.avgProteinG,
+        targetG: reason.targetProteinG,
+      });
+    case "log-energy-overshoot":
+      return adjustmentCopy({
+        kind: "log-energy-overshoot",
+        days: reason.days,
+        avgKcal: reason.avgKcal,
+        targetKcal: reason.targetKcal,
+      });
+    case "kitchen-relaxed":
+      return adjustmentCopy({ kind: "kitchen-relaxed" });
+    case "kitchen-cap-raised":
+      return adjustmentCopy({
+        kind: "kitchen-cap-raised",
+        capMinutes: reason.capMinutes,
+        stageMinutes: reason.stageMinutes,
+      });
+    case "kitchen-cap-quickest":
+      return adjustmentCopy({ kind: "kitchen-cap-quickest", capMinutes: reason.capMinutes });
+    case "budget-widened":
+      return adjustmentCopy({ kind: "budget-widened", ceilingRupees: reason.ceilingRupees });
+    case "snack-added":
+      return adjustmentCopy({
+        kind: "meal-added",
+        slot: "snack",
+        assessmentMeals: reason.mealsPerDay,
+      });
+    default:
+      return null;
+  }
+}
+
 function expectedAdjustedRows(reasons: readonly PlanReason[]) {
   return reasons
     .map((reason, index) => ({ reason, index }))
@@ -171,14 +218,14 @@ function expectedAdjustedRows(reasons: readonly PlanReason[]) {
         ADJUSTED_TIER[a.reason.kind]! - ADJUSTED_TIER[b.reason.kind]! || a.index - b.index,
     )
     .slice(0, 3)
-    .map((e) => reasonCopy(e.reason))
+    .map((e) => expectedCopyFor(e.reason))
     .filter((c) => c !== null);
 }
 
 /* -------------------------------- tests ------------------------------- */
 
 describe("today guard — the owner's corner, composed through the page", () => {
-  it("(a) one primary in the plan section: the next meal's Log meal; macros are dots, never coloured text", async () => {
+  it("(a) one primary in the day section: the clock's Log meal; macros are dots, never coloured text", async () => {
     seedAssessment(OWNER_ANSWERS);
     const today = todayLocal();
     writeFoodLog([
@@ -188,34 +235,49 @@ describe("today guard — the owner's corner, composed through the page", () => 
     ]);
     const { container } = render(<NutritionPage />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
-    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+    await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 8000 });
 
-    const planSection = sectionByLabel(container, "Your plan for today");
+    /* Brief v7 N5: the meals live in the day section now — the
+       header card ("Your plan for today") carries the head alone. */
+    const planSection = sectionByLabel(container, "Your day");
 
     /* Every meal offers the same short label; only styling differs. */
     const logButtons = within(planSection).getAllByRole("button", { name: "Log meal" });
     expect(logButtons.length).toBe(4);
     expect(within(planSection).queryByRole("button", { name: "Log this meal" })).toBeNull();
 
-    /* Exactly one primary in the whole section, and it belongs to
-       the first meal card — the next unlogged meal. */
+    /* The primary belongs to the CLOCK's pick (brief v7 M-149:
+       pickPrimaryMeal replaced the "first unlogged meal" rule) —
+       computed here from the stored plan with the test's own clock.
+       Late in the evening the clock may pick no meal; then no gold
+       exists at all. Nothing is logged today in this fixture, so
+       every meal is unlogged. */
+    const stored = readPlan();
+    if (!stored) throw new Error("expected a stored plan");
+    const nowDate = new Date();
+    const primarySlot = pickPrimaryMeal(
+      stored.meals.map((m) => ({ meal: m.meal, logged: false })),
+      nowDate.getHours() * 60 + nowDate.getMinutes(),
+    );
     const golds = planSection.querySelectorAll(".nut-btn-gold");
-    expect(golds.length, "primary buttons in the plan section").toBe(1);
-    /* Meal cards are the section's labelled articles ("Breakfast
-       plan"); the learning insights are articles too, and are not
-       meal cards. */
-    const firstCard = planSection.querySelector<HTMLElement>('article[aria-label$=" plan"]');
-    expect(firstCard, "a meal card renders").not.toBeNull();
-    expect(golds[0]!.textContent).toBe("Log meal");
-    expect(firstCard!.contains(golds[0]!)).toBe(true);
+    expect(golds.length, "primary buttons in the day section").toBe(primarySlot ? 1 : 0);
+    if (primarySlot) {
+      expect(golds[0]!.textContent).toBe("Log meal");
+      const primaryRow = planSection.querySelector<HTMLElement>(`#meal-${primarySlot}`);
+      expect(primaryRow, "the clock's meal row renders").not.toBeNull();
+      expect(primaryRow!.contains(golds[0]!)).toBe(true);
+    }
 
-    /* Macros: dots with neutral numbers on every card. */
+    /* Macros: dots with neutral numbers on every row (brief v7 N3:
+       the rows' fixed macro table carries the dots now). Meal rows
+       are the section's labelled articles ("Breakfast plan"); the
+       learning insights are articles too, and are not meal rows. */
     const cards = planSection.querySelectorAll('article[aria-label$=" plan"]');
     expect(cards.length).toBe(4);
     for (const card of cards) {
-      expect(card.querySelector(".macros .dot--protein"), "protein dot").not.toBeNull();
-      expect(card.querySelector(".macros .dot--carb"), "carb dot").not.toBeNull();
-      expect(card.querySelector(".macros .dot--fat"), "fat dot").not.toBeNull();
+      expect(card.querySelector(".meal-macros .dot--protein"), "protein dot").not.toBeNull();
+      expect(card.querySelector(".meal-macros .dot--carb"), "carb dot").not.toBeNull();
+      expect(card.querySelector(".meal-macros .dot--fat"), "fat dot").not.toBeNull();
       /* The M-88 instance: a macro number coloured as a category. */
       expect(card.innerHTML).not.toContain("--sage");
     }
@@ -231,7 +293,7 @@ describe("today guard — the owner's corner, composed through the page", () => 
     ]);
     const { container } = render(<NutritionPage />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
-    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+    await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 8000 });
 
     const stored = readPlan();
     if (!stored) throw new Error("expected a stored plan");
@@ -250,14 +312,17 @@ describe("today guard — the owner's corner, composed through the page", () => 
       const copy = expected[i]!;
       expect(row.querySelector("h3")?.textContent).toBe(copy.title);
       expect(row.textContent).toContain(copy.detail);
+      /* Brief v7 N4: the rows carry no source chip — the row's only
+         chip is the copy's badge (an early read), dashed via
+         data-estimate. No badge → no chip. */
       const chip = row.querySelector(".src-chip");
-      expect(chip, "each row carries its source chip").not.toBeNull();
-      expect(chip!.textContent).toBe(copy.source.label);
+      expect(chip?.textContent ?? null).toBe(copy.badge ?? null);
+      if (copy.badge) expect(chip!.getAttribute("data-estimate")).toBe("true");
     });
     /* The lowest-priority adjustment is the one the cap drops. */
     const allAdjusted = (stored.reasons ?? []).filter((r) => r.kind in ADJUSTED_TIER);
     const dropped = allAdjusted[allAdjusted.length - 1]!;
-    const droppedCopy = reasonCopy(dropped);
+    const droppedCopy = expectedCopyFor(dropped);
     if (droppedCopy) {
       expect(within(section).queryByText(droppedCopy.title)).toBeNull();
     }
@@ -328,14 +393,15 @@ describe("today guard — the rotation's stored plan", () => {
       expect(petal.getAttribute("data-covered")).toBe(String(groups[i]!.covered));
     });
 
-    /* Missing groups are chips; covered groups are not chipped. */
-    for (const g of groups) {
-      if (g.covered) {
-        expect(within(balance).queryByText(g.missing)).toBeNull();
-      } else {
-        expect(within(balance).getByText(g.missing)).toBeTruthy();
-      }
-    }
+    /* Open groups are dashed chips carrying their LABELS (brief v7
+       N4, M-152); covered groups are not chipped, and the old
+       "No X yet today" sentences appear nowhere. (This fixture
+       logs nothing on the plan's day, so open == not covered.) */
+    const chips = [...balance.querySelectorAll("[data-open-group]")];
+    expect(chips.map((c) => c.textContent)).toEqual(
+      groups.filter((g) => !g.covered).map((g) => g.label),
+    );
+    expect(balance.textContent).not.toMatch(/yet today/);
 
     /* The two goal meters, valued by the same tally. */
     const meters = balance.querySelectorAll('[role="progressbar"]');
@@ -360,10 +426,11 @@ describe("today guard — the rotation's stored plan", () => {
     expect(balance.querySelectorAll("p.nut-note").length).toBe(0);
   });
 
-  it("(c) a plan with no adjustments shows the one quiet line", () => {
+  it("(c) a plan with no adjustments shows one empty row (brief v7 N4, M-154)", () => {
     const { container } = renderRotation();
     const section = sectionByLabel(container, "How today's plan was adjusted");
     expect(section.querySelectorAll("article.insight").length).toBe(0);
+    expect(section.querySelectorAll(".empty-row").length).toBe(1);
     expect(
       within(section).getByText("No adjustments today — the plan follows your Assessment as set."),
     ).toBeTruthy();

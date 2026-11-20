@@ -82,7 +82,7 @@ export interface PlanStore {
    *  profile always (it is the seed), and the Assessment's answers too
    *  once the Assessment has been started — status and step untouched.
    *  The stored plan is NOT regenerated: it goes stale by name, and the
-   *  person's own tap on "Compose again" rebuilds it (no silent
+   *  person's own tap on "Suggest different meals" rebuilds it (no silent
    *  changes, §10/§13). */
   setGoal: (goal: PlanGoalProfile) => void;
   /** Generate today's plan from the current inputs and save it. The

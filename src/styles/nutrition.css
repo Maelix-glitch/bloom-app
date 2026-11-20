@@ -145,33 +145,9 @@
   text-underline-offset: 3px;
 }
 
-/* The day timeline (P12): the plan's stops from waking to bedtime,
-   a time column (tabular, the person's own usual times) beside the
-   stop's name; a relative day shows an em dash where a clock time
-   would be invented. */
-.nut-timeline {
-  margin-top: var(--space-2);
-  max-width: 58ch;
-}
-.nut-timeline-item {
-  display: flex;
-  align-items: baseline;
-  gap: var(--space-3);
-  padding: var(--space-1) 0;
-  /* The stops are core plan content, not a caption — they read at the
-     callout size the meal rows use (OTT pass). */
-  font-size: var(--text-callout);
-  line-height: var(--leading-body);
-  color: var(--foreground);
-}
-.nut-timeline-item + .nut-timeline-item {
-  border-top: 1px solid var(--border);
-}
-.nut-timeline-time {
-  flex: 0 0 5.5rem;
-  font-variant-numeric: tabular-nums;
-  color: var(--muted-foreground);
-}
+/* The P12 day timeline list retired with brief v7 N3: the day is
+   the DayPath now (see .day-path below), and its "—" time cells
+   retired with it (M-144). */
 
 /* ------------------------------- meal list ------------------------------ */
 
@@ -938,14 +914,17 @@ button.nut-chip,
 a.nut-chip {
   min-height: var(--bloom-touch-min);
 }
-/* Sub-navigation (Plan B): anchor chips to the today view's named
-   sections. The chips reuse .nut-chip; as navigation they hold the
-   44px touch floor. Since brief v4 Slice 3 the bar is STICKY under
-   the app chrome: it offsets by the shell's own --app-top-bar token
-   (60px below the fixed phone brand bar, 0 at lg where the rail
-   takes over) and carries an opaque page ground, so sections sliding
+/* Sub-navigation (Plan B): anchors to the today view's named
+   sections. Since brief v4 Slice 3 the bar is STICKY under the app
+   chrome: it offsets by the shell's own --app-top-bar token (60px
+   below the fixed phone brand bar, 0 at lg where the rail takes
+   over) and carries an opaque page ground, so sections sliding
    beneath it never show through. Jump targets clear the stuck bar
-   (60px brand bar + the bar itself) at the brief's 80px. */
+   (60px brand bar + the bar itself) at the brief's 80px.
+   Brief v7 N2 (M-155): the pill chips are retired — the items are
+   plain text now, and the active one (set by the page's scrollspy)
+   is marked by a single 2px gold underline that SLIDES to it
+   (transform only), never a ring or a filled pill. */
 .nut-subnav {
   position: sticky;
   top: var(--app-top-bar);
@@ -957,26 +936,44 @@ a.nut-chip {
   padding-block: var(--space-2);
   background: var(--background);
 }
-.nut-subnav .nut-chip {
+.nut-subnav__item {
+  display: inline-flex;
+  align-items: center;
   min-height: var(--bloom-touch-min);
+  padding-inline: var(--space-2);
+  color: var(--text-secondary);
+  font-size: var(--text-support);
+  font-weight: 500;
   text-decoration: none;
+  transition: color var(--motion-standard) var(--ease-out-expo);
 }
-/* The active anchor (set by the page's scrollspy) takes the shell
-   nav's treatment (Slice 2, rulebook §20) adapted to a pill: a solid
-   --surface-2 fill, foreground text, and the accent bar INSIDE the
-   pill — a 3px gold underline — never a ring. */
-.nut-subnav .nut-chip[data-selected] {
-  background: var(--surface-2);
-  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+.nut-subnav__item:hover {
   color: var(--foreground);
-  box-shadow: inset 0 -3px 0 var(--gold);
 }
-/* Focus (rulebook §20): :focus-visible only — a mouse click on a
-   chip never leaves a ring. */
-.nut-subnav .nut-chip:focus {
+.nut-subnav__item[data-selected] {
+  color: var(--foreground);
+}
+/* The sliding underline: measured onto the active item by the page
+   (offsetLeft/width), moved by transform only; its width snaps,
+   its position glides. Hidden until a section is in view. */
+.nut-subnav__indicator {
+  position: absolute;
+  left: 0;
+  bottom: var(--space-1);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--gold);
+  transition:
+    transform var(--motion-standard) var(--ease-out-expo),
+    opacity var(--motion-standard) var(--ease-out-expo);
+  pointer-events: none;
+}
+/* Focus (rulebook §20): :focus-visible only — a mouse click on an
+   item never leaves a ring. */
+.nut-subnav__item:focus {
   outline: none;
 }
-.nut-subnav .nut-chip:focus-visible {
+.nut-subnav__item:focus-visible {
   outline: 2px solid color-mix(in oklab, var(--gold) 65%, transparent);
   outline-offset: 2px;
 }
@@ -1499,28 +1496,9 @@ a.nut-chip {
   --macro-fat: #8aa4c4;
   --macro-fibre: #a99bc9;
 }
-.meal__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--space-3);
-}
-.macros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-4);
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  color: var(--text-secondary);
-  font-size: var(--text-callout);
-}
-.macros b {
-  color: var(--foreground);
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-}
+/* The meal card's foot and its .macros list retired with brief
+   v7 N3: the macros live in the rows' fixed table (.meal-macros),
+   whose headers carry these same dots. */
 .dot {
   display: inline-block;
   inline-size: 8px;
@@ -1541,25 +1519,13 @@ a.nut-chip {
 .dot--fibre {
   background: var(--macro-fibre);
 }
-/* Buttons inside a meal card are 10px-radius rectangles (§19);
-   pills stay for badges and chips. The press dip is 1px (Part 5),
-   not the pill scale, and hover lifts the card's border colour
-   only — the layout never moves. */
-.meal .nut-btn {
-  border-radius: var(--radius-control);
-}
-.meal .nut-btn:active {
-  transform: translateY(1px);
-}
-.meal {
-  transition: border-color var(--motion-standard) var(--ease-out-expo);
-}
-.meal:hover {
-  border-color: var(--border-strong);
-}
+/* Buttons inside a meal row keep the §19 rule (10px-radius
+   rectangles, a 1px press dip) — see .meal-row .nut-btn in the
+   N3 block below. The meal CARD's own rules retired with it. */
 
-/* Today's balance (brief 3.2): the flower beside the goal
-   meters, the missing groups as chips under it. */
+/* Today's balance (brief v7 N4): the flower beside the two-layer
+   meters, the covered count in the section head, the open groups
+   as dashed chips under a plain label. No prose lives here. */
 .balance {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -1590,18 +1556,34 @@ a.nut-chip {
   font-size: var(--text-caption);
   color: var(--muted-foreground);
 }
+/* The count in the section head (N4): right-aligned against the
+   H2, the serif numeral over its caption. */
+.balance__count--head {
+  justify-items: end;
+  text-align: right;
+}
 .balance__bars {
   display: grid;
   gap: var(--space-5);
   max-inline-size: 28rem;
 }
-.balance__missing {
+.balance__open {
+  margin-top: var(--space-4);
+}
+.balance__open-list {
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-2);
   list-style: none;
-  margin: var(--space-4) 0 0;
+  margin: var(--space-2) 0 0;
   padding: 0;
+}
+/* An open group is a gap the day can still fill — a dashed chip
+   (rule 4's planned/estimated outline), never the old "No X yet
+   today" sentence (M-152). */
+.nut-badge[data-open-group] {
+  border-style: dashed;
+  background: transparent;
 }
 @media (max-width: 720px) {
   .balance {
@@ -1662,95 +1644,130 @@ a.nut-chip {
   }
 }
 
-/* Goal meters (brief 3.2 + Part 5): the global .meter atom, its
-   fill re-expressed as a scaleX transform in this scope — --v
-   is a DECIMAL 0–1 here — animating 0 → value once when the
-   meter scrolls into view (600ms, the house curve). The fill
-   is neutral; success when the guideline is met; warning only
-   under half. The tick at the track's end is the goal itself. */
-.cover {
+/* Balance meters (brief v7 N4): ONE track, two layers — the
+   day's reach as a HATCHED layer (planned/estimated, rule 4) under
+   the eaten grams as a SOLID layer (measured), the guideline as
+   the tick at the track's end. Layers are full-width spans scaled
+   by transform (never a width), growing once when the meter
+   scrolls into view (600ms, the house curve; stilled under
+   reduced motion). The fill is a position, never a judgement
+   colour. This replaces the v4 goal meters (`.cover`), whose
+   single fill showed the plan's grams alone and whose hint line
+   was a paragraph. */
+.bal-meter {
   display: grid;
   gap: var(--space-2);
 }
-.cover__row {
+.bal-meter__row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: var(--space-3);
 }
-.cover__row span {
+.bal-meter__row span {
   font-weight: 500;
   font-size: var(--text-callout);
   color: var(--text-secondary);
 }
-.cover__row b {
+.bal-meter__row b {
   font-weight: 600;
   font-size: var(--text-body);
   font-variant-numeric: tabular-nums;
   color: var(--foreground);
 }
-.cover__row b small {
+.bal-meter__row b small {
   font-size: var(--text-caption);
   color: var(--muted-foreground);
   font-weight: 400;
 }
-.cover__hint {
-  font-size: var(--text-caption);
-  color: var(--muted-foreground);
-  margin: 0;
-}
-.cover .meter {
+.bal-meter__track {
   position: relative;
-  --fill: var(--text-secondary);
+  block-size: 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
 }
-.cover .meter::after {
-  inline-size: 100%;
-  transform-origin: left;
-  transform: scaleX(0);
-  background: var(--fill);
-  transition: transform 0.6s var(--ease-out-expo);
-}
-.cover .meter.is-in::after {
-  transform: scaleX(var(--v, 0));
-}
-.cover .meter.is-met {
-  --fill: var(--success);
-}
-.cover .meter.is-low {
-  --fill: var(--warning);
-}
-.cover .meter--goal::before {
+.bal-meter__track::after {
   content: "";
   position: absolute;
   inset-block: 0;
   inset-inline-end: 0;
   inline-size: 2px;
   background: var(--border-strong);
-  z-index: 1;
+  z-index: 2;
+}
+.bal-meter__layer {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  transform-origin: left;
+  transition: transform 0.6s var(--ease-out-expo);
+}
+.bal-meter__layer.is-reach {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--border-strong) 0 2px,
+    transparent 2px,
+    transparent 6px
+  );
+}
+.bal-meter__layer.is-eaten {
+  background: var(--text-secondary);
+}
+.bal-meter__sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-4);
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
 }
 
-/* Adjusted rows (brief 3.3): the detail clamps at two lines —
-   the sentence is never cut; the whole of it is one More tap
-   away, and rides the title attribute throughout. */
-.adj-detail {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-}
-.adj-detail.is-open {
-  -webkit-line-clamp: unset;
-}
-.adj-more {
-  margin-top: var(--space-1);
-  padding: 0;
+/* The balance legend (N4): the layer key, stated once for both
+   meters, with the guideline's source chip at its end. */
+.bal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-4);
   font-size: var(--text-caption);
-  font-weight: 600;
-  color: var(--gold);
+  color: var(--muted-foreground);
 }
-.adj-more:active {
-  transform: translateY(1px);
+.bal-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
 }
+.bal-swatch {
+  display: inline-block;
+  inline-size: 14px;
+  block-size: 8px;
+  border-radius: 2px;
+  background: var(--surface-3);
+}
+.bal-swatch.is-eaten {
+  background: var(--text-secondary);
+}
+.bal-swatch.is-planned {
+  background: repeating-linear-gradient(
+    45deg,
+    var(--border-strong) 0 2px,
+    transparent 2px,
+    transparent 5px
+  );
+}
+.bal-swatch.is-target {
+  inline-size: 2px;
+  block-size: 10px;
+  border-radius: 0;
+  background: var(--border-strong);
+}
+
+/* Adjusted rows (brief v7 N4): the detail is a ≤140-char row
+   line now — it renders whole, so the v4 clamp/More machinery is
+   retired with the paragraph it served. The action link keeps
+   its spacing. */
 .adj-action {
   display: inline-block;
   margin-top: var(--space-1);
@@ -1761,12 +1778,621 @@ a.nut-chip {
   .petal.is-on {
     animation: none;
   }
-  .cover .meter::after {
+  .bal-meter__layer {
     transition: none;
   }
-  .meal .nut-btn:active,
-  .adj-more:active {
+  .meal-row .nut-btn:active {
     transform: none;
+  }
+}
+
+/* Water the Bloom (Brief v7 WATER): the scene panel that replaced the
+   M-145 prose paragraph. The painting lives on the canvas; this is
+   only the frame — a quiet card, the figure in the display serif, one
+   line of copy, and real buttons at a full touch height. */
+.water-bloom {
+  display: grid;
+  grid-template-columns: 172px minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: center;
+  margin-top: 0.75rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card, 16px);
+}
+
+.water-bloom-scene {
+  position: relative;
+}
+
+.water-bloom-canvas {
+  display: block;
+  width: 100%;
+  height: 228px;
+}
+
+.water-bloom-side {
+  display: grid;
+  gap: 0.55rem;
+  justify-items: start;
+  min-width: 0;
+}
+
+.water-bloom-figure {
+  font-family: var(--font-display);
+  font-size: 1.65rem;
+  line-height: 1.15;
+  color: var(--foreground);
+}
+
+.water-bloom-line {
+  font-size: var(--text-body, 0.9375rem);
+  color: var(--muted-foreground);
+}
+
+.water-bloom-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.15rem;
+}
+
+.water-bloom-add {
+  min-height: 44px;
+  padding: 0 1.05rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 160ms ease, background 160ms ease;
+}
+
+.water-bloom-add:hover {
+  border-color: var(--gold);
+}
+
+.water-bloom-add:active {
+  transform: translateY(1px);
+}
+
+.water-bloom-add:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.water-bloom-notice {
+  min-height: 1.25rem;
+  font-size: var(--text-caption, 0.8125rem);
+  color: var(--muted-foreground);
+}
+
+@media (max-width: 560px) {
+  .water-bloom {
+    grid-template-columns: 128px minmax(0, 1fr);
+    gap: 1rem;
+    padding: 0.9rem 1rem;
+  }
+
+  .water-bloom-canvas {
+    height: 188px;
+  }
+
+  .water-bloom-figure {
+    font-size: 1.35rem;
+  }
+}
+
+/* ---------------- brief v7 N2: plan primitives ---------------- */
+
+/* Segmented goal control (M-142's pill half): one pill track, four
+   radio segments, a NEUTRAL raised thumb that slides by transform
+   over 180ms. No gold anywhere in the control — the goal is a
+   setting, not the page's one gold action. The real radio input
+   covers its segment (invisible), so the platform gives arrow-key
+   movement and the label gives the hit area. */
+.seg {
+  position: relative;
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+}
+.seg__thumb {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  height: calc(100% - 8px);
+  border-radius: var(--radius-pill);
+  background: var(--surface-3);
+  box-shadow: inset 0 0 0 1px var(--border-subtle);
+  transition:
+    transform 180ms var(--ease-out-expo),
+    opacity 180ms var(--ease-out-expo);
+  pointer-events: none;
+}
+.seg__option {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--bloom-touch-min);
+  padding-inline: var(--space-2);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-size: var(--text-support);
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+  transition: color var(--motion-standard) var(--ease-out-expo);
+}
+.seg__option[data-selected] {
+  color: var(--foreground);
+  font-weight: 600;
+}
+.seg__option:has(.seg__input:focus-visible) {
+  outline: 2px solid var(--text-secondary);
+  outline-offset: 2px;
+}
+.seg__input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* The one disclosure (M-157): a hairline, a label, a chevron that
+   rotates as the content fades in — the chrome every former
+   <details> on this page now shares. */
+.more {
+  border-top: 1px solid var(--border-subtle);
+}
+.more__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: var(--bloom-touch-min);
+  padding-block: var(--space-2);
+  background: none;
+  border: 0;
+  color: var(--foreground);
+  font-size: var(--text-callout);
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.more__head:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 65%, transparent);
+  outline-offset: 2px;
+}
+.more__chev {
+  flex: none;
+  color: var(--muted-foreground);
+  transition: transform var(--motion-standard) var(--ease-out-expo);
+}
+.more[data-open] .more__chev {
+  transform: rotate(180deg);
+}
+.more__body {
+  padding-bottom: var(--space-3);
+  animation: more-in 240ms var(--ease-out-expo) both;
+}
+@keyframes more-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+
+/* Stat strip: the plan header's figures as one ruled row — serif
+   numerals, hairline dividers, and the guide riding as a DASHED
+   badge (dashed = estimated/planned, rule 4). */
+.stat-strip {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0;
+  padding-block: var(--space-3);
+  border-block: 1px solid var(--border-subtle);
+}
+.stat-strip__cell {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-inline: var(--space-3);
+}
+.stat-strip__cell:first-child {
+  padding-left: 0;
+}
+.stat-strip__cell + .stat-strip__cell {
+  border-left: 1px solid var(--border-subtle);
+}
+.stat-strip__label {
+  font-size: var(--text-caption);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+.stat-strip__row {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin-top: 2px;
+}
+.stat-strip__value {
+  font-family: var(--font-display);
+  font-size: 1.375rem;
+  line-height: 1.1;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+}
+.stat-strip__value small {
+  font-size: var(--text-caption);
+  color: var(--muted-foreground);
+}
+.stat-strip__guide {
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-pill);
+  padding: 0.05rem 0.45rem;
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Day path (M-144/M-159, primitive half): the day down a hairline.
+   The track fills to the furthest reached stop (scaleY — transform
+   only, one-shot). Done = a sage check (solid: measured), now =
+   the gold-ringed marker with the page's ONLY looping animation,
+   later = a hollow outline. Estimated times are dashed-underlined
+   (rule 4); unknown times are words, never dashes. */
+.day-path {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.day-path__track {
+  position: absolute;
+  left: 13px;
+  top: 22px;
+  bottom: 22px;
+  width: 2px;
+  border-radius: 2px;
+  background: var(--border-subtle);
+  overflow: hidden;
+}
+.day-path__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--sage);
+  transform-origin: top;
+  transition: transform var(--motion-signature) var(--ease-out-expo);
+}
+.day-path__stop {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding-block: var(--space-2);
+}
+.day-path__marker {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-strong);
+  background: var(--background);
+}
+.day-path__stop[data-state="done"] .day-path__marker {
+  background: var(--sage);
+  border-color: var(--sage);
+  color: var(--background);
+}
+.day-path__stop[data-state="now"] .day-path__marker {
+  border-color: var(--gold);
+}
+.day-path__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+}
+.day-path__pulse {
+  position: absolute;
+  inset: -2px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  animation: day-path-pulse 2.4s var(--ease-out) infinite;
+  pointer-events: none;
+}
+@keyframes day-path-pulse {
+  from {
+    transform: scale(0.85);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+.day-path__thumb {
+  flex: none;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-control);
+  object-fit: cover;
+}
+.day-path__body {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  min-width: 0;
+  padding-top: 3px;
+}
+.day-path__label {
+  font-size: var(--text-callout);
+  font-weight: 500;
+  color: var(--foreground);
+  text-decoration: none;
+}
+a.day-path__label:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.day-path__stop[data-state="later"] .day-path__label {
+  color: var(--text-secondary);
+}
+.day-path__when {
+  font-size: var(--text-support);
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+.day-path__when[data-estimated="true"] {
+  text-decoration: underline dashed;
+  text-underline-offset: 3px;
+}
+.day-path__kcal {
+  font-size: var(--text-support);
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Meal rows (brief v7 N3): the day's meals as rows in ONE panel —
+   hairlines only, no card inside the section's card (M-146). A row
+   states its meal once (eyebrow, serif title, one meta line, the
+   fixed macro table) and unfolds its dishes and foods in place.
+   Buttons keep the meal-card rule (§19): 10px-radius rectangles
+   with a 1px press dip. A logged meal's photograph dims to 60% —
+   the day moves on from it. */
+.meal-row {
+  padding-block: var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+}
+.meal-row__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.meal-row__toggle {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.meal-row__toggle:focus-visible {
+  outline: 2px solid color-mix(in oklab, var(--gold) 65%, transparent);
+  outline-offset: 2px;
+}
+.meal-row__thumb,
+.meal-row__petal {
+  flex: none;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-control);
+  border: 1px solid var(--border-subtle);
+}
+.meal-row__thumb {
+  object-fit: cover;
+  background: var(--surface-3);
+}
+.meal-row__petal {
+  display: grid;
+  place-items: center;
+  background: var(--surface-2);
+}
+.meal-row__petal svg {
+  width: 30px;
+  height: 30px;
+}
+.meal-row[data-logged="true"] .meal-row__thumb,
+.meal-row[data-logged="true"] .meal-row__petal {
+  opacity: 0.6;
+}
+.meal-row__main {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+}
+.meal-row__static {
+  display: grid;
+  gap: 2px;
+}
+.meal-row__eyebrow {
+  font-size: var(--text-caption);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.meal-row__eyebrow [data-estimated="true"] {
+  text-decoration: underline dashed;
+  text-underline-offset: 3px;
+}
+.meal-row__title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  line-height: 1.15;
+  color: var(--foreground);
+}
+.meal-row__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  font-size: var(--text-support);
+  color: var(--muted-foreground);
+  font-variant-numeric: tabular-nums;
+}
+.meal-row__note {
+  font-size: var(--text-callout);
+  line-height: var(--leading-body);
+  color: var(--text-secondary);
+}
+.meal-row__chev {
+  flex: none;
+  margin-top: 4px;
+  color: var(--muted-foreground);
+  transition: transform var(--motion-standard) var(--ease-out-expo);
+}
+.meal-row__chev.is-open {
+  transform: rotate(180deg);
+}
+.meal-row__action {
+  flex: none;
+}
+.meal-row .nut-btn {
+  border-radius: var(--radius-control);
+}
+.meal-row .nut-btn:active {
+  transform: translateY(1px);
+}
+.meal-row__body {
+  padding-top: var(--space-2);
+  animation: more-in 240ms var(--ease-out-expo) both;
+}
+
+/* The macro table: four FIXED columns, identical in every row, so
+   the values align down the panel. The hairline sits under the
+   header; the category colour lives in the header dots alone. */
+.meal-macros {
+  width: 100%;
+  margin-top: var(--space-3);
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.meal-macros th {
+  padding: 0 var(--space-2) var(--space-1) 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: var(--text-caption);
+  font-weight: 600;
+  text-align: left;
+  color: var(--text-secondary);
+}
+.meal-macros td {
+  padding: var(--space-1) var(--space-2) 0 0;
+  font-size: var(--text-callout);
+  font-variant-numeric: tabular-nums;
+  color: var(--foreground);
+}
+
+/* The cooking badge (M-139): a dish's tag from its own method
+   pins. A conflict — a cooked dish, or one past the prep-time
+   answer, under answers that exclude it — turns amber with a
+   dashed underline: the estimate/conflict signature (rule 4). */
+.cook-badge {
+  padding: 0.05rem 0.45rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-caption);
+  font-weight: 500;
+  white-space: nowrap;
+  color: var(--text-secondary);
+}
+.cook-badge[data-conflict="true"] {
+  border-color: var(--amber);
+  color: var(--amber);
+  text-decoration: underline dashed;
+  text-underline-offset: 3px;
+}
+
+/* The dish idea, demoted (N3): a quiet text link inside the row's
+   expansion — present, loggable, and no longer a block competing
+   with the meal itself. */
+.meal-idea-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-2);
+  margin-top: var(--space-3);
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: var(--text-callout);
+  text-align: left;
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.meal-idea-link__nums {
+  font-size: var(--text-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--muted-foreground);
+}
+.meal-idea-logged {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-top: var(--space-3);
+  font-size: var(--text-callout);
+  color: var(--text-secondary);
+}
+
+/* Reduced motion: the pulse stops (a still ring remains), the
+   track is simply drawn, the thumb and the disclosure content
+   arrive without travelling. */
+@media (prefers-reduced-motion: reduce) {
+  .day-path__pulse {
+    animation: none;
+    opacity: 0;
+  }
+  .day-path__fill {
+    transition: none;
+  }
+  .seg__thumb {
+    transition: none;
+  }
+  .more__body {
+    animation: none;
+  }
+  .meal-row__body {
+    animation: none;
+  }
+  .meal-row__chev {
+    transition: none;
   }
 }
 

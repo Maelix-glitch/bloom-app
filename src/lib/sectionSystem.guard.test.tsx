@@ -313,9 +313,11 @@ describe("section system — Nutrition page render", () => {
        guideline judgement (the mix block is retired).
        Slice 4 update (brief 3.2): the fruit-guideline SENTENCE this
        guard pinned became the fruit goal meter — the same fact,
-       rendered as the viz the brief mandates. The pin follows it:
-       the meter's goal (aria-valuemax) and its "to go" hint, and
-       the old sentence gone everywhere. */
+       rendered as the viz the brief mandates.
+       Brief v7 N4 update: the meter's "to go" hint line is deleted
+       with the rest of the balance prose — the pin follows it: the
+       meter's goal (aria-valuemax) stands, the banned phrase is
+       gone, and the section holds no paragraph at all. */
     const balance = expectShelled(container, "Today's balance");
     expect(within(balance).getByRole("heading", { level: 2 }).textContent).toBe(
       "Today's balance",
@@ -325,7 +327,8 @@ describe("section system — Nutrition page render", () => {
       .find((m) => m.getAttribute("aria-label")?.startsWith("Fruit:"));
     expect(fruitMeter, "the fruit goal meter").toBeTruthy();
     expect(fruitMeter!.getAttribute("aria-valuemax")).toBe("100");
-    expect(within(balance).getAllByText(/g to go · ICMR-NIN guideline/).length).toBeGreaterThan(0);
+    expect(within(balance).queryByText(/to go/)).toBeNull();
+    expect(balance.querySelectorAll("p").length).toBe(0);
     expect(
       within(container).queryByText(
         /fruit — the ICMR-NIN guideline aims for at least 100 g across the day/,
@@ -380,14 +383,18 @@ describe("section system — Nutrition page render", () => {
 
     const { container } = render(<NutritionPage />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
-    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+    await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 8000 });
 
     const adjusted = expectShelled(container, "How today's plan was adjusted");
     expect(within(adjusted).getByRole("heading", { level: 2 }).textContent).toBe(
       "How today's plan was adjusted",
     );
-    expect(within(adjusted).getByText(/Kitchen limits relaxed/)).toBeTruthy();
+    /* Brief v7 N4: the kitchen row is worded by `adjustmentCopy`
+       now — its title is "Some dishes need cooking" (the old
+       `reasonCopy` title "Kitchen limits relaxed" retired with the
+       prose partition). */
+    expect(within(adjusted).getByText(/Some dishes need cooking/)).toBeTruthy();
     const plan = sectionByLabel(container, "Your plan for today");
-    expect(within(plan).queryByText(/Kitchen limits relaxed/)).toBeNull();
+    expect(within(plan).queryByText(/Some dishes need cooking/)).toBeNull();
   }, 30000);
 });
