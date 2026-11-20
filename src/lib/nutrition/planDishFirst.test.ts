@@ -161,8 +161,16 @@ describe("method 13 · the owner's corner (D3/F9)", () => {
   const plan = gen(ownerCornerProfile(), "2026-11-19", 1350, 171);
 
   it("every meal is dish-composed — no raw composite anywhere", () => {
+    /* Method 14 (M-160): a gravy lunch/dinner anchor now carries
+       ONE base beside it, so a meal is one dish (anchor) or two
+       (anchor + base) — never a layered raw composite, which is
+       what this pin exists to keep out. The base's own shape is
+       pinned in planAccompaniment.test.ts. */
     for (const meal of plan.meals) {
-      expect(meal.dishes.length, meal.meal).toBe(1);
+      expect(meal.dishes.length, meal.meal).toBeGreaterThanOrEqual(1);
+      expect(meal.dishes.length, meal.meal).toBeLessThanOrEqual(2);
+      expect(meal.dishes[0]!.role, meal.meal).toBe("anchor");
+      if (meal.dishes.length === 2) expect(meal.dishes[1]!.role, meal.meal).toBe("base");
     }
   });
 

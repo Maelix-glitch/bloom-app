@@ -17,8 +17,10 @@
 import { useState } from "react";
 import { Activity, ArrowDownRight, ArrowUpRight, Calculator, Droplets, Flame, Pencil, Ruler, Scale, Target, Trash2 } from "lucide-react";
 
+import { useAssessment } from "@/hooks/useAssessment";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useTrackers } from "@/hooks/useTrackers";
+import { legacyGoal } from "@/lib/vitalis/calc/body";
 import { trackerDef } from "@/lib/trackers/core";
 import {
   ACTIVITY_LABEL,
@@ -249,11 +251,23 @@ function BodyForm({ initial, onDone }: { initial: BodyProfile; onDone: () => voi
 
 export function HealthTools({ className }: { className?: string }) {
   const body = useBodyProfile();
+  const assessment = useAssessment();
   const trackers = useTrackers();
   const [editing, setEditing] = useState(false);
   const [weighIn, setWeighIn] = useState("");
   const [saved, setSaved] = useState<string | null>(null);
   const [confirmClear, setConfirmClear] = useState(false);
+
+  /* The form opens on the person's SAVED goal — the resolved profile
+     the plan itself reads (usePlan's order: the Assessment's stated
+     goal wins; the body profile's goal only fills an Assessment that
+     never stated one). Seeding from the body pref alone opened the
+     dropdown on a stale "Gain weight" for a person whose saved goal
+     is Lose weight (PR #210 sweep). */
+  const statedGoal = assessment.state.answers.goal;
+  const savedGoal: BodyGoal =
+    statedGoal === null ? body.profile.goal : legacyGoal(statedGoal);
+  const formInitial: BodyProfile = { ...body.profile, goal: savedGoal };
 
   const todayWater =
     trackers.days.find((day) => day.date === trackers.today)?.waterMl ?? null;
@@ -317,7 +331,7 @@ export function HealthTools({ className }: { className?: string }) {
       </header>
 
       {!ready || editing ? (
-        <BodyForm initial={body.profile} onDone={() => setEditing(false)} />
+        <BodyForm initial={formInitial} onDone={() => setEditing(false)} />
       ) : (
         <>
           <div className="bt-cards">

@@ -16,6 +16,7 @@ import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
 import { DISH_LIBRARY, findDish } from "./data/dishLibrary";
 import { dishNutrients, dishPatterns, type Dish } from "./dishes";
+import { dishIsGravyStyle } from "./gravyStyle";
 import {
   generatePlan,
   parsePlanValue,
@@ -42,6 +43,15 @@ import type { Food, Nutrients } from "./types";
  * the worst meal) until the day sits inside its bands — energy
  * ±5%, protein 95–110% — whenever the pool allows. The pattern gate
  * is re-verified on the composed plan itself before it is returned.
+ *
+ * Method 14 note (2026-11-20, M-160): the one legal second dish in
+ * a main meal is the accompaniment — a gravy anchor at lunch or
+ * dinner carries ONE base (steamed rice or phulka, a fixed half
+ * serving). It is not the P5 stack revived: the anchor is still
+ * the meal, the base is a fixed accompaniment the repair never
+ * scales, and every shape assertion below runs through
+ * expectDishMealShape, which pins the base's seat, serving, dish
+ * and gravy condition as strictly as P8 pinned the single dish.
  */
 
 const NOW = "2026-11-17T03:00:00.000Z";
@@ -143,6 +153,25 @@ const dayTotals = (plan: DailyPlan) => ({
 
 const mainMeals = (plan: DailyPlan): PlanMeal[] => plan.meals.filter((m) => m.meal !== "snack");
 
+/** The method-14 meal shape: ONE anchor, plus at most ONE
+ *  accompaniment — role "base" in the second seat, the fixed half
+ *  serving, one of the two base dishes, at lunch or dinner only,
+ *  beside an anchor the gravy derivation calls gravy-style. */
+const BASE_DISH_IDS = new Set(["dish-steamed-rice", "dish-phulka-roti"]);
+function expectDishMealShape(meal: PlanMeal, label: string) {
+  expect(meal.dishes.length, label).toBeGreaterThanOrEqual(1);
+  expect(meal.dishes.length, label).toBeLessThanOrEqual(2);
+  expect(meal.dishes[0]!.role, label).toBe("anchor");
+  if (meal.dishes.length === 2) {
+    const base = meal.dishes[1]!;
+    expect(base.role, label).toBe("base");
+    expect(base.servings, label).toBe(0.5);
+    expect(BASE_DISH_IDS.has(base.dishId), label).toBe(true);
+    expect(meal.meal === "lunch" || meal.meal === "dinner", label).toBe(true);
+    expect(dishIsGravyStyle(findDish(meal.dishes[0]!.dishId)!), label).toBe(true);
+  }
+}
+
 /** The day's bands, asserted strictly — the fixtures below are the
  *  ones the pool CAN land, so there is no honesty escape hatch. */
 function expectDayInBand(plan: DailyPlan, targets: { kcal: number; proteinG: number }) {
@@ -173,10 +202,10 @@ const NUTRIENT_FIELDS = [
 ] as const satisfies readonly (keyof Nutrients)[];
 
 describe("plan · P8 single-dish composition", () => {
-  it("every main meal is exactly ONE real library dish", () => {
+  it("every main meal is ONE real library dish as anchor, plus at most its base", () => {
     const plan = ownerDay("2026-11-17");
     for (const meal of mainMeals(plan)) {
-      expect(meal.dishes.length, meal.meal).toBe(1);
+      expectDishMealShape(meal, meal.meal);
       const dish = meal.dishes[0]!;
       expect(dish.role, meal.meal).toBe("anchor");
       /* A dish from the shipped library — not a food, not an invention. */
@@ -222,7 +251,7 @@ describe("plan · P8 single-dish composition", () => {
     }
   });
 
-  it("the owner's week lands inside the day bands, one dish per meal", () => {
+  it("the owner's week lands inside the day bands, every meal dish-composed", () => {
     const days = [
       "2026-11-17",
       "2026-11-18",
@@ -235,7 +264,7 @@ describe("plan · P8 single-dish composition", () => {
     for (const day of days) {
       const plan = ownerDay(day);
       expectDayInBand(plan, OWNER_TARGETS);
-      for (const meal of mainMeals(plan)) expect(meal.dishes.length, `${day} ${meal.meal}`).toBe(1);
+      for (const meal of mainMeals(plan)) expectDishMealShape(meal, `${day} ${meal.meal}`);
     }
   }, 60_000);
 
@@ -244,7 +273,7 @@ describe("plan · P8 single-dish composition", () => {
     for (const day of ["2026-11-17", "2026-11-18", "2026-11-19"]) {
       const plan = gen(ownerProfile(), { day, fallbackTargets: targets });
       expectDayInBand(plan, targets);
-      for (const meal of mainMeals(plan)) expect(meal.dishes.length, `${day} ${meal.meal}`).toBe(1);
+      for (const meal of mainMeals(plan)) expectDishMealShape(meal, `${day} ${meal.meal}`);
       for (const meal of plan.meals) {
         for (const planDish of meal.dishes) {
           expect(dishPatterns(findDish(planDish.dishId)!), `${day}: ${planDish.name}`).toContain(
@@ -293,7 +322,7 @@ describe("plan · P8 single-dish composition", () => {
         for (const day of ["2026-11-17", "2026-11-19"]) {
           const plan = gen(fullProfile(pattern), { day, fallbackTargets: targets });
           for (const meal of mainMeals(plan)) {
-            expect(meal.dishes.length, `${pattern}/${targets.kcal}/${day} ${meal.meal}`).toBeLessThanOrEqual(1);
+            expectDishMealShape(meal, `${pattern}/${targets.kcal}/${day} ${meal.meal}`);
           }
           if (planPattern === null) continue;
           for (const meal of plan.meals) {
@@ -345,8 +374,17 @@ describe("plan · P8 single-dish composition", () => {
       "2026-11-23",
     ].map(ownerDay);
     for (const plan of days) {
-      const ids = plan.meals.flatMap((m) => m.dishes.map((d) => d.dishId));
+      /* Method 14: the repeat rule binds every dish except the
+         base — a plain base may serve at lunch AND dinner (rice
+         beside two curries), never more than twice. */
+      const ids = plan.meals.flatMap((m) =>
+        m.dishes.filter((d) => d.role !== "base").map((d) => d.dishId),
+      );
       expect(new Set(ids).size, plan.day).toBe(ids.length);
+      const baseIds = plan.meals.flatMap((m) =>
+        m.dishes.filter((d) => d.role === "base").map((d) => d.dishId),
+      );
+      expect(baseIds.length, plan.day).toBeLessThanOrEqual(2);
     }
     /* The P5–P7 pin — no anchor repeats on consecutive days — is
        retired with the mechanism that made it true: order-driven
@@ -370,6 +408,9 @@ describe("plan · P8 single-dish composition", () => {
     for (const plan of days) {
       for (const meal of mainMeals(plan)) {
         for (const d of meal.dishes) {
+          /* The variety census counts anchors: a base is an
+             accompaniment, not rotation (method 14). */
+          if (d.role === "base") continue;
           all.add(d.dishId);
           if (!bySlot.has(meal.meal)) bySlot.set(meal.meal, new Set());
           bySlot.get(meal.meal)!.add(d.dishId);
@@ -443,7 +484,7 @@ describe("plan · P8 single-dish composition", () => {
     for (const plan of plans) {
       expectDayInBand(plan, OWNER_TARGETS);
       for (const meal of mainMeals(plan)) {
-        expect(meal.dishes.length, `${plan.day} ${meal.meal}`).toBe(1);
+        expectDishMealShape(meal, `${plan.day} ${meal.meal}`);
       }
     }
     const slotSeq = (slot: string) =>

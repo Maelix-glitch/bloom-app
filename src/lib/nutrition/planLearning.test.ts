@@ -147,8 +147,8 @@ describe("no usable log — the P5 plan, unchanged", () => {
     /* Method 10 = the behavioural pass (spec §10): the pin moves
        with the version; the behaviour pinned here — no log, no learning
        notes — is unchanged. (Moved again at method 13, the dish-first
-       repair.) */
-    expect(base.methodVersion).toBe(13);
+       repair, and at method 14, the accompaniment + snack placement.) */
+    expect(base.methodVersion).toBe(14);
     expect(base.notes.some((n) => n.startsWith("From your log"))).toBe(false);
   });
 
@@ -234,7 +234,13 @@ describe("a protein-shortfall log", () => {
        220 g, and the leaned day at 234 g, not 231 g — the snack
        slot serves a real dish (a shake) whose protein rides in
        the day's total where plain snack foods used to sit. The
-       lean's lift and the ceiling below are unchanged. */
+       lean's lift and the ceiling below are unchanged.
+       Method 14 re-pin: the un-leaned day lands at 223 g and the
+       leaned day at 237 g — the lunch anchor (a creamy kulajda)
+       is gravy-style, so its steamed-rice base rides in both
+       days' totals, and the whole-plate judging moves the leaned
+       day's breakfast anchor. The lift (+14 g) and the ceiling
+       are unchanged. */
     const day = "2026-11-23";
     const log: LogEntry[] = [
       entry("2026-11-20", 3000, 120),
@@ -248,8 +254,8 @@ describe("a protein-shortfall log", () => {
       recentLog: log,
     });
     expect(anchorIds(biasedDay)).not.toEqual(anchorIds(baseDay));
-    expect(Math.round(dayTotals(baseDay).proteinG)).toBe(221);
-    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(234);
+    expect(Math.round(dayTotals(baseDay).proteinG)).toBe(223);
+    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(237);
     expect(dayTotals(biasedDay).proteinG).toBeGreaterThan(dayTotals(baseDay).proteinG);
     expect(dayTotals(biasedDay).proteinG).toBeLessThanOrEqual(1.1 * 220);
     expect(meanAnchorDensity(biasedDay)).toBeGreaterThan(meanAnchorDensity(baseDay));

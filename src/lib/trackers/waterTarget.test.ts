@@ -12,7 +12,13 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { bodyTargetsOf, DEFAULT_BODY } from "@/lib/health/body";
+import { bodyTargetsOf, DEFAULT_BODY, type BodyProfile } from "@/lib/health/body";
+import {
+  EMPTY_ANSWERS,
+  EMPTY_ASSESSMENT_STATE,
+  toHealthProfile,
+  type AssessmentState,
+} from "@/lib/assessment/state";
 import {
   EMPTY_CONSTRAINTS,
   EMPTY_DIETARY,
@@ -29,7 +35,7 @@ import { generatePlan } from "@/lib/nutrition/plan";
 import { USDA_REFERENCE_FOODS } from "@/lib/nutrition/usdaReference";
 
 import { DEFAULT_GOALS } from "./core";
-import { goalsWithWaterTarget, waterTargetMlOf } from "./waterTarget";
+import { goalsWithWaterTarget, planWaterTargetMlOf, waterTargetMlOf } from "./waterTarget";
 
 const DAY = "2026-11-19";
 const NOW = "2026-11-19T03:00:00.000Z";
@@ -91,6 +97,107 @@ describe("waterTargetMlOf — the resolver reads the plan's own guide", () => {
     if (!outcome.ok) return;
     expect(outcome.plan.hydration).toBeDefined();
     expect(outcome.plan.hydration!.targetMl).toBe(guide);
+  });
+});
+
+/* The Assessment-only account (live failure, PR #210 sweep): the plan
+ * resolves its targets from the Assessment; Trackers must resolve the
+ * water target from that SAME assembled profile. */
+const ASSESSMENT_COMPLETE: AssessmentState = {
+  version: 1,
+  status: "complete",
+  step: "summary",
+  answers: {
+    ...EMPTY_ANSWERS,
+    ageYears: 30,
+    heightCm: 175,
+    weightKg: 82,
+    sex: "female",
+    goal: "lose",
+    activity: "light",
+    pregnantOrBreastfeeding: false,
+    eatingDisorderHistory: false,
+    unexplainedWeightChange: false,
+  },
+  consents: [],
+  startedAt: "2026-11-15T03:00:00.000Z",
+  completedAt: "2026-11-15T03:05:00.000Z",
+  updatedAt: "2026-11-15T03:05:00.000Z",
+};
+
+/* 80 kg · 178 cm · 30 · male · moderate → body-guide water 3,300 ml. */
+const BODY_PROFILE: BodyProfile = {
+  units: "metric",
+  heightCm: 178,
+  weightKg: 80,
+  targetWeightKg: null,
+  age: 30,
+  sex: "male",
+  activity: "moderate",
+  goal: "maintain",
+  rateKgPerWeek: 0.5,
+  updatedAt: "2026-06-01T07:00:00.000Z",
+};
+
+describe("planWaterTargetMlOf — the plan's own resolution, shared", () => {
+  it("resolves from the Assessment alone (no body pref) and equals the composed plan's hydration target", () => {
+    const resolved = planWaterTargetMlOf({
+      assessmentState: ASSESSMENT_COMPLETE,
+      bodyProfile: DEFAULT_BODY,
+      today: DAY,
+    });
+    /* 82 kg × 35 + 250 (light) = 3,120 → 3,100 on the 50 ml grid. */
+    expect(resolved).toBe(3100);
+
+    const profile = toHealthProfile(ASSESSMENT_COMPLETE, "local");
+    const safety = classifySafety(toSafetyInput(profile));
+    const outcome = generatePlan({
+      profile,
+      safety,
+      gatedOutcome: targetsFor(profile, safety, DAY),
+      fallbackTargets: null,
+      foods: USDA_REFERENCE_FOODS,
+      dishes: DISH_LIBRARY,
+      waterMl: null,
+      day: DAY,
+      now: NOW,
+      id: "plan-water-assessment-only",
+    });
+    expect(outcome.ok).toBe(true);
+    if (!outcome.ok) return;
+    expect(outcome.plan.hydration!.targetMl).toBe(resolved);
+  });
+
+  it("when both sources exist and differ, the Assessment (gated) figure stands — the plan's order", () => {
+    /* Assessment guide: 3,100. Body-pref guide: 3,300. The plan's
+       targets come from the gated outcome, so its water does too. */
+    expect(
+      planWaterTargetMlOf({
+        assessmentState: ASSESSMENT_COMPLETE,
+        bodyProfile: BODY_PROFILE,
+        today: DAY,
+      }),
+    ).toBe(3100);
+  });
+
+  it("a body-pref-only account keeps the body guide's figure", () => {
+    expect(
+      planWaterTargetMlOf({
+        assessmentState: EMPTY_ASSESSMENT_STATE,
+        bodyProfile: BODY_PROFILE,
+        today: DAY,
+      }),
+    ).toBe(3300);
+  });
+
+  it("is null when neither source can produce a figure", () => {
+    expect(
+      planWaterTargetMlOf({
+        assessmentState: EMPTY_ASSESSMENT_STATE,
+        bodyProfile: DEFAULT_BODY,
+        today: DAY,
+      }),
+    ).toBeNull();
   });
 });
 

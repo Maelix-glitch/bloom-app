@@ -24,6 +24,11 @@ import {
   type BodyProfile,
   type WeighIn,
 } from "@/lib/health/body";
+import {
+  ASSESSMENT_KEY,
+  EMPTY_ANSWERS,
+  type AssessmentState,
+} from "@/lib/assessment/state";
 import { HealthTools } from "./HealthTools";
 
 const profile: BodyProfile = {
@@ -101,5 +106,62 @@ describe("HealthTools — Clear body data confirmation", () => {
     fireEvent.click(screen.getByRole("button", { name: /Clear body data/ }));
     expect(getPref(WEIGHINS_KEY, parseWeighIns, [])).toHaveLength(2);
     expect(screen.getByRole("button", { name: /Tap again to confirm/ })).toBeTruthy();
+  });
+});
+
+/* Rider A (PR #210 sweep): the form's Goal dropdown must open on the
+ * person's SAVED goal — the resolved profile the plan uses (Assessment
+ * goal wins; the body goal only fills an Assessment that never stated
+ * one) — not on whatever the body pref alone happens to hold. Live it
+ * opened on "Gain weight" for a person whose saved goal is Lose. */
+function seedAssessmentGoal(goal: "lose" | "gain"): void {
+  const state: AssessmentState = {
+    version: 1,
+    status: "complete",
+    step: "summary",
+    answers: { ...EMPTY_ANSWERS, goal },
+    consents: [],
+    startedAt: null,
+    completedAt: "2026-11-15T03:05:00.000Z",
+    updatedAt: "2026-11-15T03:05:00.000Z",
+  };
+  setPref(ASSESSMENT_KEY, state);
+  resetPrefCache();
+}
+
+function goalSelect(container: HTMLElement): HTMLSelectElement {
+  const label = [...container.querySelectorAll("label.bt-field")].find(
+    (l) => l.querySelector(".bt-field__label")?.textContent === "Goal",
+  );
+  if (!label) throw new Error("Goal field did not render");
+  const select = label.querySelector("select");
+  if (!select) throw new Error("Goal select did not render");
+  return select as HTMLSelectElement;
+}
+
+describe("HealthTools — the Goal dropdown opens on the saved goal", () => {
+  it("Assessment-only account: the saved Assessment goal, not the body default", () => {
+    setPref(BODY_KEY, DEFAULT_BODY);
+    resetPrefCache();
+    seedAssessmentGoal("lose");
+    const { container } = render(<HealthTools />);
+    expect(goalSelect(container).value).toBe("lose");
+  });
+
+  it("the Assessment goal wins over a different stored body goal", () => {
+    setPref(BODY_KEY, { ...profile, goal: "gain" });
+    resetPrefCache();
+    seedAssessmentGoal("lose");
+    const { container } = render(<HealthTools />);
+    fireEvent.click(screen.getByRole("button", { name: /Edit numbers/ }));
+    expect(goalSelect(container).value).toBe("lose");
+  });
+
+  it("no Assessment goal: the body goal still fills the form", () => {
+    setPref(BODY_KEY, { ...profile, goal: "gain" });
+    resetPrefCache();
+    const { container } = render(<HealthTools />);
+    fireEvent.click(screen.getByRole("button", { name: /Edit numbers/ }));
+    expect(goalSelect(container).value).toBe("gain");
   });
 });

@@ -18,7 +18,7 @@
  * Method 13 (2026-11-19): the meal budget is a PREFERENCE on the
  * shelf, not a cut. Until method 12 a stated budget kept every dish
  * above its tier off the shelf entirely — the owner saw 545 of the
- * library's 1,202 dishes, and the missing ones were
+ * library's 1,203 dishes, and the missing ones were
  * disproportionately the protein dishes (priced into the top tier
  * by a costing band that priced flesh and fish like almonds). Now
  * the shelf shows the full pattern pool; in-budget dishes sort

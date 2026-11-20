@@ -51,7 +51,7 @@ const dish = (id: string): Dish => {
 
 describe("§10.4 · coverage", () => {
   it("classifies every dish in the library — pinned or counted method-less", () => {
-    expect(DISH_LIBRARY.length).toBe(1202);
+    expect(DISH_LIBRARY.length).toBe(1203);
     const methodLess = DISH_LIBRARY.filter((d) => !Array.isArray(d.method) || d.method.length === 0);
     /* Today the count is zero: every shipped dish carries a method.
        A future method-less dish must stay UNTAGGED (the conservative
@@ -85,7 +85,7 @@ describe("§10.4 · coverage", () => {
 
   it("the tag census — a count moves only with a method edit or a rule change", () => {
     const count = (item: string) => DISH_LIBRARY.filter((d) => d.equipment?.includes(item as never)).length;
-    expect(count("stove")).toBe(1114);
+    expect(count("stove")).toBe(1115);
     expect(count("pressure_cooker")).toBe(68);
     expect(count("oven")).toBe(102);
     /* No shipped method uses a microwave. The honest count is zero,

@@ -21,6 +21,7 @@ import { PROTEIN_INDIA_DISHES } from "./data/dishLibraryProteinIndia";
 import { PROTEIN_INTL_DISHES } from "./data/dishLibraryProteinIntl";
 import { SHAKES_DISHES } from "./data/dishLibraryShakes";
 import { dishPatterns } from "./dishes";
+import { dishIsGravyStyle } from "./gravyStyle";
 import {
   generatePlan,
   patternAllowsClassification,
@@ -39,7 +40,11 @@ import type { Food } from "./types";
  *
  *   · day energy inside ±5% of the guide, protein inside 95–110%;
  *   · zero dietary-pattern violations (dishes AND plain foods);
- *   · at most one dish in a main meal, no dish repeated in a day;
+ *   · one dish in a main meal — plus, since method 14, the ONE legal
+ *     second dish: the accompaniment (role "base", fixed half
+ *     serving, steamed rice or phulka, beside a gravy-style anchor
+ *     at lunch or dinner); no dish repeated in a day, the base
+ *     excepted (at most two base servings, lunch and dinner);
  *   · a real snack every day; a morning element every day;
  *   · hydration present and summing exactly to the day's water
  *     target whenever one was supplied;
@@ -61,6 +66,17 @@ import type { Food } from "./types";
  * whose notes label the relaxation that caused them. A dedicated
  * block pins the owner's exact corner across a week × four budget
  * states.
+ *
+ * Method 14 extension (2026-11-20, M-160/M-161): the accompaniment
+ * moves this suite's two shape tallies to the method-14 contract,
+ * at equal strictness. multiDishMains counts only a second dish
+ * that is NOT the accompaniment; a base malformed in any
+ * particular (seat, serving, dish, meal, non-gravy anchor) is a
+ * judged failure, as in the 1000 matrix's bad_base class. The
+ * repeat tally binds every non-base dish; a base may repeat
+ * across lunch and dinner, never more. Dish-composition counting
+ * (mainDishes, proteinDishes) reads the anchor, so a based main
+ * counts as the dish-composed main it is.
  */
 
 const NOW = "2026-11-19T03:00:00.000Z";
@@ -254,7 +270,18 @@ const kcalNamed = (plan: DailyPlan) =>
 const proteinNamed = (plan: DailyPlan, over: boolean) =>
   over
     ? plan.notes.some((n) => n.includes("g of protein — above your"))
-    : plan.notes.some((n) => n.includes("protein guide — the portion caps bind"));
+    : /* Any shortfall note that states the figure against the guide
+         names the miss — the caps-bind wording ("— the portion caps
+         bind…") or the energy-bind wordings ("— a top-up is in the
+         day, but the day is already over its energy guide…"). The
+         detector keys on the shared "protein guide —" stem, not
+         one sentence: the same generalisation the 1000 matrix
+         already carries. Method 14 made the energy-bind wording
+         reachable on cells the caps-bind wording used to cover —
+         a gravy anchor's rice base can carry the day over its
+         energy guide, and the top-up discipline then honestly
+         withholds the protein top-up and says so. */
+      plan.notes.some((n) => n.includes("protein guide —"));
 
 /** Method 13: the notes that honestly label a plan whose mains
  *  could not all be dish-composed — a kitchen relaxation, a budget
@@ -282,6 +309,7 @@ function judge(
   let dishProtein = 0;
   let planHasFoodMain = false;
   const dishIds: string[] = [];
+  let baseCount = 0;
   for (const meal of plan.meals) {
     const mealKcal =
       meal.dishes.reduce((a, d) => a + d.nutrients.kcal, 0) +
@@ -306,8 +334,29 @@ function judge(
         stats.foodMains += 1;
         planHasFoodMain = true;
       }
-      if (meal.dishes.length > 1) stats.multiDishMains += 1;
-      if (meal.dishes.length === 1) {
+      /* Method 14: the accompaniment is the one legal second
+         dish — a well-formed base beside a gravy anchor. A second
+         dish that is not one counts as the old multi-dish defect;
+         a base malformed in any particular is a judged failure. */
+      const base = meal.dishes.find((d) => d.role === "base");
+      if (base) {
+        const anchorDish = DISH_BY_ID.get(meal.dishes[0]!.dishId);
+        const wellFormed =
+          meal.dishes.length === 2 &&
+          meal.dishes[1] === base &&
+          (meal.meal === "lunch" || meal.meal === "dinner") &&
+          base.servings === 0.5 &&
+          (base.dishId === "dish-steamed-rice" || base.dishId === "dish-phulka-roti") &&
+          anchorDish !== undefined &&
+          dishIsGravyStyle(anchorDish);
+        if (!wellFormed && !MEASURE) {
+          failures.push(`${label}: malformed base in ${meal.meal}`);
+        }
+      }
+      if (meal.dishes.length > 2 || (meal.dishes.length > 1 && !base)) {
+        stats.multiDishMains += 1;
+      }
+      if (meal.dishes.length >= 1) {
         stats.mainDishes += 1;
         if (PROTEIN_DISH_IDS.has(meal.dishes[0]!.dishId)) stats.proteinDishes += 1;
       }
@@ -322,7 +371,12 @@ function judge(
         if (!MEASURE) failures.push(`${label}: ${meal.meal} at ${ratio.toFixed(2)}× its share`);
       }
     }
-    for (const d of meal.dishes) dishIds.push(d.dishId);
+    for (const d of meal.dishes) {
+      /* Method 14: the repeat tally binds non-base dishes; bases
+         are counted apart (at most two servings, lunch + dinner). */
+      if (d.role === "base") baseCount += 1;
+      else dishIds.push(d.dishId);
+    }
   }
   if (dishIds.length > 0) stats.dishDays += 1;
   /* Method 13: a food-composed main is a labelled last resort,
@@ -333,7 +387,7 @@ function judge(
     stats.unlabelledFoodMainPlans += 1;
     if (!MEASURE) failures.push(`${label}: food-composed main with no relaxation note`);
   }
-  if (new Set(dishIds).size !== dishIds.length) {
+  if (new Set(dishIds).size !== dishIds.length || baseCount > 2) {
     stats.repeatDays += 1;
     if (!MEASURE) failures.push(`${label}: a dish repeats within the day`);
   }
@@ -562,7 +616,18 @@ describe("plan matrix 500", () => {
               if (DISH_BY_ID.get(d.dishId)?.category === "shake") shakes += 1;
             }
             if (meal.meal === "snack") continue;
-            expect(meal.dishes.length, `${key}/${day}/${meal.meal}`).toBe(1);
+            /* Method 14: one anchor, plus at most its base. */
+            expect(meal.dishes.length, `${key}/${day}/${meal.meal}`).toBeGreaterThanOrEqual(1);
+            expect(meal.dishes.length, `${key}/${day}/${meal.meal}`).toBeLessThanOrEqual(2);
+            if (meal.dishes.length === 2) {
+              const base = meal.dishes[1]!;
+              expect(base.role, `${key}/${day}/${meal.meal}`).toBe("base");
+              expect(base.servings, `${key}/${day}/${meal.meal}`).toBe(0.5);
+              expect(
+                dishIsGravyStyle(DISH_BY_ID.get(meal.dishes[0]!.dishId)!),
+                `${key}/${day}/${meal.meal}`,
+              ).toBe(true);
+            }
             acc.mains += 1;
             if (PROTEIN_DISH_IDS.has(meal.dishes[0]!.dishId)) acc.pw += 1;
           }

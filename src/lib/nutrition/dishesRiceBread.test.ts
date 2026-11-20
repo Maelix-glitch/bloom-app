@@ -37,11 +37,13 @@ describe("the rice/bread/breakfast/snack library", () => {
     for (const dish of DISHES_RICE_BREAD) {
       counts.set(dish.category, (counts.get(dish.category) ?? 0) + 1);
     }
-    /* Rice 19 / breakfast 20 after the 2026-11-17 dedupe removed five
-       duplicates from this file (21 / 23 before); bread 16 → 14 after
-       the same day's borderline removal took poori and bhatura. */
+    /* Rice 20 / breakfast 20: rice was 19 after the 2026-11-17 dedupe
+       removed five duplicates from this file (21 / 23 before), and
+       method 14 (2026-11-20) added the plain Steamed Rice; bread
+       16 → 14 after the same day's borderline removal took poori
+       and bhatura. */
     expect(Object.fromEntries(counts)).toEqual({
-      rice: 19,
+      rice: 20,
       bread: 14,
       breakfast: 20,
       snack: 16,
@@ -178,16 +180,17 @@ describe("derived patterns — representatives", () => {
       for (const p of patterns) spread.set(p, (spread.get(p) ?? 0) + 1);
     }
     /* Spread recomputed after the 2026-11-17 dedupe removed five
-       dishes from this file (76 dishes before, 71 then), and again
+       dishes from this file (76 dishes before, 71 then), again
        after the same day's borderline removal took poori and bhatura
-       (69 now). */
+       (69 then), and again after method 14 (2026-11-20) added the
+       plain Steamed Rice, which suits every pattern (70 now). */
     expect(Object.fromEntries(spread)).toEqual({
-      vegetarian: 62,
-      eggetarian: 67,
-      vegan: 30,
-      ovo_vegetarian: 33,
-      pescatarian: 67,
-      non_vegetarian: 69,
+      vegetarian: 63,
+      eggetarian: 68,
+      vegan: 31,
+      ovo_vegetarian: 34,
+      pescatarian: 68,
+      non_vegetarian: 70,
     });
   });
 });

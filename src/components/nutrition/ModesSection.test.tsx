@@ -46,7 +46,7 @@ describe("ModesSection", () => {
     expect(screen.getByText("Added sugar")).toBeTruthy();
     expect(screen.getByText("Carbs > 75 g")).toBeTruthy();
     expect(screen.getByText("Sodium > 800 mg")).toBeTruthy();
-    /* Both filtering modes carry the "Would hide N of 1,202 dishes"
+    /* Both filtering modes carry the "Would hide N of 1,203 dishes"
        footer while OFF — the effect is a fact about the rules and
        the library, not about the switch. (The count is a <strong>
        inside the footer line, so match on the footers' full text.) */

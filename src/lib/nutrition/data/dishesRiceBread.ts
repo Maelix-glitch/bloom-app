@@ -22,6 +22,35 @@ import type { Dish } from "../dishes";
 export const DISHES_RICE_BREAD: Dish[] = [
   /* ------------------------------- RICE ------------------------------- */
   {
+    /* The plain base (method 14): the rice a curry is eaten with.
+       Until this dish existed the library held only one-pot rice
+       meals (pulaos, biryanis, khichdis) that compete as anchors —
+       there was no plain steamed rice for the accompaniment rule
+       to serve beside a gravy, which is why curry plates arrived
+       with nothing to eat them with (M-160). Two lines, nothing
+       added and nothing hidden: rice and salt, cooked in water. */
+    id: "dish-steamed-rice",
+    name: { en: "Steamed Rice", hindi: "उबला चावल" },
+    category: "rice",
+    servings: 4,
+    cuisine: "india",
+    lines: [
+      { foodId: "usda-2512381", grams: 300 }, // white rice, dry
+      { foodId: "usda-173468", grams: 4 }, // salt
+    ],
+    method: [
+      "Rinse the 300 g rice in several changes of water until it runs clearer; soak for 20 minutes and drain.",
+      "Bring about 600 ml water to a boil in a heavy pot with the salt.",
+      "Add the rice and stir once; cover and cook on the lowest heat for 10 minutes without lifting the lid.",
+      "Rest, covered and off the heat, for 10 minutes — the grains finish steaming in their own vapour.",
+      "Fluff gently with a fork and serve plain, beside the dish it accompanies.",
+    ],
+    timeMinutes: 30,
+    budgetTier: 1,
+    enriched: false,
+    equipment: ["stove"],
+  },
+  {
     id: "dish-veg-pulao",
     name: { en: "Vegetable Pulao", hindi: "सब्ज़ी पुलाव" },
     category: "rice",

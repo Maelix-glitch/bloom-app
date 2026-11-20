@@ -10,6 +10,10 @@
  *   callback the old chips used, which the section wires to
  *   `usePlan.setGoal` — the one write path (body profile + the
  *   Assessment answers patch), unchanged.
+ * - `SegmentedSnackControl` (P14, M-161): the same pattern at two
+ *   segments — where the day's snack sits, "In the longest gap" or
+ *   "In the morning" — living inside the "How this plan is built"
+ *   disclosure and writing through `usePlan.setSnackPlacement`.
  * - `MoreDisclosure` (M-157): the page's ONE disclosure. A button
  *   with aria-expanded over a hairline, a chevron that rotates, and
  *   content that fades in — replacing every native <details> on the
@@ -53,7 +57,7 @@ import { Check, ChevronDown } from "lucide-react";
 
 import { GOAL_LABEL, GOAL_OPTIONS } from "@/lib/assessment/questions";
 import { fmtGrams, fmtInt, fmtLitres } from "@/lib/format";
-import type { PlanGoalProfile } from "@/lib/nutrition";
+import type { PlanGoalProfile, SnackPlacement } from "@/lib/nutrition";
 import { dishPreparationNeeds, type Dish } from "@/lib/nutrition/dishes";
 import type { PlanRailStop } from "@/lib/nutrition/planView";
 import type { CookingAbility, PrepTimeMaxMinutes } from "@/lib/vitalis/domain/profile";
@@ -133,6 +137,97 @@ export function SegmentedGoalControl({
             />
             <span className="seg__label" aria-hidden="true">
               {option.short}
+            </span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+/* ----------------------- segmented snack sits ----------------------- */
+
+/** The snack-placement options (P14, M-161), in the order the row
+ *  presents them: the rule the plan has always used first, the
+ *  morning preference second. The labels are the person's own
+ *  words for the choice — where the snack sits — never the
+ *  composer's rule names. */
+const SNACK_SEG_OPTIONS: readonly { value: SnackPlacement; label: string }[] = [
+  { value: "widest_gap", label: "In the longest gap" },
+  { value: "morning", label: "In the morning" },
+];
+
+/**
+ * The snack-placement control: the goal control's own pattern —
+ * real radios in a radiogroup, a NEUTRAL thumb that slides by
+ * transform, no gold anywhere (a setting, not an action). It
+ * lives inside the "How this plan is built" disclosure as one
+ * quiet row: the plan's structure is explained there, and this
+ * is the one part of that structure the person can choose. It
+ * reports through `usePlan.setSnackPlacement` — the preference
+ * write — and never regenerates silently: the stored plan goes
+ * stale by name ("where your snack sits") until the person's
+ * own "Suggest different meals" tap rebuilds it.
+ */
+export function SegmentedSnackControl({
+  current,
+  onSelect,
+}: {
+  current: SnackPlacement;
+  onSelect: (placement: SnackPlacement) => void;
+}) {
+  const trackRef = useRef<HTMLDivElement>(null);
+  const optionRefs = useRef<(HTMLLabelElement | null)[]>([]);
+  const [thumb, setThumb] = useState<{ x: number; w: number } | null>(null);
+  const index = SNACK_SEG_OPTIONS.findIndex((o) => o.value === current);
+
+  /* The thumb is measured, not computed — the goal control's own
+     discipline, for the same reason: segment widths follow the
+     labels. */
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = index >= 0 ? optionRefs.current[index] : null;
+      setThumb(el ? { x: el.offsetLeft, w: el.offsetWidth } : null);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [index]);
+
+  return (
+    <div className="seg" role="radiogroup" aria-label="Snack sits" ref={trackRef}>
+      <span
+        className="seg__thumb"
+        aria-hidden="true"
+        data-index={index}
+        style={{
+          transform: `translateX(${thumb?.x ?? 0}px)`,
+          width: thumb?.w ?? 0,
+          opacity: thumb ? 1 : 0,
+        }}
+      />
+      {SNACK_SEG_OPTIONS.map((option, i) => {
+        const selected = current === option.value;
+        return (
+          <label
+            key={option.value}
+            ref={(el) => {
+              optionRefs.current[i] = el;
+            }}
+            className="seg__option"
+            data-selected={selected || undefined}
+          >
+            <input
+              type="radio"
+              name="plan-snack-placement"
+              className="seg__input"
+              aria-label={option.label}
+              data-selected={selected || undefined}
+              checked={selected}
+              onChange={() => onSelect(option.value)}
+            />
+            <span className="seg__label" aria-hidden="true">
+              {option.label}
             </span>
           </label>
         );
