@@ -647,28 +647,30 @@ describe("N6 — add-on rows carry the included marker (M-147)", () => {
     const row = mealRow(container, "breakfast");
     setRowOpen(row, true);
 
-    /* The top-up sits under its group label, wearing the marker. */
+    /* M-166 re-contract (equal strictness, new shape): the top-up no
+       longer sits in a group of its own — it flows in the same list
+       as the meal's other foods, so the visible rows can sum to the
+       header. What is pinned now: NO separate top-up group exists,
+       the top-up shares its <ul> with the plain suggestion rows, and
+       it still wears the marker. */
     const labels = [...row.querySelectorAll(".nut-group-label")].map((el) => el.textContent);
-    expect(labels).toContain("To complete the meal");
-    const group = [...row.querySelectorAll<HTMLElement>(".meal-row__body > div")].find(
-      (d) => d.querySelector(".nut-group-label")?.textContent === "To complete the meal",
-    );
-    expect(group, "the top-up group renders").toBeDefined();
-    const topupEntries = [...group!.querySelectorAll<HTMLElement>(".nut-entry")];
+    expect(labels).not.toContain("To complete the meal");
+    const entries = [...row.querySelectorAll<HTMLElement>(".nut-entry")];
+    const topupEntries = entries.filter((li) => li.querySelector("[data-included]"));
     expect(topupEntries).toHaveLength(1);
     const marker = topupEntries[0]!.querySelector("[data-included]");
     expect(marker, "the top-up row carries the included marker").not.toBeNull();
     expect(marker!.textContent).toBe("Included in total");
     expect(marker!.classList.contains("nut-badge")).toBe(true);
 
-    /* Ordinary suggestion rows in the same expansion have none. */
-    const otherEntries = [...row.querySelectorAll<HTMLElement>(".nut-entry")].filter(
-      (li) => !group!.contains(li),
-    );
+    /* Ordinary suggestion rows in the same expansion have none — and
+       they share the top-up's own list, which is the M-166 point. */
+    const otherEntries = entries.filter((li) => !li.querySelector("[data-included]"));
     expect(otherEntries.length).toBeGreaterThan(0);
     for (const li of otherEntries) {
       expect(li.querySelector("[data-included]")).toBeNull();
     }
+    expect(topupEntries[0]!.closest("ul")).toBe(otherEntries[0]!.closest("ul"));
 
     /* Exactly one marker on this meal, and the row's one stated
        total is mealTotals — which sums the top-up's 37 kcal in

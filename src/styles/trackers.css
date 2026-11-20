@@ -1112,6 +1112,9 @@
   display: inline-flex;
   align-items: center;
   gap: 0.45rem;
+  /* One chip height for all six (M-168): the row reads as a set,
+     not six unrelated pills. */
+  min-height: 34px;
   padding: 0.35rem 0.7rem 0.35rem var(--space-2);
   border: 1px solid var(--tk2-rule);
   border-radius: var(--radius-pill);
@@ -1185,6 +1188,12 @@
   opacity: 0.75;
 }
 
+/* The On word at full strength (M-168): state readable at a glance,
+   against the off word's deliberate fade. */
+.tk2-active-toggle[data-on="true"] .tk2-active-state {
+  opacity: 1;
+}
+
 .tk2-active-toggle:hover:not(:disabled) {
   color: var(--ci-text);
 }
@@ -1232,7 +1241,13 @@
 }
 
 .tk2-targets-grid input {
-  width: 100%;
+  /* The figure hugs its content (M-168): at width:100% the field
+     stretched across the cell and exiled the unit to the far edge —
+     "480" at the left, "min" at the right, one fact torn in two.
+     Five mono characters cover every goal's longest value (8,000 ml,
+     1,200 min) with the caret's room; the unit now sits immediately
+     beside its figure, one tight group, like a designed table. */
+  width: 5ch;
   min-width: 0;
   padding: 0.15rem 0;
   border: 0;
@@ -1683,6 +1698,24 @@
   background: var(--surface);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
+}
+
+/* The log field is a designed number, not a browser control (M-168):
+   the native step arrows — a stray spinner riding the field's right
+   edge — are removed in every engine, and the field claims the
+   text-field appearance it is styled as. What remains in the empty
+   field is the placeholder "0", in the field's own mono, full-size:
+   a clean reading, never a broken-looking glyph. */
+.bsheet-panel.tk2-log-panel input[type="number"]::-webkit-outer-spin-button,
+.bsheet-panel.tk2-log-panel input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0;
+}
+
+.bsheet-panel.tk2-log-panel input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }
 
 .bsheet.bsheet--phone .bsheet-panel.tk2-log-panel {
@@ -2330,7 +2363,10 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .tk2-target-auto-value {
-  width: 100%;
+  /* M-168: the plan-set figure (water) hugs its content like the
+     typed fields do — at width:100% its "ml" was exiled to the far
+     edge of the cell, the same tear as the inputs'. */
+  width: auto;
   min-width: 0;
   padding: 0.15rem 0;
   border-bottom: 1px solid transparent;
@@ -2376,6 +2412,13 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
 .tk2-target-human {
   font-size: var(--text-meta);
   color: var(--ci-text-mute);
+  /* M-168: the human line's home is the cell's foot. Anchored there
+     (the cell is a flex column; this margin takes the slack), every
+     cell in a row lands its reading on the same line — a two-line
+     reading (water's "3.4 L · Set by your plan") no longer leaves
+     its row-mates' readings floating at a different height. */
+  margin-top: auto;
+  padding-top: 0.15rem;
 }
 
 /* ------------------------------ fine print ------------------------------- */
