@@ -1384,7 +1384,6 @@ a.nut-chip {
   inset: 0;
   z-index: 60;
   background: rgba(0, 0, 0, 0.72);
-  backdrop-filter: blur(6px);
   display: flex;
   align-items: flex-end;
   justify-content: center;

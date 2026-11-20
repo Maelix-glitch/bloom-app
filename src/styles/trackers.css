@@ -1446,6 +1446,9 @@
   font-size: 0.85em;
   margin-left: 2px;
   opacity: 1;
+  /* A unit is one phrase ("of 5", "min", "ml") — it must never wrap
+     mid-phrase beside its figure (owner screenshot, 2026-11-20). */
+  white-space: nowrap;
 }
 
 /* ------------------ 5. capsule docks and the tracer chip ----------------- */
@@ -1696,8 +1699,6 @@ body:has(.tk2-log-sheet) .bsheet-backdrop {
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 86%, transparent);
-  backdrop-filter: blur(18px) saturate(1.05);
-  -webkit-backdrop-filter: blur(18px) saturate(1.05);
 }
 
 /* ------------------- the snapshot sheet (MetricsEntryModal) --------------
@@ -1731,8 +1732,6 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 86%, transparent);
-  backdrop-filter: blur(18px) saturate(1.05);
-  -webkit-backdrop-filter: blur(18px) saturate(1.05);
 }
 
 /* ------------------------- the insight dock ------------------------------ */
@@ -2371,8 +2370,6 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 86%, transparent);
-  backdrop-filter: blur(18px) saturate(1.05);
-  -webkit-backdrop-filter: blur(18px) saturate(1.05);
 }
 
 /* The human reading under each target field, in the sheet. */

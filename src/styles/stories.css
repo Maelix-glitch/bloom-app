@@ -374,8 +374,6 @@
   inset: 0;
   z-index: 80;
   background: rgba(7, 8, 10, 0.72);
-  backdrop-filter: blur(6px);
-  -webkit-backdrop-filter: blur(6px);
   animation: ssheet-fade 220ms var(--story-ease) both;
 }
 

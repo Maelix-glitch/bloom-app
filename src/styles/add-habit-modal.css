@@ -105,7 +105,6 @@
   position: fixed;
   inset: 0;
   background: rgba(10, 10, 16, 0.72);
-  backdrop-filter: blur(8px);
   display: none;
   align-items: center;
   justify-content: center;

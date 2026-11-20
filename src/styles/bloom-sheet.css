@@ -21,7 +21,10 @@
   position: fixed;
   inset: 0;
   z-index: 2000;
-  /* no-color-mix fallback (legacy-engine rule, see .bsheet-panel):
+  /* A flat dim, never a blur scrim (owner rule, 2026-11-20): a blurred
+     backdrop lets page text ghost through and read around the panel;
+     the dim alone must do the hiding. Pinned in sheet.guard.
+     no-color-mix fallback (legacy-engine rule, see .bsheet-panel):
      --background at 72% as rgba, so the scrim never vanishes whole */
   background: rgba(10, 11, 14, 0.72);
   background:
@@ -31,8 +34,6 @@
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 72%, transparent);
-  backdrop-filter: blur(14px) saturate(1.1);
-  -webkit-backdrop-filter: blur(14px) saturate(1.1);
 }
 
 .bsheet {
@@ -1279,6 +1280,4 @@ body:has(.assess-sheet) .bsheet-backdrop {
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 86%, transparent);
-  backdrop-filter: blur(18px) saturate(1.05);
-  -webkit-backdrop-filter: blur(18px) saturate(1.05);
 }

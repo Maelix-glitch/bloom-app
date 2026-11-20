@@ -24,8 +24,6 @@
   /* no-color-mix fallback first (legacy-engine rule, see .bsheet-panel) */
   background: rgba(5, 4, 10, 0.72);
   background: color-mix(in oklab, var(--ap-scrim) 72%, transparent);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
 }
 
 .adm-panel {
