@@ -5,12 +5,8 @@ import { applyQuickAdd, readTrackerValue } from "@/components/tk/shared";
 import { trackerDef } from "@/lib/trackers/core";
 import { fmtLitres } from "@/lib/format";
 
-import {
-  BLOOM_STAGE_WORDS,
-  bloomStageOf,
-  mountWaterScene,
-  type WaterScene,
-} from "./waterBloomScene";
+import { BLOOM_STAGE_WORDS, bloomStageOf, type WaterScene } from "./waterBloomScene";
+import { mountWaterSceneAuto } from "./waterBloomSceneAuto";
 
 /**
  * Water the Bloom — the plan's water, as a scene (Brief v7 WATER slice;
@@ -34,6 +30,13 @@ import {
  *
  * The canvas is decoration; the numbers live in HTML text, and the
  * scene container speaks the progress in words for assistive tech.
+ *
+ * The flower itself is now Bloom's own 3D bloom (M-163), mounted by
+ * waterBloomSceneAuto wherever WebGL can carry it; the painted scene
+ * above remains the fallback — same contract, same progress, same
+ * pour — wherever it cannot, and takes over silently if the 3D scene
+ * ever fails. The mount decides; this component neither knows nor
+ * cares which scene is standing.
  */
 export function WaterBloomPanel({ targetMl }: { targetMl: number }) {
   const store = useTrackers();
@@ -54,7 +57,7 @@ export function WaterBloomPanel({ targetMl }: { targetMl: number }) {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const scene = mountWaterScene(canvas, { reducedMotion: reduced });
+    const scene = mountWaterSceneAuto(canvas, { reducedMotion: reduced });
     sceneRef.current = scene;
     return () => {
       scene.destroy();
