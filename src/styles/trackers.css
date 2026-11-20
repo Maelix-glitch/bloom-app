@@ -2309,6 +2309,38 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   white-space: nowrap;
 }
 
+/* Water's target is set by the plan's guide, not by hand (Brief v7
+   WATER): the display list says so under the value, in the caption
+   voice — never as a second number. */
+.tk2-target-auto {
+  display: block;
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-caption);
+  color: var(--ci-text-soft);
+  white-space: normal;
+}
+
+/* The sheet's auto row: a label without a field, and the value as
+   text in the input's own voice. */
+.tk2-targets-grid .tk2-target-label {
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  color: var(--ci-text-soft);
+}
+
+.tk2-target-auto-value {
+  width: 100%;
+  min-width: 0;
+  padding: 0.15rem 0;
+  border-bottom: 1px solid transparent;
+  color: var(--ci-text);
+  font-family: var(--ci-font-mono);
+  font-size: var(--text-section);
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 560px) {
   .tk2-targets-display {
     grid-template-columns: 1fr 1fr;

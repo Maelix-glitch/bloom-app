@@ -193,7 +193,7 @@ describe("anti-document guard — the absorbed insight strip (strict)", () => {
       </>,
     );
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
-    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+    await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 8000 });
     first.unmount();
 
     /* Remount: both sections read the STORED plan — the state the
@@ -204,7 +204,7 @@ describe("anti-document guard — the absorbed insight strip (strict)", () => {
         <MetabolicTwinSection />
       </>,
     );
-    await screen.findByRole("button", { name: /Compose again/ }, { timeout: 8000 });
+    await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 8000 });
 
     /* The retired block's label renders nowhere (M-84's remainder
        dies with the block). */

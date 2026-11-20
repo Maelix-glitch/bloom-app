@@ -105,7 +105,7 @@ const COMPLETE = {
  *  again button is the reveal signal). */
 async function createPlanAndAwait(): Promise<void> {
   fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
-  await screen.findByRole("button", { name: /Compose again/ }, { timeout: 4000 });
+  await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 4000 });
 }
 
 describe("NutritionPlanSection — dish-first meals (P5)", () => {
@@ -125,9 +125,15 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
     if (!dish) throw new Error("anchor is not a library dish");
 
     const lunch = screen.getByLabelText("Lunch plan");
+    /* Brief v7 N3: the dishes live inside the meal row's expansion
+       — open the row before querying them. */
+    const lunchToggle = lunch.querySelector<HTMLButtonElement>(".meal-row__toggle");
+    if (lunchToggle && lunchToggle.getAttribute("aria-expanded") === "false") {
+      fireEvent.click(lunchToggle);
+    }
     /* A dish-composed meal carries no separate "Dish idea" — it IS
        the dishes. */
-    expect(within(lunch).queryByText("Dish idea")).toBeNull();
+    expect(within(lunch).queryByText(/Dish idea/)).toBeNull();
 
     /* The anchor dish is a row naming the dish and its computed
        numbers; its ingredients are not shown until it is tapped. */
@@ -218,10 +224,14 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
 
     render(<NutritionPlanSection />);
     const lunch = screen.getByLabelText("Lunch plan");
+    const lunchToggle = lunch.querySelector<HTMLButtonElement>(".meal-row__toggle");
+    if (lunchToggle && lunchToggle.getAttribute("aria-expanded") === "false") {
+      fireEvent.click(lunchToggle);
+    }
     expect(within(lunch).queryByRole("button", { name: /— show ingredients$/ })).toBeNull();
-    expect(within(lunch).getByText("Dish idea")).toBeTruthy();
-
-    fireEvent.click(within(lunch).getByRole("button", { name: "Log this dish" }));
+    /* Brief v7 N3: the idea is a quiet text link inside the row's
+       expansion now — clicking it IS the old "Log this dish". */
+    fireEvent.click(within(lunch).getByRole("button", { name: /Dish idea/ }));
     const entries = readFoodLog().filter((e) => e.day === todayLocal());
     expect(entries).toHaveLength(1);
     expect(entries[0]!.source).toBe("dish");
@@ -242,7 +252,11 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
     await createPlanAndAwait();
     const snack = screen.queryByLabelText("Snack plan");
     if (snack) {
-      expect(within(snack).queryByText("Dish idea")).toBeNull();
+      const snackToggle = snack.querySelector<HTMLButtonElement>(".meal-row__toggle");
+      if (snackToggle && snackToggle.getAttribute("aria-expanded") === "false") {
+        fireEvent.click(snackToggle);
+      }
+      expect(within(snack).queryByText(/Dish idea/)).toBeNull();
       expect(
         within(snack).queryByRole("button", { name: /— show ingredients$/ }),
       ).toBeTruthy();

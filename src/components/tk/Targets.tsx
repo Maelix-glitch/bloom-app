@@ -129,22 +129,48 @@ export function TargetSheet({ store }: { store: TrackerStore }) {
         </ul>
       </div>
       <ul className="tk2-targets-grid">
-        {TRACKERS.filter((def) => store.active.includes(def.id)).map((def) => (
-          <li key={def.id} data-id={def.id}>
-            <label htmlFor={`target-${def.id}`}>{def.name}</label>
-            <span className="tk2-target-field">
-              <TargetInput
-                def={def}
-                value={store.goals[def.goalKey]}
-                onCommit={(v) => store.setGoal(def.goalKey, Math.min(def.max, Math.max(def.min, v)))}
-              />
-              <span className="tk2-unit">{unit(def.kind)}</span>
-            </span>
-            {/* The same human reading the page displays, so the sheet
-                and the section can never disagree about a target. */}
-            <span className="tk2-target-human">{targetDisplay(def, store.goals[def.goalKey])}</span>
-          </li>
-        ))}
+        {TRACKERS.filter((def) => store.active.includes(def.id)).map((def) => {
+          /* Water is the one target the person does not set by hand
+             while a plan guide exists (Brief v7 WATER): the guide's
+             figure is shown as a fact, not a field. The stored manual
+             goal stays in the record and returns if the guide goes. */
+          const auto = def.id === "water" && store.waterTargetMl != null;
+          const value = auto ? store.waterTargetMl! : store.goals[def.goalKey];
+          return (
+            <li key={def.id} data-id={def.id}>
+              {auto ? (
+                <span className="tk2-target-label">{def.name}</span>
+              ) : (
+                <label htmlFor={`target-${def.id}`}>{def.name}</label>
+              )}
+              <span className="tk2-target-field">
+                {auto ? (
+                  <>
+                    <span className="tk2-target-auto-value">{value}</span>
+                    <span className="tk2-unit">{unit(def.kind)}</span>
+                  </>
+                ) : (
+                  <>
+                    <TargetInput
+                      def={def}
+                      value={value}
+                      onCommit={(v) =>
+                        store.setGoal(def.goalKey, Math.min(def.max, Math.max(def.min, v)))
+                      }
+                    />
+                    <span className="tk2-unit">{unit(def.kind)}</span>
+                  </>
+                )}
+              </span>
+              {/* The same human reading the page displays, so the sheet
+                  and the section can never disagree about a target. */}
+              <span className="tk2-target-human">
+                {targetDisplay(def, value)}
+                {auto ? " · Set by your plan" : ""}
+              </span>
+            </li>
+          );
+        })}
       </ul>
       <p className="tk2-targets-foot">
         <button type="button" onClick={store.resetGoals}>
@@ -166,12 +192,19 @@ export function TargetsPanel({ store }: { store: TrackerStore }) {
   return (
     <div className="tk2-targets-wrap">
       <ul className="tk2-targets-display">
-        {shown.map((def) => (
-          <li key={def.id} data-id={def.id}>
-            <span className="tk2-target-name">{def.name}</span>
-            <span className="tk2-target-value">{targetDisplay(def, store.goals[def.goalKey])}</span>
-          </li>
-        ))}
+        {shown.map((def) => {
+          const auto = def.id === "water" && store.waterTargetMl != null;
+          const value = auto ? store.waterTargetMl! : store.goals[def.goalKey];
+          return (
+            <li key={def.id} data-id={def.id}>
+              <span className="tk2-target-name">{def.name}</span>
+              <span className="tk2-target-value">
+                {targetDisplay(def, value)}
+                {auto ? <span className="tk2-target-auto"> from your plan</span> : null}
+              </span>
+            </li>
+          );
+        })}
       </ul>
       <button type="button" className="ci-btn tk2-targets-edit" onClick={() => setOpen(true)}>
         Edit targets

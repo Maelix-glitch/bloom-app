@@ -17,7 +17,7 @@
  * reason this build does not know is dropped, never guessed at.
  */
 
-import { fmtCount, fmtGrams, fmtKcalApprox } from "./format";
+import { fmtCount, fmtGrams, fmtKcalApprox, plural } from "./format";
 
 /* ------------------------------ the data ------------------------------- */
 
@@ -317,4 +317,147 @@ export function reasonDetails(reasons: readonly PlanReason[]): string[] {
     if (detail) out.push(detail);
   }
   return out;
+}
+
+/* --------------------- adjustments (brief v7) -------------------------- */
+
+/**
+ * One planner-owned adjustment (brief v7): the plan's adjustments
+ * array carries DATA only — `{kind, ...data}` — derived from the
+ * plan's reasons by the ONE derivation in planView.ts
+ * (`adjustmentsOf`). The words for an adjustment live here, in
+ * `adjustmentCopy`, exactly as the words for a reason live in
+ * `reasonCopy` above. The two vocabularies are deliberately
+ * separate: a reason explains composition; an adjustment is one of
+ * the few ways the plan DEPARTED from the person's stated answers
+ * or record, and it renders as a row, never as prose in another
+ * card (M-138).
+ */
+export type AdjustmentData =
+  | { kind: "protein-lean"; days: number; avgG: number; targetG: number }
+  | { kind: "kitchen-relaxed" }
+  | { kind: "meal-added"; slot: string; assessmentMeals: number }
+  | { kind: "budget-widened"; ceilingRupees: number | null }
+  | { kind: "kitchen-cap-raised"; capMinutes: number; stageMinutes: number }
+  | { kind: "kitchen-cap-quickest"; capMinutes: number }
+  | { kind: "log-energy-overshoot"; days: number; avgKcal: number; targetKcal: number };
+
+/** The loose shape `adjustmentCopy` accepts: an unknown kind, or a
+ *  known kind with its data missing, is dropped (null) — never
+ *  rendered as raw text. */
+export interface AdjustmentLike {
+  kind: string;
+  days?: number;
+  avgG?: number;
+  targetG?: number;
+  slot?: string;
+  assessmentMeals?: number;
+  ceilingRupees?: number | null;
+  capMinutes?: number;
+  stageMinutes?: number;
+  avgKcal?: number;
+  targetKcal?: number;
+}
+
+export interface AdjustmentCopy {
+  /** An icon NAME from the house icon set (the renderer maps it). */
+  icon: string;
+  title: string;
+  /** ≤ 140 chars, a complete sentence — pinned in reasons.test.ts. */
+  detail: string;
+  /** The dashed confidence badge ("Early read · 2 days"), when the
+   *  adjustment rests on too little record to state plainly. */
+  badge?: string;
+  action?: { label: string; href: string };
+}
+
+/**
+ * The copy for one adjustment, or null for a kind this build does
+ * not know (never guess, never render the raw kind). Banned words
+ * (brief v7 rule 9): "to go", "left", "failed" — pinned in tests.
+ * The kitchen action points at the Assessment's real home (Profile),
+ * the same href `reasonCopy`'s kitchen-relaxed action uses.
+ */
+export function adjustmentCopy(a: AdjustmentLike | null | undefined): AdjustmentCopy | null {
+  if (!a) return null;
+  const copy: AdjustmentCopy | null = ((): AdjustmentCopy | null => {
+    switch (a.kind) {
+      case "protein-lean": {
+        if (a.days === undefined || a.avgG === undefined || a.targetG === undefined) return null;
+        const days = a.days;
+        return {
+          icon: "trend",
+          title: "Leaning protein-rich",
+          detail: `Your last ${plural(days, "logged day")} averaged ${Math.round(a.avgG)} g, against a guide of ${Math.round(a.targetG)} g. Your guide is unchanged.`,
+          ...(days < 7 ? { badge: `Early read · ${plural(days, "day")}` } : {}),
+        };
+      }
+      case "kitchen-relaxed":
+        return {
+          icon: "pan",
+          title: "Some dishes need cooking",
+          detail: "Your answers leave very few no-cook dishes, so we included some that cook.",
+          action: { label: "Update kitchen answers", href: "/profile#pf-assessment" },
+        };
+      case "meal-added": {
+        if (a.slot === undefined || a.assessmentMeals === undefined) return null;
+        return {
+          icon: "plus",
+          title: `Added a ${a.slot}`,
+          detail: `Your Assessment lists ${plural(a.assessmentMeals, "meal")} a day. A ${a.slot} spreads the food across one more sitting.`,
+        };
+      }
+      /* The remaining adjustment kinds `adjustmentsOf` returns —
+         the planner's gates and the energy adaptation. They gained
+         their row copy in brief v7 N4, when the adjusted section
+         began rendering from this function alone: before that they
+         were worded by `reasonCopy` in the old rows, and rendering
+         from `adjustmentCopy` without them would have dropped
+         adjustments the plan reports. The facts are the same ones
+         `reasonCopy` states for these kinds; the shape is the
+         row's (icon, title, one ≤140-char detail). */
+      case "budget-widened": {
+        if (a.ceilingRupees === undefined) return null;
+        return {
+          icon: "wallet",
+          title: "Budget treated as a preference",
+          detail:
+            a.ceilingRupees === null
+              ? "Your meal budget leaves too few main dishes, so the plan includes dishes above it."
+              : `Your budget (about ₹${whole(a.ceilingRupees)} a serving) leaves too few main dishes, so the plan includes dishes above it.`,
+        };
+      }
+      case "kitchen-cap-raised": {
+        if (a.capMinutes === undefined || a.stageMinutes === undefined) return null;
+        return {
+          icon: "clock",
+          title: "Prep time stretched",
+          detail: `Your answers aim for about ${a.capMinutes} minutes a main; today's dishes take up to about ${a.stageMinutes} minutes — the closest fit.`,
+        };
+      }
+      case "kitchen-cap-quickest": {
+        if (a.capMinutes === undefined) return null;
+        return {
+          icon: "clock",
+          title: "Prep time stretched",
+          detail: `Your answers aim for about ${a.capMinutes} minutes, and every main dish takes longer — today uses the quickest there are.`,
+        };
+      }
+      case "log-energy-overshoot": {
+        if (a.days === undefined || a.avgKcal === undefined || a.targetKcal === undefined)
+          return null;
+        return {
+          icon: "flame",
+          title: "Lighter energy picks",
+          detail: `Your last ${plural(a.days, "logged day")} averaged ${whole(a.avgKcal)} kcal against a ${whole(a.targetKcal)} kcal target, so energy top-ups stay out.`,
+        };
+      }
+      default:
+        return null;
+    }
+  })();
+  if (copy && copy.detail.length > 140) {
+    console.warn("adjustment copy over 140 chars:", a.kind, copy.detail.length);
+  }
+  return copy;
 }

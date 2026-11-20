@@ -14,7 +14,7 @@
  * yesterday's meals can be copied into today in one tap.
  */
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Camera, Plus, Sparkles, Undo2, X } from "lucide-react";
 
 import { FeelIn } from "@/components/system/FeelIn";
@@ -53,6 +53,77 @@ interface SheetState {
   open: boolean;
   meal: Meal | null;
   editing: LogEntry | null;
+}
+
+/**
+ * The Nutrition sub-nav (brief v7 N2, M-155): the section anchors as
+ * plain text under ONE gold underline that slides to the section in
+ * view. The pills are retired — no fill, no ring; the active item is
+ * foreground text (data-selected + aria-current="page") and the
+ * indicator, measured onto it (offsetLeft/width) and moved by
+ * transform only. The entries follow the sections' own render
+ * conditions exactly (the grocery entry exists only when its section
+ * does), so an item never points at a section that is not on the
+ * page. Until the scrollspy marks a section, no item is selected
+ * and the underline stays hidden — the honest state.
+ */
+export function NutritionSubNav({
+  active,
+  showGrocery,
+}: {
+  active: string | null;
+  showGrocery: boolean;
+}) {
+  const navRef = useRef<HTMLElement | null>(null);
+  const [indicator, setIndicator] = useState<{ x: number; w: number } | null>(null);
+
+  useLayoutEffect(() => {
+    const measure = () => {
+      const el = navRef.current?.querySelector<HTMLElement>('a[data-selected="true"]');
+      setIndicator(el ? { x: el.offsetLeft, w: el.offsetWidth } : null);
+    };
+    measure();
+    window.addEventListener("resize", measure);
+    return () => window.removeEventListener("resize", measure);
+  }, [active, showGrocery]);
+
+  const itemProps = (id: string) => ({
+    className: "nut-subnav__item",
+    "data-selected": active === id || undefined,
+    "aria-current": active === id ? ("page" as const) : undefined,
+  });
+
+  return (
+    <nav ref={navRef} className="nut-subnav" aria-label="Nutrition sections">
+      <a {...itemProps("nut-plan")} href="#nut-plan">
+        Plan
+      </a>
+      {showGrocery ? (
+        <a {...itemProps("nut-grocery")} href="#nut-grocery">
+          Grocery &amp; pantry
+        </a>
+      ) : null}
+      <a {...itemProps("nut-modes")} href="#nut-modes">
+        Condition modes
+      </a>
+      <a {...itemProps("nut-programmes")} href="#nut-programmes">
+        Programmes
+      </a>
+      <a {...itemProps("nut-dishes")} href="#nut-dishes">
+        Dishes
+      </a>
+      <span
+        className="nut-subnav__indicator"
+        aria-hidden="true"
+        data-active={active ?? undefined}
+        style={{
+          transform: `translateX(${indicator?.x ?? 0}px)`,
+          width: indicator?.w ?? 0,
+          opacity: indicator ? 1 : 0,
+        }}
+      />
+    </nav>
+  );
 }
 
 export function NutritionPage() {
@@ -231,58 +302,15 @@ export function NutritionPage() {
 
       {/* Sub-navigation (Plan B, senior diagnosis slice 5): the today
           view is a long stack of named sections — plan, grocery, modes,
-          programmes, dishes. The chips are plain anchors to the section
+          programmes, dishes. The items are plain anchors to the section
           ids below, named as the sections name themselves; the entries
-          follow the sections' own render conditions exactly, so a chip
+          follow the sections' own render conditions exactly, so an item
           never points at a section that is not on the page. Dishes stay
           a section here rather than a route of their own: the library
           is day-coupled — a dish logged from it lands on the day being
           viewed, which is this page's state. */}
       {isToday ? (
-        <nav className="nut-subnav" aria-label="Nutrition sections">
-          <a
-            className="nut-chip"
-            href="#nut-plan"
-            data-selected={activeAnchor === "nut-plan" ? true : undefined}
-            aria-current={activeAnchor === "nut-plan" ? "true" : undefined}
-          >
-            Plan
-          </a>
-          {!freshAccount ? (
-            <a
-              className="nut-chip"
-              href="#nut-grocery"
-              data-selected={activeAnchor === "nut-grocery" ? true : undefined}
-              aria-current={activeAnchor === "nut-grocery" ? "true" : undefined}
-            >
-              Grocery &amp; pantry
-            </a>
-          ) : null}
-          <a
-            className="nut-chip"
-            href="#nut-modes"
-            data-selected={activeAnchor === "nut-modes" ? true : undefined}
-            aria-current={activeAnchor === "nut-modes" ? "true" : undefined}
-          >
-            Condition modes
-          </a>
-          <a
-            className="nut-chip"
-            href="#nut-programmes"
-            data-selected={activeAnchor === "nut-programmes" ? true : undefined}
-            aria-current={activeAnchor === "nut-programmes" ? "true" : undefined}
-          >
-            Programmes
-          </a>
-          <a
-            className="nut-chip"
-            href="#nut-dishes"
-            data-selected={activeAnchor === "nut-dishes" ? true : undefined}
-            aria-current={activeAnchor === "nut-dishes" ? "true" : undefined}
-          >
-            Dishes
-          </a>
-        </nav>
+        <NutritionSubNav active={activeAnchor} showGrocery={!freshAccount} />
       ) : null}
 
       {freshAccount ? (
@@ -373,23 +401,25 @@ export function NutritionPage() {
         </FeelIn>
       ) : null}
 
+      {/* The grocery list + pantry (System 5) — derived from the same
+          stored plan the section above renders, so it belongs to the
+          today view beside it. With no plan and no logs it has nothing
+          to derive, so the merged empty state covers it too. Brief v7
+          N5 (§7.1): the plan's shopping list precedes the Twin — the
+          day reads plan → balance → adjustments → shopping → Twin. */}
+      {isToday && !freshAccount ? (
+        <FeelIn id="nut-grocery" className="nut-jump" delay={120}>
+          <GrocerySection />
+        </FeelIn>
+      ) : null}
       {/* The metabolic twin — a standing model of the person, computed
           from the record as of today; it belongs to every day's view
           because it describes the person, not the day being viewed.
           In the merged empty state it steps aside: every one of its
           fields would only read "insufficient". */}
       {!freshAccount ? (
-        <FeelIn delay={120}>
+        <FeelIn delay={180}>
           <MetabolicTwinSection />
-        </FeelIn>
-      ) : null}
-      {/* The grocery list + pantry (System 5) — derived from the same
-          stored plan the section above renders, so it belongs to the
-          today view beside it. With no plan and no logs it has nothing
-          to derive, so the merged empty state covers it too. */}
-      {isToday && !freshAccount ? (
-        <FeelIn id="nut-grocery" className="nut-jump" delay={180}>
-          <GrocerySection />
         </FeelIn>
       ) : null}
       {/* Condition modes (System 14) — the person's own guardrails on

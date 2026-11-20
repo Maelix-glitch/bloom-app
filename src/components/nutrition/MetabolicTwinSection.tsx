@@ -34,6 +34,7 @@ import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
 import { buildTwinSnapshot, type TwinField, type TwinProgress } from "@/lib/twin/twin";
 import { planLearningFor } from "@/lib/nutrition";
+import { MoreDisclosure } from "./PlanPrimitives";
 import { pctOfTarget } from "@/lib/nutrition/targets";
 import { fmtCount, fmtGrams } from "@/lib/format";
 
@@ -643,10 +644,7 @@ export function MetabolicTwinSection() {
         ))}
       </div>
 
-      <details className="mt-5">
-        <summary className="cursor-pointer text-[length:var(--text-callout)] font-medium text-foreground">
-          How the twin works
-        </summary>
+      <MoreDisclosure label="How the twin works" className="mt-5">
         <div className="mt-3 space-y-3">
           {provenanceLines.map(({ label, field }) => (
             <p
@@ -658,7 +656,7 @@ export function MetabolicTwinSection() {
             </p>
           ))}
         </div>
-      </details>
+      </MoreDisclosure>
     </section>
   );
 }

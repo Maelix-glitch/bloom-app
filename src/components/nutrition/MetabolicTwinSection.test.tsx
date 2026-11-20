@@ -156,6 +156,11 @@ describe("MetabolicTwinSection — a record that can speak", () => {
       habitLogs,
     });
     const { container } = render(<MetabolicTwinSection />);
+    /* Brief v7 N2 (M-157): the provenance lines live behind the one
+       `.more` disclosure now — closed, they are not in the DOM at
+       all (the native <details> kept them mounted). Open it, as a
+       reader would, before reading them. */
+    fireEvent.click(screen.getByRole("button", { name: /How the twin works/ }));
     const text = container.textContent ?? "";
 
     expect(text).toContain("Your metabolic twin");

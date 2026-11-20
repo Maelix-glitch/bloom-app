@@ -78,6 +78,10 @@ const GROUP_DEFS: readonly { key: BalanceGroupKey; label: string; missing: strin
  *  coverage food (fats and oils, aromatics and pantry residuals,
  *  protein-dairy that is not milk or curd). Flags first: a flesh
  *  food's group is `other` in the data, its identity is the flag. */
+export function balanceGroupKeyOf(food: Food): BalanceGroupKey | null {
+  return bucketOf(food);
+}
+
 function bucketOf(food: Food): BalanceGroupKey | null {
   const c = food.classification;
   if (!c) return null;

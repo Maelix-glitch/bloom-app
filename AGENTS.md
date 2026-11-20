@@ -4,6 +4,11 @@
      Brief v4 is retained in full after v6 for reference; its programme is complete
      and merged. The Repo commands tail at the end applies to both. -->
 
+<!-- BRIEF v7 (2026-11-19) is the operative brief for Nutrition › Plan and
+     supersedes v6/v4 there (owner's precedence ruling: v7 > v6 > v4 >
+     rulebook). It lives in docs/BLOOM_NUTRITION_PLAN.md. -->
+Read `docs/BLOOM_NUTRITION_PLAN.md` before touching Nutrition › Plan, the sub-nav, the sidebar points card, or any `<details>`.
+
 # BLOOM: BUILD BRIEF v6, "Connections and the Feel Layer"
 
 ## PARENT NOTES (binding adaptations — read before the brief)

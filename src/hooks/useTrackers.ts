@@ -43,7 +43,14 @@ import {
   saveGoals,
   TRACKERS_CHANGED,
 } from "@/lib/trackers/store";
-import { PREFS_CHANGED } from "@/lib/prefs";
+import { getPref, PREFS_CHANGED } from "@/lib/prefs";
+import {
+  BODY_KEY,
+  DEFAULT_BODY,
+  parseBodyProfile,
+  type BodyProfile,
+} from "@/lib/health/body";
+import { goalsWithWaterTarget, waterTargetMlOf } from "@/lib/trackers/waterTarget";
 
 export type SaveDayResult = { ok: true } | { ok: false; errors: DayFieldErrors };
 
@@ -63,6 +70,15 @@ export interface TrackerStore {
   syncNow: () => void;
   days: DayEntry[];
   goals: Goals;
+  /**
+   * The day's water target from the plan's guide (body targets), when
+   * the body profile can produce one. While set, it — not the stored
+   * manual goal — is what the analysis (and so the tile, the flower
+   * and the Targets list) measures water against. Optional in the type
+   * because test fixtures construct stores; the real hook always sets
+   * it (null when there is no guide value).
+   */
+  waterTargetMl?: number | null;
   analysis: TrackerAnalysis;
   today: string;
   hydrated: boolean;
@@ -90,6 +106,12 @@ export interface TrackerStore {
 export function useTrackers(): TrackerStore {
   const [days, setDays] = useState<DayEntry[]>([]);
   const [goals, setGoals] = useState<Goals>(() => ({ ...loadGoals() }));
+  /* The body profile rides along for one reason: its guide owns the
+     day's water target (see waterTargetMl below). Read through the
+     same pref useBodyProfile reads, refreshed on the same event. */
+  const [bodyProfile, setBodyProfile] = useState<BodyProfile>(() =>
+    getPref(BODY_KEY, parseBodyProfile, DEFAULT_BODY),
+  );
   const [active, setActiveState] = useState<TrackerId[]>(() => loadActiveTrackers());
   const [customSubjects, setCustomSubjects] = useState<string[]>(() => loadCustomSubjects());
   const [today, setToday] = useState<string>(() => todayKey());
@@ -131,6 +153,13 @@ export function useTrackers(): TrackerStore {
       const g = loadGoals();
       setGoals((prev) =>
         (Object.keys(g) as (keyof Goals)[]).every((k) => g[k] === prev[k]) ? prev : g,
+      );
+      const bp = getPref(BODY_KEY, parseBodyProfile, DEFAULT_BODY);
+      setBodyProfile((prev) =>
+        bp.updatedAt === prev.updatedAt &&
+        waterTargetMlOf(bp, todayKey()) === waterTargetMlOf(prev, todayKey())
+          ? prev
+          : bp,
       );
     };
     window.addEventListener(TRACKERS_CHANGED, onExternal);
@@ -389,9 +418,23 @@ export function useTrackers(): TrackerStore {
     return () => window.clearTimeout(id);
   }, [days, hydrated, pushPending]);
 
+  /* One water target (Brief v7 WATER; owner directive 2026-11-20):
+     the plan's guide sets it, and the analysis measures water against
+     the guide's figure whenever one exists. The stored manual goal is
+     left in the record untouched — superseded, never rewritten — and
+     returns if the body profile is cleared. */
+  const waterTargetMl = useMemo(
+    () => waterTargetMlOf(bodyProfile, today),
+    [bodyProfile, today],
+  );
+  const effectiveGoals = useMemo(
+    () => goalsWithWaterTarget(goals, waterTargetMl),
+    [goals, waterTargetMl],
+  );
+
   const analysis = useMemo(
-    () => analyzeTrackers(days, goals, today, { active }),
-    [days, goals, today, active],
+    () => analyzeTrackers(days, effectiveGoals, today, { active }),
+    [days, effectiveGoals, today, active],
   );
 
   return {
@@ -399,6 +442,7 @@ export function useTrackers(): TrackerStore {
     syncNow,
     days: useMemo(() => [...days].sort((a, b) => b.date.localeCompare(a.date)), [days]),
     goals,
+    waterTargetMl,
     analysis,
     today,
     hydrated,

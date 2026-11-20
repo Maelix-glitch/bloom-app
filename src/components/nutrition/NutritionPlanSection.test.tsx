@@ -35,6 +35,7 @@ import {
   writePlan,
   type Food,
 } from "@/lib/nutrition";
+import { fmtInt } from "@/lib/format";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { toSafetyInput } from "@/lib/vitalis/domain/profile";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
@@ -78,10 +79,10 @@ function seedAssessment(answers: Partial<AssessmentState["answers"]>): void {
 /** P8: composing runs behind the loading sequence (~1.4 s) — the tap
  *  shows the building steps first, then the plan. Tests that need the
  *  plan await its arrival the way a person sees it: the ready state's
- *  Compose again button is the reveal signal. */
+ *  Suggest different meals button is the reveal signal. */
 async function createPlanAndAwait(): Promise<void> {
   fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
-  await screen.findByRole("button", { name: /Compose again/ }, { timeout: 4000 });
+  await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 4000 });
 }
 
 const COMPLETE = {
@@ -126,19 +127,24 @@ describe("NutritionPlanSection", () => {
 
     await createPlanAndAwait();
 
-    /* The plan renders: the goal (title + the active goal chip), the
-       day's targets, meal sections. The targets query names the header
-       sentence itself ("…across the day — your guide is…"): the bare
-       phrase "across the day" also ends the day notes under "Today's
-       balance" whenever a rotation misses an ICMR floor — for this profile
-       the 2026-11-16 rotation falls short on milk and curd, so the
-       unscoped query matched two correct elements and threw. The notes
-       are pinned per-day in planComposition.test.ts, and their rendering
-       is pinned in the "Today's balance" test below. */
+    /* The plan renders: the goal (title + the active goal radio), the
+       day's targets, meal sections. Brief v7 N2: the targets live in
+       the header's stat strip now — the plan's figures as serif
+       numerals, the guide as dashed badges carrying the data-metric
+       names the retired "Composed to land near…" sentence carried.
+       (The day notes under "Today's balance" are pinned per-day in
+       planComposition.test.ts, and their rendering in the "Today's
+       balance" test below.) */
     expect(screen.getAllByText("Lose weight").length).toBeGreaterThan(0);
-    expect(screen.getByText(/across the day — your guide is/)).toBeTruthy();
-    /* P12: the day timeline names each meal too, so "Breakfast" appears
-       in the schedule summary as well as the meal card. */
+    const kcalGuide = document.querySelector('[data-metric="plan-kcal-guide"]');
+    const proteinGuide = document.querySelector('[data-metric="plan-protein-guide"]');
+    expect(kcalGuide, "the strip's kcal guide badge").not.toBeNull();
+    expect(proteinGuide, "the strip's protein guide badge").not.toBeNull();
+    expect(kcalGuide!.textContent).toContain("guide");
+    expect(screen.queryByText(/Composed to land near/)).toBeNull();
+    /* P12 (now the DayPath, brief v7 N3): the day's stops name each
+       meal too, so "Breakfast" appears in the path as well as the
+       meal row. */
     expect(screen.getAllByText("Breakfast").length).toBeGreaterThan(0);
 
     /* P5: main meals are built from dishes — each carries dish rows
@@ -148,7 +154,13 @@ describe("NutritionPlanSection", () => {
        dish-composed — snack included — so no plain-food suggestion
        rows render at all; the provenance badge lives in the dish
        expansion, and logging goes through the dish. The test's
-       shape follows the plan's. */
+       shape follows the plan's. Brief v7 N3: the dishes live inside
+       the meal rows' expansions — open every row first. */
+    for (const toggle of document.querySelectorAll<HTMLButtonElement>(
+      ".meal-row__toggle",
+    )) {
+      if (toggle.getAttribute("aria-expanded") === "false") fireEvent.click(toggle);
+    }
     const dishRows = screen.getAllByRole("button", { name: /— show ingredients$/ });
     expect(dishRows.length).toBeGreaterThan(0);
     fireEvent.click(dishRows[0]!);
@@ -203,8 +215,9 @@ describe("NutritionPlanSection", () => {
         vi.advanceTimersByTime(1000);
       });
       expect(screen.queryByRole("status", { name: "Building your plan" })).toBeNull();
-      /* P12: the day timeline names each meal too, so "Breakfast" appears
-       in the schedule summary as well as the meal card. */
+      /* P12 (now the DayPath, brief v7 N3): the day's stops name each
+       meal too, so "Breakfast" appears in the path as well as the
+       meal row. */
     expect(screen.getAllByText("Breakfast").length).toBeGreaterThan(0);
       expect(readPlan()).not.toBeNull();
     } finally {
@@ -212,7 +225,7 @@ describe("NutritionPlanSection", () => {
     }
   });
 
-  it("meal card headers show the composed sum of the listed dishes and foods, not the target split (P3, P5)", async () => {
+  it("meal row meta lines show the composed sum of the listed dishes and foods, not the target split (P3, P5)", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
     await createPlanAndAwait();
@@ -220,15 +233,17 @@ describe("NutritionPlanSection", () => {
     const plan = readPlan();
     if (!plan) throw new Error("expected a stored plan");
     for (const meal of plan.meals) {
-      const card = screen.getByLabelText(`${MEAL_LABEL[meal.meal]} plan`);
-      const headerNumber = card.querySelector("p.shrink-0 span")?.textContent;
+      const row = screen.getByLabelText(`${MEAL_LABEL[meal.meal]} plan`);
+      const meta = row.querySelector("[data-meta]")?.textContent ?? "";
       const composed =
         meal.suggestions.reduce((sum, s) => sum + s.nutrients.kcal, 0) +
         meal.dishes.reduce((sum, d) => sum + d.nutrients.kcal, 0);
-      /* The header is the sum of what is actually listed on the card.
-         Pre-P3 it showed meal.kcal — the meal's share of the day
-         target — while the listed items summed to something else. */
-      expect(headerNumber).toBe(String(Math.round(composed)));
+      /* The meta figure is the sum of what is actually listed in
+         the row. Pre-P3 the card header showed meal.kcal — the
+         meal's share of the day target — while the listed items
+         summed to something else. (Brief v7 N3: the numeral lives
+         in the row's meta line now, en-IN grouped by fmtInt.) */
+      expect(meta).toContain(`${fmtInt(Math.round(composed))} kcal`);
     }
   });
 
@@ -288,14 +303,23 @@ describe("NutritionPlanSection", () => {
       .find((m) => m.getAttribute("aria-label")?.startsWith("Fruit:"));
     expect(fruitMeter, "the fruit goal meter").toBeTruthy();
     expect(fruitMeter!.getAttribute("aria-valuemax")).toBe("100");
-    expect(within(balance).getAllByText(/g to go · ICMR-NIN guideline/).length).toBeGreaterThan(0);
+    /* Pin updated for brief v7 N4: the meter's "… g to go" hint line
+       is deleted with the rest of the balance prose — the section
+       holds no <p> at all now, and the banned phrase is gone. */
+    expect(within(balance).queryByText(/to go/)).toBeNull();
+    expect(balance.querySelectorAll("p").length).toBe(0);
     expect(
       screen.queryByText(
         /fruit — the ICMR-NIN guideline aims for at least 100 g across the day/,
       ),
     ).toBeNull();
-    /* The targets line still matches on its own sentence alone. */
-    expect(screen.getByText(/across the day — your guide is/)).toBeTruthy();
+    /* Pin updated for brief v7 N2: the header's targets sentence is
+       retired — its figures live in the stat strip (guide badges
+       under data-metric), so the collision class this test guards
+       (a balance note duplicating a header sentence) has no second
+       rendering left to collide with. */
+    expect(document.querySelector('[data-metric="plan-kcal-guide"]')).not.toBeNull();
+    expect(screen.queryByText(/across the day — your guide is/)).toBeNull();
   });
 
   it("shows a past plan as history, not as today's plan", () => {
@@ -413,13 +437,23 @@ describe("NutritionPlanSection — food photographs (P3-R)", () => {
        the photograph path — a vacuous pass here would prove nothing. */
     expect(photographed.length).toBeGreaterThan(0);
 
-    /* Suggestion rows only (li.nut-entry): the dish-idea rows share
-       the nut-food-thumb class through DishPhoto, and P3's distinct
-       per-meal dish ideas can carry photographs of their own — they
-       are not plan suggestions and must not enter this count. */
-    const imgs = [...container.querySelectorAll("li.nut-entry img.nut-food-thumb")];
-    expect(imgs.length).toBe(photographed.length);
-    const alts = imgs.map((img) => img.getAttribute("alt"));
+    /* Suggestion rows only (li.nut-entry): they are the plan's own
+       photographed foods — the dish ideas (a quiet link since brief
+       v7 N3, no photo of their own) are not plan suggestions and
+       must not enter this count. (N3: the rows live inside the meal
+       rows' expansions, one open at a time — count row by row.) */
+    let imgCount = 0;
+    const alts: (string | null)[] = [];
+    for (const row of container.querySelectorAll<HTMLElement>(".meal-row")) {
+      const toggle = row.querySelector<HTMLButtonElement>(".meal-row__toggle");
+      if (toggle && toggle.getAttribute("aria-expanded") === "false") {
+        fireEvent.click(toggle);
+      }
+      const rowImgs = [...row.querySelectorAll("li.nut-entry img.nut-food-thumb")];
+      imgCount += rowImgs.length;
+      alts.push(...rowImgs.map((img) => img.getAttribute("alt")));
+    }
+    expect(imgCount).toBe(photographed.length);
     for (const suggestion of photographed) {
       /* D4: the photograph's alt is the food's friendly display name —
          the name the row renders — not the raw USDA description. */
@@ -435,14 +469,17 @@ describe("NutritionPlanSection — N-UI plan panel", () => {
     await createPlanAndAwait();
     expect(screen.queryByText(/Since this plan was made/)).toBeNull();
 
-    fireEvent.click(screen.getByRole("button", { name: "Maintain my weight" }));
+    /* Brief v7 N2: the goal control is a radiogroup now — the same
+       write path (usePlan.setGoal), the same data-selected marker,
+       reached by its radio role. */
+    fireEvent.click(screen.getByRole("radio", { name: "Maintain my weight" }));
 
     /* The stored plan is untouched; the staleness banner names the change. */
     expect(readPlan()?.goal).toBe("lose");
     expect(screen.getByText(/Since this plan was made/)).toBeTruthy();
     expect(screen.getByText(/your goal/)).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: "Maintain my weight" }).getAttribute("data-selected"),
+      screen.getByRole("radio", { name: "Maintain my weight" }).getAttribute("data-selected"),
     ).toBe("true");
   });
 
@@ -471,7 +508,10 @@ describe("NutritionPlanSection — N-UI plan panel", () => {
     expect(entries.filter((e) => e.source === "dish")).toHaveLength(firstMeal.dishes.length);
     expect(entries.filter((e) => e.source === "plan")).toHaveLength(firstMeal.suggestions.length);
     expect(entries.every((e) => e.meal === firstMeal.meal)).toBe(true);
-    expect(screen.getByText("Logged")).toBeTruthy();
+    /* Pin updated for brief v7 N4: the balance legend carries the
+       word "Logged" too (the solid layer's key), so the badge is
+       asserted by count, as the sibling test above already does. */
+    expect(screen.getAllByText("Logged").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("button", { name: "Log meal" })).toHaveLength(3);
   });
 });

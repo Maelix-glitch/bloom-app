@@ -131,8 +131,11 @@ describe("Plan B: nutrition sub-navigation", () => {
     expect(Number(jump![1])).toBeGreaterThanOrEqual(60);
   });
 
-  it("sub-nav chips keep the touch floor", () => {
-    const rule = /\.nut-subnav \.nut-chip\s*\{([^}]*)\}/.exec(nutritionCss);
+  it("sub-nav items keep the touch floor", () => {
+    /* Brief v7 N2 (M-155): the pill chips became underline text
+       items — the touch-floor pin follows the new item class, its
+       intent (a 44px target on every sub-nav entry) unchanged. */
+    const rule = /\.nut-subnav__item\s*\{([^}]*)\}/.exec(nutritionCss);
     expect(rule).not.toBeNull();
     expect(rule![1]).toContain("min-height: var(--bloom-touch-min)");
   });
