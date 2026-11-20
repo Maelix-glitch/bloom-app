@@ -13,6 +13,11 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 
 vi.mock("@/lib/billing/checkout", () => ({
   startCheckout: vi.fn(async () => ({ state: "payments_not_configured" as const })),
+  /* The buy action runs the Orders rail; unconfigured is the state
+     these tests exercise (the honest "payments open soon" notice). */
+  createOrder: vi.fn(async () => ({ state: "payments_not_configured" as const })),
+  payWithRazorpay: vi.fn(async () => ({ kind: "dismissed" as const })),
+  verifyPayment: vi.fn(async () => false),
 }));
 
 /* The entitlement the sheet sees, steered per test. The default is
