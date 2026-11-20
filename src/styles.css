@@ -7,6 +7,9 @@
 @import "tw-animate-css";
 /* Bloom's own motion primitives: press, arrival, changed, pending. */
 @import "./styles/motion.css";
+/* Liquid Glass — the Night Glass material (M-169): tokens + utilities
+   for onboarding and floating chrome only; sheets stay opaque. */
+@import "./styles/glass.css";
 /* App shell chrome: header icons (the bell), the Notification Center
    behind it, and the connection notice. */
 @import "./styles/shell.css";
@@ -2268,8 +2271,16 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   border-right: 1px solid var(--border-subtle);
 }
 .app-mobile-bar {
-  background: color-mix(in oklab, var(--surface) 55%, var(--background));
-  backdrop-filter: blur(16px);
+  /* Night Glass (M-169): the phone brand bar is floating navigation —
+     it takes the shared material (ink tint over the 20px/180% blur,
+     a rim of light along its edges). Plain fallback first, as ever. */
+  background: var(--lg-fallback-strong);
+  background: var(--lg-tint-strong);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.07);
 }
 /* The phone tab bar is a floating pill now (Reskin slice 2): its geometry —
    inset, radius, panel, shadow, safe-area lift — lives with the rest of the
@@ -2417,10 +2428,17 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
-  background: var(--surface-2);
+  /* Night Glass (M-169): the dock's chrome is glass — the shared
+     material's tokens over a plain fallback, rim lit, floating. */
+  background: var(--lg-fallback);
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
   border: 1px solid var(--border);
   color: var(--muted-foreground);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    var(--lg-rim-soft),
+    0 8px 24px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   visibility: hidden;
@@ -2431,6 +2449,7 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
     transform var(--motion-standard) var(--ease-out-expo),
     border-color var(--motion-standard) var(--ease-out-expo),
     color var(--motion-standard) var(--ease-out-expo),
+    filter var(--motion-standard) var(--ease-out-expo),
     visibility 0s var(--motion-standard);
 }
 .dock__top[data-show="true"] {
@@ -2442,6 +2461,7 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
 .dock__top:hover {
   border-color: var(--border-strong);
   color: var(--foreground);
+  filter: brightness(1.16);
 }
 /* Press (feel layer, v6 §3): the one press token, at press speed — the
    same :active duration override .bm-press uses. */
@@ -2464,20 +2484,28 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
-  background: var(--surface-2);
+  /* Night Glass (M-169): same glass as the rest of the dock's chrome. */
+  background: var(--lg-fallback);
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
   border: 1px solid var(--border);
   color: var(--muted-foreground);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    var(--lg-rim-soft),
+    0 8px 24px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
     border-color var(--motion-standard) var(--ease-out-expo),
     color var(--motion-standard) var(--ease-out-expo),
+    filter var(--motion-standard) var(--ease-out-expo),
     transform var(--motion-micro) var(--ease-out-expo);
 }
 .dock__log:hover {
   border-color: var(--border-strong);
   color: var(--foreground);
+  filter: brightness(1.16);
 }
 .dock__log:active {
   transform: var(--press);

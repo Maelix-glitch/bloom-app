@@ -32,21 +32,32 @@
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
-  background: var(--surface-2);
+  /* Night Glass (M-169): the orb's chrome joins the dock in glass —
+     the shared material's tokens over a plain fallback, rim lit. The
+     PANEL it opens stays a solid slab (the sheet rule); only the
+     button's chrome is glass. */
+  background: var(--lg-fallback);
+  background: var(--lg-tint);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
   border: 1px solid var(--border);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    var(--lg-rim-soft),
+    0 8px 24px rgba(0, 0, 0, 0.4);
   color: var(--gold);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition:
     transform var(--motion-standard) var(--ease-out-expo),
     box-shadow var(--motion-standard) var(--ease-out-expo),
-    border-color var(--motion-standard) var(--ease-out-expo);
+    border-color var(--motion-standard) var(--ease-out-expo),
+    filter var(--motion-standard) var(--ease-out-expo);
 }
 
 .coach-orb:hover {
   transform: translateY(-2px);
   border-color: var(--border-strong);
+  filter: brightness(1.16);
 }
 
 .coach-orb:active {
