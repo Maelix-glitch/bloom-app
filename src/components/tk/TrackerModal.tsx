@@ -207,6 +207,16 @@ export function TrackerModal({
     setUnit(next);
   };
 
+  /* The header's target (M-167): water reads the RESOLVED figure —
+     the plan guide's target when one exists, the stored manual goal
+     otherwise — the exact choice Targets.tsx makes, so the sheet and
+     the section can never state two targets for the same day. Every
+     other tracker reads its stored goal, as before. */
+  const targetValue =
+    tracker === "water" && store.waterTargetMl != null
+      ? store.waterTargetMl
+      : store.goals[def.goalKey];
+
   const commit = (value: string) => {
     const parsed = Number(value);
     if (value.trim() === "" || !Number.isFinite(parsed) || parsed < 0) {
@@ -246,7 +256,7 @@ export function TrackerModal({
           type="button"
           onClick={onClose}
           aria-label="Close"
-          className="bsheet-icon absolute right-0 top-0"
+          className="bsheet-icon absolute right-4 top-4 z-10 sm:right-5"
         >
           <BloomIcon name="close" size={16} />
         </button>
@@ -254,7 +264,7 @@ export function TrackerModal({
           Log {def.name}
         </p>
         <p className="mt-2 text-center text-[length:var(--text-meta)] font-semibold uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
-          Target · {def.format(store.goals[def.goalKey])}
+          Target · {def.format(targetValue)}
         </p>
 
         {usualValue !== null && usualEmpty && tracker !== "energy" ? (
@@ -345,7 +355,7 @@ export function TrackerModal({
           onKeyDown={(event) => {
             if (event.key === "Enter") commit(draft);
           }}
-          className="mt-4 h-[60px] text-center font-mono text-[28px] font-normal"
+          className="mt-4 h-[60px] text-center font-mono text-[28px] font-normal md:text-[28px]"
         />
         <p className="mt-2 text-center text-xs text-muted-foreground">{prompt}</p>
 

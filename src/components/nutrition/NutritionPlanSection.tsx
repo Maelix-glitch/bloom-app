@@ -31,10 +31,11 @@
  * the card's title, each dish a row with its photo and computed
  * numbers, and tapping a dish unfolds its ingredients (the raw
  * things, per serving) underneath it, with the full recipe one tap
- * further in the dish detail sheet. Simple foods appear only in the
- * subordinate "To complete the meal" top-up group. A meal the dish
- * pool could not fill keeps the layered food rendering above, and
- * its D4 dish idea with it.
+ * further in the dish detail sheet. Simple foods — top-ups included —
+ * flow in the same list as the meal's other items (M-166), so the
+ * rows a reader sees always sum to the meal's stated total. A meal
+ * the dish pool could not fill keeps the layered food rendering
+ * above, and its D4 dish idea with it.
  *
  * P8: composing runs behind a designed loading state, scoped to
  * this section (never a full-screen takeover): the three honest
@@ -69,6 +70,7 @@ import { canUse } from "@/lib/billing/plans";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
+import { useTrackers } from "@/hooks/useTrackers";
 import { useSession } from "@/hooks/useSession";
 import { GOAL_LABEL } from "@/lib/assessment/questions";
 import { fmtGrams, fmtInt, fmtKcalApprox } from "@/lib/format";
@@ -347,6 +349,11 @@ export function NutritionPlanSection() {
   } = usePlan();
   const assessment = useAssessment();
   const session = useSession();
+  /* The tracker store rides along for one figure: the resolved water
+     target (M-165). The water panel below must stand even on a day no
+     plan has been made for, and this is the same resolved figure
+     Trackers measures against — never a second computation. */
+  const trackerStore = useTrackers();
 
   /* P8: the composing sequence — the step currently on show, or
      null when no composition is running. The timers are the
@@ -605,6 +612,15 @@ export function NutritionPlanSection() {
               Create my plan
             </Button>
           </div>
+          {/* M-165: the water panel stands even before any plan exists.
+              Its target is the resolved tracker figure — the same
+              planWaterTargetMlOf resolution Trackers uses — and the
+              panel reads today's water live from the tracker store,
+              so nothing here can disagree with the Trackers page.
+              No resolved figure → no panel; a target is never invented. */}
+          {trackerStore.waterTargetMl != null ? (
+            <WaterBloomPanel targetMl={trackerStore.waterTargetMl} />
+          ) : null}
         </div>
       </section>
     );
@@ -634,6 +650,12 @@ export function NutritionPlanSection() {
               Create today's plan
             </Button>
           </div>
+          {/* M-165: yesterday's plan still carries its hydration
+              target, and the panel reads TODAY's water live from the
+              tracker store — so the Bloom stays reachable and truthful
+              on the days between plans, wearing the stored plan's own
+              figure, exactly as the ready state wears today's. */}
+          {plan.hydration ? <WaterBloomPanel targetMl={plan.hydration.targetMl} /> : null}
         </div>
       </section>
     );
@@ -1126,18 +1148,19 @@ export function NutritionPlanSection() {
             ) : null}
             {dishComposed ? (
               <>
-                {foodSuggestions.length > 0 ? (
+                {/* M-166: the top-ups flow in the SAME list as the
+                    meal's other foods — no separate group. The header
+                    total sums them (mealTotals always did), so a
+                    reader adding up the visible rows must be able to
+                    reach it; exiled to their own group below, they
+                    could not, and the header read as a lie. The row
+                    itself still wears its "Included in total" badge —
+                    the honesty now sits on the row, in the flow. */}
+                {foodSuggestions.length > 0 || topups.length > 0 ? (
                   <ul className="divide-y divide-border-subtle">
                     {foodSuggestions.map((s) => suggestionRow(meal, s))}
+                    {topups.map((s) => suggestionRow(meal, s))}
                   </ul>
-                ) : null}
-                {topups.length > 0 ? (
-                  <div className="mt-3">
-                    <p className="nut-group-label">To complete the meal</p>
-                    <ul className="divide-y divide-border-subtle">
-                      {topups.map((s) => suggestionRow(meal, s))}
-                    </ul>
-                  </div>
                 ) : null}
               </>
             ) : layered ? (
