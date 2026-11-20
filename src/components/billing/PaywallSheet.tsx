@@ -19,7 +19,8 @@ import { Check } from "lucide-react";
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { useEntitlement } from "@/hooks/useEntitlement";
-import { startCheckout } from "@/lib/billing/checkout";
+import { createOrder, payWithRazorpay, verifyPayment } from "@/lib/billing/checkout";
+import { invalidateEntitlement } from "@/lib/billing/entitlement";
 import {
   PAYWALL_HEADLINES,
   onPaywallRequest,
@@ -110,22 +111,66 @@ export function PaywallSheet({
     return Math.max(0, Math.round((1 - yearly / (monthly * 12)) * 100));
   }, [region]);
 
+  /* The buy action runs the Standard Web Checkout rail: the edge
+     function creates a one-time Order priced from the server's own
+     table, Razorpay's modal opens in-page, and the signature the
+     modal returns is confirmed through the function. The plan
+     itself is switched on by the provider's verified webhook —
+     this flow only ever reports what honestly happened. */
   const go = async (tier: Exclude<PlanTier, "free">) => {
     setBusyTier(tier);
     setNotice(null);
-    const result = await startCheckout(tier, period);
-    setBusyTier(null);
-    if (result.state === "ready" && result.shortUrl) {
-      window.location.href = result.shortUrl;
-      return;
+    try {
+      const order = await createOrder(tier, period);
+      if (order.state === "payments_not_configured") {
+        setNotice(
+          "Payments open soon — Bloom's payment account isn't connected yet, so checkout can't start today. Nothing has been charged. The moment it connects, this button goes straight to a secure checkout.",
+        );
+        return;
+      }
+      if (order.state !== "ready") {
+        setNotice("Checkout couldn't start just now — nothing has been charged. Try again in a moment.");
+        return;
+      }
+      const pay = await payWithRazorpay({
+        keyId: order.keyId,
+        orderId: order.orderId,
+        amount: order.amount,
+        currency: order.currency,
+        description: `${PLANS[tier].name} — ${period === "monthly" ? "monthly" : "yearly"}`,
+      });
+      if (pay.kind === "dismissed") {
+        setNotice("Checkout closed — nothing has been charged.");
+        return;
+      }
+      if (pay.kind === "unavailable") {
+        setNotice(
+          "The secure payment window couldn't load — check your connection and try again. Nothing has been charged.",
+        );
+        return;
+      }
+      if (pay.kind === "failed") {
+        setNotice(
+          `Payment didn't go through — ${pay.message} No plan was started; if your bank shows a debit for it, Razorpay refunds it automatically.`,
+        );
+        return;
+      }
+      const confirmed = await verifyPayment(pay.signature);
+      /* The webhook does the actual switching-on; refresh the
+         entitlement now and once more shortly after, so the sheet
+         reflects the new plan as soon as it lands. */
+      invalidateEntitlement();
+      if (confirmed) {
+        setNotice("Payment received — your plan is switching on now. It can take a few seconds to show here.");
+        window.setTimeout(() => invalidateEntitlement(), 4000);
+      } else {
+        setNotice(
+          "Your payment is being confirmed — if it went through, your plan switches on automatically within a few minutes, and you won't be charged twice for the same period.",
+        );
+      }
+    } finally {
+      setBusyTier(null);
     }
-    if (result.state === "payments_not_configured") {
-      setNotice(
-        "Payments open soon — Bloom's payment account isn't connected yet, so checkout can't start today. Nothing has been charged. The moment it connects, this button goes straight to a secure checkout.",
-      );
-      return;
-    }
-    setNotice("Checkout couldn't start just now — nothing has been charged. Try again in a moment.");
   };
 
   return (
