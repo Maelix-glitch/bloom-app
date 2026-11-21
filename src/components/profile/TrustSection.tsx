@@ -22,7 +22,7 @@
  */
 
 import { useState } from "react";
-import { BadgeCheck, ChevronDown, ChevronRight } from "lucide-react";
+import { IconChevronDown, IconChevronRight, IconVerified } from "@/components/profile/SettingsIcons";
 
 import { TRUST_CLAIMS } from "@/lib/trust/claims";
 import { CATALOG } from "@/lib/vitalis/evidence/catalog";
@@ -52,7 +52,7 @@ export function TrustSection() {
         onClick={() => setOpen((v) => !v)}
       >
         <span className="pf-row-icon" aria-hidden>
-          <BadgeCheck className="size-3.5" />
+          <IconVerified />
         </span>
         <span className="pf-row-text">
           <span className="pf-row-label">Trust &amp; security</span>
@@ -62,9 +62,9 @@ export function TrustSection() {
         </span>
         <span className="pf-row-value">Verified</span>
         {open ? (
-          <ChevronDown className="pf-row-chevron size-3.5" aria-hidden />
+          <IconChevronDown className="pf-row-chevron" />
         ) : (
-          <ChevronRight className="pf-row-chevron size-3.5" aria-hidden />
+          <IconChevronRight className="pf-row-chevron" />
         )}
       </button>
       {open ? (

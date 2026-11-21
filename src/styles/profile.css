@@ -570,7 +570,13 @@ button.pf-number:hover {
 /* ------------------------------- sections -------------------------------- */
 
 .pf-section {
-  margin-top: var(--space-6);
+  /* Premium Pass 3 (M-212): the section rhythm is the app's 40px
+     step (the .dbx-section rhythm), not 24px — sections breathe at
+     one rate on Profile and Settings alike. The settings sections
+     that also carried a Tailwind mt-10 were stacking 24 + 40 = 64px
+     gaps beside 24px ones; the utilities are gone, this is the one
+     source. */
+  margin-top: var(--space-10);
   padding-inline: var(--space-5);
 }
 @media (max-width: 640px) {
@@ -1970,4 +1976,26 @@ button.pf-number:hover {
 .pf-group-rows {
   border: none;
   box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Premium Pass 3 (M-211): the settings icon family finish. The glyphs
+ * are now one drawn family (SettingsIcons.tsx: 24px grid, 1.5px stroke,
+ * 20px render) in the row's fixed 30px optical box. What remains here:
+ * the colour warms a step toward the brand (gold-soft over the muted
+ * step — a whisper, not a tint), the rows gain a breath of vertical
+ * air (11px was an off-scale half-step; the rhythm step is space-3),
+ * and keyboard focus on a row gets the same calm ring the handle
+ * buttons already use. Danger rows keep their rose (their rule is
+ * more specific than this block's colour, by design).
+ * ------------------------------------------------------------------------- */
+.pf-row-icon {
+  color: color-mix(in oklab, var(--gold-soft) 72%, var(--muted-foreground));
+}
+.pf-row {
+  padding-block: var(--space-3);
+}
+button.pf-row:focus-visible {
+  outline: 2px solid var(--pf-accent);
+  outline-offset: -2px;
 }

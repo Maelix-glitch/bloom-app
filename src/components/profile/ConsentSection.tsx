@@ -14,7 +14,7 @@
  */
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, ShieldCheck } from "lucide-react";
+import { IconChevronDown, IconChevronRight, IconShieldCheck } from "@/components/profile/SettingsIcons";
 
 import { useAssessment } from "@/hooks/useAssessment";
 import {
@@ -98,7 +98,7 @@ export function ConsentSection() {
         onClick={() => setOpen((v) => !v)}
       >
         <span className="pf-row-icon" aria-hidden>
-          <ShieldCheck className="size-3.5" />
+          <IconShieldCheck />
         </span>
         <span className="pf-row-text">
           <span className="pf-row-label">Your consent</span>
@@ -110,9 +110,9 @@ export function ConsentSection() {
         </span>
         <span className="pf-row-value">{value}</span>
         {open ? (
-          <ChevronDown className="pf-row-chevron size-3.5" aria-hidden />
+          <IconChevronDown className="pf-row-chevron" />
         ) : (
-          <ChevronRight className="pf-row-chevron size-3.5" aria-hidden />
+          <IconChevronRight className="pf-row-chevron" />
         )}
       </button>
       {open ? (
