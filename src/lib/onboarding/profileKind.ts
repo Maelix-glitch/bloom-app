@@ -148,6 +148,30 @@ export const welcomeRerunDue = (state: OnboardingState): boolean =>
   state.done && !state.admin && state.welcomeVersion < WELCOME_VERSION;
 
 /**
+ * The name a re-run (or replay) opens with (M-185). The name the person
+ * gave the Welcome itself always wins — it is the answer on the record.
+ * Only when the record holds none — an account older than the question,
+ * whose Settings still reads "Not asked yet" — does the field fall back
+ * to the account's profile display name: the name Profile shows, read
+ * from the same profiles row. The placeholder the app substitutes for an
+ * unset profile name ("Bloom User") is not a name anyone offered, so it
+ * never pre-fills; with neither source the field opens empty, exactly
+ * as it does on a first run. Nothing else about the record is ever
+ * filled this way — the other answers have no second source, and
+ * inventing one would put words in the record the person never gave.
+ */
+export function welcomeInitialName(
+  recordName: string | null,
+  profileName: string | null,
+): string | null {
+  const own = recordName?.trim();
+  if (own) return own.slice(0, 48);
+  const fromProfile = profileName?.trim();
+  if (fromProfile && fromProfile !== "Bloom User") return fromProfile.slice(0, 48);
+  return null;
+}
+
+/**
  * The one question the rest of the app asks. `unspecified` keeps the cycle
  * visible — hiding a feature from someone who never said they didn't want it
  * would be the wrong way round.

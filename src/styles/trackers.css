@@ -2472,3 +2472,54 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   border-radius: var(--radius);
   padding-inline: 14px;
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box, second pass (M-184; spec rules 1, 2, 4): M-176's block above
+ * restyled the targets FORM grid inside the "Edit targets" sheet — plus
+ * the badges grid, which IS the page's achievements list, so the badges
+ * de-boxed live. But the Targets section the page renders is not the
+ * form grid: TargetsPanel renders a display list (.tk2-targets-display)
+ * whose base rules above are a grid of bordered tiles, and no de-box
+ * block ever named it — so the six targets stayed boxed on the live
+ * page while the guard pinned the wrong surface. This block names the
+ * surface the page actually renders:
+ *
+ *   · the display list becomes one column of open rows on the canvas —
+ *     the name on the left, its human reading on the right, each row
+ *     split from the next by the shared hairline token and nothing
+ *     else (the .dbx-rows move). Every value, unit and testid is the
+ *     markup's own, unchanged;
+ *   · the territory cards stay cards — each one IS the trigger that
+ *     opens its tracker, a real object, the sanctioned card case —
+ *     but they drop the frame: no border, no shadow box. What remains
+ *     is the tonal treatment the system allows an object: the surface
+ *     step it already wears, plus the one specular catch
+ *     (--dbx-specular). The hover lift stays as the press affordance.
+ * ------------------------------------------------------------------------- */
+.tk2-root .tk2-targets-display {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.tk2-root .tk2-targets-display li {
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  background: none;
+  background-image: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 14px 0;
+}
+.tk2-root .tk2-targets-display li + li {
+  border-top: 1px solid var(--dbx-hairline);
+}
+.tk2-root .tk2-targets-display .tk2-target-value {
+  text-align: right;
+}
+.tk2-root .at-territory {
+  border: none;
+  box-shadow: var(--dbx-specular);
+}

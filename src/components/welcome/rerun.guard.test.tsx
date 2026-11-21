@@ -65,6 +65,7 @@ import {
   ONBOARDING_PREF,
   WELCOME_VERSION,
   parseOnboarding,
+  welcomeInitialName,
   welcomeRerunDue,
   type OnboardingState,
 } from "@/lib/onboarding/profileKind";
@@ -334,5 +335,58 @@ describe("welcome re-run: the manual replay", () => {
     /* The starting-tracker application sits inside the first-run branch —
        a re-run must never re-apply setup over a shaped Bloom. */
     expect(gate).toMatch(/if \(mode === "first"\) \{\s*const suggested = suggestedTrackers/);
+  });
+});
+
+/* ----------------- (e) the name pre-fill fallback (M-185) ----------------- */
+
+describe("welcome re-run: the name pre-fill fallback", () => {
+  it("a name stored on the record always wins over the profile name", () => {
+    expect(welcomeInitialName("Ada", "Maelix")).toBe("Ada");
+  });
+
+  it("with no name on the record, the profile display name fills in", () => {
+    expect(welcomeInitialName(null, "Maelix")).toBe("Maelix");
+    expect(welcomeInitialName("", "Maelix")).toBe("Maelix");
+    expect(welcomeInitialName("  ", "Maelix")).toBe("Maelix");
+  });
+
+  it("with neither, the field opens empty — and the placeholder is not a name", () => {
+    expect(welcomeInitialName(null, null)).toBeNull();
+    expect(welcomeInitialName(null, "")).toBeNull();
+    expect(welcomeInitialName(null, "Bloom User")).toBeNull();
+  });
+
+  it("only the name falls back — the rule takes no other answer as input", () => {
+    /* The function's whole surface is two names. There is no parameter
+       through which a sex, kind or focus fallback could ever sneak in. */
+    expect(welcomeInitialName.length).toBe(2);
+  });
+
+  it("the gate wires the fallback to the rail identity, the profile name's own source", () => {
+    const gate = read("components/welcome/WelcomeGate.tsx");
+    expect(gate).toContain("useRailIdentity");
+    expect(gate).toContain("welcomeInitialName(state.name");
+    /* A first run still opens with no initial at all — unchanged. */
+    expect(gate).toMatch(/mode === "first"\s*\? undefined/);
+  });
+
+  it("a re-run whose record predates the name question opens with the profile name filled", () => {
+    /* The owner's own shape: nothing on the record (sex unanswered too,
+       exactly as his Settings shows), and a profile that has a name.
+       The fallback product — record null, profile "Maelix" — is what
+       the gate hands the flow. */
+    setupRerun({
+      sex: null,
+      kind: "unspecified",
+      focus: [],
+      name: welcomeInitialName(null, "Maelix"),
+    });
+    tap(/get started/i);
+    tap(/prefer not to say/i);
+    tap(/continue/i);
+    tap(/continue/i);
+    const input = screen.getByLabelText(/your name, optional/i) as HTMLInputElement;
+    expect(input.value).toBe("Maelix");
   });
 });

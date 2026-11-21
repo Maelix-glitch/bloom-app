@@ -28,6 +28,19 @@
  *     arriving on the replay bus (lib/welcome/replayRequest). Same dress
  *     as the re-run, but nothing is owed: the exit just closes, and the
  *     version stamp neither needs nor gets a change either way.
+ *
+ * The name a re-run or replay opens with is `welcomeInitialName`
+ * (M-185): the record's own name when it has one, else the account's
+ * profile display name — the rail identity's read of the same profiles
+ * row Profile shows. A record older than the name question has no name
+ * to pre-fill, and opening the new Welcome to an empty field on an
+ * account that plainly HAS a name ("Maelix", in the owner's case) read
+ * as if Bloom had forgotten him. Because Welcome takes its name from
+ * `initial` once, at mount, a re-run with no stored name waits for the
+ * rail identity to settle before it mounts — the same no-flash
+ * patience the gate already keeps for hydration. A first run never
+ * waits and never pre-fills: there is no profile name yet to fall
+ * back to, and its behaviour is byte-identical to before.
  */
 
 import { useEffect, useState } from "react";
@@ -37,7 +50,8 @@ import { useNavigate, useRouterState } from "@tanstack/react-router";
 import { Welcome } from "@/components/welcome/Welcome";
 import { useAdminAccess } from "@/hooks/useAdminAccess";
 import { useOnboarding } from "@/hooks/useOnboarding";
-import { suggestedTrackers } from "@/lib/onboarding/profileKind";
+import { useRailIdentity } from "@/hooks/useRailIdentity";
+import { suggestedTrackers, welcomeInitialName } from "@/lib/onboarding/profileKind";
 import { setPref } from "@/lib/prefs";
 import { onWelcomeReplayRequest } from "@/lib/welcome/replayRequest";
 
@@ -47,6 +61,11 @@ export function WelcomeGate() {
   const { needsWelcome, needsWelcomeRerun, state, finish, skipAsAdmin, markWelcomeSeen } =
     useOnboarding();
   const adminAccess = useAdminAccess();
+  /* The account's profile display name, from the rail identity — the
+     same read of the profiles row that Profile's own header shows.
+     Only ever a FALLBACK for the re-run's name field (M-185): the
+     record's stored name wins, and a first run never looks here. */
+  const rail = useRailIdentity();
   const navigate = useNavigate();
   /* A replay asked for from Profile. Session-only state, like the bus
      that carries it: it opens the Welcome here, now, and is forgotten. */
@@ -70,9 +89,22 @@ export function WelcomeGate() {
         ? "replay"
         : null;
 
+  /* The name the run opens with (M-185): the record's, or — only when
+     the record has none — the profile's. Welcome reads `initial` once
+     at mount, so a re-run that still needs the profile's answer waits
+     for the rail identity to settle rather than mounting empty and
+     staying empty. Signed-in is the only state that can offer a name;
+     every other settled state simply means the field opens empty. */
+  const initialName =
+    mode === "first" || mode === null
+      ? null
+      : welcomeInitialName(state.name, rail.status === "signed-in" ? rail.displayName : null);
+  const awaitingProfileName =
+    (mode === "rerun" || mode === "replay") && !state.name && rail.status === "checking";
+
   return (
     <AnimatePresence>
-      {mode !== null && !onLegalPage && (
+      {mode !== null && !onLegalPage && !awaitingProfileName && (
         <motion.div
           key="welcome"
           initial={{ opacity: 1 }}
@@ -84,7 +116,7 @@ export function WelcomeGate() {
             initial={
               mode === "first"
                 ? undefined
-                : { sex: state.sex, kind: state.kind, focus: state.focus, name: state.name }
+                : { sex: state.sex, kind: state.kind, focus: state.focus, name: initialName }
             }
             onExit={
               mode === "first"
