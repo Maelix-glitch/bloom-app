@@ -115,6 +115,78 @@ function TargetInput({
   );
 }
 
+/** One step per − / + press, per tracker: a quarter hour for the
+ *  durations, 250 ml for water, a single point for the rating. The
+ *  commit that receives the stepped value is the same clamped commit
+ *  the typed field uses — a press can never write what typing can't. */
+const TARGET_STEP: Record<TrackerId, number> = {
+  sleep: 15,
+  water: 250,
+  study: 15,
+  movement: 5,
+  energy: 1,
+  screen: 15,
+};
+
+/**
+ * A target's edit control (M-197): a real field — filled, bordered,
+ * the unit locked beside the figure — flanked by − / + steppers.
+ * Before M-197 the field was a ghost (borderless, transparent, one
+ * hairline under the number), so the sheet read as the display list
+ * it was supposed to edit. The plan-set row (water under a guide)
+ * wears the same field with no steppers and no input: a fact, in the
+ * field's shape, so the grid stays one rhythm.
+ */
+function TargetControl({
+  def,
+  value,
+  auto,
+  onCommit,
+}: {
+  def: TrackerDef;
+  value: number;
+  auto: boolean;
+  onCommit: (value: number) => void;
+}) {
+  if (auto) {
+    return (
+      <div className="tk2-target-control tk2-target-control--auto">
+        <span className="tk2-target-field">
+          <span className="tk2-target-auto-value">{value}</span>
+          <span className="tk2-unit">{unit(def.kind)}</span>
+        </span>
+      </div>
+    );
+  }
+  const step = TARGET_STEP[def.id];
+  return (
+    <div className="tk2-target-control">
+      <button
+        type="button"
+        className="tk2-target-step"
+        aria-label={`Decrease ${def.name} target`}
+        disabled={value <= def.min}
+        onClick={() => onCommit(value - step)}
+      >
+        <span aria-hidden>−</span>
+      </button>
+      <span className="tk2-target-field">
+        <TargetInput def={def} value={value} onCommit={onCommit} />
+        <span className="tk2-unit">{unit(def.kind)}</span>
+      </span>
+      <button
+        type="button"
+        className="tk2-target-step"
+        aria-label={`Increase ${def.name} target`}
+        disabled={value >= def.max}
+        onClick={() => onCommit(value + step)}
+      >
+        <span aria-hidden>+</span>
+      </button>
+    </div>
+  );
+}
+
 /** The form itself — switches and fields. Rendered inside the sheet. */
 export function TargetSheet({ store }: { store: TrackerStore }) {
   return (
@@ -167,32 +239,27 @@ export function TargetSheet({ store }: { store: TrackerStore }) {
              goal stays in the record and returns if the guide goes. */
           const auto = def.id === "water" && store.waterTargetMl != null;
           const value = auto ? store.waterTargetMl! : store.goals[def.goalKey];
+          const Glyph = TARGET_GLYPH[def.id];
           return (
             <li key={def.id} data-id={def.id}>
-              {auto ? (
-                <span className="tk2-target-label">{def.name}</span>
-              ) : (
-                <label htmlFor={`target-${def.id}`}>{def.name}</label>
-              )}
-              <span className="tk2-target-field">
+              <span className="tk2-target-top">
+                <span className="tk2-target-cell-glyph" aria-hidden>
+                  <Glyph className="size-4" />
+                </span>
                 {auto ? (
-                  <>
-                    <span className="tk2-target-auto-value">{value}</span>
-                    <span className="tk2-unit">{unit(def.kind)}</span>
-                  </>
+                  <span className="tk2-target-label">{def.name}</span>
                 ) : (
-                  <>
-                    <TargetInput
-                      def={def}
-                      value={value}
-                      onCommit={(v) =>
-                        store.setGoal(def.goalKey, Math.min(def.max, Math.max(def.min, v)))
-                      }
-                    />
-                    <span className="tk2-unit">{unit(def.kind)}</span>
-                  </>
+                  <label htmlFor={`target-${def.id}`}>{def.name}</label>
                 )}
               </span>
+              <TargetControl
+                def={def}
+                value={value}
+                auto={auto}
+                onCommit={(v) =>
+                  store.setGoal(def.goalKey, Math.min(def.max, Math.max(def.min, v)))
+                }
+              />
               {/* The same human reading the page displays, so the sheet
                   and the section can never disagree about a target. */}
               <span className="tk2-target-human">

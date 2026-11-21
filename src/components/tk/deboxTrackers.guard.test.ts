@@ -31,8 +31,19 @@ const TARGETS_TSX = readFileSync(join(SRC, "components/tk/Targets.tsx"), "utf8")
 
 const marker = CSS.indexOf("De-box (M-176");
 const marker184 = CSS.indexOf("De-box, second pass (M-184");
+const marker190 = CSS.indexOf("De-box COMPLETE — Trackers (M-190");
 const BLOCK = marker >= 0 ? CSS.slice(marker, marker184 >= 0 ? marker184 : undefined) : "";
-const BLOCK184 = marker184 >= 0 ? CSS.slice(marker184) : "";
+/* RE-CONTRACTED by M-197 (disclosed): BLOCK184 used to slice to the
+   end of the file, so the pin below ("the block styles the display
+   list, not the sheet's form grid") incidentally barred ANY later
+   block from naming the form's grid class — the bar M-210 recorded
+   as its exception, which left the Edit targets form unstyled while
+   its guard claimed the cascade. The slice is now bounded at the
+   M-190 block, the M-184 block's true end: the pin keeps its full
+   force over the block it names, and later work (M-197's form block,
+   pinned by its own guard) is no longer collateral. */
+const BLOCK184 =
+  marker184 >= 0 ? CSS.slice(marker184, marker190 > marker184 ? marker190 : undefined) : "";
 
 describe("trackers de-box (M-176)", () => {
   it("the M-176 block exists at the cascade end", () => {
