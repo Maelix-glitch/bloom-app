@@ -72,6 +72,7 @@ import {
   reportActionResult,
 } from "@/lib/vitalis-ai/actions";
 import { askVitalis, VitalisUnavailable } from "@/lib/vitalis-ai/client";
+import { announceVitalisOpened, onVitalisOpenRequest } from "@/lib/vitalis-ai/openRequest";
 import { requestPaywall } from "@/lib/billing/paywall";
 import { requestMetricsEntry } from "@/lib/trackers/entrySheet";
 import { buildVitalisContext, type VitalisPlanSlice } from "@/lib/vitalis-ai/context";
@@ -211,6 +212,15 @@ export function CoachOrb() {
   }, []);
 
   /* ------------------------------ lifecycle ------------------------------ */
+  /* The open bus (lib/vitalis-ai/openRequest): a page may ask the orb
+     to open — Today's First Bloom journey introduces Vitalis this
+     way — and every opening is announced on the same bus, because a
+     meeting with Vitalis leaves no record anywhere else by design. */
+  useEffect(() => onVitalisOpenRequest(() => setOpen(true)), []);
+  useEffect(() => {
+    if (open) announceVitalisOpened();
+  }, [open]);
+
   useEffect(() => {
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
     const apply = () => setReducedMotion(mq.matches);

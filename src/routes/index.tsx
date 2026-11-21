@@ -9,7 +9,9 @@ import { HabitUndo } from "@/components/home/HabitUndo";
 import { AssessmentPromptCard } from "@/components/assessment/AssessmentEntry";
 import { NutritionTodayCard } from "@/components/nutrition/NutritionEntryCards";
 import { ChangesCard, StatTiles } from "@/components/home/OverviewBand";
-import { LevelCard } from "@/components/home/LevelCard";
+import { FirstBloomJourney } from "@/components/home/FirstBloomJourney";
+import { LevelCard, LevelStrip } from "@/components/home/LevelCard";
+import { TodayStoryCard } from "@/components/home/TodayStoryCard";
 import { MoodCard } from "@/components/home/MoodCard";
 import { TopBar } from "@/components/home/TopBar";
 import { FeelIn, useFeelIn } from "@/components/system/FeelIn";
@@ -18,7 +20,11 @@ import { ConnectionConstellation } from "@/components/home/ConnectionConstellati
 import { weekTicks } from "@/lib/home/weekChart";
 import { useAssessment } from "@/hooks/useAssessment";
 import { summaryOf } from "@/lib/assessment/summary";
-import { overviewRecordsSettled, synthesizeOverview } from "@/lib/overview/synthesis";
+import {
+  overviewRecordsSettled,
+  synthesizeOverview,
+  type OverviewAction,
+} from "@/lib/overview/synthesis";
 import { MetricsEntryModal } from "@/components/tk/MetricsEntryModal";
 import { NudgeCard } from "@/components/behaviour/NudgeCard";
 import { Composer } from "@/components/mood/Composer";
@@ -247,6 +253,29 @@ function TodayPage() {
           ? "Saved on this device — sign in to sync"
           : trackers.sync.message || null;
 
+  /* The mobile story card's action door (M-174): the synthesis's
+     chosen next action, resolved through the same doors the rest of
+     the page uses. Link and assessment actions render as links
+     inside the card itself and never reach here. */
+  const runOverviewAction = (action: OverviewAction) => {
+    switch (action.kind) {
+      case "habit":
+        if (action.habitId) void habits.toggle(action.habitId);
+        break;
+      case "mood":
+        setMoodOpen(true);
+        break;
+      case "metrics":
+        setMetricsOpen(true);
+        break;
+      case "add-habit":
+        openNewHabit();
+        break;
+      default:
+        break;
+    }
+  };
+
   const addHabit = async (draft: HabitDraft) => {
     try {
       if (editingHabitId) await habits.editHabit(editingHabitId, draft);
@@ -353,6 +382,12 @@ function TodayPage() {
                 />
               )}
             </p>
+            {/* M-174: on mobile the opening moment carries the
+                person's standing too — the same wallet balance and
+                rank maths as the Level card, as a designed strip
+                under the greeting. Desktop's hero is unchanged (the
+                strip never renders at lg). */}
+            <LevelStrip />
             {/* ONE action style (brief v6, M-117): every hero action —
                 mood, metrics, BMI, the weekly report, and voice — is
                 the same `.home-chip`. State lives in the label, never
@@ -413,6 +448,24 @@ function TodayPage() {
 
         <div className="home-hairline" aria-hidden />
 
+        {/* M-174 — the rebuilt mobile lead, phones only: the First
+            Bloom journey while it is unfinished (the path retires
+            when the record completes it), then the day's story line
+            and single next action from the same synthesis the stack
+            below computes. Both children are lg:hidden and the
+            wrapper steps aside entirely when both do (empty:hidden),
+            so the desktop page renders exactly what it always did. */}
+        <div className="mt-8 grid gap-8 empty:hidden lg:hidden">
+          <FirstBloomJourney
+            ready={recordReady}
+            onLogMetrics={() => setMetricsOpen(true)}
+            onOpenMood={() => setMoodOpen(true)}
+            onToggleHabit={(id) => void habits.toggle(id)}
+            onAddHabit={openNewHabit}
+          />
+          <TodayStoryCard overview={overview} ready={overviewReady} onAction={runOverviewAction} />
+        </div>
+
         {/* The prototype stack, exactly (Reskin slice A): Focus + Level,
             StatTiles, WeekChart + Changes, Habits + Mood, and the small
             centred footer line. Everything else that used to live here —
@@ -431,12 +484,23 @@ function TodayPage() {
             data-visible={rowFocus.inView}
             className="feel-in grid gap-[var(--bloom-section-gap)] lg:grid-cols-12"
           >
-            <div className="lg:col-span-7 [&>*]:h-full">
+            <div
+              className={
+                assessment.state.status === "complete"
+                  ? "lg:col-span-7 [&>*]:h-full"
+                  : "hidden lg:block lg:col-span-7 [&>*]:h-full"
+              }
+            >
               {/* W4-1: the ASSESS step's door — the prototype's FocusCard
                   in Bloom's build: segmented gold progress, the existing
                   flow behind it, the PR #87 slab untouched. Renders only
                   while the assessment is unfinished and undismissed; when
-                  it steps aside, the LevelCard takes the row alone. */}
+                  it steps aside, the LevelCard takes the row alone.
+                  M-174: while unfinished, the cell is desktop-only — on
+                  mobile the assessment lives as the First Bloom path's
+                  final step and in its Profile home, never as a
+                  standalone prompt; the settled starting-point card
+                  keeps rendering on mobile exactly as before. */}
               <AssessmentPromptCard />
             </div>
             <div className="lg:col-span-5 [&>*]:h-full">
