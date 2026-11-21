@@ -410,7 +410,12 @@
   border-radius: 50%;
   border: 1.5px solid color-mix(in oklab, var(--foreground) 35%, transparent);
   color: var(--background);
-  transition: all var(--wl-dur-tick);
+  /* No transition (M-173): under `all`, the gold gradient (a
+     background-image) flipped discretely at the fade's midpoint while
+     the border faded smoothly — a pop inside the pill, out of step
+     with the pill's own landing. The fill and the border now arrive
+     in the same frame as the chosen surface; only the check's
+     opacity still fades, below. */
 }
 .wl-tick svg {
   opacity: 0;
