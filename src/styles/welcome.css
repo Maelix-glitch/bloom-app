@@ -410,12 +410,7 @@
   border-radius: 50%;
   border: 1.5px solid color-mix(in oklab, var(--foreground) 35%, transparent);
   color: var(--background);
-  /* No transition (M-173): under `all`, the gold gradient (a
-     background-image) flipped discretely at the fade's midpoint while
-     the border faded smoothly — a pop inside the pill, out of step
-     with the pill's own landing. The fill and the border now arrive
-     in the same frame as the chosen surface; only the check's
-     opacity still fades, below. */
+  transition: all var(--wl-dur-tick);
 }
 .wl-tick svg {
   opacity: 0;
@@ -635,4 +630,29 @@
     min-height: 50px;
     padding: 13px var(--space-5);
   }
+}
+
+/* ------------------------------------------------- the re-run exit (M-182) */
+
+/* "Not now" — the way out of a re-run or replay, in the apart button's
+   quiet voice (dim cream, underlined, a full 44px target), centred
+   under the CTA. It exists only in those runs: the markup renders it
+   only when the gate passes an exit, so a first run's composition is
+   exactly the preview's. No glass, no capsule — a door, not a control
+   competing with the way in. */
+.wl-notnow-row {
+  margin-top: 6px;
+  text-align: center;
+}
+.wl-notnow {
+  background: none;
+  border: none;
+  min-height: 44px;
+  padding: 10px 14px;
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+  font-size: var(--text-callout); /* the scale's 14px step */
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
 }

@@ -36,6 +36,7 @@ import {
   Palette,
   Share2,
   Smartphone,
+  Sparkles,
   Trash2,
   Droplet,
   UserRound,
@@ -46,6 +47,7 @@ import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { useSound } from "@/hooks/useSound";
 import { SEX_LABEL } from "@/lib/onboarding/profileKind";
+import { requestWelcomeReplay } from "@/lib/welcome/replayRequest";
 import { VERIFIED_BLUE, type VerificationStatus } from "@/lib/profile/verification";
 import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 import { ConsentSection } from "@/components/profile/ConsentSection";
@@ -257,6 +259,21 @@ function PersonalizationSection() {
              only way to hear what you just enabled. */
           if (!next) sound("toggleOff");
           setEnabled(next);
+        }}
+      />
+      {/* The Welcome, on demand (M-182): the gate owns the flow and this
+          row only asks it to open, over the replay bus — Profile and the
+          root-mounted gate share no React state. The run opens with the
+          stored answers already in it and resets nothing; leaving it
+          early changes nothing either. */}
+      <Row
+        icon={<Sparkles className="size-3.5" />}
+        label="See the welcome again"
+        hint="The setup questions, with your answers filled in. Nothing is reset."
+        testId="pf-row-welcome-replay"
+        onClick={() => {
+          sound("open");
+          requestWelcomeReplay();
         }}
       />
       <Row

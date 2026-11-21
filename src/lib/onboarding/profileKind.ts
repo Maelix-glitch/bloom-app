@@ -53,6 +53,15 @@ export interface OnboardingState {
   /** ISO timestamp of the answer, so a later change wins across devices. */
   at: string | null;
   /**
+   * The Welcome version this person last completed (M-182). Every record
+   * written before versioning existed has no such field and parses as 0 —
+   * which is exactly the point: when `WELCOME_VERSION` moves past the
+   * stored value, the gate runs the (new) Welcome once more, pre-filled
+   * with these very answers. "Not now" and a completion both stamp the
+   * current version here; nothing else about the record changes.
+   */
+  welcomeVersion: number;
+  /**
    * Entered through the admin door. This is a *mode*, not a bookkeeping flag:
    * it keeps the admin bar visible so there is always a way back out, and it
    * marks that no real answers were given — so `setKind` from settings still
@@ -74,6 +83,14 @@ export const FOCUS_LABEL: Record<FocusArea, string> = {
 
 export const ONBOARDING_PREF = "onboarding.v1";
 
+/**
+ * The current Welcome, as a version (M-182). Version 1 is the Liquid
+ * Glass Welcome (M-170). Bump this when the flow changes enough that
+ * people who answered an older one should see the new one once —
+ * the gate compares it against the version stamped on their record.
+ */
+export const WELCOME_VERSION = 1;
+
 export const DEFAULT_ONBOARDING: OnboardingState = {
   done: false,
   kind: "unspecified",
@@ -82,6 +99,7 @@ export const DEFAULT_ONBOARDING: OnboardingState = {
   name: null,
   at: null,
   admin: false,
+  welcomeVersion: 0,
 };
 
 const KINDS: ProfileKind[] = ["cycle", "no-cycle", "unspecified"];
@@ -103,6 +121,10 @@ export function parseOnboarding(raw: unknown): OnboardingState | null {
     : null;
   const name =
     typeof r["name"] === "string" && r["name"].trim() ? r["name"].trim().slice(0, 48) : null;
+  const welcomeVersion =
+    typeof r["welcomeVersion"] === "number" && Number.isFinite(r["welcomeVersion"])
+      ? Math.max(0, Math.floor(r["welcomeVersion"]))
+      : 0;
   return {
     done: r["done"] === true,
     kind,
@@ -111,8 +133,19 @@ export function parseOnboarding(raw: unknown): OnboardingState | null {
     name,
     at: typeof r["at"] === "string" ? r["at"] : null,
     admin: r["admin"] === true,
+    welcomeVersion,
   };
 }
+
+/**
+ * Is the Welcome owed another run? (M-182) True only for someone who
+ * finished an older Welcome: they answered (so this is a re-run, not a
+ * first run), they are not in admin mode (the door asks nothing, and its
+ * records stamp the current version anyway), and the version stamped on
+ * their record is behind the Welcome the app now ships.
+ */
+export const welcomeRerunDue = (state: OnboardingState): boolean =>
+  state.done && !state.admin && state.welcomeVersion < WELCOME_VERSION;
 
 /**
  * The one question the rest of the app asks. `unspecified` keeps the cycle

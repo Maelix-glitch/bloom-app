@@ -19,8 +19,10 @@ import { usePrefValue } from "@/lib/prefsStore";
 import {
   DEFAULT_ONBOARDING,
   ONBOARDING_PREF,
+  WELCOME_VERSION,
   parseOnboarding,
   tracksCycle,
+  welcomeRerunDue,
   type FocusArea,
   type OnboardingState,
   type ProfileKind,
@@ -36,6 +38,16 @@ export interface OnboardingStore {
   hydrated: boolean;
   /** True when the welcome flow should be shown. */
   needsWelcome: boolean;
+  /**
+   * True when a finished user is owed the current Welcome once more
+   * (M-182): their record's version is behind `WELCOME_VERSION`.
+   */
+  needsWelcomeRerun: boolean;
+  /**
+   * The re-run's "Not now": stamp the current version as seen, changing
+   * nothing else — the answers, and the time they were given, stand.
+   */
+  markWelcomeSeen: () => void;
   /** Does this person's Bloom include the cycle? */
   cycle: boolean;
   finish: (answer: {
@@ -92,6 +104,9 @@ export function useOnboarding(): OnboardingStore {
         name: name?.trim() ? name.trim().slice(0, 48) : null,
         at: new Date().toISOString(),
         admin: false,
+        /* Completing the flow is completing the CURRENT Welcome (M-182) —
+           first run and re-run alike stamp the version they just saw. */
+        welcomeVersion: WELCOME_VERSION,
       }),
     [write],
   );
@@ -107,8 +122,21 @@ export function useOnboarding(): OnboardingStore {
         name: null,
         at: new Date().toISOString(),
         admin: true,
+        /* The door is a deliberate bypass of the current Welcome, so the
+           record stamps it as seen — an admin is never owed a re-run. */
+        welcomeVersion: WELCOME_VERSION,
       }),
     [write],
+  );
+
+  const markWelcomeSeen = useCallback(
+    () =>
+      /* The version stamp ONLY. `at` keeps the time the answers were
+         given — "Not now" is not an answer, and must not impersonate
+         one. The pref entry's own write stamp (setPref) is what makes
+         the new version win across devices. */
+      write({ ...state, welcomeVersion: WELCOME_VERSION }),
+    [write, state],
   );
 
   const setKind = useCallback(
@@ -123,6 +151,8 @@ export function useOnboarding(): OnboardingStore {
     hydrated,
     /* Never on the server pass — the welcome screen must not be in the HTML. */
     needsWelcome: hydrated && !state.done,
+    needsWelcomeRerun: hydrated && welcomeRerunDue(state),
+    markWelcomeSeen,
     cycle: tracksCycle(state),
     finish,
     skipAsAdmin,
