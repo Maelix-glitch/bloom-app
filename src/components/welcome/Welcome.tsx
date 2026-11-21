@@ -23,13 +23,15 @@
  * and the picture always fought the question. A typography-only pass followed
  * — one soft accent bloom and a lot of air.
  *
- * The look now is Night Glass (M-169, the owner's Liquid Glass programme):
- * an animated mesh of gold, cream and sage light drifts on the ink, and the
- * question lives in the shared glass material (src/styles/glass.css). The
- * words sit in ONE glass panel per screen; the answers are glass pills on
- * the scene beside it — glass never stacks on glass. Every question, answer,
- * order and write below is exactly what it was before the material arrived:
- * this is a presentation change only.
+ * The look now is the owner's approved Liquid Glass preview, carried exactly
+ * (M-170, superseding M-169's composition): the preview's animated mesh —
+ * gold, sage, rose and deep-gold pools — drifts on the ink, the words sit
+ * directly on that scene (the preview wraps them in nothing), and only the
+ * controls wear the shared glass material (src/styles/glass.css): the
+ * answer pills, the back and admin capsules, the name field, the CTA. The
+ * step rail is the preview's bare bars; the recap is its one solid card.
+ * Every question, answer, order and write below is exactly what it was
+ * before: this is a presentation change only.
  */
 
 import { useCallback, useMemo, useState } from "react";
@@ -47,69 +49,37 @@ import {
 import { AdminPanel } from "@/components/welcome/AdminPanel";
 import "@/styles/welcome.css";
 
-const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
+/* The preview's screen entrance: .55s on its spring-in curve. */
+const EASE: [number, number, number, number] = [0.22, 1.2, 0.36, 1];
 
 /** Four questions, so four segments in the rail. */
 const STEP_COUNT = 4;
-
-/**
- * One accent for the whole flow.
- *
- * Each screen used to take a colour from its photograph. With the photographs
- * gone, a colour that changes for no reason reads as arbitrary — so the flow
- * holds one accent and lets the type carry the change between screens. Under
- * Night Glass the accent is gold: it is the light in the mesh, the tint of a
- * chosen answer, and the wash on the way forward.
- */
-const ACCENT = "var(--gold)";
 
 /**
  * The first real question: Male or Female.
  *
  * Three deliberate choices about how this is presented:
  *
- *   · **Both answers get the same card and the same accent.** A pink option
+ *   · **Both answers get the same pill and the same dress.** A pink option
  *     next to a blue one would make the choice read as picking a theme rather
  *     than answering a question.
- *   · **The consequence is stated, not implied.** Someone choosing Male is told
- *     the cycle won't be there — that is the reason the question exists, and
- *     hiding it behind "we'll personalise your experience" would be the app
- *     deciding something on their behalf without saying so.
+ *   · **The pills carry the label only** (M-170): the preview's capsules
+ *     have no helper line, so the consequence sentences the cards used to
+ *     carry are gone — the answer still decides exactly what it decided,
+ *     and Settings still shows the answer that was given. Recorded in
+ *     M-170 as the one content-display change the exact match cost.
  *   · **"Prefer not to say" sits apart**, because it isn't a third kind of
  *     person, it is declining the question. It keeps everything available.
  */
-const SEXES: Array<{ sex: SexAnswer; title: string; sub?: string; kind: ProfileKind }> = [
-  {
-    sex: "female",
-    title: "Female",
-    sub: "Bloom includes cycle tracking. You can turn it off at any time.",
-    kind: "cycle",
-  },
-  {
-    sex: "male",
-    title: "Male",
-    sub: "Bloom leaves the cycle out entirely — no entry, no widgets, no prompts.",
-    kind: "no-cycle",
-  },
-  {
-    sex: "unspecified",
-    title: "Prefer not to say",
-    kind: "unspecified",
-  },
+const SEXES: Array<{ sex: SexAnswer; title: string; kind: ProfileKind }> = [
+  { sex: "female", title: "Female", kind: "cycle" },
+  { sex: "male", title: "Male", kind: "no-cycle" },
+  { sex: "unspecified", title: "Prefer not to say", kind: "unspecified" },
 ];
 
-/** The last entry is the decline, so it renders below a divider. */
+/** The last entry is the decline, so it renders apart, below the pills. */
 const SEX_CHOICES = SEXES.slice(0, -1);
 const SEX_DECLINE = SEXES.at(-1)!;
-
-const FOCUS_SUB: Record<FocusArea, string> = {
-  habits: "Small things, done often.",
-  mood: "Notice the pattern behind the day.",
-  sleep: "What you did, and how you woke up.",
-  study: "Sessions, subjects, deep work.",
-  movement: "Anything that gets you going.",
-  cycle: "Phases and what they explain.",
-};
 
 export interface WelcomeProps {
   onFinish: (answer: {
@@ -133,8 +103,6 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
   const { sound } = useSound();
 
   const [step, setStep] = useState(0);
-  /** +1 forward, -1 back — so the slide leaves in the direction you came from. */
-  const [dir, setDir] = useState(1);
   /* One piece of state, not two: the answer *is* the capability. Deriving
      `kind` at the point of answering is what stops the two ever disagreeing. */
   const [answer, setAnswer] = useState<(typeof SEXES)[number] | null>(null);
@@ -143,7 +111,6 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
 
   const go = useCallback(
     (next: number) => {
-      setDir(next > step ? 1 : -1);
       setStep(next);
       sound(next > step ? "navigate" : "close");
     },
@@ -176,6 +143,11 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
 
   const canAdvance = step !== 1 || answer !== null;
 
+  /* The preview's entrance, on every screen change: in from the right
+     with a breath of scale, .55s on the preview's curve. The preview
+     has no exit move — the old screen simply goes — so the exit is a
+     short fade and nothing more. Direction no longer flips the slide:
+     the preview enters the same way backwards and forwards. */
   const slide = reduced
     ? {
         initial: { opacity: 0 },
@@ -184,27 +156,29 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
         transition: { duration: 0.2 },
       }
     : {
-        initial: { opacity: 0, x: dir * 24 },
-        animate: { opacity: 1, x: 0 },
-        exit: { opacity: 0, x: dir * -24 },
-        transition: { duration: 0.42, ease: EASE },
+        initial: { opacity: 0, x: 22, scale: 0.985 },
+        animate: { opacity: 1, x: 0, scale: 1 },
+        exit: { opacity: 0, transition: { duration: 0.15 } },
+        transition: { duration: 0.55, ease: EASE },
       };
 
   return (
-    <div
-      className="wl"
-      style={{ ["--wl-accent" as string]: ACCENT }}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Set up Bloom"
-    >
-      <div className="wl-mesh" aria-hidden />
+    <div className="wl" role="dialog" aria-modal="true" aria-label="Set up Bloom">
+      {/* The preview's mesh: four pools of palette light, each with its
+          own seat and drift (welcome.css owns the values). */}
+      <div className="wl-mesh" aria-hidden>
+        <i className="m1" />
+        <i className="m2" />
+        <i className="m3" />
+        <i className="m4" />
+      </div>
 
       {/* The refraction filter the glass material references (glass.css,
-          .glass-refract). Defined once, never painted: an SVG host whose
-          feDisplacementMap warps the panel's backdrop at its edges in
-          engines that support it, behind @supports + reduced-motion
-          gates — everywhere else the panel keeps its plain blur. */}
+          .glass-refract). Defined once, never painted — and, exactly as
+          in the preview, applied nowhere in this flow: the preview
+          ships the filter defined and inert, its layered rims carrying
+          the effect. Kept for parity and for the material's other
+          surfaces. */}
       <svg className="glass-defs" aria-hidden="true" focusable="false">
         <defs>
           <filter id="lg-refract" x="-5%" y="-5%" width="110%" height="110%">
@@ -228,12 +202,26 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
 
       <div className="wl-shell">
         <div className="wl-top">
-          <div className="wl-rail glass-cap" aria-hidden>
+          {/* The preview's back capsule, top-left: present on every
+              screen, disabled and dimmed on the first — there is
+              nowhere back to, and it doesn't pretend otherwise. */}
+          <button
+            type="button"
+            className="wl-back glass-cap"
+            onClick={() => go(step - 1)}
+            disabled={step === 0}
+            aria-label="Back"
+          >
+            <ArrowLeft size={18} />
+          </button>
+          {/* The preview's rail: bare bars, centred — done in gold,
+              current stretched and lit, the rest dim. */}
+          <div className="wl-rail" aria-hidden>
             {Array.from({ length: STEP_COUNT }, (_, i) => (
               <div
                 key={i}
                 className="wl-seg"
-                style={{ ["--fill" as string]: i < step ? 1 : i === step ? 0.55 : 0 }}
+                data-state={i < step ? "done" : i === step ? "on" : "todo"}
               />
             ))}
           </div>
@@ -261,31 +249,39 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={step} className="wl-step" {...slide}>
               {step === 0 && (
-                <div className="wl-panel glass-panel glass-refract">
+                <>
+                  {/* The preview's hero flower: glass petals over a
+                      gold heart, above the words. Decoration only. */}
+                  <div className="wl-flower" aria-hidden>
+                    <i />
+                    <i />
+                    <i />
+                    <b />
+                  </div>
                   <p className="wl-eyebrow">Welcome</p>
                   <h1 className="wl-title">
                     Bloom keeps the record.
                     <br />
-                    You keep living.
+                    <em>You keep living.</em>
                   </h1>
                   <p className="wl-sub">
                     Log a little each day and Bloom finds what actually moves your energy, focus and
                     mood. Three quick questions and it's yours.
                   </p>
-                </div>
+                </>
               )}
 
               {step === 1 && (
                 <>
-                  <div className="wl-panel glass-panel glass-refract">
-                    <p className="wl-eyebrow">Step one</p>
-                    <h1 className="wl-title">Which best describes you?</h1>
-                    <p className="wl-sub">
-                      Bloom tracks a menstrual cycle for the people who have one. This answer
-                      decides whether that part of the app is there at all — asked once, and
-                      changeable later from Settings.
-                    </p>
-                  </div>
+                  <p className="wl-eyebrow">Step one</p>
+                  <h1 className="wl-title">
+                    Which best <em>describes you?</em>
+                  </h1>
+                  <p className="wl-sub">
+                    Bloom tracks a menstrual cycle for the people who have one. This answer decides
+                    whether that part of the app is there at all — asked once, and changeable later
+                    from Settings.
+                  </p>
                   <div className="wl-choices">
                     {SEX_CHOICES.map((opt) => (
                       <button
@@ -299,19 +295,20 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
                           setAnswer(opt);
                         }}
                       >
-                        <span className="wl-radio" aria-hidden />
-                        <span className="wl-card-text">
-                          <span className="wl-card-title">{opt.title}</span>
-                          {opt.sub ? <span className="wl-card-sub">{opt.sub}</span> : null}
+                        <span className="wl-tick" aria-hidden>
+                          <Check size={12} strokeWidth={3.4} />
                         </span>
+                        <span className="wl-card-title">{opt.title}</span>
                       </button>
                     ))}
+                  </div>
 
-                    <div className="wl-choices-divider" aria-hidden />
-
+                  {/* The decline sits apart, as the preview's quiet
+                      underlined text button — not a third pill. */}
+                  <div className="wl-apart">
                     <button
                       type="button"
-                      className="wl-card wl-card--decline glass-pill"
+                      className="wl-apart-btn"
                       data-on={answer?.sex === SEX_DECLINE.sex}
                       aria-pressed={answer?.sex === SEX_DECLINE.sex}
                       onClick={() => {
@@ -319,10 +316,7 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
                         setAnswer(SEX_DECLINE);
                       }}
                     >
-                      <span className="wl-radio" aria-hidden />
-                      <span className="wl-card-text">
-                        <span className="wl-card-title">{SEX_DECLINE.title}</span>
-                      </span>
+                      {SEX_DECLINE.title}
                     </button>
                   </div>
                 </>
@@ -330,15 +324,15 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
 
               {step === 2 && (
                 <>
-                  <div className="wl-panel glass-panel glass-refract">
-                    <p className="wl-eyebrow">Step two</p>
-                    <h1 className="wl-title">What brought you here?</h1>
-                    <p className="wl-sub">
-                      Pick any that fit — Bloom switches on the right trackers to start. You can add
-                      or drop them at any time.
-                    </p>
-                  </div>
-                  <div className="wl-choices">
+                  <p className="wl-eyebrow">Step two</p>
+                  <h1 className="wl-title">
+                    What brought <em>you here?</em>
+                  </h1>
+                  <p className="wl-sub">
+                    Pick any that fit — Bloom switches on the right trackers to start. You can add
+                    or drop them at any time.
+                  </p>
+                  <div className="wl-choices wl-choices--grid">
                     {areas.map((area) => {
                       const on = focus.includes(area);
                       return (
@@ -350,13 +344,10 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
                           aria-pressed={on}
                           onClick={() => toggleFocus(area)}
                         >
-                          <span className="wl-check" aria-hidden>
-                            <Check size={11} strokeWidth={3.4} />
+                          <span className="wl-tick" aria-hidden>
+                            <Check size={12} strokeWidth={3.4} />
                           </span>
-                          <span className="wl-card-text">
-                            <span className="wl-card-title">{FOCUS_LABEL[area]}</span>
-                            <span className="wl-card-sub">{FOCUS_SUB[area]}</span>
-                          </span>
+                          <span className="wl-card-title">{FOCUS_LABEL[area]}</span>
                         </button>
                       );
                     })}
@@ -366,10 +357,10 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
 
               {step === 3 && (
                 <>
-                  <div className="wl-panel glass-panel glass-refract">
-                    <p className="wl-eyebrow">Last one</p>
-                    <h1 className="wl-title">What should Bloom call you?</h1>
-                  </div>
+                  <p className="wl-eyebrow">Last one</p>
+                  <h1 className="wl-title">
+                    What should <em>Bloom call you?</em>
+                  </h1>
                   <input
                     className="wl-input glass-field"
                     value={name}
@@ -380,17 +371,20 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
                     aria-label="Your name, optional"
                   />
                   <div className="wl-summary">
-                    <div className="wl-summary-row">
-                      <span>Cycle</span>
-                      <span>{answer?.kind === "no-cycle" ? "Left out" : "Included"}</span>
-                    </div>
-                    <div className="wl-summary-row">
-                      <span>Focus</span>
-                      <span>
-                        {focus.length
-                          ? focus.map((f) => FOCUS_LABEL[f]).join(", ")
-                          : "Everything, to start"}
-                      </span>
+                    <p className="wl-summary-title">Your start</p>
+                    <div className="wl-summary-rows">
+                      <div className="wl-summary-row">
+                        <span>Cycle</span>
+                        <span>{answer?.kind === "no-cycle" ? "Left out" : "Included"}</span>
+                      </div>
+                      <div className="wl-summary-row">
+                        <span>Focus</span>
+                        <span>
+                          {focus.length
+                            ? focus.map((f) => FOCUS_LABEL[f]).join(", ")
+                            : "Everything, to start"}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </>
@@ -400,19 +394,13 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
         </div>
 
         <div className="wl-foot">
-          {step > 0 && (
-            <button
-              type="button"
-              className="wl-back glass-cap"
-              onClick={() => go(step - 1)}
-              aria-label="Back"
-            >
-              <ArrowLeft size={18} />
-            </button>
-          )}
+          {/* The preview's CTA: glass on the middle screens, the solid
+              gold capsule on the first and the last (Begin / the way
+              in) — [data-solid] is the glass CTA's own variant. */}
           <button
             type="button"
             className="wl-next glass-cta"
+            data-solid={step === 0 || step === STEP_COUNT - 1}
             disabled={!canAdvance}
             onClick={() => (step === STEP_COUNT - 1 ? finish() : go(step + 1))}
           >
