@@ -1,0 +1,409 @@
+/*
+ * The invitation gate, in the approved glass (M-172, 2026-11-21).
+ *
+ * The owner approved the "Bloom Invitation — Glass Preview" and directed
+ * the real gate built to it: the same composition the M-170 slice carried
+ * into the Welcome from the same preview family — the four-pool mesh
+ * scene, the words sitting directly on it, one glass field, the solid
+ * gold CTA. This sheet owns ONLY that presentation. The flow (the
+ * eleven-phase reducer in lib/auth/flow, the is_email_invited check, the
+ * magic-link send) is untouched, and every word on the screen is the
+ * gate's own — the preview's state names map onto the real states:
+ * entry → idle/typing, checking → checking/sending, on-the-list → sent,
+ * not-on-the-list → the rejected message in the form.
+ *
+ * Why a second sheet instead of editing access.css: access.css is
+ * pinned as text by ui.guard (the dialog family's elevation recipe
+ * names .ag-panel there) and by contrast.guard (the gate's label, copy
+ * and placeholder colours are read from it and judged on flat grounds).
+ * Those pins stay literally true; this sheet, imported after it,
+ * re-dresses the same .ag-* classes for the scene. The .ag-panel and
+ * .ag-mark rules in access.css are inert legacy from this slice on —
+ * the gate renders no panel and no tile.
+ *
+ * The glass surfaces themselves are the shared material's classes
+ * (.glass-field on the input, .glass-cta on the way forward, .glass-pill
+ * on the quiet actions), consumed from glass.css read-only. Where
+ * access.css's later-in-the-old-order declarations would paint over the
+ * frost (its input ground, its quiet button's transparency), this sheet
+ * re-asserts the frost after it — the same layered-fallback discipline
+ * glass.css itself uses.
+ */
+
+.ag-root {
+  /* Scoped tokens (the house pattern for a feature sheet): the preview
+     values with no home in the shared scale — its mesh light stops,
+     field radius and size, the CTA's 16px, its two trackings and the
+     sub's 1.6 leading. Everything else reads the shared tokens, whose
+     values are the preview's own. */
+  --ig-mesh-sage-hi: #bfe3cb;
+  --ig-mesh-rose-hi: #f3c3cd;
+  --ig-mesh-deep-hi: #fff6df;
+  --ig-flower-heart-hi: #fff3d6;
+  --ig-radius-field: 20px;
+  --ig-text-field: 17px;
+  --ig-text-cta: 16px;
+  --ig-tracking-kicker: 0.16em;
+  --ig-tracking-title: -0.015em;
+  --ig-leading-sub: 1.6;
+  /* The scene is the mesh over the ink; access.css's gold wash retires. */
+  background: var(--background);
+  justify-content: flex-start;
+  gap: 0;
+  padding: 0;
+}
+
+/* ------------------------------------------------------------ atmosphere */
+
+/* The mesh, exactly as previewed (the same four pools the Welcome
+   wears, M-170): each with its own size, seat and drift. Transform
+   only; still under reduced motion. */
+.ig-mesh {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ig-mesh i {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(46px);
+  opacity: 0.85;
+  will-change: transform;
+}
+.ig-mesh .m1 {
+  width: 300px;
+  height: 300px;
+  left: -70px;
+  top: -50px;
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--gold-grad-hi),
+    var(--gold) 55%,
+    transparent 72%
+  );
+  animation: ig-drift1 16s ease-in-out infinite alternate;
+}
+.ig-mesh .m2 {
+  width: 280px;
+  height: 280px;
+  right: -80px;
+  top: 180px;
+  background: radial-gradient(
+    circle at 40% 40%,
+    var(--ig-mesh-sage-hi),
+    var(--sage) 55%,
+    transparent 72%
+  );
+  animation: ig-drift2 19s ease-in-out infinite alternate;
+}
+.ig-mesh .m3 {
+  width: 260px;
+  height: 260px;
+  left: 40px;
+  bottom: -90px;
+  background: radial-gradient(
+    circle at 40% 40%,
+    var(--ig-mesh-rose-hi),
+    var(--rose) 50%,
+    transparent 72%
+  );
+  opacity: 0.55;
+  animation: ig-drift1 22s ease-in-out infinite alternate-reverse;
+}
+.ig-mesh .m4 {
+  width: 190px;
+  height: 190px;
+  right: 30px;
+  bottom: 130px;
+  background: radial-gradient(
+    circle at 40% 40%,
+    var(--ig-mesh-deep-hi),
+    var(--gold-grad-lo) 55%,
+    transparent 72%
+  );
+  opacity: 0.7;
+  animation: ig-drift2 14s ease-in-out infinite alternate-reverse;
+}
+
+@keyframes ig-drift1 {
+  from {
+    transform: translate(0, 0) scale(1);
+  }
+  to {
+    transform: translate(52px, 38px) scale(1.14);
+  }
+}
+@keyframes ig-drift2 {
+  from {
+    transform: translate(0, 0) scale(1.08);
+  }
+  to {
+    transform: translate(-44px, 52px) scale(0.94);
+  }
+}
+
+/* -------------------------------------------------------------- structure */
+
+/* The preview's phone column in the real gate: 410px at its widest,
+   20px sides, the top seated 54px down (the frame's notch-inclusive
+   inset, carried as a floor under the real safe-area inset), the foot
+   at 20px. Wider screens keep the same centred column, the mesh
+   living around it. There is no panel: the words sit on the scene. */
+.ag-scene {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  max-width: 410px;
+  margin: 0 auto;
+  padding: max(54px, env(safe-area-inset-top)) var(--space-5)
+    max(var(--space-5), env(safe-area-inset-bottom));
+}
+
+/* The body scrolls its own column on short screens, as the Welcome's
+   does, so the footers and the pinned CTA never leave the frame. */
+.ag-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.ag-body::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------------------------------------------------------- the flower */
+
+/* The preview's hero flower: three glass petals turning over a gold
+   heart (the Welcome's .wl-flower recipe, M-170). Pure decoration,
+   aria-hidden in the DOM. It stands over the ask; the sent state
+   trades it for the seal inside its own body. */
+.ig-flower {
+  position: relative;
+  flex: none;
+  width: 86px;
+  height: 86px;
+  margin: var(--space-2) 0 var(--space-5);
+}
+.ig-flower i {
+  position: absolute;
+  inset: 0;
+  border-radius: 58% 42% 55% 45% / 52% 55% 45% 48%;
+  background: linear-gradient(
+    160deg,
+    rgba(246, 233, 205, 0.9),
+    rgba(220, 192, 143, 0.55) 55%,
+    rgba(143, 199, 162, 0.5)
+  );
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.ig-flower i:nth-child(2) {
+  transform: rotate(72deg) scale(0.82);
+  opacity: 0.8;
+}
+.ig-flower i:nth-child(3) {
+  transform: rotate(150deg) scale(0.64);
+  opacity: 0.65;
+}
+.ig-flower b {
+  position: absolute;
+  inset: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--ig-flower-heart-hi), var(--gold-grad-lo));
+  box-shadow: 0 6px 18px rgba(199, 157, 98, 0.5);
+}
+
+/* ------------------------------------------------------------- type scale */
+
+/* The kicker — a new element in the preview's composition slot, in
+   the preview's own words. Its colour follows the M-170 kicker
+   compromise: the preview's dim-cream 66% (its sub/pill dim), at the
+   preview's size, spacing and case, weight 600 (the heaviest face
+   the app loads). */
+.ig-kicker {
+  margin: 0 0 var(--space-3);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta); /* the scale's 11px step */
+  font-weight: 600;
+  letter-spacing: var(--ig-tracking-kicker);
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+}
+
+/* The preview's title: Fraunces at the phone-frame step, left-aligned
+   on the scene. */
+.ag-title {
+  font-size: clamp(30px, 8.72vw, 34px);
+  font-weight: 600;
+  line-height: 1.06;
+  letter-spacing: var(--ig-tracking-title);
+  text-align: left;
+  color: var(--foreground);
+}
+
+.ag-copy {
+  margin-top: var(--space-3);
+  font-size: var(--text-body); /* the scale's 15px step */
+  line-height: var(--ig-leading-sub);
+  text-align: left;
+  max-width: 300px;
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+}
+
+.ag-email {
+  color: var(--foreground);
+  font-weight: 600;
+}
+
+/* The field's label, in the kicker's dress (the preview field is
+   label-less; the real gate's label stays — it is the field's name). */
+.ag-label {
+  margin: var(--space-5) 0 var(--space-2);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: var(--ig-tracking-kicker);
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+}
+
+/* ------------------------------------------------------------ the field */
+
+/* The preview's glass field: 56px tall, a 20px radius, 17px type.
+   The surface is .glass-field's; the declarations below re-assert the
+   frost over access.css's solid ground, which would otherwise paint
+   it flat. */
+.ag-input {
+  height: 56px;
+  min-height: 56px;
+  padding: 0 18px;
+  margin-bottom: var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: var(--ig-radius-field);
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
+  font-size: var(--ig-text-field);
+  color: var(--foreground);
+}
+.ag-input::placeholder {
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+}
+.ag-input:focus-visible {
+  border-color: var(--gold);
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
+}
+/* The preview's error treatment: a rose border and a soft rose ring
+   over the field's own rim and float. */
+.ag-input[aria-invalid="true"] {
+  border-color: rgba(227, 145, 159, 0.75);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 14px 28px rgba(0, 0, 0, 0.18),
+    0 0 0 3px rgba(227, 145, 159, 0.18);
+}
+
+.ag-message {
+  margin: 0 0 var(--space-4);
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+}
+
+/* -------------------------------------------------------------- the CTA */
+
+/* The preview's CTA geometry: a full pill, 56px, 16px words. The
+   surface is .glass-cta's — solid gold on the way in (data-solid in
+   the DOM), the resting frost for the resend. */
+.ag-btn {
+  height: 56px;
+  min-height: 56px;
+  border-radius: 999px;
+  font-size: var(--ig-text-cta);
+  font-weight: 600;
+}
+.ag-btn:disabled {
+  opacity: 0.75;
+}
+/* The way in is pinned to the foot of the column, as previewed; the
+   field's bottom margin is the minimum gap when the column is full. */
+form.ag-body > .ag-btn[type="submit"] {
+  margin-top: auto;
+}
+/* The quiet actions wear .glass-pill; re-assert its frost over
+   access.css's transparent quiet ground. */
+.ag-btn--quiet {
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
+  border-color: rgba(255, 255, 255, 0.24);
+  color: var(--foreground);
+  font-weight: 600;
+}
+.ag-btn--quiet:hover:not(:disabled) {
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
+  color: var(--foreground);
+}
+
+/* The sent state's actions ride the foot the same way. */
+.ag-actions {
+  margin-top: auto;
+}
+.ag-actions .ag-btn:first-child {
+  margin-top: 0;
+}
+
+/* The preview's status seal, in the app's sage: the sent state's
+   check disc, seated at the left where the flower stood. */
+.ag-done {
+  margin: 0 0 var(--space-4);
+  background: color-mix(in oklab, var(--sage) 18%, transparent);
+  border-color: color-mix(in oklab, var(--sage) 55%, transparent);
+  color: var(--sage);
+}
+
+.ag-note {
+  text-align: left;
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+}
+
+/* The small print stays the scene's quiet foot, centred under the
+   column as the preview's fine print sits under its CTA. */
+.ag-foot {
+  color: color-mix(in oklab, var(--foreground) 48%, transparent);
+}
+.ag-scene > .ag-foot:first-of-type {
+  margin-top: var(--space-4);
+}
+
+/* ------------------------------------------------------------ calm states */
+
+@media (prefers-reduced-motion: reduce) {
+  .ig-mesh i {
+    animation: none;
+  }
+}
+
+/* Short screens — the preview is a single tall frame and defines no
+   such state; this compact rhythm is the real app's own carry, the
+   same one the Welcome keeps (M-170). */
+@media (max-height: 680px) {
+  .ag-scene {
+    padding-top: max(var(--space-5), env(safe-area-inset-top));
+  }
+  .ig-flower {
+    width: 64px;
+    height: 64px;
+    margin-bottom: var(--space-4);
+  }
+  .ig-flower b {
+    inset: 22px;
+  }
+}
