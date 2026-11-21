@@ -90,14 +90,27 @@ export function AccountSettings({
      can appear late but never unproven. */
   const [verificationFacts, setVerificationFacts] =
     useState<VerificationFacts>(UNPROVEN_FACTS);
+  /* M-194: the facts' landing is tracked separately — while a signed-in
+     read is in flight the status computed from UNPROVEN_FACTS is a
+     false claim ("1 step left") that the row printed and then replaced
+     with "Verified" when the read landed. The row now holds a neutral
+     no-claim state until the read settles (the sync lines' rule: while
+     checking, print nothing that can be mistaken for the answer). */
+  const [verificationFactsSettled, setVerificationFactsSettled] =
+    useState(false);
   useEffect(() => {
     if (authState !== "signed-in") {
       setVerificationFacts(UNPROVEN_FACTS);
+      setVerificationFactsSettled(true);
       return;
     }
     let alive = true;
+    setVerificationFactsSettled(false);
     void loadVerificationFacts().then((facts) => {
-      if (alive) setVerificationFacts(facts);
+      if (alive) {
+        setVerificationFacts(facts);
+        setVerificationFactsSettled(true);
+      }
     });
     return () => {
       alive = false;
@@ -132,6 +145,7 @@ export function AccountSettings({
       identity={identity}
       moodEntries={moodEntries}
       verification={verification}
+      verificationPending={authState === "signed-in" && !verificationFactsSettled}
       allStories={allStories}
       highlights={highlights}
       accent={accent}
@@ -205,6 +219,7 @@ function AccountSettingsInner({
   identity,
   moodEntries,
   verification,
+  verificationPending,
   allStories,
   highlights,
   accent,
@@ -214,6 +229,7 @@ function AccountSettingsInner({
   identity: NonNullable<ProfileSpace["identity"]>;
   moodEntries: MoodEntry[];
   verification: ReturnType<typeof verificationStatus>;
+  verificationPending: boolean;
   allStories: Story[];
   highlights: import("@/lib/profile/types").HighlightItem[];
   accent: import("@/lib/profile/types").ProfileIdentity["accent"];
@@ -365,6 +381,7 @@ function AccountSettingsInner({
           identity={identity.identity}
           account={{ email: identity.email, memberSince: identity.memberSince }}
           verification={verification}
+          verificationPending={verificationPending}
           privacy={identity.privacy}
           stories={allStories}
           highlights={highlights}

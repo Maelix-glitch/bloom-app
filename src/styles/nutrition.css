@@ -2533,7 +2533,8 @@ a.day-path__label:hover {
   border-bottom: 1px solid var(--dbx-hairline);
   border-radius: 0;
   box-shadow: none;
-  padding: var(--space-5) 0;
+  /* M-195: meal rows breathe a step deeper (the named worst case). */
+  padding: var(--space-6) 0;
 }
 .nut-meal-slot .nut-meal-add {
   border-color: transparent;
@@ -2555,6 +2556,168 @@ a.day-path__label:hover {
   padding: 0;
 }
 .nut-spectrum-row {
-  padding-bottom: var(--space-3);
+  /* M-195: spectrum rows loosened with the rest of the day view. */
+  padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--dbx-hairline);
+}
+
+/* =====================================================================
+   M-196 — "Your whole day" as a designed day-rhythm composition.
+   The M-162 stacked document rows (label + paragraph, label +
+   paragraph) read like a form. The facts now hang on a 24-hour
+   ribbon with the sleep window shaded and the day's moments placed
+   on it; sleep is three Fraunces figures with air; Tonight is two
+   calm lists. Tonal surfaces only — no glass, no card-in-card.
+   ===================================================================== */
+.nut-care-ribbon {
+  margin-top: var(--space-6);
+}
+.nut-care-ribbon-track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  overflow: visible;
+}
+.nut-care-ribbon-sleep {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  border-radius: 999px;
+  background: color-mix(in oklab, var(--sage) 38%, transparent);
+}
+.nut-care-ribbon-dot {
+  position: absolute;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--gold);
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 22%, transparent);
+}
+.nut-care-ribbon-labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-5);
+  margin-top: var(--space-3);
+  font-size: var(--text-meta);
+  color: var(--muted-foreground);
+}
+.nut-care-ribbon-time {
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.nut-care-block {
+  margin-top: var(--space-8);
+}
+.nut-care-kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  margin: 0 0 var(--space-3);
+}
+.nut-care-kicker-icon {
+  width: 15px;
+  height: 15px;
+  color: var(--gold);
+  flex: none;
+}
+.nut-care-figures {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4) var(--space-5);
+  margin: 0;
+}
+.nut-care-fig {
+  display: inline-flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.nut-care-fig-label {
+  font-size: var(--text-meta);
+  color: var(--muted-foreground);
+}
+.nut-care-fig-value {
+  font-family: var(--font-display);
+  font-size: var(--text-display);
+  line-height: 1;
+  color: var(--foreground);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.nut-care-sep {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--muted-foreground);
+  align-self: center;
+}
+@media (max-width: 639px) {
+  .nut-care-sep {
+    display: none;
+  }
+  .nut-care-figures {
+    gap: var(--space-5);
+  }
+}
+.nut-care-wake {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+.nut-care-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+}
+@media (max-width: 639px) {
+  .nut-care-cols {
+    grid-template-columns: 1fr;
+    gap: var(--space-6);
+  }
+}
+.nut-care-col-title {
+  font-family: var(--font-display);
+  font-size: 1.125rem;
+  color: var(--foreground);
+  margin: 0 0 var(--space-3);
+}
+.nut-care-list2 {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+.nut-care-list2 li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+.nut-care-list-icon {
+  width: 15px;
+  height: 15px;
+  flex: none;
+  margin-top: 4px;
+}
+.nut-care-list-icon.is-do {
+  color: var(--sage);
+}
+.nut-care-avoid-mark {
+  flex: none;
+  width: 15px;
+  margin-top: 11px;
+  border-top: 2px solid var(--rose);
+  border-radius: 2px;
 }

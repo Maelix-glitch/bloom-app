@@ -1480,7 +1480,7 @@
    are opaque by house rule (glass belongs to navigation/controls only), and
    a dark card is a lightness step + hairline, never a shadow. The territory
    card's own later block carries the same solid ground. */
-.tk2-root .ci-card, .tk2-root .tk2-targets-grid li, .tk2-root .tk2-badges-grid li, .at-territory {
+.tk2-root .ci-card, .tk2-root .tk2-targets-grid li, .tk2-root .tk2-badges-grid li {
   background: var(--surface);
   /* explicit none: the finishing pass above still declares a blur for
      these containers, and an omitted property would let it back in */
@@ -1832,13 +1832,12 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .at-territory {
   overflow: hidden;
   padding: var(--space-6);
-  border: 1px solid var(--glass-border-rim);
-  border-radius: var(--radius-dialog);
-  /* OTT pass: solid ground — the panel-glass fill, the gold→violet tint
-     gradient, the backdrop blur and the drop shadow came off, matching
-     the container rule above. Hover keeps the border + lift only. */
-  background: var(--surface);
-  box-shadow: inset 0 1px 1px color-mix(in oklab, var(--foreground) 0.03, transparent);
+  /* M-194 (cascade truth): this block once painted the territory panel
+     (surface fill, rim border, dialog radius, inset shadow). Those
+     declarations are REMOVED, not overridden — the de-boxed territory
+     is open canvas, and no rule in the cascade may carry paint for it.
+     The (0,2,0) .tk2-root block at the foot of this file owns the
+     territory's final word (transparent / 0 / none). */
   transition:
   border-color var(--motion-page) var(--ease-out-expo),
   transform var(--motion-page) var(--ease-out-expo),
@@ -2521,7 +2520,11 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
 }
 .tk2-root .at-territory {
   border: none;
-  box-shadow: var(--dbx-specular);
+  /* M-194: this block once carried the de-box v1 specular catch
+     (the specular catch). It lost the cascade to the
+     later territory block, but the declaration is removed at the
+     source — no rule in the file may carry paint for the territory. */
+  box-shadow: none;
 }
 
 /* ---------------------------------------------------------------------------
@@ -2561,19 +2564,27 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   gap: var(--space-5);
 }
 .tk2-root .at-territory {
-  background: var(--surface);
+  /* M-194 (cascade truth): this (0,2,0) block is the rule that actually
+     paints the territory — the M-193 open values were written here in
+     the systems-run tree but PR #233's merge silently kept the M-190
+     text below's predecessor (a filled --surface zone at the 20px
+     radius with the specular catch), so the live page kept its panels
+     while the guard pinned a block that never reached main. The zones
+     sit fully open on the canvas: no fill, no radius, no specular.
+     Layout, padding rhythm, hairlines and typography unchanged. */
+  background: transparent;
   border: none;
-  /* the spec's 20px zone radius, in the house token (R8: radii come
-     from --radius-*; --radius-xl = --radius + 4px = 20px) */
-  border-radius: var(--radius-xl);
-  box-shadow: var(--dbx-specular);
+  border-radius: 0;
+  box-shadow: none;
   padding: var(--space-5);
 }
 .tk2-root .at-territory:hover {
-  background: var(--surface-2);
+  /* The press affordance is the flat 4% tonal step the de-boxed hero
+     chips use (M-183) — hover only, never a frame, lift or panel. */
+  background: rgb(255 255 255 / 0.04);
   border: none;
   transform: none;
-  box-shadow: var(--dbx-specular);
+  box-shadow: none;
 }
 .tk2-root .at-board,
 .tk2-root .at-flower-col,
@@ -2654,8 +2665,13 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   flex: none;
   width: 40px;
   height: 40px;
-  border-radius: var(--radius-md);
-  background: color-mix(in oklab, var(--target-accent, var(--gold)) 13%, var(--surface));
+  /* M-194: a medallion is a CIRCLE — M-210's own block set
+     var(--radius-md) (a rounded square) and a 13% tint over the
+     near-black --surface, so live it read as a dark square tile.
+     Full radius + a 26% tint step: the tracker's colour is now the
+     visible ground, not a whisper inside a dark box. */
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--target-accent, var(--gold)) 26%, var(--surface));
   color: var(--target-accent, var(--gold));
 }
 .tk2-root .tk2-target-main {
@@ -2710,15 +2726,19 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
 .tk2-root .tk2-targets-edit {
   gap: var(--space-2);
   padding: var(--space-2) var(--space-4);
-  border-color: color-mix(in oklab, var(--gold) 38%, transparent);
-  background: color-mix(in oklab, var(--gold) 10%, transparent);
+  /* M-194: quiet gold must READ gold — M-210's 38% rim / 10% fill over
+     the ink canvas rendered as a dark pill with a hairline. The rim
+     and fill step up (55% / 16%, hover 72% / 24%) so gold leads and
+     the ink merely grounds it. */
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 16%, transparent);
   color: var(--gold-soft);
   font-size: var(--text-callout);
   font-weight: 500;
 }
 .tk2-root .tk2-targets-edit:hover:not(:disabled) {
-  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
-  background: color-mix(in oklab, var(--gold) 16%, transparent);
+  border-color: color-mix(in oklab, var(--gold) 72%, transparent);
+  background: color-mix(in oklab, var(--gold) 24%, transparent);
 }
 .tk2-root .tk2-targets-edit:active:not(:disabled) {
   transform: scale(0.98);

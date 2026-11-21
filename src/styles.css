@@ -287,17 +287,24 @@
   --lift-shadow: 0 12px 32px rgb(0 0 0 / 0.28), 0 2px 8px rgb(0 0 0 / 0.22);
 
   /* ---- spacing scale ------------------------------------------------- */
+  /* M-195 (global decongestion, owner directive 2026-11-21): the whole
+     scale steps UP — Nutrition read "too tight and congested, and same
+     in all the tabs". The fine steps (1–3) stay for detail work; every
+     working step grows ~20–30% so section gaps, row padding and panel
+     padding all breathe at once, through the one rhythm system. This
+     supersedes M-212's kept-with-reasons rhythms where they conflict:
+     the steps M-212 set in tokens now simply resolve larger. */
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  /* The section rhythm (brief v4 Part 2): 56px between sections. */
-  --space-14: 3.5rem;
+  --space-4: 1.125rem;
+  --space-5: 1.5rem;
+  --space-6: 1.75rem;
+  --space-8: 2.5rem;
+  --space-10: 3rem;
+  --space-12: 3.75rem;
+  /* The section rhythm: 72px between sections (was 56px before M-195). */
+  --space-14: 4.5rem;
   /* Icon-button geometry (P2-3, R17): two size roles for every icon-only
      control, centred by grid place-items — never by hand padding. The ui
      kit's h-9 / h-10 buttons are the same two steps. */
