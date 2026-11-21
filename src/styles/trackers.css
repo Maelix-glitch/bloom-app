@@ -2882,9 +2882,14 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   outline-offset: 2px;
 }
 
-/* The plan-set field carries no steppers; its figure sits in the
-   input's own voice (the base .tk2-target-auto-value rule), quietly
-   marking that this one is a fact, not a field. */
+/* The plan-set field carries no steppers — and, since M-199, no
+   box either: live, its bordered box read as one more editable
+   input (the sweep's finding), so the fill and the border are
+   gone and the figure stands as a plain fact in the cell. The
+   field's geometry (height, padding) stays, so the figure keeps
+   the manual values' typographic position; its voice is the
+   input's own (the base .tk2-target-auto-value rule). */
 .tk2-targets-panel .tk2-target-control--auto .tk2-target-field {
-  border-color: var(--border);
+  background: transparent;
+  border-color: transparent;
 }

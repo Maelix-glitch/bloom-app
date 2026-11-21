@@ -27,6 +27,15 @@
  *   (e) THE WORDS DID NOT MOVE — the sleep figures' sentence and
  *       the Tonight zones read exactly as the M-162 guard pins
  *       them (that guard passes unmodified beside this one).
+ *   (f) THE WALK BY SEQUENCE (M-199) — when the plan gives the
+ *       largest meal no clock, the walk medallion still rides:
+ *       placed by the geometry's sequence rule between Up and
+ *       Caffeine ends, its caption naming the order and claiming
+ *       no hour.
+ *   (g) THE LABEL'S PLACEMENT IS THE RULE (M-199) — the "You are
+ *       here" label carries the displacement classes the pure
+ *       geometry computes (lifted at 22:13, the live defect;
+ *       undisplaced on a clear stretch of arc).
  *
  * Fixtures: the M-162 guard's house pattern — a real composed
  * plan re-stamped to today over a seeded complete Assessment,
@@ -73,9 +82,13 @@ import { clockToMinutes } from "@/lib/nutrition/dayRhythm";
 import {
   ARC_VIEW_H,
   ARC_VIEW_W,
+  arcAnchorsFromRawXs,
   arcAnchorsOf,
   arcAwakeFraction,
   arcFrameOf,
+  arcNowLabelPlacementOf,
+  arcSequenceRawX,
+  arcXForFraction,
   arcYAtX,
 } from "@/lib/nutrition/dayArc";
 import { DISH_LIBRARY } from "@/lib/nutrition/data/dishLibrary";
@@ -348,6 +361,116 @@ describe("day arc guard — your whole day as the Day Arc (M-198)", () => {
     expect(reduced).toContain(".nut-care-here-dot::after");
     expect(reduced).toContain("animation: none");
     expect(reduced).toContain("stroke-dashoffset: 0");
+  });
+
+  it("(f) the walk rides by sequence when the plan gives its meal no clock (M-199)", () => {
+    /* The owner's live shape: a relative day — the timeline
+       names every meal but carries no clock at all, so the
+       largest meal has no time. The preview still showed its
+       medallion, and so must the arc. */
+    const slotLabel: Record<Meal, string> = {
+      breakfast: "Breakfast",
+      lunch: "Lunch",
+      dinner: "Dinner",
+      snack: "Snack",
+    };
+    const relativeTimeline = (plan: DailyPlan): PlanTimeline => ({
+      anchor: "relative",
+      items: [
+        { kind: "wake", time: null, label: "On waking" },
+        ...plan.meals.map(
+          (m): PlanTimelineItem => ({
+            kind: "meal",
+            meal: m.meal,
+            time: null,
+            label: slotLabel[m.meal],
+          }),
+        ),
+        { kind: "wind_down", time: null, label: "Wind down" },
+        { kind: "sleep", time: null, label: "Bedtime" },
+      ],
+    });
+    const stored = seedAndStore(relativeTimeline);
+    const { container } = render(<NutritionPlanSection />);
+    const whole = sectionByLabel(container, "Your whole day");
+
+    const nodes = [...whole.querySelectorAll<HTMLElement>("[data-arc-node]")];
+    expect(nodes).toHaveLength(6);
+    expect(nodes.map((n) => n.dataset.arcNode)).toEqual(
+      expect.arrayContaining(["up", "walk", "caffeine", "lastMeal", "windDown", "bed"]),
+    );
+
+    /* The caption names the order and the walk — and claims no
+       hour: the time line is the meal's name, digit-free. */
+    const largest = stored.meals.reduce((a, b) => (b.kcal > a.kcal ? b : a));
+    const walk = nodeByKey(whole, "walk");
+    const timeLine = walk.querySelector(".nut-care-node-time");
+    expect(timeLine?.textContent).toBe(`After ${slotLabel[largest.meal]}`);
+    expect(timeLine?.textContent).not.toMatch(/\d/);
+    expect(walk.textContent).toContain("Walk · 30 min");
+
+    /* Its place is the sequence rule's, recomputed from the
+       lib: after Up, before Caffeine ends, relaxed with the
+       whole set exactly as the timed nodes are. */
+    const frame = arcFrameOf(390, 1350);
+    const rawOf = (mins: number) => arcXForFraction(arcAwakeFraction(mins, frame));
+    const raws = [
+      rawOf(390),
+      arcSequenceRawX(rawOf(390), rawOf(870)),
+      rawOf(870),
+      rawOf(1230),
+      rawOf(1290),
+      rawOf(1350),
+    ];
+    const anchors = arcAnchorsFromRawXs(raws);
+    nodes.forEach((node, i) => {
+      expect(leftPct(node)).toBeCloseTo((anchors.placed[i]! / ARC_VIEW_W) * 100, 1);
+    });
+    expect(leftPct(walk)).toBeGreaterThan(leftPct(nodeByKey(whole, "up")));
+    expect(leftPct(walk)).toBeLessThan(leftPct(nodeByKey(whole, "caffeine")));
+  });
+
+  it("(g) the now label's placement is the geometry's rule — lifted at 22:13, home when clear (M-199)", () => {
+    seedTimedPlan();
+    const hours = vi.spyOn(Date.prototype, "getHours").mockReturnValue(22);
+    const minutes = vi.spyOn(Date.prototype, "getMinutes").mockReturnValue(13);
+    const evening = render(<NutritionPlanSection />);
+    const whole = sectionByLabel(evening.container, "Your whole day");
+    const marker = whole.querySelector<HTMLElement>("[data-arc-now]");
+    expect(marker, "the now marker renders").not.toBeNull();
+
+    /* Recompute the rule from the lib over the rendered points:
+       at 22:13 the marker is wedged against Wind-down, and the
+       placement the live sweep caught striking through its
+       medallion (left, at the dot's height) is not the one the
+       component may use — it must be lifted, offence-free. */
+    const pointOf = (el: HTMLElement) => ({
+      x: (leftPct(el) / 100) * ARC_VIEW_W,
+      y: (topPct(el) / 100) * ARC_VIEW_H,
+    });
+    const nodePoints = [...whole.querySelectorAll<HTMLElement>("[data-arc-node]")].map(pointOf);
+    const expected = arcNowLabelPlacementOf(pointOf(marker!), nodePoints);
+    expect(expected).toEqual({ side: "left", level: "lifted" });
+    expect(marker!.classList.contains("is-flip")).toBe(true);
+    expect(marker!.classList.contains("is-lifted")).toBe(true);
+    expect(marker!.classList.contains("is-below")).toBe(false);
+    expect(marker!.classList.contains("is-raised")).toBe(false);
+    expect(marker!.classList.contains("is-dropped")).toBe(false);
+    cleanup();
+
+    /* 09:00 — the arc around the marker is clear, and the label
+       keeps the home placement: no displacement classes at all. */
+    hours.mockReturnValue(9);
+    minutes.mockReturnValue(0);
+    const morning = render(<NutritionPlanSection />);
+    const morningWhole = sectionByLabel(morning.container, "Your whole day");
+    const morningMarker = morningWhole.querySelector<HTMLElement>("[data-arc-now]");
+    expect(morningMarker, "the now marker renders in the morning").not.toBeNull();
+    for (const cls of ["is-flip", "is-below", "is-raised", "is-lifted", "is-dropped"]) {
+      expect(morningMarker!.classList.contains(cls), cls).toBe(false);
+    }
+    hours.mockRestore();
+    minutes.mockRestore();
   });
 
   it("(e) the words did not move — figures sentence and Tonight zones verbatim", () => {

@@ -25,6 +25,12 @@
  * Data is frozen throughout: the water row stays a plan-set fact
  * (no input, no steppers, "Set by your plan"), and a stepper click
  * commits through the sheet's own clamped onCommit.
+ *
+ * M-199 adds one pin family to #2's: the plan-set water value sat
+ * in the same bordered box as the editable fields and read as an
+ * input (live sweep, 2026-11-21) — its field rule now strips the
+ * fill and border, and the manual fields are pinned keeping
+ * theirs, so the distinction cannot quietly repaint.
  */
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
@@ -130,6 +136,28 @@ describe("M-197 — the edit sheet's controls are real controls", () => {
     expect(row.querySelectorAll("button.tk2-target-step").length).toBe(0);
     expect(row.textContent).toContain("3350");
     expect(row.textContent).toContain("3.4 L · Set by your plan");
+  });
+
+  it("water's fact wears no input box (M-199): the auto field is unpainted, the manual fields keep theirs", () => {
+    render(<TargetSheet store={makeStore(() => {})} />);
+    const row = document.querySelector('.tk2-targets-grid li[data-id="water"]')!;
+    const control = row.querySelector(".tk2-target-control");
+    expect(control, "water control").not.toBeNull();
+    expect(control!.classList.contains("tk2-target-control--auto")).toBe(true);
+
+    /* The distinction is in the cascade, not just the class:
+       the auto field's own rule strips the fill and the border
+       the shared field rule paints… */
+    const auto = blockWith(".tk2-target-control--auto .tk2-target-field");
+    expect(auto, "auto field rule").toBeTruthy();
+    expect(auto!.body).toContain("background: transparent;");
+    expect(auto!.body).toContain("border-color: transparent;");
+
+    /* …while the manual targets' field keeps its box. */
+    const manual = blockWith(".tk2-targets-panel .tk2-target-field");
+    expect(manual, "manual field rule").toBeTruthy();
+    expect(manual!.body).toContain("background: var(--surface-2);");
+    expect(manual!.body).toContain("border: 1px solid var(--border-strong);");
   });
 });
 
