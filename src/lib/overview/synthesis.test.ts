@@ -37,6 +37,7 @@ import {
   type OverviewInput,
   type OverviewSettleState,
 } from "./synthesis";
+import { recordTotals } from "@/lib/profile/record";
 
 const TODAY = "2026-11-10";
 
@@ -140,6 +141,9 @@ interface InputPatch {
   habits?: Partial<OverviewInput["habits"]>;
   moodEntries?: MoodEntry[];
   assessment?: OverviewInput["assessment"];
+  foodDays?: string[];
+  weighInDays?: string[];
+  cycleDays?: string[];
 }
 
 function makeInput(patch: InputPatch = {}): OverviewInput {
@@ -161,6 +165,9 @@ function makeInput(patch: InputPatch = {}): OverviewInput {
       active: patch.active ?? [],
     }),
     assessment: patch.assessment ?? { state: assessmentState(), summary: null },
+    foodDays: patch.foodDays,
+    weighInDays: patch.weighInDays,
+    cycleDays: patch.cycleDays,
   };
 }
 
@@ -192,6 +199,64 @@ describe("state", () => {
     });
     expect(recordDayKeys(input).size).toBe(1);
     expect(synthesizeOverview(input).state.recordDays).toBe(1);
+  });
+
+  it("M-192: a food-only day counts — and bridges a streak gap, as on the Profile", () => {
+    /* The systems-run case in miniature: habit days on the 8th and
+       10th, a food log alone on the 9th. Before M-192 Today read
+       2 days / streak 1 while the Profile read 3 / 3. */
+    const input = makeInput({
+      habits: { logs: [tick("h1", "2026-11-08"), tick("h1", "2026-11-10")] },
+      foodDays: ["2026-11-09"],
+    });
+    expect(recordDayKeys(input).size).toBe(3);
+    const out = synthesizeOverview(input);
+    expect(out.state.recordDays).toBe(3);
+    expect(out.state.streak).toBe(3);
+  });
+
+  it("M-192: weigh-in-only and cycle days count too", () => {
+    const input = makeInput({
+      weighInDays: ["2026-11-09"],
+      cycleDays: ["2026-11-10"],
+    });
+    expect(recordDayKeys(input).size).toBe(2);
+    expect(synthesizeOverview(input).state.recordDays).toBe(2);
+  });
+
+  it("M-192: an empty tracker row (no signal on it) is NOT a logged day", () => {
+    const input = makeInput({ trackerDays: [day("2026-11-09")] });
+    expect(recordDayKeys(input).size).toBe(0);
+    expect(synthesizeOverview(input).state.recordDays).toBe(0);
+  });
+
+  it("M-192: the union agrees with the Profile record's totals on the same record", () => {
+    const trackerDays = [day("2026-11-08", { waterMl: 500 }), day("2026-11-09")];
+    const habitLogs = [tick("h1", "2026-11-10")];
+    const moodEntries = [moodOn("2026-11-08", 7)];
+    const foodDays = ["2026-11-09"];
+    const weighInDays = ["2026-11-07"];
+    const cycleDays = ["2026-11-06"];
+    const input = makeInput({
+      trackerDays,
+      habits: { logs: habitLogs },
+      moodEntries,
+      foodDays,
+      weighInDays,
+      cycleDays,
+    });
+    const totals = recordTotals({
+      trackerDays,
+      moodEntries,
+      habitLogs,
+      cycleDays: cycleDays.map((date) => ({ date })),
+      periods: [],
+      foodDays,
+      weighInDays,
+      today: TODAY,
+    });
+    expect(recordDayKeys(input).size).toBe(totals.daysLogged);
+    expect(synthesizeOverview(input).state.streak).toBe(totals.streak);
   });
 
   it("streak follows the shared definition: today, else yesterday, else zero", () => {
@@ -624,6 +689,7 @@ describe("overviewRecordsSettled — Today's numbers are final only when every s
     moodLoading: false,
     trackersHydrated: true,
     trackerSyncState: "saved",
+    cycleHydrated: true,
   };
 
   it("all sources answered: settled", () => {
@@ -642,6 +708,13 @@ describe("overviewRecordsSettled — Today's numbers are final only when every s
   it("habits or mood still loading from the account: not settled", () => {
     expect(overviewRecordsSettled({ ...SETTLED, habitsLoading: true })).toBe(false);
     expect(overviewRecordsSettled({ ...SETTLED, moodLoading: true })).toBe(false);
+  });
+
+  it("cycle store not yet read (M-192: its days count now): not settled", () => {
+    expect(overviewRecordsSettled({ ...SETTLED, cycleHydrated: false })).toBe(false);
+    expect(
+      overviewRecordsSettled({ ...SETTLED, auth: "off", trackerSyncState: "off", cycleHydrated: false }),
+    ).toBe(false);
   });
 
   it("auth still checking: not settled, however much else has landed", () => {

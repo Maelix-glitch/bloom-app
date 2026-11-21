@@ -2561,19 +2561,26 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   gap: var(--space-5);
 }
 .tk2-root .at-territory {
-  background: var(--surface);
+  /* M-193 (post-deploy sweep residue): the --surface fill at a 20px
+     radius still READ as six dark panels on the live page — a filled
+     rounded rectangle is a box to the eye whatever its border state.
+     The zones now sit fully open on the canvas: no fill, no radius,
+     no specular. Layout, padding rhythm, hairlines and typography
+     are exactly as M-190 left them. */
+  background: transparent;
   border: none;
-  /* the spec's 20px zone radius, in the house token (R8: radii come
-     from --radius-*; --radius-xl = --radius + 4px = 20px) */
-  border-radius: var(--radius-xl);
-  box-shadow: var(--dbx-specular);
+  border-radius: 0;
+  box-shadow: none;
   padding: var(--space-5);
 }
 .tk2-root .at-territory:hover {
-  background: var(--surface-2);
+  /* The press affordance is now the flat tonal step the de-boxed
+     hero chips use (M-183) — a 4% fill on hover only, never a frame,
+     a lift, or a resting panel. */
+  background: rgb(255 255 255 / 0.04);
   border: none;
   transform: none;
-  box-shadow: var(--dbx-specular);
+  box-shadow: none;
 }
 .tk2-root .at-board,
 .tk2-root .at-flower-col,

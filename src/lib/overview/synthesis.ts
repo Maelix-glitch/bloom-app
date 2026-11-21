@@ -43,7 +43,8 @@ import {
   type TrackerAnalysis,
   type TrackerId,
 } from "@/lib/trackers/core";
-import { averageMood, currentStreak } from "@/lib/stats";
+import { averageMood, currentStreak, daySignalCount } from "@/lib/stats";
+import { signalsOf } from "@/lib/profile/record";
 import { localDay, shiftDay } from "@/lib/localDay";
 import type { AssessmentState } from "@/lib/assessment/state";
 import type { AssessmentSummary } from "@/lib/assessment/summary";
@@ -67,6 +68,19 @@ export interface OverviewInput {
   moodEntries: readonly MoodEntry[];
   /** The tracker store's days — the same array the hero counts from. */
   trackerDays: readonly DayEntry[];
+  /**
+   * Day keys carrying food entries / weigh-ins / cycle records
+   * (v6 §1.2, M-113; widened M-192). Optional so existing callers and
+   * fixtures keep their shape; when present, the day union counts them
+   * exactly as the Profile record's totals do — a day the person
+   * logged food, weighed in or logged a cycle day IS a logged day on
+   * every surface, so Today's facts and the Profile's can never
+   * disagree about the same record.
+   */
+  foodDays?: readonly string[];
+  weighInDays?: readonly string[];
+  /** Cycle day keys, pre-expanded by the caller via `cycleDayKeys`. */
+  cycleDays?: readonly string[];
   trackers: TrackerAnalysis;
   assessment: {
     state: AssessmentState;
@@ -175,20 +189,32 @@ const inWindow = (day: string, w: Window) => day >= w.start && day <= w.end;
 /* ------------------------------ day counting ----------------------------- */
 
 /**
- * The distinct-day union over the Overview's own three inputs (habit log
- * days ∪ mood check-in days ∪ tracker days), computed in this one place
- * so the command centre's facts can never disagree with each other.
- * Scope note (v6 §1.2 census, M-113): this is an any-log union over the
- * three sources this module is fed and settled-gated on — deliberately
- * narrower than the Connections chip's union (which also counts food
- * and weigh-in days) and the Profile record's. Widening it means
- * widening OverviewInput and its settle contract together.
+ * The distinct-day union the Overview's facts count — the one any-log
+ * definition (v6 §1.2, M-113), computed in this one place so the
+ * command centre's facts can never disagree with each other.
+ * Scope note (M-113, updated M-192): the union was originally the
+ * three sources this module is fed and settled-gated on (habit log
+ * days ∪ mood check-in days ∪ tracker days), deliberately narrower
+ * than the Profile record's — and the two surfaces then printed
+ * different "days logged" and "day streak" numbers for the same
+ * person (20/5 on Today vs 21/8 on Profile in the 2026-11-21 systems
+ * run; the gap was exactly one food-logged day). M-192 takes the
+ * widening this note always required — OverviewInput and its settle
+ * contract widened together — so the union is now the Profile's:
+ * habits ∪ mood ∪ tracker days WITH at least one signal (the shared
+ * lib/stats rule; an empty tracker row is not a logged day) ∪ food
+ * days ∪ weigh-in days ∪ cycle days, when the caller feeds them.
  */
 export function recordDayKeys(input: OverviewInput): Set<string> {
   const keys = new Set<string>();
   for (const l of input.habits.logs) keys.add(l.date);
   for (const e of input.moodEntries) keys.add(localDay(e.timestamp));
-  for (const d of input.trackerDays) keys.add(d.date);
+  for (const d of input.trackerDays) {
+    if (daySignalCount(signalsOf(d)) > 0) keys.add(d.date);
+  }
+  for (const d of input.foodDays ?? []) keys.add(d);
+  for (const d of input.weighInDays ?? []) keys.add(d);
+  for (const d of input.cycleDays ?? []) keys.add(d);
   return keys;
 }
 
@@ -196,8 +222,8 @@ export function recordDayKeys(input: OverviewInput): Set<string> {
 
 /**
  * The settle state of the records behind Today's Overview — the same
- * inputs the synthesis counts (habits, mood, tracker days), each with
- * whether its account answer has landed.
+ * inputs the synthesis counts (habits, mood, tracker days, cycle),
+ * each with whether its account answer has landed.
  */
 export interface OverviewSettleState {
   auth: "checking" | "signed-out" | "signed-in" | "off";
@@ -207,6 +233,15 @@ export interface OverviewSettleState {
   trackersHydrated: boolean;
   /** Where the tracker account pull stands. */
   trackerSyncState: "off" | "loading" | "signed-out" | "saved" | "pending" | "error";
+  /**
+   * The cycle store has read its device copy (M-192: the day union now
+   * counts cycle days, so the cycle store's read is part of the settle
+   * contract — the same condition `profileRecordsSettled` applies).
+   * Food and weigh-in days ride the synced-prefs store, which exposes
+   * no account-pull state; the Profile totals read them under the same
+   * discipline, so they add no condition here.
+   */
+  cycleHydrated: boolean;
 }
 
 /**
@@ -229,9 +264,10 @@ export function overviewRecordsSettled(state: OverviewSettleState): boolean {
   // Device mode (no database, or genuinely signed out): the device
   // record IS the record, once the local reads have landed.
   if (state.auth !== "signed-in") {
-    return state.trackersHydrated && !state.habitsLoading && !state.moodLoading;
+    return state.trackersHydrated && state.cycleHydrated && !state.habitsLoading && !state.moodLoading;
   }
-  if (state.habitsLoading || state.moodLoading || !state.trackersHydrated) return false;
+  if (state.habitsLoading || state.moodLoading || !state.trackersHydrated || !state.cycleHydrated)
+    return false;
   // The tracker pull starts at "off" and passes through "loading"; every
   // later state means the pull has answered.
   return state.trackerSyncState !== "off" && state.trackerSyncState !== "loading";

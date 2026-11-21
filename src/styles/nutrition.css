@@ -2501,12 +2501,20 @@ a.day-path__label:hover {
   color: var(--foreground);
 }
 
-/* 2 — hero: one borderless soft tonal zone */
+/* 2 — hero: opened fully onto the canvas (M-193, post-deploy sweep
+   residue). M-187 left the Day totals as one borderless tonal zone,
+   but the surface gradient + gold wash at a card radius still read
+   as one large rounded panel live. The hero now carries NO panel
+   presence at all — no fill, no radius, no shadow; the gold hairline
+   and the typography stay, and the padding keeps every position
+   exactly where the zone put it. */
 .nut-card.nut-card-gold {
+  background: transparent;
+  background-image: none;
   border: none;
-  border-radius: var(--radius-card);
+  border-radius: 0;
   padding: var(--space-8);
-  box-shadow: var(--dbx-specular);
+  box-shadow: none;
 }
 .nut-card-gold .nut-hairline {
   background: var(--dbx-hairline);
