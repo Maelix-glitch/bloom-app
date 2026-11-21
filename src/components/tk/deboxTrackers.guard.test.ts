@@ -4,9 +4,9 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * Trackers de-box guards (M-176). The targets list and the badges list
- * were grids of bordered boxes — homogeneous rows wearing containers.
- * Pinned here, against the M-176 block at the end of trackers.css:
+ * Trackers de-box guards (M-176, M-184). The targets list and the badges
+ * list were grids of bordered boxes — homogeneous rows wearing
+ * containers. Pinned here, against the M-176 block in trackers.css:
  *
  *   1. Both grids become a single flex column (rows, not boxes).
  *   2. Their items carry no background, border, radius or shadow.
@@ -15,13 +15,24 @@ import { describe, expect, it } from "vitest";
  *      highlight is a shift, never a frame.
  *   5. The de-box block does not touch .at-territory: the territory
  *      cards are real tappable objects and keep their tonal card.
+ *
+ * M-184 (below the M-176 pins) is the correction this file owed: the
+ * M-176 pins held for the classes they named, but the Targets section
+ * the page renders is not the form grid the block restyled — it is
+ * .tk2-targets-display, which stayed a grid of bordered tiles live.
+ * The M-184 pins name the ACTUAL classes, and pin the component side
+ * too, so a guard can never again pass against a surface the page
+ * does not render for the section it claims to cover.
  */
 
 const SRC = join(process.cwd(), "src");
 const CSS = readFileSync(join(SRC, "styles/trackers.css"), "utf8");
+const TARGETS_TSX = readFileSync(join(SRC, "components/tk/Targets.tsx"), "utf8");
 
 const marker = CSS.indexOf("De-box (M-176");
-const BLOCK = marker >= 0 ? CSS.slice(marker) : "";
+const marker184 = CSS.indexOf("De-box, second pass (M-184");
+const BLOCK = marker >= 0 ? CSS.slice(marker, marker184 >= 0 ? marker184 : undefined) : "";
+const BLOCK184 = marker184 >= 0 ? CSS.slice(marker184) : "";
 
 describe("trackers de-box (M-176)", () => {
   it("the M-176 block exists at the cascade end", () => {
@@ -62,5 +73,54 @@ describe("trackers de-box (M-176)", () => {
   it("the territory cards are left as real-object cards", () => {
     expect(BLOCK).not.toContain(".at-territory {");
     expect(BLOCK).not.toContain(".at-territory,");
+  });
+});
+
+/* ------------------------- M-184: the real surface ------------------------ */
+
+describe("trackers de-box, second pass (M-184)", () => {
+  it("the M-184 block exists, after the M-176 block", () => {
+    expect(marker184).toBeGreaterThan(marker);
+  });
+
+  it("the page's Targets section really renders the display list this block styles", () => {
+    /* The M-176 miss, pinned shut: the class the block de-boxes must be
+       the class TargetsPanel puts on the page — not a namesake elsewhere. */
+    expect(TARGETS_TSX).toContain('className="tk2-targets-display"');
+    expect(BLOCK184).toContain(".tk2-root .tk2-targets-display");
+    /* The block styles the display list, not the sheet's form grid. */
+    expect(BLOCK184).not.toContain("targets-grid");
+  });
+
+  it("the display list is one column of open rows, not a tile grid", () => {
+    const ul = BLOCK184.match(/\.tk2-root \.tk2-targets-display \{([^}]*)\}/);
+    expect(ul).not.toBeNull();
+    expect(ul![1]).toContain("display: flex;");
+    expect(ul![1]).toContain("flex-direction: column;");
+  });
+
+  it("display rows wear no box: no background, border, radius or shadow", () => {
+    const li = BLOCK184.match(/\.tk2-root \.tk2-targets-display li \{([^}]*)\}/);
+    expect(li).not.toBeNull();
+    expect(li![1]).toContain("background: none;");
+    expect(li![1]).toContain("border: none;");
+    expect(li![1]).toContain("border-radius: 0;");
+    expect(li![1]).toContain("box-shadow: none;");
+  });
+
+  it("display rows separate by the shared hairline token only", () => {
+    const sep = BLOCK184.match(/\.tk2-root \.tk2-targets-display li \+ li \{([^}]*)\}/);
+    expect(sep).not.toBeNull();
+    expect(sep![1]).toContain("border-top: 1px solid var(--dbx-hairline);");
+  });
+
+  it("the territory cards stay objects, but lose the frame", () => {
+    const card = BLOCK184.match(/\.tk2-root \.at-territory \{([^}]*)\}/);
+    expect(card).not.toBeNull();
+    expect(card![1]).toContain("border: none;");
+    expect(card![1]).toContain("box-shadow: var(--dbx-specular);");
+    /* Still an object: the tonal surface step is NOT stripped — only
+       the border and the shadow box go. */
+    expect(card![1]).not.toContain("background: none");
   });
 });
