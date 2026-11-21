@@ -1214,14 +1214,19 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  /* M-197: two even columns, always — auto-fit dealt the six targets
+     into whatever columns the width happened to divide by (three
+     across in the 520px sheet), which is part of why the form read
+     scattered. (On the page, the de-box blocks restyle both grids
+     into row lists; this base is the sheet form's own geometry.) */
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .tk2-targets-grid li {
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.7rem 0.8rem;
+  gap: var(--space-2);
+  padding: var(--space-3);
   border: 1px solid var(--tk2-rule);
   border-radius: var(--radius-control);
 }
@@ -1236,7 +1241,7 @@
 
 .tk2-target-field {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.35rem;
 }
 
@@ -1246,23 +1251,24 @@
      "480" at the left, "min" at the right, one fact torn in two.
      Five mono characters cover every goal's longest value (8,000 ml,
      1,200 min) with the caret's room; the unit now sits immediately
-     beside its figure, one tight group, like a designed table. */
+     beside its figure, one tight group, like a designed table.
+     M-197: the input itself carries no border and no fill — the
+     CONTROL around it (the M-197 block at the cascade end) is the
+     field: filled, bordered, 44px. The ghost underline that used to
+     be the field's only edge is gone. */
   width: 5ch;
   min-width: 0;
   padding: 0.15rem 0;
   border: 0;
-  border-bottom: 1px solid var(--tk2-rule);
   background: transparent;
   color: var(--ci-text);
   font-family: var(--ci-font-mono);
   font-size: var(--text-section);
   font-variant-numeric: tabular-nums;
-  transition: border-color var(--motion-standard) var(--ease-out-expo);
 }
 
 .tk2-targets-grid input:focus {
   outline: none;
-  border-bottom-color: var(--ci-text-soft);
 }
 
 .tk2-targets-grid input:focus-visible {
@@ -1282,7 +1288,12 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-2) var(--space-4);
-  margin: var(--space-4) 0 0;
+  /* M-197: the foot was squeezed against the grid (one --space-4
+     margin, no separation). A full step of air and a hairline of its
+     own: the reset row now closes the form instead of trailing it. */
+  margin: var(--space-5) 0 0;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--tk2-rule);
   font-size: var(--text-meta);
   color: var(--ci-text-mute);
 }
@@ -2388,7 +2399,13 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .bsheet-panel.tk2-targets-panel {
+  /* M-197: the slab stated twice — the shorthand the family wears,
+     and the explicit colour beneath it — and this panel now sits in
+     sheet.guard's opacity census beside its log/snapshot siblings
+     (it was the one BloomSheet panel the census never named, so the
+     owner's creation-time opacity check never ran on it). */
   background: var(--surface);
+  background-color: var(--surface);
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
 }
@@ -2746,4 +2763,128 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
 .tk2-root .tk2-targets-edit:focus-visible {
   outline: 2px solid var(--gold);
   outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * M-197 — the Edit targets sheet's form, designed (owner screenshot,
+ * 2026-11-21: opened Edit targets and "can't find any difference —
+ * this is pure mess"). The display list got its design in M-210; the
+ * form behind the button never did — M-210 recorded the exception
+ * (its styling was barred by M-184's guard, which forbids the M-184
+ * BLOCK from naming this grid). This block lifts that exception the
+ * honest way: the M-184 block is untouched and its guard still
+ * passes; the form is styled here, under the panel's own scope, at
+ * the cascade end. Three fixes:
+ *   1. The control is a field: panel-2 fill, a real border, 44px —
+ *      flanked by − / + steppers at 44px. The ghost input (borderless,
+ *      transparent, one hairline) is retired in the base rule above.
+ *   2. Each cell leads with the tracker's medallion — the display
+ *      list's own language (M-210/M-194: full circle, 26% tint) at
+ *      cell size — so the form and the section read as one surface.
+ *   3. The plan-set row wears the same field with no steppers: a
+ *      fact in the field's shape, so the grid keeps one rhythm.
+ * ------------------------------------------------------------------------- */
+.tk2-targets-panel .tk2-targets-grid li[data-id="sleep"] {
+  --target-accent: var(--tk2-ring-sleep);
+}
+.tk2-targets-panel .tk2-targets-grid li[data-id="water"] {
+  --target-accent: var(--tk2-ring-water);
+}
+.tk2-targets-panel .tk2-targets-grid li[data-id="study"] {
+  --target-accent: var(--tk2-ring-study);
+}
+.tk2-targets-panel .tk2-targets-grid li[data-id="movement"] {
+  --target-accent: var(--tk2-ring-movement);
+}
+.tk2-targets-panel .tk2-targets-grid li[data-id="energy"] {
+  --target-accent: var(--tk2-ring-energy);
+}
+.tk2-targets-panel .tk2-targets-grid li[data-id="screen"] {
+  --target-accent: var(--tk2-ring-screen);
+}
+
+.tk2-targets-panel .tk2-target-top {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.tk2-targets-panel .tk2-target-cell-glyph {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: color-mix(in oklab, var(--target-accent, var(--gold)) 26%, var(--surface));
+  color: var(--target-accent, var(--gold));
+}
+
+.tk2-targets-panel .tk2-target-control {
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-2);
+}
+
+.tk2-targets-panel .tk2-target-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 var(--space-3);
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  transition: border-color var(--motion-standard) var(--ease-out-expo);
+}
+
+.tk2-targets-panel .tk2-target-field:focus-within {
+  border-color: var(--gold);
+}
+
+.tk2-targets-panel .tk2-target-step {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-control);
+  color: var(--ci-text);
+  font-family: var(--ci-font-sans);
+  font-size: var(--text-title);
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo),
+    transform var(--motion-standard) var(--ease-out-expo);
+}
+
+.tk2-targets-panel .tk2-target-step:hover:not(:disabled) {
+  border-color: var(--gold);
+  color: var(--gold-soft);
+}
+
+.tk2-targets-panel .tk2-target-step:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.tk2-targets-panel .tk2-target-step:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.tk2-targets-panel .tk2-target-step:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+/* The plan-set field carries no steppers; its figure sits in the
+   input's own voice (the base .tk2-target-auto-value rule), quietly
+   marking that this one is a fact, not a field. */
+.tk2-targets-panel .tk2-target-control--auto .tk2-target-field {
+  border-color: var(--border);
 }

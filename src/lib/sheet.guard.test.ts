@@ -402,6 +402,7 @@ const PANELS: [string, string][] = [
   ["styles/bloom-sheet.css", ".bsheet-panel.assess-panel"],
   ["styles/trackers.css", ".bsheet-panel.tk2-log-panel"],
   ["styles/trackers.css", ".bsheet-panel.tk2-snap-panel"],
+  ["styles/trackers.css", ".bsheet-panel.tk2-targets-panel"],
   ["styles/stories.css", ".ssheet"],
   ["styles/admin-panel.css", ".adm-panel"],
   ["styles/nutrition.css", ".nut-dialog-panel"],
