@@ -2431,3 +2431,44 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   line-height: 1.7;
   color: var(--ci-text-soft);
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box (M-176; spec rules 1, 2, 4): the targets and badges stop being
+ * grids of bordered boxes. Both lists are homogeneous rows the eye scans
+ * in order — the weakest separator that works is a hairline, so each
+ * item is now an open row on the canvas, split from the next by the
+ * shared hairline token. The territory cards above them stay cards:
+ * each one IS the trigger that opens its tracker (a real object), and
+ * they already wear the tonal system (surface step, capped rim,
+ * specular catch, 24px radius).
+ * ------------------------------------------------------------------------- */
+.tk2-root .tk2-targets-grid,
+.tk2-root .tk2-badges-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.tk2-root .tk2-targets-grid li,
+.tk2-root .tk2-badges-grid li {
+  background: none;
+  background-image: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding-block: 14px;
+}
+.tk2-root .tk2-targets-grid li + li,
+.tk2-root .tk2-badges-grid li + li {
+  border-top: 1px solid var(--dbx-hairline);
+}
+/* An earned badge is the one highlighted row: a tonal gold wash (the
+   .dbx-module move — a shift, not a frame). No border, and its own top
+   hairline steps aside so the wash reads as one piece. */
+.tk2-root .tk2-badges-grid li[data-earned="true"] {
+  background: color-mix(in oklab, var(--gold) 8%, transparent);
+  border-top: none;
+  border-radius: var(--radius);
+  padding-inline: 14px;
+}

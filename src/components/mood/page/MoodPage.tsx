@@ -784,14 +784,14 @@ function QuickInsights({
       />
 
       {insights.length > 0 ? (
-        <ul className="mt-10 space-y-4">
+        <ul className="mm-insights mt-10">
           {insights.map(({ id, icon, text }) => {
             const Icon = INSIGHT_ICON[icon];
             return (
               <li key={id}>
                 <Link
                   to="/mood/intelligence"
-                  className="mm-insight grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 rounded-2xl border border-border bg-card/70 p-5 text-left hover:bg-card sm:p-6"
+                  className="mm-insight grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-5 p-5 text-left sm:p-6"
                 >
                   <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary">
                     <Icon className="mm-insight-icon h-5 w-5 text-gold" strokeWidth={1.5} />

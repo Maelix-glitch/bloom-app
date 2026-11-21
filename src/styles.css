@@ -22,6 +22,9 @@
 /* The invitation gate in the approved glass (M-172): layered over
    access.css, whose text ui.guard and contrast.guard pin as-is. */
 @import "./styles/invite.css";
+/* De-box surface system (M-175): tonal surfaces, hairline grouping,
+   telemetry strips — the calm comes from tone, never from glass. */
+@import "./styles/debox.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -1966,12 +1969,14 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   --mood-tone-radiant: #e3919f;
 }
 
+/* De-boxed (M-180): the mood panel joins the tonal system — a solid
+   surface step, a capped rim, the specular catch. The glass material
+   stays in its ruled places; content panels get their depth from tone. */
 .mp-panel {
   background-color: var(--surface);
-  background-image: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
-  box-shadow: var(--glass-shadow);
+  box-shadow: var(--dbx-specular);
 }
 /* The mood eyebrow is sentence-case sans (M-137, the Trackers Slice 6
    recipe): no uppercase transform — the label reads as a line of text,

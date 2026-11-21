@@ -3735,3 +3735,23 @@
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box (M-178; spec rules 1, 3, 5): the points history stops wearing a
+ * frame. Its rows already separate by hairlines — the bordered,
+ * translucent box around them was a second mechanism doing the same job,
+ * so the frame goes: the list sits open on the canvas, hairlines inside
+ * the group only, none under the last row. The medallions, crest plates
+ * and the rank path are NOT touched: they are collectible objects and a
+ * journey track, the sanctioned uses of a container — not sections in
+ * boxes.
+ * ------------------------------------------------------------------------- */
+.pg-history {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+.pg-history-row:last-child {
+  border-bottom: none;
+}

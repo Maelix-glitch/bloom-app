@@ -1,0 +1,111 @@
+/* ---------------------------------------------------------------------------
+ * De-box surface system (M-175) — the shared foundation for the de-box
+ * programme (~/workspace/bloom-debox-spec.md; research: 15 rules).
+ *
+ * The calm comes from TONE, never from glass: glass stays in its ruled
+ * places (Welcome, invitation gate, dock/orb chrome, phone brand bar).
+ * Everywhere else, surfaces are SOLID tonal steps on the ink canvas:
+ *
+ *   - no bordered card inside a bordered card (inner grouping is a tonal
+ *     shift, a hairline, or whitespace — nothing else);
+ *   - no container around a single metric (micro-metrics share ONE
+ *     borderless telemetry strip, hairline-separated);
+ *   - no hard 1px borders (borders cap at white 8%; depth is a luminance
+ *     step plus ONE specular top-edge highlight);
+ *   - radii: heroes 24–28px, nested modules 16px, actions full pills;
+ *   - numbers are tabular everywhere.
+ *
+ * M-174's mobile Today is the reference implementation (.home-fact is the
+ * first telemetry strip); these classes generalise its values app-wide.
+ * ------------------------------------------------------------------------- */
+
+:root {
+  /* The one hairline: rows inside a group, cells inside a strip. */
+  --dbx-hairline: rgb(255 255 255 / 0.06);
+  /* The one depth cue: a specular catch on the top edge. */
+  --dbx-specular: inset 0 1px 0 rgb(255 255 255 / 0.06);
+  /* Inner tonal shift — grouping without a border (white ~3%). */
+  --dbx-tone: rgb(255 255 255 / 0.03);
+}
+
+/* Hero surface: ONE per screen. A tonal step on the canvas, a capped
+   rim, the specular catch — never a shadow doing the depth work. */
+.dbx-surface {
+  background-color: var(--surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 26px;
+  box-shadow: var(--dbx-specular);
+}
+
+/* Nested module: lives INSIDE a surface or on the canvas. Tonal shift
+   only — no border, by rule (a bordered module inside .dbx-surface is
+   the box-in-a-box this programme exists to remove). */
+.dbx-module {
+  background-color: var(--dbx-tone);
+  border-radius: 16px;
+  box-shadow: var(--dbx-specular);
+}
+
+/* Telemetry strip: micro-metrics share one borderless ribbon. No
+   surface, no border, no shadow — cells are set off by hairlines and
+   whitespace alone (the .home-fact pattern, generalised). */
+.dbx-strip {
+  display: flex;
+  align-items: stretch;
+}
+.dbx-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-block: 4px;
+  font-variant-numeric: tabular-nums;
+}
+.dbx-cell + .dbx-cell {
+  border-left: 1px solid var(--dbx-hairline);
+  padding-left: 16px;
+  margin-left: 16px;
+}
+/* The strip's figures: big, light, tabular — the number is the design. */
+.dbx-num {
+  font-size: 30px;
+  font-weight: 300;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+/* Eyebrow / metric label: one style app-wide. */
+.dbx-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+/* Hairline list: homogeneous rows grouped by proximity, separated by
+   hairlines INSIDE the group only — no line above the first row, none
+   below the last, and the group itself wears no surface. */
+.dbx-rows {
+  display: flex;
+  flex-direction: column;
+}
+.dbx-row {
+  padding-block: 14px;
+}
+.dbx-row + .dbx-row {
+  border-top: 1px solid var(--dbx-hairline);
+}
+
+/* Section rhythm: the gap BETWEEN groups is at least twice the gap
+   within one (proximity ratio ≥ 2:1). */
+.dbx-section {
+  margin-top: 40px;
+}
+
+/* The de-box press (same value as .home-press, M-174): a 300ms expo-out
+   settle to .98 on tap, never a hard cut. */
+.dbx-press {
+  transition: transform 300ms var(--ease-out-expo);
+}
+.dbx-press:active {
+  transform: scale(0.98);
+}
