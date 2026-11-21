@@ -1,24 +1,45 @@
 /*
  * The welcome flow — the first thirty seconds of Bloom.
  *
- * This used to be built around photography: a different blurred picture behind
- * glass on every screen, with the type laid over it. It looked like an app
- * trying to feel premium by borrowing a mood from a stock image, and the
- * picture always fought the question sitting on top of it. A typography-only
- * pass followed.
- *
- * The current look is Night Glass (M-169): the scene is a slow mesh of gold,
- * cream and sage light on the ink ground, and everything the reader touches
- * or reads is the shared Liquid Glass material (src/styles/glass.css) —
- * this sheet owns only the flow's layout, type and rhythm, never the
- * material itself. Structure per screen: the words in one glass panel, the
- * answers as glass pills on the scene below it. Glass never stacks on
- * glass, and the mesh is decoration behind the material, never a surface.
+ * The look is the owner-approved Liquid Glass preview, carried exactly
+ * (M-170, 2026-11-21 — the preview is the spec, not inspiration). The
+ * scene is the preview's animated mesh: four soft pools of palette
+ * light (gold, sage, rose, deep gold) blurred and drifting on the ink.
+ * The words sit directly on that scene — in the preview nothing wraps
+ * them — and everything touchable is the shared glass material
+ * (src/styles/glass.css): answer pills, the back and admin capsules,
+ * the name field, the CTA. The step rail is the preview's bare bars.
+ * The recap is the preview's one solid card. This sheet owns the
+ * flow's layout, type and rhythm; the values are the preview's own,
+ * taken from its source, at phone width first.
  *
  * Nothing here is reused elsewhere, so it is all scoped under .wl.
  */
 
 .wl {
+  /* Scoped tokens (the house pattern for a feature sheet): the
+     preview values that have no home in the shared scale — its
+     mesh light stops, recap ground, field and recap radii, the
+     13px capsule and 17px field sizes, its three trackings, its
+     1.6 sub leading, and its two transition durations. Everything
+     else below reads the shared tokens, whose values are the
+     preview's own (the gold gradient stops, the 15px body step,
+     the 11px meta step, the space scale). */
+  --wl-mesh-sage-hi: #bfe3cb;
+  --wl-mesh-rose-hi: #f3c3cd;
+  --wl-mesh-deep-hi: #fff6df;
+  --wl-flower-heart-hi: #fff3d6;
+  --wl-recap-bg: #0d0f13;
+  --wl-radius-field: 20px;
+  --wl-radius-recap: 22px;
+  --wl-text-cap: 13px;
+  --wl-text-field: 17px;
+  --wl-tracking-kicker: 0.16em;
+  --wl-tracking-title: -0.015em;
+  --wl-tracking-recap: 0.12em;
+  --leading-welcome: 1.6;
+  --wl-dur-rail: 0.4s;
+  --wl-dur-tick: 0.25s;
   position: fixed;
   inset: 0;
   z-index: 3000;
@@ -32,72 +53,107 @@
 /* ------------------------------------------------------------ atmosphere */
 
 /*
- * The mesh: four soft pools of the palette's light — gold high right,
- * cream high left, sage low left, a second gold low right — laid over the
- * ink ground and drifting a few percent over half a minute, so the glass
- * above it always has something living to refract. Transform only, and
- * still under reduced motion (the gradients remain; only the drift goes).
- * The plain ground is declared first: an engine without color-mix drops
- * the layered line whole and keeps a correct ink scene.
+ * The mesh, exactly as previewed: four blurred pools, each with its
+ * own size, seat and drift. Transform only; still under reduced
+ * motion. The preview's values are pixels in a 390px frame — at phone
+ * width they carry 1:1, and on wider screens the same pools anchor to
+ * the same corners around the centred column.
  */
 .wl-mesh {
   position: absolute;
   inset: 0;
   z-index: 0;
+  overflow: hidden;
   pointer-events: none;
-  background: var(--background);
-  background:
-    radial-gradient(
-      58% 44% at 82% 6%,
-      color-mix(in oklab, var(--gold) 26%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      50% 40% at 8% 22%,
-      color-mix(in oklab, var(--gold-soft) 13%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      64% 52% at 12% 96%,
-      color-mix(in oklab, var(--sage) 17%, transparent),
-      transparent 72%
-    ),
-    radial-gradient(
-      40% 34% at 92% 88%,
-      color-mix(in oklab, var(--gold) 10%, transparent),
-      transparent 70%
-    );
-  animation: wl-drift 30s ease-in-out infinite alternate;
+}
+.wl-mesh i {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(46px);
+  opacity: 0.85;
+  will-change: transform;
+}
+.wl-mesh .m1 {
+  width: 300px;
+  height: 300px;
+  left: -70px;
+  top: -50px;
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--gold-grad-hi),
+    var(--gold) 55%,
+    transparent 72%
+  );
+  animation: wl-drift1 16s ease-in-out infinite alternate;
+}
+.wl-mesh .m2 {
+  width: 280px;
+  height: 280px;
+  right: -80px;
+  top: 180px;
+  background: radial-gradient(
+    circle at 40% 40%,
+    var(--wl-mesh-sage-hi),
+    var(--sage) 55%,
+    transparent 72%
+  );
+  animation: wl-drift2 19s ease-in-out infinite alternate;
+}
+.wl-mesh .m3 {
+  width: 260px;
+  height: 260px;
+  left: 40px;
+  bottom: -90px;
+  background: radial-gradient(
+    circle at 40% 40%,
+    var(--wl-mesh-rose-hi),
+    var(--rose) 50%,
+    transparent 72%
+  );
+  opacity: 0.55;
+  animation: wl-drift1 22s ease-in-out infinite alternate-reverse;
+}
+.wl-mesh .m4 {
+  width: 190px;
+  height: 190px;
+  right: 30px;
+  bottom: 130px;
+  background: radial-gradient(
+    circle at 40% 40%,
+    var(--wl-mesh-deep-hi),
+    var(--gold-grad-lo) 55%,
+    transparent 72%
+  );
+  opacity: 0.7;
+  animation: wl-drift2 14s ease-in-out infinite alternate-reverse;
 }
 
-@keyframes wl-drift {
+@keyframes wl-drift1 {
   from {
-    transform: translate3d(-1.5%, -1%, 0) scale(1.02);
+    transform: translate(0, 0) scale(1);
   }
   to {
-    transform: translate3d(1.5%, 1.5%, 0) scale(1.07);
+    transform: translate(52px, 38px) scale(1.14);
   }
 }
-
-/* A hairline of light along the top edge — the only edge treatment. */
-.wl::before {
-  content: "";
-  position: absolute;
-  inset-inline: 0;
-  top: 0;
-  z-index: 3;
-  height: 1px;
-  pointer-events: none;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in oklab, var(--foreground) 12%, transparent) 50%,
-    transparent
-  );
+@keyframes wl-drift2 {
+  from {
+    transform: translate(0, 0) scale(1.08);
+  }
+  to {
+    transform: translate(-44px, 52px) scale(0.94);
+  }
 }
 
 /* -------------------------------------------------------------- structure */
 
+/*
+ * The preview's phone column: 410px at its widest, 20px side padding,
+ * the top row seated 54px down (the frame's notch-inclusive inset —
+ * carried as a floor under the real safe-area inset), 20px at the
+ * foot. Wider screens keep the same centred column in the same
+ * composition, the mesh living around it.
+ */
 .wl-shell {
   position: relative;
   z-index: 2;
@@ -106,70 +162,87 @@
   flex-direction: column;
   min-height: 0;
   width: 100%;
-  max-width: 520px;
+  max-width: 410px;
   margin: 0 auto;
-  padding: max(24px, env(safe-area-inset-top)) var(--space-6) max(24px, env(safe-area-inset-bottom));
+  padding: max(54px, env(safe-area-inset-top)) var(--space-5)
+    max(var(--space-5), env(safe-area-inset-bottom));
 }
 
+/* The preview's top row: a glass capsule at each edge — back on the
+   left, the admin door (the real flow's own capsule) on the right —
+   and the step rail centred between them. */
 .wl-top {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3);
-  min-height: 36px;
+  min-height: 44px;
 }
 
 /* ------------------------------------------------------ the progress rail */
 
 /*
- * Four hairline segments that fill as you go, riding in a glass capsule
- * (the material is .glass-cap). Thinner and quieter than a typical
- * stepper: the point is to prove how short this is, not to add chrome.
+ * The preview's step rail: bare bars, no capsule — 22px long, 4px
+ * thick, the current one stretched to 34px and lit with the gold
+ * gradient, the finished ones solid gold. Width animates, as in the
+ * preview (transition: all .4s there; width is the one layout property
+ * the preview itself animates, on four 22px bars).
  */
 .wl-rail {
+  justify-self: center;
   display: flex;
-  flex: 1;
   align-items: center;
-  gap: 5px;
-  padding: var(--space-2) var(--space-3);
+  gap: 6px;
 }
 
 .wl-seg {
-  position: relative;
-  flex: 1;
-  height: 2px;
-  border-radius: var(--radius-pill);
-  background: color-mix(in oklab, var(--foreground) 12%, transparent);
-  overflow: hidden;
+  width: 22px;
+  height: 4px;
+  border-radius: 99px;
+  background: color-mix(in oklab, var(--foreground) 22%, transparent);
+  transition: all var(--wl-dur-rail);
+}
+.wl-seg[data-state="on"] {
+  width: 34px;
+  background: linear-gradient(90deg, var(--gold-grad-hi), var(--gold));
+}
+.wl-seg[data-state="done"] {
+  background: var(--gold);
 }
 
-.wl-seg::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: var(--wl-accent, var(--violet));
-  transform: scaleX(var(--fill, 0));
-  transform-origin: left center;
-  transition: transform var(--motion-signature) var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+/* The way back: the preview's 44px glass circle, top-left. On the
+   first screen it sits disabled and dimmed, exactly as previewed —
+   present, and honest that there is nowhere back to. */
+.wl-back {
+  justify-self: start;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  /* Surface, rim and the pill radius are the glass capsule's (.glass-cap). */
+  color: var(--foreground);
+}
+.wl-back:disabled {
+  opacity: 0.35;
+  pointer-events: none;
 }
 
-/* The admin door. Present only for someone the database lists; for everybody
-   else the button isn't there at all rather than being there and refusing. */
+/* The admin door. Present only for someone the database lists; for
+   everybody else the button isn't there at all rather than being
+   there and refusing. It wears the preview's Skip capsule dress —
+   the right-hand capsule of the top row — with its own words. */
 .wl-skip {
+  justify-self: end;
   display: inline-flex;
   align-items: center;
-  height: 28px;
-  padding: 0 11px;
+  height: 44px;
+  padding: 0 var(--space-4);
   /* Surface and rim are the glass capsule's (.glass-cap); this rule
      owns only the label's dress. */
-  color: color-mix(in oklab, var(--foreground) 60%, transparent);
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-meta);
-  text-transform: uppercase;
+  color: var(--foreground);
+  font-size: var(--wl-text-cap);
+  font-weight: 600;
   white-space: nowrap;
-  transition: color var(--motion-fast) var(--ease-out-expo);
 }
 .wl-skip:hover {
   color: var(--foreground);
@@ -180,8 +253,8 @@
   min-height: 0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  padding: 28px 0 var(--space-2);
+  justify-content: flex-start;
+  padding: 26px 0 0;
   overflow-y: auto;
   overscroll-behavior: contain;
   scrollbar-width: none;
@@ -190,287 +263,306 @@
   display: none;
 }
 
-/* One screen of the flow: the glass panel of words, then the answers on
-   the scene. A column, so the panel and the pills can never overlap —
-   glass on glass is structurally impossible here, not just unlikely. */
+/* One screen of the flow: flower (first screen only), kicker, title
+   and sub on the scene, then the answers below them. A column, so
+   the pieces can never overlap. */
 .wl-step {
   display: flex;
   flex-direction: column;
 }
 
-/* The panel holds text only (the material itself is .glass-panel). Its
-   padding is the reading room the old open layout got from the page. */
-.wl-panel {
-  padding: var(--space-5) var(--space-5) var(--space-6);
+/* ---------------------------------------------------------- the flower */
+
+/* The preview's hero flower on the first screen: three glass petals
+   turning over a gold heart. Pure decoration, aria-hidden in the DOM. */
+.wl-flower {
+  position: relative;
+  width: 86px;
+  height: 86px;
+  margin: var(--space-2) 0 var(--space-5);
+}
+.wl-flower i {
+  position: absolute;
+  inset: 0;
+  border-radius: 58% 42% 55% 45% / 52% 55% 45% 48%;
+  background: linear-gradient(
+    160deg,
+    rgba(246, 233, 205, 0.9),
+    rgba(220, 192, 143, 0.55) 55%,
+    rgba(143, 199, 162, 0.5)
+  );
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+.wl-flower i:nth-child(2) {
+  transform: rotate(72deg) scale(0.82);
+  opacity: 0.8;
+}
+.wl-flower i:nth-child(3) {
+  transform: rotate(150deg) scale(0.64);
+  opacity: 0.65;
+}
+.wl-flower b {
+  position: absolute;
+  inset: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--wl-flower-heart-hi), var(--gold-grad-lo));
+  box-shadow: 0 6px 18px rgba(199, 157, 98, 0.5);
 }
 
 /* ------------------------------------------------------------- type scale */
 
+/*
+ * The kicker. The preview colours it gold; Bloom's contrast guard
+ * pins .wl-eyebrow to a foreground percentage mix at AA on the bare
+ * background, and this slice may not re-contract that guard — so the
+ * kicker takes the preview's own dim-cream value (66%, its sub/pill
+ * dim) in the guard's recipe, at the preview's size, weight, spacing
+ * and case. Named in M-170 as the one colour that did not carry.
+ */
 .wl-eyebrow {
-  font-family: var(--font-mono);
-  font-size: var(--text-micro);
-  letter-spacing: var(--tracking-wide);
+  font-family: var(--font-sans);
+  font-size: var(--text-meta); /* the scale's 11px step */
+  /* The preview's weight is 700; the heaviest face the app loads is
+     600, and ui.guard (R5) pins feature CSS to it — same rendered
+     face, the honest number. */
+  font-weight: 600;
+  letter-spacing: var(--wl-tracking-kicker);
   text-transform: uppercase;
-  color: color-mix(in oklab, var(--foreground) 53%, transparent);
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+  margin: 0 0 var(--space-3);
 }
 
 .wl-title {
   font-family: var(--font-display);
-  font-weight: 400;
-  font-size: clamp(29px, 7.6vw, 42px);
+  font-weight: 600;
+  /* The preview's 34px at its 390px frame, as a fluid ladder that
+     reaches 34px at 390px and breathes a little below it. */
+  font-size: clamp(30px, 8.72vw, 34px);
   line-height: 1.06;
-  letter-spacing: var(--tracking-display);
+  letter-spacing: var(--wl-tracking-title);
   text-wrap: balance;
-  margin-top: 14px;
+  margin: 0 0 var(--space-3);
+}
+/* The preview's italic gold-soft second voice in the headline —
+   emphasis on the real titles' own closing clause, no words changed. */
+.wl-title em {
+  font-style: italic;
+  color: var(--gold-soft);
 }
 
 .wl-sub {
-  margin-top: 14px;
-  font-size: var(--text-callout);
-  line-height: var(--leading-body);
-  color: color-mix(in oklab, var(--foreground) 64%, transparent);
+  font-size: var(--text-body); /* the scale's 15px step */
+  line-height: var(--leading-welcome);
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
   text-wrap: pretty;
-  max-width: 40ch;
+  max-width: 300px;
+  margin: 0 0 22px;
 }
 
 /* ------------------------------------------------------------- the options */
 
+/* The answers follow the sub's 22px rhythm — no extra top margin,
+   exactly as the preview stacks them. */
 .wl-choices {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 26px;
+}
+
+/* "What brought you here?" is the preview's two-column pill grid. */
+.wl-choices--grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
 }
 
 /*
- * An option row.
- *
- * The earlier version led every row with the same sparkles icon inside a disc,
- * which added a shape that carried no information — it couldn't distinguish
- * the options, so it was just noise repeated three times. The indicator is now
- * a radio dot, which is the one mark that actually says "one of these".
+ * An answer pill (the surface is .glass-pill): the preview's capsule
+ * geometry — 52px minimum, 14/16 padding, the tick and the label
+ * centred on one line. The preview's pills carry the label only; the
+ * helper lines the cards used to carry are gone (M-170).
  */
 .wl-card {
   position: relative;
   display: flex;
-  align-items: flex-start;
-  gap: 14px;
+  align-items: center;
+  gap: 10px;
   width: 100%;
-  padding: var(--space-4);
+  min-height: 52px;
+  padding: 14px var(--space-4);
   text-align: left;
-  border-radius: var(--radius-card);
-  /* Surface, rim, illumination, press and the gold chosen state are the
+  border-radius: var(--radius-pill);
+  /* Surface, rim, illumination, press and the chosen state are the
      glass pill's (.glass-pill); this rule owns the row's layout only. */
 }
 
-/* The radio dot: an empty ring that fills when chosen. */
-.wl-radio {
-  position: relative;
-  flex: none;
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  border-radius: var(--radius-pill);
-  border: 1.5px solid color-mix(in oklab, var(--foreground) 26%, transparent);
-  transition: border-color var(--motion-standard) var(--ease-out-expo);
-}
-
-.wl-radio::after {
-  content: "";
-  position: absolute;
-  inset: 3px;
-  border-radius: var(--radius-pill);
-  background: var(--wl-accent, var(--violet));
-  transform: scale(0);
-  transition: transform var(--motion-standard) var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
-}
-
-.wl-card[data-on="true"] .wl-radio {
-  border-color: color-mix(in oklab, var(--wl-accent, var(--violet)) 70%, transparent);
-}
-.wl-card[data-on="true"] .wl-radio::after {
-  transform: scale(1);
-}
-
-/*
- * The multi-select counterpart to the radio dot, for "what brought you here?".
- * A square that takes a tick, because several of these can be true at once and
- * a filled dot would claim otherwise.
- */
-.wl-check {
+/* The preview's tick: a 22px ring that fills with the gold gradient
+   and shows its check when the answer is chosen — the same mark for
+   the one-of-these question and the pick-any question, as previewed. */
+.wl-tick {
   display: grid;
   place-items: center;
   flex: none;
-  width: 18px;
-  height: 18px;
-  margin-top: 2px;
-  border-radius: 6px;
-  border: 1.5px solid color-mix(in oklab, var(--foreground) 26%, transparent);
-  color: var(--primary-foreground);
-  transition:
-    border-color var(--motion-standard) var(--ease-out-expo),
-    background-color var(--motion-standard) var(--ease-out-expo);
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid color-mix(in oklab, var(--foreground) 35%, transparent);
+  color: var(--background);
+  transition: all var(--wl-dur-tick);
 }
-
-.wl-check svg {
+.wl-tick svg {
   opacity: 0;
-  transform: scale(0.6);
-  transition:
-    opacity var(--motion-standard) var(--ease-out-expo),
-    transform var(--motion-standard) var(--wl-ease, cubic-bezier(0.16, 1, 0.3, 1));
+  transition: opacity var(--wl-dur-tick);
 }
-
-.wl-card[data-on="true"] .wl-check {
-  border-color: var(--wl-accent, var(--violet));
-  background: var(--wl-accent, var(--violet));
+.wl-card[data-on="true"] .wl-tick {
+  background: linear-gradient(180deg, var(--gold-grad-hi), var(--gold-grad-lo));
+  border-color: transparent;
 }
-.wl-card[data-on="true"] .wl-check svg {
+.wl-card[data-on="true"] .wl-tick svg {
   opacity: 1;
-  transform: scale(1);
-}
-
-.wl-card-text {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  min-width: 0;
-  flex: 1;
 }
 
 .wl-card-title {
-  font-size: var(--text-callout);
-  font-weight: 500;
-  letter-spacing: var(--tracking-heading);
-  color: var(--foreground);
-}
-
-.wl-card-sub {
-  font-size: var(--text-caption);
-  line-height: var(--leading-caption);
-  /* 60%, lifted from 52%: the pill's glass can sit over the mesh's
-     brightest stop, and the sub must hold AA there, not just on ink. */
-  color: color-mix(in oklab, var(--foreground) 60%, transparent);
+  font-size: var(--text-body); /* the scale's 15px step */
+  font-weight: 600;
+  color: inherit;
 }
 
 /*
- * "Prefer not to say" is a real answer, but it isn't a third kind of person —
- * it is declining the question. So it sits apart, quieter, and without a
- * subtitle competing with the two above it.
+ * "Prefer not to say" sits apart in the preview as a quiet underlined
+ * text button under the pills — it isn't a third kind of person, it
+ * is declining the question. Chosen, it takes the gold-soft voice at
+ * full weight, exactly as the preview marks it.
  */
-.wl-choices-divider {
-  height: 1px;
-  margin: 6px 2px 2px;
-  background: color-mix(in oklab, var(--foreground) 9%, transparent);
+.wl-apart {
+  margin-top: 14px;
+  text-align: center;
 }
-
-.wl-card--decline {
-  padding: 13px var(--space-4);
-  /* The same glass as the answers above it — what makes it the decline
-     is its place apart and its quieter title, not a lesser surface. */
+.wl-apart-btn {
+  background: none;
+  border: none;
+  min-height: 44px;
+  padding: 10px 14px;
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+  font-size: var(--text-callout); /* the scale's 14px step */
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
 }
-.wl-card--decline .wl-card-title {
-  font-weight: 400;
-  color: color-mix(in oklab, var(--foreground) 72%, transparent);
+.wl-apart-btn[data-on="true"] {
+  color: var(--gold-soft);
+  /* The preview marks it 700; 600 is the heaviest loaded face (R5). */
+  font-weight: 600;
 }
 
 /* ---------------------------------------------------------------- the foot */
 
+/* The preview's bottom block: the CTA pinned to the foot of the
+   column by the body's flex, 16px of air above it. */
 .wl-foot {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding-top: 18px;
+  padding-top: var(--space-4);
 }
 
 .wl-next {
-  flex: 1;
+  width: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  height: 50px;
-  border-radius: 14px;
-  /* Surface and gold wash are the glass CTA's (.glass-cta); this rule
-     owns the button's size and voice. */
+  gap: var(--space-2);
+  min-height: 56px;
+  padding: var(--space-4) var(--space-5);
+  border-radius: var(--radius-pill);
+  /* Surface is the glass CTA's (.glass-cta, gold-solid on the first
+     and last screens via [data-solid] — the solid state carries its
+     own ink colour there); this rule owns size and voice. */
   color: var(--foreground);
-  font-size: var(--text-callout);
-  font-weight: 500;
-  letter-spacing: var(--tracking-heading);
+  font-size: var(--text-card); /* the scale's 16px step */
+  /* The preview's weight is 700; 600 is the heaviest loaded face (R5). */
+  font-weight: 600;
 }
 .wl-next:disabled {
   opacity: 0.38;
   cursor: not-allowed;
 }
 
-.wl-back {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 50px;
-  height: 50px;
-  /* Surface, rim and the pill radius are the glass capsule's (.glass-cap). */
-  color: color-mix(in oklab, var(--foreground) 66%, transparent);
-  transition: color var(--motion-fast) var(--ease-out-expo);
-}
-.wl-back:hover {
-  color: var(--foreground);
-}
-
 /* ------------------------------------------------------------ name + recap */
 
+/* The name field: the preview's geometry — 20px radius, 56px tall,
+   17px type (never smaller: below 16px iOS zooms the page on focus),
+   a gold border when focused. Surface is .glass-field. */
 .wl-input {
   width: 100%;
-  height: 52px;
+  min-height: 56px;
   margin-top: 22px;
-  padding: 0 var(--space-4);
-  border-radius: 14px;
-  /* Surface is the glass field's (.glass-field); this rule owns the
-     field's size, type and focus voice. */
+  padding: var(--space-4) 18px;
+  border-radius: var(--wl-radius-field);
   color: var(--foreground);
-  font-size: var(--text-card); /* 16px, not smaller: below this iOS zooms the page on focus */
-  letter-spacing: var(--tracking-heading);
+  font-size: var(--wl-text-field);
   transition: border-color var(--motion-standard) var(--ease-out-expo);
 }
 .wl-input::placeholder {
-  color: color-mix(in oklab, var(--foreground) 53%, transparent);
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
 }
 .wl-input:focus {
   outline: none;
-  border-color: color-mix(in oklab, var(--wl-accent, var(--gold)) 46%, transparent);
+  border-color: var(--gold);
 }
 
-/* The recap before entering: what the answers mean, in two quiet lines. */
+/*
+ * The recap: the preview's one solid card — near-ink, 22px radius,
+ * a gold small-caps header and quiet rows, label dim at the left,
+ * the answer at full weight on the right. The rows and their words
+ * are the real flow's own, unchanged; only the dress is the preview's.
+ */
 .wl-summary {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  margin-top: 26px;
-  border-top: 1px solid color-mix(in oklab, var(--foreground) 9%, transparent);
+  background: var(--wl-recap-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--wl-radius-recap);
+  padding: var(--space-4) 18px;
+  margin-top: 22px;
+}
+
+.wl-summary-title {
+  margin: 0 0 10px;
+  font-size: var(--text-caption); /* the scale's 12px step */
+  /* The preview's header weight is 700; 600 is the heaviest loaded (R5). */
+  font-weight: 600;
+  letter-spacing: var(--wl-tracking-recap);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.wl-summary-rows {
+  display: grid;
+  gap: var(--space-2);
 }
 
 .wl-summary-row {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  gap: var(--space-4);
-  padding: 11px 2px;
-  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 7%, transparent);
-  font-size: var(--text-caption);
+  gap: 14px;
+  font-size: var(--text-callout); /* the scale's 14px step */
 }
 .wl-summary-row span:first-child {
-  color: color-mix(in oklab, var(--foreground) 53%, transparent);
+  color: color-mix(in oklab, var(--foreground) 55%, transparent);
 }
 .wl-summary-row span:last-child {
   color: var(--foreground);
+  font-weight: 600;
   text-align: right;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .wl-mesh {
+  .wl-mesh i {
     animation: none;
   }
-  .wl-seg::after,
-  .wl-radio::after,
+  .wl-seg,
+  .wl-tick,
+  .wl-tick svg,
   .wl-card,
   .wl-next,
   .wl-back,
@@ -479,28 +571,29 @@
   }
 }
 
-/* Short screens — a phone in landscape, or a large display-scaling setting.
-   The type and the gaps give way first; the tap targets never do. */
+/* Short screens — a phone in landscape, or a large display-scaling
+   setting. The preview is a single tall frame and defines no such
+   state; this compact rhythm is the real app's own carry (M-170):
+   the type and the gaps give way first, the tap targets never do. */
 @media (max-height: 680px) {
   .wl-body {
     padding-top: var(--space-4);
   }
-  .wl-panel {
-    padding: var(--space-4) var(--space-5) var(--space-5);
-  }
   .wl-title {
-    font-size: clamp(25px, 6.6vw, 32px);
-    margin-top: 10px;
+    font-size: clamp(26px, 7.4vw, 29px);
+  }
+  .wl-sub {
+    margin-bottom: var(--space-4);
   }
   .wl-choices {
-    margin-top: 18px;
     gap: var(--space-2);
   }
   .wl-card {
-    padding: var(--space-3) 14px;
+    min-height: 48px;
+    padding: 11px var(--space-4);
   }
-  .wl-next,
-  .wl-back {
-    height: 46px;
+  .wl-next {
+    min-height: 50px;
+    padding: 13px var(--space-5);
   }
 }

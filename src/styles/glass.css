@@ -19,9 +19,18 @@
  * floating dock, floating navigation and floating popovers ONLY. Sheets
  * and modals stay fully opaque slabs (the bleed-through rule, pinned by
  * sheet.guard) — no --lg-* token and no .glass-* class may ever reach a
- * sheet panel, and glass.guard pins that. Glass never stacks on glass:
- * in the Welcome the panel holds text and the pills sit on the scene
- * beside it, never on the panel.
+ * sheet panel, and glass.guard pins that. Glass never stacks on glass.
+ *
+ * M-170 (2026-11-21) aligned the Welcome-facing utility classes below
+ * (pill / cap / field / cta) to the owner-approved preview's exact
+ * recipe: a WHITE frost — linear-gradient(135deg, white .15, white .06)
+ * over the blur, a white .24 border, the preview's per-piece shadows —
+ * because the preview is the spec for the onboarding's look, and its
+ * glass is white, not ink-tinted. The --lg-* tokens above are unchanged:
+ * the dock, the orb and the phone brand bar consume them and were out
+ * of that slice's scope. .glass-panel keeps the M-169 recipe as the
+ * material's panel utility; the Welcome itself no longer wears it (in
+ * the preview the words sit on the scene and only controls are glass).
  *
  * Legacy engines: every tint is a color-mix line PAINTED OVER a plain
  * rgba fallback declared first, so an engine without color-mix or
@@ -59,6 +68,9 @@
     rgba(255, 255, 255, 0.03) 52%,
     rgba(255, 255, 255, 0.07)
   );
+  /* The ink on the solid gold CTA (M-170): the preview's near-black
+     gold ink — a deeper step than the house --gold-ink. */
+  --lg-gold-ink: #171106;
   /* Gold, the chosen state's tint (Night Glass: gold is the light). */
   --lg-gold-wash: linear-gradient(
     165deg,
@@ -86,101 +98,145 @@
 
 /* -------------------------------------------------------------- the pill */
 
-/* An interactive selection: illuminates on hover, flexes on press, and
-   tints gold when chosen. Brightness and transform only — the feel
-   layer's currency — at press speed while pressed. */
+/* An interactive selection, in the preview's exact recipe (M-170):
+   white frost over the blur, a .5 top rim, and the spring press —
+   illuminates and lifts on hover, compresses and brightens pressed.
+   Chosen is the preview's black moment: solid ink, gold-soft words, a
+   gold-soft border — black is reserved for the selected answer. */
 .glass-pill {
-  background-color: var(--lg-fallback);
-  background-color: var(--lg-tint);
-  background-image: var(--lg-sheen);
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
   -webkit-backdrop-filter: var(--lg-blur);
   backdrop-filter: var(--lg-blur);
-  border: 1px solid var(--lg-border);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   box-shadow:
-    var(--lg-rim-soft),
-    0 10px 28px -12px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.12),
+    0 14px 28px rgba(0, 0, 0, 0.2);
   transition:
-    transform var(--motion-standard) var(--ease-out-expo),
-    filter var(--motion-standard) var(--ease-out-expo),
-    background-color var(--motion-standard) var(--ease-out-expo),
-    border-color var(--motion-standard) var(--ease-out-expo);
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
 }
 .glass-pill:hover {
   filter: brightness(1.14);
+  transform: translateY(-1px) scale(1.015);
 }
 .glass-pill:active {
-  transform: scale(0.99);
-  filter: brightness(1.24);
-  transition-duration: var(--motion-micro);
+  transform: scale(0.965);
+  filter: brightness(1.22);
+}
+.glass-pill:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
 .glass-pill[data-on="true"],
 .glass-pill[aria-pressed="true"] {
-  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
-  background-color: rgba(24, 20, 12, 0.6);
-  background-color: color-mix(in oklab, var(--surface) 44%, transparent);
-  background-image: var(--lg-gold-wash), var(--lg-sheen);
+  background-color: var(--background);
+  background-image: none;
+  color: var(--gold-soft);
+  border-color: rgba(246, 233, 205, 0.5);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    0 14px 28px rgba(0, 0, 0, 0.3);
 }
 
 /* ------------------------------------------------------------ the capsule */
 
-/* Small floating chrome: the step rail's wrap, the back and admin
-   capsules in the Welcome, and any future floating popover shell. */
+/* Small floating chrome: the back and admin capsules in the Welcome,
+   and any future floating popover shell. The preview's capsule recipe
+   (M-170): the white frost, the full .55 top rim, a lighter float. */
 .glass-cap {
-  background-color: var(--lg-fallback);
-  background-color: var(--lg-tint);
-  background-image: var(--lg-sheen);
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
   -webkit-backdrop-filter: var(--lg-blur);
   backdrop-filter: var(--lg-blur);
-  border: 1px solid var(--lg-border);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   border-radius: var(--radius-pill);
   box-shadow:
-    var(--lg-rim-soft),
-    0 10px 28px -12px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 10px 24px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease;
+}
+.glass-cap:hover {
+  filter: brightness(1.14);
+  transform: translateY(-1px) scale(1.015);
+}
+.glass-cap:active {
+  transform: scale(0.965);
+  filter: brightness(1.22);
+}
+.glass-cap:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
 }
 
 /* -------------------------------------------------------------- the field */
 
-/* A text field in glass: the material, with the rim turned inward —
-   a field is a well in the glass, not a slab on it. */
+/* A text field in glass: the preview's name-input recipe (M-170) —
+   the white frost with a .5 top rim, floating like the pills do. */
 .glass-field {
-  background-color: var(--lg-fallback);
-  background-color: var(--lg-tint);
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
   -webkit-backdrop-filter: var(--lg-blur);
   backdrop-filter: var(--lg-blur);
-  border: 1px solid var(--lg-border);
+  border: 1px solid rgba(255, 255, 255, 0.24);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.22),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.07),
-    0 10px 28px -12px rgba(0, 0, 0, 0.5);
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    0 14px 28px rgba(0, 0, 0, 0.18);
 }
 
 /* ---------------------------------------------------------------- the CTA */
 
-/* The primary action in glass: the gold wash over the material, so the
-   one way forward glows with the accent instead of sitting flat. */
+/* The way forward, in the preview's two states (M-170). The resting
+   state is glass — a slightly stronger frost (.18 top stop), a .3
+   border, the .6 rim. The culminating screens wear [data-solid]: the
+   gold gradient itself, ink words — the one solid gold moment in the
+   flow, exactly where the preview puts it (Begin, and the last step). */
 .glass-cta {
-  background-color: rgba(24, 20, 12, 0.55);
-  background-color: color-mix(in oklab, var(--surface) 46%, transparent);
-  background-image: var(--lg-gold-wash), var(--lg-sheen);
+  background-color: rgba(255, 255, 255, 0.05);
+  background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.18), rgba(255, 255, 255, 0.06));
   -webkit-backdrop-filter: var(--lg-blur);
   backdrop-filter: var(--lg-blur);
-  border: 1px solid color-mix(in oklab, var(--gold) 42%, transparent);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   box-shadow:
-    var(--lg-rim-soft),
-    0 14px 32px -12px rgba(0, 0, 0, 0.55);
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 18px 36px rgba(0, 0, 0, 0.28);
   transition:
-    transform var(--motion-standard) var(--ease-out-expo),
-    filter var(--motion-standard) var(--ease-out-expo),
-    border-color var(--motion-standard) var(--ease-out-expo),
+    transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1),
+    filter 0.25s ease,
+    background-color 0.25s ease,
+    box-shadow 0.25s ease,
     opacity var(--motion-standard) var(--ease-out-expo);
 }
 .glass-cta:hover:not(:disabled) {
-  filter: brightness(1.13);
+  filter: brightness(1.14);
+  transform: translateY(-1px) scale(1.015);
 }
 .glass-cta:active:not(:disabled) {
-  transform: scale(0.99);
+  transform: scale(0.965);
   filter: brightness(1.22);
-  transition-duration: var(--motion-micro);
+}
+.glass-cta:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.glass-cta[data-solid="true"] {
+  /* The preview's gold gradient, in the token home's own stops
+     (--gold-grad-hi → --gold → --gold-grad-lo). */
+  background-image: linear-gradient(
+    180deg,
+    var(--gold-grad-hi),
+    var(--gold) 55%,
+    var(--gold-grad-lo)
+  );
+  color: var(--lg-gold-ink);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 /* ------------------------------------------------------------ refraction */

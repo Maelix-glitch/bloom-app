@@ -8,8 +8,10 @@
  * opaque, and glass never stacks on glass. These pins hold the three
  * lines structurally:
  *
- *   (a) the Welcome renders the material as designed — words in ONE
- *       glass panel per screen, answers as glass pills OUTSIDE it;
+ *   (a) the Welcome renders the material as the approved preview
+ *       designs it (M-170) — words on the scene with NO glass panel,
+ *       answers as glass pills, the decline apart as a text button,
+ *       the recap as the preview's one solid card;
  *   (b) no sheet/modal panel wears the material — the same panel census
  *       sheet.guard holds opaque, re-checked here against the glass
  *       tokens and classes specifically;
@@ -136,15 +138,41 @@ describe("glass guard: the material is defined once, to spec", () => {
     expect(glass).toContain('.glass-pill[data-on="true"]');
   });
 
-  it("paints a plain fallback before every color-mix tint", () => {
+  it("paints a plain first coat before every tint and frost", () => {
     const panel = blockFor("styles/glass.css", ".glass-panel")!;
     expect(panel, ".glass-panel must exist").toBeTruthy();
     expect(panel.body.indexOf("--lg-fallback-strong")).toBeGreaterThanOrEqual(0);
     expect(panel.body.indexOf("--lg-fallback-strong")).toBeLessThan(
       panel.body.indexOf("--lg-tint-strong"),
     );
+    /* M-170: the pill's surface is the preview's white frost — a plain
+       rgba coat declared first, the gradient painted over it. The
+       no-blur strengthening (next test's @supports block) is what
+       keeps a blur-less engine legible, as it was under M-169. */
     const pill = blockFor("styles/glass.css", ".glass-pill")!;
-    expect(pill.body.indexOf("--lg-fallback)")).toBeLessThan(pill.body.indexOf("--lg-tint)"));
+    expect(pill.body).toContain(
+      "linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06))",
+    );
+    expect(pill.body.indexOf("background-color: rgba(255, 255, 255, 0.05)")).toBeLessThan(
+      pill.body.indexOf("background-image: linear-gradient"),
+    );
+  });
+
+  it("the chosen pill is the preview's black moment; the CTA has its gold-solid state", () => {
+    const chosen = blockFor("styles/glass.css", '.glass-pill[data-on="true"]')!;
+    expect(chosen, "the chosen-pill block must exist").toBeTruthy();
+    /* Solid ink, gold-soft words, a gold-soft border (preview values). */
+    expect(chosen.body).toContain("background-color: var(--background)");
+    expect(chosen.body).toContain("color: var(--gold-soft)");
+    expect(chosen.body).toContain("rgba(246, 233, 205, 0.5)");
+    const solid = blockFor("styles/glass.css", '.glass-cta[data-solid="true"]')!;
+    expect(solid, "the solid CTA block must exist").toBeTruthy();
+    /* The preview's gradient stops are the token home's gold stops. */
+    expect(solid.body).toContain("var(--gold-grad-hi)");
+    expect(solid.body).toContain("var(--gold) 55%");
+    expect(solid.body).toContain("var(--gold-grad-lo)");
+    expect(solid.body).toContain("color: var(--lg-gold-ink)");
+    expect(glass).toContain("--lg-gold-ink: #171106");
   });
 
   it("gates refraction behind support and reduced-motion, over the plain blur", () => {
@@ -168,33 +196,58 @@ describe("glass guard: the material is defined once, to spec", () => {
 });
 
 describe("glass guard: the Welcome wears it, structured so glass cannot stack", () => {
-  it("the first screen is a glass panel over the mesh, with a glass CTA", () => {
+  it("the first screen is words on the scene over the mesh — no glass panel — with a solid gold CTA", () => {
     setup();
-    const panel = document.querySelector(".glass-panel");
-    expect(panel, "the words must sit in a glass panel").toBeTruthy();
-    expect(panel!.textContent).toContain("Bloom keeps the record");
-    expect(document.querySelector(".wl-mesh"), "the mesh scene must be mounted").toBeTruthy();
-    expect(document.querySelector(".wl-next.glass-cta")).toBeTruthy();
-    expect(document.querySelector(".wl-rail.glass-cap")).toBeTruthy();
+    /* The preview wraps the words in nothing: no glass panel anywhere,
+       and the title sits in no glass element at all. */
+    expect(document.querySelector(".glass-panel")).toBeNull();
+    const title = screen.getByText(/Bloom keeps the record/);
+    expect(
+      title.closest(".glass-panel, .glass-pill, .glass-cap, .glass-field, .glass-cta"),
+    ).toBeNull();
+    /* The mesh is the preview's four pools. */
+    const mesh = document.querySelector(".wl-mesh");
+    expect(mesh, "the mesh scene must be mounted").toBeTruthy();
+    expect(mesh!.querySelectorAll("i").length).toBe(4);
+    /* The hero flower rides above the words, as previewed. */
+    expect(document.querySelector(".wl-flower")).toBeTruthy();
+    /* Begin wears the preview's solid gold CTA state. */
+    const cta = document.querySelector(".wl-next.glass-cta");
+    expect(cta).toBeTruthy();
+    expect(cta!.getAttribute("data-solid")).toBe("true");
+    /* The rail is the preview's bare bars — no capsule around them. */
+    const rail = document.querySelector(".wl-rail");
+    expect(rail).toBeTruthy();
+    expect(rail!.classList.contains("glass-cap")).toBe(false);
+    expect(rail!.querySelectorAll(".wl-seg").length).toBe(4);
+    expect(rail!.querySelector('.wl-seg[data-state="on"]')).toBeTruthy();
   });
 
-  it("answers are glass pills on the scene — never inside the panel", () => {
+  it("answers are glass pills on the scene; the decline sits apart as text", () => {
     setup();
     tap(/get started/i);
-    const panel = document.querySelector(".glass-panel")!;
-    expect(panel).toBeTruthy();
-    expect(panel.textContent).toContain("Which best describes you?");
-    /* The no-stacking rule, as a DOM fact: the panel holds text only. */
-    expect(panel.querySelector("button")).toBeNull();
-    expect(panel.querySelector(".glass-pill")).toBeNull();
+    expect(document.querySelector(".glass-panel")).toBeNull();
+    const q = screen.getByText(/Which best/);
+    expect(q.closest(".glass-panel, .glass-pill, .glass-cap, .glass-field")).toBeNull();
+    /* Two answers, both pills, dressed alike. */
     const pills = [...document.querySelectorAll("button.glass-pill")];
-    expect(pills.length).toBeGreaterThanOrEqual(3);
-    for (const pill of pills) expect(panel.contains(pill)).toBe(false);
-    /* The way back is a glass capsule too. */
-    expect(document.querySelector(".wl-back.glass-cap")).toBeTruthy();
+    expect(pills.length).toBe(2);
+    /* The decline is not a third pill: it is the preview's apart
+       text button, in its own centred row. */
+    const decline = screen.getByRole("button", { name: /prefer not to say/i });
+    expect(decline.classList.contains("glass-pill")).toBe(false);
+    expect(decline.closest(".wl-apart")).toBeTruthy();
+    /* The way back is the preview's glass capsule, in the top row. */
+    const back = document.querySelector(".wl-back.glass-cap");
+    expect(back).toBeTruthy();
+    expect(back!.closest(".wl-top")).toBeTruthy();
+    /* The rail's states follow the step: one done, the current lit. */
+    const segs = [...document.querySelectorAll(".wl-seg")];
+    expect(segs[0]!.getAttribute("data-state")).toBe("done");
+    expect(segs[1]!.getAttribute("data-state")).toBe("on");
   });
 
-  it("the name field is a glass field, and the recap stays off the glass", () => {
+  it("the name field is a glass field, and the recap is the preview's solid card", () => {
     setup();
     tap(/get started/i);
     tap(/Female/);
@@ -202,12 +255,49 @@ describe("glass guard: the Welcome wears it, structured so glass cannot stack", 
     tap(/continue/i);
     const input = screen.getByLabelText(/your name, optional/i);
     expect(input.className).toContain("glass-field");
-    const panel = document.querySelector(".glass-panel")!;
-    expect(panel.contains(input)).toBe(false);
-    /* The recap is plain text on the scene — readable, unglazed. */
+    expect(document.querySelector(".glass-panel")).toBeNull();
+    /* The recap is the preview's solid card — a card, never glass. */
     const recap = screen.getByText("Included");
-    expect(panel.contains(recap)).toBe(false);
-    expect(recap.closest(".glass-panel, .glass-pill, .glass-cap, .glass-field")).toBeNull();
+    expect(recap.closest(".wl-summary")).toBeTruthy();
+    expect(
+      recap.closest(".glass-panel, .glass-pill, .glass-cap, .glass-field, .glass-cta"),
+    ).toBeNull();
+    /* The last screen's CTA is solid gold too, as previewed. */
+    expect(document.querySelector(".wl-next.glass-cta")!.getAttribute("data-solid")).toBe("true");
+  });
+});
+
+describe("glass guard: the Welcome's geometry is the preview's (M-170)", () => {
+  it("pins the preview's column, type and rhythm values in welcome.css", () => {
+    /* The values are the preview's; their expression is the house
+       token form ui.guard pins (shared tokens where the scale holds
+       the value, scoped --wl-* tokens where it does not). */
+    const welcome = read("styles/welcome.css");
+    const shell = blockFor("styles/welcome.css", ".wl-shell")!;
+    expect(shell.body).toContain("max-width: 410px");
+    const title = blockFor("styles/welcome.css", ".wl-title")!;
+    expect(title.body).toContain("clamp(30px, 8.72vw, 34px)");
+    expect(title.body).toContain("font-weight: 600");
+    expect(title.body).toContain("letter-spacing: var(--wl-tracking-title)");
+    expect(welcome).toContain("--wl-tracking-title: -0.015em");
+    const seg = blockFor("styles/welcome.css", ".wl-seg")!;
+    expect(seg.body).toContain("width: 22px");
+    expect(seg.body).toContain("height: 4px");
+    const card = blockFor("styles/welcome.css", ".wl-card")!;
+    expect(card.body).toContain("min-height: 52px");
+    expect(card.body).toContain("padding: 14px var(--space-4)");
+    const input = blockFor("styles/welcome.css", ".wl-input")!;
+    expect(input.body).toContain("border-radius: var(--wl-radius-field)");
+    expect(input.body).toContain("font-size: var(--wl-text-field)");
+    expect(welcome).toContain("--wl-radius-field: 20px");
+    expect(welcome).toContain("--wl-text-field: 17px");
+    const summary = blockFor("styles/welcome.css", ".wl-summary")!;
+    expect(summary.body).toContain("background: var(--wl-recap-bg)");
+    expect(summary.body).toContain("border-radius: var(--wl-radius-recap)");
+    expect(welcome).toContain("--wl-recap-bg: #0d0f13");
+    expect(welcome).toContain("--wl-radius-recap: 22px");
+    /* The mesh pools blur at the preview's 46px. */
+    expect(welcome).toContain("blur(46px)");
   });
 });
 
