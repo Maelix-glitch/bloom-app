@@ -18,6 +18,14 @@
  *      changes nothing, and a wrong code is one gentle line, never a
  *      locked door.
  *
+ * The flow is versioned (M-182): when `WELCOME_VERSION` moves past the
+ * version stamped on a finished record, the gate runs this same flow
+ * once more — pre-filled with the stored answers (`initial`), with a
+ * "Not now" exit (`onExit`) a first run never has. Profile can also
+ * open it on demand, in the same dress. Nothing here knows which run
+ * it is beyond those two props, and a run can only ever write what the
+ * flow itself writes: the onboarding record, nothing else.
+ *
  * There is a **Launch as admin** door on every screen. It only renders for
  * someone the database lists in `public.app_admins` (see `useAdminAccess`); for
  * everybody else the button isn't there at all, rather than being present and
@@ -97,9 +105,39 @@ export interface WelcomeProps {
   }) => void;
   /** Enter admin mode and navigate to `to`. */
   onAdmin: (to: string) => void;
+  /**
+   * The stored answers, for a re-run or a replay (M-182). Absent on a
+   * first run — and a first run is byte-identical to before: every
+   * question unanswered, exactly as it has always opened.
+   *
+   * Present, the flow opens with these answers already in it, so a
+   * straight click-through hands back what was already stored. `kind`
+   * rides along separately from `sex` on purpose: Settings can change
+   * the capability without changing the answer (the cycle switch), so
+   * the two can legitimately disagree — and a re-run that derived the
+   * capability from the answer alone would silently undo that change.
+   * Finishing with the sex answer untouched therefore returns the
+   * stored `kind`; only a changed answer re-derives it, exactly as a
+   * first run does.
+   */
+  initial?:
+    | {
+        sex: SexAnswer;
+        kind: ProfileKind;
+        focus: FocusArea[];
+        name: string | null;
+      }
+    | undefined;
+  /**
+   * The way out of a re-run or replay (M-182): "Not now". Only ever
+   * passed by the gate for those runs — a first run has no exit, as
+   * before. The gate owns what it records (the version, seen); this
+   * component just offers the door.
+   */
+  onExit?: (() => void) | undefined;
 }
 
-export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
+export function Welcome({ onFinish, onAdmin, initial, onExit }: WelcomeProps) {
   /* The admin door opens a launcher rather than skipping straight in — see
      AdminPanel for why picking a destination is the whole interaction. */
   const [adminOpen, setAdminOpen] = useState(false);
@@ -110,10 +148,15 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
 
   const [step, setStep] = useState(0);
   /* One piece of state, not two: the answer *is* the capability. Deriving
-     `kind` at the point of answering is what stops the two ever disagreeing. */
-  const [answer, setAnswer] = useState<(typeof SEXES)[number] | null>(null);
-  const [focus, setFocus] = useState<FocusArea[]>([]);
-  const [name, setName] = useState("");
+     `kind` at the point of answering is what stops the two ever disagreeing.
+     A re-run pre-fills from the stored record (M-182): the answer that was
+     given, the focus that was picked, the name that was offered — the
+     capability itself is reconciled at finish, not here (see `initial`). */
+  const [answer, setAnswer] = useState<(typeof SEXES)[number] | null>(
+    () => SEXES.find((s) => s.sex === initial?.sex) ?? null,
+  );
+  const [focus, setFocus] = useState<FocusArea[]>(() => [...(initial?.focus ?? [])]);
+  const [name, setName] = useState(() => initial?.name ?? "");
   /* The optional trainer code (M-171) and the one line it may earn.
      `attemptedCodes` is what makes "call the RPC once" true: blur and
      finish can both reach the attempt, but a given typed value only
@@ -166,12 +209,20 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
        door, and its outcome must never delay entering Bloom. */
     if (trainerCode.trim()) void attemptLink(trainerCode);
     onFinish({
-      kind: answer?.kind ?? "unspecified",
+      /* A re-run that leaves the sex answer as it found it returns the
+         STORED capability, not the one the answer would derive (M-182):
+         Settings may have changed the capability since the answer was
+         given, and a click-through must not undo that. A changed answer
+         re-derives, exactly as a first run does. */
+      kind:
+        initial && answer?.sex === initial.sex
+          ? initial.kind
+          : (answer?.kind ?? "unspecified"),
       sex: answer?.sex ?? null,
       focus,
       name: name.trim() || null,
     });
-  }, [answer, focus, name, onFinish, sound, trainerCode, attemptLink]);
+  }, [answer, focus, name, onFinish, sound, trainerCode, attemptLink, initial]);
 
   const toggleFocus = useCallback(
     (area: FocusArea) => {
@@ -490,6 +541,25 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
             {step === 0 ? "Get started" : step === STEP_COUNT - 1 ? "Enter Bloom" : "Continue"}
             <ArrowRight size={17} />
           </button>
+          {/* The re-run's exit (M-182): the preview's quiet text-button
+              voice, under the CTA, on every screen of the run — the one
+              addition the re-run makes to the composition, and only
+              ever rendered when the gate passes `onExit` (re-runs and
+              replays; never a first run). */}
+          {onExit ? (
+            <div className="wl-notnow-row">
+              <button
+                type="button"
+                className="wl-notnow"
+                onClick={() => {
+                  sound("close");
+                  onExit();
+                }}
+              >
+                Not now
+              </button>
+            </div>
+          ) : null}
         </div>
       </div>
 

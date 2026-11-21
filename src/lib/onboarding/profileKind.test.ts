@@ -59,6 +59,11 @@ describe("parseOnboarding", () => {
       name: "Ada",
       at: "2026-09-08T00:00:00.000Z",
       admin: false,
+      /* A pre-versioning document has no `welcomeVersion` field either.
+         It must come back as 0 — "answered before versions existed" —
+         which is what makes the gate offer the current Welcome once
+         more (M-182). */
+      welcomeVersion: 0,
     });
   });
 
