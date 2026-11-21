@@ -13,8 +13,9 @@ import { describe, expect, it } from "vitest";
  *
  *   1. Date strip: day cells carry no border; the selected day is a
  *      soft pill (pill radius, transparent border, warm gold fill).
- *   2. Hero (.nut-card-gold): ONE borderless soft tonal zone — no
- *      border, the 24px card radius, 32px padding; inside it the
+ *   2. Hero (.nut-card-gold): fully open on the canvas (M-193 — the
+ *      M-187 tonal zone still read as a panel live): no fill, no
+ *      border, no radius, no shadow, 32px padding kept; inside it the
  *      footer hairline is the shared faint hairline and the
  *      eating-window chip is borderless footer typography, so the
  *      provenance ledger + estimates note are not nested sub-boxes.
@@ -60,11 +61,19 @@ describe("nutrition de-box complete (day view)", () => {
     expect(selected).not.toContain("border: 1px solid");
   });
 
-  it("hero: one borderless soft tonal zone at 24px radius and 32px padding", () => {
+  it("hero: fully open on the canvas (M-193: no fill, no radius, no shadow; padding kept)", () => {
+    /* M-187's borderless tonal zone still read as one large rounded
+       panel live (post-deploy sweep, 2026-11-21). M-193 opens the
+       Day totals hero fully — this pin replaces the zone pin at
+       greater strictness: no background presence may remain. */
     const hero = rule(/\.nut-card\.nut-card-gold \{([^}]*)\}/);
+    expect(hero).toContain("background: transparent;");
+    expect(hero).toContain("background-image: none;");
     expect(hero).toContain("border: none;");
-    expect(hero).toContain("border-radius: var(--radius-card);");
+    expect(hero).toContain("border-radius: 0;");
+    expect(hero).toContain("box-shadow: none;");
     expect(hero).toContain("padding: var(--space-8);");
+    expect(hero).not.toContain("var(--dbx-specular)");
   });
 
   it("hero: the footer hairline is the shared faint hairline", () => {

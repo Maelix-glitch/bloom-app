@@ -58,24 +58,26 @@ describe("trackers de-box complete (M-190) — the six trackers", () => {
     expect(BLOCK).toContain(".tk2-root .at-territories");
   });
 
-  it("each territory is a soft borderless zone: tonal step, 20px radius, specular only", () => {
+  it("each territory sits fully open on the canvas (M-193: no fill, no radius, no specular)", () => {
+    /* M-190's borderless tonal zone still read as a dark panel live
+       (post-deploy sweep, 2026-11-21): a solid --surface fill at a
+       20px radius is a box to the eye. M-193 opens the zones fully —
+       this pin replaces the M-190 zone pin at greater strictness:
+       NO background presence at rest at all. */
     const zone = rule(/\.tk2-root \.at-territory \{([^}]*)\}/);
     expect(zone).not.toBeNull();
-    expect(zone![1]).toContain("background: var(--surface);");
+    expect(zone![1]).toContain("background: transparent;");
     expect(zone![1]).toContain("border: none;");
-    /* the spec's 20px, as the house token: --radius-xl = --radius + 4px */
-    expect(zone![1]).toContain("border-radius: var(--radius-xl);");
-    expect(zone![1]).toContain("box-shadow: var(--dbx-specular);");
-    /* No shadow box: the ONLY box-shadow declaration in the zone is
-       the specular catch token — never a literal offset/blur shadow. */
-    const shadows = [...zone![1].matchAll(/box-shadow:\s*([^;]+);/g)].map((m) => m[1].trim());
-    expect(shadows).toEqual(["var(--dbx-specular)"]);
+    expect(zone![1]).toContain("border-radius: 0;");
+    expect(zone![1]).toContain("box-shadow: none;");
+    expect(zone![1]).not.toContain("var(--surface)");
+    expect(zone![1]).not.toContain("var(--dbx-specular)");
   });
 
-  it("hover is a tonal step, never a frame or a lift", () => {
+  it("hover is the flat 4% tonal step, never a frame or a lift", () => {
     const hover = rule(/\.tk2-root \.at-territory:hover \{([^}]*)\}/);
     expect(hover).not.toBeNull();
-    expect(hover![1]).toContain("background: var(--surface-2);");
+    expect(hover![1]).toContain("background: rgb(255 255 255 / 0.04);");
     expect(hover![1]).toContain("border: none;");
     expect(hover![1]).toContain("transform: none;");
     expect(hover![1]).not.toContain("border-color");

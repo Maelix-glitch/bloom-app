@@ -32,6 +32,11 @@ import { AddHabitModal } from "@/components/tk/AddHabitModal";
 
 import { useTrackers } from "@/hooks/useTrackers";
 import { useHabits } from "@/hooks/useHabits";
+import { useNutrition } from "@/hooks/useNutrition";
+import { useBodyProfile } from "@/hooks/useBodyProfile";
+import { usePeriodLog } from "@/hooks/usePeriodLog";
+import { cycleDayKeys, signalsOf } from "@/lib/profile/record";
+import { daySignalCount } from "@/lib/stats";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { useProfileSpace } from "@/hooks/useProfileSpace";
 import { greetingFor, moodToday } from "@/lib/home/today";
@@ -111,6 +116,13 @@ function WallpaperFigure() {
 function TodayPage() {
   const trackers = useTrackers();
   const habits = useHabits();
+  /* M-192: the day union's remaining sources — food days, weigh-in
+     days and cycle days — read from the same stores the Profile
+     record joins, so Today's facts count the same logged days the
+     Profile's totals do. */
+  const nutrition = useNutrition();
+  const body = useBodyProfile();
+  const period = usePeriodLog();
   /* The browser's connectivity word: it downgrades the sync pill and
      carries the one honest offline line — it never upgrades a claim. */
   const online = useConnectivity();
@@ -169,6 +181,7 @@ function TodayPage() {
     moodLoading: mood.loading,
     trackersHydrated: trackers.hydrated,
     trackerSyncState: trackers.sync.state,
+    cycleHydrated: period.hydrated,
   });
   const recordReady = useEverReady(recordsSettled);
   /* Feel layer (v6 §3): the stack's three grid rows carry .feel-in on
@@ -177,21 +190,37 @@ function TodayPage() {
   const rowFocus = useFeelIn<HTMLDivElement>();
   const rowWeek = useFeelIn<HTMLDivElement>();
   const rowHabits = useFeelIn<HTMLDivElement>();
+  /* The union's extra sources (M-192), as day-key lists: food entries,
+     weigh-ins, and cycle days expanded the Profile record's way. */
+  const foodDays = useMemo(() => nutrition.entries.map((e) => e.day), [nutrition.entries]);
+  const weighInDays = useMemo(() => body.weighIns.map((w) => w.date), [body.weighIns]);
+  const cycleDays = useMemo(
+    () => cycleDayKeys(period.days, period.logs, trackers.today),
+    [period.days, period.logs, trackers.today],
+  );
   /* Day one is a property of the record, not of this device's onboarding
      answer — see genuineFirstDay. The stores on this page are the record:
-     habit ticks, mood check-ins and tracker days, by distinct day. */
+     habit ticks, mood check-ins, tracker days with something on them,
+     food days, weigh-in days and cycle days, by distinct day — the
+     synthesis's own union (recordDayKeys), counted inline here because
+     this count stands before the synthesis input is assembled. */
   const recordDayCount = useMemo(() => {
     const keys = new Set<string>();
     for (const l of habits.logs) keys.add(l.date);
     for (const e of mood.entries) keys.add(localDay(e.timestamp));
-    for (const d of trackers.days) keys.add(d.date);
+    for (const d of trackers.days) {
+      if (daySignalCount(signalsOf(d)) > 0) keys.add(d.date);
+    }
+    for (const d of foodDays) keys.add(d);
+    for (const d of weighInDays) keys.add(d);
+    for (const d of cycleDays) keys.add(d);
     return keys.size;
-  }, [habits.logs, mood.entries, trackers.days]);
+  }, [habits.logs, mood.entries, trackers.days, foodDays, weighInDays, cycleDays]);
 
   /* W4-2 — the command centre's synthesis: the record, read once, answering
      how you're doing / what changed / what matters / what's next. Its day
      count is the same distinct-day union as recordDayCount above (the lib
-     computes it from the same three sources), so the tiles and the hero can
+     computes it from the same sources, M-192), so the tiles and the hero can
      never disagree. The summary is null until the assessment is complete. */
   const assessmentSummary = useMemo(() => summaryOf(assessment.state), [assessment.state]);
   const overview = useMemo(
@@ -210,6 +239,9 @@ function TodayPage() {
         trackerDays: trackers.days,
         trackers: trackers.analysis,
         assessment: { state: assessment.state, summary: assessmentSummary },
+        foodDays,
+        weighInDays,
+        cycleDays,
       }),
     [
       today,
@@ -224,6 +256,9 @@ function TodayPage() {
       trackers.analysis,
       assessment.state,
       assessmentSummary,
+      foodDays,
+      weighInDays,
+      cycleDays,
     ],
   );
   /* Latched like the hero, on the same settled predicate: once the

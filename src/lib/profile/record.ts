@@ -62,8 +62,10 @@ const weekStart = (date: string): string => {
   return shift(date, -dow);
 };
 
-/** A tracker day in the shared signal shape (lib/stats) — study arrives as sessions here. */
-const signalsOf = (e: DayEntry): DaySignals => ({
+/** A tracker day in the shared signal shape (lib/stats) — study arrives as sessions here.
+ *  Exported (M-192): Today's overview union reads tracker days through
+ *  the same mapping, so both surfaces apply the one signal rule. */
+export const signalsOf = (e: DayEntry): DaySignals => ({
   sleepMinutes: e.sleepMinutes,
   waterMl: e.waterMl,
   studyMinutes: e.sessions.reduce((sum, s) => sum + s.minutes, 0),
@@ -115,6 +117,27 @@ export function recordGrid(input: RecordInput): { days: RecordDay[]; start: stri
     });
   }
   return { days, start, end };
+}
+
+/**
+ * The cycle day keys the totals count (M-192): day-log dates plus every
+ * day inside each period's range, capped at today — the same expansion
+ * `recordTotals` applies inline. Exported so Today's overview union
+ * counts cycle days identically instead of re-deriving the rule.
+ */
+export function cycleDayKeys(
+  cycleDays: readonly DayLog[],
+  periods: readonly PeriodLog[],
+  today: string,
+): string[] {
+  const keys = new Set<string>();
+  for (const c of cycleDays) if (c.date <= today) keys.add(c.date);
+  for (const p of periods) {
+    if (!p.start) continue;
+    const last = p.end && p.end >= p.start ? p.end : p.start;
+    for (let d = p.start; d <= last && d <= today; d = shift(d, 1)) keys.add(d);
+  }
+  return [...keys];
 }
 
 export interface RecordTotals {
