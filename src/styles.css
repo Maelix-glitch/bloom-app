@@ -19,6 +19,9 @@
 /* Bloom mobile-first responsive system: shell, nav, sheets, type, guards. */
 @import "./styles/responsive.css";
 @import "./styles/access.css";
+/* The invitation gate in the approved glass (M-172): layered over
+   access.css, whose text ui.guard and contrast.guard pin as-is. */
+@import "./styles/invite.css";
 
 @custom-variant dark (&:is(.dark *));
 
