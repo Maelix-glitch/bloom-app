@@ -2560,57 +2560,233 @@ a.day-path__label:hover {
   padding-bottom: var(--space-4);
   border-bottom: 1px solid var(--dbx-hairline);
 }
-
 /* =====================================================================
-   M-196 — "Your whole day" as a designed day-rhythm composition.
-   The M-162 stacked document rows (label + paragraph, label +
-   paragraph) read like a form. The facts now hang on a 24-hour
-   ribbon with the sleep window shaded and the day's moments placed
-   on it; sleep is three Fraunces figures with air; Tonight is two
-   calm lists. Tonal surfaces only — no glass, no card-in-card.
+   M-198 — "Your whole day" as the Day Arc.
+   The M-196 ribbon is retired: the owner reviewed a preview of
+   the day drawn as one sun-path arc and approved it, and this
+   block ports that preview exact — the arc (gold waking hours
+   deepening through dusk into a sage sleep valley, horizon glow,
+   draw-in), six moment medallions riding it with the preview's
+   phone staggering, a pulsing "You are here" marker, sleep as
+   three Fraunces figures, and Tonight as two calm tonal zones.
+   Node positions come from the pure geometry in
+   lib/nutrition/dayArc (time → arc position, data-driven).
+   Tonal surfaces only — no card-in-card.
    ===================================================================== */
-.nut-care-ribbon {
+.nut-care-arc-wrap {
+  /* The arc gradient's stops, as scoped tokens (the house hex
+     law: a hex lives on a token definition line or nowhere) —
+     the preview's blend, dawn gold through dusk into sage. */
+  --arc-stop-dawn: #dcc08f;
+  --arc-stop-morning: #e8d3a5;
+  --arc-stop-dusk: #d9a37e;
+  --arc-stop-evening: #a9b98d;
+  --arc-stop-night: #8fc7a2;
   margin-top: var(--space-6);
 }
-.nut-care-ribbon-track {
+.nut-care-arc {
   position: relative;
-  height: 10px;
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--foreground) 7%, transparent);
-  overflow: visible;
 }
-.nut-care-ribbon-sleep {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  border-radius: 999px;
-  background: color-mix(in oklab, var(--sage) 38%, transparent);
+.nut-care-arc-svg {
+  display: block;
+  width: 100%;
+  height: auto;
 }
-.nut-care-ribbon-dot {
-  position: absolute;
-  top: 50%;
-  width: 9px;
-  height: 9px;
-  border-radius: 50%;
-  background: var(--gold);
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--gold) 22%, transparent);
+.nut-care-arc-track {
+  fill: none;
+  stroke: color-mix(in oklab, var(--foreground) 9%, transparent);
+  stroke-width: 2;
+  stroke-linecap: round;
 }
-.nut-care-ribbon-labels {
+.nut-care-arc-path {
+  fill: none;
+  stroke: url(#nutCareArcGrad);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: nutCareDraw 2s cubic-bezier(0.6, 0.05, 0.25, 1) 0.2s forwards;
+}
+@keyframes nutCareDraw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+/* horizon ticks under the arc ends */
+.nut-care-arc-base {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2) var(--space-5);
-  margin-top: var(--space-3);
-  font-size: var(--text-meta);
-  color: var(--muted-foreground);
+  justify-content: space-between;
+  margin-top: -6px;
+  padding: 0 2px;
+  font-size: 0.68rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: color-mix(in oklab, var(--foreground) 42%, transparent);
 }
-.nut-care-ribbon-time {
+
+/* moment nodes — the medallion's centre sits exactly on the arc */
+.nut-care-node {
+  position: absolute;
+  transform: translate(-50%, -24px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  opacity: 0;
+  animation: nutCareNodeIn 0.9s ease forwards;
+  pointer-events: none;
+}
+@keyframes nutCareNodeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -12px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -24px);
+  }
+}
+.nut-care-medallion {
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--surface-2);
+  border: 1px solid color-mix(in oklab, var(--gold) 38%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold-soft);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+}
+.nut-care-medallion svg {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+.nut-care-node.is-sleep .nut-care-medallion {
+  border-color: color-mix(in oklab, var(--sage) 45%, transparent);
+  color: var(--sage);
+}
+.nut-care-node-cap {
+  margin-top: 10px;
+  width: 104px;
+}
+.nut-care-node-time {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.02rem;
+  line-height: 1.15;
   color: var(--foreground);
-  font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.nut-care-node-label {
+  display: block;
+  margin-top: 3px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  color: var(--muted-foreground);
+}
+/* edge nodes: keep captions inside the frame */
+.nut-care-node.is-first .nut-care-node-cap {
+  transform: translateX(16px);
+}
+.nut-care-node.is-last .nut-care-node-cap {
+  transform: translateX(-14px);
+}
+
+/* you are here */
+.nut-care-here {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  animation: nutCareHereIn 0.9s ease 1.9s forwards;
+  pointer-events: none;
+}
+@keyframes nutCareHereIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -30%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+.nut-care-here-dot {
+  position: relative;
+  display: block;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow:
+    0 0 0 3px color-mix(in oklab, var(--gold) 22%, transparent),
+    0 0 18px color-mix(in oklab, var(--gold) 55%, transparent);
+}
+.nut-care-here-dot::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklab, var(--gold) 65%, transparent);
+  animation: nutCarePulse 2.6s ease-out infinite;
+}
+@keyframes nutCarePulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.9;
+  }
+  70% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(2.3);
+    opacity: 0;
+  }
+}
+.nut-care-here-label {
+  position: absolute;
+  left: 19px;
+  bottom: 13px;
+  white-space: nowrap;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+.nut-care-here.is-flip .nut-care-here-label {
+  left: auto;
+  right: 19px;
+}
+
+/* the walk line, tied to the arc */
+.nut-care-walk {
+  margin: var(--space-6) auto 0;
+  max-width: 36em;
+  text-align: center;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(1.02rem, 2.4vw, 1.18rem);
+  line-height: 1.6;
+  color: var(--gold-soft);
+}
+.nut-care-walk-strong {
+  font-style: normal;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
 .nut-care-block {
   margin-top: var(--space-8);
+  padding-top: var(--space-8);
+  border-top: 1px solid var(--dbx-hairline);
 }
 .nut-care-kicker {
   display: flex;
@@ -2621,7 +2797,7 @@ a.day-path__label:hover {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--muted-foreground);
-  margin: 0 0 var(--space-3);
+  margin: 0 0 var(--space-5);
 }
 .nut-care-kicker-icon {
   width: 15px;
@@ -2629,67 +2805,138 @@ a.day-path__label:hover {
   color: var(--gold);
   flex: none;
 }
+
+/* Sleep as three figures: the duration is the hero, centred by
+   grid placement — the DOM (and so the sentence the words make)
+   keeps its order: In bed by · Up at · duration. */
 .nut-care-figures {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-4) var(--space-5);
-  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  gap: var(--space-5);
+  max-width: 720px;
+  margin: 0 auto;
+  text-align: center;
 }
 .nut-care-fig {
-  display: inline-flex;
-  flex-direction: column;
-  gap: var(--space-1);
+  display: block;
+}
+.nut-care-fig-bed {
+  grid-column: 1;
+}
+.nut-care-fig-up {
+  grid-column: 3;
+}
+.nut-care-fig-hero {
+  grid-column: 2;
 }
 .nut-care-fig-label {
+  display: block;
   font-size: var(--text-meta);
+  font-weight: 600;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
   color: var(--muted-foreground);
+  margin-bottom: 10px;
 }
 .nut-care-fig-value {
+  display: block;
   font-family: var(--font-display);
-  font-size: var(--text-display);
+  font-weight: 500;
+  font-size: clamp(1.7rem, 4.6vw, 2.6rem);
   line-height: 1;
   color: var(--foreground);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.nut-care-sep {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  color: var(--muted-foreground);
-  align-self: center;
+.nut-care-fig-hero .nut-care-fig-value {
+  font-size: clamp(2.6rem, 7.5vw, 4.2rem);
+  color: var(--gold-soft);
 }
-@media (max-width: 639px) {
-  .nut-care-sep {
-    display: none;
-  }
-  .nut-care-figures {
-    gap: var(--space-5);
-  }
+/* The sentence's joins live in the words, not the layout: the
+   figures stand alone on the page, and the "·" separators stay
+   in the text for anyone reading it as text. */
+.nut-care-sep {
+  display: none;
+}
+.nut-care-wake-note {
+  margin: var(--space-5) 0 0;
+  text-align: center;
+  font-size: 0.92rem;
+  color: var(--muted-foreground);
 }
 .nut-care-wake {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: var(--space-2);
+  justify-content: center;
+  gap: var(--space-3);
   margin-top: var(--space-4);
 }
+.nut-care-wake-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--gold-soft);
+}
+.nut-care-wake-input {
+  min-height: 40px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+  background: var(--surface-2);
+  color: var(--gold-soft);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color-scheme: dark;
+}
+
+/* Tonight — two calm tonal zones, divided by a hairline */
 .nut-care-cols {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1px 1fr;
   gap: var(--space-8);
 }
-@media (max-width: 639px) {
-  .nut-care-cols {
-    grid-template-columns: 1fr;
-    gap: var(--space-6);
-  }
+.nut-care-cols-divider {
+  background: var(--dbx-hairline);
+}
+.nut-care-zone {
+  padding: var(--space-2) var(--space-4);
+  border-radius: 6px;
+}
+.nut-care-zone.is-do {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--sage) 6%, transparent),
+    transparent 85%
+  );
+}
+.nut-care-zone.is-avoid {
+  background: linear-gradient(
+    180deg,
+    color-mix(in oklab, var(--rose) 5%, transparent),
+    transparent 85%
+  );
 }
 .nut-care-col-title {
   font-family: var(--font-display);
-  font-size: 1.125rem;
+  font-weight: 500;
+  font-size: 1.45rem;
+  line-height: 1.2;
+  margin: 0 0 var(--space-5);
+}
+.nut-care-zone.is-do .nut-care-col-title {
+  color: var(--sage);
+}
+.nut-care-zone.is-avoid .nut-care-col-title {
+  color: var(--rose);
+}
+.nut-care-col-title span {
   color: var(--foreground);
-  margin: 0 0 var(--space-3);
+  font-style: italic;
 }
 .nut-care-list2 {
   list-style: none;
@@ -2700,24 +2947,133 @@ a.day-path__label:hover {
 }
 .nut-care-list2 li {
   display: flex;
-  gap: var(--space-2);
+  gap: var(--space-3);
   align-items: flex-start;
-  line-height: 1.6;
-  color: var(--muted-foreground);
+  font-size: 0.98rem;
+  line-height: 1.55;
+  color: var(--foreground);
 }
 .nut-care-list-icon {
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   flex: none;
-  margin-top: 4px;
+  margin-top: 3px;
 }
 .nut-care-list-icon.is-do {
   color: var(--sage);
 }
 .nut-care-avoid-mark {
   flex: none;
-  width: 15px;
+  width: 18px;
   margin-top: 11px;
   border-top: 2px solid var(--rose);
   border-radius: 2px;
+}
+
+/* Phone: the preview's own staggering — smaller medallions, the
+   Wind-down caption stepped left and down, clear of In bed's;
+   the orientation row gives its space to the night captions. */
+@media (max-width: 640px) {
+  .nut-care-node {
+    transform: translate(-50%, -19px);
+  }
+  @keyframes nutCareNodeIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -8px);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -19px);
+    }
+  }
+  .nut-care-medallion {
+    width: 38px;
+    height: 38px;
+  }
+  .nut-care-medallion svg {
+    width: 19px;
+    height: 19px;
+  }
+  .nut-care-node-cap {
+    width: 66px;
+    margin-top: 7px;
+  }
+  .nut-care-node-time {
+    font-size: 0.78rem;
+    white-space: normal;
+  }
+  .nut-care-node-label {
+    font-size: 0.6rem;
+    margin-top: 2px;
+  }
+  .nut-care-node.is-first .nut-care-node-cap {
+    transform: translateX(10px);
+  }
+  .nut-care-node.is-last .nut-care-node-cap {
+    transform: translateX(-10px);
+  }
+  .nut-care-node.is-stagger .nut-care-node-cap {
+    transform: translate(-18px, 32px);
+  }
+  .nut-care-here-label {
+    font-size: 0.48rem;
+    letter-spacing: 0.16em;
+    left: 10px;
+    bottom: 10px;
+  }
+  .nut-care-here.is-flip .nut-care-here-label {
+    left: auto;
+    right: 10px;
+  }
+  .nut-care-arc-base {
+    display: none;
+  }
+  .nut-care-walk {
+    margin-top: var(--space-10);
+  }
+  .nut-care-figures {
+    grid-template-columns: 1fr 1fr;
+  }
+  .nut-care-fig-hero {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    margin-bottom: var(--space-3);
+  }
+  .nut-care-fig-bed {
+    grid-column: 1;
+    grid-row: 2;
+  }
+  .nut-care-fig-up {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  .nut-care-cols {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+  }
+  .nut-care-cols-divider {
+    height: 1px;
+    width: 100%;
+    margin: var(--space-4) 0;
+  }
+  .nut-care-zone {
+    padding: var(--space-3) var(--space-1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nut-care-arc-path {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+  .nut-care-node,
+  .nut-care-here {
+    animation: none;
+    opacity: 1;
+  }
+  .nut-care-here-dot::after {
+    animation: none;
+    opacity: 0;
+  }
 }
