@@ -12,6 +12,11 @@
  *   3. **Focus** — what they came for. Multi-select, entirely optional, used to
  *      pick sensible starting trackers instead of dumping all of them on.
  *   4. **Name** — offered, never required, then a short recap and in.
+ *      Under the recap sits one optional extra (M-171): "Have a trainer
+ *      code?" — a code an admin-granted trainer gave them. Entering one
+ *      links the account to that trainer server-side; leaving it empty
+ *      changes nothing, and a wrong code is one gentle line, never a
+ *      locked door.
  *
  * There is a **Launch as admin** door on every screen. It only renders for
  * someone the database lists in `public.app_admins` (see `useAdminAccess`); for
@@ -34,7 +39,7 @@
  * before: this is a presentation change only.
  */
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, ArrowRight, Check, Shield } from "lucide-react";
 
@@ -47,6 +52,7 @@ import {
   type SexAnswer,
 } from "@/lib/onboarding/profileKind";
 import { AdminPanel } from "@/components/welcome/AdminPanel";
+import { linkTrainerCode } from "@/lib/trainer/referralServer";
 import "@/styles/welcome.css";
 
 /* The preview's screen entrance: .55s on its spring-in curve. */
@@ -108,6 +114,42 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
   const [answer, setAnswer] = useState<(typeof SEXES)[number] | null>(null);
   const [focus, setFocus] = useState<FocusArea[]>([]);
   const [name, setName] = useState("");
+  /* The optional trainer code (M-171) and the one line it may earn.
+     `attemptedCodes` is what makes "call the RPC once" true: blur and
+     finish can both reach the attempt, but a given typed value only
+     ever makes one call. */
+  const [trainerCode, setTrainerCode] = useState("");
+  const [trainerFlag, setTrainerFlag] = useState<string | null>(null);
+  const attemptedCodes = useRef<Set<string>>(new Set());
+
+  const attemptLink = useCallback(async (raw: string) => {
+    const value = raw.trim();
+    if (!value || attemptedCodes.current.has(value)) return;
+    attemptedCodes.current.add(value);
+    const result = await linkTrainerCode(value);
+    switch (result.kind) {
+      case "linked":
+        setTrainerFlag("Linked — your trainer will see you've joined.");
+        break;
+      case "already-linked":
+        setTrainerFlag("You're already linked to a trainer, so this code wasn't added.");
+        break;
+      case "own-code":
+        setTrainerFlag("That's your own trainer code — it's for your clients to enter.");
+        break;
+      case "unknown-code":
+      case "malformed":
+        setTrainerFlag(
+          "That code doesn't match a trainer — check it with them, or carry on without it.",
+        );
+        break;
+      case "unavailable":
+        /* Signed out, offline, or the server can't be reached: the
+           code simply isn't linked, and onboarding never says so —
+           a setup flow does not fail over an optional extra. */
+        break;
+    }
+  }, []);
 
   const go = useCallback(
     (next: number) => {
@@ -119,13 +161,17 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
 
   const finish = useCallback(() => {
     sound("celebrate");
+    /* A code typed but never blurred still gets its one link attempt —
+       fire-and-forget, because an optional code must never hold the
+       door, and its outcome must never delay entering Bloom. */
+    if (trainerCode.trim()) void attemptLink(trainerCode);
     onFinish({
       kind: answer?.kind ?? "unspecified",
       sex: answer?.sex ?? null,
       focus,
       name: name.trim() || null,
     });
-  }, [answer, focus, name, onFinish, sound]);
+  }, [answer, focus, name, onFinish, sound, trainerCode, attemptLink]);
 
   const toggleFocus = useCallback(
     (area: FocusArea) => {
@@ -386,6 +432,43 @@ export function Welcome({ onFinish, onAdmin }: WelcomeProps) {
                         </span>
                       </div>
                     </div>
+                  </div>
+
+                  {/* The trainer code (M-171): below the recap, in the
+                      name field's own glass dress, so the preview's
+                      composition — words, field, recap — is untouched.
+                      Optional in every way: empty is skipped silently,
+                      a wrong code is one gentle line, and finishing
+                      never waits on it. */}
+                  <div className="wl-trainer">
+                    <label className="wl-trainer-label" htmlFor="wl-trainer-code">
+                      Have a trainer code?
+                    </label>
+                    <input
+                      id="wl-trainer-code"
+                      className="wl-input glass-field"
+                      value={trainerCode}
+                      onChange={(e) => {
+                        setTrainerCode(e.target.value);
+                        setTrainerFlag(null);
+                      }}
+                      onBlur={() => void attemptLink(trainerCode)}
+                      placeholder="Optional"
+                      maxLength={20}
+                      autoComplete="off"
+                      autoCapitalize="characters"
+                      spellCheck={false}
+                      aria-label="Trainer code, optional"
+                    />
+                    <p className="wl-trainer-note">
+                      Your trainer will see that you&rsquo;ve joined Bloom with their code. Nothing
+                      else about you is shared.
+                    </p>
+                    {trainerFlag ? (
+                      <p className="wl-trainer-flag" role="status">
+                        {trainerFlag}
+                      </p>
+                    ) : null}
                   </div>
                 </>
               )}

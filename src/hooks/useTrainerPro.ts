@@ -18,7 +18,6 @@ import {
   TRAINER_KEY,
   confirmPendingOverride,
   dismissPendingOverride,
-  ensureReferralCode,
   parseTrainerState,
   setShareConsent,
   type TrainerState,
@@ -34,8 +33,6 @@ export interface TrainerProStore {
   /** The consent-gated share summary; null while sharing is off. */
   summary: ShareSummary | null;
   setConsent: (consent: boolean) => void;
-  /** Create (once) and return the referral code for this account. */
-  ensureCode: (userId: string | null) => string | null;
   confirmOverride: () => void;
   dismissOverride: () => void;
 }
@@ -71,8 +68,6 @@ export function useTrainerPro(): TrainerProStore {
     setShareConsent(consent);
   }, []);
 
-  const ensureCode = useCallback((userId: string | null) => ensureReferralCode(userId), []);
-
   const confirmOverride = useCallback(() => {
     confirmPendingOverride(new Date().toISOString());
   }, []);
@@ -81,5 +76,5 @@ export function useTrainerPro(): TrainerProStore {
     dismissPendingOverride();
   }, []);
 
-  return { state, summary, setConsent, ensureCode, confirmOverride, dismissOverride };
+  return { state, summary, setConsent, confirmOverride, dismissOverride };
 }
