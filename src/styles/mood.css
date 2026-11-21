@@ -1120,3 +1120,81 @@ select.bmood-input {
 .mm-insight:hover {
   background: color-mix(in oklab, var(--foreground) 4%, transparent);
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box Complete (owner directive 2026-11-21): the Mood page's remaining
+ * panels open onto the canvas. These are per-section overrides of the
+ * M-180 .mp-panel dress (which stays in styles.css for the ONE panel
+ * this page keeps — mood-streak, whose candle-photo gradient is built
+ * from --surface and would strand a hard-edged rectangle if its ground
+ * were removed). Every selector below was checked against the markup
+ * MoodPage / MoodGraph actually render (the M-176 lesson):
+ *
+ *   hero            section.mp-hero > img.mp-hero-art — the window photo
+ *                   is masked on all four edges and the section's own
+ *                   surface tone is gone, so no rectangular image edge
+ *                   survives; the two gradient veils only modulate the
+ *                   photo (over the canvas they blend to the canvas
+ *                   colour itself), and the copy keeps its scrim.
+ *   mood-log        heading + faces float on the canvas; the quote
+ *                   strip below keeps only its top hairline.
+ *   mood-journey    chart dots and axis sit directly on the canvas.
+ *   mood-insights   the section surface goes; the M-180 hairline rows
+ *                   sit on the canvas.
+ *   mood-graph      the web opens on the canvas under one top hairline
+ *                   (its loading skeleton wears the same dress).
+ *   mood-distribution  unboxed to the canvas; its bokeh note stays as a
+ *                   borderless media zone (border removed in markup).
+ *   "A small insight" (inside MoodJourney) is the featured insight: an
+ *                   editorial callout — gold left bar + faint tint, its
+ *                   old photo box removed in markup.
+ * ------------------------------------------------------------------------- */
+.mood-page .mp-hero {
+  background: transparent;
+}
+.mood-page .mp-hero-art {
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 10%, #000 90%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent 0, #000 14%, #000 86%, transparent 100%),
+    linear-gradient(to right, transparent 0, #000 10%, #000 90%, transparent 100%);
+  mask-composite: intersect;
+}
+
+.mood-page section.mp-panel[data-testid="mood-log"],
+.mood-page section.mp-panel[data-testid="mood-journey"],
+.mood-page section.mp-panel[data-testid="mood-insights"],
+.mood-page section.mp-panel[data-testid="mood-distribution"] {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+}
+.mood-page section.mp-panel[data-testid="mood-journey"],
+.mood-page section.mp-panel[data-testid="mood-insights"],
+.mood-page section.mp-panel[data-testid="mood-distribution"] {
+  padding: 0;
+}
+.mood-page section.mp-panel[data-testid="mood-log"] > div:first-child {
+  padding: 0;
+}
+.mood-page section.mp-panel[data-testid="mood-log"] > div:last-child > div:last-child {
+  padding-inline: 0;
+}
+
+.mood-page section.mp-panel[data-testid="mood-graph"],
+.mood-page section[aria-label="Loading mood web"] {
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  border-radius: 0;
+  border-top: 1px solid var(--dbx-hairline);
+  padding: var(--space-10) 0 0;
+}
+
+.mood-page .mp-insight-callout {
+  border-left: 2px solid var(--gold);
+  background: rgb(255 255 255 / 0.02);
+}

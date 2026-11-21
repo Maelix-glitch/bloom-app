@@ -51,7 +51,7 @@ export function MoodGraphSkeleton() {
       </div>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,1fr)] lg:items-stretch lg:gap-12">
-        <div className="relative flex min-h-[380px] flex-col overflow-hidden rounded-2xl border border-border">
+        <div className="relative flex min-h-[380px] flex-col overflow-hidden rounded-2xl">
           <div className="mg-canvas-bg absolute inset-0" aria-hidden />
           <div className="relative grid flex-1 animate-pulse place-items-center" aria-hidden>
             <span className="absolute size-56 rounded-full border border-gold/25" />
@@ -146,7 +146,7 @@ export function MoodGraph({
       </div>
 
       <div className="mt-10 grid gap-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,1fr)] lg:items-stretch lg:gap-12">
-        <div className="mg-canvas relative flex flex-col overflow-hidden rounded-2xl border border-border">
+        <div className="mg-canvas relative flex flex-col overflow-hidden rounded-2xl">
           <div className="mg-canvas-bg absolute inset-0" aria-hidden />
           {/* my-auto keeps the web vertically centred if the reading column
               (e.g. a pinned node with three links) is taller than the canvas */}

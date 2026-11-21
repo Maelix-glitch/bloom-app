@@ -2015,3 +2015,22 @@ textarea.ci-input {
     display: none !important;
   }
 }
+
+/* ==========================================================================
+ * De-box Complete (audit, Cycle) — cascade-end.
+ *
+ * .ci-card is Cycle's one layout container: a tonal surface
+ * (--ci-surface on the --ci-bg canvas) that also wore a 1px
+ * --ci-line rim and the deep --ci-shadow. The de-box depth cues are
+ * already built into the card — the tonal step itself and the
+ * ::before top highlight (light catching the edge, the specular
+ * catch). Rim and shadow go; surface and highlight stay.
+ *
+ * The rest of this sheet's borders are primary interactive controls
+ * (.ci-input, .ci-seg, .ci-badge — spec rule 1a), data-viz rings
+ * (phase/ovulation markers), or hairline dividers — audited, kept.
+ * ======================================================================== */
+.ci-card {
+  border: none;
+  box-shadow: none;
+}

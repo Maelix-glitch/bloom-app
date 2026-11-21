@@ -40,7 +40,7 @@ export function WeekPanel({
     new Date(`${d.day}T12:00:00`).toLocaleDateString(undefined, { weekday: "short" }).slice(0, 3),
   );
   return (
-    <section className="nut-card nut-rise" aria-label="This week" style={{ "--d": "160ms" } as CSSProperties}>
+    <section className="nut-card nut-rise nut-week" aria-label="This week" style={{ "--d": "160ms" } as CSSProperties}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="eyebrow">This week</p>
@@ -106,7 +106,7 @@ export function Spectrum({
 }) {
   const anyIncomplete = rows.some((r) => r.incomplete);
   return (
-    <section className="nut-card nut-rise" aria-label="Micronutrient spectrum" style={{ "--d": "200ms" } as CSSProperties}>
+    <section className="nut-card nut-rise nut-spectrum" aria-label="Micronutrient spectrum" style={{ "--d": "200ms" } as CSSProperties}>
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="eyebrow">Micronutrient spectrum</p>
@@ -128,7 +128,7 @@ export function Spectrum({
               ? "var(--sage)"
               : "var(--gold)";
           return (
-            <div key={row.key}>
+            <div key={row.key} className="nut-spectrum-row">
               <div className="flex items-baseline gap-2 text-[length:var(--text-callout)]">
                 <span className="text-muted-foreground">
                   {row.label}

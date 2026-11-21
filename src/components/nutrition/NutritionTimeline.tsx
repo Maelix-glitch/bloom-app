@@ -66,7 +66,7 @@ export function NutritionTimeline({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="nut-meal-list">
       {MEALS.map((meal, mealIndex) => {
         const mealEntries = entries.filter((e) => e.meal === meal);
         const mealTotals = sumNutrients(mealEntries.map((e) => e.nutrients));
@@ -83,7 +83,7 @@ export function NutritionTimeline({
           <section
             key={meal}
             aria-label={MEAL_LABEL[meal]}
-            className="nut-card nut-rise"
+            className="nut-card nut-rise nut-meal-slot"
             style={{ "--d": `${120 + mealIndex * 70}ms` } as CSSProperties}
           >
             <div className="flex items-start justify-between gap-3">
@@ -108,7 +108,7 @@ export function NutritionTimeline({
                 ) : null}
                 <button
                   type="button"
-                  className="nut-icon-btn"
+                  className="nut-icon-btn nut-meal-add"
                   aria-label={`Add food to ${MEAL_LABEL[meal]}`}
                   onClick={() => onAdd(meal)}
                 >

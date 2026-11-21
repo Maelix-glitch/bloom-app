@@ -44,7 +44,6 @@ import {
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import heroWindow from "@/assets/mood/hero-window.jpg";
 import flowerBranch from "@/assets/mood/flower-branch.jpg";
-import flowerDetail from "@/assets/mood/flower-detail.jpg";
 import bokeh from "@/assets/mood/bokeh.jpg";
 import candle from "@/assets/mood/candle.jpg";
 import mountainLake from "@/assets/mood/mountain-lake.jpg";
@@ -353,7 +352,7 @@ function Hero({
   }, []);
 
   return (
-    <section className="relative overflow-hidden rounded-[calc(var(--radius)+0.5rem)] bg-surface-2">
+    <section className="mp-hero relative overflow-hidden rounded-[calc(var(--radius)+0.5rem)] bg-surface-2">
       <img
         ref={heroImgRef}
         src={heroWindow}
@@ -361,7 +360,7 @@ function Hero({
         width={1376}
         height={768}
         onLoad={() => setPhotoIn(true)}
-        className={`mm-hero-img absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-[var(--motion-signature)] ease-[var(--ease-out-expo)] ${
+        className={`mp-hero-art mm-hero-img absolute inset-0 h-full w-full object-cover object-center transition-opacity duration-[var(--motion-signature)] ease-[var(--ease-out-expo)] ${
           photoIn ? "opacity-90" : "opacity-0"
         }`}
       />
@@ -660,16 +659,7 @@ function MoodJourney({
         </div>
       </div>
 
-      <div className="relative mt-10 overflow-hidden rounded-2xl border border-border">
-        <img
-          src={flowerDetail}
-          alt=""
-          width={1376}
-          height={768}
-          className="absolute inset-0 h-full w-full object-cover opacity-25"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 bg-gradient-to-r from-card via-card/90 to-card/60" />
+      <div className="mp-insight-callout relative mt-10">
         <div className="relative grid gap-6 p-6 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:p-8">
           <div className="min-w-0">
             <div className="flex items-center gap-3">
@@ -732,7 +722,7 @@ function MoodDistribution({
           <MoodDonut slices={slices} total={total} unit={total === 1 ? "day" : "days"} />
         </div>
 
-        <div className="relative overflow-hidden rounded-2xl border border-border">
+        <div className="relative overflow-hidden rounded-2xl">
           <img
             src={bokeh}
             alt=""
@@ -914,7 +904,7 @@ function Streak({
 
 function ClosingBanner() {
   return (
-    <section className="relative overflow-hidden rounded-[calc(var(--radius)+0.25rem)] border border-border">
+    <section className="relative overflow-hidden rounded-[calc(var(--radius)+0.25rem)]">
       <img
         src={mountainLake}
         alt=""

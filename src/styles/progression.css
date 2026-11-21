@@ -3755,3 +3755,143 @@
 .pg-history-row:last-child {
   border-bottom: none;
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box Complete — Rewards (owner directive 2026-11-21; spec: Rewards
+ * view + global rules 1–4). Cascade-end overrides, presentation only —
+ * every value, hook, button and piece of copy above is frozen.
+ *
+ *   1. Hero rank showcase: the rectangular outer border, its animated
+ *      glint ring and the four corner brackets go (the brackets' markup
+ *      is removed from JourneyHero.tsx). The emblem sits on the open
+ *      canvas, held by the halo below, strengthened into the ambient
+ *      glow role: larger, gold-tinted, still subtle, still borderless.
+ *   2. Next milestone: the container loses its border and fill; the
+ *      meter becomes a sleek borderless pill track floating beneath
+ *      the rank display — tonal step (the spec's dark step mapped onto
+ *      Bloom's surface tokens), gold fill, no border anywhere.
+ *   3. Active goals: the boxed two-column grid becomes clean editorial
+ *      rows separated by 1px hairline dividers (white 6%). No card
+ *      backgrounds, no borders, no radius, no lift on hover; title,
+ *      detail, meter and counts keep their content and order. The
+ *      hairline sits on the card wrapper (Goals.tsx wraps each card
+ *      in a plain div), between rows only.
+ *   4. Filter pills: borderless — no outline on any chip; the active
+ *      chip alone carries a subtle fill, hover gets a flat wash only.
+ *   5. Group containers and the empty/loading placeholder wear no
+ *      frame either: both are open on the canvas.
+ *
+ * Kept with reason (collectible objects — the sanctioned exception,
+ * named here and pinned in deboxComplete.guard.test.ts): the rank
+ * ladder track, the achievement medallions and the crest plates keep
+ * their struck-object treatment; the status banner keeps its frame
+ * as the page's single transient focal notice.
+ * ------------------------------------------------------------------------- */
+
+/* 1 — hero: no border, no glint ring, ambient halo glow */
+.pg-hero {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+.pg-hero::before {
+  content: none;
+  display: none;
+}
+.pg-halo {
+  inset: -46%;
+  background: radial-gradient(
+    closest-side,
+    color-mix(in oklab, var(--gold) 26%, transparent),
+    color-mix(in oklab, var(--gold) 9%, transparent) 54%,
+    transparent 74%
+  );
+}
+
+/* 2 — next milestone: borderless container, pill track in a tonal step */
+.pg-next {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+.pg-next-meter .pg-rail {
+  border: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  height: 8px;
+}
+.pg-next-meter .pg-rail-fill {
+  border: none;
+  background: var(--gold);
+}
+
+/* 3 — goals: editorial hairline rows, not a boxed grid */
+.pg-goals-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.pg-goals-grid > div + div {
+  border-top: 1px solid rgb(255 255 255 / 0.06);
+}
+.pg-goal {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 1.15rem 0 1.1rem;
+}
+.pg-goal::before {
+  content: none;
+  display: none;
+}
+.pg-goal::after {
+  content: none;
+  display: none;
+}
+.pg-goal:hover {
+  transform: none;
+  border-color: transparent;
+  background: transparent;
+  box-shadow: none;
+}
+.pg-goal[data-complete="true"] {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  animation: none;
+}
+.pg-goal[data-claimed="true"] {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+/* 4 — filter pills: borderless, fill on the active chip only */
+.pg-chip {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+.pg-chip:hover {
+  border: none;
+  background: rgb(255 255 255 / 0.04);
+}
+.pg-chip[aria-pressed="true"],
+.pg-chip.is-on {
+  border: none;
+  background: color-mix(in oklab, var(--gold) 12%, transparent);
+}
+
+/* 5 — group containers + empty placeholder: open on the canvas */
+.pg-group {
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+.pg-empty {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}

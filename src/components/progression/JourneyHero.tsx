@@ -152,11 +152,6 @@ export function JourneyHero({
 
   return (
     <section className="pg-hero" aria-labelledby="pg-journey-title">
-      {/* ornamental hairline corners — the hero reads as a struck plaque */}
-      <span className="pg-hero-corner pg-hero-corner-tl" aria-hidden />
-      <span className="pg-hero-corner pg-hero-corner-tr" aria-hidden />
-      <span className="pg-hero-corner pg-hero-corner-bl" aria-hidden />
-      <span className="pg-hero-corner pg-hero-corner-br" aria-hidden />
       <span className="pg-hero-beam" aria-hidden />
 
       <div className="pg-hero-copy">
