@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useState } from "react";
-import { Eraser, Laptop, LogOut, MonitorSmartphone } from "lucide-react";
+import { IconDevices, IconErase, IconLaptop, IconLogOut } from "@/components/profile/SettingsIcons";
 
 import { bloomKeys } from "@/lib/data/erase";
 import { fmtDate } from "@/lib/format";
@@ -87,7 +87,7 @@ export function SessionsSection({
       <div className="pf-group-rows">
         <div className="pf-row">
           <span className="pf-row-icon" aria-hidden>
-            <Laptop className="size-4" />
+            <IconLaptop />
           </span>
           <span className="pf-row-text">
             <span className="pf-row-label">This device</span>
@@ -104,7 +104,7 @@ export function SessionsSection({
         {isSignedIn && session ? (
           <div className="pf-row">
             <span className="pf-row-icon" aria-hidden>
-              <MonitorSmartphone className="size-4" />
+              <IconDevices />
             </span>
             <span className="pf-row-text">
               <span className="pf-row-label">{session.email ?? "Your account"}</span>
@@ -126,7 +126,7 @@ export function SessionsSection({
               disabled={busy !== null}
             >
               <span className="pf-row-icon" aria-hidden>
-                <LogOut className="size-4" />
+                <IconLogOut />
               </span>
               <span className="pf-row-text">
                 <span className="pf-row-label">Sign out on this device</span>
@@ -143,7 +143,7 @@ export function SessionsSection({
               disabled={busy !== null}
             >
               <span className="pf-row-icon" aria-hidden>
-                <LogOut className="size-4" />
+                <IconLogOut />
               </span>
               <span className="pf-row-text">
                 <span className="pf-row-label">Sign out on every device</span>
@@ -168,7 +168,7 @@ export function SessionsSection({
       <div className="pf-group-rows pf-group-rows--danger">
         <button type="button" className="pf-row" onClick={onOpenErase}>
           <span className="pf-row-icon" aria-hidden>
-            <Eraser className="size-4" />
+            <IconErase />
           </span>
           <span className="pf-row-text">
             <span className="pf-row-label">Erase this device</span>

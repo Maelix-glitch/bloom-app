@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { FileUp } from "lucide-react";
+import { IconFileUp } from "@/components/profile/SettingsIcons";
 import { toast } from "sonner";
 
 import { EMOTION_MAP } from "@/lib/mood/types";
@@ -388,12 +388,12 @@ function AccountSettingsInner({
         />
 
         {/* The other half of "Download everything". */}
-        <section aria-label="Backup" className="pf-group mt-6">
+        <section aria-label="Backup" className="pf-group mt-8">
           <h2 className="pf-group-label">Backup</h2>
           <div className="pf-group-rows">
             <button type="button" className="pf-row" onClick={() => ui.setRestoreOpen(true)}>
               <span className="pf-row-icon" aria-hidden>
-                <FileUp className="size-4" />
+                <IconFileUp />
               </span>
               <span className="pf-row-text">
                 <span className="pf-row-label">Restore from backup</span>
@@ -410,14 +410,14 @@ function AccountSettingsInner({
 
       {/* Money System: the membership card — plan, AI credits,
           and the door to Premium. */}
-      <section id="pf-membership" className="pf-section pf-jump mt-10" aria-label="Membership">
+      <section id="pf-membership" className="pf-section pf-jump" aria-label="Membership">
         <PremiumSection />
       </section>
 
       {/* Trainer & Clinician Pro: the consent-gated share summary
           and trainer-proposed targets. (The referral code moved to
           the trainers-only server section below — M-171.) */}
-      <section id="pf-trainer" className="pf-section pf-jump mt-10" aria-label="Trainer and clinician">
+      <section id="pf-trainer" className="pf-section pf-jump" aria-label="Trainer and clinician">
         <TrainerSection />
       </section>
 
@@ -428,14 +428,14 @@ function AccountSettingsInner({
 
       {/* One-Kitchen Family: the household the person cooks for,
           and the dishes that suit everyone at the table. */}
-      <section id="pf-household" className="pf-section pf-jump mt-10" aria-label="Household">
+      <section id="pf-household" className="pf-section pf-jump" aria-label="Household">
         <HouseholdSection />
       </section>
 
       {/* Launch compliance: where you're signed in, and how to end it. */}
       <section
         id="pf-sessions"
-        className="pf-section pf-jump mt-10"
+        className="pf-section pf-jump"
         aria-label="Sessions and devices settings"
       >
         <div className="pf-section-head">

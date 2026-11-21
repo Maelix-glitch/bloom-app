@@ -19,29 +19,29 @@
 
 import { useState } from "react";
 import {
-  Archive,
-  BadgeCheck,
-  Bell,
-  Check,
-  ChevronDown,
-  ChevronRight,
-  Clock,
-  Download,
-  Eye,
-  Lock,
-  LogIn,
-  MessageCircle,
-  LogOut,
-  Mail,
-  Palette,
-  Share2,
-  Smartphone,
-  Sparkles,
-  Trash2,
-  Droplet,
-  UserRound,
-  Volume2,
-} from "lucide-react";
+  IconArchive,
+  IconBell,
+  IconCheck,
+  IconChevronDown,
+  IconChevronRight,
+  IconClock,
+  IconDownload,
+  IconDroplet,
+  IconEye,
+  IconLock,
+  IconLogIn,
+  IconLogOut,
+  IconMail,
+  IconPalette,
+  IconReplies,
+  IconShare,
+  IconSmartphone,
+  IconSound,
+  IconSparkles,
+  IconTrash,
+  IconUser,
+  IconVerified,
+} from "@/components/profile/SettingsIcons";
 
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useOnboarding } from "@/hooks/useOnboarding";
@@ -91,7 +91,7 @@ function Row({
         {hint ? <span className="pf-row-hint">{hint}</span> : null}
       </span>
       <span className={danger ? "pf-row-value pf-row-value--danger" : "pf-row-value"}>{value}</span>
-      {onClick ? <ChevronRight className="pf-row-chevron size-3.5" aria-hidden /> : <span />}
+      {onClick ? <IconChevronRight className="pf-row-chevron" /> : <span />}
     </>
   );
   if (!onClick) {
@@ -222,7 +222,7 @@ function PersonalizationSection() {
   return (
     <Group label="Personalisation">
       <SwitchRow
-        icon={<Droplet className="size-3.5" />}
+        icon={<IconDroplet />}
         label="Cycle tracking"
         value={optedOut ? "off" : "on"}
         on={!optedOut}
@@ -249,7 +249,7 @@ function PersonalizationSection() {
         }}
       />
       <SwitchRow
-        icon={<Volume2 className="size-3.5" />}
+        icon={<IconSound />}
         label="Sound"
         value={enabled ? "on" : "off"}
         on={enabled}
@@ -267,7 +267,7 @@ function PersonalizationSection() {
           stored answers already in it and resets nothing; leaving it
           early changes nothing either. */}
       <Row
-        icon={<Sparkles className="size-3.5" />}
+        icon={<IconSparkles />}
         label="See the welcome again"
         hint="The setup questions, with your answers filled in. Nothing is reset."
         testId="pf-row-welcome-replay"
@@ -277,7 +277,7 @@ function PersonalizationSection() {
         }}
       />
       <Row
-        icon={<UserRound className="size-3.5" />}
+        icon={<IconUser />}
         label="You told us"
         hint={
           state.sex
@@ -338,7 +338,7 @@ function VerificationRow({
         onClick={() => setOpen((v) => !v)}
       >
         <span className="pf-row-icon" aria-hidden>
-          <BadgeCheck className="size-3.5" style={{ color: VERIFIED_BLUE }} />
+          <span style={{ color: VERIFIED_BLUE }}><IconVerified /></span>
         </span>
         <span className="pf-row-text">
           <span className="pf-row-label">Verification</span>
@@ -356,9 +356,9 @@ function VerificationRow({
             : `${verification.remaining} step${verification.remaining === 1 ? "" : "s"} left`}
         </span>
         {open ? (
-          <ChevronDown className="pf-row-chevron size-3.5" aria-hidden />
+          <IconChevronDown className="pf-row-chevron" />
         ) : (
-          <ChevronRight className="pf-row-chevron size-3.5" aria-hidden />
+          <IconChevronRight className="pf-row-chevron" />
         )}
       </button>
       {open ? (
@@ -375,7 +375,7 @@ function VerificationRow({
                       : undefined
                   }
                 >
-                  {step.done ? <Check className="size-2.5" strokeWidth={3.5} /> : null}
+                  {step.done ? <IconCheck /> : null}
                 </span>
                 <span className="min-w-0 text-[length:var(--text-caption)] leading-snug">
                   <span className={step.done ? "text-muted-foreground" : "text-foreground"}>
@@ -463,13 +463,13 @@ export function AccountRow({
     <div className="pf-settings">
       <Group label="Account">
         <Row
-          icon={<Mail className="size-3.5" />}
+          icon={<IconMail />}
           label="Email"
           value={account.email ?? "not connected"}
         />
         <VerificationRow verification={verification} onEdit={onEdit} />
         <Row
-          icon={<Clock className="size-3.5" />}
+          icon={<IconClock />}
           label="Tracking since"
           value={
             account.memberSince
@@ -483,7 +483,7 @@ export function AccountRow({
         />
         {isSignedIn ? (
           <Row
-            icon={<LogOut className="size-3.5" />}
+            icon={<IconLogOut />}
             label="Sign out"
             value="this device"
             onClick={onSignOut}
@@ -492,7 +492,7 @@ export function AccountRow({
           />
         ) : (
           <Row
-            icon={<LogIn className="size-3.5" />}
+            icon={<IconLogIn />}
             label="Sign in"
             value="magic link"
             onClick={onSignIn}
@@ -505,7 +505,7 @@ export function AccountRow({
 
       <Group label="Appearance">
         <Row
-          icon={<Palette className="size-3.5" />}
+          icon={<IconPalette />}
           label="Accent"
           value={ACCENT_LABEL[identity.accent]}
           onClick={onEdit}
@@ -515,7 +515,7 @@ export function AccountRow({
 
       <Group label="Privacy">
         <Row
-          icon={<Lock className="size-3.5" />}
+          icon={<IconLock />}
           label="Profile visibility"
           value={privacy.profileVisibility === "public" ? "Public" : "Private"}
           onClick={onOpenPrivacy}
@@ -524,7 +524,7 @@ export function AccountRow({
         <ConsentSection />
         <TrustSection />
         <Row
-          icon={<Eye className="size-3.5" />}
+          icon={<IconEye />}
           label="Preview as others see it"
           onClick={onPreview}
           testId="pf-row-preview"
@@ -533,7 +533,7 @@ export function AccountRow({
 
       <Group label="Stories">
         <Row
-          icon={<Archive className="size-3.5" />}
+          icon={<IconArchive />}
           label="Archive"
           value={`${stories.length} kept`}
           onClick={onOpenArchive}
@@ -541,7 +541,7 @@ export function AccountRow({
         />
         {onOpenStorySettings ? (
           <Row
-            icon={<MessageCircle className="size-3.5" />}
+            icon={<IconReplies />}
             label="Replies, reactions & audience"
             onClick={onOpenStorySettings}
             testId="pf-row-story-settings"
@@ -551,21 +551,21 @@ export function AccountRow({
 
       <Group label="Sharing & data">
         <Row
-          icon={<Share2 className="size-3.5" />}
+          icon={<IconShare />}
           label="Share profile"
           value={identity.username ? `/@${identity.username}` : "pick a @username"}
           onClick={onShare}
           testId="pf-row-share"
         />
         <Row
-          icon={<Download className="size-3.5" />}
+          icon={<IconDownload />}
           label="Download everything"
           value="json"
           testId="pf-row-export-all"
           onClick={onExportAll}
         />
         <Row
-          icon={<Bell className="size-3.5" />}
+          icon={<IconBell />}
           label="Reminders"
           value={remindersValue}
           testId="pf-row-reminders"
@@ -573,7 +573,7 @@ export function AccountRow({
         />
         {installValue ? (
           <Row
-            icon={<Smartphone className="size-3.5" />}
+            icon={<IconSmartphone />}
             label="Install on this device"
             value={installValue}
             testId="pf-row-install"
@@ -581,7 +581,7 @@ export function AccountRow({
           />
         ) : null}
         <Row
-          icon={<Trash2 className="size-3.5" />}
+          icon={<IconTrash />}
           label="Erase everything"
           value="permanent"
           danger

@@ -2561,26 +2561,19 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   gap: var(--space-5);
 }
 .tk2-root .at-territory {
-  /* M-193 (post-deploy sweep residue): the --surface fill at a 20px
-     radius still READ as six dark panels on the live page — a filled
-     rounded rectangle is a box to the eye whatever its border state.
-     The zones now sit fully open on the canvas: no fill, no radius,
-     no specular. Layout, padding rhythm, hairlines and typography
-     are exactly as M-190 left them. */
-  background: transparent;
+  background: var(--surface);
   border: none;
-  border-radius: 0;
-  box-shadow: none;
+  /* the spec's 20px zone radius, in the house token (R8: radii come
+     from --radius-*; --radius-xl = --radius + 4px = 20px) */
+  border-radius: var(--radius-xl);
+  box-shadow: var(--dbx-specular);
   padding: var(--space-5);
 }
 .tk2-root .at-territory:hover {
-  /* The press affordance is now the flat tonal step the de-boxed
-     hero chips use (M-183) — a 4% fill on hover only, never a frame,
-     a lift, or a resting panel. */
-  background: rgb(255 255 255 / 0.04);
+  background: var(--surface-2);
   border: none;
   transform: none;
-  box-shadow: none;
+  box-shadow: var(--dbx-specular);
 }
 .tk2-root .at-board,
 .tk2-root .at-flower-col,
@@ -2600,4 +2593,137 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
 }
 .tk2-root .ci-card::before {
   content: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * Premium Pass 3 (M-210): the Targets section, designed — the owner's
+ * named complaint ("the targets in the trackers are not good"). M-184
+ * made the six targets honest open rows; this pass gives the rows the
+ * finish of a designed settings surface, Apple-Health grade:
+ *
+ *   · each row opens with a glyph medallion — the tracker's own glyph
+ *     from the one icon family, in the tracker's own ring colour on a
+ *     tonal step of that colour (the same colour language as the
+ *     flower above it), optically centred in a 40px box;
+ *   · the name steps up from caption to body size, medium weight, in
+ *     the full text colour — a label you read, not a footnote;
+ *   · the value is a large tabular figure in the UI sans (22px title
+ *     step, 600) with its unit quiet beside it (callout size, soft
+ *     colour, medium) — figure first, unit whispered, one baseline;
+ *   · under the name, when today has anything logged, a 2px progress
+ *     hairline in the tracker's colour fills to the core's own
+ *     progress figure — a whisper, never a chart; nothing logged,
+ *     no track: the row is typography alone;
+ *   · the rows breathe at the rhythm step (space-4 block padding,
+ *     up from a literal 14px), and the Edit affordance becomes a
+ *     quiet gold pill with the sliders glyph — tonal fill, gold rim,
+ *     a weighted hover and a calm press.
+ *
+ * Every value, unit, testid and behaviour is the markup's own,
+ * unchanged; the edit form behind the button keeps its styling.
+ * ------------------------------------------------------------------------- */
+.tk2-root .tk2-targets-display {
+  margin-bottom: var(--space-5);
+}
+.tk2-root .tk2-targets-display li {
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-4) 0;
+}
+.tk2-root .tk2-targets-display li[data-id="sleep"] {
+  --target-accent: var(--tk2-ring-sleep);
+}
+.tk2-root .tk2-targets-display li[data-id="water"] {
+  --target-accent: var(--tk2-ring-water);
+}
+.tk2-root .tk2-targets-display li[data-id="study"] {
+  --target-accent: var(--tk2-ring-study);
+}
+.tk2-root .tk2-targets-display li[data-id="movement"] {
+  --target-accent: var(--tk2-ring-movement);
+}
+.tk2-root .tk2-targets-display li[data-id="energy"] {
+  --target-accent: var(--tk2-ring-energy);
+}
+.tk2-root .tk2-targets-display li[data-id="screen"] {
+  --target-accent: var(--tk2-ring-screen);
+}
+.tk2-root .tk2-target-glyph {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: color-mix(in oklab, var(--target-accent, var(--gold)) 13%, var(--surface));
+  color: var(--target-accent, var(--gold));
+}
+.tk2-root .tk2-target-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.tk2-root .tk2-targets-display .tk2-target-name {
+  font-size: var(--text-body);
+  font-weight: 500;
+  letter-spacing: var(--tracking-body);
+  color: var(--ci-text);
+}
+.tk2-root .tk2-target-track {
+  display: block;
+  width: min(100%, 220px);
+  height: 2px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--target-accent, var(--gold)) 16%, transparent);
+  overflow: hidden;
+}
+.tk2-root .tk2-target-fill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--target-accent, var(--gold));
+  transform-origin: left center;
+}
+.tk2-root .tk2-targets-display .tk2-target-value {
+  font-family: var(--ci-font-sans);
+  /* Figure and unit are one phrase (the M-132 rule, kept): they
+     never split across lines; the from-plan line is a block and
+     still breaks below. */
+  white-space: nowrap;
+}
+.tk2-root .tk2-target-figure {
+  font-size: var(--text-title);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ci-text);
+}
+.tk2-root .tk2-target-unit {
+  font-size: var(--text-callout);
+  font-weight: 500;
+  color: var(--ci-text-soft);
+}
+.tk2-root .tk2-targets-display .tk2-target-auto {
+  margin-top: var(--space-1);
+}
+.tk2-root .tk2-targets-edit {
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  border-color: color-mix(in oklab, var(--gold) 38%, transparent);
+  background: color-mix(in oklab, var(--gold) 10%, transparent);
+  color: var(--gold-soft);
+  font-size: var(--text-callout);
+  font-weight: 500;
+}
+.tk2-root .tk2-targets-edit:hover:not(:disabled) {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+  background: color-mix(in oklab, var(--gold) 16%, transparent);
+}
+.tk2-root .tk2-targets-edit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+.tk2-root .tk2-targets-edit:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }

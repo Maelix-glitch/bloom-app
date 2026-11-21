@@ -221,7 +221,12 @@
 }
 
 .pg-section {
-  margin-top: 5.5rem;
+  /* Premium Pass 3 (M-212): the old 88px gap stood alone in the app —
+     double the content-page section rhythm. Sections now breathe at
+     the shared 56px step (the --space-14 token Nutrition and
+     Trackers already use). The scroll margin is anchor geometry for
+     the sticky head, not rhythm, and stays. */
+  margin-top: var(--space-14);
   scroll-margin-top: 5rem;
 }
 
@@ -2106,7 +2111,10 @@
 }
 
 .pg-reveal {
-  margin-top: 5.5rem;
+  /* Premium Pass 3 (M-212): the reveal wrapper carries the rendered
+     rhythm (the section's own margin is zeroed inside it) — the same
+     56px token step as .pg-section above. */
+  margin-top: var(--space-14);
 }
 
 /* the first section stays close to the hero (or its banner), as before */
@@ -2117,7 +2125,8 @@
 
 @media (max-width: 620px) {
   .pg-reveal {
-    margin-top: 4rem;
+    /* Premium Pass 3 (M-212): the phone step of the same rhythm. */
+    margin-top: var(--space-12);
   }
 }
 

@@ -31,6 +31,15 @@ import {
   type TrackerId,
 } from "@/lib/trackers/core";
 import type { TrackerStore } from "@/hooks/useTrackers";
+import {
+  IconActivity,
+  IconBolt,
+  IconBook,
+  IconDroplet,
+  IconMonitor,
+  IconMoon,
+  IconSliders,
+} from "@/components/profile/SettingsIcons";
 
 const unit = (kind: "duration" | "volume" | "rating") =>
   kind === "volume" ? "ml" : kind === "rating" ? "of 5" : "min";
@@ -40,6 +49,28 @@ function targetDisplay(def: TrackerDef, value: number): string {
   if (def.kind === "volume") return fmtLitres(value);
   if (def.kind === "rating") return `${fmtCount(value)} of 5`;
   return fmtDuration(value);
+}
+
+/** The row's glyph — the icon family's tracker set (M-210). */
+const TARGET_GLYPH: Record<TrackerId, (props: { className?: string }) => React.ReactNode> = {
+  sleep: IconMoon,
+  water: IconDroplet,
+  study: IconBook,
+  movement: IconActivity,
+  energy: IconBolt,
+  screen: IconMonitor,
+};
+
+/**
+ * The displayed reading split into figure and unit, so the figure can
+ * carry the size and the unit can stay quiet (M-210). The joined text
+ * is exactly targetDisplay's — "8 h", "2.2 L", "1 h 30 min", "3 of 5".
+ */
+function targetParts(def: TrackerDef, value: number): { figure: string; unit: string } {
+  const text = targetDisplay(def, value);
+  if (def.kind === "rating") return { figure: text.replace(/ of 5$/, ""), unit: "of 5" };
+  const cut = text.lastIndexOf(" ");
+  return cut > 0 ? { figure: text.slice(0, cut), unit: text.slice(cut + 1) } : { figure: text, unit: "" };
 }
 
 /**
@@ -195,11 +226,41 @@ export function TargetsPanel({ store }: { store: TrackerStore }) {
         {shown.map((def) => {
           const auto = def.id === "water" && store.waterTargetMl != null;
           const value = auto ? store.waterTargetMl! : store.goals[def.goalKey];
+          const parts = targetParts(def, value);
+          const Glyph = TARGET_GLYPH[def.id];
+          /* Today's honest progress toward this target, from the same
+             analysis the flower and tiles read — the core's own
+             progress (direction-aware: under a ceiling counts too).
+             Nothing logged today, no whisper: the row is typography
+             alone rather than an invented bar. */
+          const stat = store.analysis?.trackers[def.id];
+          const progress = stat && stat.today !== null ? stat.progress : null;
           return (
             <li key={def.id} data-id={def.id}>
-              <span className="tk2-target-name">{def.name}</span>
+              <span className="tk2-target-glyph" aria-hidden>
+                <Glyph className="size-5" />
+              </span>
+              <span className="tk2-target-main">
+                <span className="tk2-target-name">{def.name}</span>
+                {progress !== null ? (
+                  <span
+                    className="tk2-target-track"
+                    role="progressbar"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(progress * 100)}
+                    aria-label={`${def.name}: ${Math.round(progress * 100)}% of today's target`}
+                  >
+                    <span
+                      className="tk2-target-fill"
+                      style={{ transform: `scaleX(${progress})` }}
+                    />
+                  </span>
+                ) : null}
+              </span>
               <span className="tk2-target-value">
-                {targetDisplay(def, value)}
+                <span className="tk2-target-figure">{parts.figure}</span>{" "}
+                <span className="tk2-target-unit">{parts.unit}</span>
                 {auto ? <span className="tk2-target-auto"> from your plan</span> : null}
               </span>
             </li>
@@ -207,6 +268,7 @@ export function TargetsPanel({ store }: { store: TrackerStore }) {
         })}
       </ul>
       <button type="button" className="ci-btn tk2-targets-edit" onClick={() => setOpen(true)}>
+        <IconSliders />
         Edit targets
       </button>
       <BloomSheet
