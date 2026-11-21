@@ -27,7 +27,7 @@ export function WeekChart({ data, ready = true }: { data: WeekTicks; ready?: boo
 
   return (
     <section
-      className="home-panel home-rise p-5 sm:p-7"
+      className="home-panel home-open home-rise p-5 sm:p-7"
       style={{ animationDelay: "110ms" }}
       aria-labelledby="home-week-title"
       aria-busy={!ready}

@@ -1045,35 +1045,50 @@
 }
 
 /* The day's facts, de-boxed (M-174; de-box spec rule 2 — a single
-   metric never sits in its own box). Below lg the four StatTiles
-   facts form ONE borderless telemetry strip: no surface, no border,
-   no shadow — the second column is set off by a hairline and
-   whitespace, the numerals stay the tiles' big light figures. At lg
-   each fact returns to its panel with .home-panel's exact values
-   (and the old p-7 inset), so the desktop row renders as it always
-   has; only the class that carries the values is new. */
+   metric never sits in its own box). The four StatTiles facts form
+   ONE borderless telemetry strip at every width: no surface, no
+   border, no shadow — the columns are set off by whitespace and a
+   faint vertical hairline that runs only 40% of the strip's height,
+   centred (the complete de-box spec's strip, M-183), and the
+   numerals stay the tiles' big light tabular figures. M-174
+   introduced the strip below lg and returned each fact to a panel
+   at lg; M-183 (the owner's order, lifting that freeze) holds the
+   strip at desktop too — the media block below only widens the
+   inset for the four-column row and extends the divider to every
+   cell after the first. The divider is a ::before so its height
+   can be 40%: a border-left would rule the cell's full height. */
 .home-fact {
+  position: relative;
   display: flex;
   flex-direction: column;
   padding-block: 4px;
 }
 .home-fact:nth-child(even) {
-  border-left: 1px solid rgb(255 255 255 / 0.06);
   padding-left: 16px;
 }
+.home-fact:nth-child(even)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  translate: 0 -50%;
+  height: 40%;
+  width: 1px;
+  background: rgb(255 255 255 / 0.06);
+}
 @media (min-width: 1024px) {
-  .home-fact {
-    background-color: var(--home-surface);
-    background-image: var(--glass-bg);
-    border: 1px solid var(--glass-border);
-    border-radius: calc(var(--radius) + 8px);
-    box-shadow: var(--glass-shadow);
-    backdrop-filter: blur(14px);
-    padding: 28px;
+  .home-fact:nth-child(n + 2) {
+    padding-left: 24px;
   }
-  .home-fact:nth-child(even) {
-    border-left: 1px solid var(--glass-border);
-    padding-left: 28px;
+  .home-fact:nth-child(n + 2)::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    translate: 0 -50%;
+    height: 40%;
+    width: 1px;
+    background: rgb(255 255 255 / 0.06);
   }
 }
 
@@ -1085,6 +1100,121 @@
 }
 .home-press:active {
   transform: scale(0.98);
+}
+
+/* Today joins the de-box system in full (M-183 — the owner's
+   complete de-box order: every tab, desktop AND mobile; it lifts
+   the M-174 desktop freeze and, for the five elements it names,
+   M-174's mobile dress too — each such delta is disclosed in the
+   registry entry). The rules are scoped to .home-page so the
+   shared classes keep their exact values on every other route.
+   Glass stays in its ruled places and Today is not one of them:
+   nothing here carries a gradient wash or a backdrop blur.
+
+   At lg the stack's remaining panels and bands become borderless
+   tonal zones (complete-spec rules 1 + 3: elevation over outlines,
+   soft zones borderless at 20–24px): a solid tonal step, the 24px
+   radius, depth from the one specular catch, NO border. Below lg
+   the un-named sections keep M-174's dress; the named elements
+   below (.home-growth, .home-open, the assessment callout, the
+   delta rows) carry their treatment at every width. */
+@media (min-width: 1024px) {
+  .home-page .home-panel,
+  .home-page .home-band:not(.assess-prompt) {
+    background-color: var(--surface);
+    background-image: none;
+    border: 0;
+    border-radius: 24px;
+    box-shadow: var(--dbx-specular);
+    backdrop-filter: none;
+  }
+}
+
+/* "What changed" (ChangesCard): a bordered mini-card inside a panel
+   was the stack's last box-in-a-box. The deltas now read as hairline
+   rows at EVERY width — dividers inside the group only, a tonal
+   wash on hover. The DeltaPill keeps its own object treatment: it
+   is a status chip, not a container. */
+.home-page .home-delta-list {
+  gap: 0;
+}
+.home-page .home-delta-row {
+  background: transparent;
+  border: 0;
+  border-top: 1px solid var(--dbx-hairline);
+  border-radius: 0;
+  padding: 14px 4px;
+}
+.home-page .home-delta-row:first-child {
+  border-top: 0;
+  padding-top: 4px;
+}
+.home-page .home-delta-row:hover {
+  background: var(--dbx-tone);
+  border-top-color: var(--dbx-hairline);
+}
+
+/* Growth ("First Bloom is next", LevelCard): the view's SINGLE
+   subtle tonal surface card — borderless, 24px radius, the M-175
+   tonal system — set asymmetrically against the open Assessment
+   beside it. It carries the treatment at every width (the spec
+   names the element, not a breakpoint). */
+.home-page .home-growth {
+  background-color: var(--surface);
+  background-image: none;
+  border: 0;
+  border-radius: 24px;
+  box-shadow: var(--dbx-specular);
+  backdrop-filter: none;
+}
+
+/* Assessment ("Your starting point"): UNBOXED entirely, at every
+   width — an open editorial callout on the canvas: no border, no
+   box background, no shadow; the typography and the gold
+   "Open Nutrition" pill (the house Button) carry it. The band's
+   own padding goes too, so the callout's inner frame sets the
+   inset. This lifts the slab dress the card used to wear (strong
+   border, real shadow) — that dress was a design choice for an
+   in-flow section, never an overlay: nothing sits behind this
+   section but the page canvas, and the owner's complete de-box
+   order names this element explicitly. Sheets, modals and
+   popovers — the bleed-through rule's actual subjects — are
+   untouched and stay fully opaque. The base .home-band and
+   .home-band.assess-prompt rules stand as they were for any
+   surface outside .home-page. */
+.home-page .home-band.assess-prompt {
+  background: none;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
+}
+
+/* The bottom overview (WeekChart + ChangesCard): enclosing cards
+   removed at every width — headers and charts directly on the
+   canvas, their markup padding gone so the content takes the
+   column's edge like the open sections above them. Placed after
+   the lg panel block so, at equal specificity, the open treatment
+   wins over the tonal zone at desktop too. */
+.home-page .home-open {
+  background: none;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
+}
+/* Between the two overview columns at desktop: a vertical hairline,
+   and the hairline plus the row gap plus this inset lands the
+   separation on ~48px, as the spec allows. */
+@media (min-width: 1024px) {
+  .home-page .home-open-split {
+    border-left: 1px solid var(--dbx-hairline);
+    padding-left: 16px;
+  }
 }
 
 /* ---------------------------------------------------------------------------
@@ -1719,7 +1849,11 @@
 }
 
 /* Primary and secondary action chips: the first two invite a log, the rest
-   are quiet navigation. Hierarchy comes from surface and border, not colour. */
+   are quiet navigation. Hierarchy comes from surface and border, not colour.
+   M-183 (complete de-box spec): the pills float on the open hero — a
+   subtle FLAT translucent fill (white 4%), never a backdrop blur
+   (glass stays in its ruled places); the hairline rim stays, as the
+   spec allows borders on primary interactive pills. */
 .home-chip {
   display: inline-flex;
   align-items: center;
@@ -1727,7 +1861,7 @@
   min-height: 36px;
   padding: 0.4rem 0.85rem;
   border-radius: var(--radius-pill);
-  background: var(--surface-2);
+  background: rgb(255 255 255 / 0.04);
   border: 1px solid var(--border-subtle);
   color: var(--text-secondary);
   font-size: var(--text-support);
@@ -1739,8 +1873,8 @@
     transform var(--motion-micro) var(--ease-out-expo);
 }
 .home-chip:hover {
-  border-color: var(--border-strong);
-  background: var(--surface-3);
+  /* Hover brightens the fill only — the rim never recolours. */
+  background: rgb(255 255 255 / 0.08);
   color: var(--foreground);
 }
 /* Press (feel layer, v6 §3): the chips are actions; a tap lands on the

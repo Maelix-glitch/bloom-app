@@ -3,13 +3,16 @@
  * slice A). The synthesis in `lib/overview` still makes every decision —
  * these components only present it, in the prototype's arrangement:
  *
- *   · `StatTiles` — the state's headline and lines, then its fact tiles
+ *   · `StatTiles` — the state's headline and lines, then its facts
  *     (Days logged, This week, Day streak, Points when the record
- *     carries a balance): eyebrow label, big tabular serif number,
- *     counting up where the value is one stable integer.
+ *     carries a balance) as one telemetry strip: eyebrow label, big
+ *     tabular serif number, counting up where the value is one
+ *     stable integer.
  *   · `ChangesCard` — "What changed": each real delta as its own row —
  *     label, the synthesis's own sentence, and its DeltaPill (colour by
- *     what the direction means, never an invented percentage).
+ *     what the direction means, never an invented percentage). The
+ *     card itself is unboxed (M-183): header and rows sit directly on
+ *     the canvas, the rows as hairline rows at every width.
  *
  * Slice A's recomposition retired the old band's priority strip from
  * Today: the prototype stack has one Focus slot and Bloom's assessment
@@ -40,8 +43,8 @@ const UNIT_FACT = /^(.+?) (days?)$/;
 /**
  * The prototype's StatTiles row, fed by the synthesis's own facts —
  * the same facts the band has always shown (Days logged, This week,
- * Day streak, and Points when the balance is known), each as a glass
- * tile under the state's headline and lines.
+ * Day streak, and Points when the balance is known), as one open
+ * telemetry strip under the state's headline and lines.
  */
 export function StatTiles({
   overview,
@@ -85,10 +88,10 @@ export function StatTiles({
           <dl className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
             {state.facts.map((fact) => {
               const unit = UNIT_FACT.exec(fact.value);
-              /* M-174 (de-box spec rule 2): on phones these facts are
-                 one borderless telemetry strip, not four boxes —
-                 .home-fact carries the strip below lg and the panel's
-                 exact values at lg. */
+              /* M-174 (de-box spec rule 2): these facts are one
+                 borderless telemetry strip, not four boxes —
+                 .home-fact carried the strip below lg first; M-183
+                 holds it at lg too, by the owner's order. */
               return (
                 <div key={fact.id} className="home-fact">
                   <dt className="home-eyebrow">{fact.label}</dt>
@@ -135,7 +138,7 @@ export function ChangesCard({ overview, ready }: { overview: OverviewSynthesis; 
   const { changes } = overview;
   return (
     <section
-      className="home-panel home-rise flex h-full flex-col p-5 sm:p-7"
+      className="home-panel home-open home-open-split home-rise flex h-full flex-col p-5 sm:p-7"
       style={{ animationDelay: "150ms" }}
       aria-labelledby="home-changes-title"
       aria-busy={!ready}
@@ -152,11 +155,11 @@ export function ChangesCard({ overview, ready }: { overview: OverviewSynthesis; 
             {changes.note}
           </p>
         ) : (
-          <ul className="mt-5 flex flex-1 flex-col justify-center gap-3">
+          <ul className="home-delta-list mt-5 flex flex-1 flex-col justify-center gap-3">
             {changes.deltas.map((delta) => (
               <li
                 key={delta.id}
-                className="rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors duration-[var(--motion-standard)] hover:border-white/[0.14] hover:bg-white/[0.04]"
+                className="home-delta-row rounded-2xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors duration-[var(--motion-standard)] hover:border-white/[0.14] hover:bg-white/[0.04]"
               >
                 <div className="flex items-center justify-between gap-3">
                   <span className="text-[length:var(--text-body)] font-medium text-foreground">

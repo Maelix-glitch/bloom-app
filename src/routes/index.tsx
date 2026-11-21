@@ -436,7 +436,7 @@ function TodayPage() {
               quieter, and hidden from assistive tech. */}
           <figure
             aria-hidden="true"
-            className="group relative hidden self-start overflow-hidden rounded-card border border-white/[0.08] opacity-80 shadow-[0_40px_80px_-30px_rgba(0,0,0,0.9)] lg:block"
+            className="group relative hidden self-start overflow-hidden rounded-card border border-white/[0.08] opacity-80 lg:block"
           >
             <WallpaperFigure />
             <div
