@@ -1907,3 +1907,37 @@ button.pf-row:hover {
     opacity: 0.7;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box (M-179; spec rules 1, 2): the record-in-numbers stops being four
+ * bordered tiles. Each tile held ONE metric in its own box — the exact
+ * pattern the programme removes. The numbers now form one telemetry
+ * strip: the same four links, the same figures, open on the canvas,
+ * separated by hairlines; a hover/focus wash (a tonal shift, radius on
+ * the wash only) still marks the tap target. The grouped lists below
+ * already follow the programme (one surface per group, hairline rows),
+ * and the assessment slab keeps its deliberate solid treatment — its
+ * opacity is an owner-ruled fix, not a box to remove.
+ * ------------------------------------------------------------------------- */
+.pf-numbers {
+  gap: 0;
+}
+.pf-number {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+.pf-number:nth-child(even) {
+  border-left: 1px solid var(--dbx-hairline);
+}
+@media (min-width: 641px) {
+  .pf-number + .pf-number {
+    border-left: 1px solid var(--dbx-hairline);
+  }
+}
+a.pf-number:hover,
+button.pf-number:hover {
+  background: color-mix(in oklab, var(--pf-accent) 5%, transparent);
+  border-radius: var(--radius);
+}

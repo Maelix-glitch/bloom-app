@@ -60,7 +60,7 @@ export function UserMessage({
       transition={{ duration: 0.32, ease: [0.16, 1, 0.3, 1] }}
     >
       <div className="coach-user-stack">
-        <div className="coach-user-bubble">
+        <div className="coach-user-bubble dbx-module">
           {text ? <p>{text}</p> : null}
           <AttachmentInline message={message} previewUrl={previewUrl} />
         </div>

@@ -1100,3 +1100,23 @@ select.bmood-input {
     transition: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box (M-180; spec rules 1, 3): the quick insights stop being bordered
+ * cards nested inside the mood panel — the box-in-a-box. They are now
+ * hairline rows on the panel's ground: one list, dividers inside the
+ * group only, a tonal wash on hover. The mood faces above them were
+ * already the programme's organic orbs (full-pill discs, spring motion,
+ * a glow when chosen), and the chart/photo frames stay frames — media
+ * is the decoration, not chrome.
+ * ------------------------------------------------------------------------- */
+.mm-insights > li + li {
+  border-top: 1px solid var(--dbx-hairline);
+}
+.mm-insight {
+  border-radius: var(--radius);
+  transition: background-color var(--motion-standard) var(--ease-out-expo);
+}
+.mm-insight:hover {
+  background: color-mix(in oklab, var(--foreground) 4%, transparent);
+}

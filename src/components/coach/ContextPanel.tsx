@@ -107,9 +107,9 @@ function ContextView({
         never your raw entries.
       </p>
       {rows.length > 0 ? (
-        <div className="coach-signal-list">
+        <div className="coach-signal-list dbx-rows">
           {rows.map((row) => (
-            <div key={row.label} className="coach-signal-row">
+            <div key={row.label} className="coach-signal-row dbx-row">
               <span className="coach-signal-dot" aria-hidden="true" />
               <span className="coach-signal-copy">
                 <strong>{row.label}</strong>
@@ -177,9 +177,9 @@ function MemoryView({
         ))}
       </div>
       {filtered.length > 0 ? (
-        <ul className="coach-memory-list">
+        <ul className="coach-memory-list dbx-rows">
           {filtered.map((memory) => (
-            <li key={memory.id} className="coach-memory-item">
+            <li key={memory.id} className="coach-memory-item dbx-row">
               <span className="coach-memory-copy">
                 <span className="coach-memory-category">{CATEGORY_LABEL[memory.category]}</span>
                 <span className="coach-memory-text">{memory.text}</span>
