@@ -1041,6 +1041,49 @@
   backdrop-filter: blur(14px);
 }
 
+/* The day's facts, de-boxed (M-174; de-box spec rule 2 — a single
+   metric never sits in its own box). Below lg the four StatTiles
+   facts form ONE borderless telemetry strip: no surface, no border,
+   no shadow — the second column is set off by a hairline and
+   whitespace, the numerals stay the tiles' big light figures. At lg
+   each fact returns to its panel with .home-panel's exact values
+   (and the old p-7 inset), so the desktop row renders as it always
+   has; only the class that carries the values is new. */
+.home-fact {
+  display: flex;
+  flex-direction: column;
+  padding-block: 4px;
+}
+.home-fact:nth-child(even) {
+  border-left: 1px solid rgb(255 255 255 / 0.06);
+  padding-left: 16px;
+}
+@media (min-width: 1024px) {
+  .home-fact {
+    background-color: var(--home-surface);
+    background-image: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: calc(var(--radius) + 8px);
+    box-shadow: var(--glass-shadow);
+    backdrop-filter: blur(14px);
+    padding: 28px;
+  }
+  .home-fact:nth-child(even) {
+    border-left: 1px solid var(--glass-border);
+    padding-left: 28px;
+  }
+}
+
+/* The de-box press (M-174; spec rule 7): primary actions answer a
+   tap with a 300ms expo-out settle to .98, never a hard cut. One
+   class, applied by the components that introduce new actions. */
+.home-press {
+  transition: transform 300ms var(--ease-out-expo);
+}
+.home-press:active {
+  transform: scale(0.98);
+}
+
 /* ---------------------------------------------------------------------------
  * Home — the connection map stage.
  *

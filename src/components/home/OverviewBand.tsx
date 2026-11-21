@@ -61,11 +61,17 @@ export function StatTiles({
     >
       {ready ? (
         <>
-          <p className="max-w-[62ch] px-1 font-display text-[length:var(--text-body)] italic leading-snug text-muted-foreground">
+          {/* M-174: the headline and lines are desktop prose. On
+              mobile the day gets exactly ONE story line — the same
+              headline, carried by the TodayStoryCard above the stack
+              with the synthesis's next action — so the tiles here
+              keep only their numbers on phones. At lg both render
+              exactly as they always have. */}
+          <p className="hidden max-w-[62ch] px-1 font-display text-[length:var(--text-body)] italic leading-snug text-muted-foreground lg:block">
             {state.headline}
           </p>
           {state.lines.length > 0 ? (
-            <ul className="mt-2 space-y-1 px-1">
+            <ul className="hidden mt-2 space-y-1 px-1 lg:block">
               {state.lines.map((line) => (
                 <li
                   key={line}
@@ -79,8 +85,12 @@ export function StatTiles({
           <dl className="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-4">
             {state.facts.map((fact) => {
               const unit = UNIT_FACT.exec(fact.value);
+              /* M-174 (de-box spec rule 2): on phones these facts are
+                 one borderless telemetry strip, not four boxes —
+                 .home-fact carries the strip below lg and the panel's
+                 exact values at lg. */
               return (
-                <div key={fact.id} className="home-panel flex flex-col p-5 sm:p-7">
+                <div key={fact.id} className="home-fact">
                   <dt className="home-eyebrow">{fact.label}</dt>
                   <dd className="mt-auto whitespace-nowrap pt-3 font-display text-4xl font-light leading-none tracking-tight tabular-nums text-foreground">
                     {NUMERIC_FACT.test(fact.value) ? (

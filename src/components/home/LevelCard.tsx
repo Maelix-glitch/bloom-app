@@ -181,3 +181,51 @@ export function LevelCard() {
     </section>
   );
 }
+
+/**
+ * LevelStrip — the hero's rank element for the rebuilt mobile Today.
+ *
+ * The desktop page meets its rank in the Level card; on mobile the
+ * card sits far down the stack, so the opening moment carried no
+ * progression at all — a plain greeting and nothing that says where
+ * you stand. This strip puts the same standing in the hero: the same
+ * wallet balance, the same `levelModel` maths, the same house meter,
+ * the same honesty rules (while the balance is still settling it
+ * renders nothing rather than a provisional number). Mobile only —
+ * the desktop hero is unchanged.
+ */
+export function LevelStrip() {
+  const wallet = useWallet();
+  if (wallet.loading) return null;
+  const model = levelModel(wallet.balance);
+  return (
+    <div className="mt-5 flex items-center gap-3 lg:hidden" data-testid="home-level-strip">
+      <span
+        aria-hidden
+        className="grid size-9 shrink-0 place-items-center rounded-full bg-gold/10 text-gold"
+      >
+        <Sprout className="size-4" strokeWidth={1.75} />
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-[length:var(--text-support)] text-muted-foreground">
+          <span className="font-medium text-gold">{model.rankName}</span>
+          {" · "}
+          <span className="tabular-nums text-foreground">{formatPoints(wallet.balance)}</span>{" "}
+          points
+        </p>
+        <div
+          className="meter mt-1.5"
+          role="progressbar"
+          aria-label={`Progress toward ${model.nextName}`}
+          aria-valuemin={0}
+          aria-valuemax={model.span}
+          aria-valuenow={model.intoRank}
+          style={{ "--v": `${model.pct}%` } as React.CSSProperties}
+        />
+      </div>
+      <p className="shrink-0 whitespace-nowrap text-[length:var(--text-caption)] tabular-nums text-gold">
+        {formatPoints(model.remaining)} to {model.nextName}
+      </p>
+    </div>
+  );
+}
