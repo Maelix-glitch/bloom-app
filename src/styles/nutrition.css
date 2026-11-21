@@ -2461,3 +2461,92 @@ a.day-path__label:hover {
   background: color-mix(in oklab, var(--foreground) 4%, transparent);
   border-color: transparent;
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box COMPLETE — Nutrition day view (owner directive 2026-11-21;
+ * reconciled spec: ~/workspace/bloom-debox-complete-spec.md). Structural
+ * de-box of the day view only, presentation/layout only — the engine,
+ * plan data, method 14 and every number are untouched. Four moves:
+ * 1. Date strip: unselected day cells carry no border at any state; the
+ *    selected day is a soft pill with a subtle warm glow, never an
+ *    outlined box.
+ * 2. The day hero (.nut-card-gold — the one focal surface of the view)
+ *    becomes ONE borderless soft tonal zone: no border, the 24px card
+ *    radius, a generous 32px of air. Inside it nothing is a sub-box:
+ *    the footer hairline drops to the shared faint hairline and the
+ *    eating-window chip reads as plain footer typography, so the
+ *    provenance ledger and the estimates note sit as borderless footer
+ *    type directly beneath the macro bars.
+ * 3. Meal slots (.nut-meal-slot, NutritionTimeline) leave their cards:
+ *    an open vertical list on the canvas — no background, no side or
+ *    top border, no radius, only the shared 1px bottom hairline and
+ *    20px of vertical air; the add button goes borderless-minimal.
+ *    Logged entries were already open rows (typography + hairlines)
+ *    and stay exactly that.
+ * 4. The right column (.nut-week, .nut-spectrum in NutritionPanels)
+ *    is unboxed: chart, stat strip and nutrient key-value rows sit
+ *    directly on the canvas, nutrient rows separated by hairlines.
+ * Sheets and modals are untouched — they stay fully opaque by rule.
+ * ------------------------------------------------------------------------- */
+
+/* 1 — date strip */
+.nut-daycell {
+  border-color: transparent;
+  border-radius: var(--radius-pill);
+}
+.nut-daycell[data-selected] {
+  border-color: transparent;
+  background: color-mix(in oklab, var(--gold) 13%, transparent);
+  box-shadow: 0 0 28px -8px color-mix(in oklab, var(--gold) 45%, transparent);
+  color: var(--foreground);
+}
+
+/* 2 — hero: one borderless soft tonal zone */
+.nut-card.nut-card-gold {
+  border: none;
+  border-radius: var(--radius-card);
+  padding: var(--space-8);
+  box-shadow: var(--dbx-specular);
+}
+.nut-card-gold .nut-hairline {
+  background: var(--dbx-hairline);
+}
+.nut-card-gold .nut-chip {
+  background: transparent;
+  border-color: transparent;
+  padding-inline: 0;
+  min-height: 0;
+}
+
+/* 3 — meal slots: an open list on the canvas */
+.nut-card.nut-meal-slot {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--dbx-hairline);
+  border-radius: 0;
+  box-shadow: none;
+  padding: var(--space-5) 0;
+}
+.nut-meal-slot .nut-meal-add {
+  border-color: transparent;
+  background: transparent;
+}
+.nut-meal-slot .nut-meal-add:hover {
+  border-color: transparent;
+  background: color-mix(in oklab, var(--foreground) 5%, transparent);
+  color: var(--foreground);
+}
+
+/* 4 — right column: chart and spectrum on the canvas */
+.nut-card.nut-week,
+.nut-card.nut-spectrum {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 0;
+}
+.nut-spectrum-row {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--dbx-hairline);
+}

@@ -2523,3 +2523,74 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   border: none;
   box-shadow: var(--dbx-specular);
 }
+
+/* ---------------------------------------------------------------------------
+ * De-box COMPLETE — Trackers (M-190; owner directive 2026-11-21, spec
+ * "Trackers" + global rules 1–4). M-184 left the six territories as
+ * frameless tonal CARDS; the complete programme takes the last step the
+ * spec names for this page: the six rigid cards become soft BORDERLESS
+ * surface zones in the board's existing 2-column layout, so the page
+ * reads as a calm interactive journal, not six boxes.
+ *
+ * The classes below are the ones TrackersPage.tsx actually renders
+ * (verified against the component, the M-176/M-184 lesson):
+ *
+ *   · .at-territories is the <ul> of the six trackers; each
+ *     .at-territory <li> (role="button", data-id sleep/water/study/
+ *     movement/energy/screen) carries .at-place (title), .at-coord
+ *     (today's status), .at-contour (the progress line), the
+ *     .at-territory-actions quick-increment pills and the
+ *     .at-territory-foot progress line (target · avg · days logged).
+ *     The zone keeps ONE tonal step (--surface) and the specular catch
+ *     M-184 left it, at the spec's 20px radius — and nothing else:
+ *     no border (M-184), no shadow box, no hover lift, no hover frame.
+ *     The step to --surface-2 on hover is the press affordance now;
+ *     the focus outline is untouched. Every value, testid, hook and
+ *     increment behaviour is the markup's own, unchanged.
+ *   · the flower (.at-flower inside .at-flower-col, inside .at-board)
+ *     stands frameless on the open canvas: no enclosing surface,
+ *     border or shadow on the figure, its column or the board. The
+ *     viz, its petals and its count are untouched.
+ *   · the record table's .ci-card (HistoryTable's <Card>, the one
+ *     remaining bordered secondary card on the page proper) opens up
+ *     the same way: no surface, no border, no shadow, no top-highlight
+ *     strip — the table keeps its own row hairlines. Sheets are NOT
+ *     touched: .ci-card never renders inside a sheet on this page.
+ * ------------------------------------------------------------------------- */
+.tk2-root .at-territories {
+  gap: var(--space-5);
+}
+.tk2-root .at-territory {
+  background: var(--surface);
+  border: none;
+  /* the spec's 20px zone radius, in the house token (R8: radii come
+     from --radius-*; --radius-xl = --radius + 4px = 20px) */
+  border-radius: var(--radius-xl);
+  box-shadow: var(--dbx-specular);
+  padding: var(--space-5);
+}
+.tk2-root .at-territory:hover {
+  background: var(--surface-2);
+  border: none;
+  transform: none;
+  box-shadow: var(--dbx-specular);
+}
+.tk2-root .at-board,
+.tk2-root .at-flower-col,
+.tk2-root .at-flower {
+  background: none;
+  background-image: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+.tk2-root .ci-card {
+  background: none;
+  background-image: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+.tk2-root .ci-card::before {
+  content: none;
+}

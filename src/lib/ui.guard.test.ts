@@ -1195,19 +1195,32 @@ describe("UI guard: reskin chrome (R-2)", () => {
   const blockFor = (text: string, selector: string) =>
     blocks(text).find((b) => b.selector.trim().endsWith(selector) || b.selector.includes(selector));
 
-  it("marks the active rail item with the gold bar inside the pill and the filled surface", () => {
+  it("marks the active rail item with the gold bar and no filled box", () => {
     /* Pin updated for brief v4 Slice 2 (M-46/M-89): the reskin's white-7%
        pill and the tick at the rail's outer edge (left:-1rem) are
        superseded by the brief's §20 form — active = filled --surface-2,
        the 3px gold bar INSIDE the pill at its left edge. The brief
-       outranks the older pin; the tick's width and gold stay pinned. */
+       outranks the older pin; the tick's width and gold stay pinned.
+       Pin re-contracted for De-box Complete (M-186, owner directive
+       2026-11-21): the owner's de-box spec supersedes §20's filled
+       pill — the active link carries NO background fill and NO inset
+       shadow; the signal is the tick (pinned below, unchanged), the
+       gold glyph and full-cream text. The cascade-end M-186 block in
+       styles.css is the rendered winner, so the LAST exact
+       .app-nav-link-active block is what this pin now reads. */
     expect(SIDEBAR.text).toContain("app-nav-tick");
     const tick = blockFor(STYLES.text, ".app-nav-tick")!;
     expect(tick.body).toContain("width: 3px");
     expect(tick.body).toContain("background: var(--gold)");
     expect(tick.body).toContain("left: 0");
-    const active = blockFor(STYLES.text, ".app-nav-link-active")!;
-    expect(active.body).toContain("background: var(--surface-2)");
+    const activeBlocks = blocks(STYLES.text).filter(
+      (b) => b.selector.trim() === ".app-nav-link-active",
+    );
+    expect(activeBlocks.length).toBeGreaterThanOrEqual(2);
+    const active = activeBlocks[activeBlocks.length - 1]!;
+    expect(active.body).toContain("background: transparent");
+    expect(active.body).toContain("box-shadow: none");
+    expect(active.body).not.toContain("var(--surface-2)");
   });
 
   it("derives the points card from Bloom's wallet and rank ladder, never hardcoded maths", () => {

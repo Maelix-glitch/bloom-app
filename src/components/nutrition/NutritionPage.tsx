@@ -372,7 +372,7 @@ export function NutritionPage() {
               onEdit={(entry) => setSheet({ open: true, meal: null, editing: entry })}
               onRemove={remove}
             />
-            <div className="space-y-4">
+            <div className="space-y-8">
               <WeekPanel week={week} targets={targets} reportDay={day} />
               <Spectrum rows={spectrum} sex={nutrition.spectrumSex} />
             </div>

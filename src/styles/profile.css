@@ -1941,3 +1941,33 @@ button.pf-number:hover {
   background: color-mix(in oklab, var(--pf-accent) 5%, transparent);
   border-radius: var(--radius);
 }
+
+/* ==========================================================================
+ * De-box Complete (audit, Profile) — cascade-end.
+ *
+ * Two layout containers carried the boxy class on Profile:
+ *
+ * 1. .pf-card — the family's generic card (GettingStartedCard,
+ *    LabReportsSection, and the Nutrition entry cards that borrow it)
+ *    wore a 1px --pf-line rim around its tonal fill. The fill
+ *    (--pf-card over the page canvas) is the surface; the rim goes.
+ *    The owner-ruled exception stands untouched: .pf-card.assess-card
+ *    is the opaque assessment slab (a bleed-through fix with its own
+ *    strong border and shadow) and is deliberately NOT matched here.
+ *
+ * 2. .pf-group-rows — the grouped settings list wore a rim AND the
+ *    glass shadow around its tonal wash. The grouping is the wash,
+ *    the radius and the hairlines between rows; rim and shadow go.
+ *
+ * Everything else bordered in this sheet is a primary interactive
+ * control (buttons, pills, switches, icon buttons — spec rule 1a),
+ * an icon plate inside a hairline row, a loading skeleton, or the
+ * sign-out sheet family — audited, kept with reason.
+ * ======================================================================== */
+.pf-card:not(.assess-card) {
+  border: none;
+}
+.pf-group-rows {
+  border: none;
+  box-shadow: none;
+}

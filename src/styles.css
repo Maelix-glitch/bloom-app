@@ -3808,3 +3808,34 @@ body {
     margin-bottom: 0;
   }
 }
+
+/* ==========================================================================
+ * De-box Complete (M-186) — the shell, cascade-end.
+ *
+ * The owner's full de-box (2026-11-21) reaches the chrome:
+ *
+ * 1. The rail loses its vertical right border. The separation was never
+ *    only the line: the rail already sits on its own tonal step
+ *    (--sidebar #0b0c10 against the #0a0b0e canvas, pinned in .app-nav
+ *    above), so the border was a second, harsher divider drawn over a
+ *    tonal one. Tonal shift alone now separates rail from canvas.
+ *
+ * 2. The active nav link loses its filled pill. Brief v4 §20 put the
+ *    active destination on a filled --surface-2 pill; the owner's
+ *    de-box spec supersedes it — the active state is carried by the
+ *    things that were always the real signal: the 3px gold tick inside
+ *    the link's left edge (.app-nav-tick, untouched), the gold glyph
+ *    with its glow (.app-nav-link-active .app-nav-glyph, untouched)
+ *    and full-cream text (the .app-sidebar colour rule, untouched).
+ *    Hover keeps its 4% wash — an interactive state, not a static box.
+ *
+ * The phone brand bar keeps its Night Glass (a ruled glass place) and
+ * the rail points card keeps its owner-ruled form; neither is touched.
+ * ======================================================================== */
+.app-sidebar {
+  border-right: none;
+}
+.app-nav-link-active {
+  background: transparent;
+  box-shadow: none;
+}
