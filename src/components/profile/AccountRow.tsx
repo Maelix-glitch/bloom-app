@@ -304,12 +304,34 @@ function PersonalizationSection() {
  */
 function VerificationRow({
   verification,
+  pending,
   onEdit,
 }: {
   verification: VerificationStatus;
+  pending?: boolean | undefined;
   onEdit: () => void;
 }) {
   const [open, setOpen] = useState(false);
+
+  /* M-194: while the facts read is in flight, the status was computed
+     from unproven facts and printed a false "steps left" claim that
+     the settled "Verified" then replaced. Hold the row's shape with
+     no claim at all until the read lands. */
+  if (pending) {
+    return (
+      <div className="pf-row" data-testid="pf-row-verification" aria-busy="true">
+        <span className="pf-row-icon" aria-hidden>
+          <span style={{ color: "var(--text-dim)" }}><IconVerified /></span>
+        </span>
+        <span className="pf-row-text">
+          <span className="pf-row-label">Verification</span>
+          <span className="pf-row-hint">&nbsp;</span>
+        </span>
+        <span className="pf-row-value">&nbsp;</span>
+        <span />
+      </div>
+    );
+  }
 
   if (verification.verified) {
     return (
@@ -414,6 +436,7 @@ export function AccountRow({
   identity,
   account,
   verification,
+  verificationPending,
   privacy,
   stories,
   isSignedIn,
@@ -436,6 +459,9 @@ export function AccountRow({
   account: AccountDetails;
   /** Verification status — the Account group's Verification row. */
   verification: VerificationStatus;
+  /** M-194: the facts read behind the status is still in flight — the
+      row holds a neutral no-claim state instead of the unproven one. */
+  verificationPending?: boolean;
   privacy: ProfilePrivacy;
   stories: Story[];
   highlights: HighlightItem[];
@@ -467,7 +493,7 @@ export function AccountRow({
           label="Email"
           value={account.email ?? "not connected"}
         />
-        <VerificationRow verification={verification} onEdit={onEdit} />
+        <VerificationRow verification={verification} pending={verificationPending} onEdit={onEdit} />
         <Row
           icon={<IconClock />}
           label="Tracking since"

@@ -270,7 +270,15 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
   gap: clamp(1.5rem, 4vw, 3.5rem);
-  align-items: center;
+  /* M-194 (cascade truth): the ~150px void under the hero's points
+     strip was three spaces stacked — this row gap at its 3.5rem top
+     step, .pg-next's own margin-top, and the short copy column
+     CENTRED in a row whose height the tall emblem stage sets (half
+     the difference pooled under the strip). One step now carries the
+     separation: the columns share the top edge (the stage's own
+     content fills its column), and the row gap is the token step. */
+  row-gap: var(--space-6);
+  align-items: start;
   padding: clamp(1.75rem, 4vw, 3.4rem);
   border-radius: 32px;
   border: 1px solid var(--pg-line-soft);
@@ -510,7 +518,9 @@
 
 .pg-next {
   grid-column: 1 / -1;
-  margin-top: clamp(0.5rem, 2vw, 1.25rem);
+  /* M-194: no margin of its own — the hero's row gap is the one
+     separation step (the clamp margin stacked on top of it). */
+  margin-top: 0;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(120px, 240px) auto;
   gap: clamp(1rem, 3vw, 2.25rem);

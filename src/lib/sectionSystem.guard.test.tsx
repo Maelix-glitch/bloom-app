@@ -122,8 +122,11 @@ function rulesMatching(rel: string, needle: string): { selector: string; body: s
 }
 
 describe("section system — stylesheet pins", () => {
-  it("the 56px rhythm is a token, and .section carries it with the 80px scroll margin", () => {
-    expect(read("styles.css")).toContain("--space-14: 3.5rem");
+  it("the 72px rhythm is a token, and .section carries it with the 80px scroll margin", () => {
+    /* M-195 re-contract (disclosed): the decongestion pass raised the
+       section step 56px → 72px at the owner's order; the pin keeps its
+       strictness — the rhythm is still one named token with one value. */
+    expect(read("styles.css")).toContain("--space-14: 4.5rem");
     const section = rulesFor("styles/nutrition.css", ".section");
     expect(section.length, ".section rule exists").toBeGreaterThan(0);
     const body = section.map((b) => b.body).join("\n");

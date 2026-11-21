@@ -92,6 +92,7 @@ export function GettingStartedCard() {
   if (doneCount === steps.length) return null;
 
   return (
+    <section className="pf-section" aria-label="Getting started">
     <div className="pf-card pf-card--pad" data-testid="getting-started-card">
       <div className="pf-section-head">
         <div>
@@ -141,5 +142,6 @@ export function GettingStartedCard() {
         })}
       </ul>
     </div>
+    </section>
   );
 }

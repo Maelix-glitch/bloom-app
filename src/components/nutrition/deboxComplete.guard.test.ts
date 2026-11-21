@@ -93,14 +93,17 @@ describe("nutrition de-box complete (day view)", () => {
     expect(TIMELINE).toContain("nut-meal-list");
   });
 
-  it("meal slots: an open list — bottom hairline only, 20px vertical air", () => {
+  it("meal slots: an open list — bottom hairline only, deep vertical air", () => {
     const slot = rule(/\.nut-card\.nut-meal-slot \{([^}]*)\}/);
     expect(slot).toContain("background: transparent;");
     expect(slot).toContain("border: none;");
     expect(slot).toContain("border-bottom: 1px solid var(--dbx-hairline);");
     expect(slot).toContain("border-radius: 0;");
     expect(slot).toContain("box-shadow: none;");
-    expect(slot).toContain("padding: var(--space-5) 0;");
+    /* M-195 re-contract (disclosed): the decongestion pass loosened the
+       meal rows one step (var(--space-5) → var(--space-6)); the pin
+       keeps naming the exact step so the air can't silently shrink. */
+    expect(slot).toContain("padding: var(--space-6) 0;");
   });
 
   it("meal slots: the add button is borderless-minimal", () => {

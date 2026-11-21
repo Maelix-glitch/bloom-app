@@ -98,7 +98,9 @@
 /* Section rhythm: the gap BETWEEN groups is at least twice the gap
    within one (proximity ratio ≥ 2:1). */
 .dbx-section {
-  margin-top: 40px;
+  /* M-195: the de-box section step rides the token scale (60px at the
+     raised scale), not a frozen 40px literal. */
+  margin-top: var(--space-12);
 }
 
 /* The de-box press (same value as .home-press, M-174): a 300ms expo-out

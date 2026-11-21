@@ -576,10 +576,12 @@ function ProfilePage() {
                   steps in ONE card, each read from the real record —
                   it renders nothing once all three are done, so a new
                   account meets one card here instead of an empty
-                  paragraph inside every section below. */}
-              <section className="pf-section" aria-label="Getting started">
-                <GettingStartedCard />
-              </section>
+                  paragraph inside every section below. M-194: the
+                  .pf-section wrapper lives INSIDE the card component —
+                  it used to sit here unconditionally, so a completed
+                  account (card = null) still paid the section's 40px
+                  margin and met a large empty band before Your health. */}
+              <GettingStartedCard />
 
               {/* Health (Plan B): the health content grouped as health,
                   under one named region — the assessment and its

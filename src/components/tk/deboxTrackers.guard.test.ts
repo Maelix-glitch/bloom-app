@@ -118,7 +118,17 @@ describe("trackers de-box, second pass (M-184)", () => {
     const card = BLOCK184.match(/\.tk2-root \.at-territory \{([^}]*)\}/);
     expect(card).not.toBeNull();
     expect(card![1]).toContain("border: none;");
-    expect(card![1]).toContain("box-shadow: var(--dbx-specular);");
+    /* RE-CONTRACTED by M-194 (disclosed): M-184's "stay objects" clause
+       pinned the specular catch (box-shadow: var(--dbx-specular)).
+       M-190/M-193 superseded that design — the territories are open
+       canvas, no catch — and the catch's declaration is now removed at
+       this source too, so the pin flips to the stricter outcome: no
+       shadow of any kind in this block. The background clause below is
+       unchanged (this block still may not strip the surface step; the
+       final open state is owned by the later territory block and the
+       cascade-truth guard). */
+    expect(card![1]).toContain("box-shadow: none;");
+    expect(card![1]).not.toContain("var(--dbx-specular)");
     /* Still an object: the tonal surface step is NOT stripped — only
        the border and the shadow box go. */
     expect(card![1]).not.toContain("background: none");
