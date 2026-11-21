@@ -76,7 +76,7 @@ export function LevelCard() {
 
   return (
     <section
-      className="home-panel home-rise flex h-full flex-col p-5 sm:p-7"
+      className="home-panel home-growth home-rise flex h-full flex-col p-5 sm:p-7"
       style={{ animationDelay: "110ms" }}
       aria-labelledby="home-level-title"
       data-testid="home-level-card"

@@ -304,13 +304,24 @@ describe("source pins — mobile scoping and the untouched desktop", () => {
     expect(index).toContain('"lg:col-span-7 [&>*]:h-full"');
   });
 
-  it("StatTiles prose yields on mobile; the facts are a telemetry strip below lg", () => {
+  it("StatTiles prose yields on mobile; the facts are a telemetry strip at every width", () => {
     const band = read("components/home/OverviewBand.tsx");
     expect(band).toContain("hidden max-w-[62ch] px-1 font-display");
     expect(band).toContain('className="home-fact"');
     const css = read("styles.css");
     expect(css).toContain(".home-fact");
-    expect(css).toContain("@media (min-width: 1024px)");
+    /* M-183 RE-CONTRACT (the owner's explicit order, disclosed in
+       the registry): M-174 pinned the strip below lg with each fact
+       returning to its panel at lg. The owner lifted that freeze —
+       the strip now holds at desktop too, so the lg block extends
+       the hairline to every cell after the first and carries none
+       of the panel's glass values. */
+    const base = css.indexOf("\n.home-fact {");
+    const lgStart = css.indexOf("@media (min-width: 1024px)", base);
+    const lgBlock = css.slice(lgStart, css.indexOf("\n}", lgStart));
+    expect(lgBlock).toContain(".home-fact:nth-child(n + 2)");
+    expect(lgBlock).not.toContain("--glass-bg");
+    expect(lgBlock).not.toContain("backdrop-filter");
   });
 
   it("the orb answers the open bus and announces its openings", () => {
