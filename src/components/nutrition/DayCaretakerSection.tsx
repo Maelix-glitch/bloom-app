@@ -34,6 +34,15 @@
  * person's day. Every fact and sentence remains byte-identical —
  * only the composition changed.
  *
+ * M-199 (live-sweep fixes, 2026-11-21): the walk medallion the
+ * preview showed was missing live whenever the plan gave the
+ * largest meal no clock — the node now rides by SEQUENCE in
+ * that case (after the peak, before Caffeine ends; its caption
+ * names the order and claims no hour), and the "You are here"
+ * label's placement is the geometry's rule, so it can no longer
+ * strike through the Wind-down medallion as it did live at
+ * ~22:13. Facts and sentences still byte-identical.
+ *
  * Placement: its own section in the §7.1 flow, immediately after
  * the day card that holds "How this plan is built" and before
  * "Today's balance" — beside the disclosure that explains the
@@ -58,13 +67,19 @@ import {
   type DayCaretaker,
 } from "@/lib/nutrition/dayRhythm";
 import {
+  ARC_DAY_START_X,
   ARC_PATH_D,
+  ARC_VALLEY_X,
   ARC_VIEW_H,
   ARC_VIEW_W,
-  arcAnchorsOf,
+  arcAnchorsFromRawXs,
   arcAwakeFraction,
+  arcDroppedLabelRectOf,
   arcFrameOf,
+  arcNowLabelPlacementOf,
   arcPointForTime,
+  arcSequenceRawX,
+  arcXForFraction,
   arcYAtX,
 } from "@/lib/nutrition/dayArc";
 import type { DailyPlan } from "@/lib/nutrition/plan";
@@ -158,8 +173,12 @@ const IconBed = () => (
 
 interface ArcMoment {
   key: string;
-  /** The moment's clock, minutes since midnight. */
-  minutes: number;
+  /** The moment's clock, minutes since midnight — or null for
+   *  the one moment the day may state in order rather than on
+   *  the clock: the walk after a largest meal the plan gives no
+   *  time. A null moment is placed by sequence (M-199), and its
+   *  caption names the order, never an hour. */
+  minutes: number | null;
   /** The caption's time line, in the page's own reading. */
   timeLabel: string;
   /** The caption's name line. */
@@ -196,8 +215,11 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
 
   /* The arc's frame and moments, from the caretaker's own times.
      The walk rides the largest meal's clock when the plan carries
-     one; a plan with no clock for it states the walk in words
-     below and places no node it cannot place honestly. */
+     one; when it does not, the node is placed by sequence — after
+     the midday peak, before Caffeine ends — and its caption claims
+     no hour: the day states the walk in order, so the arc draws it
+     in order (M-199; the preview the owner approved shows the walk
+     medallion either way). */
   const frame = useMemo(
     () => arcFrameOf(clockToMinutes(care.wakeTime), clockToMinutes(care.bedTime)),
     [care.wakeTime, care.bedTime],
@@ -211,11 +233,11 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
       name: "Up",
       icon: <IconSunrise />,
     },
-    ...(care.largestMeal?.time
+    ...(care.largestMeal
       ? [
           {
             key: "walk",
-            minutes: clockToMinutes(care.largestMeal.time),
+            minutes: care.largestMeal.time ? clockToMinutes(care.largestMeal.time) : null,
             timeLabel: `After ${care.largestMeal.label}`,
             name: `Walk · ${care.movementMinutes} min`,
             icon: <IconFootsteps />,
@@ -253,15 +275,32 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
       icon: <IconBed />,
       sleep: true,
     },
-  ].sort((a, b) => arcAwakeFraction(a.minutes, frame) - arcAwakeFraction(b.minutes, frame));
+  ];
 
-  const anchors = useMemo(
-    () => arcAnchorsOf(moments.map((m) => m.minutes), frame),
+  /* Placement: each timed moment's raw x from its time; the
+     sequence moment (a clock-less walk) takes its raw x from its
+     day-order neighbours by the geometry's sequence rule. The
+     set is then put in raw-x order and relaxed as one — the
+     same relaxation the timed set has always ridden — and the
+     now marker warps through these very anchors. */
+  const { anchors, ordered } = useMemo(() => {
+    const raws = moments.map((m) =>
+      m.minutes != null ? arcXForFraction(arcAwakeFraction(m.minutes, frame)) : Number.NaN,
+    );
+    moments.forEach((m, i) => {
+      if (m.minutes == null) {
+        raws[i] = arcSequenceRawX(raws[i - 1] ?? ARC_DAY_START_X, raws[i + 1] ?? ARC_VALLEY_X);
+      }
+    });
+    const order = moments.map((_, i) => i).sort((a, b) => raws[a]! - raws[b]!);
+    return {
+      anchors: arcAnchorsFromRawXs(order.map((i) => raws[i]!)),
+      ordered: order.map((i) => moments[i]!),
+    };
     // moments is rebuilt from care + frame each render; its inputs
     // are the memoised care and frame, so keying on them is exact.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [care, frame],
-  );
+  }, [care, frame]);
 
   /* "You are here" — the real current local time, placed on the
      same geometry (warped through the nodes' own relaxation, so
@@ -280,6 +319,33 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
     return () => window.clearInterval(id);
   }, []);
   const nowPoint = arcPointForTime(nowMinutes, frame, anchors);
+
+  /* The label's placement is the geometry's rule (M-199): the
+     home placement stands while the arc around the marker is
+     clear; when a medallion or a caption crowds it, the label
+     moves — never over either. The dropped level's height is
+     solved from the nodes around the marker, so the component
+     hands the label its exact offset in that case. */
+  const nodePoints = ordered.map((_, i) => {
+    const x = anchors.placed[i]!;
+    return { x, y: arcYAtX(x) };
+  });
+  const nowPlacement = arcNowLabelPlacementOf(nowPoint, nodePoints);
+  const nowLabelStyle =
+    nowPlacement.level === "dropped"
+      ? (() => {
+          const rect = arcDroppedLabelRectOf(nowPoint, nodePoints);
+          /* The label is positioned inside the marker's box (a
+             13-unit dot centred on the point): convert the
+             solved arc rect into that box's offsets. */
+          return {
+            left: rect.x0 - nowPoint.x + 6.5,
+            top: rect.y0 - nowPoint.y + 6.5,
+            right: "auto" as const,
+            bottom: "auto" as const,
+          };
+        })()
+      : undefined;
 
   const pctX = (x: number): string => `${(x / ARC_VIEW_W) * 100}%`;
   const pctY = (y: number): string => `${(y / ARC_VIEW_H) * 100}%`;
@@ -331,8 +397,8 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
             <path className="nut-care-arc-path" pathLength={100} d={ARC_PATH_D} />
           </svg>
 
-          {moments.map((m, i) => {
-            const x = anchors.placed[i];
+          {ordered.map((m, i) => {
+            const x = anchors.placed[i]!;
             const y = arcYAtX(x);
             return (
               <div
@@ -343,7 +409,7 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
                   m.sleep ? "is-sleep" : "",
                   m.stagger ? "is-stagger" : "",
                   i === 0 ? "is-first" : "",
-                  i === moments.length - 1 ? "is-last" : "",
+                  i === ordered.length - 1 ? "is-last" : "",
                 ]
                   .filter(Boolean)
                   .join(" ")}
@@ -363,14 +429,29 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
           })}
 
           {/* You are here: the current time, on the same arc. Its
-              label flips to the dot's left on the evening side so
-              it never leaves the frame. */}
+              label's side and level are the geometry's placement
+              (M-199) — it flips, drops below the arc, raises or
+              lifts as the moments around it require, and in the
+              wedged case rests on the valley floor at the solved
+              offset — so it never covers a medallion or a caption
+              and never leaves the frame. */}
           <div
             data-arc-now
-            className={`nut-care-here${nowPoint.x > 640 ? " is-flip" : ""}`}
+            className={[
+              "nut-care-here",
+              nowPlacement.side === "left" ? "is-flip" : "",
+              nowPlacement.level === "below" ? "is-below" : "",
+              nowPlacement.level === "raised" ? "is-raised" : "",
+              nowPlacement.level === "lifted" ? "is-lifted" : "",
+              nowPlacement.level === "dropped" ? "is-dropped" : "",
+            ]
+              .filter(Boolean)
+              .join(" ")}
             style={{ left: pctX(nowPoint.x), top: pctY(nowPoint.y) }}
           >
-            <span className="nut-care-here-label">You are here</span>
+            <span className="nut-care-here-label" style={nowLabelStyle}>
+              You are here
+            </span>
             <span className="nut-care-here-dot" />
           </div>
         </div>

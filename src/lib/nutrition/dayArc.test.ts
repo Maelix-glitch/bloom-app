@@ -10,11 +10,16 @@ import { describe, expect, it } from "vitest";
 
 import {
   ARC_DAY_START_X,
+  ARC_PEAK_X,
   ARC_VALLEY_X,
+  arcAnchorsFromRawXs,
   arcAnchorsOf,
   arcAwakeFraction,
   arcFrameOf,
+  arcNowLabelOffence,
+  arcNowLabelPlacementOf,
   arcPointForTime,
+  arcSequenceRawX,
   arcTailPointAt,
   arcYAtX,
   relaxArcXs,
@@ -132,5 +137,97 @@ describe("day arc geometry — placement", () => {
     const point = arcPointForTime(1277, frame, anchors);
     expect(point.x).toBeCloseTo(warped, 6);
     expect(point.y).toBeCloseTo(arcYAtX(warped), 6);
+  });
+});
+
+describe("day arc geometry — the sequence-placed walk (M-199)", () => {
+  it("a next moment past the peak anchors the walk between the peak and it", () => {
+    /* The owner's shape: Up raw 24, Caffeine ends raw 435 — the
+       walk belongs after the peak station (360) and before the
+       caffeine node: the midpoint of that stretch. */
+    expect(arcSequenceRawX(24, 435)).toBeCloseTo((ARC_PEAK_X + 435) / 2, 6);
+    expect(arcSequenceRawX(24, 435)).toBeGreaterThan(ARC_PEAK_X);
+    expect(arcSequenceRawX(24, 435)).toBeLessThan(435);
+  });
+
+  it("a next moment before the peak leaves the midpoint of its neighbours", () => {
+    expect(arcSequenceRawX(24, 300)).toBeCloseTo(162, 6);
+    expect(arcSequenceRawX(24, ARC_PEAK_X)).toBeCloseTo((24 + ARC_PEAK_X) / 2, 6);
+  });
+
+  it("anchors built from raw xs are the timed anchors, unchanged", () => {
+    const minutes = [390, 785, 870, 1230, 1290, 1350];
+    const timed = arcAnchorsOf(minutes, frame);
+    expect(arcAnchorsFromRawXs(timed.raw)).toEqual(timed);
+  });
+
+  it("the sequence walk rides the relaxation between Up and Caffeine ends", () => {
+    /* The owner's day with the walk placed by sequence instead
+       of by the meal's clock: Up 24, walk (sequence), Caffeine
+       ends 435, Last meal by, Wind-down, In bed. */
+    const raw = [24, arcSequenceRawX(24, 435), 435, 743.25, 794.625, 846];
+    const seq = arcAnchorsFromRawXs(raw);
+    for (let i = 0; i < seq.placed.length - 1; i++) {
+      expect(seq.placed[i + 1]! - seq.placed[i]!).toBeGreaterThanOrEqual(99.5);
+    }
+    expect(seq.placed[1]).toBeGreaterThan(seq.placed[0]);
+    expect(seq.placed[1]).toBeLessThan(seq.placed[2]);
+    /* …and it stays at the peak the preview drew. */
+    expect(seq.placed[1]).toBeGreaterThan(320);
+    expect(seq.placed[1]).toBeLessThan(400);
+  });
+});
+
+describe("day arc geometry — the now label's placement (M-199)", () => {
+  const minutes = [390, 785, 870, 1230, 1290, 1350];
+  const anchors = arcAnchorsOf(minutes, frame);
+  const nodes = anchors.placed.map((x) => ({ x, y: arcYAtX(x) }));
+  const placementAt = (t: number) => {
+    const marker = arcPointForTime(t, frame, anchors);
+    return { marker, placement: arcNowLabelPlacementOf(marker, nodes) };
+  };
+
+  it("a clear stretch of arc keeps the home placement", () => {
+    /* 09:00 — the morning climb, nothing near the marker. */
+    const { marker, placement } = placementAt(540);
+    expect(placement).toEqual({ side: "right", level: "above" });
+    expect(arcNowLabelOffence(marker, placement, nodes)).toBe(0);
+  });
+
+  it("the 22:13 defect: the label lifts clear of the Wind-down medallion", () => {
+    /* Live on the owner's phone, 2026-11-21 ~22:13: the marker
+       sat between Wind-down and In bed and the old frame rule
+       (x > 640 → label left) struck the label through the
+       Wind-down medallion. The rule now lifts it above every
+       medallion, on the same side, offence zero. */
+    const { marker, placement } = placementAt(1333);
+    expect(placement).toEqual({ side: "left", level: "lifted" });
+    expect(arcNowLabelOffence(marker, placement, nodes)).toBe(0);
+    /* …and the placement it replaces really did offend. */
+    expect(arcNowLabelOffence(marker, { side: "left", level: "above" }, nodes)).toBeGreaterThan(0);
+  });
+
+  it("wedged between Wind-down and In bed, the label drops to the valley floor", () => {
+    /* ~21:50 — the marker is boxed in: Wind-down's medallion
+       and caption on one side, In bed and the frame's edge on
+       the other, Last meal's medallion above. No side or level
+       at the dot's own height is clean; the floor is. */
+    const { marker, placement } = placementAt(1310);
+    expect(placement.level).toBe("dropped");
+    expect(arcNowLabelOffence(marker, placement, nodes)).toBe(0);
+  });
+
+  it("the night marker's label is clean too, on the home side", () => {
+    const { marker, placement } = placementAt(180); // 03:00, in the valley
+    expect(marker.span).toBe("sleep");
+    expect(placement.side).toBe("left");
+    expect(arcNowLabelOffence(marker, placement, nodes)).toBe(0);
+  });
+
+  it("every minute of the day resolves to a clean placement", () => {
+    for (let t = 0; t < 1440; t++) {
+      const { marker, placement } = placementAt(t);
+      expect(arcNowLabelOffence(marker, placement, nodes), `t=${t}`).toBe(0);
+    }
   });
 });

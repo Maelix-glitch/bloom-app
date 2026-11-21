@@ -2764,6 +2764,29 @@ a.day-path__label:hover {
   left: auto;
   right: 19px;
 }
+/* The label's other levels (M-199): below the dot when the arc
+   above it is crowded, raised and lifted clear of the
+   medallions when the evening cluster leaves no room at the
+   dot's own height, and dropped — resting on the valley floor
+   at the offset the geometry solves inline — when the marker
+   is wedged between the last two nodes. The choice among them
+   is the geometry's rule (arcNowLabelPlacementOf); these are
+   only its renderings. The offsets are the lib's bands: below
+   sits 19..31 units under the centre, raised 34..46 above it,
+   lifted 49..61. */
+.nut-care-here.is-below .nut-care-here-label {
+  bottom: auto;
+  top: 26px;
+}
+.nut-care-here.is-raised .nut-care-here-label {
+  bottom: 28px;
+}
+.nut-care-here.is-lifted .nut-care-here-label {
+  bottom: 43px;
+}
+.nut-care-here.is-dropped .nut-care-here-label {
+  bottom: auto;
+}
 
 /* the walk line, tied to the arc */
 .nut-care-walk {
@@ -3025,6 +3048,15 @@ a.day-path__label:hover {
   .nut-care-here.is-flip .nut-care-here-label {
     left: auto;
     right: 10px;
+  }
+  .nut-care-here.is-below .nut-care-here-label {
+    top: 20px;
+  }
+  .nut-care-here.is-raised .nut-care-here-label {
+    bottom: 22px;
+  }
+  .nut-care-here.is-lifted .nut-care-here-label {
+    bottom: 34px;
   }
   .nut-care-arc-base {
     display: none;

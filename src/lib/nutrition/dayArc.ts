@@ -225,11 +225,40 @@ export interface ArcAnchors {
   placed: number[];
 }
 
+/** Anchors for a set of moments whose raw xs are already known:
+ *  one relaxation over the whole set. Timed moments map time →
+ *  raw x (arcAnchorsOf); a sequence moment carries the raw x
+ *  arcSequenceRawX gives it — both ride the same relaxation, so
+ *  a free point warped through either anchor set keeps the same
+ *  neighbours. */
+export function arcAnchorsFromRawXs(rawXs: readonly number[]): ArcAnchors {
+  return { raw: [...rawXs], placed: relaxArcXs(rawXs) };
+}
+
 /** Anchors for a set of moment times (minutes since midnight),
  *  in the order given — the caller passes them in day order. */
 export function arcAnchorsOf(minutesList: readonly number[], frame: ArcFrame): ArcAnchors {
-  const raw = minutesList.map((m) => arcXForFraction(arcAwakeFraction(m, frame)));
-  return { raw, placed: relaxArcXs(raw) };
+  return arcAnchorsFromRawXs(
+    minutesList.map((m) => arcXForFraction(arcAwakeFraction(m, frame))),
+  );
+}
+
+/** The path's peak station — the segment joint where the sun
+ *  tops out (arcYAtX(ARC_PEAK_X) is the path's highest point). */
+export const ARC_PEAK_X = 360;
+
+/** The raw x for a moment the day states in ORDER, not on the
+ *  clock — the walk after the largest meal, when the plan gives
+ *  that meal no time (M-199). Position conveys sequence and
+ *  nothing more: the moment belongs after the midday peak and
+ *  before the next timed moment, so its raw x is the midpoint
+ *  of that stretch (the peak station → the next moment's raw
+ *  x). When the next moment itself rides before the peak, the
+ *  midpoint of its two neighbours is all the order claims. No
+ *  hour is ever invented — the caption of such a node names
+ *  the order ("After Lunch"), never a time. */
+export function arcSequenceRawX(prevRawX: number, nextRawX: number): number {
+  return nextRawX > ARC_PEAK_X ? (ARC_PEAK_X + nextRawX) / 2 : (prevRawX + nextRawX) / 2;
 }
 
 /** Map an x through the nodes' relaxation, piecewise-linearly
@@ -283,4 +312,169 @@ export function arcPointForTime(
   const s = sleepSpan === 0 ? 0 : (offset - frame.awakeSpan) / sleepSpan;
   const p = arcTailPointAt(s);
   return { x: p.x, y: p.y, span: "sleep" };
+}
+
+/* --------------------- the now marker's label --------------------- */
+
+/** Where the "You are here" label sits relative to its dot: a
+ *  side (the way it extends from the dot) and a level — above
+ *  the arc (the preview's placement), below the arc, or raised /
+ *  lifted clear above the medallions when the day crowds in
+ *  (M-199: at 22:13 the label, flipped left by the frame rule,
+ *  struck through the Wind-down medallion and covered its
+ *  glyph). */
+export interface ArcNowLabelPlacement {
+  side: "left" | "right";
+  level: "above" | "below" | "raised" | "lifted" | "dropped";
+}
+
+/* The label's measure in arc units — the arc wrap renders the
+   880-unit viewBox at roughly unit scale, and the label is
+   small caps: ~112 units wide, ~12 tall. Its band sits 19..31
+   units from the dot's centre (the stylesheet's own offsets:
+   the dot is 13 wide, the label starts 13 past the dot's edge),
+   and the lifted level raises the band by 30 more. */
+const ARC_LABEL_W = 112;
+const ARC_LABEL_H = 12;
+const ARC_LABEL_DX = 13;
+const ARC_LABEL_DY = 19;
+/** The raised level lifts the band by this much; the lifted
+ *  level by twice it — at the peak the frame's top edge leaves
+ *  room only for the smaller lift, in the evening valley only
+ *  the larger one clears the medallions. */
+const ARC_LABEL_RAISE = 15;
+const ARC_LABEL_LIFT = 30;
+/** Past this x the label's home side is the left, so it never
+ *  leaves the frame — the placement the component has always
+ *  used when the arc around the marker is clear. */
+const ARC_LABEL_FLIP_X = 640;
+
+interface ArcRect {
+  x0: number;
+  y0: number;
+  x1: number;
+  y1: number;
+}
+
+/** The label's rectangle on the arc for a placement. The
+ *  dropped level is the exception: it centres on the marker
+ *  (its side is nominal) and its height depends on the nodes
+ *  around it, so it is solved by arcDroppedLabelRectOf, which
+ *  needs them; this function treats a dropped placement as the
+ *  centred rect at the marker's own floor and the placement
+ *  search uses the solved one. */
+export function arcNowLabelRectOf(marker: Pt, placement: ArcNowLabelPlacement): ArcRect {
+  if (placement.level === "dropped") return arcDroppedLabelRectOf(marker, []);
+  const x0 =
+    placement.side === "right"
+      ? marker.x + ARC_LABEL_DX
+      : marker.x - ARC_LABEL_DX - ARC_LABEL_W;
+  const y0 =
+    placement.level === "above"
+      ? marker.y - ARC_LABEL_DY - ARC_LABEL_H
+      : placement.level === "below"
+        ? marker.y + ARC_LABEL_DY
+        : placement.level === "raised"
+          ? marker.y - ARC_LABEL_DY - ARC_LABEL_H - ARC_LABEL_RAISE
+          : marker.y - ARC_LABEL_DY - ARC_LABEL_H - ARC_LABEL_LIFT;
+  return { x0, y0, x1: x0 + ARC_LABEL_W, y1: y0 + ARC_LABEL_H };
+}
+
+/** The dropped label's rectangle: centred on the marker
+ *  (clamped inside the frame), resting on the floor beneath
+ *  the deepest caption around it — the valley's floor is the
+ *  one stretch of the composition that is always empty. */
+export function arcDroppedLabelRectOf(marker: Pt, nodes: readonly Pt[]): ArcRect {
+  const x0 = Math.min(
+    Math.max(2, marker.x - ARC_LABEL_W / 2),
+    ARC_VIEW_W - 2 - ARC_LABEL_W,
+  );
+  let floor = marker.y + 96;
+  for (const node of nodes) {
+    const caption = arcNodeZonesOf(node)[1]!;
+    if (caption.x0 < x0 + ARC_LABEL_W && caption.x1 > x0) {
+      floor = Math.max(floor, caption.y1 + 6);
+    }
+  }
+  return { x0, y0: floor, x1: x0 + ARC_LABEL_W, y1: floor + ARC_LABEL_H };
+}
+
+/** What a label may never cover: a node's medallion (kept as
+ *  its bounding square, inflated by a breath of clearance) and
+ *  the caption block beneath it (104 wide, shifted a little at
+ *  the frame's edges — the zone allows for both). */
+function arcNodeZonesOf(node: Pt): ArcRect[] {
+  return [
+    { x0: node.x - 28, y0: node.y - 28, x1: node.x + 28, y1: node.y + 28 },
+    { x0: node.x - 62, y0: node.y + 30, x1: node.x + 62, y1: node.y + 88 },
+  ];
+}
+
+function rectOverlapArea(a: ArcRect, b: ArcRect): number {
+  const w = Math.min(a.x1, b.x1) - Math.max(a.x0, b.x0);
+  const h = Math.min(a.y1, b.y1) - Math.max(a.y0, b.y0);
+  return w > 0 && h > 0 ? w * h : 0;
+}
+
+/** The label's total offence at a placement: the area it would
+ *  cover of any node's medallion or caption, plus a heavy
+ *  penalty for any part of it that leaves the frame. Zero is a
+ *  clean placement. */
+export function arcNowLabelOffence(
+  marker: Pt,
+  placement: ArcNowLabelPlacement,
+  nodes: readonly Pt[],
+): number {
+  const rect =
+    placement.level === "dropped"
+      ? arcDroppedLabelRectOf(marker, nodes)
+      : arcNowLabelRectOf(marker, placement);
+  let offence = 0;
+  for (const node of nodes) {
+    for (const zone of arcNodeZonesOf(node)) offence += rectOverlapArea(rect, zone);
+  }
+  const outX = Math.max(0, -rect.x0) + Math.max(0, rect.x1 - ARC_VIEW_W);
+  const outY = Math.max(0, -rect.y0) + Math.max(0, rect.y1 - ARC_VIEW_H);
+  return offence + (outX + outY) * 10000;
+}
+
+/** The label's placement, as a rule: the home placement (the
+ *  preview's side rule, above the arc) stands whenever it is
+ *  clean; when the marker crowds a node, the label tries the
+ *  other side, then below the arc, then raised and lifted
+ *  clear above the medallions, and finally — when the marker
+ *  is wedged between two evening nodes with the frame's edge
+ *  behind it — dropped to the empty floor beneath the deepest
+ *  caption around it. The first clean placement wins, so the
+ *  label can never cover a medallion or a caption while a
+ *  clean placement exists. In the pathological case where
+ *  none is clean, the least-offending placement stands. */
+export function arcNowLabelPlacementOf(
+  marker: Pt,
+  nodes: readonly Pt[],
+): ArcNowLabelPlacement {
+  const home: ArcNowLabelPlacement["side"] = marker.x > ARC_LABEL_FLIP_X ? "left" : "right";
+  const away: ArcNowLabelPlacement["side"] = home === "left" ? "right" : "left";
+  const candidates: ArcNowLabelPlacement[] = [
+    { side: home, level: "above" },
+    { side: away, level: "above" },
+    { side: home, level: "below" },
+    { side: away, level: "below" },
+    { side: home, level: "raised" },
+    { side: away, level: "raised" },
+    { side: home, level: "lifted" },
+    { side: away, level: "lifted" },
+    { side: home, level: "dropped" },
+  ];
+  let best = candidates[0]!;
+  let bestOffence = Infinity;
+  for (const candidate of candidates) {
+    const offence = arcNowLabelOffence(marker, candidate, nodes);
+    if (offence <= 0) return candidate;
+    if (offence < bestOffence) {
+      best = candidate;
+      bestOffence = offence;
+    }
+  }
+  return best;
 }

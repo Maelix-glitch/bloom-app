@@ -134,8 +134,9 @@ const TARGET_STEP: Record<TrackerId, number> = {
  * Before M-197 the field was a ghost (borderless, transparent, one
  * hairline under the number), so the sheet read as the display list
  * it was supposed to edit. The plan-set row (water under a guide)
- * wears the same field with no steppers and no input: a fact, in the
- * field's shape, so the grid stays one rhythm.
+ * has no steppers and no input — and since M-199 no box either:
+ * the figure stands as a plain fact in the field's position, so
+ * nothing about it reads as editable.
  */
 function TargetControl({
   def,
