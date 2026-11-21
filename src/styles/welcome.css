@@ -556,6 +556,40 @@
   text-align: right;
 }
 
+/* The trainer code (M-171): an optional extra under the recap. The
+   label wears the recap header's dress (gold, small caps), the field
+   is the name field itself (.wl-input + .glass-field) with a tighter
+   offset, and the two lines under it are quiet — the honest line
+   always, the outcome line only when there is one. */
+.wl-trainer {
+  margin-top: 22px;
+}
+
+.wl-trainer-label {
+  display: block;
+  font-size: var(--text-caption); /* the scale's 12px step */
+  font-weight: 600;
+  letter-spacing: var(--wl-tracking-recap);
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.wl-trainer .wl-input {
+  margin-top: 10px;
+}
+
+.wl-trainer-note {
+  margin: 10px 0 0;
+  font-size: var(--text-callout); /* the scale's 14px step */
+  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+}
+
+.wl-trainer-flag {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-callout);
+  color: var(--gold);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wl-mesh i {
     animation: none;

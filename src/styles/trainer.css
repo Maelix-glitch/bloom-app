@@ -107,3 +107,60 @@
     gap: var(--space-3);
   }
 }
+
+/* The trainer's own code (M-171): the same field dress as the card's
+   rows, but the code itself is the section's one big figure — mono,
+   letterspaced, sized to be read aloud across a room. */
+.trnref-code-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  padding-left: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-control);
+  background: var(--surface-2);
+}
+
+.trnref-code {
+  font-family: var(--font-mono);
+  font-size: var(--text-title);
+  letter-spacing: var(--tracking-meta);
+  color: var(--foreground);
+  white-space: nowrap;
+}
+
+/* My clients: one quiet row per person — name, then the joined date.
+   Name and date are the whole payload, so they are the whole row. */
+.trnref-clients {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  display: grid;
+}
+
+.trnref-client {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.trnref-client:first-child {
+  border-top: 0;
+}
+
+.trnref-client-name {
+  font-size: var(--text-callout);
+  color: var(--foreground);
+}
+
+.trnref-client-date {
+  font-size: var(--text-caption);
+  color: var(--text-secondary);
+  white-space: nowrap;
+}

@@ -39,6 +39,7 @@ import { RestoreSheet } from "@/components/profile/RestoreSheet";
 import { SessionsSection } from "@/components/profile/SessionsSection";
 import { PremiumSection } from "@/components/billing/PremiumSection";
 import { TrainerSection } from "@/components/trainer/TrainerSection";
+import { TrainerReferralSection } from "@/components/trainer/TrainerReferralSection";
 import { HouseholdSection } from "@/components/household/HouseholdSection";
 import { AccountRow } from "@/components/profile/AccountRow";
 import { EraseSheet, ExportSheet, RemindersSheet } from "@/components/profile/DataSheets";
@@ -413,11 +414,17 @@ function AccountSettingsInner({
         <PremiumSection />
       </section>
 
-      {/* Trainer & Clinician Pro: referral code, the consent-gated
-          share summary, and trainer-proposed targets. */}
+      {/* Trainer & Clinician Pro: the consent-gated share summary
+          and trainer-proposed targets. (The referral code moved to
+          the trainers-only server section below — M-171.) */}
       <section id="pf-trainer" className="pf-section pf-jump mt-10" aria-label="Trainer and clinician">
-        <TrainerSection userId={userId} />
+        <TrainerSection />
       </section>
+
+      {/* Trainer referral (M-171): renders its own section ONLY when
+          the server confirms this account is an admin-granted trainer.
+          For everyone else this line leaves no trace in the page. */}
+      <TrainerReferralSection />
 
       {/* One-Kitchen Family: the household the person cooks for,
           and the dishes that suit everyone at the table. */}
