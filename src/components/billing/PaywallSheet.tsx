@@ -4,13 +4,20 @@
  * PaywallHost mounts once at the app root and opens this sheet when
  * any surface calls requestPaywall(context) — Coach out of credits,
  * the free habit limit, the plan composer, the Assessment. The sheet
- * is specific first (what was reached, what your plan looks like
- * right now) and commercial second: two plan cards with the real
- * prices from lib/billing/plans, and a checkout button that tells
- * the truth about its own state — until Bloom's payment account is
- * connected it says payments open soon, because that is what is
- * true. Nothing here can grant Premium; only the provider's
- * verified webhook can.
+ * is specific first (what was reached, in the context strip) and
+ * commercial second.
+ *
+ * M-216 — the commercial composition is design G, "The Comparison"
+ * (owner pick from preview round 2, 2026-11-22): two column heads
+ * (price, works-out-to, credit line) over ONE shared feature ledger,
+ * one button per column. The ledger renders PAYWALL_COMPARISON from
+ * lib/billing/plans and resolves every tick or dash through
+ * comparisonHas, so a row can never claim a Premium tick for a
+ * Plus-only feature — the M-214 split is the ledger's dashes. The
+ * checkout flow, period state, current-plan handling and notices
+ * are the card era's, unchanged; only the presentation was rebuilt.
+ * Nothing here can grant Premium; only the provider's verified
+ * webhook can.
  */
 
 import { useEffect, useMemo, useState } from "react";
@@ -28,9 +35,11 @@ import {
   type PaywallContext,
 } from "@/lib/billing/paywall";
 import {
-  PAYWALL_BULLETS,
+  CREDIT_WEIGHTS_LINE,
+  PAYWALL_COMPARISON,
   PLANS,
   TIER_ORDER,
+  comparisonHas,
   detectPriceRegion,
   formatPrice,
   monthlyEquivalent,
@@ -41,12 +50,15 @@ import {
 
 import "@/styles/billing.css";
 
-/* The cards' bullets are PAYWALL_BULLETS in lib/billing/plans —
-   M-214 moved them there so the offer renders from the same module
-   that defines the tiers and their feature matrix. (M-205's F-37
-   note stands: the two cards carry comparable length, so neither
-   reads as the lesser plan — under the M-214 split the Plus card
-   lists the intelligence layer it alone carries.) */
+/* Contexts that are ABOUT the Plus layer spotlight its column —
+   the member arrived from a Plus boundary (the Vitalis gate, the
+   Twin, the reports), so the ledger's right column is where their
+   eye should land. */
+const PLUS_SPOTLIGHT_CONTEXTS: ReadonlySet<PaywallContext> = new Set([
+  "vitalis_plus",
+  "premium_plus",
+  "vitalis_credits",
+]);
 
 function formatDate(iso: string | null): string | null {
   if (!iso) return null;
@@ -97,12 +109,13 @@ export function PaywallSheet({
   const entitlement = entitlementState.kind === "ready" ? entitlementState.entitlement : null;
   const myTier: PlanTier = entitlement?.tier ?? "free";
   const myRank = TIER_ORDER.indexOf(myTier);
+  const spotlightPlus = PLUS_SPOTLIGHT_CONTEXTS.has(context);
 
   /* M-214: the two tiers no longer save the same share on yearly
      (India: Premium 30%, Plus 17% — the deeper allowance carries a
      shallower discount). One number on the toggle must not claim
      Plus saves what only Premium does, so the toggle states the
-     best saving, labelled "up to"; each card's own "works out to"
+     best saving, labelled "up to"; each head's own "works out to"
      line carries its tier's real figure. */
   const yearlySaving = useMemo(() => {
     const savingFor = (tier: Exclude<PlanTier, "free">) => {
@@ -176,6 +189,8 @@ export function PaywallSheet({
     }
   };
 
+  const paidTiers = ["premium", "premium_plus"] as const;
+
   return (
     <BloomSheet open={open} onClose={onClose} title="Bloom Premium" size="lg">
       {/* The family's visible way out, like the tracker and data sheets
@@ -197,19 +212,27 @@ export function PaywallSheet({
           scroll once it outgrows the panel cap. */}
       <div className="bsheet-scroll">
         <div className="bill-stack">
+          {/* Design G's head — the approved preview's words, verbatim. */}
           <div>
-            <p className="bill-eyebrow">Bloom Premium</p>
-            <h3 className="bill-title">{headline.title}</h3>
-            <p className="bill-body">{headline.body}</p>
+            <p className="bill-eyebrow">Bloom Membership</p>
+            <h3 className="bill-title">Two plans. One ledger.</h3>
+            <p className="bill-body">Every feature, side by side — so the difference is plain.</p>
           </div>
+
+          {/* What was reached, stated plainly — the context's own
+              headline, kept from the card era: the sheet is specific
+              first, commercial second. */}
+          <p className="bill-context">
+            <strong>{headline.title}</strong> — {headline.body}
+          </p>
 
           {entitlement ? (
             <p className="bill-status" role="status">
               {/* M-205 (F-37): a paid member's plan is marked ONCE — on
-                  their card ("Your current plan"). The banner used to
-                  claim it a second time; it now leads with the facts a
+                  their column ("Your plan"). The banner used to claim
+                  it a second time; it now leads with the facts a
                   member opens the sheet for: credits and period. Free
-                  keeps its claim — Free is on no card to mark it. */}
+                  keeps its claim — Free is on no column to mark it. */}
               {entitlement.tier === "free" ? (
                 <>
                   You're on <strong>{PLANS[entitlement.tier].name}</strong> —{" "}
@@ -227,6 +250,11 @@ export function PaywallSheet({
               )}
             </p>
           ) : null}
+
+          {/* M-215: the sheet quotes the allowances (300 / 800), so it
+              also says what a credit buys — the weighted line set
+              every credit surface shares (plans.ts). */}
+          <p className="bill-weights">{CREDIT_WEIGHTS_LINE}</p>
 
           <div className="bill-toggle-row">
             <div className="bill-toggle" role="group" aria-label="Billing period">
@@ -247,26 +275,32 @@ export function PaywallSheet({
             </div>
           </div>
 
-          <div className="bill-cards">
-            {(["premium", "premium_plus"] as const).map((tier) => {
+          {/* The two column heads. Plus carries the gold treatment and
+              the "Most loved" eyebrow (the preview's composition);
+              the member's own column is marked "Your plan", a lower
+              included column "Included". At phone width the pair
+              stays side by side — the columns tighten, never stack. */}
+          <div className="bill-g-heads">
+            {paidTiers.map((tier) => {
               const plan = PLANS[tier];
               const price = priceFor(tier, period, region);
               const equivalent = monthlyEquivalent(tier, region);
               const rank = TIER_ORDER.indexOf(tier);
               const isMine = rank === myRank && entitlement !== null;
               const included = rank < myRank;
-              /* The gold border belongs to the member's own plan — a
-                 Premium Plus member's Premium card used to out-glow the
-                 Plus card they actually own, because the featured class
-                 was hard-coded to Premium. A visitor with no paid plan
-                 still meets Premium featured, as the entry plan. */
-              const featured = isMine || (myTier === "free" && tier === "premium");
               return (
-                <article
+                <div
                   key={tier}
-                  className={`bill-card${featured ? " bill-card--featured" : ""}`}
+                  data-plan-head={tier}
+                  className={
+                    `bill-g-head` +
+                    `${tier === "premium_plus" ? " bill-g-head--plus" : ""}` +
+                    `${isMine ? " bill-g-head--mine" : ""}` +
+                    `${tier === "premium_plus" && spotlightPlus ? " bill-g-head--spotlight" : ""}`
+                  }
                 >
-                  <p className="bill-card-name">{plan.name}</p>
+                  {tier === "premium_plus" ? <p className="bill-g-loved">Most loved</p> : null}
+                  <p className="bill-g-plan">{plan.name}</p>
                   <p className="bill-price">
                     {formatPrice(price)}
                     <small> / {period === "monthly" ? "month" : "year"}</small>
@@ -274,48 +308,108 @@ export function PaywallSheet({
                   {period === "yearly" ? (
                     <p className="bill-equivalent">Works out to {formatPrice(equivalent)} a month.</p>
                   ) : null}
-                  <ul className="bill-features">
-                    {PAYWALL_BULLETS[tier].map((f) => (
-                      <li key={f}>
-                        <Check aria-hidden /> {f}
-                      </li>
-                    ))}
-                  </ul>
-                  {/* A plan state is a status, not an action: the owned
-                      and included cards get a non-interactive badge, so
-                      nothing on the card pretends to be a button that
-                      does nothing. Only a real next step — go / upgrade,
-                      including the tap that surfaces the honest
-                      payments-open-soon notice — stays a button. */}
-                  {isMine || included ? (
-                    <p className="bill-card-status">
-                      {isMine ? "Your current plan" : "Included in your plan"}
-                    </p>
-                  ) : (
-                    <button
-                      type="button"
-                      className="bill-btn bill-btn-gold"
-                      disabled={busyTier !== null}
-                      onClick={() => void go(tier)}
+                  <p className="bill-g-credits">{plan.monthlyCredits} AI credits a month</p>
+                  {isMine ? (
+                    <p className="bill-g-yours">Your plan</p>
+                  ) : included ? (
+                    <p className="bill-g-yours">Included</p>
+                  ) : null}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* The shared ledger. Every row is a PAYWALL_COMPARISON row;
+              every cell resolves through comparisonHas against the
+              tier data in plans.ts — a gold tick where the tier
+              carries the feature, an honest muted dash where it does
+              not. The words "Included" / "Not included" ride along
+              screen-reader-only, so the tick is never the only signal. */}
+          <div className="bill-g-ledger">
+            <div className="bill-g-row bill-g-row--head" aria-hidden="true">
+              <span />
+              <span className="bill-g-cell bill-g-colname">Premium</span>
+              <span className="bill-g-cell bill-g-colname bill-g-colname--plus">Plus</span>
+            </div>
+            {PAYWALL_COMPARISON.map((row) => (
+              <div key={row.label} className="bill-g-row" data-comparison-row={row.label}>
+                <span className="bill-g-label">{row.label}</span>
+                {paidTiers.map((tier) => {
+                  const included = comparisonHas(row, tier);
+                  return (
+                    <span
+                      key={tier}
+                      className="bill-g-cell"
+                      data-tier={tier}
+                      data-included={String(included)}
                     >
-                      {busyTier === tier
-                        ? "Opening checkout…"
-                        : tier === "premium"
-                          ? "Go Premium"
-                          : "Upgrade to Plus"}
-                    </button>
-                  )}
-                </article>
+                      {included ? (
+                        <>
+                          <Check aria-hidden />
+                          <span className="sr-only">Included in {PLANS[tier].name}</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="bill-g-dash" aria-hidden="true">
+                            —
+                          </span>
+                          <span className="sr-only">Not included in {PLANS[tier].name}</span>
+                        </>
+                      )}
+                    </span>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          {/* One button per column. A plan state is a DISABLED button
+              in the sage state treatment — it holds the column's foot
+              so the pair composes, it cannot be tapped, and it never
+              wears the gold action fill. Only a real next step — go /
+              upgrade, including the tap that surfaces the honest
+              payments-open-soon notice — is a live gold button. */}
+          <div className="bill-g-btns">
+            {paidTiers.map((tier) => {
+              const rank = TIER_ORDER.indexOf(tier);
+              const isMine = rank === myRank && entitlement !== null;
+              const included = rank < myRank;
+              if (isMine || included) {
+                return (
+                  <button
+                    key={tier}
+                    type="button"
+                    className="bill-btn bill-btn-state"
+                    disabled
+                  >
+                    {isMine ? "Your plan" : "Included in your plan"}
+                  </button>
+                );
+              }
+              return (
+                <button
+                  key={tier}
+                  type="button"
+                  className="bill-btn bill-btn-gold"
+                  disabled={busyTier !== null}
+                  onClick={() => void go(tier)}
+                >
+                  {busyTier === tier
+                    ? "Opening checkout…"
+                    : tier === "premium"
+                      ? "Go Premium"
+                      : "Go Premium Plus"}
+                </button>
               );
             })}
           </div>
 
           {/* M-205 (F-37): a Premium Plus member's sheet used to have
-              NO primary action at all — both cards are badges for
+              NO primary action at all — both columns are states for
               them. One clear action: manage the membership where the
               membership actually lives (Settings). Premium members
-              already have "Upgrade to Plus" as the sheet's primary;
-              this renders only when no card carries an action. */}
+              already have "Go Premium Plus" as the sheet's primary;
+              this renders only when no column carries an action. */}
           {entitlement && myTier === "premium_plus" ? (
             <button
               type="button"
@@ -336,15 +430,23 @@ export function PaywallSheet({
           ) : null}
         </div>
       </div>
-      {/* M-202 (F-03): the reassurance line is the sheet's footer, not
-          scroll content — it lives in the shell's always-visible foot
-          zone (.bsheet-foot), so the panel cap can never slice it
-          mid-line at the fold again. Same words, always whole. */}
+      {/* M-202 (F-03): the closing lines are the sheet's footer, not
+          scroll content — they live in the shell's always-visible foot
+          zone (.bsheet-foot), so the panel cap can never slice them
+          mid-line at the fold. The free-keeps-working promise first,
+          then the payment honesty lines, whole. */}
       <div className="bsheet-foot bill-foot-zone">
         <p className="bill-foot">
           Free keeps working either way — trackers, habits, mood and your records are never held
           hostage. AI credits refill monthly; when they run out, the AI pauses and everything
           else carries on.
+        </p>
+        <p className="bill-foot">
+          Payments are handled securely by Razorpay — UPI, cards and netbanking.
+        </p>
+        <p className="bill-foot">
+          The first payment confirms your plan. Renewals are charged manually in this version —
+          nothing is taken automatically, and you keep Premium until the period ends.
         </p>
       </div>
     </BloomSheet>

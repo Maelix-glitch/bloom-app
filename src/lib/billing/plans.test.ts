@@ -8,10 +8,12 @@ import { describe, expect, it } from "vitest";
 import {
   COACH_ACCESS,
   PAYWALL_BULLETS,
+  PAYWALL_COMPARISON,
   PLANS,
   TIER_FEATURES,
   asPlanTier,
   canUse,
+  comparisonHas,
   detectPriceRegion,
   formatPrice,
   habitLimitFor,
@@ -125,6 +127,67 @@ describe("feature matrix (M-214 split, 2026-11-22)", () => {
     expect(COACH_ACCESS.free).toBe("limited");
     expect(COACH_ACCESS.premium).toBe("full");
     expect(COACH_ACCESS.premium_plus).toBe("full");
+  });
+});
+
+describe("the comparison ledger (M-216, design G)", () => {
+  /* The ledger the paywall renders — one row per compared feature,
+     in display order. The words are the owner's M-214 split stated
+     plainly; the tick/dash truth must come from the same matrix the
+     gates read, never from a second hand-kept list. */
+  const LABELS = [
+    "Unlimited habits",
+    "Coach chat",
+    "Food-photo analysis",
+    "Assessment + standard plan",
+    "Grocery list",
+    "Trackers & mood",
+    "Basic Stories templates",
+    "Vitalis AI + daily voice",
+    "Plans that adapt and learn",
+    "Metabolic Twin",
+    "Advanced analytics & reports",
+    "Photo-led logging",
+    "Stories premium templates",
+    "Priority features",
+  ];
+  const PLUS_ONLY = [
+    "Vitalis AI + daily voice",
+    "Plans that adapt and learn",
+    "Metabolic Twin",
+    "Advanced analytics & reports",
+    "Photo-led logging",
+    "Stories premium templates",
+    "Priority features",
+  ];
+
+  it("carries exactly the compared features, in order", () => {
+    expect(PAYWALL_COMPARISON.map((r) => r.label)).toEqual(LABELS);
+  });
+
+  it("feature rows read the same TIER_FEATURES matrix the gates read", () => {
+    for (const row of PAYWALL_COMPARISON) {
+      if (row.access.kind !== "feature") continue;
+      for (const tier of ["premium", "premium_plus"] as const) {
+        expect(comparisonHas(row, tier), `${row.label} / ${tier}`).toBe(
+          canUse(tier, row.access.feature),
+        );
+      }
+    }
+  });
+
+  it("Premium has the shared rows and none of the Plus-only rows; Plus has every row", () => {
+    for (const row of PAYWALL_COMPARISON) {
+      expect(comparisonHas(row, "premium_plus"), `${row.label} / plus`).toBe(true);
+      expect(comparisonHas(row, "premium"), `${row.label} / premium`).toBe(
+        !PLUS_ONLY.includes(row.label),
+      );
+    }
+  });
+
+  it("priority features are a Plus-only matrix feature, not a ledger invention", () => {
+    expect(canUse("premium", "priority_features")).toBe(false);
+    expect(canUse("premium_plus", "priority_features")).toBe(true);
   });
 });
 
