@@ -11,10 +11,18 @@
  *
  *   · Every AI request is gated BEFORE any provider is called —
  *     Coach chat, Vitalis chat (fast path and deliberation) and TTS.
- *   · Costs are flat per request, so a person can predict them:
- *     a Coach message 1 credit, a Coach photo analysis 3, a Vitalis
- *     message 2 (deliberation included — up to three provider calls
- *     for one flat price), one spoken chunk 1.
+ *   · Costs are WEIGHTED by what an action costs to serve (M-215,
+ *     owner decision 2026-11-22 — the earlier flat-ish table let one
+ *     credit mean a one-line chat or a three-call deliberation):
+ *     a Coach message 1 credit, a Coach photo analysis 5 (a vision
+ *     call), a Vitalis chat message 2 (it reasons over the full
+ *     nutrition record), a Vitalis plan deliberation 10 (up to three
+ *     provider calls checking their own numbers), a dish-swap
+ *     proposal out of a chat 3, and speech 1 per 500 characters
+ *     spoken (minimum 1, rounded up). The gate always checks the
+ *     ACTION's own cost: a member with 3 credits can chat with
+ *     Vitalis but is refused a 10-credit plan session, with the
+ *     numbers named in the refusal.
  *   · Food-photo analysis is a Premium feature: the free tier is
  *     refused with `premium_required` no matter its balance. The
  *     refusal is a 402-style JSON error the client renders as an
@@ -48,16 +56,59 @@ export type BillingTier = "free" | "premium" | "premium_plus";
 
 export type BillingAction = "coach" | "vitalis" | "tts";
 
-/** Flat per-request credit costs. The ledger reasons are these keys
- *  with the action's own suffix, e.g. "coach_message". */
+/** Weighted per-action credit costs (M-215). The keys ARE the ledger
+ *  reasons `spend_credits` records, so a member's credit history names
+ *  the action and the weighted amount it drew. `tts_request` is the
+ *  unit price — 1 credit per TTS_CHARS_PER_CREDIT characters of
+ *  spoken text — and `ttsCostForChars` does the rounding. */
 export const CREDIT_COSTS = {
   coach_message: 1,
-  coach_photo: 3,
+  coach_photo: 5,
   vitalis_message: 2,
+  vitalis_plan: 10,
+  vitalis_dish_swap: 3,
   tts_request: 1,
 } as const;
 
 export type CreditReason = keyof typeof CREDIT_COSTS;
+
+/** Speech is priced by length: 1 credit per this many characters of
+ *  text actually sent to the voice provider, minimum 1, rounded up
+ *  (501 characters cost 2). */
+export const TTS_CHARS_PER_CREDIT = 500;
+
+export function ttsCostForChars(chars: number): number {
+  const n = Number.isFinite(chars) && chars > 0 ? Math.floor(chars) : 0;
+  return Math.max(CREDIT_COSTS.tts_request, Math.ceil(n / TTS_CHARS_PER_CREDIT));
+}
+
+/** How a Vitalis request is priced at the gate: "chat" is one message
+ *  on the fast path; "plan" is a deliberation session (plan creation
+ *  or regeneration). A dish-swap is NOT a gate kind — it cannot be
+ *  known before the reply exists; it is priced at charge time by
+ *  resolveVitalisCharge. */
+export type VitalisKind = "chat" | "plan";
+
+/** What a finished Vitalis request turned out to be, for the charge:
+ *  the deliberation outcome outranks a proposal inside it (the member
+ *  paid for the session, proposals included). */
+export type VitalisOutcome = "chat" | "plan" | "dish_swap";
+
+/**
+ * The gate's deliberation classifier — the SAME rule handleVitalisChat
+ * deliberates by (a usable record AND (the client's deliberate flag OR
+ * plan-like words)), with the record check and the word check computed
+ * by the caller from vitalis-core so this module stays dependency-free.
+ * When it says "chat", the handler takes the fast path too, so the
+ * price and the work can never disagree.
+ */
+export function vitalisKindFor(input: {
+  recordValid: boolean;
+  deliberateFlag: boolean;
+  planLike: boolean;
+}): VitalisKind {
+  return input.recordValid && (input.deliberateFlag || input.planLike) ? "plan" : "chat";
+}
 
 /** Monthly AI credit allowance per tier. Mirrors PLANS in
  *  src/lib/billing/plans.ts and billing_tier_allowance() in the
@@ -119,13 +170,52 @@ export function parseEntitlementRows(rows: unknown): EntitlementSnapshot | null 
   };
 }
 
-/** The cost + ledger reason for an action, before any tier logic. */
-export function costFor(action: BillingAction, hasMedia: boolean): { cost: number; reason: CreditReason } {
-  if (action === "tts") return { cost: CREDIT_COSTS.tts_request, reason: "tts_request" };
-  if (action === "vitalis") return { cost: CREDIT_COSTS.vitalis_message, reason: "vitalis_message" };
-  return hasMedia
+/** The cost + ledger reason for an action, before any tier logic.
+ *  `vitalisKind` prices a Vitalis request (gate-time classification,
+ *  see vitalisKindFor); `ttsChars` is the length of the text about to
+ *  be spoken — speech is the one cost that depends on the request's
+ *  size, and the handler passes the exact text it will send. */
+export function costFor(
+  action: BillingAction,
+  opts: { hasMedia?: boolean; vitalisKind?: VitalisKind; ttsChars?: number } = {},
+): { cost: number; reason: CreditReason } {
+  if (action === "tts") return { cost: ttsCostForChars(opts.ttsChars ?? 0), reason: "tts_request" };
+  if (action === "vitalis") {
+    return opts.vitalisKind === "plan"
+      ? { cost: CREDIT_COSTS.vitalis_plan, reason: "vitalis_plan" }
+      : { cost: CREDIT_COSTS.vitalis_message, reason: "vitalis_message" };
+  }
+  return opts.hasMedia
     ? { cost: CREDIT_COSTS.coach_photo, reason: "coach_photo" }
     : { cost: CREDIT_COSTS.coach_message, reason: "coach_message" };
+}
+
+/**
+ * The charge a FINISHED Vitalis request actually records. The gate
+ * priced the request it could see; the reply decides the rest:
+ *   · a deliberation (gated as one, or — defensively — reported as
+ *     one) records the plan session's 10 under "vitalis_plan";
+ *   · a plain chat whose reply proposed a dish swap records 3 under
+ *     "vitalis_dish_swap" — the swap is the action the member got;
+ *   · any other chat records the gated chat cost.
+ * The spend itself stays the caller's atomic, best-effort-after-success
+ * `spend_credits`: if a swap lands for a member whose balance covered
+ * the chat (2) but not the swap (3), the spend writes nothing and is
+ * logged — a completed answer is never withheld over a credit.
+ * Denied and uncharged gate decisions resolve to null: no charge, ever.
+ */
+export function resolveVitalisCharge(
+  decision: GateDecision,
+  outcome: VitalisOutcome,
+): { cost: number; reason: CreditReason } | null {
+  if (decision.kind !== "allow") return null;
+  if (decision.reason === "vitalis_plan" || outcome === "plan") {
+    return { cost: CREDIT_COSTS.vitalis_plan, reason: "vitalis_plan" };
+  }
+  if (outcome === "dish_swap") {
+    return { cost: CREDIT_COSTS.vitalis_dish_swap, reason: "vitalis_dish_swap" };
+  }
+  return { cost: decision.cost, reason: decision.reason };
 }
 
 /**
@@ -139,13 +229,18 @@ export function costFor(action: BillingAction, hasMedia: boolean): { cost: numbe
  *   free + photo      → deny_premium (feature gate, balance irrelevant)
  *   vitalis/tts below → deny_premium, feature "vitalis" (M-214: the
  *   premium_plus          Plus gate, balance irrelevant)
- *   balance < cost    → deny_insufficient
- *   otherwise         → allow with the flat cost to deduct on success
+ *   balance < cost    → deny_insufficient (the ACTION's weighted cost)
+ *   otherwise         → allow with that cost to deduct on success
  */
 export function decideGate(input: {
   entitlement: EntitlementSnapshot | null;
   action: BillingAction;
   hasMedia: boolean;
+  /** Vitalis only: the gate-time kind (see vitalisKindFor). Defaults
+   *  to a chat — the cheaper read, and the handler's own fallback. */
+  vitalisKind?: VitalisKind;
+  /** TTS only: characters of text about to be spoken. */
+  ttsChars?: number;
   darkLaunch?: boolean;
 }): GateDecision {
   const { entitlement, action, hasMedia, darkLaunch } = input;
@@ -158,7 +253,11 @@ export function decideGate(input: {
   if ((action === "vitalis" || action === "tts") && entitlement.tier !== "premium_plus") {
     return { kind: "deny_premium", feature: "vitalis", tier: entitlement.tier };
   }
-  const { cost, reason } = costFor(action, hasMedia);
+  const { cost, reason } = costFor(action, {
+    hasMedia,
+    ...(input.vitalisKind ? { vitalisKind: input.vitalisKind } : {}),
+    ...(input.ttsChars !== undefined ? { ttsChars: input.ttsChars } : {}),
+  });
   if (entitlement.creditBalance < cost) {
     return { kind: "deny_insufficient", cost, balance: entitlement.creditBalance, tier: entitlement.tier };
   }

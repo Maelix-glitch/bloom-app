@@ -163,6 +163,15 @@ export const PAYWALL_BULLETS: Record<Exclude<PlanTier, "free">, string[]> = {
   ],
 };
 
+/** What uses credits — the weighted truth (M-215), in one line set.
+ *  Credits are weighted by what an action costs to serve; these are
+ *  the numbers the coach edge function's gate actually charges
+ *  (CREDIT_COSTS in supabase/functions/coach/billing-core.ts), in the
+ *  words the credit surfaces show. One home so the Membership card
+ *  and the paywall can never quote different weights. */
+export const CREDIT_WEIGHTS_LINE =
+  "What uses credits — a Coach message 1 · a food photo 5 · a Vitalis message 2 · a Vitalis plan session 10 · voice 1 per 500 characters spoken.";
+
 /** Free Coach is real but bounded — by the credit allowance and by the
  *  absence of photo analysis. Paid tiers are the full Coach. */
 export const COACH_ACCESS: Record<PlanTier, "limited" | "full"> = {

@@ -90,6 +90,23 @@ describe("PremiumSection — the status card", () => {
     expect(fill.getAttribute("data-level")).toBeNull();
   });
 
+  it("the balance card also says what things cost — the weighted line (M-215)", () => {
+    entitlementMock.state = ready({
+      tier: "premium",
+      status: "active",
+      currentPeriodEnd: "2126-11-18T12:00:00.000Z",
+      creditBalance: 300,
+      monthlyAllowance: 300,
+    });
+    render(<PremiumSection />);
+
+    const line = screen.getByText(/What uses credits/);
+    expect(line.textContent).toContain("a Coach message 1");
+    expect(line.textContent).toContain("a food photo 5");
+    expect(line.textContent).toContain("a Vitalis plan session 10");
+    expect(line.textContent).toContain("voice 1 per 500 characters");
+  });
+
   it("action row: one muted line, and Manage or upgrade opens the paywall", () => {
     entitlementMock.state = ready({
       tier: "premium_plus",

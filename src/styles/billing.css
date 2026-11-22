@@ -250,6 +250,15 @@
   color: var(--faint-strong);
 }
 
+/* M-215: the weighted-credits line under the sheet's status facts —
+   caption register, in the scroll flow (not the foot zone). */
+.bill-weights {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--faint-strong);
+  margin-top: var(--space-3);
+}
+
 /* Profile membership card — the credits meter. */
 .bill-meter {
   height: 6px;
