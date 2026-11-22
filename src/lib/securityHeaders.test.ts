@@ -39,7 +39,8 @@ describe("the CSP fits the app's real sources", () => {
 
   it("allows exactly the external origins the app loads", () => {
     /* Supabase (REST/auth/storage + realtime), the Stories providers
-       (Giphy, iTunes, Deezer) — and nothing else. */
+       (Giphy, iTunes, Deezer), Razorpay checkout (M-213) — and
+       nothing else. */
     expect(CONTENT_SECURITY_POLICY).toContain("https://*.supabase.co");
     expect(CONTENT_SECURITY_POLICY).toContain("wss://*.supabase.co");
     expect(CONTENT_SECURITY_POLICY).toContain("https://*.giphy.com");
@@ -47,6 +48,26 @@ describe("the CSP fits the app's real sources", () => {
     expect(CONTENT_SECURITY_POLICY).toContain("https://*.mzstatic.com");
     expect(CONTENT_SECURITY_POLICY).toContain("https://api.deezer.com");
     expect(CONTENT_SECURITY_POLICY).toContain("https://*.dzcdn.net");
+    expect(CONTENT_SECURITY_POLICY).toContain("https://*.razorpay.com");
+  });
+
+  it("puts Razorpay in exactly the directives checkout needs (M-213)", () => {
+    /* checkout.js is a script, the modal is an iframe, the modal
+       calls and form-posts back to Razorpay, and bank/method marks
+       are images. Each Razorpay origin must sit in its own
+       directive — anywhere else in the string proves nothing. */
+    const directives = new Map(
+      CONTENT_SECURITY_POLICY.split("; ").map((d) => {
+        const [name, ...sources] = d.split(" ");
+        return [name, sources] as const;
+      }),
+    );
+    for (const name of ["script-src", "frame-src", "connect-src", "img-src", "form-action"]) {
+      expect(directives.get(name), name).toContain("https://*.razorpay.com");
+    }
+    for (const name of ["style-src", "font-src", "media-src", "worker-src", "default-src"]) {
+      expect(directives.get(name), name).not.toContain("https://*.razorpay.com");
+    }
   });
 
   it("does NOT allow the origins the app never loads from the client", () => {
