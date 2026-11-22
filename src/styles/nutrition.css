@@ -1609,6 +1609,23 @@ a.nut-chip {
 .nut-jump {
   scroll-margin-top: 80px;
 }
+/* M-207: below lg the phone brand bar (60px — the --app-top-bar the
+   sub-nav sticks under) stacks ON TOP of the sub-nav's own ~60px, so
+   the band a jumped-to section must clear is ~120px, not 80px — the
+   Dishes heading landed under the stuck nav. On narrow screens the
+   sub-nav wraps to two rows (~112px) and the band grows to ~172px;
+   the margin grows with it. At lg the bar goes to 0 and the base 80px
+   stands (60px nav + air). */
+@media (max-width: 64rem) {
+  .nut-jump {
+    scroll-margin-top: 136px;
+  }
+}
+@media (max-width: 40rem) {
+  .nut-jump {
+    scroll-margin-top: 188px;
+  }
+}
 .nut-backlink {
   display: inline-flex;
   align-items: center;
