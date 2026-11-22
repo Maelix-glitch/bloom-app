@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { ArrowDown } from "lucide-react";
 
 import type { CoachMessage } from "@/hooks/useCoachSystem";
@@ -24,6 +24,36 @@ function ThinkingRow({ slow }: { slow: boolean }) {
       </div>
     </div>
   );
+}
+
+/* M-207 (F-13, live shape): a resumed thread — above all the imported
+   cloud thread, which lands as ONE conversation — can span many local
+   days, and the thread showed no date anywhere (message stamps are
+   clock times only). The once-per-day attribution then read as the same
+   caption repeating inside "one day": live, the identical caption at
+   12:40 AM, 6:00 PM and 8:55 PM is in fact the first reply of three
+   different days (24 / 26 / 28 Aug). A quiet divider names each day as
+   it starts, so the day's single attribution visibly belongs to a new
+   day. Day keys and labels both read the message's own local day. */
+function localDayKey(time: string): string {
+  const d = new Date(time);
+  return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+}
+
+function dayDividerLabel(time: string): string | null {
+  const d = new Date(time);
+  if (Number.isNaN(d.getTime())) return null;
+  const now = new Date();
+  const startOf = (x: Date) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+  const days = Math.round((startOf(now) - startOf(d)) / 86_400_000);
+  if (days === 0) return "Today";
+  if (days === 1) return "Yesterday";
+  return d.toLocaleDateString("en-IN", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    ...(d.getFullYear() !== now.getFullYear() ? { year: "numeric" as const } : {}),
+  });
 }
 
 function ThreadLoading() {
@@ -142,8 +172,7 @@ export function CoachThread({
     const indexes = new Set<number>();
     messages.forEach((message, index) => {
       if (message.role !== "coach") return;
-      const d = new Date(message.time);
-      const dayKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const dayKey = localDayKey(message.time);
       if (seenDays.has(dayKey)) return;
       seenDays.add(dayKey);
       indexes.add(index);
@@ -188,19 +217,22 @@ export function CoachThread({
                photo identification behind the reply plus a parseable
                ≈ totals line in it. Null for every other message. */
             const logEstimate = isCoach ? coachEstimateForMessage(messages, index) : null;
-            if (!isCoach) {
-              return (
-                <UserMessage
-                  key={message.id}
-                  message={message}
-                  previewUrl={message.attachment ? previews[message.id] : undefined}
-                  fresh={fresh}
-                />
-              );
-            }
-            return (
+            /* M-207: the day divider stands before the first message of
+               each local day (and opens the thread), so a resumed
+               multi-day thread shows where each day begins. */
+            const dividerLabel =
+              index === 0 ||
+              localDayKey(message.time) !== localDayKey(messages[index - 1]!.time)
+                ? dayDividerLabel(message.time)
+                : null;
+            const node = !isCoach ? (
+              <UserMessage
+                message={message}
+                previewUrl={message.attachment ? previews[message.id] : undefined}
+                fresh={fresh}
+              />
+            ) : (
               <BloomMessage
-                key={message.id}
                 message={message}
                 fresh={fresh}
                 onRetry={message.status === "error" ? () => onRetry(message) : undefined}
@@ -221,6 +253,16 @@ export function CoachThread({
                 showAttribution={attributionIndexes.has(index)}
                 latest={isLastCoachMessage}
               />
+            );
+            return (
+              <Fragment key={message.id}>
+                {dividerLabel ? (
+                  <div className="coach-day-divider" role="separator">
+                    <span>{dividerLabel}</span>
+                  </div>
+                ) : null}
+                {node}
+              </Fragment>
             );
           })}
           {thinking ? <ThinkingRow slow={responseSlow} /> : null}

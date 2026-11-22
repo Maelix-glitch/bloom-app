@@ -45,6 +45,48 @@ const FILTER_ORDER: { key: StoryKind | "all"; label: string }[] = [
 const dateLabel = (iso: string) =>
   new Date(iso).toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" });
 
+/* Element kinds that put words on the canvas. A story carrying any of
+   these (or a title/body) has something to read, and its tile paints the
+   composition itself (M-205). */
+const WORD_ELEMENT_KINDS = new Set([
+  "text",
+  "data",
+  "poll",
+  "question",
+  "countdown",
+  "mention",
+  "date",
+  "music",
+]);
+
+/** True when the story has anything to read: a title, a body, or a
+ *  word-bearing element on its canvas. */
+function storyHasWords(story: Story): boolean {
+  return (
+    Boolean(story.title.trim() || story.body.trim()) ||
+    story.elements.some((el) => WORD_ELEMENT_KINDS.has(el.kind))
+  );
+}
+
+/**
+ * The image that can stand as a story's face, when it has one: its own
+ * photo first, then the composed canvas's photo layer, then the first
+ * image-bearing element (photo, gif, sticker). Null when the story
+ * carries no image at all.
+ */
+function faceImageOf(story: Story): string | null {
+  if (story.kind === "photo" && story.mediaPath) return storyMediaUrl(story);
+  if (story.mediaType === "image" && story.mediaPath) return storyMediaUrl(story);
+  const canvasPhoto = story.canvas?.photo?.src;
+  if (canvasPhoto) return canvasPhoto;
+  for (const el of story.elements) {
+    if (el.kind === "photo" && el.src) return el.src;
+    if (el.kind === "gif") return el.src;
+    if (el.kind === "sticker" && el.src) return el.src;
+  }
+  return null;
+}
+
 function MomentCard({
   story,
   index,
@@ -61,6 +103,7 @@ function MomentCard({
   onShareAgain: (story: Story) => void;
 }) {
   const [imgOk, setImgOk] = useState(true);
+  const [faceOk, setFaceOk] = useState(true);
   const media = story.kind === "photo" && story.mediaPath && imgOk ? storyMediaUrl(story) : null;
   /* M-205 (F-28): a composed story (canvas, elements, background, filter or
      music) carries its content on the canvas, not in title/body — the
@@ -75,6 +118,16 @@ function MomentCard({
     !!story.backgroundId ||
     !!story.filterId ||
     !!story.music;
+  /* M-207 (F-28, the live shape): a composed story can carry NO words
+     at all — the owner's 9 Nov 2026 note is a solid canvas, a decorative
+     underline and one GIF sticker, with empty title/body and no
+     word-bearing element. Painting that composition at story scale
+     (M-205) leaves a mostly-empty field with a small sticker in the
+     corner: the blank tile again, one level down. When a story has no
+     words but does have an image, the image is the moment's face —
+     present it full-bleed, the way a photo story presents its photo.
+     A failed face falls back to the composition below. */
+  const face = !storyHasWords(story) && faceOk ? faceImageOf(story) : null;
   const varAccent = accentVar[story.accent];
   const active = isStoryActive(story);
 
@@ -85,12 +138,21 @@ function MomentCard({
       aria-label={`Open moment: ${story.title || KIND_LABEL[story.kind]}`}
       className="group relative flex aspect-[3/4] w-full flex-col overflow-hidden rounded-2xl border border-border/70 text-left transition-[transform,border-color,box-shadow] duration-[var(--motion-med)] hover:-translate-y-[2px] hover:border-border-strong hover:shadow-[0_24px_50px_-30px_rgba(0,0,0,0.9)]"
       style={{
-        background: media
-          ? "var(--surface-2)"
-          : `radial-gradient(130% 105% at 50% -10%, color-mix(in oklab, ${varAccent} 30%, var(--surface)), color-mix(in oklab, ${varAccent} 8%, var(--surface)) 55%, var(--surface) 100%)`,
+        background:
+          media || face
+            ? "var(--surface-2)"
+            : `radial-gradient(130% 105% at 50% -10%, color-mix(in oklab, ${varAccent} 30%, var(--surface)), color-mix(in oklab, ${varAccent} 8%, var(--surface)) 55%, var(--surface) 100%)`,
       }}
     >
-      {rich ? (
+      {face ? (
+        <img
+          src={face}
+          alt=""
+          loading="lazy"
+          onError={() => setFaceOk(false)}
+          className="absolute inset-0 size-full object-cover"
+        />
+      ) : rich ? (
         <span aria-hidden className="pointer-events-none absolute inset-0 block overflow-hidden">
           <StoryContent story={story} compact />
         </span>
@@ -310,6 +372,13 @@ export function MomentsGrid({
         <ul className="flex flex-col gap-1.5">
           {shown.map((story) => {
             const varAccent = accentVar[story.accent];
+            /* M-207: the row's swatch carries the moment's face when
+               the story leads with an image (a photo, or a wordless
+               composed story — the same condition as the grid tile),
+               not only the accent field: a wordless note's row
+               otherwise reads as a label with nothing behind it. */
+            const rowFace =
+              story.kind === "photo" || !storyHasWords(story) ? faceImageOf(story) : null;
             return (
               <li key={story.id}>
                 <button
@@ -319,11 +388,20 @@ export function MomentsGrid({
                 >
                   <span
                     aria-hidden
-                    className="size-8 shrink-0 rounded-lg"
+                    className="relative size-8 shrink-0 overflow-hidden rounded-lg"
                     style={{
                       background: `linear-gradient(135deg, color-mix(in oklab, ${varAccent} 45%, var(--surface-2)), var(--surface-2))`,
                     }}
-                  />
+                  >
+                    {rowFace ? (
+                      <img
+                        src={rowFace}
+                        alt=""
+                        loading="lazy"
+                        className="absolute inset-0 size-full object-cover"
+                      />
+                    ) : null}
+                  </span>
                   <span className="min-w-0 flex-1">
                     <span className="block truncate text-[length:var(--text-support)] font-medium">
                       {story.title || `${KIND_LABEL[story.kind]} moment`}
