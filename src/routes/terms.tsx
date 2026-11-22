@@ -46,7 +46,7 @@ function TermsRoute() {
         {
           heading: "Plans and prices",
           paras: [
-            "Bloom is free to use, with a monthly taste of the AI features. Premium is ₹599 a month or ₹3,999 a year. Premium Plus is ₹999 a month or ₹7,999 a year. Outside India, Premium is $9.99 a month or $59.99 a year, and Premium Plus is $14.99 a month or $89.99 a year. The amount shown at checkout is the amount you pay.",
+            "Bloom is free to use, with a monthly taste of the AI features. Premium is ₹599 a month or ₹4,999 a year. Premium Plus is ₹999 a month or ₹9,999 a year. Outside India, Premium is $9.99 a month or $59.99 a year, and Premium Plus is $14.99 a month or $89.99 a year. The amount shown at checkout is the amount you pay.",
           ],
         },
         {

@@ -123,6 +123,10 @@ interface VitalisTurn {
   /** This turn is the Money System's pause (out of AI credits) — it
    *  offers Premium instead of a retry. */
   paywall?: boolean;
+  /** M-214: this turn is the Premium Plus refusal instead — Vitalis
+   *  itself is a Plus feature, so the words and the button name the
+   *  tier, not the credit balance. */
+  plusPaywall?: boolean;
 }
 
 function newTurnId(prefix: string) {
@@ -518,15 +522,25 @@ export function CoachOrb() {
           err instanceof VitalisUnavailable &&
           (err.reason === "insufficient_credits" || err.reason === "premium_required");
         if (billingRefusal) {
+          /* M-214: the two refusals are different facts and get
+             different words. Out of credits is a pause that refills;
+             premium_required from Vitalis means the tier itself —
+             Vitalis is part of Premium Plus now — and saying
+             "credits" to a Premium member with a full balance would
+             be a lie. */
+          const plusRefusal = err.reason === "premium_required";
           const turn: VitalisTurn = {
             id: newTurnId("vitalis-paywall"),
             role: "vitalis",
             time: new Date().toISOString(),
             paragraphs: [
-              "You've used this month's AI credits, so I pause here. Premium refills the allowance every month — your record, plans and trackers keep working either way.",
+              plusRefusal
+                ? "Vitalis is part of Premium Plus, so I can't open here on your current plan. Premium Plus carries the whole intelligence layer — me, the adaptive plans and the Metabolic Twin."
+                : "You've used this month's AI credits, so I pause here. Premium Plus refills the allowance every month — your record, plans and trackers keep working either way.",
             ],
             status: "error",
             paywall: true,
+            ...(plusRefusal ? { plusPaywall: true } : {}),
           };
           applyTurns([...turnsRef.current, turn]);
           lastFailedRef.current = null;
@@ -863,9 +877,11 @@ export function CoachOrb() {
                           <button
                             type="button"
                             className="coach-orb-retry"
-                            onClick={() => requestPaywall("vitalis_credits")}
+                            onClick={() =>
+                              requestPaywall(turn.plusPaywall ? "vitalis_plus" : "vitalis_credits")
+                            }
                           >
-                            See Premium
+                            {turn.plusPaywall ? "See Premium Plus" : "See Premium"}
                           </button>
                         ) : turn.id === errorTurnId ? (
                           <button type="button" className="coach-orb-retry" onClick={retry}>

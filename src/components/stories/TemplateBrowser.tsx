@@ -12,6 +12,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, Heart, Search, SlidersHorizontal, Sparkles } from "lucide-react";
 
 import { StoryCanvas } from "./StoryCanvas";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { requestPaywall } from "@/lib/billing/paywall";
+import { canUse } from "@/lib/billing/plans";
 import {
   STORY_TEMPLATE_LIBRARY,
   favoriteTemplateIds,
@@ -136,7 +139,10 @@ function TemplateCard({
         aria-label={`Preview the ${def.name} template`}
       >
         <TemplateThumb def={def} data={data} />
-        <span className="stpl-card-name">{def.name}</span>
+        <span className="stpl-card-name">
+          {def.name}
+          {def.premium ? <span className="stpl-card-plus"> · Plus</span> : null}
+        </span>
         <span className="stpl-card-meta">
           {meta.photoSlots > 0
             ? `${meta.photoSlots} photo${meta.photoSlots === 1 ? "" : "s"}`
@@ -223,6 +229,27 @@ export function TemplateBrowser({
   const [preview, setPreview] = useState<StoryTemplateDef | null>(null);
   const [tick, setTick] = useState(0);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const entitlementState = useEntitlement();
+
+  /* M-214: premium templates are Premium Plus designs. Browsing and
+     previewing stay open to everyone — the gate is the pick. A KNOWN
+     entitlement below Plus meets the paywall; an unread one never
+     blocks (house rule). UI gate: templates are client-side data,
+     so there is no server read to refuse. */
+  const pick = useCallback(
+    (def: StoryTemplateDef) => {
+      if (
+        def.premium &&
+        entitlementState.kind === "ready" &&
+        !canUse(entitlementState.entitlement.tier, "stories_premium_templates")
+      ) {
+        requestPaywall("premium_plus");
+        return;
+      }
+      onPick(def);
+    },
+    [entitlementState, onPick],
+  );
 
   useEffect(() => {
     const onChange = () => {
@@ -369,7 +396,7 @@ export function TemplateBrowser({
           data={data}
           favorite={favorites.includes(preview.id)}
           onToggleFavorite={() => toggleFavorite(preview.id)}
-          onUse={() => onPick(preview)}
+          onUse={() => pick(preview)}
           onClose={() => setPreview(null)}
         />
       ) : null}
@@ -396,6 +423,14 @@ export function TemplatePreview({
 }) {
   const composed = useMemo(() => instantiateTemplate(def), [def]);
   const meta = templateMeta(def);
+  const entitlementState = useEntitlement();
+  /* M-214: a premium design viewed below Plus — the preview stays
+     open (seeing what Plus holds is the point), the Use button
+     names the tier instead of pretending to pick. */
+  const plusLocked =
+    Boolean(def.premium) &&
+    entitlementState.kind === "ready" &&
+    !canUse(entitlementState.entitlement.tier, "stories_premium_templates");
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -471,7 +506,7 @@ export function TemplatePreview({
               <Heart className="size-4" data-filled={favorite || undefined} aria-hidden />
             </button>
             <button type="button" className="stpl-use-btn" onClick={onUse}>
-              Use this template
+              {plusLocked ? "Part of Premium Plus" : "Use this template"}
             </button>
             <button
               type="button"

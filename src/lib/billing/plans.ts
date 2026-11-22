@@ -10,11 +10,26 @@
  * else in Bloom keeps working. Top-ups are credit packs, never a
  * silent bill.
  *
+ * M-214 (owner decisions, 2026-11-22): the yearly India prices rose —
+ * Premium ₹4,999/yr, Premium Plus ₹9,999/yr (monthly and international
+ * unchanged; anyone who already paid keeps the price they paid) — and
+ * the tiers were split for real. Premium is now the essentials:
+ * unlimited habits, the Coach, food-photo analysis, the Assessment
+ * with a standard plan and grocery, Trackers, Mood, basic Stories.
+ * Premium Plus carries the intelligence layer on top: Vitalis (the
+ * orb AI) with daily voice, adaptive plans, the Metabolic Twin and
+ * Overview intelligence, advanced analytics and reports, photo-led
+ * logging and the premium Stories templates. The feature matrix
+ * below is that split, and the gates read it — the Vitalis gate is
+ * enforced in the coach edge function itself.
+ *
  * Two mirrors exist by design and are pinned equal by tests: the SQL
  * `billing_tier_allowance()` in the billing migration, and
  * TIER_ALLOWANCES in supabase/functions/coach/billing-core.ts. Prices
- * live ONLY here (the server never needs them — the webhook trusts the
- * tier metadata the checkout created, never a client-sent amount).
+ * live here and in ONE server mirror — PLAN_PRICES_PAISE in
+ * supabase/functions/billing/billing-core.ts, which prices the Orders
+ * rail (pinned equal by billingOrders.test.ts). Nothing else may
+ * quote a price.
  */
 
 export type PlanTier = "free" | "premium" | "premium_plus";
@@ -56,22 +71,22 @@ export const PLANS: Record<PlanTier, PlanDetail> = {
   premium: {
     tier: "premium",
     name: "Premium",
-    tagline: "The full intelligence — Coach, Vitalis, adaptive plans and Nutrition.",
+    tagline: "The essentials, unlimited — the Coach, your plan, Nutrition and your full record.",
     monthlyCredits: 300,
     habitLimit: null,
     prices: {
-      IN: { monthly: INR(599), yearly: INR(3999) },
+      IN: { monthly: INR(599), yearly: INR(4999) },
       INTL: { monthly: USD(9.99), yearly: USD(59.99) },
     },
   },
   premium_plus: {
     tier: "premium_plus",
     name: "Premium Plus",
-    tagline: "Premium with a deep AI allowance — for daily Vitalis conversations and photo-led logging.",
+    tagline: "The intelligence layer — Vitalis, adaptive plans and the Metabolic Twin, with room to use them daily.",
     monthlyCredits: 800,
     habitLimit: null,
     prices: {
-      IN: { monthly: INR(999), yearly: INR(7999) },
+      IN: { monthly: INR(999), yearly: INR(9999) },
       INTL: { monthly: USD(14.99), yearly: USD(89.99) },
     },
   },
@@ -81,14 +96,24 @@ export const TIER_ORDER: PlanTier[] = ["free", "premium", "premium_plus"];
 
 /** The premium capabilities a tier either has or has not. Coach access
  *  itself is tiered separately (see COACH_ACCESS) because free includes
- *  a limited Coach, not none. */
+ *  a limited Coach, not none.
+ *
+ *  M-214 split: Premium carries the essentials; the intelligence
+ *  layer — vitalis, adaptive_plans, metabolic_twin,
+ *  overview_intelligence, advanced_analytics, photo_led_logging and
+ *  stories_premium_templates — is Premium Plus only. Before M-214
+ *  the two paid sets were identical, which is what the owner ended. */
 export type PremiumFeature =
   | "unlimited_habits"
   | "food_photo_analysis"
   | "assessment_plan"
   | "nutrition"
+  | "vitalis"
+  | "adaptive_plans"
+  | "metabolic_twin"
   | "overview_intelligence"
   | "advanced_analytics"
+  | "photo_led_logging"
   | "stories_premium_templates";
 
 export const TIER_FEATURES: Record<PlanTier, ReadonlySet<PremiumFeature>> = {
@@ -98,19 +123,44 @@ export const TIER_FEATURES: Record<PlanTier, ReadonlySet<PremiumFeature>> = {
     "food_photo_analysis",
     "assessment_plan",
     "nutrition",
-    "overview_intelligence",
-    "advanced_analytics",
-    "stories_premium_templates",
   ]),
   premium_plus: new Set<PremiumFeature>([
     "unlimited_habits",
     "food_photo_analysis",
     "assessment_plan",
     "nutrition",
+    "vitalis",
+    "adaptive_plans",
+    "metabolic_twin",
     "overview_intelligence",
     "advanced_analytics",
+    "photo_led_logging",
     "stories_premium_templates",
   ]),
+};
+
+/** The paywall's own words for each paid tier — the bullets the
+ *  Membership sheet renders, kept here with the plan definitions so
+ *  the offer can never drift from the matrix above. Every line is
+ *  something the tier actually carries under TIER_FEATURES. */
+export const PAYWALL_BULLETS: Record<Exclude<PlanTier, "free">, string[]> = {
+  premium: [
+    "Unlimited habits",
+    "Full Coach — 300 AI credits a month",
+    "Food-photo analysis",
+    "Assessment + your nutrition plan and grocery list",
+    "Trackers, Mood and your full daily record",
+    "Basic Stories templates",
+  ],
+  premium_plus: [
+    "Everything in Premium",
+    "Vitalis — your nutrition AI, with daily voice conversations",
+    "800 AI credits a month (Premium has 300)",
+    "Adaptive plans that learn from your days",
+    "Metabolic Twin and Overview intelligence",
+    "Advanced analytics and reports",
+    "Photo-led logging · Stories premium templates",
+  ],
 };
 
 /** Free Coach is real but bounded — by the credit allowance and by the
@@ -153,7 +203,7 @@ export function priceFor(tier: PlanTier, period: BillingPeriod, region: PriceReg
   return PLANS[tier].prices[region][period];
 }
 
-/** "₹599", "₹3,999", "$9.99" — whole rupees group Indian-style by
+/** "₹599", "₹4,999", "$9.99" — whole rupees group Indian-style by
  *  thousands; dollars keep their cents. */
 export function formatPrice(price: PlanPrice): string {
   if (price.currency === "INR") {

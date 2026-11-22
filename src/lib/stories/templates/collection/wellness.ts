@@ -49,6 +49,7 @@ export const WELLNESS_TEMPLATES = [
      on the library's lightest ground. */
   tpl({
     id: "wellness-in-motion",
+    premium: true,
     name: "In Motion",
     hint: "The week's movement, drawn honestly.",
     category: "wellness",

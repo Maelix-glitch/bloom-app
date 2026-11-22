@@ -30,9 +30,12 @@ import { EyeOff, Flame, Gauge, Scale, SlidersHorizontal, UtensilsCrossed } from 
 
 import { SectionHead } from "@/components/ui/SectionHead";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
+import { useEntitlement } from "@/hooks/useEntitlement";
 import { useHabits } from "@/hooks/useHabits";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
+import { requestPaywall } from "@/lib/billing/paywall";
+import { canUse } from "@/lib/billing/plans";
 import { buildTwinSnapshot, type TwinField, type TwinProgress } from "@/lib/twin/twin";
 import { planLearningFor } from "@/lib/nutrition";
 import { MoreDisclosure } from "./PlanPrimitives";
@@ -208,6 +211,7 @@ export function MetabolicTwinSection() {
   const body = useBodyProfile();
   const habitsStore = useHabits();
   const planStore = usePlan();
+  const entitlementState = useEntitlement();
 
   const targets =
     nutrition.targetState.kind === "ready" ? nutrition.targetState.targets : null;
@@ -615,6 +619,40 @@ export function MetabolicTwinSection() {
     { label: "Food-log coverage", field: twin.logCoverage as TwinField<never> },
     { label: "Nutrient gaps", field: twin.nutrientGaps as TwinField<never> },
   ];
+
+  /* M-214: the Twin is Premium Plus intelligence. A KNOWN
+     entitlement below Plus meets an honest invitation instead of
+     the model — no tiles, no figures, nothing of the Twin's read
+     shown. An unread entitlement never blocks (the house rule):
+     the section renders as it always did while the read is
+     loading or unavailable. This gate is presentation — the Twin
+     computes on-device from the person's own record, so there is
+     no server read to refuse; recorded as UI-gated in M-214. */
+  if (
+    entitlementState.kind === "ready" &&
+    !canUse(entitlementState.entitlement.tier, "metabolic_twin")
+  ) {
+    return (
+      <section className="nut-card nut-rise section" aria-label="Your metabolic twin">
+        <SectionHead
+          title="Your metabolic twin"
+          subline="A living model of your metabolism, computed fresh from your record."
+        />
+        <p className="mt-4 text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
+          The Twin reads your food log, weigh-ins and habits together — maintenance energy,
+          weight trend, nutrient gaps — and it is where your plan's adaptations are proposed.
+          It is part of Premium Plus, with Vitalis and the rest of the intelligence layer.
+        </p>
+        <button
+          type="button"
+          className="nut-btn nut-btn-gold mt-4"
+          onClick={() => requestPaywall("premium_plus")}
+        >
+          See Premium Plus
+        </button>
+      </section>
+    );
+  }
 
   return (
     <section className="nut-card nut-rise section" aria-label="Your metabolic twin">

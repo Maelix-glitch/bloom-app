@@ -28,6 +28,7 @@ import {
   type PaywallContext,
 } from "@/lib/billing/paywall";
 import {
+  PAYWALL_BULLETS,
   PLANS,
   TIER_ORDER,
   detectPriceRegion,
@@ -40,29 +41,12 @@ import {
 
 import "@/styles/billing.css";
 
-const FEATURE_BULLETS: Record<Exclude<PlanTier, "free">, string[]> = {
-  premium: [
-    "Unlimited habits",
-    "Full Coach & Vitalis — 300 AI credits a month",
-    "Food-photo analysis",
-    "Assessment + adaptive plans that learn from your days",
-    "Full Nutrition & Overview intelligence",
-    "Advanced analytics · Stories premium templates",
-  ],
-  /* M-205 (F-37): the Plus card stood at half the Premium card's
-     height with three bullets against six, reading as the lesser
-     plan. The tiers' feature sets are identical (plans.ts) — the
-     honest differences are the credit allowance and what it makes
-     room for, so the card now says all of it, at the same length. */
-  premium_plus: [
-    "Everything in Premium",
-    "800 AI credits a month (Premium has 300)",
-    "Daily Vitalis voice conversations",
-    "Photo-led logging and food-photo analysis",
-    "Full Coach, Assessment and adaptive plans",
-    "Advanced analytics · Stories premium templates",
-  ],
-};
+/* The cards' bullets are PAYWALL_BULLETS in lib/billing/plans —
+   M-214 moved them there so the offer renders from the same module
+   that defines the tiers and their feature matrix. (M-205's F-37
+   note stands: the two cards carry comparable length, so neither
+   reads as the lesser plan — under the M-214 split the Plus card
+   lists the intelligence layer it alone carries.) */
 
 function formatDate(iso: string | null): string | null {
   if (!iso) return null;
@@ -114,11 +98,20 @@ export function PaywallSheet({
   const myTier: PlanTier = entitlement?.tier ?? "free";
   const myRank = TIER_ORDER.indexOf(myTier);
 
+  /* M-214: the two tiers no longer save the same share on yearly
+     (India: Premium 30%, Plus 17% — the deeper allowance carries a
+     shallower discount). One number on the toggle must not claim
+     Plus saves what only Premium does, so the toggle states the
+     best saving, labelled "up to"; each card's own "works out to"
+     line carries its tier's real figure. */
   const yearlySaving = useMemo(() => {
-    const monthly = priceFor("premium", "monthly", region).amount;
-    const yearly = priceFor("premium", "yearly", region).amount;
-    if (monthly <= 0) return 0;
-    return Math.max(0, Math.round((1 - yearly / (monthly * 12)) * 100));
+    const savingFor = (tier: Exclude<PlanTier, "free">) => {
+      const monthly = priceFor(tier, "monthly", region).amount;
+      const yearly = priceFor(tier, "yearly", region).amount;
+      if (monthly <= 0) return 0;
+      return Math.max(0, Math.round((1 - yearly / (monthly * 12)) * 100));
+    };
+    return Math.max(savingFor("premium"), savingFor("premium_plus"));
   }, [region]);
 
   /* The buy action runs the Standard Web Checkout rail: the edge
@@ -249,7 +242,7 @@ export function PaywallSheet({
                 aria-pressed={period === "yearly"}
                 onClick={() => setPeriod("yearly")}
               >
-                Yearly{yearlySaving > 0 ? <span className="bill-save"> · save {yearlySaving}%</span> : null}
+                Yearly{yearlySaving > 0 ? <span className="bill-save"> · save up to {yearlySaving}%</span> : null}
               </button>
             </div>
           </div>
@@ -282,7 +275,7 @@ export function PaywallSheet({
                     <p className="bill-equivalent">Works out to {formatPrice(equivalent)} a month.</p>
                   ) : null}
                   <ul className="bill-features">
-                    {FEATURE_BULLETS[tier].map((f) => (
+                    {PAYWALL_BULLETS[tier].map((f) => (
                       <li key={f}>
                         <Check aria-hidden /> {f}
                       </li>

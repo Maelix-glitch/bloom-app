@@ -7,6 +7,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   COACH_ACCESS,
+  PAYWALL_BULLETS,
   PLANS,
   TIER_FEATURES,
   asPlanTier,
@@ -21,12 +22,12 @@ import {
   priceFor,
 } from "./plans";
 
-describe("plan prices (owner-agreed 2026-11-10/12)", () => {
-  it("India: premium ₹599/mo · ₹3,999/yr, plus ₹999/mo · ₹7,999/yr", () => {
+describe("plan prices (owner-agreed 2026-11-10/12; yearly raised M-214, 2026-11-22)", () => {
+  it("India: premium ₹599/mo · ₹4,999/yr, plus ₹999/mo · ₹9,999/yr", () => {
     expect(priceFor("premium", "monthly", "IN")).toEqual({ amount: 599, currency: "INR" });
-    expect(priceFor("premium", "yearly", "IN")).toEqual({ amount: 3999, currency: "INR" });
+    expect(priceFor("premium", "yearly", "IN")).toEqual({ amount: 4999, currency: "INR" });
     expect(priceFor("premium_plus", "monthly", "IN")).toEqual({ amount: 999, currency: "INR" });
-    expect(priceFor("premium_plus", "yearly", "IN")).toEqual({ amount: 7999, currency: "INR" });
+    expect(priceFor("premium_plus", "yearly", "IN")).toEqual({ amount: 9999, currency: "INR" });
     expect(priceFor("free", "monthly", "IN").amount).toBe(0);
   });
 
@@ -48,15 +49,16 @@ describe("plan prices (owner-agreed 2026-11-10/12)", () => {
   });
 
   it("formats ₹ with Indian grouping and $ with two decimals", () => {
-    expect(formatPrice(priceFor("premium", "yearly", "IN"))).toBe("₹3,999");
+    expect(formatPrice(priceFor("premium", "yearly", "IN"))).toBe("₹4,999");
     expect(formatPrice(priceFor("premium", "monthly", "IN"))).toBe("₹599");
     expect(formatPrice(priceFor("premium", "monthly", "INTL"))).toBe("$9.99");
     expect(formatPrice(priceFor("free", "monthly", "IN"))).toBe("₹0");
   });
 
   it("monthly equivalent of a yearly price is the honest twelfth", () => {
-    expect(monthlyEquivalent("premium", "IN")).toEqual({ amount: 333.25, currency: "INR" });
-    expect(formatPrice(monthlyEquivalent("premium", "IN"))).toBe("₹333");
+    expect(monthlyEquivalent("premium", "IN")).toEqual({ amount: 416.58, currency: "INR" });
+    expect(formatPrice(monthlyEquivalent("premium", "IN"))).toBe("₹417");
+    expect(formatPrice(monthlyEquivalent("premium_plus", "IN"))).toBe("₹833");
     expect(formatPrice(monthlyEquivalent("premium", "INTL"))).toBe("$5.00");
   });
 });
@@ -70,7 +72,7 @@ describe("AI credit allowances", () => {
   });
 });
 
-describe("feature matrix (agreed model)", () => {
+describe("feature matrix (M-214 split, 2026-11-22)", () => {
   it("free gets none of the premium features", () => {
     for (const feature of TIER_FEATURES.premium) {
       expect(canUse("free", feature)).toBe(false);
@@ -78,19 +80,45 @@ describe("feature matrix (agreed model)", () => {
     expect(TIER_FEATURES.free.size).toBe(0);
   });
 
-  it("premium and plus carry every premium feature", () => {
+  it("premium carries the essentials — and only the essentials", () => {
     for (const feature of [
       "unlimited_habits",
       "food_photo_analysis",
       "assessment_plan",
       "nutrition",
-      "overview_intelligence",
-      "advanced_analytics",
-      "stories_premium_templates",
     ] as const) {
       expect(canUse("premium", feature)).toBe(true);
+    }
+    /* The intelligence layer is NOT Premium's any more (M-214). */
+    for (const feature of [
+      "vitalis",
+      "adaptive_plans",
+      "metabolic_twin",
+      "overview_intelligence",
+      "advanced_analytics",
+      "photo_led_logging",
+      "stories_premium_templates",
+    ] as const) {
+      expect(canUse("premium", feature)).toBe(false);
+    }
+  });
+
+  it("premium plus carries the whole matrix", () => {
+    for (const feature of TIER_FEATURES.premium_plus) {
       expect(canUse("premium_plus", feature)).toBe(true);
     }
+    /* Plus is a strict superset of Premium — nothing Premium has is
+       missing from Plus. */
+    for (const feature of TIER_FEATURES.premium) {
+      expect(canUse("premium_plus", feature)).toBe(true);
+    }
+  });
+
+  it("the paywall bullets tell the same story as the matrix", () => {
+    expect(PAYWALL_BULLETS.premium.length).toBeLessThanOrEqual(6);
+    expect(PAYWALL_BULLETS.premium.join(" ")).not.toMatch(/Vitalis/);
+    expect(PAYWALL_BULLETS.premium_plus[0]).toBe("Everything in Premium");
+    expect(PAYWALL_BULLETS.premium_plus.join(" ")).toMatch(/Vitalis/);
   });
 
   it("coach access: free is limited, paid is full", () => {

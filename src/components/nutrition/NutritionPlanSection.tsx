@@ -69,6 +69,7 @@ import { peekEntitlement } from "@/lib/billing/entitlement";
 import { requestPaywall } from "@/lib/billing/paywall";
 import { canUse } from "@/lib/billing/plans";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
+import { useEntitlement } from "@/hooks/useEntitlement";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
 import { useTrackers } from "@/hooks/useTrackers";
@@ -350,6 +351,7 @@ export function NutritionPlanSection() {
   } = usePlan();
   const assessment = useAssessment();
   const session = useSession();
+  const entitlementState = useEntitlement();
   /* The tracker store rides along for one figure: the resolved water
      target (M-165). The water panel below must stand even on a day no
      plan has been made for, and this is the same resolved figure
@@ -659,7 +661,18 @@ export function NutritionPlanSection() {
     Math.abs(proposalDelta) <= MAX_TARGET_ADJUSTMENT_KCAL &&
     adjustedTargets({ kcal: engineTargetKcal, proteinG: plan.targets.proteinG }, proposalDelta) !==
       null;
+  /* M-214: the expenditure proposal is Adaptation — a Premium Plus
+     behaviour. Below Plus it is neither shown nor confirmable (the
+     Confirm button lives on the card this flag renders). A KNOWN
+     entitlement gates; an unread one never blocks, per the house
+     rule. The composer's own learning bias is part of the shared
+     plan engine (method 14) and is not tier-split — what Plus
+     carries is the Twin's read and this target adaptation. */
+  const adaptationAllowed =
+    entitlementState.kind !== "ready" ||
+    canUse(entitlementState.entitlement.tier, "adaptive_plans");
   const showProposal =
+    adaptationAllowed &&
     estimate !== null &&
     proposalDelta !== null &&
     Math.abs(proposalDelta) >= 25 &&

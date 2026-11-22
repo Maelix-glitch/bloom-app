@@ -109,8 +109,12 @@ export function parseCheckoutRequest(body: unknown): { tier: PaidTier; period: P
 /* ------------------------------------------------------------------ */
 
 export const PLAN_PRICES_PAISE: Record<PaidTier, Record<PaidPeriod, number>> = {
-  premium: { monthly: 59900, yearly: 399900 },
-  premium_plus: { monthly: 99900, yearly: 799900 },
+  /* M-214 (2026-11-22): yearly rose to ₹4,999 / ₹9,999 — monthly
+     unchanged. A payment captured at the old yearly amount no longer
+     equals this table and so activates nothing, which is correct:
+     it was not a payment for the current offer. */
+  premium: { monthly: 59900, yearly: 499900 },
+  premium_plus: { monthly: 99900, yearly: 999900 },
 };
 
 /** Razorpay refuses orders under ₹1; Bloom's cheapest period is far

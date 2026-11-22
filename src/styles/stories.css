@@ -2703,6 +2703,12 @@
   white-space: nowrap;
 }
 
+/* M-214: the Premium Plus mark on a premium template's card. */
+.stpl-card-plus {
+  color: var(--gold);
+  font-weight: 600;
+}
+
 .stpl-card-meta {
   font-size: 11px;
   color: var(--muted-foreground);

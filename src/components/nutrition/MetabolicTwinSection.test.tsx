@@ -32,6 +32,15 @@ vi.mock("@/hooks/useHabits", () => ({
 vi.mock("@/hooks/usePlan", () => ({
   usePlan: () => planState.current,
 }));
+/* M-214 gate fixtures: the entitlement the section sees, steered per
+   test. The default is "unavailable" — an unread entitlement never
+   blocks, which is the state every pre-M-214 fixture renders under. */
+const entitlementState = vi.hoisted(() => ({
+  current: { kind: "unavailable" } as { kind: string; entitlement?: Record<string, unknown> },
+}));
+vi.mock("@/hooks/useEntitlement", () => ({
+  useEntitlement: () => entitlementState.current,
+}));
 
 import { fireEvent, screen } from "@testing-library/react";
 import type { Habit, HabitLog } from "@/lib/home/habits";
@@ -339,5 +348,55 @@ describe("MetabolicTwinSection — the absorbed insight strip (brief v4 Slice 5)
     setStores({ entries: daysFrom("2026-10-20", 2, 1800) });
     const { container } = render(<MetabolicTwinSection />);
     expect(container.querySelector(".twin-strip")).toBeNull();
+  });
+});
+
+describe("MetabolicTwinSection — the Premium Plus gate (M-214)", () => {
+  const readyWith = (tier: string) => ({
+    kind: "ready",
+    entitlement: {
+      tier,
+      status: "active",
+      currentPeriodEnd: null,
+      creditBalance: 300,
+      monthlyAllowance: 300,
+      periodStart: null,
+    },
+  });
+
+  afterEach(() => {
+    entitlementState.current = { kind: "unavailable" };
+  });
+
+  it("a known Premium entitlement meets the invitation — no Twin read shown", () => {
+    entitlementState.current = readyWith("premium");
+    setStores({ entries: daysFrom("2026-10-01", 12, 2500) });
+    const { container } = render(<MetabolicTwinSection />);
+    expect(container.textContent).toContain("part of Premium Plus");
+    expect(container.textContent).not.toContain("signals ready");
+    expect(screen.getByRole("button", { name: "See Premium Plus" })).toBeTruthy();
+  });
+
+  it("a known Free entitlement is gated the same way", () => {
+    entitlementState.current = readyWith("free");
+    setStores({ entries: daysFrom("2026-10-01", 12, 2500) });
+    const { container } = render(<MetabolicTwinSection />);
+    expect(container.textContent).toContain("part of Premium Plus");
+    expect(container.textContent).not.toContain("signals ready");
+  });
+
+  it("Premium Plus renders the Twin itself", () => {
+    entitlementState.current = readyWith("premium_plus");
+    setStores({ entries: daysFrom("2026-10-01", 12, 2500) });
+    const { container } = render(<MetabolicTwinSection />);
+    expect(container.textContent).toContain("signals ready");
+    expect(container.textContent).not.toContain("part of Premium Plus");
+  });
+
+  it("an unread entitlement never blocks — the Twin renders", () => {
+    entitlementState.current = { kind: "unavailable" };
+    setStores({ entries: daysFrom("2026-10-01", 12, 2500) });
+    const { container } = render(<MetabolicTwinSection />);
+    expect(container.textContent).toContain("signals ready");
   });
 });

@@ -440,4 +440,30 @@ describe("template metadata", () => {
   });
 });
 
+describe("premium templates (M-214)", () => {
+  const PREMIUM_IDS = [
+    "everyday-day-in-numbers",
+    "everyday-golden-arch",
+    "progress-streak-ring",
+    "progress-poster",
+    "mood-energy-arc",
+    "wellness-in-motion",
+  ];
+
+  it("exactly the designated designs are premium", () => {
+    expect(STORY_TEMPLATE_LIBRARY.filter((t) => t.premium).map((t) => t.id).sort()).toEqual(
+      [...PREMIUM_IDS].sort(),
+    );
+  });
+
+  it("every category with a premium design keeps a basic one", () => {
+    for (const t of STORY_TEMPLATE_LIBRARY.filter((x) => x.premium)) {
+      expect(
+        STORY_TEMPLATE_LIBRARY.some((x) => x.category === t.category && !x.premium),
+        `category ${t.category} would be Plus-only`,
+      ).toBe(true);
+    }
+  });
+});
+
 export type { StoryTemplateDef };
