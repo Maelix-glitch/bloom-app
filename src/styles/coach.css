@@ -2240,8 +2240,9 @@
 /* send */
 .coach-send {
   display: grid;
-  width: 38px;
-  height: 38px;
+  /* M-203 (F-16): the send carries the shared Button's 44px measure. */
+  width: 44px;
+  height: 44px;
   margin-left: var(--space-1);
   place-items: center;
   border-radius: var(--radius-pill);
@@ -2269,14 +2270,15 @@
 }
 
 .coach-send.can-send {
-  background: linear-gradient(135deg, var(--coach-violet-a), var(--coach-violet-b));
-  color: var(--coach-on-violet);
+  /* M-203 (F-16): one primary — flat gold with ink, like the shared
+     Button; the violet gradient retires from Coach's actions. */
+  background: var(--gold);
+  color: var(--gold-ink);
   cursor: pointer;
-  box-shadow: 0 10px 26px -10px rgb(141 119 214 / 0.65);
 }
 
 .coach-send.can-send:hover {
-  box-shadow: 0 12px 30px -8px rgb(141 119 214 / 0.8);
+  background: var(--gold-soft);
   transform: translateY(-1px);
 }
 
@@ -3315,13 +3317,18 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  /* M-203 (F-16): one primary — the shared Button's height, pill radius
+     and flat-gold treatment (the sizing block above is shared with the
+     ghost button, which keeps its own metrics). */
+  height: 44px;
+  border-radius: var(--radius-pill);
   border: 1px solid transparent;
-  background: linear-gradient(135deg, var(--coach-violet-a), var(--coach-violet-b));
-  color: var(--coach-on-violet);
-  box-shadow: 0 10px 26px -12px rgb(141 119 214 / 0.6);
+  background: var(--gold);
+  color: var(--gold-ink);
 }
 
 .coach-btn-primary:hover {
+  background: var(--gold-soft);
   transform: translateY(-1px);
 }
 

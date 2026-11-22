@@ -40,7 +40,7 @@ export function LegalPage({
         <header className="mt-10 flex items-start gap-4">
           <BloomLogo size={40} />
           <div>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
               Bloom · legal
             </p>
             <h1 className="mt-1 font-display text-[clamp(26px,5vw,38px)] italic leading-tight">

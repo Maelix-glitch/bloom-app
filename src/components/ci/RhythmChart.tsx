@@ -88,7 +88,7 @@ export function RhythmChart({
                   style={{
                     fill: "var(--ci-text-mute)",
                     fontFamily: "var(--ci-font-mono)",
-                    fontSize: 9.5,
+                    fontSize: 11,
                   }}
                 >
                   {days}
@@ -143,7 +143,7 @@ export function RhythmChart({
                   style={{
                     fill: gap.plausible ? "var(--ci-text-soft)" : "var(--ci-ovulation)",
                     fontFamily: "var(--ci-font-mono)",
-                    fontSize: compact ? 9 : 10,
+                    fontSize: compact ? 11 : 12,
                   }}
                 >
                   {gap.days}
@@ -156,7 +156,7 @@ export function RhythmChart({
                     style={{
                       fill: "var(--ci-text-mute)",
                       fontFamily: "var(--ci-font-mono)",
-                      fontSize: 9.5,
+                      fontSize: 11,
                     }}
                   >
                     {formatDateShort(gap.fromStart).replace(/ \d+/, "")}
@@ -185,7 +185,7 @@ export function RhythmChart({
                 style={{
                   fill: "var(--ci-text-soft)",
                   fontFamily: "var(--ci-font-mono)",
-                  fontSize: 9.5,
+                  fontSize: 11,
                 }}
               >
                 avg {analysis.averageLength}d

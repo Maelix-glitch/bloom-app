@@ -133,7 +133,7 @@ function TemperatureSpark({ points }: { points: DayLogAnalysis["temperatures"] }
                 style={{
                   fill: "var(--ci-text-mute)",
                   fontFamily: "var(--ci-font-mono)",
-                  fontSize: 9,
+                  fontSize: 11,
                 }}
               >
                 {v.toFixed(1)}
@@ -331,7 +331,7 @@ export function DayLogInsights({
             <div className="mt-3 flex items-end gap-2" style={{ height: 92 }}>
               {dayAnalysis.flowCurve.map((point) => (
                 <div key={point.day} className="flex h-full flex-1 flex-col items-center gap-1.5">
-                  <span className="ci-num text-[10px] ci-muted">
+                  <span className="ci-num text-[11px] ci-muted">
                     {FLOW_WORD[Math.round(point.average)]}
                   </span>
                   <span className="flex w-full flex-1 items-end">
@@ -345,7 +345,7 @@ export function DayLogInsights({
                       title={`Day ${point.day}: average ${FLOW_WORD[Math.round(point.average)]} across ${point.days} logged ${point.days === 1 ? "day" : "days"}`}
                     />
                   </span>
-                  <span className="ci-num text-[10px] ci-muted">d{point.day}</span>
+                  <span className="ci-num text-[11px] ci-muted">d{point.day}</span>
                 </div>
               ))}
             </div>

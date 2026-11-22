@@ -87,7 +87,7 @@ function PointAuditPage() {
 
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
               Admin
             </p>
             <h1 className="mt-2 font-display text-3xl">Point audit</h1>
@@ -155,13 +155,13 @@ function PointAuditPage() {
                     </td>
                     <td className="px-4 py-2.5">
                       {row.profile_name ?? "Bloom user"}
-                      <span className="block font-mono text-[10px] text-muted-foreground">
+                      <span className="block font-mono text-[11px] text-muted-foreground">
                         {row.profile_id.slice(0, 8)}
                       </span>
                     </td>
                     <td className="px-4 py-2.5">
                       {row.title}
-                      <span className="block font-mono text-[10px] text-muted-foreground">
+                      <span className="block font-mono text-[11px] text-muted-foreground">
                         {row.ref_id}
                       </span>
                     </td>

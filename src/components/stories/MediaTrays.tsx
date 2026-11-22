@@ -209,7 +209,7 @@ export function MusicTray({
         ) : (
           <>
             {musicProvider.attribution ? (
-              <p className="mono text-center text-[10px] uppercase tracking-[0.1em] text-faint">
+              <p className="mono text-center text-[11px] uppercase tracking-[0.1em] text-faint">
                 {musicProvider.attribution}
               </p>
             ) : null}
@@ -419,7 +419,7 @@ export function CatalogSearchTray({
               ))}
             </div>
             {provider.attribution ? (
-              <p className="mono pt-1 text-center text-[10px] uppercase tracking-[0.1em] text-faint">
+              <p className="mono pt-1 text-center text-[11px] uppercase tracking-[0.1em] text-faint">
                 {provider.attribution}
               </p>
             ) : null}

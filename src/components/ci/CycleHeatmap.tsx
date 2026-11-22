@@ -145,7 +145,7 @@ export function CycleHeatmap({
       </div>
 
       {!compact ? (
-        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[10.5px] ci-muted">
+        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] ci-muted">
           <span className="flex items-center gap-1.5">
             <span
               className="h-2.5 w-2.5 rounded-[2px]"

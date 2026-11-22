@@ -53,7 +53,7 @@ export function SymptomPhaseGrid({
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2 text-[10.5px] ci-muted">
+      <div className="mt-3 flex items-center gap-2 text-[11px] ci-muted">
         <span>less</span>
         {[0, 0.25, 0.5, 0.75, 1].map((step) => (
           <span
@@ -106,7 +106,7 @@ function GridRow({ row, index }: { row: SymptomPhaseRow; index: number }) {
               />
             </GrowIn>
             {count > 0 ? (
-              <span className="ci-num relative text-[10.5px]" style={{ color: "var(--ci-text)" }}>
+              <span className="ci-num relative text-[11px]" style={{ color: "var(--ci-text)" }}>
                 {count}
               </span>
             ) : null}

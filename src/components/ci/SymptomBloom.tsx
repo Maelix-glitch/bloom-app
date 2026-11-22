@@ -124,7 +124,7 @@ export function SymptomBloom({ tally, total }: { tally: SymptomTally[]; total: n
                 y={tip.y + 3}
                 textAnchor={right ? "start" : "end"}
                 className="ci-num"
-                fontSize={9.5}
+                fontSize={11}
                 fill="var(--ci-text)"
                 opacity={0.7}
               >
@@ -158,7 +158,7 @@ export function SymptomBloom({ tally, total }: { tally: SymptomTally[]; total: n
           y={C + 14}
           textAnchor="middle"
           className="ci-num"
-          fontSize={8.5}
+          fontSize={11}
           letterSpacing={1.6}
           fill="var(--ci-text)"
           opacity={0.6}

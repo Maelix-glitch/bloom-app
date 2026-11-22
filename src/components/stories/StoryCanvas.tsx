@@ -849,7 +849,7 @@ function PollPiece({
         );
       })}
       {showResults && tally ? (
-        <p className="mt-2 text-[10.5px] text-[color:var(--story-ink-faint)]">
+        <p className="mt-2 text-[11px] text-[color:var(--story-ink-faint)]">
           {tally.total} {tally.total === 1 ? "vote" : "votes"}
         </p>
       ) : null}
@@ -1030,7 +1030,7 @@ function SliderPiece({
         </span>
       </div>
       {stats && stats.count > 0 ? (
-        <p className="mt-2 text-[10.5px] text-[color:var(--story-ink-faint)]">
+        <p className="mt-2 text-[11px] text-[color:var(--story-ink-faint)]">
           {stats.average !== null ? `avg ${stats.average} · ` : ""}
           {stats.count} {stats.count === 1 ? "response" : "responses"}
         </p>

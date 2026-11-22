@@ -573,7 +573,7 @@ function ViewerRow({ v }: { v: StoryViewerEntry }) {
         </span>
         <span className="truncate text-[13.5px]">{v.name}</span>
       </span>
-      <span className="mono shrink-0 text-[10.5px] text-faint">{storyAge(v.viewedAt)}</span>
+      <span className="mono shrink-0 text-[11px] text-faint">{storyAge(v.viewedAt)}</span>
     </li>
   );
 }

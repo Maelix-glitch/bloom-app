@@ -161,7 +161,7 @@ export function TextTool({
       {/* controls */}
       <div className="flex flex-col gap-3 px-4 pb-[max(18px,env(safe-area-inset-bottom))]">
         <p
-          className="mono text-center text-[10px] uppercase tracking-[0.1em] text-white/40"
+          className="mono text-center text-[11px] uppercase tracking-[0.1em] text-white/40"
           role="status"
         >
           {value.text.length}/{ELEMENT_LIMITS.maxTextLength}

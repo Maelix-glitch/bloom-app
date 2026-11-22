@@ -1516,6 +1516,8 @@
   font-weight: 600;
   text-shadow: none;
   box-shadow: none;
+  /* M-203 (F-16): the shared Button's 44px height, at the winning rule. */
+  min-height: 44px;
 }
 
 .tk2-root .ci-btn--primary:hover:not(:disabled) {
@@ -2295,7 +2297,9 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .at-petal-label {
   font-family: var(--ci-font-sans);
   font-size: var(--text-meta);
-  fill: var(--ci-text-soft);
+  /* M-203 (F-10): the zone names take the family's full cream step — they
+     label the flower's six territories and were the faintest text on it. */
+  fill: var(--ci-text);
 }
 
 .at-flower-heart {

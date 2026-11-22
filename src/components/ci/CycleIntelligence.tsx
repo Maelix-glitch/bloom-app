@@ -231,7 +231,7 @@ export function CycleIntelligence({
             Dates, phases and patterns computed from what you log — with the evidence, the sample
             size and the uncertainty shown next to every estimate.
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] ci-muted">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] ci-soft">
             <SyncLine sync={store.sync} onRetry={store.syncNow} />
             <span aria-hidden>·</span>
             <span>estimates, not medical advice</span>

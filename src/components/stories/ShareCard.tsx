@@ -50,7 +50,7 @@ export function BloomShareCard({
           style={{
             color: bg.ink,
             opacity: 0.7,
-            fontSize: compact ? 8.5 : 10,
+            fontSize: compact ? 11 : 12,
             letterSpacing: "0.14em",
           }}
         >
