@@ -100,8 +100,10 @@ export const TIER_ORDER: PlanTier[] = ["free", "premium", "premium_plus"];
  *
  *  M-214 split: Premium carries the essentials; the intelligence
  *  layer — vitalis, adaptive_plans, metabolic_twin,
- *  overview_intelligence, advanced_analytics, photo_led_logging and
- *  stories_premium_templates — is Premium Plus only. Before M-214
+ *  overview_intelligence, advanced_analytics, photo_led_logging,
+ *  stories_premium_templates and priority_features (named in the
+ *  matrix by M-216, where the comparison ledger needed it as data,
+ *  not words) — is Premium Plus only. Before M-214
  *  the two paid sets were identical, which is what the owner ended. */
 export type PremiumFeature =
   | "unlimited_habits"
@@ -114,7 +116,8 @@ export type PremiumFeature =
   | "overview_intelligence"
   | "advanced_analytics"
   | "photo_led_logging"
-  | "stories_premium_templates";
+  | "stories_premium_templates"
+  | "priority_features";
 
 export const TIER_FEATURES: Record<PlanTier, ReadonlySet<PremiumFeature>> = {
   free: new Set<PremiumFeature>(),
@@ -136,6 +139,7 @@ export const TIER_FEATURES: Record<PlanTier, ReadonlySet<PremiumFeature>> = {
     "advanced_analytics",
     "photo_led_logging",
     "stories_premium_templates",
+    "priority_features",
   ]),
 };
 
@@ -162,6 +166,70 @@ export const PAYWALL_BULLETS: Record<Exclude<PlanTier, "free">, string[]> = {
     "Photo-led logging · Stories premium templates",
   ],
 };
+
+/** The comparison ledger — design G's rows (M-216, owner pick
+ *  2026-11-22). One row per compared feature, in display order, and
+ *  NO hand-kept tick table: each row names the authority its tick
+ *  reads — a TIER_FEATURES feature, the full-Coach access level, or
+ *  an always-included core surface (Trackers, Mood and the basic
+ *  Stories templates are part of every tier, Free included, so both
+ *  paid columns tick honestly). comparisonHas resolves a row for a
+ *  tier from that authority alone, so the ledger can never claim a
+ *  Premium tick for a Plus-only feature. */
+export type ComparisonAccess =
+  | { kind: "feature"; feature: PremiumFeature }
+  | { kind: "coach" }
+  | { kind: "always" };
+
+export interface PaywallComparisonRow {
+  label: string;
+  access: ComparisonAccess;
+}
+
+const featureRow = (label: string, feature: PremiumFeature): PaywallComparisonRow => ({
+  label,
+  access: { kind: "feature", feature },
+});
+
+export const PAYWALL_COMPARISON: PaywallComparisonRow[] = [
+  featureRow("Unlimited habits", "unlimited_habits"),
+  { label: "Coach chat", access: { kind: "coach" } },
+  featureRow("Food-photo analysis", "food_photo_analysis"),
+  featureRow("Assessment + standard plan", "assessment_plan"),
+  featureRow("Grocery list", "nutrition"),
+  { label: "Trackers & mood", access: { kind: "always" } },
+  { label: "Basic Stories templates", access: { kind: "always" } },
+  featureRow("Vitalis AI + daily voice", "vitalis"),
+  featureRow("Plans that adapt and learn", "adaptive_plans"),
+  featureRow("Metabolic Twin", "metabolic_twin"),
+  featureRow("Advanced analytics & reports", "advanced_analytics"),
+  featureRow("Photo-led logging", "photo_led_logging"),
+  featureRow("Stories premium templates", "stories_premium_templates"),
+  featureRow("Priority features", "priority_features"),
+];
+
+/** Whether a comparison row ticks for a tier — resolved from the
+ *  row's authority (the feature matrix, Coach access, or the
+ *  always-included core), never from a per-row boolean. */
+export function comparisonHas(row: PaywallComparisonRow, tier: PlanTier): boolean {
+  switch (row.access.kind) {
+    case "feature":
+      return canUse(tier, row.access.feature);
+    case "coach":
+      return COACH_ACCESS[tier] === "full";
+    case "always":
+      return true;
+  }
+}
+
+/** What uses credits — the weighted truth (M-215), in one line set.
+ *  Credits are weighted by what an action costs to serve; these are
+ *  the numbers the coach edge function's gate actually charges
+ *  (CREDIT_COSTS in supabase/functions/coach/billing-core.ts), in the
+ *  words the credit surfaces show. One home so the Membership card
+ *  and the paywall can never quote different weights. */
+export const CREDIT_WEIGHTS_LINE =
+  "What uses credits — a Coach message 1 · a food photo 5 · a Vitalis message 2 · a Vitalis plan session 10 · voice 1 per 500 characters spoken.";
 
 /** Free Coach is real but bounded — by the credit allowance and by the
  *  absence of photo analysis. Paid tiers are the full Coach. */
