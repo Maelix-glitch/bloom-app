@@ -201,7 +201,7 @@ export function MoodChart({
                   show: true,
                   position: "insideEndTop",
                   formatter: "usual",
-                  fontSize: 9,
+                  fontSize: 11,
                   color: line,
                   opacity: 0.8,
                 },
@@ -260,7 +260,7 @@ export function MoodChart({
               ${typeof meta.sleep === "number" ? row("Sleep", `${meta.sleep.toFixed(1)}h`) : ""}
               ${typeof meta.exercise === "number" ? row("Exercise", `${Math.round(meta.exercise)} min`) : ""}
               ${row("Entries", String(meta.entries))}
-              ${meta.emotions.length ? `<div style="margin-top:8px;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint-strong)">${meta.emotions.join(" · ")}</div>` : ""}
+              ${meta.emotions.length ? `<div style="margin-top:8px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--faint-strong)">${meta.emotions.join(" · ")}</div>` : ""}
             </div>`;
           },
         },
@@ -270,7 +270,7 @@ export function MoodChart({
           boundaryGap: false,
           axisLine: { lineStyle: { color: chrome.border } },
           axisTick: { show: false },
-          axisLabel: { fontSize: 10, color: chrome.label, hideOverlap: true },
+          axisLabel: { fontSize: 11, color: chrome.label, hideOverlap: true },
         },
         yAxis: {
           type: "value",
@@ -278,7 +278,7 @@ export function MoodChart({
           max: 10,
           interval: 2.5,
           splitLine: { lineStyle: { color: chrome.borderSubtle, type: "dashed" } },
-          axisLabel: { fontSize: 10, color: chrome.label },
+          axisLabel: { fontSize: 11, color: chrome.label },
         },
         series,
       },

@@ -363,10 +363,12 @@ describe("contrast guard — scoped systems", () => {
     }
   });
 
-  it("Coach's violet action gradient carries its label at AA on both stops", () => {
-    for (const stop of ["var(--coach-violet-a)", "var(--coach-violet-b)"]) {
-      expect(onGround("var(--coach-on-violet)", "coach", C(stop, "coach")), `on-violet on ${stop}`).toBeGreaterThanOrEqual(AA);
-    }
+  it("Coach's primary action carries its label at AA — flat gold, ink text (M-203)", () => {
+    /* Re-contracted by M-203 (F-16): the violet action gradient this pin
+       used to measure is retired — Coach's primary and send now wear the
+       shared Button's pairing, --gold-ink on --gold, the same pairing the
+       house proves for the Profile and Nutrition primaries. */
+    expect(onGround("var(--gold-ink)", "coach", C("var(--gold)", "coach")), "gold-ink on gold").toBeGreaterThanOrEqual(AA);
   });
 
   it("Cycle's muted text and input placeholder clear AA in both themes", () => {

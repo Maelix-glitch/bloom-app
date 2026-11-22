@@ -691,7 +691,10 @@
 }
 .vstat span {
   font-size: var(--text-caption);
-  color: var(--muted-foreground);
+  /* M-203 (F-10): the label takes the cream step — field labels are how
+     the summary is read, and the muted step cost them a full contrast
+     grade against the value they name. */
+  color: var(--foreground);
 }
 
 /* The meter (rulebook v2 §6): a 6px track whose fill is the `--v`
@@ -1326,7 +1329,7 @@
   top: calc(100% + 0.28rem);
   left: 50%;
   transform: translateX(-50%);
-  font-size: 3.24cqw;
+  font-size: max(3.24cqw, var(--text-meta));
   line-height: 1;
   white-space: nowrap;
   color: var(--muted-foreground);
@@ -1337,19 +1340,21 @@
   top: calc(100% + 1.15rem);
   left: 50%;
   transform: translateX(-50%);
-  font-size: 2.94cqw;
+  font-size: max(2.94cqw, var(--text-meta));
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-/* On a 320px phone the map is ~240px wide and the type above drops under 8px,
-   which is unreadable. Below 400px the panel is full width, so the stage is
-   wide enough to hold a legible floor without the nodes colliding. */
+/* On a 320px phone the map is ~240px wide and the type above would drop
+   under 8px, which is unreadable. Below 400px the panel is full width, so
+   the stage is wide enough to hold a legible floor without the nodes
+   colliding. The floor is the app's meta step everywhere (M-203, F-06):
+   the base rules above carry it too, so no width renders under 11px. */
 @media (max-width: 400px) {
   .cm-node-label {
-    font-size: max(3.24cqw, 9px);
+    font-size: max(3.24cqw, var(--text-meta));
   }
   .cm-node-value {
-    font-size: max(2.94cqw, 8.5px);
+    font-size: max(2.94cqw, var(--text-meta));
   }
 }
 
@@ -1477,7 +1482,9 @@
   transition: opacity var(--motion-standard) var(--ease-out-expo);
 }
 .orbit-node[data-dim] {
-  opacity: 0.4;
+  /* M-203 (F-08): a smaller dim step — the unselected half of the web
+     stays present and readable while the selected node leads. */
+  opacity: 0.65;
 }
 .orbit-node-disc {
   display: grid;
@@ -1514,10 +1521,12 @@
   top: calc(100% + 0.3rem);
   left: 50%;
   transform: translateX(-50%);
-  font-size: max(2.6cqw, var(--text-micro));
+  font-size: max(2.6cqw, var(--text-meta));
   line-height: var(--leading-micro);
   white-space: nowrap;
-  color: var(--faint-strong);
+  /* M-203 (F-08): the label carries the node's name at reading distance —
+     cream at full strength, floored at the meta step. */
+  color: var(--foreground);
   pointer-events: none;
 }
 .orbit-node[aria-pressed="true"] .orbit-node-label {
@@ -2298,7 +2307,10 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
 }
 .mood-page .mg-node-emotion .mg-label {
   font-size: var(--text-meta);
-  font-style: italic;
+  /* M-203 (F-07): the emotion names are the web's primary reading — upright
+     and cream at full strength, not italic at the muted step. */
+  font-style: normal;
+  fill: var(--foreground);
 }
 .mood-page .mg-node:hover .mg-label,
 .mood-page .mg-node[data-state="on"] .mg-label {

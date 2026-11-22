@@ -503,7 +503,7 @@ export function StoryViewer({
             />
             <div className="min-w-0 flex-1 leading-tight">
               <p className="truncate text-[13px] font-semibold text-white">{viewerName}</p>
-              <p className="mono text-[10px] uppercase tracking-[0.08em] text-white/55">
+              <p className="mono text-[11px] uppercase tracking-[0.08em] text-white/55">
                 {storyAge(story.createdAt)}
                 {" · "}
                 {story.visibility === "public" ? "shared" : "private"}
@@ -701,13 +701,13 @@ export function StoryViewer({
               </>
             )}
             <div className="flex items-center justify-between px-1">
-              <p className="mono text-[10px] uppercase tracking-[0.08em] text-white/40">
+              <p className="mono text-[11px] uppercase tracking-[0.08em] text-white/40">
                 {current.storyIndex + 1} of {stories.length}
                 {current.slideCount > 1
                   ? ` · slide ${current.slideIndex + 1}/${current.slideCount}`
                   : ""}
               </p>
-              <p className="mono inline-flex items-center gap-1.5 text-[10px] uppercase tracking-[0.08em] text-white/40">
+              <p className="mono inline-flex items-center gap-1.5 text-[11px] uppercase tracking-[0.08em] text-white/40">
                 {story.visibility === "public" ? (
                   story.audience === "close" ? (
                     "close friends"

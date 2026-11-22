@@ -566,7 +566,7 @@
 
   .se-tool-btn {
     min-width: 56px;
-    font-size: 10px;
+    font-size: 11px;
   }
 
   .se-delete-zone {
@@ -582,7 +582,7 @@
   .se-tool-btn {
     min-width: 52px;
     padding: 6px 5px 5px;
-    font-size: 10px;
+    font-size: 11px;
     gap: 3px;
   }
 
@@ -1044,7 +1044,7 @@
   min-width: 60px;
   padding: 9px 6px 8px;
   border-radius: 16px;
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 550;
   letter-spacing: 0.01em;
   color: var(--story-ink-dim);
@@ -1591,7 +1591,7 @@
 }
 
 .sdata-label {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -2224,7 +2224,7 @@
   padding: 6px 2px;
   border-radius: 12px;
   border: 1px solid transparent;
-  font-size: 10px;
+  font-size: 11px;
   color: var(--muted-foreground);
 }
 
@@ -2704,7 +2704,7 @@
 }
 
 .stpl-card-meta {
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--muted-foreground);
 }
 
@@ -2784,7 +2784,7 @@
 }
 
 .stpl-preview-cat {
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.18em;
   text-transform: uppercase;

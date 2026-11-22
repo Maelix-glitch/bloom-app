@@ -39,13 +39,13 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
   return (
     <Reveal delay={120} className="mx-auto max-w-[680px] pt-10 text-center">
       <p className="eyebrow mb-4 flex items-center justify-center gap-2">
-        <Sparkles className="size-3.5 text-violet" /> Begin the record
+        <Sparkles className="size-3.5 text-gold" /> Begin the record
       </p>
 
       <h2 className="display text-[30px] leading-tight sm:text-[40px]">
         The intelligence arrives
         <br />
-        <span className="bg-gradient-to-r from-violet via-sky to-amber bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-gold-soft via-gold to-amber bg-clip-text text-transparent">
           once you do.
         </span>
       </h2>
@@ -61,8 +61,7 @@ function EmptyState({ onCompose }: { onCompose: () => void }) {
           onClick={onCompose}
           className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[length:var(--text-support)] font-medium text-background transition-transform duration-[var(--motion-signature)] hover:scale-[1.03]"
           style={{
-            background: "var(--grad-violet)",
-            boxShadow: "var(--glow-violet)",
+            background: "var(--gold)",
           }}
         >
           <PenLine className="size-4" /> Log your first entry

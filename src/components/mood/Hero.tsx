@@ -25,15 +25,15 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
         <div>
           <p className="eyebrow mb-3 flex items-center gap-2">
             <span className="relative flex size-1.5">
-              <span className="animate-ping-soft absolute inline-flex size-full rounded-full bg-violet" />
-              <span className="relative inline-flex size-1.5 rounded-full bg-violet" />
+              <span className="animate-ping-soft absolute inline-flex size-full rounded-full bg-gold" />
+              <span className="relative inline-flex size-1.5 rounded-full bg-gold" />
             </span>
             Mood intelligence · {dayjs().format("dddd, MMMM D YYYY")}
           </p>
           <h1 className="display text-[34px] leading-[1.05] sm:text-[52px]">
             Your inner weather,
             <br />
-            <span className="animate-gradient-pan bg-gradient-to-r from-violet via-sky to-amber bg-[length:220%_auto] bg-clip-text text-transparent">
+            <span className="animate-gradient-pan bg-gradient-to-r from-gold-soft via-gold to-amber bg-[length:220%_auto] bg-clip-text text-transparent">
               measured precisely.
             </span>
           </h1>
@@ -48,7 +48,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
             type="button"
             onClick={onCompose}
             className="group relative inline-flex items-center gap-2 overflow-hidden rounded-full px-5 py-3 text-[length:var(--text-support)] font-medium text-background transition-transform duration-[var(--motion-signature)] hover:scale-[1.02]"
-            style={{ background: "var(--grad-violet)", backgroundSize: "200% 200%", boxShadow: "var(--glow-violet)" }}
+            style={{ background: "var(--gold)" }}
           >
             <span
               aria-hidden
@@ -68,7 +68,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
                 className={cn(
                   "mono rounded-full border px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] transition-all duration-[var(--motion-page)]",
                   rangeKey === r.key
-                    ? "border-violet/60 bg-[var(--dim-violet)] text-violet"
+                    ? "border-gold/60 bg-gold/10 text-gold"
                     : "border-border text-faint hover:border-border-strong hover:text-muted-foreground",
                 )}
               >
@@ -143,7 +143,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
           />
         </div>
         <div className="hairline" />
-        <div className="mono flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 text-[length:var(--text-meta)] text-faint-strong">
           <span className="flex items-center gap-2">
             <Sparkles className="size-3 text-violet" /> depth: {a.tier.current.label}
           </span>

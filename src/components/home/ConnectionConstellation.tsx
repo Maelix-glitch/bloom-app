@@ -356,12 +356,6 @@ export function ConnectionConstellationView({
             data-focus={dimming ? "on" : "off"}
           >
             <svg viewBox="0 0 100 100" className="orbit-svg" aria-hidden="true" focusable="false">
-              <defs>
-                <linearGradient id="orbit-link-gold" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="var(--gold-soft)" />
-                  <stop offset="100%" stopColor="var(--gold)" />
-                </linearGradient>
-              </defs>
               <circle className="orbit-guide" cx={50} cy={50} r={30.5} />
               <g fill="none" strokeLinecap="round">
                 {links.map((link, i) => {
@@ -377,7 +371,12 @@ export function ConnectionConstellationView({
                       className={`orbit-arc${i === 0 ? " orbit-arc--strongest" : ""}`}
                       d={arcPath(a, b)}
                       pathLength={1}
-                      stroke={i === 0 ? "var(--success)" : "url(#orbit-link-gold)"}
+                      /* M-203 (F-08): every real connection wears sage at
+                         honest strength — gold reads as the actionable
+                         accent elsewhere on Today, and a link is a fact,
+                         not an action. Width and opacity still carry the
+                         weight; the strongest link keeps its class. */
+                      stroke="var(--success)"
                       strokeWidth={0.5 + link.weight * 1.6}
                       opacity={dim ? 0.08 : 0.3 + link.weight * 0.6}
                       style={{ ["--i" as string]: i }}

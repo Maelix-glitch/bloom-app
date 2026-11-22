@@ -111,7 +111,7 @@ export function StoryArchive({
                 <section key={key} aria-label={archiveMonthLabel(key)}>
                   <div className="mb-3 flex items-baseline justify-between">
                     <h3 className="display text-[18px]">{archiveMonthLabel(key)}</h3>
-                    <span className="mono text-[10.5px] uppercase tracking-[0.08em] text-faint">
+                    <span className="mono text-[11px] uppercase tracking-[0.08em] text-faint">
                       {stories.length} {stories.length === 1 ? "memory" : "memories"}
                     </span>
                   </div>

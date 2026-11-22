@@ -100,7 +100,7 @@ export function HighlightComposer({
               type="button"
               aria-label="Close highlight editor"
               onClick={onClose}
-              className="mono rounded-full border border-border px-3 py-1 text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
+              className="mono rounded-full border border-border px-3 py-1 text-[11px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground"
             >
               Close
             </button>
@@ -194,7 +194,7 @@ export function HighlightComposer({
                             <span className="block truncate text-[13px] font-medium">
                               {story.title || STORY_KIND_LABELS[story.kind]}
                             </span>
-                            <span className="mono block text-[10px] uppercase tracking-[0.06em] text-faint">
+                            <span className="mono block text-[11px] uppercase tracking-[0.06em] text-faint">
                               {STORY_KIND_LABELS[story.kind]} · {formatRelativeDay(story.createdAt)}
                             </span>
                           </span>

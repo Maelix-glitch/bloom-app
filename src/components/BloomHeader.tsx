@@ -116,7 +116,7 @@ export function BloomHeader() {
         to="/profile"
         aria-label="Your profile"
         aria-current={profileActive ? "page" : undefined}
-        className={`shrink-0 grid h-[26px] w-[26px] place-items-center rounded-full border text-[10px] transition-colors ${
+        className={`shrink-0 grid h-[26px] w-[26px] place-items-center rounded-full border text-[11px] transition-colors ${
           profileActive
             ? "border-[var(--border-strong)] text-[var(--foreground)]"
             : "border-[var(--border)] text-[var(--faint)] hover:border-[var(--border-strong)] hover:text-[var(--text-secondary)]"

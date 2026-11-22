@@ -252,7 +252,7 @@ export function CycleDial({ analysis, days }: { analysis: CycleAnalysis; days?: 
           y={C - 28}
           textAnchor="middle"
           className="ci-num"
-          fontSize={10}
+          fontSize={11}
           letterSpacing={2}
           fill={
             analysis.phase && analysis.phase !== "late"

@@ -2137,16 +2137,18 @@
 .reward-primary-button {
   position: relative;
   overflow: hidden;
-  border: 1px solid color-mix(in oklab, var(--violet) 55%, transparent);
+  /* M-203 (F-16): one primary — the shared Button's flat gold, pill and
+     44px height; the violet→sky gradient retires. */
+  border: 1px solid var(--gold);
   border-radius: var(--radius-pill);
+  min-height: 44px;
   padding: 11px var(--space-4);
   color: var(--primary-foreground);
-  background: linear-gradient(112deg, var(--violet), var(--sky));
-  box-shadow: 0 12px 28px -15px color-mix(in oklab, var(--violet) 80%, transparent);
+  background: var(--gold);
 }
 .reward-primary-button:hover {
+  background: var(--gold-soft);
   transform: translateY(-2px);
-  box-shadow: 0 16px 34px -15px color-mix(in oklab, var(--violet) 86%, transparent);
 }
 .reward-primary-button:disabled {
   cursor: wait;

@@ -287,7 +287,7 @@
 
 .ci-eyebrow {
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -427,7 +427,9 @@
 
 .ci-hint {
   font-size: 11.5px;
-  color: var(--ci-text-mute);
+  /* M-203 (F-10): log microcopy takes the soft step — it is guidance the
+     user must read while logging, not furniture. */
+  color: var(--ci-text-soft);
 }
 
 .ci-input {
@@ -651,7 +653,7 @@ textarea.ci-input {
 .ci-table th {
   text-align: left;
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -1087,7 +1089,7 @@ textarea.ci-input {
 /* editorial section numbering */
 .ci-index {
   font-family: var(--ci-font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   letter-spacing: 0.16em;
   color: var(--ci-text-mute);
 }
@@ -1475,7 +1477,7 @@ textarea.ci-input {
 .ci .ci-eyebrow {
   font-weight: 500;
   letter-spacing: 0.13em;
-  font-size: 10px;
+  font-size: 11px;
 }
 
 /* ------------------------------- tabs ------------------------------- */
@@ -1528,7 +1530,7 @@ textarea.ci-input {
 }
 
 .ci-tab__count {
-  font-size: 10.5px;
+  font-size: 11px;
   padding: 1px 6px;
   border-radius: 999px;
   background: var(--ci-accent-soft);
@@ -1743,7 +1745,7 @@ textarea.ci-input {
 }
 
 .ci-insight__strength {
-  font-size: 10px;
+  font-size: 11px;
   letter-spacing: 0.09em;
   text-transform: uppercase;
   color: var(--ci-text-mute);
@@ -1770,7 +1772,7 @@ textarea.ci-input {
   border: 1px solid var(--ci-line);
   border-radius: 999px;
   padding: 3px 9px;
-  font-size: 10.5px;
+  font-size: 11px;
 }
 
 .ci-evidence__label {
@@ -1793,7 +1795,7 @@ textarea.ci-input {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--ci-text-mute);
 }
 
@@ -1810,7 +1812,7 @@ textarea.ci-input {
   grid-template-columns: 76px 1fr 34px;
   align-items: center;
   gap: 8px;
-  font-size: 10.5px;
+  font-size: 11px;
   color: var(--ci-text-mute);
 }
 
@@ -1897,7 +1899,7 @@ textarea.ci-input {
 }
 
 .ci-compare thead th {
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 500;
   letter-spacing: 0.09em;
   text-transform: uppercase;

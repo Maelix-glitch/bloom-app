@@ -95,7 +95,7 @@ function Gauge({
           y={55}
           textAnchor="middle"
           className="ci-num"
-          fontSize={7.5}
+          fontSize={11}
           letterSpacing={1.2}
           fill="var(--ci-text)"
           opacity={0.55}
@@ -104,7 +104,7 @@ function Gauge({
         </text>
       </svg>
       <p className="mt-1.5 text-[11.5px] font-medium">{label}</p>
-      <p className="text-[10.5px] leading-snug ci-muted">{caption}</p>
+      <p className="text-[11px] leading-snug ci-muted">{caption}</p>
     </div>
   );
 }

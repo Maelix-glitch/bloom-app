@@ -542,7 +542,7 @@ export function StoryCreator({
                       className="block aspect-[9/14] w-full rounded-xl border border-border transition-transform group-active:scale-95"
                       style={{ background: b.css }}
                     />
-                    <span className="text-[10px] text-muted-foreground">{b.name}</span>
+                    <span className="text-[11px] text-muted-foreground">{b.name}</span>
                   </button>
                 ))}
               </div>

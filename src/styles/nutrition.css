@@ -304,7 +304,7 @@
 }
 .shop-ring-of {
   margin-top: 0.3rem;
-  font-size: 0.62rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--faint);
@@ -1344,7 +1344,7 @@
   white-space: nowrap;
 }
 .nut-hindi-title {
-  font-size: 0.62em;
+  font-size: var(--text-meta);
   color: var(--muted-foreground);
 }
 
@@ -3234,7 +3234,7 @@ a.day-path__label:hover {
   justify-content: space-between;
   margin-top: -6px;
   padding: 0 2px;
-  font-size: 0.68rem;
+  font-size: var(--text-meta);
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: color-mix(in oklab, var(--foreground) 42%, transparent);
@@ -3370,7 +3370,7 @@ a.day-path__label:hover {
   left: 19px;
   bottom: 13px;
   white-space: nowrap;
-  font-size: 0.66rem;
+  font-size: var(--text-meta);
   font-weight: 600;
   letter-spacing: 0.24em;
   text-transform: uppercase;
@@ -3643,7 +3643,7 @@ a.day-path__label:hover {
     white-space: normal;
   }
   .nut-care-node-label {
-    font-size: 0.6rem;
+    font-size: var(--text-meta);
     margin-top: 2px;
   }
   .nut-care-node.is-first .nut-care-node-cap {
@@ -3656,7 +3656,7 @@ a.day-path__label:hover {
     transform: translate(-18px, 32px);
   }
   .nut-care-here-label {
-    font-size: 0.48rem;
+    font-size: var(--text-meta);
     letter-spacing: 0.16em;
     left: 10px;
     bottom: 10px;

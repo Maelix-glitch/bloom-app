@@ -326,7 +326,7 @@ export function PhaseWave({
 
             {/* day ticks */}
             {!compact ? (
-              <g style={{ fontFamily: "var(--ci-font-mono)", fontSize: 10 }}>
+              <g style={{ fontFamily: "var(--ci-font-mono)", fontSize: 11 }}>
                 <text
                   x={model.x(1)}
                   y={height - 8}
@@ -379,7 +379,7 @@ export function PhaseWave({
         {/* today label */}
         {ready && todayX !== null ? (
           <span
-            className="pointer-events-none absolute top-0 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-[3px] text-[10.5px] font-medium"
+            className="pointer-events-none absolute top-0 -translate-x-1/2 whitespace-nowrap rounded-full px-2 py-[3px] text-[11px] font-medium"
             style={{
               left: clamp(todayX, compact ? 34 : 46, Math.max(compact ? 34 : 46, width - 46)),
               background: "var(--ci-surface-2)",
@@ -395,7 +395,7 @@ export function PhaseWave({
         {/* next period label */}
         {ready ? (
           <span
-            className="pointer-events-none absolute right-0 whitespace-nowrap text-[10.5px]"
+            className="pointer-events-none absolute right-0 whitespace-nowrap text-[11px]"
             style={{
               top: model.top - (compact ? 22 : 28),
               color: "var(--ci-menstrual)",
@@ -422,7 +422,7 @@ export function PhaseWave({
                 style={{ background: `var(--ci-${b.phase})`, opacity: 0.85 }}
               />
               <p
-                className="mt-1.5 truncate text-[10.5px] tracking-tight ci-muted"
+                className="mt-1.5 truncate text-[11px] tracking-tight ci-muted"
                 style={{ color: "var(--ci-text-mute)" }}
               >
                 {compact ? PHASE_LABEL[b.phase].slice(0, 4) : PHASE_LABEL[b.phase]}
