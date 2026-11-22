@@ -1013,3 +1013,32 @@
   font-size: var(--text-micro);
   opacity: 0.55;
 }
+
+/* ------------------------------------------------- M-202 touch floor */
+/*
+ * Final Audit Slice 1 (F-11): the add-habit modal's glyph-sized
+ * controls keep their drawn size and grow invisible ::after tap
+ * areas to the 44px floor (the swatch was already position:relative;
+ * the other two take it here). Pinned in touch.guard (M-202).
+ */
+.bloom-add-habit .modal-close {
+  position: relative;
+}
+.bloom-add-habit .modal-close::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
+.bloom-add-habit .step-btn {
+  position: relative;
+}
+.bloom-add-habit .step-btn::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+}
+.bloom-add-habit .swatch::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+}

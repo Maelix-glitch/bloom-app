@@ -2902,3 +2902,21 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   background: transparent;
   border-color: transparent;
 }
+
+/* ------------------------------------------------- M-202 touch floor */
+/*
+ * Final Audit Slice 1 (F-11): the Trackers controls that only met the
+ * 44px floor inside a phone/coarse-pointer media block meet it at
+ * every width and pointer. Appended last so the floors win.
+ * Pinned in touch.guard (M-202).
+ */
+.at-territory-actions button {
+  min-width: 44px;
+  min-height: 44px;
+}
+.at-body-link {
+  min-height: 44px;
+}
+.tk2-active-toggle {
+  min-height: 44px;
+}

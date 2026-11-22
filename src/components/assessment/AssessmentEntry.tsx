@@ -976,7 +976,7 @@ export function AssessmentProfileCard() {
         className="assess-sheet"
         panelClassName="assess-panel"
       >
-        <div className="flex max-h-[82vh] flex-col px-6 pb-6 pt-6 sm:px-7">
+        <div className="flex min-h-0 flex-1 flex-col px-6 pb-6 pt-6 sm:px-7">
           <div className="flex items-start justify-between gap-4">
             <div>
               <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
@@ -996,7 +996,7 @@ export function AssessmentProfileCard() {
               <X className="size-4" aria-hidden />
             </Button>
           </div>
-          <div className="no-scrollbar mt-5 min-h-0 flex-1 overflow-y-auto pr-1">
+          <div className="bsheet-scroll no-scrollbar mt-5 pr-1">
             {summary ? (
               <AssessmentSummaryView summary={summary} />
             ) : (

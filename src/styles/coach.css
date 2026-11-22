@@ -3644,3 +3644,53 @@
     transform: translateY(110%);
   }
 }
+
+/* ------------------------------------------------- M-202 touch floor */
+/*
+ * Final Audit Slice 1 (F-11): Coach's sub-44px controls meet the 44px
+ * touch floor. The text chip grows by min-height; the glyph-sized
+ * controls keep their drawn size and grow an invisible ::after tap
+ * area — the pattern the Stories editor's icon buttons already use.
+ * Appended last in the file so these floors win the cascade.
+ * Pinned in touch.guard (M-202).
+ */
+.coach-sidebar-toggle::after {
+  content: "";
+  position: absolute;
+  inset: -7px;
+}
+.coach-mode-chip {
+  position: relative;
+}
+.coach-mode-chip::after {
+  content: "";
+  position: absolute;
+  inset: -7px 0;
+}
+.coach-palette-btn {
+  position: relative;
+}
+.coach-palette-btn::after {
+  content: "";
+  position: absolute;
+  inset: -5px 0;
+}
+.coach-context-chip {
+  position: relative;
+}
+.coach-context-chip::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+.coach-panel-tab {
+  position: relative;
+}
+.coach-panel-tab::after {
+  content: "";
+  position: absolute;
+  inset: -6px 0;
+}
+.coach-log-chip {
+  min-height: 44px;
+}

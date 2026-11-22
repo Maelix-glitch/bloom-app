@@ -209,6 +209,46 @@
   /* No raw scrollbar track inside a sheet — it read as an unfinished edge
      on the owner's phone. Scrolling itself is untouched. */
   scrollbar-width: none;
+  /*
+   * M-202 (F-03) — the fold cue. The hidden scrollbar left a sheet whose
+   * content runs past the panel cap showing its last line sliced in half
+   * at the bottom edge, with nothing saying "scroll" — the
+   * dialog-clipping blocker (Membership/paywall, Assessment summary).
+   * These layers are the cue: two covers in the panel's own surface
+   * tone travel WITH the content (background-attachment: local) and
+   * hide the shadows at the scroll extremes, while the shadows stay
+   * fixed to the region — so a soft shadow stands at an edge exactly
+   * while more content lies beyond it, and the fold reads as depth,
+   * never as a cut. Every panel the scroll region serves is a
+   * var(--surface) slab (the family rule), so the covers match them
+   * all. Pinned in sheet.guard (M-202).
+   */
+  background:
+    linear-gradient(var(--surface) 30%, transparent) 50% 0 / 100% 36px no-repeat,
+    linear-gradient(transparent, var(--surface) 70%) 50% 100% / 100% 36px no-repeat,
+    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.4), transparent) 50% 0 / 100% 12px
+      no-repeat,
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.4), transparent) 50% 100% / 100%
+      12px no-repeat;
+  background-attachment:
+    local, local, scroll, scroll;
+}
+
+/*
+ * M-202 (F-03) — the always-visible footer zone. Words that must never
+ * be lost under the fold (the paywall's reassurance line was the
+ * blocker sighting) live here instead of inside .bsheet-scroll: a
+ * flex-none strip at the panel's foot, on the same opaque slab, under
+ * a hairline. The scroll region flexes around it; this strip never
+ * shrinks, never scrolls away, and its last line is always whole.
+ * Pinned in sheet.guard (M-202).
+ */
+.bsheet-foot {
+  flex: none;
+  position: relative;
+  z-index: 1;
+  background: var(--surface);
+  border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
 }
 .bsheet-scroll::-webkit-scrollbar {
   display: none;
@@ -1268,6 +1308,21 @@ textarea.bedit-field-input {
     0 -24px 70px -18px rgba(0, 0, 0, 0.85),
     0 0 0 1px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 color-mix(in oklab, var(--foreground) 18%, transparent);
+}
+
+/* ------------------------------------------------- M-202 touch floor */
+/*
+ * Final Audit Slice 1 (F-11): the sheet family's own controls meet the
+ * 44px touch floor. The icon button grows to the size the paywall's
+ * close (.bill-close) already had to grow to on its own; the ghost
+ * pill takes a 44px minimum height. Pinned in touch.guard (M-202).
+ */
+.bsheet-icon {
+  width: 44px;
+  height: 44px;
+}
+.bsheet-ghost {
+  min-height: 44px;
 }
 
 /* Scoped by :has so every other sheet keeps the family backdrop; while an

@@ -3725,3 +3725,14 @@ a.day-path__label:hover {
     opacity: 0;
   }
 }
+
+/* ------------------------------------------------- M-202 touch floor */
+/*
+ * Final Audit Slice 1 (F-11): the day-strip chips meet the 44px touch
+ * floor at every pointer — the coarse-pointer rule's floor becomes
+ * unconditional (this block sits after the later 36px base rule, so
+ * it wins the cascade). Pinned in touch.guard (M-202).
+ */
+.nut-chip {
+  min-height: var(--bloom-touch-min);
+}

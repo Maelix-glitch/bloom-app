@@ -162,9 +162,25 @@ export function JourneyHero({
           <span className="pg-plate-flank pg-plate-flank-r" aria-hidden />
         </div>
         <h1 id="pg-journey-title" className="pg-title pg-hero-title">
-          {loading ? "—" : rank.rank.name}
+          {loading ? (
+            <span
+              className="block h-[0.8em] w-60 max-w-[75%] animate-pulse rounded-control bg-surface-2"
+              aria-hidden
+            />
+          ) : (
+            rank.rank.name
+          )}
         </h1>
-        <p className="pg-hero-line">{loading ? "\u00A0" : toNext}</p>
+        <p className="pg-hero-line">
+          {loading ? (
+            <span
+              className="block h-[0.8em] w-44 max-w-[60%] animate-pulse rounded-control bg-surface-2"
+              aria-hidden
+            />
+          ) : (
+            toNext
+          )}
+        </p>
         {/* Silent when there is nothing to report — no row of zeroes. */}
         {todayPoints > 0 || weekPoints > 0 ? (
           <p className="pg-hero-micro">
@@ -211,7 +227,16 @@ export function JourneyHero({
 
         {/* the rank's banner ribbon — the crest's nameplate, worn under the ring */}
         <div className="pg-hero-banner" aria-hidden>
-          <RankBanner tone={rank.rank.tone}>{loading ? "—" : rank.rank.name}</RankBanner>
+          <RankBanner tone={rank.rank.tone}>
+            {loading ? (
+              <span
+                className="inline-block h-[0.8em] w-24 animate-pulse rounded-full bg-surface-2 align-[-0.1em]"
+                aria-hidden
+              />
+            ) : (
+              rank.rank.name
+            )}
+          </RankBanner>
         </div>
 
         <p className="pg-rank-points-label">Bloom points</p>
@@ -219,11 +244,30 @@ export function JourneyHero({
           className={`pg-rank-points pg-count${bumped ? " pg-count-bump" : ""}`}
           aria-live="polite"
         >
-          {loading ? "—" : formatPoints(shown)}
+          {loading ? (
+            <span
+              className="inline-block h-[0.8em] w-28 animate-pulse rounded-control bg-surface-2 align-[-0.08em]"
+              aria-hidden
+            />
+          ) : (
+            formatPoints(shown)
+          )}
         </p>
         {loading ? <span className="sr-only">Loading your points</span> : null}
         <p className="pg-rank-meta">
-          <span>{loading ? "Rank —" : `Rank ${rank.rank.tier}`}</span>
+          <span>
+            {loading ? (
+              <>
+                Rank{" "}
+                <span
+                  className="inline-block h-[0.8em] w-8 animate-pulse rounded-full bg-surface-2 align-[-0.1em]"
+                  aria-hidden
+                />
+              </>
+            ) : (
+              `Rank ${rank.rank.tier}`
+            )}
+          </span>
         </p>
         {/* The ring is the progress; this states it for anyone who cannot see it. */}
         {loading ? null : (

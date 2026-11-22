@@ -6,15 +6,17 @@
  * Rewards meant an earning could happen with no visible result, which read as
  * "the points didn't count". This chip is the one persistent receipt.
  *
- * While the account balance is still loading, the chip shows a dash — never
- * the device number a signed-in user would watch swap to the account number
- * a second later. Every chip reads the one shared wallet store, so they all
- * land on the real number in the same frame.
+ * While the account balance is still loading, the chip holds a skeleton
+ * bar in the number's slot (M-202, F-01) — never the device number a
+ * signed-in user would watch swap to the account number a second later.
+ * Every chip reads the one shared wallet store, so they all land on the
+ * real number in the same frame.
  */
 
 import { Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { useWallet } from "@/hooks/useWallet";
 import { formatPoints } from "@/lib/progression/format";
 import { cn } from "@/lib/utils";
@@ -51,7 +53,11 @@ export function PointsChip({
       data-testid="points-chip"
     >
       <Sparkles className="size-3.5 text-primary" strokeWidth={1.8} aria-hidden />
-      <span>{wallet.loading ? "—" : formatPoints(wallet.balance)}</span>
+      {wallet.loading ? (
+        <Skeleton className="inline-block h-[0.95em] w-10" aria-hidden />
+      ) : (
+        <span>{formatPoints(wallet.balance)}</span>
+      )}
       {compact ? null : <span className="text-muted-foreground">points</span>}
     </Link>
   );

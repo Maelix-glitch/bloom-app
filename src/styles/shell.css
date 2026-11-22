@@ -1039,3 +1039,18 @@ a.ncenter-row:hover .ncenter-go {
     bottom: calc(78px + env(safe-area-inset-bottom));
   }
 }
+
+/* ------------------------------------------------- M-202 touch floor */
+/*
+ * Final Audit Slice 1 (F-11): the connection-notice chip grows to the
+ * 44px floor outright (it floats alone; no neighbour to crowd), and
+ * the notification centre's Clear takes a 44px minimum height.
+ * Appended last so the floors win. Pinned in touch.guard (M-202).
+ */
+.conn-notice-chip {
+  width: 44px;
+  height: 44px;
+}
+.ncenter-clear {
+  min-height: 44px;
+}

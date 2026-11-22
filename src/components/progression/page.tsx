@@ -14,9 +14,11 @@
  * Nothing here is a shop. Customization lives in the Atelier, opened by ranks.
  */
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Check, CircleAlert, RefreshCw, Sparkles } from "lucide-react";
+
+import { Skeleton } from "@/components/ui/skeleton";
 
 import { useProgression } from "@/hooks/useProgression";
 import { rankFor } from "@/lib/progression/ranks";
@@ -49,6 +51,21 @@ const MOTES = Array.from({ length: 14 }, (_, i) => {
     drift: `${((seed % 90) - 45) / 10}vw`,
   };
 });
+
+/**
+ * M-202 (F-01) — a section's waiting shape: skeletons in the layout the
+ * content will take, with the loading word kept for screen readers
+ * only. The page keeps its real layout while data arrives; no section
+ * collapses to a bare "Loading…" line on a black field.
+ */
+function PgLoading({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <div role="status">
+      <span className="sr-only">{label}</span>
+      <div aria-hidden="true">{children}</div>
+    </div>
+  );
+}
 
 export function JourneyPage() {
   const progress = useProgression();
@@ -227,7 +244,17 @@ export function JourneyPage() {
               </p>
             </div>
             {progress.loading ? (
-              <p className="pg-empty">Loading…</p>
+              <PgLoading label="Loading the path…">
+                <div className="flex flex-col gap-4">
+                  {[0, 1, 2, 3].map((row) => (
+                    <div key={row} className="flex items-center gap-3">
+                      <Skeleton className="h-3.5 w-3.5 shrink-0 rounded-full" />
+                      <Skeleton className="h-4 w-40 max-w-[55%]" />
+                      <Skeleton className="h-4 w-16" />
+                    </div>
+                  ))}
+                </div>
+              </PgLoading>
             ) : (
               <RankPath points={progress.points} rankTier={progress.rank.rank.tier} />
             )}
@@ -253,7 +280,16 @@ export function JourneyPage() {
               </p>
             </div>
             {progress.loading ? (
-              <p className="pg-empty">Loading…</p>
+              <PgLoading label="Loading the hall of crests…">
+                <div className="flex flex-wrap gap-5">
+                  {[0, 1, 2, 3, 4].map((crest) => (
+                    <div key={crest} className="flex flex-col items-center gap-2.5">
+                      <Skeleton className="h-24 w-24 rounded-full" />
+                      <Skeleton className="h-3.5 w-16" />
+                    </div>
+                  ))}
+                </div>
+              </PgLoading>
             ) : (
               <CrestHall points={progress.points} rankTier={progress.rank.rank.tier} />
             )}
@@ -280,7 +316,13 @@ export function JourneyPage() {
               </p>
             </div>
             {progress.achievementsPending ? (
-              <p className="pg-empty">Loading your achievements…</p>
+              <PgLoading label="Loading your achievements…">
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  {[0, 1, 2, 3].map((tile) => (
+                    <Skeleton key={tile} className="h-28 rounded-card" />
+                  ))}
+                </div>
+              </PgLoading>
             ) : (
               <AchievementGallery achievements={progress.achievements} />
             )}

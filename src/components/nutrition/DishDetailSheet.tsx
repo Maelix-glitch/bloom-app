@@ -87,7 +87,7 @@ export function DishDetailSheet({
 
   return (
     <BloomSheet open onClose={onClose} title={dish.name.en} size="lg" className="nut-sheet">
-      <div className="flex max-h-[82vh] flex-col px-5 pb-6 pt-6 sm:px-7">
+      <div className="flex min-h-0 flex-1 flex-col px-5 pb-6 pt-6 sm:px-7">
         <div className="flex items-start justify-between gap-4">
           <div className="min-w-0">
             <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
@@ -103,7 +103,7 @@ export function DishDetailSheet({
           </Button>
         </div>
 
-        <div className="no-scrollbar mt-4 min-h-0 flex-1 overflow-y-auto pr-1">
+        <div className="bsheet-scroll no-scrollbar mt-4 pr-1">
           <DishPhoto dishId={dish.id} name={dish.name.en} size="large" />
 
           <div className="mt-3 flex flex-wrap items-center gap-2">

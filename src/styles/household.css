@@ -137,3 +137,10 @@
   color: var(--gold);
   text-decoration: none;
 }
+
+/* ------------------------------------------------- M-202 touch floor */
+/* Final Audit Slice 1 (F-11): the quiet household button meets the
+   44px touch floor. Pinned in touch.guard (M-202). */
+.hh-btn-quiet {
+  min-height: 44px;
+}
