@@ -47,6 +47,7 @@
  */
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { Link } from "@tanstack/react-router";
 import {
   Beef,
@@ -485,12 +486,7 @@ export function NutritionPlanSection() {
   if (composeStep !== null) {
     return (
       <section className="nut-card nut-rise section" aria-label="Your plan for today">
-        <div className="section-head">
-          <div className="section-head__main">
-            <div className="eyebrow">Your plan</div>
-            <h2 className="section-head__title mt-1.5">Building your plan</h2>
-          </div>
-        </div>
+        <SectionHead kicker="Your plan" title="Building your plan" />
         <div className="mt-2">
           <ul className="nut-compose-steps" role="status" aria-label="Building your plan">
             {COMPOSE_STEPS.map((label, i) => (
@@ -522,14 +518,7 @@ export function NutritionPlanSection() {
       <section className="nut-card nut-rise section" aria-label="Your plan for today">
         {refusal.kind === "safety_blocked" ? (
           <div className="mt-2">
-            <div className="section-head">
-              <div className="section-head__main">
-                <div className="eyebrow">Your plan</div>
-                <h2 className="section-head__title mt-1.5">
-                  Bloom won't build a plan from these answers
-                </h2>
-              </div>
-            </div>
+            <SectionHead kicker="Your plan" title="Bloom won't build a plan from these answers" />
             {refusal.findings.map((finding) => (
               <p
                 key={finding.ruleId}
@@ -555,14 +544,10 @@ export function NutritionPlanSection() {
           </div>
         ) : (
           <div className="mt-2">
-            <div className="section-head">
-              <div className="section-head__main">
-                <div className="eyebrow">Your plan</div>
-                <h2 className="section-head__title mt-1.5">
-                  Not enough to build a plan Bloom can stand behind
-                </h2>
-              </div>
-            </div>
+            <SectionHead
+              kicker="Your plan"
+              title="Not enough to build a plan Bloom can stand behind"
+            />
             <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
               A plan is only worth following if every number in it is really yours. Bloom still
               needs:
@@ -593,14 +578,7 @@ export function NutritionPlanSection() {
     return (
       <section className="nut-card nut-rise section" aria-label="Your plan for today">
         <div className="mt-2">
-          <div className="section-head">
-            <div className="section-head__main">
-              <div className="eyebrow">Your plan</div>
-              <h2 className="section-head__title mt-1.5">
-                A plan for your goal, built from your numbers
-              </h2>
-            </div>
-          </div>
+          <SectionHead kicker="Your plan" title="A plan for your goal, built from your numbers" />
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
             Bloom computes your daily targets deterministically — no AI, no invented numbers —
             splits them across your meals, and builds each meal around a real dish from the dish
@@ -631,14 +609,10 @@ export function NutritionPlanSection() {
     return (
       <section className="nut-card nut-rise section" aria-label="Your plan for today">
         <div className="mt-2">
-          <div className="section-head">
-            <div className="section-head__main">
-              <div className="eyebrow">Your plan</div>
-              <h2 className="section-head__title mt-1.5">
-                This plan was made for {formatPlanDay(plan.day)}
-              </h2>
-            </div>
-          </div>
+          <SectionHead
+            kicker="Your plan"
+            title={<>This plan was made for {formatPlanDay(plan.day)}</>}
+          />
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
             It aimed at {fmtKcalApprox(plan.targets.kcal)} and{" "}
             {fmtGrams(plan.targets.proteinG)} g of protein for{" "}
@@ -1290,23 +1264,23 @@ export function NutritionPlanSection() {
   return (
     <>
     <section className="nut-card nut-rise section" aria-label="Your plan for today">
-      <div className="section-head">
-        <div className="section-head__main">
-          <div className="eyebrow">Your plan</div>
-          {/* Brief v7 N5 (M-142's H2 half): the header names the DAY,
-              not the goal — the goal is stated once on the page, by
-              the segmented control below (the one interactive
-              statement, writing through usePlan.setGoal). */}
-          <h2 className="section-head__title mt-1.5">Today's plan</h2>
-        </div>
-        <button
-          type="button"
-          className="nut-btn nut-btn-ghost nut-btn-sm"
-          onClick={() => compose()}
-        >
-          <RefreshCw className="size-3.5" aria-hidden /> Suggest different meals
-        </button>
-      </div>
+      {/* Brief v7 N5 (M-142's H2 half): the header names the DAY, not
+          the goal — the goal is stated once on the page, by the
+          segmented control below (the one interactive statement,
+          writing through usePlan.setGoal). */}
+      <SectionHead
+        kicker="Your plan"
+        title="Today's plan"
+        right={
+          <button
+            type="button"
+            className="nut-btn nut-btn-ghost nut-btn-sm"
+            onClick={() => compose()}
+          >
+            <RefreshCw className="size-3.5" aria-hidden /> Suggest different meals
+          </button>
+        }
+      />
 
       <StatStrip
         planKcal={view.totals.plan.kcal}
@@ -1535,15 +1509,15 @@ export function NutritionPlanSection() {
         The section always renders with a plan — the flower is the
         day's balance whether or not anything fell short. */}
     <section className="nut-card nut-rise section" aria-label="Today's balance">
-      <div className="section-head">
-        <div className="section-head__main">
-          <h2 className="section-head__title">Today's balance</h2>
-        </div>
-        <div className="balance__count balance__count--head" data-metric="balance-covered-count">
-          <b>{view.balance.inPlan}</b>
-          <span>of {view.balance.total} food groups covered</span>
-        </div>
-      </div>
+      <SectionHead
+        title="Today's balance"
+        right={
+          <div className="balance__count balance__count--head" data-metric="balance-covered-count">
+            <b>{view.balance.inPlan}</b>
+            <span>of {view.balance.total} food groups covered</span>
+          </div>
+        }
+      />
       <div className="balance mt-3">
         <div className="balance__flower">
           <BloomFlower groups={flowerGroups} />
@@ -1586,11 +1560,7 @@ export function NutritionPlanSection() {
         the case (never a paragraph, never a card of its own —
         M-154): the page's structure holds day to day. */}
     <section className="nut-card nut-rise section" aria-label="How today's plan was adjusted">
-      <div className="section-head">
-        <div className="section-head__main">
-          <h2 className="section-head__title">How today's plan was adjusted</h2>
-        </div>
-      </div>
+      <SectionHead title="How today's plan was adjusted" />
       {adjustmentCopies.length > 0 ? (
         <div className="mt-3 grid gap-3">
           {adjustmentCopies.map((copy) => (

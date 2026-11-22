@@ -57,6 +57,7 @@ import {
   X,
 } from "lucide-react";
 
+import { SectionHead } from "@/components/ui/SectionHead";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -470,28 +471,28 @@ export function GrocerySection() {
       className={`nut-card nut-rise section${shopping ? " is-shopping" : ""}`}
       aria-label="Grocery list and pantry"
     >
-      <div className="section-head">
-        <div className="section-head__main">
-          <div className="eyebrow">Grocery &amp; pantry</div>
-          <h2 className="section-head__title mt-1.5">Shopping for your plan</h2>
-        </div>
-        {ok && ok.totalItems > 0 ? (
-          <div className="flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" variant="secondary" onClick={copyList}>
-              {copied ? (
-                <Check className="size-4" aria-hidden />
-              ) : (
-                <Copy className="size-4" aria-hidden />
-              )}
-              {copied ? "Copied" : "Copy list"}
-            </Button>
-            <Button type="button" size="sm" variant="secondary" onClick={shareList}>
-              <Share2 className="size-4" aria-hidden />
-              Share
-            </Button>
-          </div>
-        ) : null}
-      </div>
+      <SectionHead
+        kicker="Grocery & pantry"
+        title="Shopping for your plan"
+        right={
+          ok && ok.totalItems > 0 ? (
+            <div className="flex flex-wrap items-center gap-2">
+              <Button type="button" size="sm" variant="secondary" onClick={copyList}>
+                {copied ? (
+                  <Check className="size-4" aria-hidden />
+                ) : (
+                  <Copy className="size-4" aria-hidden />
+                )}
+                {copied ? "Copied" : "Copy list"}
+              </Button>
+              <Button type="button" size="sm" variant="secondary" onClick={shareList}>
+                <Share2 className="size-4" aria-hidden />
+                Share
+              </Button>
+            </div>
+          ) : null
+        }
+      />
 
       {shopping && ok && total > 0 ? (
         /* Shopping mode's pinned progress: count, bar and the way

@@ -2924,3 +2924,30 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
 .tk2-active-toggle {
   min-height: 44px;
 }
+
+/* ---------------------------------------------------------------------------
+ * M-204 (Final Audit Slice 3, F-23): the designed sparse states. A
+ * territory with under a week of logged days carries one quiet line in
+ * the chart's place, at a shorter height than the contour it precedes;
+ * the route, until a path holds two logged days, is a slim strip
+ * instead of a tall void. Appended last so these declarations win for
+ * their (new) classes.
+ * ------------------------------------------------------------------------- */
+.at-contour-note {
+  margin: 0;
+  padding: var(--space-2) 0 var(--space-1);
+  font-size: var(--text-meta);
+  line-height: var(--leading-body);
+  color: var(--ci-text-soft);
+}
+.at-route-strip {
+  border: 1px solid var(--tk2-rule);
+  border-radius: var(--radius-xl);
+  padding: var(--space-4) var(--space-5);
+}
+.at-route-strip p {
+  margin: 0;
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+  color: var(--ci-text-soft);
+}

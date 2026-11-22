@@ -23,6 +23,7 @@
 import { useMemo } from "react";
 import { Info } from "lucide-react";
 
+import { SectionHead } from "@/components/ui/SectionHead";
 import { Switch } from "@/components/ui/switch";
 import { usePrefValue } from "@/lib/prefsStore";
 import { fmtCount } from "@/lib/format";
@@ -97,12 +98,7 @@ export function ModesSection() {
 
   return (
     <section className="nut-card nut-rise section" aria-label="Condition modes">
-      <div className="section-head">
-        <div className="section-head__main">
-          <div className="eyebrow">Condition modes</div>
-          <h2 className="section-head__title mt-1.5">Guardrails you choose for your plan</h2>
-        </div>
-      </div>
+      <SectionHead kicker="Condition modes" title="Guardrails you choose for your plan" />
 
       {/* The safety sentence is the most important text on this card,
           so it renders as a note (registry M-69): full-contrast text

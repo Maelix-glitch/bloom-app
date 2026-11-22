@@ -200,6 +200,10 @@ export function MoodChart({
                 label: {
                   show: true,
                   position: "insideEndTop",
+                  /* F-41 (M-204): the label sat hard against the
+                     plot's right edge; a 10px distance gives it
+                     breathing room from the edge it ends at. */
+                  distance: 10,
                   formatter: "usual",
                   fontSize: 11,
                   color: line,

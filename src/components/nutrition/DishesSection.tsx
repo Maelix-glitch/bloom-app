@@ -29,6 +29,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Clock, Search } from "lucide-react";
 
+import { SectionHead } from "@/components/ui/SectionHead";
 import { Input } from "@/components/ui/input";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useSession } from "@/hooks/useSession";
@@ -155,12 +156,7 @@ export function DishesSection({ day }: { day: string }) {
 
   return (
     <section className="nut-card nut-rise section" aria-label="Dishes">
-      <div className="section-head">
-        <div className="section-head__main">
-          <div className="eyebrow">Dishes</div>
-          <h2 className="section-head__title mt-1.5">Cook it, then log it</h2>
-        </div>
-      </div>
+      <SectionHead kicker="Dishes" title="Cook it, then log it" />
       <p className="mt-1 max-w-[58ch] text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
         Real recipes, Indian first. Every dish is built from USDA-verified ingredients, so
         its numbers are computed from the recipe itself and labelled as such. Budget marks

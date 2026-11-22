@@ -28,6 +28,7 @@
 import { Fragment, useMemo, type ReactNode } from "react";
 import { EyeOff, Flame, Gauge, Scale, SlidersHorizontal, UtensilsCrossed } from "lucide-react";
 
+import { SectionHead } from "@/components/ui/SectionHead";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useHabits } from "@/hooks/useHabits";
 import { useNutrition } from "@/hooks/useNutrition";
@@ -617,24 +618,22 @@ export function MetabolicTwinSection() {
 
   return (
     <section className="nut-card nut-rise section" aria-label="Your metabolic twin">
-      <div className="section-head">
-        <div className="section-head__main">
-          <h2 className="section-head__title">Your metabolic twin</h2>
-          <p className="section-head__sub">
-            Computed fresh from your record. Nothing stored, nothing guessed.
-          </p>
-        </div>
-        <div className="flex items-center gap-2.5 pt-1">
-          <span className="twin-dots" aria-hidden="true">
-            {readyFirst.map((t) => (
-              <i key={t.key} data-ready={t.field.state === "value" ? true : undefined} />
-            ))}
-          </span>
-          <span className="text-[length:var(--text-callout)] text-muted-foreground">
-            {twin.readyCount} of {twin.totalFields} signals ready
-          </span>
-        </div>
-      </div>
+      <SectionHead
+        title="Your metabolic twin"
+        subline="Computed fresh from your record. Nothing stored, nothing guessed."
+        right={
+          <div className="flex items-center gap-2.5 pt-1">
+            <span className="twin-dots" aria-hidden="true">
+              {readyFirst.map((t) => (
+                <i key={t.key} data-ready={t.field.state === "value" ? true : undefined} />
+              ))}
+            </span>
+            <span className="text-[length:var(--text-callout)] text-muted-foreground">
+              {twin.readyCount} of {twin.totalFields} signals ready
+            </span>
+          </div>
+        }
+      />
 
       {strip.length > 0 ? <div className="twin-strip mt-5 grid gap-3">{strip}</div> : null}
 

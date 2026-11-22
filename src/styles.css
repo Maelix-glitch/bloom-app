@@ -3858,3 +3858,57 @@ body {
   background: transparent;
   box-shadow: none;
 }
+
+/* ========================================================================
+ * M-204 (Final Audit Slice 3, F-17/F-41/F-42): the section-head system
+ * goes app-wide. The `.section-head` rules below are Nutrition's own
+ * (styles/nutrition.css, pinned by sectionSystem.guard) carried into
+ * the global sheet with identical values, so the shared SectionHead
+ * component renders the same treatment on screens whose route sheets
+ * never load nutrition.css. On the Nutrition route both copies apply
+ * with the same declarations — no cascade difference.
+ * `.chapter-mark` is the quiet signpost for long stacks: one small
+ * label, one hairline, nothing else.
+ * ======================================================================== */
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.section-head__main {
+  min-width: 0;
+}
+.section-head__title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+.section-head__sub {
+  margin-top: var(--space-1);
+  font-size: var(--text-callout);
+  line-height: var(--leading-body);
+  color: var(--muted-foreground);
+  max-width: var(--measure);
+}
+
+.chapter-mark {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.chapter-mark__label {
+  font-size: var(--text-meta);
+  font-weight: 500;
+  letter-spacing: var(--tracking-eyebrow);
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+  white-space: nowrap;
+}
+.chapter-mark__rule {
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}

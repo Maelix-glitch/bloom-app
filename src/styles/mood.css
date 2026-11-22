@@ -1113,6 +1113,27 @@ select.bmood-input {
 .mm-insights > li + li {
   border-top: 1px solid var(--dbx-hairline);
 }
+/* M-204 (Final Audit F-02): on wide screens the insight rows compose
+   in two balanced columns — a lone short row no longer leaves the
+   panel's right half standing empty. The hairline dividers move with
+   the grid: none inside the first row, one above each later row. A
+   single insight spans the full width as one composed row. */
+@media (min-width: 1024px) {
+  .mm-insights {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-10);
+  }
+  .mm-insights > li + li {
+    border-top: none;
+  }
+  .mm-insights > li:nth-child(n + 3) {
+    border-top: 1px solid var(--dbx-hairline);
+  }
+  .mm-insights > li:only-child {
+    grid-column: 1 / -1;
+  }
+}
 .mm-insight {
   border-radius: var(--radius);
   transition: background-color var(--motion-standard) var(--ease-out-expo);

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { Link, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Loader2, PenLine, RotateCcw, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, PenLine, Sparkles } from "lucide-react";
 
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { usualMood } from "@/lib/smart/usual";
@@ -18,7 +18,7 @@ import { Distribution } from "@/components/mood/Distribution";
 import { Insights } from "@/components/mood/Insights";
 import { History } from "@/components/mood/History";
 import { Composer } from "@/components/mood/Composer";
-import { BloomConfirm } from "@/components/ui/bloom-sheet";
+import { ChapterMark } from "@/components/ui/ChapterMark";
 import { Reveal } from "@/components/mood/primitives";
 
 export const Route = createFileRoute("/mood/intelligence")({
@@ -79,7 +79,6 @@ function MoodIntelligencePage() {
 
   const [composerOpen, setComposerOpen] = useState(false);
   const [editing, setEditing] = useState<MoodEntry | null>(null);
-  const [resetOpen, setResetOpen] = useState(false);
 
   const openNew = useCallback(() => {
     setEditing(null);
@@ -145,6 +144,9 @@ function MoodIntelligencePage() {
           <EmptyState onCompose={openNew} />
         ) : (
           <div className="mt-14 flex flex-col gap-6">
+            {/* Chapter signposts (F-41, M-204): thirteen sections read
+                as three chapters — same content, same order. */}
+            <ChapterMark label="Your patterns" />
             <Reveal delay={80}>
               <MoodChart days={a.days} usualMood={usual?.mood ?? null} />
             </Reveal>
@@ -159,6 +161,7 @@ function MoodIntelligencePage() {
               </Reveal>
             </div>
 
+            <ChapterMark label="Your rhythm" />
             <div className="grid gap-6 lg:grid-cols-5">
               <Reveal delay={120} className="lg:col-span-3">
                 <Calendar days={a.allDays} />
@@ -191,6 +194,7 @@ function MoodIntelligencePage() {
               <Insights insights={a.insights} tier={a.tier} />
             </Reveal>
 
+            <ChapterMark label="Your history" />
             <Reveal delay={140}>
               <History
                 entries={entries}
@@ -200,32 +204,18 @@ function MoodIntelligencePage() {
               />
             </Reveal>
 
-            <footer className="mt-6 flex flex-wrap items-center justify-between gap-4 border-t border-border pt-6">
+            {/* F-41 (M-204): the page no longer ends on a destructive
+                action — the mood reset lives in Settings → Account &
+                data now, beside the account's other data controls.
+                The footer keeps its one quiet line. */}
+            <footer className="mt-6 border-t border-border pt-6">
               <p className="mono text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
                 Bloom · your data is saved securely to your private account
               </p>
-
-              <button
-                type="button"
-                onClick={() => setResetOpen(true)}
-                className="mono inline-flex items-center gap-2 rounded-full border border-border px-4 py-2 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong transition-colors hover:border-rose/50 hover:text-rose"
-              >
-                <RotateCcw className="size-3" /> Reset all data
-              </button>
             </footer>
           </div>
         )}
       </main>
-
-      <BloomConfirm
-        open={resetOpen}
-        onClose={() => setResetOpen(false)}
-        title="Erase every mood entry?"
-        description="Every check-in in your Mood record is removed, from this device and your account. This can't be undone."
-        confirmLabel="Erase everything"
-        busyLabel="Erasing…"
-        onConfirm={() => system.resetAll()}
-      />
 
       <Composer
         open={composerOpen}

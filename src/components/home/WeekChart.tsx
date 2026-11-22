@@ -1,8 +1,10 @@
 /**
  * The week in bars — the prototype's WeekChart language over Bloom's real
- * ticks: this week in gold, the week before muted beside it, dashed
- * gridlines, and the totals carrying the same delta pill the Overview
- * band uses (habit ticks: up is the good direction).
+ * ticks: this week in sage where the day carries ticks (grey where it
+ * doesn't — Final Audit F-40, M-204: sage is the data colour, gold is
+ * for actions), the week before muted beside it, dashed gridlines over
+ * one quiet baseline, and the totals carrying the same delta pill the
+ * Overview band uses (habit ticks: up is the good direction).
  *
  * `ready` is the caller's LATCHED settled flag (Slice B): until the
  * record has settled the section holds its skeleton — the panel and
@@ -14,6 +16,7 @@
 import { useState } from "react";
 
 import type { WeekTicks } from "@/lib/home/weekChart";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { CountUp } from "./CountUp";
 import { DeltaPill } from "./DeltaPill";
 import { cn } from "@/lib/utils";
@@ -32,22 +35,21 @@ export function WeekChart({ data, ready = true }: { data: WeekTicks; ready?: boo
       aria-labelledby="home-week-title"
       aria-busy={!ready}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <p className="home-eyebrow">Overview · last 7 days</p>
-          <h2 id="home-week-title" className="home-band-title mt-1">
-            Your week in ticks
-          </h2>
-        </div>
-        <div className="hidden items-center gap-4 pt-1 text-[length:var(--text-meta)] text-muted-foreground sm:flex">
-          <span className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-gold" aria-hidden /> This week
-          </span>
-          <span className="flex items-center gap-2">
-            <span className="size-2 rounded-full bg-white/20" aria-hidden /> Before
-          </span>
-        </div>
-      </div>
+      <SectionHead
+        kicker="Overview · last 7 days"
+        title="Your week in ticks"
+        titleId="home-week-title"
+        right={
+          <div className="hidden items-center gap-4 pt-1 text-[length:var(--text-meta)] text-muted-foreground sm:flex">
+            <span className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-sage" aria-hidden /> This week
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="size-2 rounded-full bg-white/20" aria-hidden /> Before
+            </span>
+          </div>
+        }
+      />
 
       {!ready ? (
         /* Unsettled: the section shell is ALWAYS present — same panel,
@@ -111,7 +113,7 @@ export function WeekChart({ data, ready = true }: { data: WeekTicks; ready?: boo
                     }}
                     aria-hidden
                   >
-                    <span className="text-gold">{v}</span>{" "}
+                    <span className={v > 0 ? "text-sage" : "text-muted-foreground"}>{v}</span>{" "}
                     <span className="text-muted-foreground">vs {prevWeek[i]} before</span>
                   </div>
                   <div className="flex h-full w-full items-end justify-center gap-1">
@@ -119,20 +121,25 @@ export function WeekChart({ data, ready = true }: { data: WeekTicks; ready?: boo
                       className="w-1/2 max-w-[18px] rounded-t-md bg-white/[0.12] transition-all duration-[var(--motion-page)]"
                       style={{ height: `${(prevWeek[i]! / max) * 100}%`, minHeight: 3 }}
                       aria-hidden
+                      data-week-bar="prev"
                     />
                     <div
                       className={cn(
                         "w-1/2 max-w-[18px] rounded-t-md transition-all duration-[var(--motion-signature)]",
+                        v > 0 ? "bg-sage" : "bg-white/[0.12]",
                         active === i
-                          ? "opacity-100 shadow-[0_0_24px_rgba(220,192,143,0.45)]"
+                          ? v > 0
+                            ? "opacity-100 shadow-[0_0_24px_rgba(143,199,162,0.45)]"
+                            : "opacity-100"
                           : "opacity-60",
                       )}
                       style={{
                         height: `${(v / max) * 100}%`,
                         minHeight: 3,
-                        background: "linear-gradient(to top, var(--gold), var(--gold-soft))",
                       }}
                       aria-hidden
+                      data-week-bar="this"
+                      data-has-data={v > 0}
                     />
                   </div>
                   <span className="sr-only">
@@ -141,6 +148,13 @@ export function WeekChart({ data, ready = true }: { data: WeekTicks; ready?: boo
                 </div>
               ))}
             </div>
+            {/* F-40: one quiet baseline the bars stand on — the only
+                axis furniture the chart gains. */}
+            <div
+              aria-hidden
+              data-testid="week-chart-baseline"
+              className="absolute inset-x-0 bottom-0 border-b border-border"
+            />
           </div>
           <div className="mt-3 flex justify-between gap-2 sm:gap-3" aria-hidden>
             {labels.map((l, i) => (
@@ -148,7 +162,7 @@ export function WeekChart({ data, ready = true }: { data: WeekTicks; ready?: boo
                 key={i}
                 className={cn(
                   "flex-1 text-center text-[length:var(--text-micro)] transition-colors",
-                  active === i ? "text-gold" : "text-muted-foreground",
+                  active === i ? "text-sage" : "text-muted-foreground",
                 )}
               >
                 {i === labels.length - 1 ? "Today" : l}

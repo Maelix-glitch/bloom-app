@@ -16,8 +16,11 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { IconFileUp } from "@/components/profile/SettingsIcons";
+import { IconErase, IconFileUp } from "@/components/profile/SettingsIcons";
 import { toast } from "sonner";
+
+import { BloomConfirm } from "@/components/ui/bloom-sheet";
+import { useMoodSystem } from "@/hooks/useMoodSystem";
 
 import { EMOTION_MAP } from "@/lib/mood/types";
 import { seenStore } from "@/lib/stories/seen";
@@ -240,6 +243,12 @@ function AccountSettingsInner({
   const reminders = useReminders();
   const install = useInstallPrompt();
 
+  /* The Mood record's reset (F-41, M-204): it lived at the foot of
+     Mood Intelligence; it belongs here, with the account's other data
+     controls. Same confirm words, same reset underneath. */
+  const moodSystem = useMoodSystem();
+  const [moodResetOpen, setMoodResetOpen] = useState(false);
+
   const milestonesList = useMemo(() => {
     if (journey.status !== "ready") return [];
     return journey.milestones.achieved;
@@ -423,6 +432,36 @@ function AccountSettingsInner({
             </button>
           </div>
         </section>
+
+        {/* The Mood record's own data control (F-41, M-204) — moved
+            here from the foot of Mood Intelligence. */}
+        <section aria-label="Mood record" className="pf-group mt-8">
+          <h2 className="pf-group-label">Mood record</h2>
+          <div className="pf-group-rows">
+            <button type="button" className="pf-row" onClick={() => setMoodResetOpen(true)}>
+              <span className="pf-row-icon" aria-hidden>
+                <IconErase />
+              </span>
+              <span className="pf-row-text">
+                <span className="pf-row-label">Reset all mood data</span>
+                <span className="pf-row-hint">
+                  Removes every check-in in your Mood record, from this device and your account
+                </span>
+              </span>
+              <span className="pf-row-value" />
+              <span />
+            </button>
+          </div>
+        </section>
+        <BloomConfirm
+          open={moodResetOpen}
+          onClose={() => setMoodResetOpen(false)}
+          title="Erase every mood entry?"
+          description="Every check-in in your Mood record is removed, from this device and your account. This can't be undone."
+          confirmLabel="Erase everything"
+          busyLabel="Erasing…"
+          onConfirm={() => moodSystem.resetAll()}
+        />
       </section>
 
       {/* Money System: the membership card — plan, AI credits,

@@ -21,8 +21,11 @@ import {
   Sparkles,
 } from "lucide-react";
 
+import { BloomLogo } from "@/components/BloomLogo";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
+import { formatDate } from "@/lib/cycle/predict";
+import { shiftDay } from "@/lib/localDay";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useHabits } from "@/hooks/useHabits";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
@@ -55,9 +58,22 @@ function Delta({ now, prev, unit }: { now: number | null; prev: number | null; u
   );
 }
 
-function Card({ label, children }: { label: string; children: React.ReactNode }) {
+function Card({
+  label,
+  children,
+  className,
+  testId,
+}: {
+  label: string;
+  children: React.ReactNode;
+  className?: string;
+  testId?: string;
+}) {
   return (
-    <section className="rounded-2xl border border-border bg-surface-1/60 p-5 sm:p-6">
+    <section
+      data-testid={testId}
+      className={`rounded-2xl border border-border bg-surface-1/60 p-5 sm:p-6 ${className ?? ""}`}
+    >
       <h2 className="text-[length:var(--text-micro)] font-medium uppercase tracking-[var(--tracking-wide)] text-muted-foreground">
         {label}
       </h2>
@@ -162,6 +178,16 @@ export function WeeklyReportPage() {
         (voice.daysWithBloom === null ? null : Math.floor(voice.daysWithBloom / 7) + 1),
     };
   }, [report.tenureWeeks]);
+
+  /* The closing movement's week-ahead line (F-05, M-204) — drawn from
+     the same report: the next week of the record, and the day it
+     starts (the day after this report's week ends). */
+  const weekAheadLine = useMemo(() => {
+    const starts = formatDate(shiftDay(report.weekEnd, 1));
+    return intro.tenureWeeks !== null
+      ? `Week ${intro.tenureWeeks + 1} of your Bloom record starts ${starts} — it will read back whatever you log.`
+      : `A new week starts ${starts} — it will read back whatever you log.`;
+  }, [report.weekEnd, intro.tenureWeeks]);
 
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">
@@ -290,7 +316,14 @@ export function WeeklyReportPage() {
               </div>
             </Card>
 
-            <Card label="Body">
+            {/* F-02 (M-204): with no Cycle card beside it, Body spans
+                the whole row — its three stats compose across the
+                width instead of filling the left half of the grid. */}
+            <Card
+              label="Body"
+              testId="report-body-card"
+              {...(cycleVisible ? {} : { className: "sm:col-span-2" })}
+            >
               <div className="grid gap-5 sm:grid-cols-3">
                 <Stat
                   icon={<MoonStar className="size-4" />}
@@ -368,6 +401,25 @@ export function WeeklyReportPage() {
           Computed on this device from what you logged. Estimates, not medical advice — and never a
           judgement.
         </p>
+
+        {/* F-05 (M-204): the report closes instead of ending in black —
+            a week-ahead line from the same data, then the quiet
+            end-mark: the Bloom rule and wordmark treatment the legal
+            pages already use. */}
+        <footer data-testid="report-closing" className="mt-14 max-w-5xl border-t border-border pt-6">
+          <p className="text-[length:var(--text-micro)] font-medium uppercase tracking-[var(--tracking-wide)] text-muted-foreground">
+            The week ahead
+          </p>
+          <p className="mt-2 max-w-md text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
+            {weekAheadLine}
+          </p>
+          <p className="mt-6 flex items-center gap-2.5">
+            <BloomLogo size={22} />
+            <span className="font-display text-[length:var(--text-body)] text-muted-foreground">
+              Bloom
+            </span>
+          </p>
+        </footer>
       </main>
     </div>
   );

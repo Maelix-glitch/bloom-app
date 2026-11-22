@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { SectionHead as SharedSectionHead } from "@/components/ui/SectionHead";
 import type { Evidence } from "@/lib/mood/types";
 
 export type Accent = "violet" | "sky" | "amber" | "sage" | "rose";
@@ -54,6 +55,13 @@ export function Panel({
   );
 }
 
+/**
+ * Mood's section head — a delegate to the one shared SectionHead
+ * (Final Audit F-17, M-204): same props its callers already use, the
+ * shared kicker + Fraunces title + subline treatment underneath. The
+ * mb-6 the panels below it were composed against rides along as the
+ * root's extra class.
+ */
 export function SectionHead({
   eyebrow,
   title,
@@ -66,18 +74,13 @@ export function SectionHead({
   right?: ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-      <div>
-        {eyebrow ? <p className="eyebrow mb-2">{eyebrow}</p> : null}
-        <h2 className="display text-[20px] leading-tight sm:text-[23px]">{title}</h2>
-        {sub ? (
-          <p className="mt-1 max-w-[60ch] text-[length:var(--text-support)] text-muted-foreground">
-            {sub}
-          </p>
-        ) : null}
-      </div>
-      {right}
-    </div>
+    <SharedSectionHead
+      kicker={eyebrow}
+      title={title}
+      subline={sub}
+      right={right}
+      className="mb-6"
+    />
   );
 }
 
