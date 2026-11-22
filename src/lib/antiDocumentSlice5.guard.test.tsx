@@ -260,8 +260,12 @@ describe("anti-document guard — Shopping list + Pantry (strict, Slice 5)", () 
     expect(section.textContent).toContain("Covered by your pantry (1)");
     expect(section.textContent).toContain(foodDisplayName(dalFirstFood).en);
 
-    /* M-63: bought progress + the two list actions in the header. */
-    expect(section.textContent).toMatch(/0 of \d+ bought/);
+    /* M-63: bought progress + the two list actions in the header.
+       M-201 re-pins the progress half: the header's plain count is
+       now the progress component's count line and percentage — the
+       actions below are unchanged. */
+    expect(section.textContent).toMatch(/0 \/ \d+ Items/);
+    expect(section.textContent).toContain("0% completed");
     expect(screen.getByRole("button", { name: /copy list/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /share/i })).toBeTruthy();
 
