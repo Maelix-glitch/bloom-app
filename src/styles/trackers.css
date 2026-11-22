@@ -2588,18 +2588,27 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
      radius with the specular catch), so the live page kept its panels
      while the guard pinned a block that never reached main. The zones
      sit fully open on the canvas: no fill, no radius, no specular.
-     Layout, padding rhythm, hairlines and typography unchanged. */
+     Layout, padding rhythm, hairlines and typography unchanged.
+     M-200 (owner directive 2026-11-22): the owner reviewed the fully
+     open zones live and directed "at least a border — it looks bad
+     without it." The hairline returns HERE, at the winning rule, with
+     the radius the M-190 programme comment above records for the zone
+     (20px, carried as var(--radius-xl) — the token that resolves to
+     it; the R8 house law bars the literal) — an outline only: the
+     fill stays transparent and the shadow stays none, so the box
+     itself does not come back. */
   background: transparent;
-  border: none;
-  border-radius: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
   box-shadow: none;
   padding: var(--space-5);
 }
 .tk2-root .at-territory:hover {
   /* The press affordance is the flat 4% tonal step the de-boxed hero
-     chips use (M-183) — hover only, never a frame, lift or panel. */
+     chips use (M-183) — hover only, never a lift or panel. M-200: this
+     rule declares no border of its own, so the resting hairline the
+     owner asked for carries through the hover unchanged. */
   background: rgb(255 255 255 / 0.04);
-  border: none;
   transform: none;
   box-shadow: none;
 }
