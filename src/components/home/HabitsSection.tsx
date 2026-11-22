@@ -33,6 +33,7 @@ import { toast } from "sonner";
 import { STREAK_KEPT } from "@/lib/voice/copy";
 import { pick } from "@/lib/voice/messages";
 import { BloomIcon } from "@/components/icons/BloomIcon";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { resolveHabitIcon } from "@/components/icons/habitIcons";
 import { habitImageFailed, useHabitImage } from "@/components/icons/habitImage";
 import { cn } from "@/lib/utils";
@@ -201,10 +202,7 @@ export function HabitsSection({
     >
       <header className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="home-eyebrow">Today's rituals</p>
-          <h2 id="home-habits-title" className="home-band-title mt-1">
-            {title}
-          </h2>
+          <SectionHead kicker="Today's rituals" title={title} titleId="home-habits-title" />
           {earnedToday > 0 && !showSkeleton ? (
             <p
               className="mt-1 text-[length:var(--text-support)] tabular-nums text-gold"

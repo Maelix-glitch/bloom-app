@@ -21,6 +21,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { FeelIn } from "@/components/system/FeelIn";
+import { ChapterMark } from "@/components/ui/ChapterMark";
+import { SectionHead } from "@/components/ui/SectionHead";
 
 import { Correlations } from "@/components/tk/Correlations";
 import { HistoryTable } from "@/components/tk/HistoryTable";
@@ -146,6 +148,9 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
           </p>
         ) : (
           <>
+            {/* Chapter signposts (F-42, M-204): the page is a long
+                stack; two quiet markers name its chapters. */}
+            <ChapterMark label="Today" className="mb-6" />
             {/* ------------------------------ the flower ---------------------------- */}
             <FeelIn as="section" className="at-board">
               <div className="at-flower-col">
@@ -185,11 +190,16 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                             )}
                           </span>
                         </div>
-                        {/* The contour only exists once a day is logged.
-                            On an empty tile the dotted "nothing here"
-                            baseline stood in for an action; the quick
-                            log below is that action now (M-129). */}
-                        {shape.logged === 0 ? null : (
+                        {/* The contour only earns its place once a week
+                            of days stands behind it. Under that, the
+                            chart's place carries a designed sparse
+                            state instead (Final Audit F-23, M-204): one
+                            quiet line where the line will be — the days
+                            themselves stay counted in the tile's foot,
+                            and the quick log below is the action. */}
+                        {shape.logged < 7 ? (
+                          <p className="at-contour-note">Your first days will draw this line.</p>
+                        ) : (
                           <svg
                             viewBox="0 0 240 54"
                             className="at-contour"
@@ -297,26 +307,32 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
 
             {/* ---------------------- targets, shown not formed -------------------- */}
             <FeelIn as="section" className="at-section">
-              <p className="at-sectionhead">Targets</p>
+              <SectionHead variant="atlas" title="Targets" />
               <TargetsPanel store={store} />
             </FeelIn>
 
             {hasDays ? (
               <FeelIn as="section" className="at-section">
-                <p className="at-sectionhead">Achievements</p>
+                <SectionHead variant="atlas" title="Achievements" />
                 <Achievements analysis={analysis} />
               </FeelIn>
             ) : null}
 
             {hasDays ? (
               <>
+                <ChapterMark label="Your record" className="mt-14" />
                 {/* ------------------------------ the route --------------------------- */}
                 {/* The route renders only when a series actually has a
                     logged day — a record of notes alone would otherwise
-                    stand a head over a blank chart (M-134). */}
+                    stand a head over a blank chart (M-134). Until some
+                    path holds two logged days there is no line to draw,
+                    so the section collapses to a slim strip instead of
+                    standing a tall, mostly-empty chart (F-23, M-204). */}
                 {routeSeries.some((s) => s.path.logged > 0) ? (
                 <FeelIn as="section" className="at-section">
-                  <p className="at-sectionhead">The route · fourteen days, six paths</p>
+                  <SectionHead variant="atlas" title="The route · fourteen days, six paths" />
+                  {routeSeries.some((s) => s.path.lines.length > 0) ? (
+                    <>
                   <div className="at-route-scroll">
                     <svg
                       viewBox="0 0 720 230"
@@ -390,12 +406,18 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                     in a line is a day you didn't log, left empty on purpose; a dot on its own is a
                     single logged day, with nothing on either side of it yet.
                   </p>
+                    </>
+                  ) : (
+                    <div className="at-route-strip">
+                      <p>The route draws itself from your second logged day.</p>
+                    </div>
+                  )}
                 </FeelIn>
                 ) : null}
 
                 {/* ------------------------------ study field -------------------------- */}
                 <FeelIn as="section" className="at-section">
-                  <p className="at-sectionhead">Study · the field</p>
+                  <SectionHead variant="atlas" title="Study · the field" />
                   <StudyMap days={store.days} today={today} goal={store.goals.studyMinutes} />
                   {analysis.subjects.length > 0 ? (
                     <ul className="at-leaders">
@@ -415,7 +437,7 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
 
                 {/* ------------------------------- the deep read ---------------------- */}
                 <FeelIn as="section" className="at-section">
-                  <p className="at-sectionhead">Advanced · bright days against low ones</p>
+                  <SectionHead variant="atlas" title="Advanced · bright days against low ones" />
                   <p className="at-statement">{analysis.advanced.headline}</p>
                   <ul className="at-contrasts">
                     {analysis.advanced.contrasts.slice(0, 4).map((c) => {
@@ -458,7 +480,7 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                     to show — no head over an empty body (M-134). */}
                 {analysis.observations.length > 0 ? (
                   <FeelIn as="section" className="at-section">
-                    <p className="at-sectionhead">What the record shows</p>
+                    <SectionHead variant="atlas" title="What the record shows" />
                     <Observations
                       items={analysis.observations}
                       className="at-observations"
@@ -473,13 +495,13 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
 
                 {analysis.correlations.length > 0 ? (
                   <FeelIn as="section" className="at-section">
-                    <p className="at-sectionhead">What moves together</p>
+                    <SectionHead variant="atlas" title="What moves together" />
                     <Correlations items={analysis.correlations} />
                   </FeelIn>
                 ) : null}
 
                 <FeelIn as="section" className="at-section">
-                  <p className="at-sectionhead">Field notes · every entry</p>
+                  <SectionHead variant="atlas" title="Field notes · every entry" />
                   <HistoryTable days={store.days} analysis={analysis} onDelete={store.removeDay} />
                 </FeelIn>
               </>

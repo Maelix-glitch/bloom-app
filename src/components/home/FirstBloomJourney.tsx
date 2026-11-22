@@ -39,6 +39,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { GOAL_LABEL } from "@/lib/assessment/questions";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useHabits } from "@/hooks/useHabits";
@@ -225,22 +226,21 @@ export function FirstBloomJourney({
       data-testid="first-bloom-journey"
       aria-labelledby="first-bloom-title"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="home-eyebrow">First Bloom</p>
-          <h2 id="first-bloom-title" className="home-band-title mt-1">
-            One step at a time
-          </h2>
-          <p className="mt-1 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            {assessment.state.answers.goal
-              ? `Seven small steps toward ${GOAL_LABEL[assessment.state.answers.goal].toLowerCase()} — each one opens a part of Bloom.`
-              : "Seven small steps — each one opens a part of Bloom."}
+      <SectionHead
+        kicker="First Bloom"
+        title="One step at a time"
+        titleId="first-bloom-title"
+        subline={
+          assessment.state.answers.goal
+            ? `Seven small steps toward ${GOAL_LABEL[assessment.state.answers.goal].toLowerCase()} — each one opens a part of Bloom.`
+            : "Seven small steps — each one opens a part of Bloom."
+        }
+        right={
+          <p className="shrink-0 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
+            {journey.doneCount} of {journey.steps.length}
           </p>
-        </div>
-        <p className="shrink-0 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
-          {journey.doneCount} of {journey.steps.length}
-        </p>
-      </div>
+        }
+      />
 
       {/* The path itself: stations on a hairline, the LevelCard
           stepper's language — done is gold-filled, the current step

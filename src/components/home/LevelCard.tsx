@@ -22,6 +22,7 @@
 import { Link } from "@tanstack/react-router";
 import { Sprout } from "lucide-react";
 
+import { SectionHead } from "@/components/ui/SectionHead";
 import { useWallet } from "@/hooks/useWallet";
 import { formatPoints } from "@/lib/progression/format";
 import { journeyRanks, rankFor } from "@/lib/progression/ranks";
@@ -81,12 +82,11 @@ export function LevelCard() {
       aria-labelledby="home-level-title"
       data-testid="home-level-card"
     >
-      <div>
-        <p className="home-eyebrow">Growth</p>
-        <h2 id="home-level-title" className="home-band-title mt-1">
-          {wallet.loading ? "Your journey" : `${model.nextName} is next`}
-        </h2>
-      </div>
+      <SectionHead
+        kicker="Growth"
+        title={wallet.loading ? "Your journey" : `${model.nextName} is next`}
+        titleId="home-level-title"
+      />
 
       <div className="mt-6">
         <div className="flex items-center gap-2 text-gold">

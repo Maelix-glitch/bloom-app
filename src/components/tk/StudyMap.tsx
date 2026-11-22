@@ -1,9 +1,15 @@
 /**
- * StudyMap — twelve weeks of study, one cell per day.
+ * StudyMap — the weeks of study that exist, one cell per day.
  *
  * Colour is how much was logged against the goal, not against other people:
  * four shades from "logged something" to "well past the target". Empty days
  * stay empty.
+ *
+ * The field spans from the week of the record's first day to this week,
+ * capped at twelve weeks (Final Audit F-23, M-204): a young record used
+ * to draw twelve weeks of grey squares for a handful of real days, and
+ * the emptiness read as the product. Weeks that don't exist yet aren't
+ * drawn; the field grows as the record does.
  */
 
 import { addDays, diffDays, formatDateShort } from "@/lib/cycle/predict";
@@ -32,10 +38,23 @@ export function StudyMap({
   const byDate = new Map(days.map((d) => [d.date, d]));
   const study = trackerDef("study");
 
-  /* Start from the Sunday twelve weeks back so columns are whole weeks. */
+  /* Start from the Sunday of the week the record begins, so rows are
+     whole weeks — and never more than twelve weeks back. */
   const last = new Date(`${today}T00:00:00`);
-  const back = WEEKS * 7 - 1;
-  const start = addDays(today, -back - last.getDay());
+  const floorStart = addDays(today, -(WEEKS * 7 - 1) - last.getDay());
+  const firstDate = days.reduce<string | null>(
+    (acc, d) => (acc === null || d.date < acc ? d.date : acc),
+    null,
+  );
+  let start = floorStart;
+  if (firstDate !== null) {
+    const first = new Date(`${firstDate}T00:00:00`);
+    const recordStart = addDays(firstDate, -first.getDay());
+    if (recordStart > floorStart) start = recordStart;
+  }
+  const weekCount = Math.floor(diffDays(start, today) / 7) + 1;
+  const weeksLabel =
+    weekCount >= WEEKS ? "Twelve weeks" : weekCount === 1 ? "One week" : `${weekCount} weeks`;
 
   const cells: { date: string; minutes: number; level: number; today: boolean }[] = [];
   for (let i = 0; i < WEEKS * 7; i += 1) {
@@ -56,7 +75,7 @@ export function StudyMap({
       <div
         className="tk-heat"
         role="img"
-        aria-label={`Twelve weeks of study. ${cells.filter((c) => c.minutes > 0).length} of the last ${cells.length} days have sessions logged.`}
+        aria-label={`${weeksLabel} of study. ${cells.filter((c) => c.minutes > 0).length} of the last ${cells.length} days have sessions logged.`}
       >
         {cells.map((cell) => (
           <i

@@ -10,6 +10,7 @@
 
 import { useMemo } from "react";
 
+import { SectionHead } from "@/components/ui/SectionHead";
 import { useAssessment } from "@/hooks/useAssessment";
 import { buildRecoverySnapshot, recoveryLines } from "@/lib/recovery/recovery";
 import type { DayEntry } from "@/lib/trackers/core";
@@ -40,7 +41,7 @@ export function SleepRecoverySection({
 
   return (
     <section className="at-section" aria-label="Sleep and recovery">
-      <p className="at-sectionhead">Sleep · recovery</p>
+      <SectionHead variant="atlas" title="Sleep · recovery" />
       <p className="at-statement">{snapshot.recovery.label}</p>
       <ul className="at-finelist">
         {shown.map((line, i) => (

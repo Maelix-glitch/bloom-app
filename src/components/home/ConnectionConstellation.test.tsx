@@ -176,8 +176,17 @@ describe("ConnectionConstellationView — the Orbit", () => {
     const { container } = renderView();
     const sleep = screen.getByRole("button", { name: /Sleep, logged on 18/ });
     fireEvent.click(sleep);
-    expect(container.querySelector(".orbit-panel")?.textContent).toContain(
+    /* Re-contracted by M-204 (F-12): the panel no longer repeats the
+       headline's sentence — the finding is stated ONCE, as the section
+       headline, and the panel carries its figures and basis. */
+    expect(container.querySelector(".orbit-panel")?.textContent).not.toContain(
       "Mood tends to run higher after longer sleep",
+    );
+    expect(container.querySelector(".orbit-headline")?.textContent).toBe(
+      "Mood tends to run higher after longer sleep",
+    );
+    expect(container.querySelector(".orbit-panel")?.textContent).toContain(
+      "From 21 paired days · last 56 days",
     );
     const habits = screen.getByRole("button", { name: /Habits, logged on 9/ });
     fireEvent.click(habits);

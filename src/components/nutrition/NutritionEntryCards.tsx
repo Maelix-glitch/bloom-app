@@ -13,6 +13,7 @@ import { Link } from "@tanstack/react-router";
 
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { Button } from "@/components/ui/button";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { useNutrition } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
 import { fmtCount, fmtGrams, fmtKcalApprox } from "@/lib/format";
@@ -106,22 +107,32 @@ export function NutritionTodayCard() {
 
   return (
     <section className="home-band" aria-labelledby="home-nutrition-title">
-      <div className="flex items-start gap-3 px-2 pb-3 pt-2">
-        <span
-          aria-hidden
-          className="grid size-10 shrink-0 place-items-center rounded-full bg-gold/10 text-gold"
-        >
-          <BloomIcon name="nutrition" size={18} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="home-eyebrow">Nutrition</p>
-          <h2 id="home-nutrition-title" className="home-band-title mt-1">
-            {hasData
-              ? targets
-                ? `${fmtCount(totals.kcal)} of your ${fmtKcalApprox(targets.kcal)} target`
-                : `${Math.round(totals.kcal)} kcal logged today`
-              : "What did you eat today?"}
-          </h2>
+      <div
+        className={
+          hasData
+            ? "grid gap-6 px-2 pb-3 pt-2 lg:grid-cols-[minmax(0,1fr)_minmax(0,19rem)]"
+            : "px-2 pb-3 pt-2"
+        }
+      >
+        <div className="flex items-start gap-3">
+          <span
+            aria-hidden
+            className="grid size-10 shrink-0 place-items-center rounded-full bg-gold/10 text-gold"
+          >
+            <BloomIcon name="nutrition" size={18} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <SectionHead
+              kicker="Nutrition"
+              title={
+                hasData
+                  ? targets
+                    ? `${fmtCount(totals.kcal)} of your ${fmtKcalApprox(targets.kcal)} target`
+                    : `${Math.round(totals.kcal)} kcal logged today`
+                  : "What did you eat today?"
+              }
+              titleId="home-nutrition-title"
+            />
           {/* The plan's next step, from the stored plan and the real
               log (M-123) — the card names what is next, not just that
               food exists. */}
@@ -145,12 +156,40 @@ export function NutritionTodayCard() {
               ? `${summaryLine(count, totals.kcal, totals.proteinG)}. Every value carries its source — USDA data, your labels, or a marked estimate.`
               : "Log meals and see them against your daily target. Every value is labelled with where it came from — nothing is presented as more certain than it is."}
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-2">
-            <Button type="button" size="sm" asChild>
-              <Link to="/nutrition">{hasData ? "Open Nutrition" : "Log food"}</Link>
-            </Button>
+            <div className="mt-3 flex flex-wrap items-center gap-2">
+              <Button type="button" size="sm" asChild>
+                <Link to="/nutrition">{hasData ? "Open Nutrition" : "Log food"}</Link>
+              </Button>
+            </div>
           </div>
         </div>
+        {/* F-02 (M-204): the band is wide; with food logged, the day's
+            figures stand in a second balanced column instead of the
+            band's right half standing empty. Every figure is read
+            from the same comparison the title and summary use —
+            nothing new is computed. */}
+        {hasData ? (
+          <dl className="home-nutrition-figures grid content-start gap-4 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-6 lg:pt-0">
+            <div>
+              <dt className="text-[length:var(--text-meta)] text-muted-foreground">Energy</dt>
+              <dd className="mt-1 font-display text-[22px] leading-tight text-foreground">
+                {fmtCount(totals.kcal)} kcal
+              </dd>
+              <p className="mt-0.5 text-[length:var(--text-meta)] text-muted-foreground">
+                {targets ? `of your ${fmtKcalApprox(targets.kcal)} target` : "logged today"}
+              </p>
+            </div>
+            <div>
+              <dt className="text-[length:var(--text-meta)] text-muted-foreground">Protein</dt>
+              <dd className="mt-1 font-display text-[22px] leading-tight text-foreground">
+                {fmtGrams(totals.proteinG)} g
+              </dd>
+              <p className="mt-0.5 text-[length:var(--text-meta)] text-muted-foreground">
+                {targets ? `of ${fmtGrams(targets.proteinG)} g target` : "logged today"}
+              </p>
+            </div>
+          </dl>
+        ) : null}
       </div>
     </section>
   );
@@ -177,14 +216,26 @@ export function NutritionProfileCard() {
           <h2 className="pf-title">Food &amp; your target</h2>
         </div>
       </div>
-      <p className="max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-        What you eat, logged against the day — USDA reference values, your own packet labels,
-        and Coach estimates, each labelled as what it is. {statusLine}
-      </p>
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-        <Button type="button" size="sm" asChild>
-          <Link to="/nutrition">{hasData ? "Open Nutrition" : "Log your first food"}</Link>
-        </Button>
+      {/* F-02 (M-204): the card is wide and its words are short — the
+          provenance sentence takes the left column, the day's status
+          and the action take the right, so the card is composed
+          across its width. The words themselves are unchanged; the
+          status sentence simply stands in its own column now. */}
+      <div className="pf-nutrition-cols mt-4 grid gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] sm:gap-8">
+        <p className="max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+          What you eat, logged against the day — USDA reference values, your own packet labels,
+          and Coach estimates, each labelled as what it is.
+        </p>
+        <div>
+          <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+            {statusLine}
+          </p>
+          <div className="mt-4 flex flex-wrap items-center gap-2">
+            <Button type="button" size="sm" asChild>
+              <Link to="/nutrition">{hasData ? "Open Nutrition" : "Log your first food"}</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     </div>
   );

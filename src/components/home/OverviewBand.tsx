@@ -23,6 +23,7 @@
  * The synthesis still computes the priority; Today no longer renders it.
  */
 
+import { SectionHead } from "@/components/ui/SectionHead";
 import type { OverviewSynthesis } from "@/lib/overview/synthesis";
 import { CountUp } from "./CountUp";
 import { DeltaPill } from "./DeltaPill";
@@ -143,12 +144,11 @@ export function ChangesCard({ overview, ready }: { overview: OverviewSynthesis; 
       aria-labelledby="home-changes-title"
       aria-busy={!ready}
     >
-      <div>
-        <p className="home-eyebrow">What changed</p>
-        <h2 id="home-changes-title" className="home-band-title mt-1">
-          Momentum, week over week
-        </h2>
-      </div>
+      <SectionHead
+        kicker="What changed"
+        title="Momentum, week over week"
+        titleId="home-changes-title"
+      />
       {ready ? (
         changes.note ? (
           <p className="mt-4 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">

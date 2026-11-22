@@ -52,6 +52,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 
+import { SectionHead } from "@/components/ui/SectionHead";
 import { useTrackers } from "@/hooks/useTrackers";
 import { setPref } from "@/lib/prefs";
 import { usePrefValue } from "@/lib/prefsStore";
@@ -352,11 +353,7 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
 
   return (
     <section className="nut-card nut-rise section nut-care" aria-label="Your whole day">
-      <div className="section-head">
-        <div className="section-head__main">
-          <h2 className="section-head__title">Your whole day</h2>
-        </div>
-      </div>
+      <SectionHead title="Your whole day" />
       <p className="nut-note">
         Sleep, movement and the evening — set from the same numbers as your plan.
       </p>

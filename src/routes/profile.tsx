@@ -17,6 +17,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ChapterMark } from "@/components/ui/ChapterMark";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Archive, Pin, Plus, Sparkles } from "lucide-react";
 import { toast } from "sonner";
@@ -583,6 +584,12 @@ function ProfilePage() {
                   margin and met a large empty band before Your health. */}
               <GettingStartedCard />
 
+              {/* Chapter signposts (F-42, M-204): the page is a long
+                  stack of blocks; three quiet markers name its
+                  chapters — health, record, story — above the groups
+                  they gather. Same content, same order. */}
+              <ChapterMark label="Your health" className="mt-12" />
+
               {/* Health (Plan B): the health content grouped as health,
                   under one named region — the assessment and its
                   starting point, nutrition, and lab reports. The
@@ -617,6 +624,8 @@ function ProfilePage() {
                   <LabReportsSection />
                 </section>
               </section>
+
+              <ChapterMark label="Your record" className="mt-12" />
 
               {/* the record: 12 weeks + what's being tracked */}
               <section
@@ -677,6 +686,8 @@ function ProfilePage() {
                   </div>
                 </div>
               </section>
+
+              <ChapterMark label="Your story" className="mt-12" />
 
               {/* featured — the pinned post */}
               <section

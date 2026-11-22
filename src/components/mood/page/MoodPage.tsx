@@ -72,6 +72,8 @@ import { longDate } from "@/lib/home/today";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import type { BloomAccent } from "@/lib/profile/types";
 
+import { SectionHead as SharedSectionHead } from "@/components/ui/SectionHead";
+
 import { MOOD_LABELS, MoodBlob } from "./MoodBlob";
 import "@/styles/mood.css";
 import { MoodJourneyChart } from "./MoodJourneyChart";
@@ -433,6 +435,12 @@ function Hero({
 
 /* ------------------------------ section head ------------------------------ */
 
+/**
+ * The Mood page's panel head — a delegate to the one shared
+ * SectionHead (Final Audit F-17, M-204), with the panel's gold glyph
+ * seated in the shared component's icon slot and its action in the
+ * right slot. Same words, one treatment.
+ */
 function SectionHead({
   icon: Icon,
   title,
@@ -445,20 +453,12 @@ function SectionHead({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-start gap-5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-      <div className="flex min-w-0 items-start gap-3.5">
-        <Icon className="mt-1 h-5 w-5 shrink-0 text-gold" strokeWidth={1.5} />
-        <div className="min-w-0">
-          <h2 className="font-display text-xl leading-tight text-foreground sm:text-[1.75rem]">
-            {title}
-          </h2>
-          {subtitle ? (
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{subtitle}</p>
-          ) : null}
-        </div>
-      </div>
-      {action ? <div className="shrink-0">{action}</div> : null}
-    </div>
+    <SharedSectionHead
+      icon={<Icon className="h-5 w-5" strokeWidth={1.5} />}
+      title={title}
+      subline={subtitle}
+      right={action}
+    />
   );
 }
 
@@ -814,6 +814,10 @@ function QuickInsights({
 
 /* ---------------------------------- streak -------------------------------- */
 
+/** The streak panel's subtitle — also streakLine's resting sentence,
+ *  which is exactly why the panel must carry it only once (F-12). */
+const STREAK_SUBTITLE = "Small check-ins, kept up gently.";
+
 function Streak({
   streak,
   dots,
@@ -843,7 +847,7 @@ function Streak({
         <SectionHead
           icon={Zap}
           title="Streak & consistency"
-          subtitle="Small check-ins, kept up gently."
+          subtitle={STREAK_SUBTITLE}
         />
 
         <div className="mt-10 grid gap-10 sm:grid-cols-2 sm:gap-12 sm:divide-x sm:divide-border">
@@ -872,9 +876,15 @@ function Streak({
           </div>
 
           <div className="sm:pl-12">
-            <p className="max-w-xs text-sm leading-relaxed text-foreground/85 sm:text-base">
-              {line}
-            </p>
+            {/* F-12 (M-204): streakLine's resting sentence IS the
+                panel's subtitle — when the line repeats it, the
+                subtitle alone carries it (the sentence stays on the
+                card exactly once). Any other line renders here. */}
+            {line !== STREAK_SUBTITLE ? (
+              <p className="max-w-xs text-sm leading-relaxed text-foreground/85 sm:text-base">
+                {line}
+              </p>
+            ) : null}
             <div className="mt-6 flex items-center gap-3 text-gold">
               {delta === null ? (
                 <span className="text-sm text-muted-foreground">

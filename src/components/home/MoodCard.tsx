@@ -31,6 +31,7 @@
 import { MOOD_LABELS, MoodBlob } from "@/components/mood/page/MoodBlob";
 import { PAGE_MOODS, faceForEntry, type PageMood } from "@/lib/mood/page";
 import type { MoodEntry } from "@/lib/mood/types";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { cn } from "@/lib/utils";
 
 /** The prototype's mood tones, mapped onto Bloom's faces (see header). */
@@ -70,10 +71,13 @@ export function MoodCard({
           faces to the bottom across a dead void. */}
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
         <div className="min-w-0 flex-1">
-          <p className="home-eyebrow">Check-in</p>
-          <h2 id="home-mood-title" className="home-band-title mt-1">
-            {selected ? `Feeling ${MOOD_LABELS[selected].toLowerCase()}.` : "How does today feel?"}
-          </h2>
+          <SectionHead
+            kicker="Check-in"
+            title={
+              selected ? `Feeling ${MOOD_LABELS[selected].toLowerCase()}.` : "How does today feel?"
+            }
+            titleId="home-mood-title"
+          />
           <p className="mt-3 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             {selected
               ? "Logged — thank you. Tap a face to change it, any time today."

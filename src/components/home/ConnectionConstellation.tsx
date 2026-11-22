@@ -43,6 +43,7 @@ import {
 } from "lucide-react";
 
 import { BloomLogo } from "@/components/BloomLogo";
+import { SectionHead } from "@/components/ui/SectionHead";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useHabits } from "@/hooks/useHabits";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
@@ -324,22 +325,19 @@ export function ConnectionConstellationView({
         if (e.key === "Escape") setHot(null);
       }}
     >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h2 id="home-constellation-title" className="home-band-title">
-            How your days connect
-          </h2>
-          <p className="mt-1.5 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            Links appear only when your own logs show them.
-          </p>
-        </div>
-        <span
-          className="home-chip shrink-0 text-[length:var(--text-meta)] text-faint-strong"
-          data-metric="orbit-days"
-        >
-          {plural(loggedDays, "day")} with any log · last {WINDOW_DAYS} days
-        </span>
-      </div>
+      <SectionHead
+        title="How your days connect"
+        titleId="home-constellation-title"
+        subline="Links appear only when your own logs show them."
+        right={
+          <span
+            className="home-chip shrink-0 text-[length:var(--text-meta)] text-faint-strong"
+            data-metric="orbit-days"
+          >
+            {plural(loggedDays, "day")} with any log · last {WINDOW_DAYS} days
+          </span>
+        }
+      />
 
       {/* the finding, as the section's headline — above the figure,
           never a caption under it (M-109) */}
@@ -442,7 +440,16 @@ export function ConnectionConstellationView({
                   <h3 className="orbit-panel-title">{panel.title}</h3>
                   {panel.badge ? <span className="orbit-badge">{panel.badge}</span> : null}
                 </div>
-                {panel.text ? <p className="orbit-panel-text">{panel.text}</p> : null}
+                {/* F-12 (M-204): the section states its finding once,
+                    in the headline above the figure. When the panel's
+                    sentence IS that headline (the strongest link, or
+                    the node whose strongest link it is), the panel
+                    carries the title, badge, figures and basis — the
+                    sentence itself is not repeated under it. Any other
+                    selection's sentence renders here as before. */}
+                {panel.text && panel.text !== headline ? (
+                  <p className="orbit-panel-text">{panel.text}</p>
+                ) : null}
                 {panel.figures ? (
                   <dl className="orbit-figures">
                     {panel.figures.map((f) => (
@@ -580,14 +587,11 @@ export function ConnectionConstellationEmpty() {
       aria-labelledby="home-constellation-title"
       data-testid="home-constellation-empty"
     >
-      <div>
-        <h2 id="home-constellation-title" className="home-band-title">
-          How your days connect
-        </h2>
-        <p className="mt-1.5 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-          Links appear only when your own logs show them.
-        </p>
-      </div>
+      <SectionHead
+        title="How your days connect"
+        titleId="home-constellation-title"
+        subline="Links appear only when your own logs show them."
+      />
 
       <div className="orbit orbit--ghost mt-2" aria-hidden="true">
         <span className="orbit-medallion orbit-medallion--ghost">
