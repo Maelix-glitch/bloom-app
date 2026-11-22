@@ -7,7 +7,10 @@
  * RPC (see lib/profile/userSearchService): only profiles their owners
  * made public can appear, the searcher never sees themselves, and the
  * blue tick beside a name is the `account_verifications` record — the
- * same truth as the hero's badge, never a decoration.
+ * same truth as the hero's badge, never a decoration. The member
+ * badges beside it (M-209) ride the same RPC and the same rule: the
+ * trainer row and the granted `member_badges` rows, derived in
+ * lib/profile/badges — never decoration either.
  *
  * A row with a @username opens that person's public profile (/@username
  * is a real route); a row without one has no page to open, so it is
@@ -22,6 +25,7 @@ import { Loader2, Search, SearchX, WifiOff } from "lucide-react";
 
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet, SheetBody, SheetItem } from "@/components/ui/bloom-sheet";
+import { MemberBadges } from "@/components/profile/MemberBadges";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 import {
@@ -214,6 +218,7 @@ function SearchResultRow({
             size={15}
             className="shrink-0"
           />
+          <MemberBadges badges={person.badges} size="sm" />
         </span>
         {person.username ? (
           <span className="mono mt-0.5 block truncate text-[length:var(--text-caption)] text-faint">

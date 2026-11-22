@@ -32,8 +32,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { formatRemaining } from "@/lib/profile/journey";
+import type { MemberBadge } from "@/lib/profile/badges";
 import type { ProfileIdentity } from "@/lib/profile/types";
 import type { VerificationStatus } from "@/lib/profile/verification";
+import { MemberBadges } from "@/components/profile/MemberBadges";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { StoryRing } from "@/components/profile/StoryRing";
 import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
@@ -139,6 +141,7 @@ export function ProfileHero({
   isSignedIn = true,
   rankPill = null,
   verification = null,
+  badges = [],
 }: {
   identity: ProfileIdentity;
   story: HeroStoryState;
@@ -173,6 +176,13 @@ export function ProfileHero({
    * decoration, and never from a hand-set boolean.
    */
   verification?: VerificationStatus | null;
+  /**
+   * The member badges (see lib/profile/badges), derived from the
+   * stored facts by the caller. The pills render beside the tick only
+   * for badges actually held — the component renders nothing for an
+   * empty list.
+   */
+  badges?: readonly MemberBadge[];
 }) {
   const ringState: "none" | "unseen" | "seen" | "prompt" =
     story.count > 0 ? (story.unseen > 0 ? "unseen" : "seen") : "prompt";
@@ -321,6 +331,7 @@ export function ProfileHero({
                   className="ml-2 inline-flex translate-y-[-2px] align-middle"
                 />
               ) : null}
+              <MemberBadges badges={badges} className="ml-2" />
               {rankPill}
             </h1>
             <div className="pf-handle">

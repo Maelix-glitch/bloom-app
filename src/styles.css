@@ -3661,6 +3661,50 @@ html[data-bloom-effect="fx-mist"] {
   border-color: color-mix(in oklab, var(--rank-tone, var(--gold)) 55%, transparent);
 }
 
+/* Member badges (M-209) — the labelled pills beside the verified tick:
+   Founder (gold), Trainer (sage), Tester (rose). The RankPill recipe
+   above in each badge's own tone: a 9% tinted ground, a 34% mixed
+   border, and text mixed from the tone toward the foreground — the
+   house chip pairing. Mono uppercase at the micro step, like the rank
+   pill they sit beside, so a badge never outweighs the name it
+   follows. Global (not profile.css) because the rail shows them on
+   every page. */
+.mb-badges {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.mb-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.6rem;
+  border-radius: var(--radius-pill);
+  border: 1px solid color-mix(in oklab, var(--mb-tone, var(--gold)) 34%, transparent);
+  background: color-mix(in oklab, var(--mb-tone, var(--gold)) 9%, transparent);
+  color: color-mix(in oklab, var(--mb-tone, var(--gold)) 84%, var(--foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1.4;
+  white-space: nowrap;
+}
+.mb-badge--founder {
+  --mb-tone: var(--gold);
+}
+.mb-badge--trainer {
+  --mb-tone: var(--sage);
+}
+.mb-badge--tester {
+  --mb-tone: var(--rose);
+}
+.mb-badges--sm .mb-badge {
+  padding: 0.1rem var(--space-2);
+}
+
 /* ---------------------------------------------------------------------------
  * App shell — the last 5% that makes the installed PWA / wrapper feel native.
  * Only affects behaviour, never layout: safe areas are already handled where
