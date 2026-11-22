@@ -65,6 +65,8 @@ export function StudyMap({
     cells.push({ date, minutes, level: level(minutes, goal), today: date === today });
   }
 
+  const loggedDays = cells.filter((c) => c.minutes > 0).length;
+
   return (
     <div>
       <div className="tk-heat-axis" aria-hidden="true">
@@ -75,7 +77,7 @@ export function StudyMap({
       <div
         className="tk-heat"
         role="img"
-        aria-label={`${weeksLabel} of study. ${cells.filter((c) => c.minutes > 0).length} of the last ${cells.length} days have sessions logged.`}
+        aria-label={`${weeksLabel} of study. ${loggedDays} of the last ${cells.length} days ${loggedDays === 1 ? "has" : "have"} sessions logged.`}
       >
         {cells.map((cell) => (
           <i

@@ -809,6 +809,31 @@
   height: 2px;
 }
 
+/* M-207: the day a thread enters, named once — the thread's only date
+   cue, so the once-per-day attribution (M-205) reads as a new day
+   starting in a resumed multi-day thread, not as a repeated caption. */
+.coach-day-divider {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin: var(--space-5) 0 var(--space-1);
+  font-size: var(--text-meta);
+  color: var(--faint-strong);
+  letter-spacing: var(--tracking-body);
+}
+
+.coach-day-divider::before,
+.coach-day-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+}
+
+.coach-day-divider:first-child {
+  margin-top: 0;
+}
+
 .coach-thread-center {
   display: flex;
   flex-direction: column;
