@@ -337,3 +337,17 @@
     align-items: flex-start;
   }
 }
+
+/* ------------------------------------------------- M-202 (Final Audit Slice 1) */
+/* F-03: the paywall footer's zone — the shell's .bsheet-foot carries
+   the strip (bloom-sheet.css); this carries its inset, matching the
+   .bill-stack padding it used to ride inside. */
+.bill-foot-zone {
+  padding: var(--space-4) var(--space-6) var(--space-6);
+}
+
+/* F-11: the Monthly/Yearly switch meets the 44px touch floor.
+   Pinned in touch.guard (M-202). */
+.bill-toggle button {
+  min-height: 44px;
+}

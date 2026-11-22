@@ -15,6 +15,7 @@ import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 import { BloomLogo } from "@/components/BloomLogo";
 import { NotificationBell } from "@/components/notifications/NotificationCenter";
 import { PointsChip } from "@/components/system/PointsChip";
+import { Skeleton } from "@/components/ui/skeleton";
 import { RailPointsCard } from "@/components/home/RailPointsCard";
 
 /**
@@ -210,27 +211,31 @@ function RailProfile() {
     username: id.username,
     hasRecord: id.verification.hasRecord,
   });
-  // While the session is still restoring, the name holds the same neutral
-  // placeholder the tagline below already uses — painting "Sign in" here
-  // flashed guest copy at signed-in users on every cold load.
+  // While the session is still restoring, the name holds a skeleton bar
+  // (M-202, F-01) — painting "Sign in" here flashed guest copy at
+  // signed-in users on every cold load, and an ellipsis reads as a
+  // broken label rather than a loading state.
+  const namePending = !signedIn && id.status === "checking";
   const name = signedIn
     ? (id.displayName ?? "Your profile")
     : id.status === "checking"
-      ? "…"
+      ? null
       : "Sign in";
-  /* The plan line: the real entitlement's plan name. While it loads,
-     the neutral ellipsis; when billing is unavailable the row falls
+  /* The plan line: the real entitlement's plan name. While it loads, a
+     skeleton bar in its slot; when billing is unavailable the row falls
      back to the member's @username rather than inventing a plan. */
+  const linePending =
+    (signedIn && entitlement.kind === "loading") || (!signedIn && id.status === "checking");
   const line = signedIn
     ? entitlement.kind === "loading"
-      ? "…"
+      ? null
       : entitlement.kind === "ready"
         ? PLANS[entitlement.entitlement.tier].name
         : id.username
           ? `@${id.username}`
           : "Bloom account"
     : id.status === "checking"
-      ? "…"
+      ? null
       : "Sync across your devices";
   return (
     <div className="app-sidebar-profile relative flex items-center gap-3 px-5 py-4">
@@ -250,11 +255,19 @@ function RailProfile() {
         </span>
         <span className="min-w-0">
           <span className="flex items-center gap-1.5 text-[length:var(--text-callout)] font-medium leading-[var(--leading-callout)] text-foreground">
-            <span className="truncate">{name}</span>
+            {namePending ? (
+              <Skeleton className="inline-block h-[0.95em] w-24" aria-hidden />
+            ) : (
+              <span className="truncate">{name}</span>
+            )}
             {signedIn ? <VerifiedBadge status={verification} size={14} tone="gold" /> : null}
           </span>
           <span className="block truncate text-[length:var(--text-caption)] leading-[var(--leading-caption)] text-muted-foreground">
-            {line}
+            {linePending ? (
+              <Skeleton className="inline-block h-[0.95em] w-16" aria-hidden />
+            ) : (
+              line
+            )}
           </span>
         </span>
       </Link>

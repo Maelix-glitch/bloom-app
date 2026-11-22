@@ -28,7 +28,7 @@ export function PhotoCreditsSheet({
 }) {
   return (
     <BloomSheet open={open} onClose={onClose} title="Photo credits" size="lg" className="nut-sheet">
-      <div className="flex max-h-[82vh] flex-col px-5 pb-6 pt-6 sm:px-7">
+      <div className="flex min-h-0 flex-1 flex-col px-5 pb-6 pt-6 sm:px-7">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
@@ -49,7 +49,7 @@ export function PhotoCreditsSheet({
           page to see the photograph in full and check its licence.
         </p>
 
-        <ul className="no-scrollbar mt-5 min-h-0 flex-1 divide-y divide-border-subtle overflow-y-auto pr-1">
+        <ul className="bsheet-scroll no-scrollbar mt-5 divide-y divide-border-subtle pr-1">
           {FOOD_PHOTO_CREDITS.map((credit) => (
             <li key={credit.foodId} className="nut-credit">
               <FoodPhoto foodId={credit.foodId} name={credit.foodName} />

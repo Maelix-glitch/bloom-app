@@ -643,7 +643,7 @@ export function ProfileEditor({
                     <div className="mt-3 flex justify-end">
                       <button
                         type="button"
-                        className="bsheet-ghost h-8 px-3 text-[length:var(--text-caption)]"
+                        className="bsheet-ghost px-3 text-[length:var(--text-caption)]"
                         onClick={() => setPhotoOpen(false)}
                       >
                         {pending ? "Done" : "Close"}
@@ -705,7 +705,7 @@ export function ProfileEditor({
                   <button
                     type="button"
                     onClick={() => void handleSave()}
-                    className="bsheet-ghost h-8 px-3 text-[length:var(--text-caption)]"
+                    className="bsheet-ghost px-3 text-[length:var(--text-caption)]"
                   >
                     Try again
                   </button>

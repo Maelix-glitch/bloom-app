@@ -2944,3 +2944,56 @@
     height: 24px;
   }
 }
+
+/* ------------------------------------------------- M-202 touch floor */
+/*
+ * Final Audit Slice 1 (F-11): the Stories editor's sub-44px controls
+ * meet the 44px touch floor. Text chips and tabs grow by min-height;
+ * the glyph-sized chips and buttons keep their drawn size and grow an
+ * invisible ::after tap area — extending the pattern .sv-icon-btn and
+ * .se-rz already use (theirs are pinned as the compliant examples).
+ * Appended last so the floors win. Pinned in touch.guard (M-202).
+ */
+.se-tab {
+  min-height: 44px;
+}
+.se-mini-btn {
+  min-height: 44px;
+}
+.se-palette-chip {
+  min-height: 44px;
+}
+.se-mask-chip,
+.se-frame-chip {
+  position: relative;
+}
+.se-mask-chip::after,
+.se-frame-chip::after {
+  content: "";
+  position: absolute;
+  inset: -7px -9px;
+}
+.se-op-btn {
+  position: relative;
+}
+.se-op-btn::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}
+.se-slide-chip {
+  position: relative;
+}
+.se-slide-chip::after {
+  content: "";
+  position: absolute;
+  inset: -10px -8px;
+}
+.se-slide-btn {
+  position: relative;
+}
+.se-slide-btn::after {
+  content: "";
+  position: absolute;
+  inset: -9px;
+}

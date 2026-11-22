@@ -12,13 +12,15 @@
  * has covered (`intoRank / span`), and the "next level" is whatever rank
  * actually follows the current one, named ladder or cycle season alike.
  *
- * While the account balance is still loading the card shows the same
- * neutral dash the chip does — never the provisional device number.
+ * While the account balance is still loading the card holds its shape
+ * with skeleton bars in the number slots (M-202, F-01) — never the
+ * provisional device number, and no dash standing in for a figure.
  */
 
 import { Link } from "@tanstack/react-router";
 import { Sparkles } from "lucide-react";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { useWallet } from "@/hooks/useWallet";
 import { formatPoints } from "@/lib/progression/format";
 import { rankFor } from "@/lib/progression/ranks";
@@ -68,14 +70,22 @@ export function RailPointsCard() {
         <span className="flex items-center gap-2">
           <Sparkles className="size-3.5 text-primary" strokeWidth={1.8} aria-hidden />
           <span className="text-[length:var(--text-body)] font-semibold tabular-nums leading-[var(--leading-tight)] text-foreground">
-            {wallet.loading ? "—" : formatPoints(wallet.balance)}
+            {wallet.loading ? (
+              <Skeleton className="inline-block h-[0.95em] w-14 align-[-0.12em]" aria-hidden />
+            ) : (
+              formatPoints(wallet.balance)
+            )}
           </span>
           <span className="text-[length:var(--text-support)] leading-[var(--leading-tight)] text-muted-foreground">
             points
           </span>
         </span>
         <span className="text-[length:var(--text-meta)] tabular-nums leading-[var(--leading-tight)] text-faint-strong">
-          {wallet.loading ? "—" : `${model.pct}%`}
+          {wallet.loading ? (
+            <Skeleton className="inline-block h-[0.95em] w-8 align-[-0.12em]" aria-hidden />
+          ) : (
+            `${model.pct}%`
+          )}
         </span>
       </div>
       <div className="rail-points-track mt-3" aria-hidden="true">
@@ -84,8 +94,13 @@ export function RailPointsCard() {
           style={{ width: wallet.loading ? "0%" : `${model.pct}%` }}
         />
       </div>
-      <p className="mt-2 text-[length:var(--text-meta)] leading-[var(--leading-meta)] text-faint-strong">
-        Next level · {wallet.loading ? "…" : model.nextName}
+      <p className="mt-2 flex items-center gap-1.5 text-[length:var(--text-meta)] leading-[var(--leading-meta)] text-faint-strong">
+        <span>Next level ·</span>
+        {wallet.loading ? (
+          <Skeleton className="inline-block h-[0.95em] w-20" aria-hidden />
+        ) : (
+          <span>{model.nextName}</span>
+        )}
       </p>
     </Link>
   );

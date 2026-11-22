@@ -644,3 +644,18 @@
 .coach-orb-panel[data-reduced-motion="true"] .coach-orb-stage-pulse {
   animation: none;
 }
+
+/* ------------------------------------------------- M-202 touch floor */
+/*
+ * Final Audit Slice 1 (F-11): the orb panel's icon button keeps its
+ * drawn 34px and grows an invisible ::after tap area to the 44px
+ * floor. Pinned in touch.guard (M-202).
+ */
+.coach-orb-icon-btn {
+  position: relative;
+}
+.coach-orb-icon-btn::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+}

@@ -570,3 +570,65 @@ describe("sheet guard: tracker target units never wrap mid-phrase", () => {
     expect(someBlock("styles/trackers.css", ".tk2-unit", "white-space: nowrap")).toBe(true);
   });
 });
+
+/*
+ * M-202 (Final Audit Slice 1) — F-03, the dialog-clipping BLOCKER.
+ *
+ * Three sightings, one mechanism: the Membership dialog and the
+ * paywall (one component, PaywallSheet) ended inside the scroll region,
+ * so at the panel cap the last line sat sliced at the fold with the
+ * scrollbar hidden and no cue; the Assessment summary hand-rolled its
+ * own max-h-[82vh] body instead of the panel's cap. The family fix:
+ *   1. .bsheet-scroll carries a fold cue — surface-tone covers that
+ *      travel with the content (background-attachment: local) over
+ *      fixed edge shadows, so an edge shows a shadow exactly while
+ *      more content lies beyond it;
+ *   2. .bsheet-foot is the shell's always-visible footer zone
+ *      (flex-none, on the same opaque var(--surface) slab) for words
+ *      that must never go under the fold — the paywall's closing line
+ *      lives there now;
+ *   3. sheet bodies ride the family contract (panel cap + .bsheet-scroll),
+ *      never a hand-rolled viewport cap of their own.
+ */
+describe("sheet guard: the fold can never slice a dialog's last line (M-202, F-03)", () => {
+  it("the shared scroll region carries the fold cue", () => {
+    const cue = blocksFor("styles/bloom-sheet.css", ".bsheet-scroll").find((b) =>
+      b.body.includes("background-attachment"),
+    );
+    expect(cue, ".bsheet-scroll must paint the scroll-shadow fold cue").toBeDefined();
+    expect(cue!.body).toMatch(/local/);
+    expect(cue!.body).toContain("var(--surface)");
+  });
+
+  it("the footer zone exists: flex-none, on the family's opaque slab", () => {
+    const foot = blocksFor("styles/bloom-sheet.css", ".bsheet-foot");
+    expect(foot.length).toBeGreaterThan(0);
+    expect(foot.some((b) => /flex:\s*none/.test(b.body))).toBe(true);
+    expect(foot.some((b) => b.body.includes("background: var(--surface)"))).toBe(true);
+  });
+
+  it("the paywall's closing line lives in the foot zone, after the scroll region", () => {
+    const src = read("components/billing/PaywallSheet.tsx");
+    const scrollAt = src.indexOf("bsheet-scroll");
+    const footAt = src.indexOf("bsheet-foot");
+    const wordsAt = src.indexOf("bill-foot");
+    expect(scrollAt).toBeGreaterThan(-1);
+    expect(footAt).toBeGreaterThan(scrollAt);
+    expect(wordsAt).toBeGreaterThan(footAt);
+  });
+
+  it("sheet bodies ride the family scroll contract, not hand-rolled viewport caps", () => {
+    for (const rel of [
+      "components/assessment/AssessmentEntry.tsx",
+      "components/assessment/AssessmentFlow.tsx",
+      "components/nutrition/DishDetailSheet.tsx",
+      "components/nutrition/PhotoCreditsSheet.tsx",
+    ]) {
+      const src = read(rel);
+      expect(src, `${rel} must not cap its own body to the viewport`).not.toMatch(
+        /max-h-\[82(?:dvh|vh)\]/,
+      );
+      expect(src, `${rel} must scroll through .bsheet-scroll`).toContain("bsheet-scroll");
+    }
+  });
+});

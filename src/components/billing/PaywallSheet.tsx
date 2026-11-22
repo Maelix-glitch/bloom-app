@@ -309,13 +309,18 @@ export function PaywallSheet({
               {notice}
             </p>
           ) : null}
-
-          <p className="bill-foot">
-            Free keeps working either way — trackers, habits, mood and your records are never held
-            hostage. AI credits refill monthly; when they run out, the AI pauses and everything
-            else carries on.
-          </p>
         </div>
+      </div>
+      {/* M-202 (F-03): the reassurance line is the sheet's footer, not
+          scroll content — it lives in the shell's always-visible foot
+          zone (.bsheet-foot), so the panel cap can never slice it
+          mid-line at the fold again. Same words, always whole. */}
+      <div className="bsheet-foot bill-foot-zone">
+        <p className="bill-foot">
+          Free keeps working either way — trackers, habits, mood and your records are never held
+          hostage. AI credits refill monthly; when they run out, the AI pauses and everything
+          else carries on.
+        </p>
       </div>
     </BloomSheet>
   );
