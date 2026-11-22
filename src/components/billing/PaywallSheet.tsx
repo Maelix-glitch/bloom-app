@@ -28,6 +28,7 @@ import {
   type PaywallContext,
 } from "@/lib/billing/paywall";
 import {
+  CREDIT_WEIGHTS_LINE,
   PAYWALL_BULLETS,
   PLANS,
   TIER_ORDER,
@@ -227,6 +228,11 @@ export function PaywallSheet({
               )}
             </p>
           ) : null}
+
+          {/* M-215: the sheet quotes the allowances (300 / 800), so it
+              also says what a credit buys — the weighted line set
+              every credit surface shares (plans.ts). */}
+          <p className="bill-weights">{CREDIT_WEIGHTS_LINE}</p>
 
           <div className="bill-toggle-row">
             <div className="bill-toggle" role="group" aria-label="Billing period">

@@ -79,6 +79,17 @@ describe("PaywallHost + PaywallSheet", () => {
     expect(screen.getByText(/Free keeps working either way/)).toBeTruthy();
   });
 
+  it("the sheet says what a credit buys — the weighted line (M-215)", async () => {
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("coach_credits");
+    });
+
+    const line = screen.getByText(/What uses credits/);
+    expect(line.textContent).toContain("a food photo 5");
+    expect(line.textContent).toContain("a Vitalis plan session 10");
+  });
+
   it("the period toggle re-prices from the same constants, with the yearly saving shown", async () => {
     render(<PaywallHost />);
     await act(async () => {

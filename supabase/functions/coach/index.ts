@@ -100,11 +100,12 @@
  * MONEY SYSTEM GATE (billing-core.ts):
  *   Every AI path — Coach chat, Vitalis chat, TTS — is gated on the
  *   caller's entitlement BEFORE any provider is called, and charged
- *   AFTER a successful answer: flat costs (Coach 1, photo 3, Vitalis
- *   2, speech 1) against the monthly credit allowance, via the
- *   get_my_entitlement / spend_credits RPCs under the caller's own
- *   JWT. Insufficient credits or a Premium-only feature on the free
- *   tier answer 402 ({ error: "insufficient_credits" |
+ *   AFTER a successful answer: weighted costs (M-215 — Coach 1,
+ *   photo 5, Vitalis chat 2, plan deliberation 10, dish-swap 3,
+ *   speech 1 per 500 characters) against the monthly credit
+ *   allowance, via the get_my_entitlement / spend_credits RPCs under
+ *   the caller's own JWT. Insufficient credits or a Premium-only
+ *   feature on the free tier answer 402 ({ error: "insufficient_credits" |
  *   "premium_required" }) and no provider is ever called. When the
  *   billing RPC does not answer, the gate FAILS CLOSED with a
  *   retryable 503 ({ error: "billing_unavailable" }) — billing has
@@ -144,9 +145,13 @@ import {
   gateErrorBody,
   gateErrorStatus,
   parseEntitlementRows,
+  resolveVitalisCharge,
+  vitalisKindFor,
   type BillingAction,
   type EntitlementSnapshot,
   type GateDecision,
+  type VitalisKind,
+  type VitalisOutcome,
 } from "./billing-core.ts";
 
 const CORS = {
@@ -339,7 +344,10 @@ async function handleTts(body: Body, req: Request, rid: string): Promise<Respons
      voice client treats any failure as silence by design, so a denial
      here simply quiets the voice — the words themselves arrive via
      the chat path, whose gate is where the upgrade prompt lives. */
-  const gate = await billingGateCheck(req, "tts", false, rid);
+  /* Speech is priced by length (M-215): the gate sees the exact text
+     that will be sent to the voice provider — the same trimmed,
+     capped string synthesised below. */
+  const gate = await billingGateCheck(req, "tts", false, rid, { ttsChars: text.length });
   const gateError = gateErrorBody(gate, rid);
   if (gateError) return json(gateError, gateErrorStatus(gate) ?? 402);
   const voiceId =
@@ -437,10 +445,14 @@ async function billingGateCheck(
   action: BillingAction,
   hasMedia: boolean,
   rid: string,
+  /* Weighted costs (M-215): a Vitalis request carries its gate-time
+     kind (chat vs plan deliberation) and a TTS request the length of
+     the text about to be spoken — the gate checks the ACTION's cost. */
+  weighted: { vitalisKind?: VitalisKind; ttsChars?: number } = {},
 ): Promise<GateDecision> {
   const entitlement = await billingEntitlement(req);
   const darkLaunch = (Deno.env.get("BLOOM_BILLING_DARK_LAUNCH") ?? "") === "1";
-  const decision = decideGate({ entitlement, action, hasMedia, darkLaunch });
+  const decision = decideGate({ entitlement, action, hasMedia, darkLaunch, ...weighted });
   if (!entitlement) {
     console.info(
       darkLaunch
@@ -453,16 +465,28 @@ async function billingGateCheck(
 
 /** Deduct after success. Best-effort by design: the answer is already
  *  earned, so a failed or raced deduct is logged, never surfaced —
- *  the next request's gate sees the true balance. */
-async function billingCharge(req: Request, decision: GateDecision, rid: string): Promise<void> {
+ *  the next request's gate sees the true balance. A Vitalis charge
+ *  passes what the finished request turned out to be (M-215): the
+ *  deliberation and dish-swap weights are resolved from the gate
+ *  decision by billing-core, never invented here. */
+async function billingCharge(
+  req: Request,
+  decision: GateDecision,
+  rid: string,
+  vitalisOutcome?: VitalisOutcome,
+): Promise<void> {
   if (decision.kind !== "allow") return;
+  const charge = vitalisOutcome
+    ? resolveVitalisCharge(decision, vitalisOutcome)
+    : { cost: decision.cost, reason: decision.reason };
+  if (!charge) return;
   const rows = await billingRpc(req, "spend_credits", {
-    p_amount: decision.cost,
-    p_reason: decision.reason,
+    p_amount: charge.cost,
+    p_reason: charge.reason,
   });
   const row = Array.isArray(rows) && rows.length > 0 ? (rows[0] as Record<string, unknown>) : null;
   console.info(
-    `coach request=${rid} billing_charge cost=${decision.cost} reason=${decision.reason} ok=${row?.["ok"] ?? "unknown"} balance=${row?.["balance"] ?? "unknown"}`,
+    `coach request=${rid} billing_charge cost=${charge.cost} reason=${charge.reason} ok=${row?.["ok"] ?? "unknown"} balance=${row?.["balance"] ?? "unknown"}`,
   );
 }
 
@@ -1283,6 +1307,18 @@ function ndjsonResult(payload: Record<string, unknown>): Response {
   return new Response(stream, { headers: NDJSON_HEADERS });
 }
 
+/** What a finished fast-path Vitalis reply is charged as (M-215): a
+ *  reply carrying a validated swap_dish proposal delivered the swap;
+ *  anything else is a chat. Deliberation exits don't consult this —
+ *  they report "plan" directly. */
+function vitalisOutcomeOf(actions: readonly unknown[]): VitalisOutcome {
+  return actions.some(
+    (a) => (a as { action?: unknown } | null)?.action === "swap_dish",
+  )
+    ? "dish_swap"
+    : "chat";
+}
+
 /* ============================================================================
    VITALIS CHAT (phases 3–5) — lock check, record validation,
    deliberation, proposal validation. The Coach never reaches here.
@@ -1298,8 +1334,10 @@ async function handleVitalisChat(params: {
   devPin: ProviderId | null;
   /** Money System: invoked exactly once per request that produced a
    *  real answer (fast path or deliberation, streamed or not) — the
-   *  credit deduct. Locked and refused requests never reach it. */
-  onSuccess?: () => Promise<void>;
+   *  credit deduct. Locked and refused requests never reach it. The
+   *  argument is what the request turned out to be (M-215), so the
+   *  charge can carry the deliberation / dish-swap weights. */
+  onSuccess?: (outcome: VitalisOutcome) => Promise<void>;
 }): Promise<Response> {
   const { body, req, rid, message, turns, recordText, rule, devPin, onSuccess } = params;
   const key = await vitalisCallerKey(req);
@@ -1394,7 +1432,7 @@ async function handleVitalisChat(params: {
           };
           try {
             const outcome = await runIt((stage, label) => emit({ type: "stage", stage, label }));
-            await onSuccess?.();
+            await onSuccess?.("plan");
             emit({
               type: "result",
               paragraphs: outcome.paragraphs,
@@ -1418,7 +1456,7 @@ async function handleVitalisChat(params: {
 
     try {
       const outcome = await runIt(undefined);
-      await onSuccess?.();
+      await onSuccess?.("plan");
       return json(
         {
           paragraphs: outcome.paragraphs,
@@ -1467,7 +1505,9 @@ async function handleVitalisChat(params: {
   if (paragraphs.length === 0 && actions.length === 0) {
     return json({ error: "unavailable", requestId: rid }, 502);
   }
-  await onSuccess?.();
+  /* A reply that proposed a dish swap delivered the swap action —
+     that is what the request is charged as (M-215). */
+  await onSuccess?.(vitalisOutcomeOf(actions));
   return json({ paragraphs, provider: result.provider, actions, stages: [] }, 200);
 }
 
@@ -1558,7 +1598,21 @@ Deno.serve(async (req: Request) => {
        is a retryable 503 (fail closed, M2). The deduct happens only
        after a real answer exists (Coach: below; Vitalis: its
        onSuccess callback). */
-    const gate = await billingGateCheck(req, isVitalis ? "vitalis" : "coach", Boolean(media), rid);
+    /* Weighted pricing (M-215): a Vitalis request is classified at
+       the gate with billing-core's mirror of the handler's own
+       deliberation rule, so a plan session is balance-checked at 10
+       BEFORE any provider is called — never discovered afterwards. */
+    const vitalisKind: VitalisKind | undefined = isVitalis
+      ? vitalisKindFor({
+          recordValid:
+            body.vitalisRecord !== undefined && validateVitalisRecord(body.vitalisRecord).ok,
+          deliberateFlag: body.deliberate === true,
+          planLike: looksLikePlanRequest(message),
+        })
+      : undefined;
+    const gate = await billingGateCheck(req, isVitalis ? "vitalis" : "coach", Boolean(media), rid, {
+      ...(vitalisKind ? { vitalisKind } : {}),
+    });
     const gateError = gateErrorBody(gate, rid);
     if (gateError) return json(gateError, gateErrorStatus(gate) ?? 402);
 
@@ -1574,7 +1628,7 @@ Deno.serve(async (req: Request) => {
         recordText: vitalisRecordText,
         rule,
         devPin,
-        onSuccess: () => billingCharge(req, gate, rid),
+        onSuccess: (outcome) => billingCharge(req, gate, rid, outcome),
       });
     }
 

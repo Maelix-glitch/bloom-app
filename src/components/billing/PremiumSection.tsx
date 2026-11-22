@@ -24,7 +24,7 @@
 
 import { useEntitlement, type UseEntitlementState } from "@/hooks/useEntitlement";
 import { requestPaywall } from "@/lib/billing/paywall";
-import { PLANS } from "@/lib/billing/plans";
+import { CREDIT_WEIGHTS_LINE, PLANS } from "@/lib/billing/plans";
 import type { Entitlement } from "@/lib/billing/entitlement";
 
 import "@/styles/billing.css";
@@ -144,6 +144,11 @@ export function PremiumSection() {
               />
             </div>
           </div>
+
+          {/* M-215: credits are weighted — the card that shows the
+              balance also says what things cost, in the one line set
+              every credit surface shares (plans.ts). */}
+          <p className="text-[length:var(--text-caption)] text-faint">{CREDIT_WEIGHTS_LINE}</p>
 
           <div className="bill-plan-foot">
             <p className="bill-plan-desc">{descriptionLine(state.entitlement)}</p>

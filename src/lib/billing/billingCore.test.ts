@@ -15,11 +15,15 @@ import { describe, expect, it } from "vitest";
 import {
   CREDIT_COSTS,
   TIER_ALLOWANCES,
+  TTS_CHARS_PER_CREDIT,
   costFor,
   decideGate,
   gateErrorBody,
   gateErrorStatus,
   parseEntitlementRows,
+  resolveVitalisCharge,
+  ttsCostForChars,
+  vitalisKindFor,
   type EntitlementSnapshot,
 } from "../../../supabase/functions/coach/billing-core";
 import { monthlyCreditsFor } from "./plans";
@@ -33,19 +37,41 @@ const snap = (over: Partial<EntitlementSnapshot> = {}): EntitlementSnapshot => (
   ...over,
 });
 
-describe("flat credit costs", () => {
-  it("coach message 1 · coach photo 3 · vitalis 2 · tts 1", () => {
-    expect(costFor("coach", false)).toEqual({ cost: 1, reason: "coach_message" });
-    expect(costFor("coach", true)).toEqual({ cost: 3, reason: "coach_photo" });
-    expect(costFor("vitalis", false)).toEqual({ cost: 2, reason: "vitalis_message" });
-    expect(costFor("vitalis", true)).toEqual({ cost: 2, reason: "vitalis_message" });
-    expect(costFor("tts", false)).toEqual({ cost: 1, reason: "tts_request" });
+describe("weighted credit costs (M-215)", () => {
+  /* PIN CHANGED (M-215, owner decision 2026-11-22): costs are weighted
+     by what an action costs to serve — they were flat-ish before
+     (coach photo 3, a Vitalis message 2 with deliberation folded in,
+     one flat credit per TTS request). Now: coach message 1, coach
+     photo 5, Vitalis chat 2, a Vitalis plan deliberation its own 10,
+     a dish-swap proposal 3, and speech 1 per 500 characters. */
+  it("coach message 1 · coach photo 5 · vitalis chat 2 · vitalis plan 10 · tts by length", () => {
+    expect(costFor("coach")).toEqual({ cost: 1, reason: "coach_message" });
+    expect(costFor("coach", { hasMedia: true })).toEqual({ cost: 5, reason: "coach_photo" });
+    expect(costFor("vitalis")).toEqual({ cost: 2, reason: "vitalis_message" });
+    expect(costFor("vitalis", { hasMedia: true })).toEqual({ cost: 2, reason: "vitalis_message" });
+    expect(costFor("vitalis", { vitalisKind: "plan" })).toEqual({ cost: 10, reason: "vitalis_plan" });
+    expect(costFor("tts")).toEqual({ cost: 1, reason: "tts_request" });
     expect(CREDIT_COSTS).toEqual({
       coach_message: 1,
-      coach_photo: 3,
+      coach_photo: 5,
       vitalis_message: 2,
+      vitalis_plan: 10,
+      vitalis_dish_swap: 3,
       tts_request: 1,
     });
+  });
+
+  it("tts cost is 1 credit per 500 characters of spoken text, minimum 1, rounded up", () => {
+    expect(TTS_CHARS_PER_CREDIT).toBe(500);
+    expect(ttsCostForChars(0)).toBe(1);
+    expect(ttsCostForChars(1)).toBe(1);
+    expect(ttsCostForChars(499)).toBe(1);
+    expect(ttsCostForChars(500)).toBe(1);
+    expect(ttsCostForChars(501)).toBe(2);
+    expect(ttsCostForChars(1000)).toBe(2);
+    expect(ttsCostForChars(1001)).toBe(3);
+    expect(costFor("tts", { ttsChars: 501 })).toEqual({ cost: 2, reason: "tts_request" });
+    expect(costFor("tts", { ttsChars: 1000 })).toEqual({ cost: 2, reason: "tts_request" });
   });
 
   it("server allowances mirror the client plan constants exactly", () => {
@@ -104,13 +130,14 @@ describe("decideGate", () => {
       balance: 0,
       tier: "free",
     });
+    /* PIN CHANGED (M-215): a photo costs 5 now, not 3. */
     expect(
       decideGate({
         entitlement: snap({ tier: "premium", creditBalance: 2, monthlyAllowance: 300 }),
         action: "coach",
         hasMedia: true,
       }),
-    ).toEqual({ kind: "deny_insufficient", cost: 3, balance: 2, tier: "premium" });
+    ).toEqual({ kind: "deny_insufficient", cost: 5, balance: 2, tier: "premium" });
     /* PIN CHANGED (M-214): vitalis/tts below Plus never reach the
        balance check — they are refused as a tier feature first (see
        the Plus gate block below), so their insufficient cases now
@@ -142,13 +169,15 @@ describe("decideGate", () => {
       cost: 1,
       reason: "coach_message",
     });
+    /* PIN CHANGED (M-215): a photo costs 5 now, not 3 — balance 5 is
+       the exact-cover case. */
     expect(
       decideGate({
-        entitlement: snap({ tier: "premium", creditBalance: 3, monthlyAllowance: 300 }),
+        entitlement: snap({ tier: "premium", creditBalance: 5, monthlyAllowance: 300 }),
         action: "coach",
         hasMedia: true,
       }),
-    ).toEqual({ kind: "allow", cost: 3, reason: "coach_photo" });
+    ).toEqual({ kind: "allow", cost: 5, reason: "coach_photo" });
     /* PIN CHANGED (M-214): a free snapshot no longer reaches this
        line for vitalis — the Plus gate refuses it first. The allow
        case now runs on the tier that carries the feature. */
@@ -247,6 +276,128 @@ describe("decideGate — the Vitalis Plus gate (M-214)", () => {
       tier: "premium",
       requestId: "req-v",
     });
+  });
+});
+
+describe("decideGate — weighted costs (M-215)", () => {
+  const plus = (creditBalance: number) =>
+    snap({ tier: "premium_plus", creditBalance, monthlyAllowance: 800 });
+
+  it("a plan deliberation needs 10: balance 9 refuses with the numbers, 10 allows", () => {
+    expect(
+      decideGate({ entitlement: plus(9), action: "vitalis", hasMedia: false, vitalisKind: "plan" }),
+    ).toEqual({ kind: "deny_insufficient", cost: 10, balance: 9, tier: "premium_plus" });
+    expect(
+      decideGate({ entitlement: plus(10), action: "vitalis", hasMedia: false, vitalisKind: "plan" }),
+    ).toEqual({ kind: "allow", cost: 10, reason: "vitalis_plan" });
+  });
+
+  it("3 credits can chat with Vitalis but cannot run a plan session", () => {
+    expect(
+      decideGate({ entitlement: plus(3), action: "vitalis", hasMedia: false, vitalisKind: "chat" }),
+    ).toEqual({ kind: "allow", cost: 2, reason: "vitalis_message" });
+    expect(
+      decideGate({ entitlement: plus(3), action: "vitalis", hasMedia: false, vitalisKind: "plan" })
+        .kind,
+    ).toBe("deny_insufficient");
+  });
+
+  it("the plan refusal body carries needed=10 and the balance, honestly", () => {
+    const decision = decideGate({
+      entitlement: plus(4),
+      action: "vitalis",
+      hasMedia: false,
+      vitalisKind: "plan",
+    });
+    expect(gateErrorBody(decision, "req-plan")).toEqual({
+      error: "insufficient_credits",
+      needed: 10,
+      balance: 4,
+      tier: "premium_plus",
+      requestId: "req-plan",
+    });
+    expect(gateErrorStatus(decision)).toBe(402);
+  });
+
+  it("tts is gated on the weighted cost of the text being spoken", () => {
+    /* 500 chars = 1 credit: a balance of 1 exactly covers it. */
+    expect(
+      decideGate({ entitlement: plus(1), action: "tts", hasMedia: false, ttsChars: 500 }),
+    ).toEqual({ kind: "allow", cost: 1, reason: "tts_request" });
+    /* 501 chars = 2 credits: a balance of 1 refuses, 2 allows. */
+    expect(
+      decideGate({ entitlement: plus(1), action: "tts", hasMedia: false, ttsChars: 501 }),
+    ).toEqual({ kind: "deny_insufficient", cost: 2, balance: 1, tier: "premium_plus" });
+    expect(
+      decideGate({ entitlement: plus(2), action: "tts", hasMedia: false, ttsChars: 501 }),
+    ).toEqual({ kind: "allow", cost: 2, reason: "tts_request" });
+  });
+
+  it("a free member's 20 credits still buy real tries: 4 photos or 20 chats", () => {
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium", creditBalance: 20, monthlyAllowance: 300 }),
+        action: "coach",
+        hasMedia: true,
+      }).kind,
+    ).toBe("allow");
+    expect(
+      decideGate({ entitlement: snap({ creditBalance: 4 }), action: "coach", hasMedia: true }).kind,
+    ).toBe("deny_premium");
+  });
+});
+
+describe("vitalisKindFor — the deliberation classifier (M-215)", () => {
+  it("mirrors handleVitalisChat's rule: a valid record AND (flag OR plan-like words)", () => {
+    expect(vitalisKindFor({ recordValid: true, deliberateFlag: true, planLike: false })).toBe("plan");
+    expect(vitalisKindFor({ recordValid: true, deliberateFlag: false, planLike: true })).toBe("plan");
+    expect(vitalisKindFor({ recordValid: true, deliberateFlag: false, planLike: false })).toBe(
+      "chat",
+    );
+    /* No usable record → the handler takes the fast path, so the gate
+       must price a chat, never a deliberation that cannot happen. */
+    expect(vitalisKindFor({ recordValid: false, deliberateFlag: true, planLike: true })).toBe(
+      "chat",
+    );
+  });
+});
+
+describe("resolveVitalisCharge — what a finished Vitalis answer actually costs (M-215)", () => {
+  const allowChat = decideGate({
+    entitlement: snap({ tier: "premium_plus", creditBalance: 800, monthlyAllowance: 800 }),
+    action: "vitalis",
+    hasMedia: false,
+  });
+
+  it("a plain chat charges the gated chat cost", () => {
+    expect(resolveVitalisCharge(allowChat, "chat")).toEqual({ cost: 2, reason: "vitalis_message" });
+  });
+
+  it("a dish-swap proposal out of a chat costs 3 in total, ledgered as its own action", () => {
+    expect(resolveVitalisCharge(allowChat, "dish_swap")).toEqual({
+      cost: 3,
+      reason: "vitalis_dish_swap",
+    });
+  });
+
+  it("a deliberated answer charges the plan session, whatever it proposed", () => {
+    const allowPlan = decideGate({
+      entitlement: snap({ tier: "premium_plus", creditBalance: 800, monthlyAllowance: 800 }),
+      action: "vitalis",
+      hasMedia: false,
+      vitalisKind: "plan",
+    });
+    expect(resolveVitalisCharge(allowPlan, "plan")).toEqual({ cost: 10, reason: "vitalis_plan" });
+    expect(resolveVitalisCharge(allowPlan, "dish_swap")).toEqual({
+      cost: 10,
+      reason: "vitalis_plan",
+    });
+  });
+
+  it("denied and uncharged decisions never resolve to a charge", () => {
+    expect(resolveVitalisCharge({ kind: "deny_insufficient", cost: 2, balance: 0, tier: "free" }, "chat")).toBeNull();
+    expect(resolveVitalisCharge({ kind: "allow_uncharged" }, "plan")).toBeNull();
+    expect(resolveVitalisCharge({ kind: "deny_premium", feature: "vitalis", tier: "free" }, "chat")).toBeNull();
   });
 });
 
