@@ -205,6 +205,622 @@
   break-inside: avoid;
   margin-bottom: var(--space-6);
 }
+
+/* --------------------- the Grocery Journey (M-201) ---------------------
+   The owner-approved concept preview, ported onto Bloom tokens: the
+   progress component, the view tabs, the search, shopping mode and
+   the completion state. Motion follows the feel layer (brief v6
+   §3.1): fills travel by transform (scaleX), never by animating
+   width; the milestone pulse is an opacity/transform ring, never an
+   animated shadow; the drawn check is the brief's documented
+   stroke-dashoffset exception, as is the ring's meter fill. Solid
+   surfaces only — no glass, no translucency. */
+
+/* Progress: a tonal sub-panel inside the section card. */
+.shop-progress {
+  position: relative;
+  margin-top: var(--space-5);
+  padding: var(--space-5) var(--space-6);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius);
+}
+/* The milestone pulse: a sage ring that breathes out once when a
+   quarter is crossed — opacity and transform only. */
+.shop-progress.is-pulse::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 1px solid var(--sage);
+  border-radius: inherit;
+  pointer-events: none;
+  animation: shop-pulse-ring 0.95s ease-out;
+}
+@keyframes shop-pulse-ring {
+  from {
+    opacity: 0.6;
+    transform: scale(0.995);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.015);
+  }
+}
+.shop-progress-main {
+  display: flex;
+  align-items: center;
+  gap: var(--space-6);
+}
+.shop-ring {
+  position: relative;
+  flex: none;
+  width: 104px;
+  height: 104px;
+}
+.shop-ring svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+.shop-ring-track {
+  stroke: var(--surface-3);
+}
+.shop-ring-fill {
+  stroke: var(--gold);
+  stroke-linecap: round;
+  transition:
+    stroke-dashoffset 560ms var(--ease-out-expo),
+    stroke var(--motion-standard) ease;
+}
+.shop-ring.is-pop {
+  animation: shop-ring-pop 0.8s var(--ease-out-expo);
+}
+@keyframes shop-ring-pop {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.07);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.shop-ring-centre {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.shop-ring-pct {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--foreground);
+}
+.shop-ring-of {
+  margin-top: 0.3rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.shop-progress-copy {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+.shop-progress-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--foreground);
+}
+.shop-progress-count b {
+  color: var(--gold);
+}
+.shop-milestone {
+  margin-top: 0.35rem;
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+.shop-message {
+  min-height: 1.45em;
+  margin-top: 0.3rem;
+  font-size: 0.95rem;
+  color: var(--muted-foreground);
+}
+/* The bar fill is a full-width layer scaled on X — the feel layer's
+   transform-only rule, visually the preview's growing bar. */
+.shop-bar {
+  height: 6px;
+  margin-top: var(--space-5);
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.shop-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--gold-gradient);
+  transform-origin: left center;
+  transition: transform 560ms var(--ease-out-expo);
+}
+.shop-bar-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-top: 0.55rem;
+  font-size: 0.8rem;
+  color: var(--faint);
+}
+.shop-pct-label {
+  font-weight: 600;
+  color: var(--muted-foreground);
+}
+
+/* View tabs: pills with live counts; the active one inverts. */
+.shop-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-6);
+}
+.shop-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.6rem 1.15rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo);
+}
+.shop-tab:hover {
+  color: var(--foreground);
+  border-color: var(--border-strong);
+}
+.shop-tab[aria-pressed="true"] {
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--background);
+}
+.shop-tab-count {
+  padding: 0.28rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--muted-foreground);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.shop-tab[aria-pressed="true"] .shop-tab-count {
+  background: var(--background);
+  color: var(--gold-soft);
+}
+
+/* Toolbar: the search pill and the way into shopping mode. */
+.shop-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+}
+.shop-search {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 1.15rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--faint);
+  transition: border-color var(--motion-standard) var(--ease-out-expo);
+}
+.shop-search:focus-within {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+  color: var(--muted-foreground);
+}
+.shop-search input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.95rem;
+}
+.shop-search input::placeholder {
+  color: var(--faint);
+}
+.shop-start {
+  flex: none;
+  min-height: 44px;
+  padding: 0.6rem 1.3rem;
+  border: 1px solid color-mix(in oklab, var(--gold) 45%, transparent);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--gold-soft);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--motion-standard) var(--ease-out-expo);
+}
+.shop-start:hover {
+  background: color-mix(in oklab, var(--gold) 10%, transparent);
+}
+
+/* Shopping mode's pinned bar: opaque section ground, stuck just
+   below the stuck sub-nav (60px brand bar + the bar itself). */
+.shop-sticky {
+  position: sticky;
+  top: calc(var(--app-top-bar) + 60px);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin-top: var(--space-4);
+  padding: var(--space-3) 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.shop-sticky .shop-bar {
+  flex: 1;
+  margin-top: 0;
+}
+.shop-sticky-count {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: var(--foreground);
+}
+.shop-sticky-count b {
+  color: var(--gold);
+}
+.shop-exit {
+  flex: none;
+  min-height: 44px;
+  padding: 0.55rem 1.1rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo);
+}
+.shop-exit:hover {
+  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
+  color: var(--gold-soft);
+}
+
+/* Aisle identity: glyph, name, the aisle's own completion count and
+   its thin sage meter. Counts describe the whole aisle. */
+.shop-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  padding-bottom: var(--space-2);
+  border-bottom: 1px solid var(--border);
+}
+.shop-group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.shop-group-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+.shop-group-count {
+  font-size: 0.78rem;
+  white-space: nowrap;
+  color: var(--faint);
+  font-variant-numeric: tabular-nums;
+}
+.shop-group-count b {
+  font-weight: 600;
+  color: var(--sage);
+}
+.shop-group-mini {
+  height: 3px;
+  margin-bottom: var(--space-2);
+  border-radius: 999px;
+  background: var(--surface-3);
+  overflow: hidden;
+}
+.shop-group-mini-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--sage);
+  transform-origin: left center;
+  transition: transform 560ms var(--ease-out-expo);
+}
+
+/* The tick and the strike: the check pops as it lands; the name's
+   strike line draws itself across by scaleX. */
+.shop-check {
+  transition:
+    transform var(--motion-standard) var(--ease-out-expo),
+    background-color var(--motion-standard) var(--ease-out-expo),
+    border-color var(--motion-standard) var(--ease-out-expo),
+    color var(--motion-standard) var(--ease-out-expo);
+}
+.shop-check:active {
+  transform: scale(0.88);
+}
+.shop-check svg {
+  width: 16px;
+  height: 16px;
+}
+.shop-check[data-state="checked"] > span {
+  animation: shop-check-in 320ms var(--ease-out-expo);
+}
+@keyframes shop-check-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  55% {
+    transform: scale(1.18);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+.shop-item-name {
+  position: relative;
+  display: inline-block;
+}
+.shop-item-name::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 54%;
+  width: 100%;
+  height: 1px;
+  background: var(--faint);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 320ms var(--ease-out-expo);
+}
+.shop-row.is-bought .shop-item-name::after {
+  transform: scaleX(1);
+}
+.shop-row.is-bought .kv-qty {
+  color: var(--faint);
+}
+
+/* Shopping mode's grouping labels and the gathered basket. */
+.shop-group-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  margin: var(--space-6) 0 var(--space-2);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+.shop-group-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-subtle);
+}
+.shop-group-label.is-collected {
+  color: var(--sage);
+}
+.shop-basket-list {
+  max-width: 44rem;
+}
+
+/* The filtered-to-nothing state. */
+.shop-empty {
+  margin-top: var(--space-5);
+  padding: var(--space-10) var(--space-4);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  text-align: center;
+}
+.shop-empty-title {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--foreground);
+}
+.shop-empty-line {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.92rem;
+  color: var(--muted-foreground);
+}
+
+/* The completion state: the drawn sage check in its ring, the
+   collected count, and the way back to the plan. */
+.shop-complete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: var(--space-5);
+  padding: var(--space-10) var(--space-6) var(--space-8);
+  border: 1px solid color-mix(in oklab, var(--sage) 35%, transparent);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  text-align: center;
+}
+.shop-complete-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 84px;
+  height: 84px;
+  margin-bottom: var(--space-5);
+  border: 1.5px solid color-mix(in oklab, var(--sage) 45%, transparent);
+  border-radius: 50%;
+  animation: shop-badge-in 0.7s var(--ease-out-expo);
+}
+@keyframes shop-badge-in {
+  0% {
+    transform: scale(0.82);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.04);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+.shop-complete-check {
+  fill: none;
+  stroke: var(--sage);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 34;
+  stroke-dashoffset: 34;
+  animation: shop-draw-check 0.7s 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes shop-draw-check {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.shop-complete-eyebrow {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--sage);
+}
+.shop-complete-title {
+  margin-top: var(--space-3);
+  font-family: var(--font-display);
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--foreground);
+}
+.shop-complete-line {
+  margin-top: var(--space-2);
+  color: var(--muted-foreground);
+}
+.shop-back {
+  margin-top: var(--space-6);
+}
+
+/* Shopping mode: the shop is the whole page — the intro, the pantry
+   story and the pantry itself step aside; the progress compacts;
+   the ticks grow to a full touch target. */
+.is-shopping .shop-intro,
+.is-shopping .shop-away {
+  display: none;
+}
+.is-shopping .shop-progress {
+  padding: var(--space-4) var(--space-5);
+}
+.is-shopping .shop-ring {
+  width: 76px;
+  height: 76px;
+}
+.is-shopping .shop-ring-pct {
+  font-size: 1.1rem;
+}
+.is-shopping .shop-milestone {
+  font-size: 1.2rem;
+}
+.is-shopping .shop-message {
+  display: none;
+}
+.is-shopping .shop-check svg {
+  width: 22px;
+  height: 22px;
+}
+.is-shopping .shop-row {
+  padding-block: var(--space-4);
+}
+
+@media (max-width: 720px) {
+  .shop-progress {
+    padding: var(--space-5);
+  }
+  .shop-progress-main {
+    gap: var(--space-4);
+  }
+  .shop-ring {
+    width: 88px;
+    height: 88px;
+  }
+  .shop-milestone {
+    font-size: 1.25rem;
+  }
+  .shop-toolbar {
+    flex-direction: column;
+  }
+  .shop-search {
+    flex: none;
+    width: 100%;
+  }
+  .shop-start {
+    width: 100%;
+  }
+}
+
+/* Reduced motion: the global rule already flattens durations; the
+   journey's own animations come off entirely, and the drawn check
+   rests drawn. */
+@media (prefers-reduced-motion: reduce) {
+  .shop-ring-fill,
+  .shop-bar-fill,
+  .shop-group-mini-fill,
+  .shop-item-name::after {
+    transition: none;
+  }
+  .shop-progress.is-pulse::after,
+  .shop-ring.is-pop,
+  .shop-complete-badge,
+  .shop-check[data-state="checked"] > span {
+    animation: none;
+  }
+  .shop-complete-check {
+    animation: none;
+    stroke-dashoffset: 0;
+  }
+}
 .nut-entry {
   display: flex;
   align-items: flex-start;
