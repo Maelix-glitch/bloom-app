@@ -8,10 +8,13 @@
  * weight is set — an honest timeline.
  *
  * Pure functions, no I/O. The numbers are standard, published formulas
- * (Mifflin–St Jeor for BMR, 35 ml/kg for water) and every screen that shows
- * them says what they are: an estimate, not a prescription. Nothing here
- * diagnoses anything, and the calorie target has a safety floor so a very
- * aggressive rate can never produce a dangerously low number.
+ * (Mifflin–St Jeor for BMR; the hydration target is a drinking-water
+ * share of EFSA's total-water adequate intake) and every screen that
+ * shows them says what they are: an estimate, not a prescription.
+ * Nothing here diagnoses anything, and the calorie target has a safety
+ * floor so a very aggressive rate can never produce a dangerously low
+ * number — a claim M-219 made true of every path that can move a
+ * target, not just this one (see targetAdjustment.ts).
  */
 
 export type BodyUnits = "metric" | "imperial";
@@ -114,12 +117,35 @@ export function bmiOf(heightCm: number, weightKg: number): number | null {
   return round(weightKg / (m * m), 1);
 }
 
+/**
+ * BMI bands for Asian Indians (Indian Consensus Group, Misra et al.
+ * 2009; ESI 2022 concordant): overweight begins at 23 and obesity at
+ * 25 — not the WHO 25/30 cut-offs this module used before M-219
+ * (audit F-08). The underweight gate (18.5) is population-independent
+ * and unchanged. Bloom is India-first; its bands are the Indian ones.
+ */
 export function bmiBandOf(bmi: number): BmiBand {
   if (bmi < 18.5) return "underweight";
-  if (bmi < 25) return "healthy";
-  if (bmi < 30) return "overweight";
+  if (bmi < 23) return "healthy";
+  if (bmi < 25) return "overweight";
   return "obese";
 }
+
+/** The top of the healthy range under the same consensus: BMI 22.9. */
+export const HEALTHY_BMI_MAX = 22.9;
+/** Above this BMI a person is outside the healthy range, and protein
+ *  is dosed on the reference weight below rather than actual weight. */
+export const OVERWEIGHT_BMI = 23;
+
+/**
+ * The fastest pace the engine will plan, kg per week — the safety
+ * domain's cap (vitalis/domain/safety MAX_RATE_KG_PER_WEEK), restated
+ * here because this legacy module is deliberately dependency-free.
+ * 0.75 kg/wk ≈ an 825 kcal/day deficit: the top of the AHA/ACC/TOS
+ * prescription neighbourhood, inside the CDC's 1–2 lb/wk range. The
+ * old 1.0 cap implied 1,100 kcal/day (M-219, audit F-04).
+ */
+export const MAX_RATE_KG_PER_WEEK = 0.75;
 
 /** Mifflin–St Jeor. `unspecified` uses the midpoint of the two constants. */
 export function bmrOf(profile: BodyProfile): number | null {
@@ -147,11 +173,11 @@ export function bodyTargetsOf(profile: BodyProfile, today: string): BodyTargets 
   const bmi = bmiOf(heightCm, weightKg)!;
   const bmiBand = bmiBandOf(bmi);
   const min = round(18.5 * (heightCm / 100) ** 2, 1);
-  const max = round(24.9 * (heightCm / 100) ** 2, 1);
+  const max = round(HEALTHY_BMI_MAX * (heightCm / 100) ** 2, 1);
   const bmr = bmrOf(profile)!;
   const tdee = round(bmr * ACTIVITY_FACTOR[profile.activity]);
 
-  const rate = Math.min(1, Math.max(0.25, profile.rateKgPerWeek || 0.5));
+  const rate = Math.min(MAX_RATE_KG_PER_WEEK, Math.max(0.25, profile.rateKgPerWeek || 0.5));
   /* Recomposition is maintenance energy by definition — the same weight,
      differently composed — so it takes no rate delta, exactly like
      maintain. Only its protein band differs (below). */
@@ -171,25 +197,46 @@ export function bodyTargetsOf(profile: BodyProfile, today: string): BodyTargets 
      the ISSN position stand's range for maximising lean mass; the safety
      classifier separately blocks the profiles for whom a high-protein
      target needs a clinician (chronic kidney disease, pregnancy,
-     eating-disorder history), so the band never reaches them from here. */
+     eating-disorder history), so the band never reaches them from here.
+     BASIS (M-219, audit F-05): the band multiplies a REFERENCE weight,
+     not always the scale weight. Above the healthy range (BMI ≥ 23),
+     dosing on actual weight treats adipose tissue as protein-demanding
+     mass and — where the calorie floor binds — pushes protein past the
+     IOM AMDR ceiling of 35% of energy (the owner's pair was 50.7%E).
+     So above BMI 23 the basis is the healthy-ceiling weight
+     (22.9 × height²): the lean-mass-protective dose for the body the
+     plan is feeding, uninfluenced by the fat mass it is reducing. */
   const proteinPerKg =
     profile.goal === "lose" ? 1.8 : profile.goal === "gain" ? 1.6 : profile.goal === "recomp" ? 2.2 : 1.4;
-  const proteinG = round(weightKg * proteinPerKg);
+  const proteinBasisKg = bmi >= OVERWEIGHT_BMI ? max : weightKg;
+  const proteinG = round(proteinBasisKg * proteinPerKg);
 
-  /* 35 ml/kg is the common adult maintenance estimate; activity adds a
-     modest allowance. Capped so a very high weight doesn't produce an
-     implausible "drink 7 litres" instruction. */
+  /* Hydration (M-219, audit F-07). The old rule — 35 ml per kg of
+     scale weight, scheduled as DRINKING water — produced 3,350 ml to
+     drink for a sedentary 95 kg man: more than EFSA's adequate intake
+     for TOTAL water (food + drink: 2.5 L men / 2.0 L women, EFSA 2010,
+     moderate temperature and activity) before any food moisture was
+     counted, and it scaled with adipose mass, which holds little
+     water. The target is now a drinking-water figure derived from
+     that AI: roughly three quarters of total water typically arrives
+     as drinks, the rest in food — men ≈ 1,900 ml, women ≈ 1,500 ml,
+     unspecified the midpoint — plus an activity allowance for the
+     sweat the AI's moderate-activity assumption does not cover.
+     EFSA's AI assumes a temperate climate; the figure is a guide for
+     ordinary days, and thirst and heat rightly override it. */
+  const drinkingBaseMl =
+    profile.sex === "female" ? 1500 : profile.sex === "male" ? 1900 : 1700;
   const activityBonus =
     profile.activity === "sedentary"
       ? 0
       : profile.activity === "light"
-        ? 250
+        ? 150
         : profile.activity === "moderate"
-          ? 500
+          ? 300
           : profile.activity === "active"
-            ? 750
-            : 1000;
-  const waterMl = Math.round(Math.min(4500, Math.max(1500, weightKg * 35 + activityBonus)) / 50) * 50;
+            ? 500
+            : 700;
+  const waterMl = Math.round(Math.min(3000, Math.max(1200, drinkingBaseMl + activityBonus)) / 50) * 50;
 
   const targetWeightKg =
     profile.targetWeightKg && profile.targetWeightKg >= 30
@@ -204,11 +251,31 @@ export function bodyTargetsOf(profile: BodyProfile, today: string): BodyTargets 
      and recomp hold the current weight, so neither gets a goal date. */
   if (targetWeightKg && (profile.goal === "lose" || profile.goal === "gain")) {
     const diff = Math.abs(weightKg - targetWeightKg);
-    if (diff >= 0.2 && rate > 0) {
-      weeksToGoal = Math.ceil(diff / rate);
-      const date = new Date(`${today}T12:00:00`);
-      date.setDate(date.getDate() + weeksToGoal * 7);
-      goalDate = date.toISOString().slice(0, 10);
+    /* The destination gate at this layer (M-219, audit F-03): no
+       countdown is ever projected toward an underweight endpoint on a
+       loss goal. The safety classifier refuses the plan outright; this
+       keeps the legacy surfaces from displaying the countdown the
+       classifier refused. */
+    const targetBmi = bmiOf(heightCm, targetWeightKg);
+    const underweightDestination =
+      profile.goal === "lose" && targetBmi !== null && targetBmi < 18.5;
+    if (diff >= 0.2 && !underweightDestination) {
+      /* The timeline runs on the EFFECTIVE rate — the deficit or
+         surplus the floored, capped target actually delivers — not
+         the requested pace (M-219, audit F-06). When the floor binds,
+         the requested rate is a promise the plan cannot keep: the
+         owner's floor-bound −820 kcal/day is ~0.75 kg/wk, so his
+         35 kg reads ~47 weeks, not the 35 the requested 1.0 kg/wk
+         used to print. When the delivered delta is zero or runs the
+         wrong way, no honest date exists and none is shown. */
+      const deliveredDelta = profile.goal === "lose" ? tdee - calories : calories - tdee;
+      const effectiveRate = (deliveredDelta * 7) / 7700;
+      if (effectiveRate > 0) {
+        weeksToGoal = Math.ceil(diff / effectiveRate);
+        const date = new Date(`${today}T12:00:00`);
+        date.setDate(date.getDate() + weeksToGoal * 7);
+        goalDate = date.toISOString().slice(0, 10);
+      }
     }
   }
 
@@ -276,11 +343,15 @@ export function parseBodyProfile(raw: unknown): BodyProfile | null {
     heightCm: numOrNull(r["heightCm"], 100, 250),
     weightKg: numOrNull(r["weightKg"], 25, 350),
     targetWeightKg: numOrNull(r["targetWeightKg"], 25, 350),
-    age: numOrNull(r["age"], 13, 110),
+    /* 18 is the product's floor (M-219, audit F-02): this legacy store
+       used to accept 13, three years under the classifier's own
+       adult_only gate — a stored 13–17 now parses as "not stated"
+       rather than feeding arithmetic the gate would refuse. */
+    age: numOrNull(r["age"], 18, 110),
     sex,
     activity,
     goal,
-    rateKgPerWeek: Math.min(1, Math.max(0.25, rate)),
+    rateKgPerWeek: Math.min(MAX_RATE_KG_PER_WEEK, Math.max(0.25, rate)),
     updatedAt: typeof r["updatedAt"] === "string" ? r["updatedAt"] : "",
   };
 }

@@ -12,12 +12,12 @@ import { estimateExpenditure } from "./expenditure";
 import type { LogEntry } from "./types";
 
 let seq = 0;
-function dayEntry(day: string, kcal: number): LogEntry {
+function dayEntry(day: string, kcal: number, meal: LogEntry["meal"] = "lunch"): LogEntry {
   seq += 1;
   return {
     id: `e-${seq}`,
     day,
-    meal: "lunch",
+    meal,
     foodId: null,
     snapshot: null,
     name: "logged",
@@ -29,12 +29,16 @@ function dayEntry(day: string, kcal: number): LogEntry {
   };
 }
 
-/** `count` consecutive logged days from `from`, each totalling kcal. */
+/** `count` consecutive COMPLETE logged days from `from`, each
+ *  totalling kcal (split across a lunch and a dinner entry — the
+ *  estimator reads complete days only since M-219). */
 function loggedDays(from: string, count: number, kcal: number): LogEntry[] {
   const out: LogEntry[] = [];
   const start = Date.parse(`${from}T12:00:00Z`);
   for (let i = 0; i < count; i += 1) {
-    out.push(dayEntry(new Date(start + i * 86_400_000).toISOString().slice(0, 10), kcal));
+    const day = new Date(start + i * 86_400_000).toISOString().slice(0, 10);
+    const a = Math.round(kcal / 2);
+    out.push(dayEntry(day, a, "lunch"), dayEntry(day, kcal - a, "dinner"));
   }
   return out;
 }

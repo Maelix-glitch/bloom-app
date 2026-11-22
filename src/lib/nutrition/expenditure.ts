@@ -18,8 +18,10 @@
  * Failing either, the result is an honest `insufficient` carrying
  * the counts, so the surface can say exactly what is missing.
  *
- * Only logged days count toward the intake average: a day with no
- * entries is unknown, not zero, and the estimate's inputs (the
+ * Only COMPLETE logged days count toward the intake average (a day
+ * whose entries span at least two meals — loggedDays.ts): a day with
+ * no entries is unknown, not zero, and a day with one fragmentary
+ * entry is not a day's intake either. The estimate's inputs (the
  * logged-day count among them) travel with it onto the surface.
  *
  * The output is a PROPOSAL input, never an applied change — see
@@ -32,6 +34,7 @@
 
 import { shiftDay } from "@/lib/localDay";
 import type { WeighIn } from "@/lib/health/body";
+import { completeLoggedDayTotals } from "./loggedDays";
 import type { LogEntry } from "./types";
 
 /** The stated energy conversion for body-mass change. */
@@ -80,9 +83,14 @@ export function estimateExpenditure(
   weighIns: readonly WeighIn[],
   day: string,
 ): ExpenditureResult {
+  /* Only COMPLETE logged days count (M-219, audit F-11): the average
+     below is an average of days that look like days of eating, not
+     of every day a stray entry landed on. A fragmentary day's low
+     total used to drag the "average intake" down and manufacture a
+     low maintenance estimate — which then fed target adjustments. */
   const totalsByDay = new Map<string, number>();
-  for (const entry of entries) {
-    totalsByDay.set(entry.day, (totalsByDay.get(entry.day) ?? 0) + entry.nutrients.kcal);
+  for (const [d, totals] of completeLoggedDayTotals(entries)) {
+    totalsByDay.set(d, totals.kcal);
   }
   const loggedIn = (from: string, to: string) => {
     let days = 0;

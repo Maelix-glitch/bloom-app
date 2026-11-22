@@ -8,8 +8,8 @@
 --   verify           npm run seed:evidence:check
 --
 -- format version   2
--- catalogue hash   sha256:eb4a23ff3e70111c9ab6ada47914b798e53e1777a147a497734940902348841f
--- rows             6 sources, 20 claims, 4 citations, 18 recommendations, 21 revisions
+-- catalogue hash   sha256:a4f12a7ccc4fafcf3bfe592350ab339b00f9e09cc5096d13383a0754bc02927f
+-- rows             6 sources, 22 claims, 4 citations, 18 recommendations, 27 revisions
 --
 -- What this file does, and does not do:
 --
@@ -140,7 +140,7 @@ begin
   -- 1. Rows the catalogue does not describe.
   select string_agg(d.id, ', ' order by d.id) into offenders
     from public.evidence_claims d
-   where d.id not in ('dga-whole-foods-emphasis', 'fao-energy-requirement-components', 'icmr-dgi-food-variety', 'rate-cap-1kg-per-week', 'usda-fdc-composition-source', 'mifflin-st-jeor-bmr', 'activity-factor-table', 'protein-recomp-2-2', 'protein-bands-by-goal', 'energy-per-kg-7700', 'calorie-floors', 'spectrum-rda-2020-references', 'plan-composition-derivations', 'water-35ml-per-kg', 'who-healthy-diet-principles', 'nice-ng246-individualisation', 'budget-tier-cost-bands', 'dish-region-markers', 'micro-gap-threshold', 'adaptation-ratios');
+   where d.id not in ('dga-whole-foods-emphasis', 'fao-energy-requirement-components', 'icmr-dgi-food-variety', 'rate-cap-1kg-per-week', 'rate-cap-0-75kg-per-week', 'usda-fdc-composition-source', 'mifflin-st-jeor-bmr', 'activity-factor-table', 'protein-recomp-2-2', 'protein-bands-by-goal', 'energy-per-kg-7700', 'calorie-floors', 'spectrum-rda-2020-references', 'plan-composition-derivations', 'water-35ml-per-kg', 'water-efsa-drinking-share', 'who-healthy-diet-principles', 'nice-ng246-individualisation', 'budget-tier-cost-bands', 'dish-region-markers', 'micro-gap-threshold', 'adaptation-ratios');
 
   if offenders is not null then
     raise exception 'seed refused: evidence_claims holds rows the catalogue does not describe: %', offenders
@@ -154,17 +154,19 @@ begin
             ('dga-whole-foods-emphasis', 1),
             ('fao-energy-requirement-components', 1),
             ('icmr-dgi-food-variety', 1),
-            ('rate-cap-1kg-per-week', 1),
+            ('rate-cap-1kg-per-week', 2),
+            ('rate-cap-0-75kg-per-week', 1),
             ('usda-fdc-composition-source', 1),
             ('mifflin-st-jeor-bmr', 1),
             ('activity-factor-table', 1),
             ('protein-recomp-2-2', 1),
-            ('protein-bands-by-goal', 1),
+            ('protein-bands-by-goal', 2),
             ('energy-per-kg-7700', 1),
             ('calorie-floors', 1),
-            ('spectrum-rda-2020-references', 1),
+            ('spectrum-rda-2020-references', 2),
             ('plan-composition-derivations', 1),
-            ('water-35ml-per-kg', 1),
+            ('water-35ml-per-kg', 2),
+            ('water-efsa-drinking-share', 1),
             ('who-healthy-diet-principles', 1),
             ('nice-ng246-individualisation', 1),
             ('budget-tier-cost-bands', 1),
@@ -186,7 +188,8 @@ begin
             ('dga-whole-foods-emphasis', null::text),
             ('fao-energy-requirement-components', null::text),
             ('icmr-dgi-food-variety', null::text),
-            ('rate-cap-1kg-per-week', null::text),
+            ('rate-cap-1kg-per-week', 'rate-cap-0-75kg-per-week'),
+            ('rate-cap-0-75kg-per-week', null::text),
             ('usda-fdc-composition-source', null::text),
             ('mifflin-st-jeor-bmr', null::text),
             ('activity-factor-table', null::text),
@@ -196,7 +199,8 @@ begin
             ('calorie-floors', null::text),
             ('spectrum-rda-2020-references', null::text),
             ('plan-composition-derivations', null::text),
-            ('water-35ml-per-kg', null::text),
+            ('water-35ml-per-kg', 'water-efsa-drinking-share'),
+            ('water-efsa-drinking-share', null::text),
             ('who-healthy-diet-principles', null::text),
             ('nice-ng246-individualisation', null::text),
             ('budget-tier-cost-bands', null::text),
@@ -219,7 +223,8 @@ begin
             ('dga-whole-foods-emphasis', 'approved'),
             ('fao-energy-requirement-components', 'in_review'),
             ('icmr-dgi-food-variety', 'in_review'),
-            ('rate-cap-1kg-per-week', 'draft'),
+            ('rate-cap-1kg-per-week', 'superseded'),
+            ('rate-cap-0-75kg-per-week', 'draft'),
             ('usda-fdc-composition-source', 'approved'),
             ('mifflin-st-jeor-bmr', 'draft'),
             ('activity-factor-table', 'draft'),
@@ -229,7 +234,8 @@ begin
             ('calorie-floors', 'draft'),
             ('spectrum-rda-2020-references', 'draft'),
             ('plan-composition-derivations', 'draft'),
-            ('water-35ml-per-kg', 'draft'),
+            ('water-35ml-per-kg', 'superseded'),
+            ('water-efsa-drinking-share', 'draft'),
             ('who-healthy-diet-principles', 'draft'),
             ('nice-ng246-individualisation', 'draft'),
             ('budget-tier-cost-bands', 'draft'),
@@ -296,7 +302,7 @@ begin
     from public.evidence_recommendation_claims d
    where (d.recommendation_id, d.claim_id) not in (
             ('vitalis.guidance.whole-foods', 'dga-whole-foods-emphasis'),
-            ('vitalis.safety.rate-cap', 'rate-cap-1kg-per-week'),
+            ('vitalis.safety.rate-cap', 'rate-cap-0-75kg-per-week'),
             ('vitalis.nutrition.composition-source', 'usda-fdc-composition-source'),
             ('vitalis.body.bmr-equation', 'mifflin-st-jeor-bmr'),
             ('vitalis.body.activity-factors', 'activity-factor-table'),
@@ -306,7 +312,7 @@ begin
             ('vitalis.body.calorie-floor', 'calorie-floors'),
             ('vitalis.nutrition.spectrum-references', 'spectrum-rda-2020-references'),
             ('vitalis.plan.composition-caps', 'plan-composition-derivations'),
-            ('vitalis.body.hydration-target', 'water-35ml-per-kg'),
+            ('vitalis.body.hydration-target', 'water-efsa-drinking-share'),
             ('vitalis.guidance.healthy-diet-principles', 'who-healthy-diet-principles'),
             ('vitalis.safety.no-vlcd', 'nice-ng246-individualisation'),
             ('vitalis.plan.budget-tiers', 'budget-tier-cost-bands'),
@@ -812,7 +818,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'protein-bands-by-goal', 'Bloom''s other protein bands are 1.8 g per kg of body weight for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance, applied to current body weight.', 'protein', 'insufficient', 0, 'Adults using Bloom''s body targets who pass Bloom''s safety screening', '["No source is stated in the code for these three bands (src/lib/health/body.ts, bodyTargetsOf); recorded as TO VERIFY."]'::jsonb, '["Per-kilogram bands scale linearly with body weight, which overstates needs at high body weights; the engine makes no adjustment for body composition today."]'::jsonb, '["Planning targets for the classifier''s cleared set, not therapeutic protein prescriptions."]'::jsonb, 'draft', 1, null, 12, null
+  'protein-bands-by-goal', 'Bloom''s other protein bands are 1.8 g per kg for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance. Above a BMI of 23 the bands multiply a reference weight — the healthy-ceiling weight for the person''s height (22.9 × height²) — instead of current body weight; at or below it they apply to current body weight. (Corrected at version 2, M-219: the statement previously said the bands apply to current body weight throughout, which stopped being true when the dosing basis changed.)', 'protein', 'insufficient', 0, 'Adults using Bloom''s body targets who pass Bloom''s safety screening', '["No source is stated in the code for these three bands (src/lib/health/body.ts, bodyTargetsOf); recorded as TO VERIFY."]'::jsonb, '["Per-kilogram bands scale linearly with body weight, which overstates needs at high body weights; since M-219 the engine doses on the healthy-ceiling reference weight above a BMI of 23, but that reference is a BMI ceiling, not a measured lean-mass figure."]'::jsonb, '["Planning targets for the classifier''s cleared set, not therapeutic protein prescriptions."]'::jsonb, 'draft', 2, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -858,7 +864,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'rate-cap-1kg-per-week', 'Bloom caps planned weight change at 1 kg per week.', 'weight_change_rate', 'insufficient', 0, 'Anyone using Bloom''s body-target calculator', '["No source has been verified for this cap. It is a Phase 1 product safety constant, not a finding from the literature.","Whether 1 kg per week is the right ceiling for this population, and how it should differ by body size, is unresolved."]'::jsonb, '["Deliberately recorded with no citation rather than attaching a plausible-looking reference to a number nobody checked.","Until a source is verified, this claim must not be presented to a person as evidence-based."]'::jsonb, '["A cap does not make an aggressive target safe for someone with a history of disordered eating; the safety classifier handles that separately."]'::jsonb, 'draft', 1, null, 12, null
+  'rate-cap-0-75kg-per-week', 'Bloom caps planned weight change at 0.75 kg per week.', 'weight_change_rate', 'insufficient', 0, 'Anyone using Bloom''s body-target calculator', '["The M-219 engine evidence audit (2026-11-22) set this cap against the published ranges it verified — CDC''s 1–2 lb per week and the AHA/ACC/TOS 500–750 kcal/day prescription the old 1 kg/week cap exceeded. Those sources are not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.","How the ceiling should differ by body size remains unresolved."]'::jsonb, '["Deliberately recorded with no citation rather than attaching a plausible-looking reference to a number nobody checked.","Until a source is verified, this claim must not be presented to a person as evidence-based."]'::jsonb, '["A cap does not make an aggressive target safe for someone with a history of disordered eating; the safety classifier handles that separately."]'::jsonb, 'draft', 1, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -881,7 +887,30 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'spectrum-rda-2020-references', 'The Nutrition tab''s micronutrient panel judges a day against reference intakes the code names as ICMR-NIN Recommended Dietary Allowances 2020: fibre 30 g, potassium 3,500 mg, magnesium 370 mg (310 mg for women), calcium 1,000 mg, iron 19 mg (29 mg for women), vitamin C 80 mg, and sodium as a 2,000 mg ceiling rather than a goal.', 'dietary_pattern', 'insufficient', 0, 'Adults reading the Nutrition tab''s daily micronutrient panel', '["The values are stated in the code (src/lib/nutrition/dayView.ts, spectrumReferences) with the ICMR-NIN RDA 2020 attribution, but the registry has not verified them against the publication, so no source is linked."]'::jsonb, '["OPEN OWNER DECISION: this registry permission-gates ICMR-NIN publications for reproduction in a product (see icmr-nin-dgi-2024 and icmr-nin-ifct-2017). Whether stating RDA numeric values as reference intakes falls under the written permission Bloom is seeking is unresolved. The values stay in the product while the owner decides; this entry records the question and does not settle it."]'::jsonb, '["A day under a reference is a statement about the logged foods that report the nutrient — never a deficiency diagnosis, and no surface may word it as one."]'::jsonb, 'draft', 1, null, 12, null
+  'rate-cap-1kg-per-week', 'Bloom caps planned weight change at 1 kg per week.', 'weight_change_rate', 'insufficient', 0, 'Anyone using Bloom''s body-target calculator', '["No source has been verified for this cap. It is a Phase 1 product safety constant, not a finding from the literature.","Whether 1 kg per week is the right ceiling for this population, and how it should differ by body size, is unresolved."]'::jsonb, '["Deliberately recorded with no citation rather than attaching a plausible-looking reference to a number nobody checked.","Until a source is verified, this claim must not be presented to a person as evidence-based."]'::jsonb, '["A cap does not make an aggressive target safe for someone with a history of disordered eating; the safety classifier handles that separately."]'::jsonb, 'draft', 2, null, 12, null
+) on conflict (id) do update set
+    statement = excluded.statement,
+    topic = excluded.topic,
+    grade = excluded.grade,
+    confidence = excluded.confidence,
+    population = excluded.population,
+    uncertainty = excluded.uncertainty,
+    limitations = excluded.limitations,
+    contraindications = excluded.contraindications,
+    version = excluded.version,
+    review_interval_months = excluded.review_interval_months,
+    updated_at = now()
+  where excluded.version >= target.version
+    and to_jsonb(excluded) - 'created_at' - 'updated_at'
+        - 'review_status' - 'reviewed_on' - 'superseded_by'
+        is distinct from
+        to_jsonb(target) - 'created_at' - 'updated_at'
+        - 'review_status' - 'reviewed_on' - 'superseded_by';
+
+insert into public.evidence_claims as target (
+  id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
+) values (
+  'spectrum-rda-2020-references', 'The Nutrition tab''s micronutrient panel judges a day against reference intakes the code names as ICMR-NIN Recommended Dietary Allowances 2020: fibre 30 g, potassium 3,500 mg, magnesium 440 mg (370 mg for women), calcium 1,000 mg, iron 19 mg (29 mg for women), vitamin C 80 mg (65 mg for women), and sodium as a 2,000 mg ceiling rather than a goal. (Corrected at version 2, M-219: the magnesium figures previously recorded here were the ICMR-NIN estimated average requirements, not the RDA, and vitamin C was recorded as a single value where the RDA is sex-specific.)', 'dietary_pattern', 'insufficient', 0, 'Adults reading the Nutrition tab''s daily micronutrient panel', '["The values are stated in the code (src/lib/nutrition/dayView.ts, spectrumReferences) with the ICMR-NIN RDA 2020 attribution, but the registry has not verified them against the publication, so no source is linked."]'::jsonb, '["OPEN OWNER DECISION: this registry permission-gates ICMR-NIN publications for reproduction in a product (see icmr-nin-dgi-2024 and icmr-nin-ifct-2017). Whether stating RDA numeric values as reference intakes falls under the written permission Bloom is seeking is unresolved. The values stay in the product while the owner decides; this entry records the question and does not settle it."]'::jsonb, '["A day under a reference is a statement about the logged foods that report the nutrient — never a deficiency diagnosis, and no surface may word it as one."]'::jsonb, 'draft', 2, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -927,7 +956,30 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'water-35ml-per-kg', 'Bloom''s hydration target is 35 ml per kg of body weight plus an activity allowance of 0 to 1,000 ml, capped between 1,500 and 4,500 ml a day.', 'hydration', 'insufficient', 0, 'Adults using Bloom''s hydration tracker', '["The code calls 35 ml/kg the common adult maintenance estimate (src/lib/health/body.ts) with no source stated; recorded as TO VERIFY."]'::jsonb, '["A single per-kilogram figure ignores climate, illness and medication; heat alone can move real needs well past it."]'::jsonb, '["People whose condition or medication restricts fluid must follow their clinician, not this target."]'::jsonb, 'draft', 1, null, 12, null
+  'water-efsa-drinking-share', 'Bloom''s daily water target is a drinking-water figure: a base of 1,900 ml for men, 1,500 ml for women and 1,700 ml when sex is unstated, plus an activity allowance of 0 to 700 ml, clamped between 1,200 and 3,000 ml. The base is set at roughly three quarters of EFSA''s total-water adequate intake (2.5 L a day for men, 2.0 L for women) — the share ordinarily drunk rather than taken in food.', 'hydration', 'insufficient', 0, 'Adults using Bloom''s hydration tracker', '["The EFSA adequate-intake basis was verified by the M-219 engine evidence audit (2026-11-22) against EFSA''s 2010 opinion; the source is not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.","The roughly-three-quarters drinking share is an estimate of how total water ordinarily splits between drink and food moisture, not an EFSA figure."]'::jsonb, '["EFSA''s adequate intake assumes a temperate climate; heat, illness and medication can move real needs well past any fixed figure."]'::jsonb, '["People whose condition or medication restricts fluid must follow their clinician, not this target."]'::jsonb, 'draft', 1, null, 12, null
+) on conflict (id) do update set
+    statement = excluded.statement,
+    topic = excluded.topic,
+    grade = excluded.grade,
+    confidence = excluded.confidence,
+    population = excluded.population,
+    uncertainty = excluded.uncertainty,
+    limitations = excluded.limitations,
+    contraindications = excluded.contraindications,
+    version = excluded.version,
+    review_interval_months = excluded.review_interval_months,
+    updated_at = now()
+  where excluded.version >= target.version
+    and to_jsonb(excluded) - 'created_at' - 'updated_at'
+        - 'review_status' - 'reviewed_on' - 'superseded_by'
+        is distinct from
+        to_jsonb(target) - 'created_at' - 'updated_at'
+        - 'review_status' - 'reviewed_on' - 'superseded_by';
+
+insert into public.evidence_claims as target (
+  id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
+) values (
+  'water-35ml-per-kg', 'Bloom''s hydration target is 35 ml per kg of body weight plus an activity allowance of 0 to 1,000 ml, capped between 1,500 and 4,500 ml a day.', 'hydration', 'insufficient', 0, 'Adults using Bloom''s hydration tracker', '["The code calls 35 ml/kg the common adult maintenance estimate (src/lib/health/body.ts) with no source stated; recorded as TO VERIFY."]'::jsonb, '["A single per-kilogram figure ignores climate, illness and medication; heat alone can move real needs well past it."]'::jsonb, '["People whose condition or medication restricts fluid must follow their clinician, not this target."]'::jsonb, 'draft', 2, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -1136,7 +1188,7 @@ values ('vitalis.guidance.whole-foods', 'dga-whole-foods-emphasis')
 on conflict (recommendation_id, claim_id) do nothing;
 
 insert into public.evidence_recommendation_claims (recommendation_id, claim_id)
-values ('vitalis.safety.rate-cap', 'rate-cap-1kg-per-week')
+values ('vitalis.safety.rate-cap', 'rate-cap-0-75kg-per-week')
 on conflict (recommendation_id, claim_id) do nothing;
 
 insert into public.evidence_recommendation_claims (recommendation_id, claim_id)
@@ -1176,7 +1228,7 @@ values ('vitalis.plan.composition-caps', 'plan-composition-derivations')
 on conflict (recommendation_id, claim_id) do nothing;
 
 insert into public.evidence_recommendation_claims (recommendation_id, claim_id)
-values ('vitalis.body.hydration-target', 'water-35ml-per-kg')
+values ('vitalis.body.hydration-target', 'water-efsa-drinking-share')
 on conflict (recommendation_id, claim_id) do nothing;
 
 insert into public.evidence_recommendation_claims (recommendation_id, claim_id)
@@ -1454,18 +1506,18 @@ update public.evidence_claims
 
 update public.evidence_claims
    set review_status = 'draft',
-       version = 1,
+       version = 2,
        reviewed_on = null,
        review_interval_months = 12,
        superseded_by = null,
        updated_at = now()
  where id = 'protein-bands-by-goal'
-   and version <= 1
+   and version <= 2
    and (superseded_by is null or superseded_by = null)
    and row(review_status, version, reviewed_on, review_interval_months, superseded_by)
        is distinct from row(
          'draft',
-         1,
+         2,
          null::date,
          12::smallint,
          null::text
@@ -1497,7 +1549,7 @@ update public.evidence_claims
        review_interval_months = 12,
        superseded_by = null,
        updated_at = now()
- where id = 'rate-cap-1kg-per-week'
+ where id = 'rate-cap-0-75kg-per-week'
    and version <= 1
    and (superseded_by is null or superseded_by = null)
    and row(review_status, version, reviewed_on, review_interval_months, superseded_by)
@@ -1510,19 +1562,38 @@ update public.evidence_claims
        );
 
 update public.evidence_claims
+   set review_status = 'superseded',
+       version = 2,
+       reviewed_on = null,
+       review_interval_months = 12,
+       superseded_by = 'rate-cap-0-75kg-per-week',
+       updated_at = now()
+ where id = 'rate-cap-1kg-per-week'
+   and version <= 2
+   and (superseded_by is null or superseded_by = 'rate-cap-0-75kg-per-week')
+   and row(review_status, version, reviewed_on, review_interval_months, superseded_by)
+       is distinct from row(
+         'superseded',
+         2,
+         null::date,
+         12::smallint,
+         'rate-cap-0-75kg-per-week'
+       );
+
+update public.evidence_claims
    set review_status = 'draft',
-       version = 1,
+       version = 2,
        reviewed_on = null,
        review_interval_months = 12,
        superseded_by = null,
        updated_at = now()
  where id = 'spectrum-rda-2020-references'
-   and version <= 1
+   and version <= 2
    and (superseded_by is null or superseded_by = null)
    and row(review_status, version, reviewed_on, review_interval_months, superseded_by)
        is distinct from row(
          'draft',
-         1,
+         2,
          null::date,
          12::smallint,
          null::text
@@ -1554,7 +1625,7 @@ update public.evidence_claims
        review_interval_months = 12,
        superseded_by = null,
        updated_at = now()
- where id = 'water-35ml-per-kg'
+ where id = 'water-efsa-drinking-share'
    and version <= 1
    and (superseded_by is null or superseded_by = null)
    and row(review_status, version, reviewed_on, review_interval_months, superseded_by)
@@ -1564,6 +1635,25 @@ update public.evidence_claims
          null::date,
          12::smallint,
          null::text
+       );
+
+update public.evidence_claims
+   set review_status = 'superseded',
+       version = 2,
+       reviewed_on = null,
+       review_interval_months = 12,
+       superseded_by = 'water-efsa-drinking-share',
+       updated_at = now()
+ where id = 'water-35ml-per-kg'
+   and version <= 2
+   and (superseded_by is null or superseded_by = 'water-efsa-drinking-share')
+   and row(review_status, version, reviewed_on, review_interval_months, superseded_by)
+       is distinct from row(
+         'superseded',
+         2,
+         null::date,
+         12::smallint,
+         'water-efsa-drinking-share'
        );
 
 update public.evidence_claims
@@ -1795,4 +1885,64 @@ select 'claim', 'adaptation-ratios', 1, '2026-11-18'::date, 'vitalis-evidence-re
     where entity_type = 'claim'
       and entity_id = 'adaptation-ratios'
       and version = 1
+ );
+
+insert into public.evidence_revisions
+  (entity_type, entity_id, version, changed_on, changed_by, summary)
+select 'claim', 'rate-cap-1kg-per-week', 2, '2026-11-22'::date, 'vitalis-evidence-registry', 'Marked superseded by rate-cap-0-75kg-per-week: the M-219 engine evidence audit found the 1 kg/week cap exceeds the CDC and AHA/ACC/TOS ranges, and the engine''s cap changed with it. Retained for history, no longer the live rule.'
+ where not exists (
+   select 1 from public.evidence_revisions
+    where entity_type = 'claim'
+      and entity_id = 'rate-cap-1kg-per-week'
+      and version = 2
+ );
+
+insert into public.evidence_revisions
+  (entity_type, entity_id, version, changed_on, changed_by, summary)
+select 'claim', 'rate-cap-0-75kg-per-week', 1, '2026-11-22'::date, 'vitalis-evidence-registry', 'Registered the 0.75 kg/week rate cap (M-219). Draft: the audit''s CDC and AHA/ACC/TOS sources are recorded in the claim''s uncertainty as TO VERIFY / TO REGISTER, not yet linked.'
+ where not exists (
+   select 1 from public.evidence_revisions
+    where entity_type = 'claim'
+      and entity_id = 'rate-cap-0-75kg-per-week'
+      and version = 1
+ );
+
+insert into public.evidence_revisions
+  (entity_type, entity_id, version, changed_on, changed_by, summary)
+select 'claim', 'water-35ml-per-kg', 2, '2026-11-22'::date, 'vitalis-evidence-registry', 'Marked superseded by water-efsa-drinking-share: the M-219 audit found the 35 ml/kg rule produced a drinking schedule above EFSA''s total-water adequate intake, and the engine''s formula changed with it. Retained for history.'
+ where not exists (
+   select 1 from public.evidence_revisions
+    where entity_type = 'claim'
+      and entity_id = 'water-35ml-per-kg'
+      and version = 2
+ );
+
+insert into public.evidence_revisions
+  (entity_type, entity_id, version, changed_on, changed_by, summary)
+select 'claim', 'water-efsa-drinking-share', 1, '2026-11-22'::date, 'vitalis-evidence-registry', 'Registered the drinking-share hydration target (M-219). Draft: the EFSA 2010 adequate-intake basis is recorded in the claim''s uncertainty as TO VERIFY / TO REGISTER, not yet linked.'
+ where not exists (
+   select 1 from public.evidence_revisions
+    where entity_type = 'claim'
+      and entity_id = 'water-efsa-drinking-share'
+      and version = 1
+ );
+
+insert into public.evidence_revisions
+  (entity_type, entity_id, version, changed_on, changed_by, summary)
+select 'claim', 'protein-bands-by-goal', 2, '2026-11-22'::date, 'vitalis-evidence-registry', 'Statement corrected (M-219, audit F-05): above a BMI of 23 the bands now multiply the healthy-ceiling reference weight, not current body weight. The bands themselves are unchanged.'
+ where not exists (
+   select 1 from public.evidence_revisions
+    where entity_type = 'claim'
+      and entity_id = 'protein-bands-by-goal'
+      and version = 2
+ );
+
+insert into public.evidence_revisions
+  (entity_type, entity_id, version, changed_on, changed_by, summary)
+select 'claim', 'spectrum-rda-2020-references', 2, '2026-11-22'::date, 'vitalis-evidence-registry', 'Statement corrected (M-219, audit F-09): magnesium is the ICMR-NIN RDA 2020 (440 mg men / 370 mg women), not the EAR figures previously recorded, and vitamin C is sex-specific (80 mg men / 65 mg women). The OPEN OWNER DECISION limitation is unchanged.'
+ where not exists (
+   select 1 from public.evidence_revisions
+    where entity_type = 'claim'
+      and entity_id = 'spectrum-rda-2020-references'
+      and version = 2
  );

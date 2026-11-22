@@ -136,22 +136,26 @@ describe("the milk-and-curd serving tally", () => {
       behavioural: { ...EMPTY_BEHAVIOURAL, cookingAbility: "basic", prepTimeMaxMinutes: 20 },
     };
     const safety = classifySafety(toSafetyInput(profile));
-    const gated = targetsFor(profile, safety, "2026-11-20");
+    const gated = targetsFor(profile, safety, "2026-11-21");
     if (!gated.ok) throw new Error("gated refused");
     const outcome = generatePlan({
       profile,
       safety,
       gatedOutcome: gated,
-      fallbackTargets: null,
       foods: USDA_REFERENCE_FOODS,
       dishes: DISH_LIBRARY,
-      day: "2026-11-20",
+      day: "2026-11-21",
       now: "2026-11-19T03:00:00.000Z",
       id: "tally-e2e",
     });
     if (!outcome.ok) throw new Error("plan refused");
-    /* This day serves a 100 g Greek yogurt top-up: the note must
-       state 100 g — before the fix it stated 0 g. */
+    /* This day serves 100 g of milk and curd: the note must state
+       100 g — before the fix it stated 0 g.
+       M-219 re-pin: at the corrected protein guide (129 g, dosed
+       on the reference weight) the 2026-11-20 composition serves
+       no dairy; on 2026-11-21 the day's dishes carry exactly
+       100 g of milk and curd and the note states it — the tally
+       property pinned here is unchanged. */
     const milkNotes = outcome.plan.notes.filter((n) => n.includes("g of milk and curd"));
     expect(milkNotes).toEqual([
       "Today's suggestions reach 100 g of milk and curd — the ICMR-NIN guideline aims for at least 300 g across the day.",

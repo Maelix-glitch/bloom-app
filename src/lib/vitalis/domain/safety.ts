@@ -15,7 +15,7 @@
  * state, and every finding names the rule that produced it.
  */
 
-export const SAFETY_RULES_VERSION = "vitalis-safety-1.0.0";
+export const SAFETY_RULES_VERSION = "vitalis-safety-1.1.0";
 
 export const SAFETY_CLASSES = [
   "standard",
@@ -51,6 +51,7 @@ export const SAFETY_RULE_IDS = [
   "eating_disorder_history",
   "severe_underweight",
   "underweight_loss_goal",
+  "underweight_target",
   "high_risk_condition",
   "unexplained_weight_change",
   "medical_condition",
@@ -120,8 +121,39 @@ export const HIGH_RISK_CONDITION_LABEL: Record<HighRiskCondition, string> = {
   eating_disorder_diagnosed: "a diagnosed eating disorder",
 };
 
-/** The fastest rate Bloom will plan for, in kg per week. */
-export const MAX_RATE_KG_PER_WEEK = 1;
+/**
+ * Conditions that do not block automated targets but always carry the
+ * caution state — and, since M-219, auto-enable the related Condition
+ * Mode in plan composition (see lib/modes). These are the common
+ * metabolic conditions of the product's launch population (type 2
+ * diabetes not managed with insulin, PCOS, thyroid disorders,
+ * hypertension): before M-219 they existed only as free text, so an
+ * honest answer bought the person nothing structured at all.
+ */
+export const CAUTION_CONDITIONS = [
+  "type_2_diabetes",
+  "pcos",
+  "thyroid_disorder",
+  "hypertension",
+] as const;
+
+export type CautionCondition = (typeof CAUTION_CONDITIONS)[number];
+
+export const CAUTION_CONDITION_LABEL: Record<CautionCondition, string> = {
+  type_2_diabetes: "type 2 diabetes (not on insulin)",
+  pcos: "PCOS",
+  thyroid_disorder: "a thyroid disorder",
+  hypertension: "high blood pressure (hypertension)",
+};
+
+/**
+ * The fastest rate Bloom will plan for, in kg per week. 0.75 kg/wk
+ * implies a ~825 kcal/day deficit — the top of the AHA/ACC/TOS
+ * 500–750 kcal/day prescription neighbourhood and inside the CDC's
+ * 1–2 lb/wk gradual-loss range. The previous 1.0 kg/wk cap implied a
+ * 1,100 kcal/day deficit, outside both (M-219, audit F-04).
+ */
+export const MAX_RATE_KG_PER_WEEK = 0.75;
 export const MIN_RATE_KG_PER_WEEK = 0.25;
 
 /** Below this BMI, no weight-loss goal is offered at all. */
@@ -142,38 +174,22 @@ export interface SafetyInput {
   readonly unexplainedWeightChange: boolean | null;
   readonly symptoms: readonly string[];
   readonly requestedRateKgPerWeek: number | null;
+  /** BMI at the person's stated target weight, when both are known.
+   *  Null when there is no target weight to judge (M-219, audit F-03:
+   *  the gates used to watch only where a person starts, never where
+   *  the plan is taking them). */
+  readonly targetBmi: number | null;
 }
 
 export const SAFETY_DISCLAIMER =
   "Bloom Vitalis is a wellness tool, not a medical device. Safety states describe what Bloom will show you, not a medical assessment.";
 
 /**
- * Rules that block on ABSENCE — the person was never asked, which is an
- * information gap, not a finding about them. Every other blocking rule
- * reports something substantive (a symptom, a history, a condition).
- *
- * Surfaces that fall back to a secondary target source when the gated
- * engine refuses (the Nutrition tab; plan generation) share this one
- * distinction: a block carrying ONLY absence rules is treated like a
- * completeness refusal, while a block carrying any substantive rule is
- * final — no fallback may resurrect a number the gate refused for a real
- * reason. Defined here, beside the rule ids themselves, so the two
- * consumers can never drift apart on what "absence" means.
+ * M-219 (audit F-02): blocks used to be split into "absence" rules
+ * (unanswered questions) and "substantive" rules, and an absence-only
+ * block fell through to legacy body-profile targets in the day view
+ * and plan generation. That routed the two most safety-critical
+ * questions in the product around the gate by silence. The split is
+ * retired: EVERY blocking finding is final in every consumer — no
+ * targets and no plan exist until the classification is non-blocking.
  */
-export const ABSENCE_BLOCK_RULE_IDS: ReadonlySet<SafetyRuleId> = new Set([
-  "age_missing",
-  "safety_answers_missing",
-]);
-
-/** True when a non-empty set of blocking rules is absence-only. */
-export function isAbsenceOnlyBlock(blockingRuleIds: readonly string[]): boolean {
-  return (
-    blockingRuleIds.length > 0 &&
-    blockingRuleIds.every((id) => ABSENCE_BLOCK_RULE_IDS.has(id as SafetyRuleId))
-  );
-}
-
-/** True when any blocking rule reports something substantive. */
-export function hasSubstantiveBlock(blockingRuleIds: readonly string[]): boolean {
-  return blockingRuleIds.some((id) => !ABSENCE_BLOCK_RULE_IDS.has(id as SafetyRuleId));
-}

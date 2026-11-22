@@ -72,7 +72,7 @@ describe("parseTargetAdjustment", () => {
 
 describe("adjustedTargets — the shared apply rule", () => {
   it("shifts energy only; protein is never adjusted", () => {
-    expect(adjustedTargets({ kcal: 3288, proteinG: 220 }, -233)).toEqual({
+    expect(adjustedTargets({ kcal: 3288, proteinG: 220 }, -233, "male")).toEqual({
       kcal: 3055,
       proteinG: 220,
     });
@@ -80,12 +80,29 @@ describe("adjustedTargets — the shared apply rule", () => {
 
   it("a zero delta is the targets themselves", () => {
     const targets = { kcal: 3288, proteinG: 220 };
-    expect(adjustedTargets(targets, 0)).toBe(targets);
+    expect(adjustedTargets(targets, 0, "male")).toBe(targets);
   });
 
   it("results outside the sane band are refused, never clamped", () => {
-    expect(adjustedTargets({ kcal: 1000, proteinG: 100 }, -300)).toBeNull();
-    expect(adjustedTargets({ kcal: 5800, proteinG: 200 }, 300)).toBeNull();
+    expect(adjustedTargets({ kcal: 1000, proteinG: 100 }, -300, "male")).toBeNull();
+    expect(adjustedTargets({ kcal: 5800, proteinG: 200 }, 300, "male")).toBeNull();
+  });
+
+  it("results below the person's own calorie floor are refused (M-219, F-01)", () => {
+    /* The audit's worked case: a floor-bound person at 1,350 kcal
+       (unspecified-sex floor) confirming −550 would land on 800 —
+       inside the old band, under the floor. Refused. */
+    expect(adjustedTargets({ kcal: 1350, proteinG: 112 }, -550, "unspecified")).toBeNull();
+    /* Exactly at the floor is allowed; one kcal under is not. */
+    expect(adjustedTargets({ kcal: 2000, proteinG: 100 }, -500, "male")).toEqual({
+      kcal: 1500,
+      proteinG: 100,
+    });
+    expect(adjustedTargets({ kcal: 2000, proteinG: 100 }, -501, "male")).toBeNull();
+    expect(adjustedTargets({ kcal: 2000, proteinG: 100 }, -800, "female")).toEqual({
+      kcal: 1200,
+      proteinG: 100,
+    });
   });
 });
 
@@ -128,7 +145,13 @@ const NOW = "2026-11-18T03:00:00.000Z";
 const PROVENANCE = { source: "user_reported", recordedAt: "2026-06-01T07:00:00Z" } as const;
 
 /** The owner's shape (as planLearning.test.ts): eggetarian, 100 kg,
- *  gain — targets from the body-profile fallback, 3,288 / 220. */
+ *  gain. Since M-219 the plan's targets come from the gated engine
+ *  alone (the body-profile fallback this fixture once rode is
+ *  retired): male, 178 cm, 100 kg, moderate, gain at 0.25 kg/wk →
+ *  BMR 1,968, TDEE 3,050, +275 surplus = 3,325 kcal; protein dosed
+ *  on the healthy-ceiling reference weight (72.6 kg × 1.6) = 116 g. */
+const ENGINE_TARGETS = { kcal: 3325, proteinG: 116 };
+
 function ownerProfile(): HealthProfile {
   return {
     ...emptyProfile("user-1", "2026-06-01T07:00:00Z"),
@@ -142,8 +165,8 @@ function ownerProfile(): HealthProfile {
     dietary: { ...EMPTY_DIETARY, pattern: "eggetarian", mealsPerDay: 3, budgetTier: null },
     constraints: {
       ...EMPTY_CONSTRAINTS,
-      pregnantOrBreastfeeding: null,
-      eatingDisorderHistory: null,
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
     },
   };
 }
@@ -155,7 +178,6 @@ function gen(targetAdjustmentKcal?: number): DailyPlan {
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, "2026-11-18"),
-    fallbackTargets: { kcal: 3288, proteinG: 220 },
     foods: USDA_REFERENCE_FOODS,
     dishes: DISH_LIBRARY,
     ...(targetAdjustmentKcal !== undefined ? { targetAdjustmentKcal } : {}),
@@ -170,9 +192,9 @@ function gen(targetAdjustmentKcal?: number): DailyPlan {
 describe("generatePlan with a confirmed adjustment", () => {
   it("the delta lands inside the targets and the inputs snapshot", () => {
     const plan = gen(-233);
-    expect(plan.targets).toEqual({ kcal: 3055, proteinG: 220 });
-    expect(plan.inputs.targetsKcal).toBe(3055);
-    expect(plan.inputs.targetsProteinG).toBe(220);
+    expect(plan.targets).toEqual({ kcal: 3092, proteinG: 116 });
+    expect(plan.inputs.targetsKcal).toBe(3092);
+    expect(plan.inputs.targetsProteinG).toBe(116);
   });
 
   it("confirming one makes the unadjusted plan stale by name: your targets", () => {
@@ -183,15 +205,21 @@ describe("generatePlan with a confirmed adjustment", () => {
     expect(planStaleness(plan, adjusted.inputs).changed).toContain("your targets");
     /* And the snapshot the adjusted plan carries is exactly the one
        the same stored inputs reproduce. */
-    expect(planInputsSnapshotOf(profile, safety, { kcal: 3055, proteinG: 220 })).toEqual(
+    expect(planInputsSnapshotOf(profile, safety, { kcal: 3092, proteinG: 116 })).toEqual(
       adjusted.inputs,
     );
   });
 
   it("an out-of-band result leaves the engine's targets standing", () => {
-    /* 3,288 − 2,600 would land under the floor: refused, not clamped.
+    /* 3,325 − 2,600 would land under the band: refused, not clamped.
        (The stored delta can never be this large — the parser caps it
        at 750 — but the engine's apply rule refuses regardless.) */
-    expect(gen(-2600).targets).toEqual({ kcal: 3288, proteinG: 220 });
+    expect(gen(-2600).targets).toEqual(ENGINE_TARGETS);
+  });
+
+  it("a result below the calorie floor leaves the engine's targets standing (M-219, F-01)", () => {
+    /* The male floor is 1,500: a −1,900 delta would land at 1,425 —
+       inside the old 800–6,000 band, under the floor. Refused. */
+    expect(gen(-1900).targets).toEqual(ENGINE_TARGETS);
   });
 });

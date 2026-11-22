@@ -36,7 +36,11 @@ import {
   ASSESSMENT_KEY,
   EMPTY_ANSWERS,
   emptyAssessmentState,
+  toHealthProfile,
 } from "@/lib/assessment/state";
+import { targetsFor } from "@/lib/vitalis/calc/body";
+import { toSafetyInput } from "@/lib/vitalis/domain/profile";
+import { classifySafety } from "@/lib/vitalis/safety/classify";
 import {
   FOOD_PHOTO_CREDITS,
   MAX_FOODS,
@@ -249,10 +253,37 @@ describe("NutritionPage — search & add flow", () => {
 describe("NutritionPage — totals vs targets", () => {
   it("measures the day against the same target Trackers computes", () => {
     const profile = seedBodyProfile();
+    /* M-219 (audit F-02): the target now reaches the day ONLY through
+       the safety-gated Assessment path — the body-profile fallback
+       this test originally relied on is retired. The one-target
+       principle survives the move: the same body numbers, entered in
+       the Assessment and answered fully, produce through the gate
+       exactly the figure Trackers computes from its own store. */
+    const complete = emptyAssessmentState(NOW);
+    complete.answers = {
+      ...EMPTY_ANSWERS,
+      ageYears: 30,
+      sex: "female",
+      heightCm: 175,
+      weightKg: 82,
+      activity: "light",
+      goal: "maintain",
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
+    };
+    setPref(ASSESSMENT_KEY, complete);
+    const healthProfile = toHealthProfile(complete, "local");
+    const gated = targetsFor(
+      healthProfile,
+      classifySafety(toSafetyInput(healthProfile)),
+      todayLocal(),
+    );
+    if (!gated.ok) throw new Error("expected gated targets for the completed assessment");
     const oats = seedOats();
     const entry = logDirect(oats, 100, todayLocal());
     const targets = bodyTargetsOf(profile, todayLocal());
     if (!targets) throw new Error("expected targets for the seeded profile");
+    expect(gated.targets.calorieTargetKcal).toBe(Math.round(targets.calories));
 
     render(<NutritionPage />);
     /* Brief v6 Slice 7 (M-126/M-125): the hero numeral is kcal EATEN
@@ -299,8 +330,8 @@ describe("NutritionPage — totals vs targets", () => {
     expect(screen.getByText(/doesn't set calorie targets/)).toBeTruthy();
   });
 
-  it("an absence-only block (safety questions never answered) still falls back to Trackers' target", () => {
-    const profile = seedBodyProfile();
+  it("an absence-only block (safety questions never answered) fails closed — totals only, no Trackers fallback", () => {
+    seedBodyProfile();
     const unanswered = emptyAssessmentState(NOW);
     unanswered.answers = {
       ...EMPTY_ANSWERS,
@@ -315,15 +346,20 @@ describe("NutritionPage — totals vs targets", () => {
     setPref(ASSESSMENT_KEY, unanswered);
     const oats = seedOats();
     logDirect(oats, 100, todayLocal());
-    const targets = bodyTargetsOf(profile, todayLocal());
-    if (!targets) throw new Error("expected targets for the seeded profile");
 
     render(<NutritionPage />);
-    /* Same hero context line as the test above (v6 M-126: the guide
-       as the eaten numeral's context — reason recorded there). */
-    expect(
-      screen.getByText(`of your ${fmtKcalApprox(targets.calories)} guide`),
-    ).toBeTruthy();
+    /* M-219 (audit F-02): this test used to pin the OPPOSITE — the
+       absence-only block fell back to Trackers' body-profile target,
+       so a person who never answered the safety questions still got
+       a full target. That fall-through is the defect the audit
+       flagged: no classification, no target. The totals still show;
+       the state is the information-gap one ("No target yet" + the
+       next step), not the refusal copy — the person has no safety
+       answers, so Bloom does not claim their answers refused. */
+    expect(screen.getAllByText("380").length).toBeGreaterThan(0);
+    expect(screen.queryByText(/of your .* guide/)).toBeNull();
+    expect(screen.queryByRole("progressbar", { name: "Calories against target" })).toBeNull();
+    expect(screen.getByText(/No target yet/)).toBeTruthy();
     expect(screen.queryByText(/doesn't set calorie targets/)).toBeNull();
   });
 

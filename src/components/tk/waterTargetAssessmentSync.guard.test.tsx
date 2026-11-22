@@ -130,8 +130,10 @@ describe("one water target on an Assessment-only account", () => {
   it("the fixture's plan figure is the guide's, not the stored manual goal", () => {
     const figure = composedPlanWaterMl();
     expect(figure).not.toBe(2200);
-    /* 82 kg × 35 + 250 (light) = 3,120 → 3,100 on the 50 ml grid. */
-    expect(figure).toBe(3100);
+    /* M-219 (audit F-07): female drinking base 1,500 + 150 (light)
+       = 1,650. The old pin (82 kg × 35 + 250 = 3,100) was the
+       retired total-water formula. */
+    expect(figure).toBe(1650);
   });
 
   it("the hook resolves the plan's figure from the Assessment alone", async () => {

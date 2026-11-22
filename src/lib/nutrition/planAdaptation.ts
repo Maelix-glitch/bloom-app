@@ -34,6 +34,7 @@
 
 import { shiftDay } from "@/lib/localDay";
 import type { PlanReason } from "@/lib/reasons";
+import { completeLoggedDayTotals } from "./loggedDays";
 import { spectrumForDay, type SpectrumSex } from "./dayView";
 import type { DailyPlan } from "./plan";
 import type { NutritionTargets } from "./targets";
@@ -51,7 +52,7 @@ export const PROTEIN_SHORTFALL_RATIO = 0.85;
 export const ENERGY_OVERSHOOT_RATIO = 1.1;
 
 export interface PlanAdaptation {
-  /** How many logged days the signals were computed over (2–3). */
+  /** How many COMPLETE logged days the signals were computed over (2–3). */
   days: number;
   /** The logged days' mean energy, as logged (unrounded). */
   avgKcal: number;
@@ -73,18 +74,17 @@ interface DayTotals {
   proteinG: number;
 }
 
-/** The recent logged days before `day`, newest first, capped. A day
- *  counts as logged when it holds at least one entry. */
+/** The recent COMPLETE logged days before `day`, newest first,
+ *  capped. A day counts only when its record is whole enough to
+ *  learn from (loggedDays.ts, M-219 / audit F-11): before that fix
+ *  any day with a single entry counted, so two fragmentary days
+ *  averaging 23 g of protein could lean a whole plan (M-153). */
 function recentLoggedDays(entries: readonly LogEntry[], day: string): DayTotals[] {
-  const byDay = new Map<string, DayTotals>();
-  for (const entry of entries) {
-    if (entry.day >= day) continue;
-    const totals = byDay.get(entry.day) ?? { day: entry.day, kcal: 0, proteinG: 0 };
-    totals.kcal += entry.nutrients.kcal;
-    totals.proteinG += entry.nutrients.proteinG;
-    byDay.set(entry.day, totals);
-  }
-  return [...byDay.values()].sort((a, b) => (a.day < b.day ? 1 : -1)).slice(0, ADAPTATION_MAX_DAYS);
+  return [...completeLoggedDayTotals(entries).values()]
+    .filter((totals) => totals.day < day)
+    .sort((a, b) => (a.day < b.day ? 1 : -1))
+    .slice(0, ADAPTATION_MAX_DAYS)
+    .map((totals) => ({ day: totals.day, kcal: totals.kcal, proteinG: totals.proteinG }));
 }
 
 const whole = (n: number) => Math.round(n).toLocaleString("en-US");

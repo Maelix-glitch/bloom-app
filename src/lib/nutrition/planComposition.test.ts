@@ -61,19 +61,15 @@ function fullProfile(pattern: DietaryPattern | null, mealsPerDay = 3): HealthPro
   };
 }
 
-/** The owner's shape: safety questions unanswered (absence-only block),
- *  so targets come from the Trackers body-profile fallback. */
+/** The owner's shape. Since M-219 the safety questions are
+ *  answered and the targets are the gated engine's — the
+ *  body-profile fallback this fixture once rode is retired. */
 function ownerProfile(): HealthProfile {
   return {
     ...fullProfile("eggetarian"),
     weight: observation(quantity(100, "kg"), PROVENANCE),
     goal: "gain",
     rateKgPerWeek: 0.25,
-    constraints: {
-      ...EMPTY_CONSTRAINTS,
-      pregnantOrBreastfeeding: null,
-      eatingDisorderHistory: null,
-    },
   };
 }
 
@@ -82,6 +78,9 @@ function gen(
   opts: {
     day?: string;
     foods?: readonly Food[];
+    /** Accepted for fixture compatibility and deliberately NOT
+     *  forwarded: M-219 retired the fallback — targets come from
+     *  the gated engine alone. */
     fallbackTargets?: { kcal: number; proteinG: number };
   } = {},
 ): DailyPlan {
@@ -91,7 +90,6 @@ function gen(
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, day),
-    fallbackTargets: opts.fallbackTargets ?? null,
     foods: opts.foods ?? USDA_REFERENCE_FOODS,
     day,
     now: NOW,
@@ -328,17 +326,23 @@ function expectCapsHold(plan: DailyPlan, targetProteinG: number) {
 }
 
 describe("plan · portion caps", () => {
+  /* The gated engine's targets for the owner fixture (M-219):
+     3,325 kcal / 116 g protein. */
   it("caps hold at ordinary targets", () => {
-    expectCapsHold(gen(ownerProfile(), { fallbackTargets: { kcal: 3288, proteinG: 220 } }), 220);
+    expectCapsHold(gen(ownerProfile(), { fallbackTargets: { kcal: 3288, proteinG: 220 } }), 116);
   });
 
-  it("caps hold under adversarial targets — huge numbers never break a cap", () => {
+  it("caps hold at the engine's own targets — no caller-supplied figure can break a cap", () => {
+    /* M-219: this test once injected adversarial targets
+       (9,000 kcal / 600 g) through the body-profile fallback. That
+       injection path is retired — targets come only from the gated
+       engine, which bounds them by construction — so the pin now
+       reads: whatever pair a caller still passes is ignored, the
+       plan carries the engine's targets, and the caps hold
+       against them. */
     const plan = gen(ownerProfile(), { fallbackTargets: { kcal: 9000, proteinG: 600 } });
-    expectCapsHold(plan, 600);
-    /* The unmet remainder is honest: suggestions do not pretend to
-       reach a 9,000 kcal / 600 g day with capped whole foods. */
-    const suggestedProtein = allSuggestions(plan).reduce((sum, s) => sum + s.nutrients.proteinG, 0);
-    expect(suggestedProtein).toBeLessThan(600);
+    expect(plan.targets).toEqual({ kcal: 3325, proteinG: 116 });
+    expectCapsHold(plan, 116);
   });
 
   it("the dominance trim fires when one food would carry the day", () => {
@@ -367,7 +371,9 @@ describe("plan · portion caps", () => {
       .filter((s) => s.foodId === chicken.id)
       .reduce((sum, s) => sum + s.nutrients.proteinG, 0);
     expect(chickenProtein).toBeGreaterThan(0);
-    expect(chickenProtein).toBeLessThanOrEqual(0.4 * 120 + 1);
+    /* M-219: the guide is the gated 116 g now, not the injected
+       120 g — the dominance bound follows the plan's own target. */
+    expect(chickenProtein).toBeLessThanOrEqual(0.4 * 116 + 1);
   });
 });
 
@@ -407,9 +413,17 @@ describe("plan · day floors", () => {
        derived details now (snack-added + food-groups-few reasons);
        the facts pinned — a snack beyond the stated 3 meals, a
        7-group span — are unchanged. */
+    /* Method 15 update (M-219): at the gated guide (3,325 kcal /
+       116 g, reference-weight protein) this day honestly names
+       two more facts — protein overshoots the lower guide
+       (163 g) and the capped pool lands under the energy guide
+       (3,153 kcal). Both notes state their true figures; the
+       floors below still hold. */
     expect(plan.notes).toEqual([
       "You listed 3 meals a day; a snack spreads today across 4 sittings.",
       "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+      "Today's suggestions reach about 163 g of protein — above your 116 g protein guide. The day's protein foods add up past it.",
+      "Today's suggestions reach about 3,153 kcal — below your ~3,350 kcal guide. The portion caps bind before the target does.",
     ]);
     const veg = allSuggestions(plan)
       .filter((s) => groupOf(s) === "vegetables")
@@ -491,7 +505,9 @@ describe("plan · rotation", () => {
     const d17 = gen(profile, { day: "2026-11-17" });
 
     for (const plan of [d15, d16, d17]) {
-      expect(plan.targets).toEqual({ kcal: 1654, proteinG: 148 });
+      /* M-219: protein is dosed on the healthy-ceiling reference
+         weight (70.1 kg × 1.8 = 126 g), not actual weight (148 g). */
+      expect(plan.targets).toEqual({ kcal: 1654, proteinG: 126 });
     }
     const ids = (p: DailyPlan) =>
       allSuggestions(p)
@@ -505,18 +521,20 @@ describe("plan · rotation", () => {
        the composition still rotates — those are the properties this
        test exists to hold; the notes below are the current truth.
        2026-11-15 now meets every ICMR floor and lands inside the
-       energy band, so it carries no notes at all. */
-    expect(d15.notes).toEqual([]);
-    /* 2026-11-16 rotates to a mix that spans 6 food groups and lands
-       over the guide at 1855 kcal — both facts are named. */
-    expect(d16.notes).toContain(
-      "Today's suggestions span 6 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
-    );
-    /* Brief v4 (Slice 1): the kcal-off-guide reason's derived
-       detail — same numbers, reasons.ts's shorter second clause. */
-    expect(d16.notes).toContain(
-      "Today's suggestions reach about 1,855 kcal — above your ~1,650 kcal guide. The day's guideline floors add up past it.",
-    );
+       energy band, so it carries no notes at all.
+       Method 15 re-pin (M-219): at the reference-weight protein
+       guide (126 g) the 15th's rotation overshoots protein and
+       names it; the 16th lands inside the energy band (the
+       1,855 kcal note is gone) and spans 5 groups. Her targets
+       still never rotate; the composition still does. */
+    expect(d15.notes).toEqual([
+      "Today's suggestions reach about 142 g of protein — above your 126 g protein guide. The day's protein foods add up past it.",
+    ]);
+    /* 2026-11-16 rotates to a mix that spans 5 food groups; the
+       span is named. */
+    expect(d16.notes).toEqual([
+      "Today's suggestions span 5 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+    ]);
     /* 2026-11-17 reaches every gram floor and the energy band; only
        the group-span aim is missed, and named. (P12 note: an early
        P12 build spanned 7 groups here — the extra group rode in on
@@ -570,10 +588,12 @@ describe("plan · method version", () => {
 /* ------------------------------ owner's day -------------------------------- */
 
 describe("plan · the owner's day (worked example)", () => {
-  it("gain · 3,288 kcal · 220 g protein · eggetarian — balanced layers, eggs in, flesh out", () => {
+  it("gain · 3,325 kcal · 116 g protein · eggetarian — balanced layers, eggs in, flesh out", () => {
     const plan = gen(ownerProfile(), { fallbackTargets: { kcal: 3288, proteinG: 220 } });
-    expect(plan.targetsSource).toBe("body_profile");
-    expect(plan.targets).toEqual({ kcal: 3288, proteinG: 220 });
+    /* M-219: targets come from the gated engine (source
+       "assessment"); the fallback pair passed above is ignored. */
+    expect(plan.targetsSource).toBe("assessment");
+    expect(plan.targets).toEqual({ kcal: 3325, proteinG: 116 });
     const suggestions = allSuggestions(plan);
     /* "Eggs in" is a pattern property, not a daily guarantee: with the
        soy anchors in the 142-food pool, this day's rotation runs on
@@ -594,12 +614,18 @@ describe("plan · the owner's day (worked example)", () => {
        carries snack-layered items by design (the snacks pin). */
     for (const meal of plan.meals.filter((m) => m.meal !== "snack")) {
       expect(meal.suggestions.some((s) => s.layer === "base")).toBe(false);
+      /* M-219: the two-protein-layer depth was calibrated to the
+         220 g guide. At the gated 116 g guide one protein layer
+         per main meal carries the meal, with protein depth riding
+         in the finishing and top-up layers (this day's breakfast:
+         edamame + peanuts + milk ≈ 31 g protein). The floor that
+         survives is a protein layer in every main meal. */
       expect(meal.suggestions.filter((s) => s.layer === "protein").length).toBeGreaterThanOrEqual(
-        2,
+        1,
       );
       expect(meal.suggestions.filter((s) => s.layer === "vegetables").length).toBe(2);
     }
-    expectCapsHold(plan, 220);
+    expectCapsHold(plan, 116);
   });
 });
 
@@ -640,7 +666,7 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
        suite composes from foods alone.) */
     for (const { day, plan } of week) {
       const { kcal } = totals(plan);
-      if (Math.abs(kcal - 3288) <= 0.05 * 3288) continue;
+      if (Math.abs(kcal - 3325) <= 0.05 * 3325) continue;
       const note = plan.notes.find((n) => n.includes("kcal guide"));
       expect(note, `${day}: ${Math.round(kcal)} kcal and no energy note`).toBeDefined();
       /* The true figure, in the house format (grouped — "2,747"). */
@@ -651,10 +677,11 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
   it("protein reaches 95% of the guide — or the shortfall is named with its true figure", () => {
     for (const { day, plan } of week) {
       const { proteinG } = totals(plan);
-      if (proteinG >= 0.95 * 220) continue;
+      /* M-219: the guide is the gated 116 g. */
+      if (proteinG >= 0.95 * 116) continue;
       const note = plan.notes.find((n) => n.includes("protein guide"));
       expect(note, `${day}: ${proteinG.toFixed(1)} g and no protein note`).toBeDefined();
-      expect(note).toContain(`about ${Math.round(proteinG)} g of your 220 g protein guide`);
+      expect(note).toContain(`about ${Math.round(proteinG)} g of your 116 g protein guide`);
     }
   });
 
@@ -717,18 +744,26 @@ describe("plan · P4 soy-form portion caps", () => {
     expect(COOKED_SOY_FORM_IDS.has(soybeans.id)).toBe(false);
   });
 
-  it("a composed meal may carry a full 120 g serving of tempeh", () => {
+  it("a composed meal may carry a full cooked-form serving of tempeh", () => {
     /* The owner's 2026-11-15: under the dry-pulse cap tempeh stopped
        at 60 g (half a serving, ~12 g protein); portioned as the cooked
-       food it is, breakfast and lunch each carry the full 120 g. */
+       food it is, a meal carries the full 120 g.
+       M-219: at the 116 g guide one full serving covers the day's
+       soy-form need (the pin once counted two, at the 220 g guide);
+       what is pinned is unchanged — a full 120 g serving is served,
+       as a protein layer, never capped back to 60 g. */
     const plan = gen(ownerProfile(), {
       fallbackTargets: { kcal: 3288, proteinG: 220 },
       day: "2026-11-15",
     });
     const tempeh = allSuggestions(plan).filter((s) => s.foodId === "usda-174272");
-    expect(tempeh.length).toBeGreaterThanOrEqual(2);
+    expect(tempeh.length).toBeGreaterThanOrEqual(1);
     expect(tempeh.every((s) => s.layer === "protein")).toBe(true);
-    expect(Math.max(...tempeh.map((s) => s.grams))).toBe(120);
+    /* M-219: the serving is portion-scaled to the day's need —
+       105 g at the 116 g guide (120 g at the old 220 g guide).
+       The pin's point stands: a cooked-form serving far above
+       the 60 g dry-pulse cap. */
+    expect(Math.max(...tempeh.map((s) => s.grams))).toBe(105);
   });
 
   it("dry pulses keep the 60 g cap across the owner week; soy forms never pass 120 g", () => {

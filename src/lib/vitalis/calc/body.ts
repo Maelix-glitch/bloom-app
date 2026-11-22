@@ -17,6 +17,7 @@ import {
   type BodyGoal,
   type BodyProfile,
 } from "../../health/body";
+import { assertPlausibleTargets } from "../../nutrition/targets";
 import type { Provenance } from "../domain/provenance";
 import {
   bodyMassIndex,
@@ -34,8 +35,15 @@ export const BODY_TARGETS_METHOD = "bloom-body-targets";
 /* 1.1.0 (P1): the engine gained a recomposition profile — maintenance
    energy at the 2.2 g/kg protein band. The other goals' numbers are
    unchanged from 1.0.0; the bump exists so a target computed before the
-   profile existed is distinguishable from one computed after. */
-export const BODY_TARGETS_METHOD_VERSION = "1.1.0";
+   profile existed is distinguishable from one computed after.
+   1.2.0 (M-219, engine evidence audit): the pace cap fell to
+   0.75 kg/wk; protein is dosed on the healthy-ceiling reference
+   weight above BMI 23; hydration is a drinking-water share of EFSA's
+   total-water AI instead of 35 ml/kg; BMI bands and the healthy
+   range follow the Indian consensus (23 / 25 / 22.9); the timeline
+   runs on the effective (floor-bound) rate. Every number a target
+   carries can differ from 1.1.0 for the same profile. */
+export const BODY_TARGETS_METHOD_VERSION = "1.2.0";
 
 const LEGACY_ACTIVITY: Record<ActivityLevel, LegacyActivityLevel> = {
   sedentary: "sedentary",
@@ -70,6 +78,13 @@ export interface VitalisBodyTargets {
   readonly weeksToGoal: number | null;
   readonly goalDate: string | null;
   readonly targetWeightKg: number | null;
+  /** The M-82 plausibility verdict on this pair (protein ≤ 35% of
+   *  energy, kcal ≥ 1,200), computed by the ONE gate in
+   *  nutrition/targets on every gated resolution (M-219, audit F-05:
+   *  the gate existed since v4 but was called nowhere outside its own
+   *  test, so implausible pairs shipped silently). It never rewrites
+   *  the targets — it names them, so a surface can say so. */
+  readonly targetsPlausible: boolean;
   /** The rate actually used, after clamping. */
   readonly rateKgPerWeek: number;
   readonly rateClamped: boolean;
@@ -146,6 +161,19 @@ export function targetsFor(
 
   const usedRate = clampRate(profile.rateKgPerWeek);
 
+  /* M-219 (audit F-05): the plausibility gate runs on EVERY gated
+     resolution — the assert warns in the console exactly as designed,
+     and the verdict rides the outcome so surfaces and tests can see
+     it. Before this wiring the gate was dead code and the M-82 pair
+     (1,350 kcal, 171 g protein, 50.7%E) shipped with no signal at
+     all; the reference-weight dosing in bodyTargetsOf now keeps the
+     pair inside the AMDR, and this call is what would catch a
+     regression. */
+  const targetsPlausible = assertPlausibleTargets({
+    kcal: targets.calories,
+    proteinG: targets.proteinG,
+  });
+
   return {
     ok: true,
     targets: {
@@ -162,6 +190,7 @@ export function targetsFor(
       weeksToGoal: targets.weeksToGoal,
       goalDate: targets.goalDate,
       targetWeightKg: targets.targetWeightKg,
+      targetsPlausible,
       rateKgPerWeek: usedRate,
       rateClamped: profile.rateKgPerWeek !== usedRate,
       provenance: {

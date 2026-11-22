@@ -31,6 +31,11 @@ import { setPref } from "@/lib/prefs";
 import { resetPrefCache } from "@/lib/prefsStore";
 import { todayLocal } from "@/lib/localDay";
 import { BODY_KEY, DEFAULT_BODY, bodyTargetsOf, type BodyProfile } from "@/lib/health/body";
+import {
+  ASSESSMENT_KEY,
+  EMPTY_ANSWERS,
+  emptyAssessmentState,
+} from "@/lib/assessment/state";
 import { createEntryFromFood, logEntry, saveCustomFood } from "@/lib/nutrition";
 import { NutritionProfileCard, NutritionTodayCard } from "./NutritionEntryCards";
 
@@ -84,6 +89,24 @@ describe("NutritionTodayCard", () => {
 
   it("shows today's kcal against the target once food is logged", () => {
     const profile = seedBodyProfile();
+    /* M-219 (audit F-02): the card's target comes through the
+       safety-gated Assessment path — a body profile alone no longer
+       supplies it. Seed the Assessment with the same numbers,
+       answered fully; the gated figure equals the body guide's for
+       identical inputs (the one-target principle, through the gate). */
+    const complete = emptyAssessmentState("2026-11-15T08:00:00.000Z");
+    complete.answers = {
+      ...EMPTY_ANSWERS,
+      ageYears: 30,
+      sex: "female",
+      heightCm: 175,
+      weightKg: 82,
+      activity: "light",
+      goal: "maintain",
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
+    };
+    setPref(ASSESSMENT_KEY, complete);
     seedLoggedOats();
     const targets = bodyTargetsOf(profile, todayLocal());
     if (!targets) throw new Error("expected targets");

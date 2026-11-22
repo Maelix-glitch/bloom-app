@@ -85,12 +85,15 @@ const MEASURE = process.env["PLAN_MATRIX_MEASURE"] === "1";
 
 const PATTERNS: DietaryPattern[] = ["vegetarian", "eggetarian", "vegan", "pescatarian", "omnivore"];
 const GOALS: HealthProfile["goal"][] = ["lose", "maintain", "gain", "recomp", "general_health"];
-const SIZES = [
-  { kcal: 1600, proteinG: 70 },
-  { kcal: 2200, proteinG: 120 },
-  { kcal: 2964, proteinG: 165 },
-  { kcal: 3288, proteinG: 220 },
-] as const;
+/* M-219: the size axis was four injected target pairs riding the
+   body-profile fallback. That path is retired — targets are the
+   gated engine's — so the axis is now four BODY sizes, and each
+   cell's guide is whatever the engine derives for that body and
+   goal. The spread is wider than the injected one (a 60 kg
+   maintenance guide and a 110 kg gain guide differ by ~1,000 kcal
+   and by protein basis), which is the variation this matrix
+   exists to judge composition across. */
+const SIZES = [{ weightKg: 60 }, { weightKg: 80 }, { weightKg: 95 }, { weightKg: 110 }] as const;
 const CUISINES: (CuisinePreference | null)[] = [null, "north_indian", "south_indian", "both"];
 const DAYS = [
   "2026-11-16",
@@ -168,23 +171,27 @@ function buildProfile(
     },
     constraints: {
       ...EMPTY_CONSTRAINTS,
-      pregnantOrBreastfeeding: opts.answered ? false : null,
-      eatingDisorderHistory: opts.answered ? false : null,
+      /* M-219: every matrix profile answers the safety questions.
+         The unanswered cells this builder once produced rode the
+         retired absence fallback (audit F-02); an unanswered
+         profile now refuses, by design, and refusal behaviour is
+         pinned in plan.test.ts, not swept here. The `answered`
+         opt is retained for call-site compatibility. */
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
     },
     behavioural: opts.behaviour ?? EMPTY_BEHAVIOURAL,
   };
 }
 
-function gen(profile: HealthProfile, day: string, opts: { dishes?: boolean; size?: (typeof SIZES)[number]; waterMl?: number } = {}): DailyPlan {
+function gen(profile: HealthProfile, day: string, opts: { dishes?: boolean } = {}): DailyPlan {
   const safety = classifySafety(toSafetyInput(profile));
   const outcome = generatePlan({
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, day),
-    fallbackTargets: opts.size ? { kcal: opts.size.kcal, proteinG: opts.size.proteinG } : null,
     foods: USDA_REFERENCE_FOODS,
     ...(opts.dishes === false ? {} : { dishes: DISH_LIBRARY }),
-    ...(opts.waterMl !== undefined ? { waterMl: opts.waterMl } : {}),
     day,
     now: NOW,
     id: "plan-matrix",
@@ -498,14 +505,15 @@ function dishMatrixBlock(offset: number, count: number): Stats {
             const behaviour = BEHAVIOURS[Math.floor(g / 3) % BEHAVIOURS.length]!;
             const mealsPerDay = MEALS_PER_DAY[Math.floor(g / 5) % MEALS_PER_DAY.length]!;
             const budgetTier = BUDGET_ROTATION[g % BUDGET_ROTATION.length]!;
-            const label = `${pattern}/${goal}/${size.kcal}k/${cuisine ?? "nocuisine"}/${behaviour.name}/mpd${mealsPerDay ?? "null"}/b${budgetTier ?? "u"}/${day}`;
+            const label = `${pattern}/${goal}/${size.weightKg}kg/${cuisine ?? "nocuisine"}/${behaviour.name}/mpd${mealsPerDay ?? "null"}/b${budgetTier ?? "u"}/${day}`;
             const profile = buildProfile(pattern, goal, {
               mealsPerDay,
               cuisine,
               behaviour: behaviour.profile,
               budgetTier,
+              weightKg: size.weightKg,
             });
-            const plan = gen(profile, day, { size, waterMl: 2800 });
+            const plan = gen(profile, day, {});
             judge(stats, label, plan, { expectHydration: true });
             judgePattern(stats, label, plan, pattern);
           }
@@ -566,30 +574,54 @@ describe("plan matrix 500", () => {
          main dish-composed at every budget state, the relaxation
          named, shakes served, and — F4 — the wave's share of dish
          mains at least 40% at tier 2 AND unset, where the pick
-         preference (guide density 171/1350 ≈ 0.127) is active. */
+         preference (guide density 171/1350 ≈ 0.127) is active.
+         M-219: the corner is the owner's real stored shape
+         (19, 165 cm, 95 kg, sedentary) and its guide is the gated
+         one — 1,350 kcal (the floor still binds) with the
+         corrected 112 g protein (density ≈ 0.083, not 0.127: the
+         old density was the M-82 implausibility itself). The F4
+         share pin is re-measured at the true density below. */
       const ownerBehaviour: BehaviouralProfile = {
         ...EMPTY_BEHAVIOURAL,
         cookingAbility: "none",
         equipment: ["stove", "pressure_cooker", "mixer_grinder", "fridge"],
         prepTimeMaxMinutes: 10,
       };
+      const ownerCorner = (budgetTier: 1 | 2 | 3 | null): HealthProfile => ({
+        ...emptyProfile("user-matrix", "2026-06-01T07:00:00Z"),
+        ageYears: 19,
+        sex: "male",
+        height: observation(quantity(165, "cm"), PROVENANCE),
+        weight: observation(quantity(95, "kg"), PROVENANCE),
+        goal: "lose",
+        activity: "sedentary",
+        rateKgPerWeek: 0.5,
+        dietary: {
+          ...EMPTY_DIETARY,
+          pattern: "omnivore",
+          budgetTier,
+          cuisinePreference: "south_indian",
+          mealsPerDay: 3,
+        },
+        behavioural: ownerBehaviour,
+        constraints: {
+          ...EMPTY_CONSTRAINTS,
+          pregnantOrBreastfeeding: false,
+          eatingDisorderHistory: false,
+        },
+      });
       const shares = new Map<string, { mains: number; pw: number }>();
       let shakes = 0;
       for (const budgetTier of [null, 1, 2, 3] as const) {
         const key = budgetTier === null ? "unset" : `tier${budgetTier}`;
         shares.set(key, { mains: 0, pw: 0 });
         for (const day of DAYS) {
-          const profile = buildProfile("omnivore", "lose", {
-            cuisine: "south_indian",
-            behaviour: ownerBehaviour,
-            budgetTier,
-          });
+          const profile = ownerCorner(budgetTier);
           const safety = classifySafety(toSafetyInput(profile));
           const outcome = generatePlan({
             profile,
             safety,
-            gatedOutcome: { ok: false, reason: "profile_incomplete", missing: [] },
-            fallbackTargets: { kcal: 1350, proteinG: 171 },
+            gatedOutcome: targetsFor(profile, safety, day),
             foods: USDA_REFERENCE_FOODS,
             dishes: DISH_LIBRARY,
             day,
@@ -655,9 +687,9 @@ describe("plan matrix 500", () => {
       for (const pattern of PATTERNS) {
         for (const size of SIZES) {
           for (const day of [DAYS[0]!, DAYS[2]!, DAYS[4]!]) {
-            const label = `food/${pattern}/${size.kcal}k/${day}`;
-            const profile = buildProfile(pattern, "maintain", {});
-            const plan = gen(profile, day, { size, dishes: false, waterMl: 2800 });
+            const label = `food/${pattern}/${size.weightKg}kg/${day}`;
+            const profile = buildProfile(pattern, "maintain", { weightKg: size.weightKg });
+            const plan = gen(profile, day, { dishes: false });
             judge(stats, label, plan, { expectHydration: true, expectDishComposition: false });
             judgePattern(stats, label, plan, pattern);
             i += 1;

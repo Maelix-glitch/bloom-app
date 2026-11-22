@@ -114,13 +114,15 @@ beforeEach(() => {
 
 describe("plan · golden cases per goal", () => {
   /* Fixture: female, 30, 175 cm, 82 kg, light activity.
-     BMR 1603, TDEE 2204 (the body engine's own numbers). */
+     BMR 1603, TDEE 2204 (the body engine's own numbers). Protein is
+     dosed on the healthy-ceiling reference weight at this BMI —
+     22.9 × 1.75² = 70.1 kg (M-219, audit F-05). */
   const cases = [
-    { goal: "lose", kcal: 2204 - 550, proteinG: Math.round(82 * 1.8), profile: "lose" },
-    { goal: "gain", kcal: 2204 + 550, proteinG: Math.round(82 * 1.6), profile: "gain" },
-    { goal: "maintain", kcal: 2204, proteinG: Math.round(82 * 1.4), profile: "maintain" },
-    { goal: "recomp", kcal: 2204, proteinG: Math.round(82 * 2.2), profile: "recomp" },
-    { goal: "general_health", kcal: 2204, proteinG: Math.round(82 * 1.4), profile: "maintain" },
+    { goal: "lose", kcal: 2204 - 550, proteinG: Math.round(70.1 * 1.8), profile: "lose" },
+    { goal: "gain", kcal: 2204 + 550, proteinG: Math.round(70.1 * 1.6), profile: "gain" },
+    { goal: "maintain", kcal: 2204, proteinG: Math.round(70.1 * 1.4), profile: "maintain" },
+    { goal: "recomp", kcal: 2204, proteinG: Math.round(70.1 * 2.2), profile: "recomp" },
+    { goal: "general_health", kcal: 2204, proteinG: Math.round(70.1 * 1.4), profile: "maintain" },
   ] as const;
 
   for (const c of cases) {
@@ -462,18 +464,20 @@ describe("plan · absence and insufficiency", () => {
     constraints: { ...EMPTY_CONSTRAINTS, pregnantOrBreastfeeding: null, eatingDisorderHistory: null },
   };
 
-  it("falls back to body-profile targets on an absence-only block, like the tab", () => {
-    const plan = expectPlan(
-      generate(profile(unansweredSafety), { fallbackTargets: { kcal: 2000, proteinG: 120 } }),
-    );
-    expect(plan.targetsSource).toBe("body_profile");
-    expect(plan.targets).toEqual({ kcal: 2000, proteinG: 120 });
-  });
-
-  it("names the unanswered safety questions when no fallback exists either", () => {
-    const outcome = generate(profile(unansweredSafety));
+  /* M-219 (audit F-02): the absence-only fall-through is retired.
+     Unanswered safety questions produce NO plan and NO targets —
+     no fallback can resurrect either. The refusal is the
+     insufficient-data one, naming the safety answers as what is
+     missing: an information gap, stated as one. (A substantive
+     block refuses as safety_blocked — the describe above.) */
+  it("refuses on an absence-only block — no fallback can override it", () => {
+    const outcome = generate(profile(unansweredSafety), {
+      fallbackTargets: { kcal: 2000, proteinG: 120 },
+    });
     expect(outcome.ok).toBe(false);
-    if (outcome.ok || outcome.refusal.kind !== "insufficient_data") return;
+    if (outcome.ok) return;
+    expect(outcome.refusal.kind).toBe("insufficient_data");
+    if (outcome.refusal.kind !== "insufficient_data") return;
     expect(outcome.refusal.missing).toContain("your safety answers in the Assessment");
   });
 

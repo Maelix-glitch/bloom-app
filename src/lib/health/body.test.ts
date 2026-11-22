@@ -24,12 +24,16 @@ const profile: BodyProfile = {
 };
 
 describe("body · BMI", () => {
-  it("computes BMI and its band at the WHO boundaries", () => {
+  it("computes BMI and its band at the Indian-consensus boundaries", () => {
     expect(bmiOf(175, 70)).toBe(22.9);
     expect(bmiBandOf(18.4)).toBe("underweight");
     expect(bmiBandOf(18.5)).toBe("healthy");
-    expect(bmiBandOf(24.9)).toBe("healthy");
-    expect(bmiBandOf(25)).toBe("overweight");
+    expect(bmiBandOf(22.9)).toBe("healthy");
+    /* Misra et al. 2009 / ESI 2022 for Asian Indians (M-219, F-08):
+       overweight from 23, obese from 25 — not the WHO 25/30. */
+    expect(bmiBandOf(23)).toBe("overweight");
+    expect(bmiBandOf(24.9)).toBe("overweight");
+    expect(bmiBandOf(25)).toBe("obese");
     expect(bmiBandOf(30)).toBe("obese");
   });
 
@@ -46,8 +50,13 @@ describe("body · energy and water", () => {
     expect(targets.bmr).toBe(1603);
     expect(targets.tdee).toBe(Math.round(1603 * 1.375));
     expect(targets.calories).toBe(targets.tdee - 550);
-    expect(targets.proteinG).toBe(Math.round(82 * 1.8));
-    expect(targets.waterMl).toBe(Math.round((82 * 35 + 250) / 50) * 50);
+    /* M-219 (F-05): at BMI 26.8 the protein band multiplies the
+       healthy-ceiling reference weight (22.9 × 1.75² = 70.1 kg),
+       not the 82 kg scale weight. */
+    expect(targets.proteinG).toBe(Math.round(70.1 * 1.8));
+    /* M-219 (F-07): drinking-water share of EFSA's total-water AI —
+       female base 1,500 ml + 150 light-activity allowance. */
+    expect(targets.waterMl).toBe(1650);
   });
 
   it("never recommends eating below the safety floor", () => {
@@ -73,8 +82,9 @@ describe("body · energy and water", () => {
     expect(recomp.calories).toBe(recomp.tdee);
     expect(recomp.calories).toBe(maintain.calories);
     expect(recomp.calorieDelta).toBe(0);
-    /* 2.2 g/kg — above lose (1.8), gain (1.6) and maintain (1.4). */
-    expect(recomp.proteinG).toBe(Math.round(82 * 2.2));
+    /* 2.2 g/kg on the reference weight — above lose (1.8), gain (1.6)
+       and maintain (1.4) on the same basis. */
+    expect(recomp.proteinG).toBe(Math.round(70.1 * 2.2));
     expect(recomp.proteinG).toBeGreaterThan(bodyTargetsOf(profile, "2026-10-30")!.proteinG);
     expect(recomp.proteinG).toBeGreaterThan(maintain.proteinG);
     /* No scale timeline, even with an explicit goal weight on file; with

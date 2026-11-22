@@ -120,9 +120,7 @@ import {
   type VitalisGoal,
 } from "@/lib/vitalis/domain/profile";
 import {
-  ABSENCE_BLOCK_RULE_IDS,
   SAFETY_CLASSES,
-  hasSubstantiveBlock,
   type SafetyAssessment,
   type SafetyClass,
 } from "@/lib/vitalis/domain/safety";
@@ -138,6 +136,7 @@ import {
   type DishCategory,
 } from "./dishes";
 import { PROTEIN_WAVE_DISH_IDS } from "./data/dishLibrary";
+import { declaredAllergens, foodExcludedByAllergens } from "./allergens";
 import { newNutritionId } from "./ids";
 import { nutrientsForGrams } from "./math";
 import { dishRegion, type DishRegion } from "./regions";
@@ -523,7 +522,7 @@ export interface DailyPlan {
  *  widest-gap rule stays the default, and a "morning"
  *  preference places the snack in the breakfast→lunch gap
  *  when that gap can hold it (see dayTimelineFor). */
-export const PLAN_METHOD_VERSION = 14;
+export const PLAN_METHOD_VERSION = 15;
 
 export type PlanRefusal =
   | {
@@ -866,9 +865,10 @@ export function patternAllowsClassification(
  * filter then judges every CLASSIFIED food by its ingredient identity.
  * A person's own foods carry no classification — Bloom does not claim
  * to know what is in a food it did not curate — so they pass the pattern
- * filter; name-matching still drops foods the person said they are
- * allergic to, cannot tolerate, or dislike — their own words against
- * food names, nothing inferred.
+ * filter; allergies then judge them structurally (allergens.ts): a
+ * recognised allergy makes an unverifiable food fail closed, while
+ * uninterpreted allergy words, intolerances and dislikes still
+ * name-match — their own words against food names, nothing inferred.
  *
  * Exported for the Nutrition tab's swap suggestions (N-UI): a swap is a
  * one-food plan decision, so it is held to exactly this filter — same
@@ -884,8 +884,16 @@ export function patternAllowsClassification(
  * composition pool in `generatePlan` and the candidates in `swapsFor`.
  */
 export function eligiblePool(profile: HealthProfile, foods: readonly Food[]): Food[] {
+  /* Allergies are judged structurally first (M-219, audit F-10): a
+     recognised term becomes allergen codes and the food's derived
+     allergen flags decide — "nuts" now reaches almonds and cashews,
+     and an unverifiable food fails closed. Terms Bloom cannot
+     interpret keep the substring backstop below, alongside
+     intolerances and dislikes (preferences, where a name match is
+     the person's own words and the failure mode is benign). */
+  const declared = declaredAllergens(profile.dietary.allergies);
   const terms = [
-    ...profile.dietary.allergies,
+    ...declared.unmappedTerms,
     ...profile.dietary.intolerances,
     ...profile.dietary.dislikedFoods,
   ]
@@ -897,6 +905,7 @@ export function eligiblePool(profile: HealthProfile, foods: readonly Food[]): Fo
     if (food.classification && !patternAllowsClassification(pattern, food.classification)) {
       return false;
     }
+    if (foodExcludedByAllergens(food, declared.structured)) return false;
     const name = food.name.toLowerCase();
     return !terms.some((term) => name.includes(term));
   });
@@ -4456,10 +4465,12 @@ export interface PlanGenerationInput {
   safety: SafetyAssessment;
   /** `targetsFor(profile, safety, day)` — the safety-gated engine outcome. */
   gatedOutcome: BodyTargetsOutcome;
-  /** Targets from the legacy body profile (the Nutrition tab's fallback),
-   *  already adapted through `nutritionTargetsFromBodyTargets`. Consulted
-   *  only when the gated path refuses for completeness or absence. */
-  fallbackTargets: NutritionTargets | null;
+  /** RETIRED (M-219, audit F-02): targets from the legacy body profile.
+   *  This field used to be consulted when the gated path refused; that
+   *  fallback let unanswered safety questions route around the gate,
+   *  so generatePlan never reads it now. It remains in the shape only
+   *  so existing callers keep compiling; new callers should omit it. */
+  fallbackTargets?: NutritionTargets | null;
   /** The suggestion pool: the user's own foods first, then the USDA
    *  reference set. Eligibility is re-checked inside regardless. */
   foods: readonly Food[];
@@ -4564,12 +4575,25 @@ function validTargets(targets: NutritionTargets | null): NutritionTargets | null
 export function generatePlan(input: PlanGenerationInput): PlanOutcome {
   const { profile, safety } = input;
 
-  /* 1. Safety first, always. A substantive block refuses the plan in the
-        classifier's own words; an absence-only block is an information
-        gap and falls through to the same fallback the Nutrition tab
-        uses — never to a plan built over a real finding. */
+  /* 1. Safety first, always — and final (M-219, audit F-02). A
+        blocking classification refuses the plan, including a block
+        that rests only on unanswered questions: the absence fall-
+        through that used to let an absence-only block reach legacy
+        body-profile targets is retired, because silence about
+        pregnancy or eating-disorder history is exactly the case the
+        gate exists for. The one distinction that remains is WHICH
+        refusal answers, and it changes no outcome: a block carrying
+        any substantive finding refuses here, in the classifier's
+        own words; a block whose findings are ALL absence rules
+        (age / safety answers never given) falls through to step 2,
+        whose insufficient-data refusal names what is missing —
+        including "your safety answers in the Assessment". No plan
+        and no targets are produced on either path. */
   const blockingIds = safety.findings.filter((f) => f.blocking).map((f) => f.ruleId);
-  if (safety.blocking && hasSubstantiveBlock(blockingIds)) {
+  const absenceOnly =
+    blockingIds.length > 0 &&
+    blockingIds.every((id) => id === "age_missing" || id === "safety_answers_missing");
+  if (safety.blocking && !absenceOnly) {
     return {
       ok: false,
       refusal: {
@@ -4577,22 +4601,20 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
         classification: safety.classification,
         requiresProfessionalReview: safety.requiresProfessionalReview,
         findings: safety.findings
-          .filter((f) => f.blocking && !ABSENCE_BLOCK_RULE_IDS.has(f.ruleId))
+          .filter((f) => f.blocking)
           .map((f) => ({ ruleId: f.ruleId, summary: f.summary })),
       },
     };
   }
 
-  /* 2 + 3. Targets: the gated engine first, the body-profile fallback
-        second — the Nutrition tab's exact resolution order. */
+  /* 2 + 3. Targets: the gated engine is the ONLY source (M-219). The
+        legacy body-profile fallback that used to answer when the
+        gated path refused is gone — a refusal now means the honest
+        insufficient-data answer below, naming what is missing. */
   let targets: NutritionTargets | null = null;
-  let targetsSource: DailyPlan["targetsSource"] = "assessment";
+  const targetsSource: DailyPlan["targetsSource"] = "assessment";
   if (input.gatedOutcome.ok) {
     targets = validTargets(nutritionTargetsFromOutcome(input.gatedOutcome));
-  }
-  if (!targets) {
-    targets = validTargets(input.fallbackTargets);
-    targetsSource = "body_profile";
   }
   if (!targets || profile.goal === null) {
     const extra: string[] = [];
@@ -4619,7 +4641,7 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      the sane band; a refused adjustment leaves the engine's targets
      standing rather than clamping to a number nobody confirmed. */
   if (input.targetAdjustmentKcal) {
-    targets = adjustedTargets(targets, input.targetAdjustmentKcal) ?? targets;
+    targets = adjustedTargets(targets, input.targetAdjustmentKcal, profile.sex) ?? targets;
   }
 
   const goal = profile.goal;
@@ -4955,15 +4977,12 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      protein total back toward its ceiling. */
   trimProteinOvershoot(meals, byId, targets);
   /* P11: the day's water, read from the same source as its targets —
-     the gated outcome carries its own figure; the fallback path
-     reads the caller's body-profile figure. Either way the number
+     the gated outcome carries the figure (M-219: the gated engine is
+     the only target source, so the caller's body-profile figure is
+     only a backstop for a hand-built input). Either way the number
      is the body engine's, computed from the person's own metrics. */
   const gatedWaterMl = input.gatedOutcome.ok ? input.gatedOutcome.targets.waterMl : null;
-  const waterTargetMl = validWaterTargetMl(
-    targetsSource === "assessment"
-      ? (gatedWaterMl ?? input.waterMl)
-      : (input.waterMl ?? gatedWaterMl),
-  );
+  const waterTargetMl = validWaterTargetMl(gatedWaterMl ?? input.waterMl);
   const dayStart = dayStartFor(waterTargetMl, meals);
   /* P12: the finished day, laid out from waking to sleep — the
      timeline schedules the meals as they stand; it is computed

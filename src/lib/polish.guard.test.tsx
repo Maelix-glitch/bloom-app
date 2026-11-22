@@ -71,6 +71,7 @@ import {
 import { observation } from "@/lib/vitalis/domain/provenance";
 import { quantity } from "@/lib/vitalis/domain/units";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
+import { targetsFor } from "@/lib/vitalis/calc/body";
 import { NutritionPlanSection } from "@/components/nutrition/NutritionPlanSection";
 import { MetabolicTwinSection } from "@/components/nutrition/MetabolicTwinSection";
 
@@ -214,12 +215,27 @@ function logEntry(day: string): LogEntry {
   };
 }
 
+/** A COMPLETE logged day (M-219, audit F-11): the day's totals
+ *  split across lunch and dinner. The adherence learning the Twin
+ *  strip carries reads complete days only — a single lunch entry
+ *  is a fragment, and fragments no longer steer anything. */
+function logDay(day: string): LogEntry[] {
+  const lunch = logEntry(day);
+  const dinner: LogEntry = {
+    ...logEntry(day),
+    meal: "dinner",
+    nutrients: { kcal: 900, proteinG: 45, carbsG: 90, fatG: 30 },
+  };
+  lunch.nutrients = { kcal: 900, proteinG: 45, carbsG: 90, fatG: 30 };
+  return [lunch, dinner];
+}
+
 function seedLog(): void {
   const today = todayLocal();
   writeFoodLog([
-    logEntry(shiftDay(today, -1)),
-    logEntry(shiftDay(today, -2)),
-    logEntry(shiftDay(today, -3)),
+    ...logDay(shiftDay(today, -1)),
+    ...logDay(shiftDay(today, -2)),
+    ...logDay(shiftDay(today, -3)),
   ]);
 }
 
@@ -255,11 +271,16 @@ describe("polish guard — storage round-trip (the M-81 pin)", () => {
         eatingDisorderHistory: false,
       },
     };
+    const safety = classifySafety(toSafetyInput(profile));
     const outcome = generatePlan({
       profile,
-      safety: classifySafety(toSafetyInput(profile)),
-      gatedOutcome: { ok: false, reason: "profile_incomplete", missing: [] },
-      fallbackTargets: { kcal: 1350, proteinG: 171 },
+      safety,
+      /* M-219 (audit F-02/F-05): the corner is composed through the
+         gated path now — the retired construction (a refused gated
+         outcome + injected fallback targets {1350, 171}) was the
+         fall-through itself. The gated outcome for this exact
+         profile is {1350 kcal, 112 g} under the corrected dosing. */
+      gatedOutcome: targetsFor(profile, safety, "2026-11-19"),
       foods: USDA_REFERENCE_FOODS,
       dishes: DISH_LIBRARY,
       day: "2026-11-19",

@@ -13,6 +13,7 @@
  */
 
 import {
+  CAUTION_CONDITION_LABEL,
   HIGH_RISK_CONDITIONS,
   HIGH_RISK_CONDITION_LABEL,
   MAX_RATE_KG_PER_WEEK,
@@ -41,6 +42,9 @@ function isHighRiskCondition(value: string): boolean {
 function conditionLabel(code: string): string {
   if (isHighRiskCondition(code)) {
     return HIGH_RISK_CONDITION_LABEL[code as keyof typeof HIGH_RISK_CONDITION_LABEL];
+  }
+  if (code in CAUTION_CONDITION_LABEL) {
+    return CAUTION_CONDITION_LABEL[code as keyof typeof CAUTION_CONDITION_LABEL];
   }
   return code.replace(/_/g, " ");
 }
@@ -130,6 +134,19 @@ export function classifySafety(input: SafetyInput): SafetyAssessment {
       "underweight_loss_goal",
       "professional_review_required",
       `A BMI of ${input.bmi.toFixed(1)} is already below the healthy range, so Bloom won't plan weight loss.`,
+      true,
+    );
+  }
+
+  /* 5b. The destination gate (M-219, audit F-03). The gates above read
+   *     the CURRENT bmi; a lose goal aimed at a target weight that is
+   *     itself underweight was never judged, so a plan could count
+   *     down to a BMI-16 endpoint. A goal is judged by where it ends. */
+  if (input.targetBmi !== null && input.targetBmi < UNDERWEIGHT_BMI && input.goal === "lose") {
+    add(
+      "underweight_target",
+      "professional_review_required",
+      `Your target weight works out to a BMI of ${input.targetBmi.toFixed(1)}, below the healthy range. Bloom won't plan weight loss toward an underweight goal — please set a target inside the healthy range, or talk it through with a clinician.`,
       true,
     );
   }

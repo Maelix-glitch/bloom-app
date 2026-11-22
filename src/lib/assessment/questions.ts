@@ -33,6 +33,8 @@ import {
   BUDGET_TIER_2_MAX_PER_SERVING,
 } from "@/lib/nutrition/dishes";
 import {
+  CAUTION_CONDITIONS,
+  CAUTION_CONDITION_LABEL,
   HIGH_RISK_CONDITIONS,
   HIGH_RISK_CONDITION_LABEL,
   URGENT_SYMPTOMS,
@@ -123,11 +125,14 @@ export const GOAL_LABEL: Record<VitalisGoal, string> = {
   general_health: "General health",
 };
 
+/* The pace menu tops out at 0.75 kg/wk (M-219, audit F-04): 1 kg/wk
+ * implied a 1,100 kcal/day deficit — beyond the CDC's 1–2 lb/wk
+ * gradual range and ~1.5–2.2× the AHA/ACC/TOS 500–750 kcal/day
+ * prescription. The fastest honest offer is 0.75. */
 export const RATE_OPTIONS: readonly { value: number; label: string }[] = [
   { value: 0.25, label: "0.25 kg a week" },
   { value: 0.5, label: "0.5 kg a week" },
   { value: 0.75, label: "0.75 kg a week" },
-  { value: 1, label: "1 kg a week" },
 ];
 
 export const ACTIVITY_OPTIONS: readonly { value: ActivityLevel; label: string; hint: string }[] = [
@@ -231,8 +236,23 @@ export const CUISINE_PREFERENCE_LABEL: Record<CuisinePreference, string> = {
   no_preference: "No preference",
 };
 
-export const CONDITION_OPTIONS: readonly { value: string; label: string }[] =
-  HIGH_RISK_CONDITIONS.map((code) => ({ value: code, label: HIGH_RISK_CONDITION_LABEL[code] }));
+/* The structured condition list: the high-risk codes (which block
+ * automated targets) AND the caution codes (M-219, audit F-12 —
+ * type 2 diabetes not on insulin, PCOS, thyroid disorders,
+ * hypertension). Before M-219 only the five rare high-risk codes
+ * were offered, so the common conditions of the launch population
+ * could only be typed as free text and bought the person nothing:
+ * no caution framing, and no auto-enabled Condition Mode. */
+export const CONDITION_OPTIONS: readonly { value: string; label: string }[] = [
+  ...HIGH_RISK_CONDITIONS.map((code) => ({
+    value: code as string,
+    label: HIGH_RISK_CONDITION_LABEL[code],
+  })),
+  ...CAUTION_CONDITIONS.map((code) => ({
+    value: code as string,
+    label: CAUTION_CONDITION_LABEL[code],
+  })),
+];
 
 export const SYMPTOM_OPTIONS: readonly { value: UrgentSymptom; label: string }[] =
   URGENT_SYMPTOMS.map((code) => ({

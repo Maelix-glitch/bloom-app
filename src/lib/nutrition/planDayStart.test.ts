@@ -70,6 +70,9 @@ function gen(
     day?: string;
     foods?: readonly Food[];
     dishes?: readonly Dish[] | null;
+    /** Accepted for fixture compatibility and deliberately NOT
+     *  forwarded: M-219 retired the fallback — targets come from
+     *  the gated engine alone. */
     fallbackTargets?: { kcal: number; proteinG: number } | null;
     waterMl?: number | null;
   } = {},
@@ -80,7 +83,6 @@ function gen(
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, day),
-    fallbackTargets: opts.fallbackTargets ?? null,
     foods: opts.foods ?? USDA_REFERENCE_FOODS,
     ...(opts.dishes === null ? {} : { dishes: opts.dishes ?? DISH_LIBRARY }),
     ...(opts.waterMl !== undefined ? { waterMl: opts.waterMl } : {}),
@@ -90,6 +92,31 @@ function gen(
   });
   if (!outcome.ok) throw new Error(`plan refused: ${JSON.stringify(outcome.refusal)}`);
   return outcome.plan;
+}
+
+/** A high-protein-share profile (M-219 fixture): 60 kg, lose, at
+ *  the 1,200 kcal floor with a 105 g guide (~33% protein) — the
+ *  shape whose days genuinely cannot be closed by light dishes
+ *  and ordinary foods alone, which is what the powder pins below
+ *  exist to exercise. (The maintain fixture's gated guide,
+ *  102 g over 2,740 kcal, is closed by whole foods every day.) */
+function highShareProfile(pattern: DietaryPattern | null): HealthProfile {
+  return {
+    ...emptyProfile("user-1", "2026-06-01T07:00:00Z"),
+    ageYears: 30,
+    sex: "female",
+    height: observation(quantity(160, "cm"), PROVENANCE),
+    weight: observation(quantity(60, "kg"), PROVENANCE),
+    goal: "lose",
+    activity: "sedentary",
+    rateKgPerWeek: 0.25,
+    dietary: { ...EMPTY_DIETARY, pattern, mealsPerDay: 3 },
+    constraints: {
+      ...EMPTY_CONSTRAINTS,
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
+    },
+  };
 }
 
 const dayProtein = (plan: DailyPlan) =>
@@ -113,8 +140,11 @@ describe("P11 · protein powders", () => {
 
   it("a protein-short dish day is closed with powder top-ups, in scoop-sized portions", () => {
     /* Three light dals as the whole dish pool: the dishes alone
-       cannot reach a 150 g protein guide, so the top-up pass must
-       speak — and the densest honest closers are the powders. */
+       cannot reach the fixture's 105 g protein guide, so the
+       top-up pass must speak — and the densest honest closers
+       are the powders. (M-219: the guide is the gated one for
+       the high-share fixture; the injected {2000, 150} pair this
+       pin once used rode the retired fallback.) */
     const dishes = [
       findDish("dish-dal-fry")!,
       findDish("dish-moong-dal-tadka")!,
@@ -130,10 +160,9 @@ describe("P11 · protein powders", () => {
       "2026-11-22",
     ];
     for (const day of days) {
-      const plan = gen(fullProfile("omnivore", { answered: false }), {
+      const plan = gen(highShareProfile("omnivore"), {
         day,
         dishes,
-        fallbackTargets: { kcal: 2000, proteinG: 150 },
       });
       const topUps = plan.meals.flatMap((m) =>
         m.suggestions.filter((s) => s.layer === "topup"),
@@ -158,12 +187,15 @@ describe("P11 · protein powders", () => {
       findDish("dish-moong-dal-tadka")!,
       findDish("dish-urad-dal")!,
     ];
-    const plan = gen(fullProfile("vegan", { answered: false }), {
+    const plan = gen(highShareProfile("vegan"), {
       dishes,
-      fallbackTargets: { kcal: 2000, proteinG: 150 },
     });
     const ids = plan.meals.flatMap((m) => m.suggestions.map((s) => s.foodId));
     expect(ids).not.toContain("usda-173177");
+    /* The gate is exercised, not vacuous: the plant powder DOES
+       close this vegan day (measured: two 15 g pea-protein
+       top-ups), so whey's absence is the gate working. */
+    expect(ids).toContain("usda-173181");
   });
 });
 
@@ -214,21 +246,35 @@ describe("P11 · morning and hydration", () => {
     expect(plan.hydration!.perMeal.map((p) => p.meal)).toEqual(plan.meals.map((m) => m.meal));
   });
 
-  it("the fallback path schedules the caller's body-profile figure", () => {
-    const plan = gen(fullProfile("omnivore", { answered: false }), {
-      fallbackTargets: { kcal: 2400, proteinG: 130 },
-      waterMl: 2650,
-    });
-    expect(plan.targetsSource).toBe("body_profile");
-    expect(plan.hydration?.targetMl).toBe(2650);
+  it("a caller-supplied water figure never overrides the gated one", () => {
+    /* M-219: this pin replaces the retired fallback-path test.
+       The fallback scheduled whatever figure the caller passed;
+       now the gated outcome's figure is the only source a plan
+       can carry, and a caller-supplied waterMl is a backstop no
+       generated plan reaches. */
+    const profile = fullProfile("omnivore");
+    const safety = classifySafety(toSafetyInput(profile));
+    const gated = targetsFor(profile, safety, DAY);
+    if (!gated.ok) throw new Error("unreachable");
+    const plan = gen(profile, { waterMl: 2650 });
+    expect(plan.targetsSource).toBe("assessment");
+    expect(plan.hydration?.targetMl).toBe(Math.round(gated.targets.waterMl));
+    expect(plan.hydration?.targetMl).not.toBe(2650);
   });
 
-  it("no water figure anywhere: the morning glass stands, no schedule is invented", () => {
-    const plan = gen(fullProfile("omnivore", { answered: false }), {
-      fallbackTargets: { kcal: 2400, proteinG: 130 },
-    });
+  it("the morning glass stands and the schedule is the gated figure, exactly", () => {
+    /* M-219: the old "no water figure anywhere" case cannot
+       arise — a generated plan always carries its gated outcome,
+       whose water figure is always computed. What survives of
+       that pin: the morning glass is constant, and no schedule
+       is ever invented beyond the gated figure. */
+    const profile = fullProfile("vegan");
+    const safety = classifySafety(toSafetyInput(profile));
+    const gated = targetsFor(profile, safety, DAY);
+    if (!gated.ok) throw new Error("unreachable");
+    const plan = gen(profile);
     expect(plan.morning).toEqual({ waterMl: 250 });
-    expect(plan.hydration).toBeUndefined();
+    expect(plan.hydration?.targetMl).toBe(Math.round(gated.targets.waterMl));
   });
 
   it("morning and hydration survive a storage round-trip; a tampered schedule is refused", () => {
@@ -245,15 +291,19 @@ describe("P11 · morning and hydration", () => {
 
 describe("P11 · protein overshoot", () => {
   it("the small-target food-composed day no longer sails past its band unnamed", () => {
-    /* Pre-P11 measurement of this exact shape: 127 g against a
-       90 g guide (+41%), with no note saying so. */
-    const plan = gen(fullProfile("eggetarian", { answered: false }), {
-      fallbackTargets: { kcal: 1800, proteinG: 90 },
+    /* Pre-P11 measurement of this shape: 127 g against a
+       90 g guide (+41%), with no note saying so.
+       M-219: the guide is the gated one for this fixture
+       (102 g); the day lands at 112 g — inside the 110% band,
+       so no naming is owed, and still under the old day's
+       absolute 127 g. The band is read from the plan's own
+       targets, never an injected pair. */
+    const plan = gen(fullProfile("eggetarian"), {
       dishes: null,
     });
     const protein = dayProtein(plan);
     const named = plan.notes.some((n) => n.includes("g of protein — above your"));
-    expect(protein <= 1.1 * 90 || named).toBe(true);
+    expect(protein <= 1.1 * plan.targets.proteinG || named).toBe(true);
     expect(protein).toBeLessThan(127);
   });
 });

@@ -12,6 +12,7 @@ import {
 import { observation } from "@/lib/vitalis/domain/provenance";
 import { quantity } from "@/lib/vitalis/domain/units";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
+import { targetsFor } from "@/lib/vitalis/calc/body";
 import { DISH_LIBRARY, PROTEIN_WAVE_DISH_IDS } from "./data/dishLibrary";
 import { dishPatterns } from "./dishes";
 import { eligiblePool, generatePlan, planPatternOf, type DailyPlan } from "./plan";
@@ -41,11 +42,18 @@ const PROVENANCE = { source: "user_reported", recordedAt: "2026-06-01T07:00:00Z"
 const NOW = "2026-11-19T03:00:00.000Z";
 
 function gen(profile: HealthProfile, day: string, kcal: number, proteinG: number): DailyPlan {
+  /* M-219: the (kcal, proteinG) pair is accepted for call-site
+     compatibility and deliberately NOT used — this suite once ran
+     on a hand-built not-ok gated outcome plus the body-profile
+     fallback; that path is retired, so targets come from the
+     gated engine for the fixture's own profile. */
+  void kcal;
+  void proteinG;
+  const safety = classifySafety(toSafetyInput(profile));
   const outcome = generatePlan({
     profile,
-    safety: classifySafety(toSafetyInput(profile)),
-    gatedOutcome: { ok: false, reason: "profile_incomplete", missing: [] },
-    fallbackTargets: { kcal, proteinG },
+    safety,
+    gatedOutcome: targetsFor(profile, safety, day),
     foods: USDA_REFERENCE_FOODS,
     dishes: DISH_LIBRARY,
     day,
@@ -174,9 +182,15 @@ describe("method 13 · the owner's corner (D3/F9)", () => {
     }
   });
 
-  it("a shake is served, and the protein wave is on the day", () => {
+  it("the protein wave is on the day", () => {
+    /* M-219: the shake half of this pin moved to the D2 suite.
+       At the corner's gated guide (2,050 kcal / 112 g, ~22%
+       protein) the day's protein is carried by its mains and no
+       shake is picked on 2026-11-19 — shakes remain servable and
+       are served where the protein share demands them (D2). What
+       stays pinned here: the protein wave reaches the corner's
+       day at all (the D1 defect class). */
     const served = plan.meals.flatMap((m) => m.dishes.map((d) => DISH_BY_ID.get(d.dishId)!));
-    expect(served.some((d) => d.category === "shake")).toBe(true);
     expect(served.some((d) => PROTEIN_WAVE_DISH_IDS.has(d.id))).toBe(true);
   });
 
@@ -201,8 +215,10 @@ describe("method 13 · the owner's corner (D3/F9)", () => {
       }),
       { kcal: 0, proteinG: 0 },
     );
-    expect(Math.abs(totals.kcal - 1350) / 1350).toBeLessThan(0.1);
-    expect(totals.proteinG).toBeGreaterThanOrEqual(160);
+    /* M-219: the guide is the gated one for this fixture —
+       2,050 kcal / 112 g (light activity; no floor binds). */
+    expect(Math.abs(totals.kcal - 2050) / 2050).toBeLessThan(0.1);
+    expect(totals.proteinG).toBeGreaterThanOrEqual(106);
   });
 });
 
@@ -234,6 +250,29 @@ describe("method 13 · the snack slot serves dishes (D2)", () => {
   });
 
   it("shakes are served across a week — at breakfast or snack", () => {
+    /* M-219: pinned on a profile whose protein share makes shakes
+       earn their place — a 60 kg lose profile at the 1,200 kcal
+       floor with a 105 g guide (~33% protein). At the plain
+       omnivore's gated share (~15–22%) the composer meets protein
+       from mains and picks no shake in the measured weeks; the
+       D2 contract is servability, and this is where service is
+       demonstrable. Measured: shakes on 3 of these 7 days. */
+    const highShare: HealthProfile = {
+      ...emptyProfile("user-1", "2026-06-01T07:00:00Z"),
+      ageYears: 30,
+      sex: "female",
+      height: observation(quantity(160, "cm"), PROVENANCE),
+      weight: observation(quantity(60, "kg"), PROVENANCE),
+      goal: "lose",
+      activity: "sedentary",
+      rateKgPerWeek: 0.25,
+      dietary: { ...EMPTY_DIETARY, pattern: "omnivore", mealsPerDay: 3 },
+      constraints: {
+        ...EMPTY_CONSTRAINTS,
+        pregnantOrBreastfeeding: false,
+        eatingDisorderHistory: false,
+      },
+    };
     const days = [
       "2026-11-16",
       "2026-11-17",
@@ -244,7 +283,7 @@ describe("method 13 · the snack slot serves dishes (D2)", () => {
       "2026-11-22",
     ];
     const shakeDays = days.filter((day) =>
-      gen(plainOmnivore, day, 2200, 140).meals.some((m) =>
+      gen(highShare, day, 1272, 105).meals.some((m) =>
         m.dishes.some((d) => DISH_BY_ID.get(d.dishId)?.category === "shake"),
       ),
     );

@@ -126,6 +126,21 @@ function logEntry(day: string): LogEntry {
   };
 }
 
+/** A COMPLETE logged day (M-219, audit F-11): the day's totals
+ *  split across lunch and dinner — the plan's learning reads
+ *  complete days only, so the single-entry version of this fixture
+ *  silently stopped steering the plan it exists to exercise. */
+function logDay(day: string): LogEntry[] {
+  const lunch = logEntry(day);
+  lunch.nutrients = { kcal: 900, proteinG: 45, carbsG: 90, fatG: 30 };
+  const dinner: LogEntry = {
+    ...logEntry(day),
+    meal: "dinner",
+    nutrients: { kcal: 900, proteinG: 45, carbsG: 90, fatG: 30 },
+  };
+  return [lunch, dinner];
+}
+
 const OWNER_ANSWERS: Partial<AssessmentState["answers"]> = {
   ageYears: 19,
   heightCm: 165,
@@ -229,9 +244,9 @@ describe("today guard — the owner's corner, composed through the page", () => 
     seedAssessment(OWNER_ANSWERS);
     const today = todayLocal();
     writeFoodLog([
-      logEntry(shiftDay(today, -1)),
-      logEntry(shiftDay(today, -2)),
-      logEntry(shiftDay(today, -3)),
+      ...logDay(shiftDay(today, -1)),
+      ...logDay(shiftDay(today, -2)),
+      ...logDay(shiftDay(today, -3)),
     ]);
     const { container } = render(<NutritionPage />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));
@@ -287,9 +302,9 @@ describe("today guard — the owner's corner, composed through the page", () => 
     seedAssessment(OWNER_ANSWERS);
     const today = todayLocal();
     writeFoodLog([
-      logEntry(shiftDay(today, -1)),
-      logEntry(shiftDay(today, -2)),
-      logEntry(shiftDay(today, -3)),
+      ...logDay(shiftDay(today, -1)),
+      ...logDay(shiftDay(today, -2)),
+      ...logDay(shiftDay(today, -3)),
     ]);
     const { container } = render(<NutritionPage />);
     fireEvent.click(screen.getByRole("button", { name: "Create my plan" }));

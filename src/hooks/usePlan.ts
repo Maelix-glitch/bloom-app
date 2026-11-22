@@ -19,7 +19,7 @@
 
 import { useCallback, useMemo } from "react";
 
-import { EMPTY_MODES_VALUE, MODES_KEY, parseModesValue } from "@/lib/modes/modes";
+import { EMPTY_MODES_VALUE, MODES_KEY, effectiveModes, parseModesValue } from "@/lib/modes/modes";
 import { getPref, setPref } from "@/lib/prefs";
 import { usualDay } from "@/lib/smart/usual";
 import { loadDays } from "@/lib/trackers/store";
@@ -46,7 +46,6 @@ import {
   parseSnackPlacement,
   parseTargetAdjustment,
   generatePlan,
-  nutritionTargetsFromBodyTargets,
   parsePlanLogValue,
   parsePlanValue,
   planInputsSnapshotOf,
@@ -135,7 +134,6 @@ interface AssembledInputs {
   profile: HealthProfile;
   safety: SafetyAssessment;
   gatedOutcome: BodyTargetsOutcome;
-  fallbackTargets: NutritionTargets | null;
 }
 
 export function usePlan(): PlanStore {
@@ -168,7 +166,6 @@ export function usePlan(): PlanStore {
       profile,
       safety,
       gatedOutcome: targetsFor(profile, safety, today),
-      fallbackTargets: nutritionTargetsFromBodyTargets(body.targets),
     };
   }, [assessment.state, session.userId, body.profile.goal, body.targets, today]);
 
@@ -192,10 +189,19 @@ export function usePlan(): PlanStore {
       ...(targetAdjustment ? { targetAdjustmentKcal: targetAdjustment.kcalDelta } : {}),
       /* System 14: the person's switched-on Condition Modes ride
        * along — the dish pool judges them beside pattern + budget. */
-      ...(modes.active.length > 0 ? { activeModes: modes.active } : {}),
-      /* P11: the body profile's water target rides along for the
-         plan's hydration schedule — consulted only when the plan's
-         targets come from this same fallback source; the gated
+      /* System 14 + M-219 (audit F-12): the person's switched-on
+       * Condition Modes ride along — and, since M-219, so do the
+       * modes their Assessment answers auto-enable (type 2 diabetes
+       * → blood-sugar aware, hypertension → blood-pressure aware,
+       * thyroid disorder → thyroid aware). Before M-219 those answers
+       * bought nothing: the modes were opt-in toggles a person with
+       * the condition had to discover for themselves. */
+      ...(() => {
+        const active = effectiveModes(modes.active, assembled.profile.constraints.conditions);
+        return active.length > 0 ? { activeModes: active } : {};
+      })(),
+      /* P11: the body profile's water target rides along as a
+         backstop for the plan's hydration schedule — the gated
          outcome carries its own figure and outranks it. */
       waterMl: body.targets?.waterMl ?? null,
       /* P12: the timeline's clock anchor — the person's usual wake

@@ -255,10 +255,14 @@ function expectShelled(container: HTMLElement, label: string, hero = false): HTM
 
 describe("section system — Nutrition page render", () => {
   it("every top-level section is shelled with a real H2; the mix block is Today's balance now", () => {
-    /* The plan-section test's fixture: the 2026-11-18 rotation, whose
-       fruit shortfall is a guideline (balance) note. Composed by the
+    /* The plan-section test's fixture: a rotation day whose fruit
+       shortfall is a guideline (balance) note. Composed by the
        real engine and written to storage, so the page reads a ready
-       plan — the same fixture NutritionPlanSection.test pins. */
+       plan — the same fixture NutritionPlanSection.test pins.
+       M-219: the day moved 2026-11-18 → 2026-11-19, the same move
+       balance.test's ROTATION fixture made — at the corrected
+       targets the 18th's composition meets the fruit floor, and
+       the 19th still exercises the shortfall note. */
     const answers = {
       ageYears: 30,
       heightCm: 175,
@@ -286,12 +290,12 @@ describe("section system — Nutrition page render", () => {
     const outcome = generatePlan({
       profile,
       safety,
-      gatedOutcome: targetsFor(profile, safety, "2026-11-18"),
+      gatedOutcome: targetsFor(profile, safety, "2026-11-19"),
       fallbackTargets: null,
       foods: USDA_REFERENCE_FOODS,
       dishes: DISH_LIBRARY,
-      day: "2026-11-18",
-      now: "2026-11-18T03:00:00.000Z",
+      day: "2026-11-19",
+      now: "2026-11-19T03:00:00.000Z",
       id: "plan-section-guard",
     });
     if (!outcome.ok) throw new Error("expected a plan");

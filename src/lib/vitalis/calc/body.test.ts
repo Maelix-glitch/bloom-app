@@ -67,7 +67,9 @@ describe("vitalis body adapter", () => {
     expect(outcome.targets.proteinG).toBe(legacy.proteinG);
     expect(outcome.targets.calorieTargetKcal).toBe(outcome.targets.tdeeKcal);
     expect(outcome.targets.calorieDelta).toBe(0);
-    expect(outcome.targets.proteinG).toBe(Math.round(82 * 2.2));
+    /* M-219: protein is dosed on the healthy-ceiling reference weight
+       at this BMI (22.9 × 1.75² = 70.1 kg), not the 82 kg scale weight. */
+    expect(outcome.targets.proteinG).toBe(Math.round(70.1 * 2.2));
     const maintain = targetsFor(profile({ goal: "maintain" }), safetyOf(profile({ goal: "maintain" })), "2026-06-01");
     if (!maintain.ok) throw new Error("expected maintenance targets");
     expect(outcome.targets.calorieTargetKcal).toBe(maintain.targets.calorieTargetKcal);
@@ -127,7 +129,8 @@ describe("vitalis body adapter", () => {
     const fast = profile({ rateKgPerWeek: 1.6 });
     const outcome = targetsFor(fast, safetyOf(fast), "2026-06-01");
     if (!outcome.ok) throw new Error(`expected targets, got ${outcome.reason}`);
-    expect(outcome.targets.rateKgPerWeek).toBe(1);
+    /* The cap is 0.75 kg/wk since M-219 (audit F-04). */
+    expect(outcome.targets.rateKgPerWeek).toBe(0.75);
     expect(outcome.targets.rateClamped).toBe(true);
 
     const clamped = profile({ rateKgPerWeek: 1 });

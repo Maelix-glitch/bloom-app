@@ -153,21 +153,25 @@ describe("spectrumForDay", () => {
       reference: 2000,
       limit: true,
     });
-    expect(rows.find((r) => r.key === "magnesiumMg")!.reference).toBe(370);
+    /* ICMR-NIN RDA 2020 (M-219, audit F-09): 440 mg men / 370 mg
+       women. The table previously carried the EAR figures (370/310)
+       under the RDA citation. Unstated sex takes the male value —
+       the module's stated default. */
+    expect(rows.find((r) => r.key === "magnesiumMg")!.reference).toBe(440);
     expect(
       spectrumForDay([], "female").find((r) => r.key === "magnesiumMg")!.reference,
-    ).toBe(310);
+    ).toBe(370);
   });
 
-  it("vitamin C is the ICMR-NIN RDA 2020 adult value — 80 mg, not sex-specific", () => {
-    /* Audit #27: the panel once showed 90 mg. The RDA states a single
-       adult value of 80 mg, so every sex selection must agree. */
-    for (const sex of [null, "male", "female"] as const) {
-      expect(spectrumForDay([], sex).find((r) => r.key === "vitaminCMg")).toMatchObject({
-        reference: 80,
-        unit: "mg",
-        limit: false,
-      });
-    }
+  it("vitamin C is the ICMR-NIN RDA 2020 value — 80 mg men, 65 mg women", () => {
+    /* M-219 (audit F-09): the RDA is sex-specific; the panel used to
+       show 80 mg for everyone. Unstated sex takes the male value. */
+    expect(spectrumForDay([], null).find((r) => r.key === "vitaminCMg")).toMatchObject({
+      reference: 80,
+      unit: "mg",
+      limit: false,
+    });
+    expect(spectrumForDay([], "male").find((r) => r.key === "vitaminCMg")!.reference).toBe(80);
+    expect(spectrumForDay([], "female").find((r) => r.key === "vitaminCMg")!.reference).toBe(65);
   });
 });

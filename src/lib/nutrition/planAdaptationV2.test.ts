@@ -36,10 +36,14 @@ import type { Food, LogEntry } from "./types";
 const NOW = "2026-11-18T03:00:00.000Z";
 const PROVENANCE = { source: "user_reported", recordedAt: "2026-06-01T07:00:00Z" } as const;
 const OWNER_DAY = "2026-11-18";
-const OWNER_TARGETS = { kcal: 3288, proteinG: 220 };
+/** The gated engine's targets for the owner fixture (M-219):
+ *  3,325 kcal / 116 g protein. */
+const OWNER_TARGETS = { kcal: 3325, proteinG: 116 };
 
 /** The owner's shape (as planLearning.test.ts): eggetarian, 100 kg,
- *  gain, safety unanswered — targets from the body-profile fallback. */
+ *  gain. Since M-219 the safety questions are answered and the
+ *  targets are the gated engine's — the body-profile fallback this
+ *  fixture once rode is retired. */
 function ownerProfile(): HealthProfile {
   return {
     ...emptyProfile("user-1", "2026-06-01T07:00:00Z"),
@@ -53,19 +57,23 @@ function ownerProfile(): HealthProfile {
     dietary: { ...EMPTY_DIETARY, pattern: "eggetarian", mealsPerDay: 3, budgetTier: null },
     constraints: {
       ...EMPTY_CONSTRAINTS,
-      pregnantOrBreastfeeding: null,
-      eatingDisorderHistory: null,
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
     },
   };
 }
 
 let seq = 0;
-function foodEntry(day: string, nutrients: LogEntry["nutrients"]): LogEntry {
+function foodEntry(
+  day: string,
+  nutrients: LogEntry["nutrients"],
+  meal: LogEntry["meal"] = "lunch",
+): LogEntry {
   seq += 1;
   return {
     id: `e-${seq}`,
     day,
-    meal: "lunch",
+    meal,
     foodId: null,
     snapshot: null,
     name: "logged",
@@ -75,6 +83,30 @@ function foodEntry(day: string, nutrients: LogEntry["nutrients"]): LogEntry {
     source: "search",
     createdAt: `${day}T12:00:00.000Z`,
   };
+}
+
+/* A COMPLETE logged day (M-219): the day's nutrients split across
+   a lunch and a dinner entry — the only shape the adaptation
+   reads since the completeness gate. Totals preserved exactly. */
+function dayEntries(day: string, nutrients: LogEntry["nutrients"]): LogEntry[] {
+  const half = (v: number | undefined) => (v === undefined ? undefined : Math.round(v / 2));
+  const split = (meal: LogEntry["meal"], rest: boolean): LogEntry =>
+    foodEntry(
+      day,
+      {
+        kcal: rest ? nutrients.kcal - (half(nutrients.kcal) ?? 0) : (half(nutrients.kcal) ?? 0),
+        proteinG: rest
+          ? nutrients.proteinG - (half(nutrients.proteinG) ?? 0)
+          : (half(nutrients.proteinG) ?? 0),
+        carbsG: 0,
+        fatG: 0,
+        ...(nutrients.ironMg !== undefined
+          ? { ironMg: rest ? nutrients.ironMg - (half(nutrients.ironMg) ?? 0) : (half(nutrients.ironMg) ?? 0) }
+          : {}),
+      },
+      meal,
+    );
+  return [split("lunch", false), split("dinner", true)];
 }
 
 function dishEntry(day: string, dishId: string, meal: LogEntry["meal"] = "lunch"): LogEntry {
@@ -96,7 +128,6 @@ function gen(opts: {
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, opts.day),
-    fallbackTargets: OWNER_TARGETS,
     foods: USDA_REFERENCE_FOODS as readonly Food[],
     dishes: DISH_LIBRARY,
     ...(opts.recentLog ? { recentLog: opts.recentLog } : {}),
@@ -118,11 +149,9 @@ describe("no usable learning — the P6 plan, unchanged", () => {
     const base = gen({ day: OWNER_DAY });
     const withEmpty = gen({ day: OWNER_DAY, recentLog: [], storedPlan: null });
     expect(withEmpty).toEqual(base);
-    /* Method 10 = the behavioural pass (spec §10): version pin
-       moved; the inertness pinned here is unchanged. (Moved again
-       at method 13, the dish-first repair, and at method 14, the
-       accompaniment + snack placement.) */
-    expect(base.methodVersion).toBe(14);
+    /* Method 15 = the engine evidence-audit fixes (M-219): version
+       pin moved; the inertness pinned here is unchanged. */
+    expect(base.methodVersion).toBe(15);
   });
 
   it("an on-target log with no dish history changes nothing", () => {
@@ -130,8 +159,8 @@ describe("no usable learning — the P6 plan, unchanged", () => {
     const onTarget = gen({
       day: OWNER_DAY,
       recentLog: [
-        foodEntry("2026-11-16", { kcal: 3288, proteinG: 220, carbsG: 0, fatG: 0 }),
-        foodEntry("2026-11-17", { kcal: 3200, proteinG: 215, carbsG: 0, fatG: 0 }),
+        ...dayEntries("2026-11-16", { kcal: 3300, proteinG: 115, carbsG: 0, fatG: 0 }),
+        ...dayEntries("2026-11-17", { kcal: 3350, proteinG: 118, carbsG: 0, fatG: 0 }),
       ],
     });
     expect(onTarget.meals).toEqual(base.meals);
@@ -140,9 +169,17 @@ describe("no usable learning — the P6 plan, unchanged", () => {
 });
 
 describe("behavioural learning", () => {
-  /* Two dense, eggetarian anchors the owner-fixture pool serves,
-     each logged three times in the window. */
-  const FAVOURED = ["dish-intl-tempeh-taco-cups", "dish-intl-tempeh-burger-patties"];
+  /* Two eggetarian anchors the owner-fixture pool serves, each
+     logged three times in the window.
+     M-219 re-pick: the pair was two tempeh dishes, chosen when
+     the 220 g protein guide made dense tempeh anchors fit the
+     day's splits. At the gated 116 g guide they no longer fit —
+     and the P7 bias is a near-tie term by design (−0.08), so it
+     cannot crown a dish that fits badly; the reason fired but
+     nothing served. The contract is unchanged; the pair is now
+     two dishes that fit this profile's splits (both anchor
+     un-biased days in the same week). */
+  const FAVOURED = ["dish-kaju-masala", "dish-intl-lentil-walnut-meatballs"];
   const favouredLog: LogEntry[] = [
     dishEntry("2026-11-10", FAVOURED[0]!),
     dishEntry("2026-11-12", FAVOURED[1]!),
@@ -191,8 +228,10 @@ describe("behavioural learning", () => {
 });
 
 describe("micronutrient gap closing", () => {
-  /* Seven logged days, each reporting just 2 mg of iron — a
-     persistent gap against the 19 mg reference (male). */
+  /* Seven complete logged days, each reporting just 2 mg of
+     iron — a persistent gap against the 19 mg reference (male).
+     (M-219: each day is split across lunch and dinner so the
+     completeness gate reads it; the day totals are unchanged.) */
   const ironPoorLog: LogEntry[] = [
     "2026-11-11",
     "2026-11-12",
@@ -201,7 +240,9 @@ describe("micronutrient gap closing", () => {
     "2026-11-15",
     "2026-11-16",
     "2026-11-17",
-  ].map((day) => foodEntry(day, { kcal: 2400, proteinG: 160, carbsG: 0, fatG: 0, ironMg: 2 }));
+  ].flatMap((day) =>
+    dayEntries(day, { kcal: 2400, proteinG: 160, carbsG: 0, fatG: 0, ironMg: 2 }),
+  );
 
   it("the note names the nutrient, the average and the reference", () => {
     const plan = gen({ day: OWNER_DAY, recentLog: ironPoorLog });

@@ -61,11 +61,17 @@ export function pctOfTarget(actual: number, target: number): number {
  * under the 1,200 kcal adult floor-of-floors, or when protein would
  * have to supply more than 35% of the day's energy — a share no
  * ordinary diet reaches. This ASSERTS and WARNS; it never rewrites
- * a target. Whether the engine's bands or floors should change is
- * a human nutrition-review decision (M-82, flagged 2026-11-19: the
- * owner's pair {1,350 kcal, 171 g} fails this check at ~51% —
- * the kcal side is the safety floor binding while the protein side
- * is an unfloored 1.8 g/kg band; see the trace in the slice log).
+ * a target.
+ *
+ * M-219 (engine evidence audit, F-05): this gate used to be called
+ * nowhere outside its own test — the M-82 pair {1,350 kcal, 171 g}
+ * failed it at ~51% and shipped silently on every surface. The
+ * audit's remedy is applied at the source (protein is dosed on the
+ * healthy-ceiling reference weight above BMI 23, so the pair now
+ * resolves to {1,350 kcal, 112 g} ≈ 33%E) and this gate is wired
+ * into the one gated resolution path (`targetsFor`) so its verdict
+ * rides every outcome as `targetsPlausible` — a regression would
+ * now be visible instead of silent.
  */
 export function assertPlausibleTargets(targets: { kcal: number; proteinG: number }): boolean {
   const share = (targets.proteinG * 4) / targets.kcal;

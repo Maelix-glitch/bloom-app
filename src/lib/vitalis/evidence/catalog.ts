@@ -329,6 +329,33 @@ export const CATALOG: EvidenceRegistry = {
       sources: [],
       // Draft, not approved: nothing backs it. The registry reports this as an
       // untraceable claim, which is the point of having the check at all.
+      // Superseded 2026-11-22 (M-219): the cap itself changed — see
+      // rate-cap-0-75kg-per-week. Retained for history.
+      reviewStatus: "superseded",
+      version: 2,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: "rate-cap-0-75kg-per-week",
+    },
+    {
+      id: "rate-cap-0-75kg-per-week",
+      statement: "Bloom caps planned weight change at 0.75 kg per week.",
+      topic: "weight_change_rate",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Anyone using Bloom's body-target calculator",
+      uncertainty: [
+        "The M-219 engine evidence audit (2026-11-22) set this cap against the published ranges it verified — CDC's 1–2 lb per week and the AHA/ACC/TOS 500–750 kcal/day prescription the old 1 kg/week cap exceeded. Those sources are not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.",
+        "How the ceiling should differ by body size remains unresolved.",
+      ],
+      limitations: [
+        "Deliberately recorded with no citation rather than attaching a plausible-looking reference to a number nobody checked.",
+        "Until a source is verified, this claim must not be presented to a person as evidence-based.",
+      ],
+      contraindications: [
+        "A cap does not make an aggressive target safe for someone with a history of disordered eating; the safety classifier handles that separately.",
+      ],
+      sources: [],
       reviewStatus: "draft",
       version: 1,
       reviewedOn: null,
@@ -450,7 +477,7 @@ export const CATALOG: EvidenceRegistry = {
     {
       id: "protein-bands-by-goal",
       statement:
-        "Bloom's other protein bands are 1.8 g per kg of body weight for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance, applied to current body weight.",
+        "Bloom's other protein bands are 1.8 g per kg for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance. Above a BMI of 23 the bands multiply a reference weight — the healthy-ceiling weight for the person's height (22.9 × height²) — instead of current body weight; at or below it they apply to current body weight. (Corrected at version 2, M-219: the statement previously said the bands apply to current body weight throughout, which stopped being true when the dosing basis changed.)",
       topic: "protein",
       grade: "insufficient",
       confidence: 0,
@@ -459,14 +486,14 @@ export const CATALOG: EvidenceRegistry = {
         "No source is stated in the code for these three bands (src/lib/health/body.ts, bodyTargetsOf); recorded as TO VERIFY.",
       ],
       limitations: [
-        "Per-kilogram bands scale linearly with body weight, which overstates needs at high body weights; the engine makes no adjustment for body composition today.",
+        "Per-kilogram bands scale linearly with body weight, which overstates needs at high body weights; since M-219 the engine doses on the healthy-ceiling reference weight above a BMI of 23, but that reference is a BMI ceiling, not a measured lean-mass figure.",
       ],
       contraindications: [
         "Planning targets for the classifier's cleared set, not therapeutic protein prescriptions.",
       ],
       sources: [],
       reviewStatus: "draft",
-      version: 1,
+      version: 2,
       reviewedOn: null,
       reviewIntervalMonths: 12,
       supersededBy: null,
@@ -523,7 +550,7 @@ export const CATALOG: EvidenceRegistry = {
     {
       id: "spectrum-rda-2020-references",
       statement:
-        "The Nutrition tab's micronutrient panel judges a day against reference intakes the code names as ICMR-NIN Recommended Dietary Allowances 2020: fibre 30 g, potassium 3,500 mg, magnesium 370 mg (310 mg for women), calcium 1,000 mg, iron 19 mg (29 mg for women), vitamin C 80 mg, and sodium as a 2,000 mg ceiling rather than a goal.",
+        "The Nutrition tab's micronutrient panel judges a day against reference intakes the code names as ICMR-NIN Recommended Dietary Allowances 2020: fibre 30 g, potassium 3,500 mg, magnesium 440 mg (370 mg for women), calcium 1,000 mg, iron 19 mg (29 mg for women), vitamin C 80 mg (65 mg for women), and sodium as a 2,000 mg ceiling rather than a goal. (Corrected at version 2, M-219: the magnesium figures previously recorded here were the ICMR-NIN estimated average requirements, not the RDA, and vitamin C was recorded as a single value where the RDA is sex-specific.)",
       topic: "dietary_pattern",
       grade: "insufficient",
       confidence: 0,
@@ -539,7 +566,7 @@ export const CATALOG: EvidenceRegistry = {
       ],
       sources: [],
       reviewStatus: "draft",
-      version: 1,
+      version: 2,
       reviewedOn: null,
       reviewIntervalMonths: 12,
       supersededBy: null,
@@ -581,6 +608,34 @@ export const CATALOG: EvidenceRegistry = {
       ],
       limitations: [
         "A single per-kilogram figure ignores climate, illness and medication; heat alone can move real needs well past it.",
+      ],
+      contraindications: [
+        "People whose condition or medication restricts fluid must follow their clinician, not this target.",
+      ],
+      sources: [],
+      // Superseded 2026-11-22 (M-219): the formula itself was
+      // replaced — see water-efsa-drinking-share. Retained for
+      // history.
+      reviewStatus: "superseded",
+      version: 2,
+      reviewedOn: null,
+      reviewIntervalMonths: 12,
+      supersededBy: "water-efsa-drinking-share",
+    },
+    {
+      id: "water-efsa-drinking-share",
+      statement:
+        "Bloom's daily water target is a drinking-water figure: a base of 1,900 ml for men, 1,500 ml for women and 1,700 ml when sex is unstated, plus an activity allowance of 0 to 700 ml, clamped between 1,200 and 3,000 ml. The base is set at roughly three quarters of EFSA's total-water adequate intake (2.5 L a day for men, 2.0 L for women) — the share ordinarily drunk rather than taken in food.",
+      topic: "hydration",
+      grade: "insufficient",
+      confidence: 0,
+      population: "Adults using Bloom's hydration tracker",
+      uncertainty: [
+        "The EFSA adequate-intake basis was verified by the M-219 engine evidence audit (2026-11-22) against EFSA's 2010 opinion; the source is not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.",
+        "The roughly-three-quarters drinking share is an estimate of how total water ordinarily splits between drink and food moisture, not an EFSA figure.",
+      ],
+      limitations: [
+        "EFSA's adequate intake assumes a temperate climate; heat, illness and medication can move real needs well past any fixed figure.",
       ],
       contraindications: [
         "People whose condition or medication restricts fluid must follow their clinician, not this target.",
@@ -747,7 +802,7 @@ export const CATALOG: EvidenceRegistry = {
     },
     {
       recommendationId: "vitalis.safety.rate-cap",
-      claimIds: ["rate-cap-1kg-per-week"],
+      claimIds: ["rate-cap-0-75kg-per-week"],
       rationale:
         "The Phase 1 classifier clamps requested pace to this constant. Phase 2 records the rule and the fact that its evidence is missing, rather than inventing support for a number that was chosen as a safety margin. Implemented in src/lib/vitalis/domain/safety.ts — MIN_RATE_KG_PER_WEEK / MAX_RATE_KG_PER_WEEK.",
     },
@@ -807,7 +862,7 @@ export const CATALOG: EvidenceRegistry = {
     },
     {
       recommendationId: "vitalis.body.hydration-target",
-      claimIds: ["water-35ml-per-kg"],
+      claimIds: ["water-efsa-drinking-share"],
       rationale:
         "Implemented in src/lib/health/body.ts — bodyTargetsOf computes waterMl as weightKg × 35 plus the activity bonus, clamped to [1500, 4500] and rounded to 50 ml.",
     },
@@ -1038,6 +1093,60 @@ export const CATALOG: EvidenceRegistry = {
       changedBy: "vitalis-evidence-registry",
       summary:
         "Registered the log-adaptation ratios (protein under 85%, energy over 110% of target) (Evidence Registry v1). Draft with no source: none is stated in the code.",
+    },
+    {
+      entityType: "claim",
+      entityId: "rate-cap-1kg-per-week",
+      version: 2,
+      changedOn: "2026-11-22",
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Marked superseded by rate-cap-0-75kg-per-week: the M-219 engine evidence audit found the 1 kg/week cap exceeds the CDC and AHA/ACC/TOS ranges, and the engine's cap changed with it. Retained for history, no longer the live rule.",
+    },
+    {
+      entityType: "claim",
+      entityId: "rate-cap-0-75kg-per-week",
+      version: 1,
+      changedOn: "2026-11-22",
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the 0.75 kg/week rate cap (M-219). Draft: the audit's CDC and AHA/ACC/TOS sources are recorded in the claim's uncertainty as TO VERIFY / TO REGISTER, not yet linked.",
+    },
+    {
+      entityType: "claim",
+      entityId: "water-35ml-per-kg",
+      version: 2,
+      changedOn: "2026-11-22",
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Marked superseded by water-efsa-drinking-share: the M-219 audit found the 35 ml/kg rule produced a drinking schedule above EFSA's total-water adequate intake, and the engine's formula changed with it. Retained for history.",
+    },
+    {
+      entityType: "claim",
+      entityId: "water-efsa-drinking-share",
+      version: 1,
+      changedOn: "2026-11-22",
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Registered the drinking-share hydration target (M-219). Draft: the EFSA 2010 adequate-intake basis is recorded in the claim's uncertainty as TO VERIFY / TO REGISTER, not yet linked.",
+    },
+    {
+      entityType: "claim",
+      entityId: "protein-bands-by-goal",
+      version: 2,
+      changedOn: "2026-11-22",
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Statement corrected (M-219, audit F-05): above a BMI of 23 the bands now multiply the healthy-ceiling reference weight, not current body weight. The bands themselves are unchanged.",
+    },
+    {
+      entityType: "claim",
+      entityId: "spectrum-rda-2020-references",
+      version: 2,
+      changedOn: "2026-11-22",
+      changedBy: "vitalis-evidence-registry",
+      summary:
+        "Statement corrected (M-219, audit F-09): magnesium is the ICMR-NIN RDA 2020 (440 mg men / 370 mg women), not the EAR figures previously recorded, and vitamin C is sex-specific (80 mg men / 65 mg women). The OPEN OWNER DECISION limitation is unchanged.",
     },
   ],
 };

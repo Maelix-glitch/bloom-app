@@ -1,9 +1,11 @@
 /**
  * Condition Modes (System 14) — user-chosen plan guardrails.
  *
- * A mode is a PREFERENCE the person switches on, never a diagnosis and
- * never medical advice: Bloom does not know whether the person has any
- * condition, and nothing here claims a dish is good or bad for one.
+ * A mode is a GUARDRAIL, never a diagnosis and never medical advice:
+ * Bloom does not know whether the person has any condition, and
+ * nothing here claims a dish is good or bad for one. A mode is on
+ * when the person switches it on, or — since M-219 — when their own
+ * Assessment answer auto-enables it (see CONDITION_AUTO_MODES).
  * Each mode is a small set of mechanical rules over data Bloom actually
  * has, stated in the same plain words the UI shows:
  *
@@ -111,6 +113,42 @@ export const MODE_DEFINITIONS: readonly ModeDefinition[] = [
 
 export function modeDefinition(id: ModeId): ModeDefinition {
   return MODE_DEFINITIONS.find((m) => m.id === id)!;
+}
+
+/**
+ * Assessment conditions that auto-enable a Mode (M-219, audit F-12).
+ * Before M-219 the structured condition list held only the five
+ * high-risk codes, and the common metabolic conditions — type 2
+ * diabetes, hypertension, thyroid disorders — existed only as free
+ * text while the Modes that answer them sat as opt-in toggles the
+ * person had to discover. Now an honest Assessment answer switches
+ * the matching guardrail on by itself. PCOS has no Mode: Bloom's data
+ * supports no honest dish rule for it, so it carries the safety
+ * caution only — inventing a rule would be worse than none.
+ */
+export const CONDITION_AUTO_MODES: Readonly<Record<string, ModeId>> = {
+  type_2_diabetes: "blood_sugar",
+  hypertension: "blood_pressure",
+  thyroid_disorder: "thyroid",
+};
+
+/** The Modes a person's stated conditions switch on by themselves. */
+export function autoModesForConditions(conditions: readonly string[]): ModeId[] {
+  const out: ModeId[] = [];
+  for (const code of conditions) {
+    const mode = CONDITION_AUTO_MODES[code];
+    if (mode && !out.includes(mode)) out.push(mode);
+  }
+  return out;
+}
+
+/** Stored (opt-in) modes ∪ answer-derived modes, in definition order. */
+export function effectiveModes(
+  storedActive: readonly ModeId[],
+  conditions: readonly string[],
+): ModeId[] {
+  const wanted = new Set<ModeId>([...storedActive, ...autoModesForConditions(conditions)]);
+  return MODE_DEFINITIONS.map((m) => m.id).filter((id) => wanted.has(id));
 }
 
 export function isModeId(value: unknown): value is ModeId {

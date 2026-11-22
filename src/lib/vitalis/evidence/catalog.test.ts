@@ -70,11 +70,18 @@ describe("the evidence catalogue", () => {
   });
 
   it("records the rate cap as an unsourced assumption", () => {
-    const cap = CATALOG.claims.find((claim) => claim.id === "rate-cap-1kg-per-week");
+    /* M-219: the live cap is 0.75 kg/week; the 1 kg/week claim is
+       retained as superseded history. The live claim is still an
+       unsourced draft assumption — the audit's sources are
+       recorded as TO VERIFY, not linked. */
+    const cap = CATALOG.claims.find((claim) => claim.id === "rate-cap-0-75kg-per-week");
     expect(cap?.sources).toEqual([]);
     expect(cap?.grade).toBe("insufficient");
     expect(cap?.confidence).toBe(0);
     expect(cap?.reviewStatus).toBe("draft");
+    const old = CATALOG.claims.find((claim) => claim.id === "rate-cap-1kg-per-week");
+    expect(old?.reviewStatus).toBe("superseded");
+    expect(old?.supersededBy).toBe("rate-cap-0-75kg-per-week");
   });
 
   it("reports its own gaps rather than hiding them", () => {
@@ -84,6 +91,7 @@ describe("the evidence catalogue", () => {
     // rate cap, plus the fifteen drafts Evidence Registry v1 recorded.
     expect(report.untraceableClaims).toEqual([
       "rate-cap-1kg-per-week",
+      "rate-cap-0-75kg-per-week",
       "mifflin-st-jeor-bmr",
       "activity-factor-table",
       "protein-recomp-2-2",
@@ -93,6 +101,7 @@ describe("the evidence catalogue", () => {
       "spectrum-rda-2020-references",
       "plan-composition-derivations",
       "water-35ml-per-kg",
+      "water-efsa-drinking-share",
       "who-healthy-diet-principles",
       "nice-ng246-individualisation",
       "budget-tier-cost-bands",
