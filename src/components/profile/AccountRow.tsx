@@ -21,8 +21,6 @@ import { useState } from "react";
 import {
   IconArchive,
   IconBell,
-  IconCheck,
-  IconChevronDown,
   IconChevronRight,
   IconClock,
   IconDownload,
@@ -293,30 +291,27 @@ function PersonalizationSection() {
 /**
  * Verification — the settings face of the blue tick.
  *
- * The status (lib/profile/verification) is a stored record, granted by
- * invitation only, over three steps: invited member, confirmed email,
- * complete basic profile. Verified, the row says so with the tick itself.
- * Not yet, the row is expandable and each remaining step is named with what
- * actually completes it — the profile step points at the existing
- * edit-profile control rather than duplicating it. Nothing here can set or
- * fake the state; it only reports it, and the record itself is granted
- * server-side by claim_account_verification().
+ * The status (lib/profile/verification) is a stored record, and since
+ * the owner's 2026-11-22 directive it is GRANT-ONLY: records are
+ * created by the owner for eligible members, from a trusted session.
+ * There is no step a member can complete to earn one — so the row no
+ * longer shows a checklist, a count of steps, or any claim language.
+ * Verified, the row says so with the tick itself. Not verified, it
+ * says the one calm true thing and offers nothing to apply through:
+ * no application flow exists, and this row does not invent one.
+ * Nothing here can set or fake the state; it only reports it.
  */
 function VerificationRow({
   verification,
   pending,
-  onEdit,
 }: {
   verification: VerificationStatus;
   pending?: boolean | undefined;
-  onEdit: () => void;
 }) {
-  const [open, setOpen] = useState(false);
-
   /* M-194: while the facts read is in flight, the status was computed
-     from unproven facts and printed a false "steps left" claim that
-     the settled "Verified" then replaced. Hold the row's shape with
-     no claim at all until the read lands. */
+     from unproven facts and printed a false claim that the settled
+     "Verified" then replaced. Hold the row's shape with no claim at
+     all until the read lands. */
   if (pending) {
     return (
       <div className="pf-row" data-testid="pf-row-verification" aria-busy="true">
@@ -341,7 +336,7 @@ function VerificationRow({
         </span>
         <span className="pf-row-text">
           <span className="pf-row-label">Verification</span>
-          <span className="pf-row-hint">Invited member · email confirmed · profile complete.</span>
+          <span className="pf-row-hint">Your account carries the verified badge.</span>
         </span>
         <span className="pf-row-value">Verified</span>
         <span />
@@ -349,78 +344,18 @@ function VerificationRow({
     );
   }
 
-  const remaining = verification.steps.filter((s) => !s.done);
   return (
-    <>
-      <button
-        type="button"
-        className="pf-row"
-        data-testid="pf-row-verification"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="pf-row-icon" aria-hidden>
-          <span style={{ color: VERIFIED_BLUE }}><IconVerified /></span>
-        </span>
-        <span className="pf-row-text">
-          <span className="pf-row-label">Verification</span>
-          <span className="pf-row-hint">
-            {verification.pendingRecord
-              ? "Every step is done — recording your verification"
-              : verification.remaining === 1
-                ? "1 step left for the blue tick"
-                : `${verification.remaining} steps left for the blue tick`}
-          </span>
-        </span>
-        <span className="pf-row-value">
-          {verification.pendingRecord
-            ? "Recording…"
-            : `${verification.remaining} step${verification.remaining === 1 ? "" : "s"} left`}
-        </span>
-        {open ? (
-          <IconChevronDown className="pf-row-chevron" />
-        ) : (
-          <IconChevronRight className="pf-row-chevron" />
-        )}
-      </button>
-      {open ? (
-        <div className="pf-confirm" data-testid="pf-verification-steps">
-          <ul className="flex flex-col gap-2">
-            {verification.steps.map((step) => (
-              <li key={step.id} className="flex items-start gap-2.5">
-                <span
-                  aria-hidden
-                  className="mt-0.5 grid size-4 shrink-0 place-items-center rounded-full border border-border"
-                  style={
-                    step.done
-                      ? { background: VERIFIED_BLUE, borderColor: VERIFIED_BLUE, color: "#fff" }
-                      : undefined
-                  }
-                >
-                  {step.done ? <IconCheck /> : null}
-                </span>
-                <span className="min-w-0 text-[length:var(--text-caption)] leading-snug">
-                  <span className={step.done ? "text-muted-foreground" : "text-foreground"}>
-                    {step.label}
-                    {step.done ? " — done" : ""}
-                  </span>
-                  {!step.done ? (
-                    <span className="block text-muted-foreground">{step.guidance}</span>
-                  ) : null}
-                </span>
-              </li>
-            ))}
-          </ul>
-          {remaining.some((s) => s.id === "profile") ? (
-            <div className="pf-confirm-actions">
-              <button type="button" className="pf-confirm-btn" onClick={onEdit}>
-                Edit profile
-              </button>
-            </div>
-          ) : null}
-        </div>
-      ) : null}
-    </>
+    <div className="pf-row" data-testid="pf-row-verification">
+      <span className="pf-row-icon" aria-hidden>
+        <span style={{ color: VERIFIED_BLUE }}><IconVerified /></span>
+      </span>
+      <span className="pf-row-text">
+        <span className="pf-row-label">Verification</span>
+        <span className="pf-row-hint">Verification is granted to eligible members.</span>
+      </span>
+      <span className="pf-row-value">Not verified</span>
+      <span />
+    </div>
   );
 }
 
@@ -493,7 +428,7 @@ export function AccountRow({
           label="Email"
           value={account.email ?? "not connected"}
         />
-        <VerificationRow verification={verification} pending={verificationPending} onEdit={onEdit} />
+        <VerificationRow verification={verification} pending={verificationPending} />
         <Row
           icon={<IconClock />}
           label="Tracking since"

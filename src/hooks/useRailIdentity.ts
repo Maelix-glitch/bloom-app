@@ -27,20 +27,21 @@ export type RailIdentity = {
   avatarPath: string | null;
   accent: BloomAccent;
   bio: string | null;
-  /** The @username from the same profile row — one verification step. */
+  /** The @username from the same profile row. */
   username: string | null;
   /**
    * Whether the auth session's user has a confirmed email
-   * (`email_confirmed_at` set) — another verification step. Read from the
-   * local session, no extra request. False until proven.
+   * (`email_confirmed_at` set). Read from the local session, no extra
+   * request. False until proven. (A v2 verification gate once; since
+   * grant-only it is carried as an identity fact only.)
    */
   emailConfirmed: boolean;
   /**
-   * The stored half of verification (verification v2): whether the
-   * account email is on the invite list and whether a record exists in
-   * `account_verifications`. Read via the verification service in the
-   * same pass as the profile row; UNPROVEN (both false) until it lands,
-   * so the rail's tick can appear late but never show unproven.
+   * Verification, whole and entire (grant-only, 2026-11-22): whether a
+   * record exists in `account_verifications`. Read via the verification
+   * service in the same pass as the profile row; UNPROVEN (no record)
+   * until it lands, so the rail's tick can appear late but never show
+   * unproven.
    */
   verification: VerificationFacts;
 };
@@ -144,10 +145,9 @@ export function useRailIdentity(): RailIdentity {
       } catch {
         /* unproven stays unproven */
       }
-      /* The stored verification facts ride the same read. The service
-         never throws and degrades to UNPROVEN, and it claims the record
-         server-side when the invite gate passes — so a person who just
-         completed their profile sees the tick from this very pass. */
+      /* The stored verification fact rides the same read. The service
+         never throws and degrades to UNPROVEN; it only reads — the
+         record is granted by the owner, never claimed from here. */
       const verification = await loadVerificationFacts();
       const { data, error } = await supabase
         .from("profiles")

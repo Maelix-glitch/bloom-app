@@ -6,24 +6,22 @@ import { verificationStatus } from "@/lib/profile/verification";
 import { VerifiedBadge, VERIFIED_BLUE, VERIFIED_GOLD } from "./VerifiedBadge";
 
 /**
- * The badge is the visible half of the verification claim, so its gating is
- * pinned at render: every unmet-criteria combination renders nothing, and
- * the one fully-met combination — invited, confirmed, complete, recorded —
- * renders the blue tick.
+ * The badge is the visible half of the verification claim, so its gating
+ * is pinned at render. Grant-only (2026-11-22): the record is the whole
+ * gate —
+ *
+ *   · a record renders the tick, even for a profile that would have
+ *     failed every v2 gate (the record is never re-judged);
+ *   · no record renders nothing, however invited, confirmed and
+ *     complete the account is — those facts are not even inputs now.
  */
 
-const VERIFIED = verificationStatus({
-  invited: true,
-  emailConfirmed: true,
-  displayName: "Ivy",
-  username: "ivy",
-  hasRecord: true,
-});
+const VERIFIED = verificationStatus({ hasRecord: true });
 
 afterEach(() => cleanup());
 
 describe("VerifiedBadge", () => {
-  it("renders the blue tick when every criterion is met", () => {
+  it("renders the blue tick when the record exists", () => {
     const { container } = render(<VerifiedBadge status={VERIFIED} />);
     expect(screen.getByTestId("verified-badge")).toBeTruthy();
     expect(screen.getByLabelText("Verified account")).toBeTruthy();
@@ -32,48 +30,18 @@ describe("VerifiedBadge", () => {
 
   it("renders the gold tick in the rail tone, with the same gating", () => {
     /* Brief v4 (M-91): the sidebar rail wears the badge in Bloom gold.
-       The tone changes the colour only — the criteria are untouched. */
+       The tone changes the colour only — the record gate is untouched. */
     const { container } = render(<VerifiedBadge status={VERIFIED} tone="gold" />);
     expect(screen.getByTestId("verified-badge")).toBeTruthy();
     expect(container.querySelector("svg path")?.getAttribute("fill")).toBe(VERIFIED_GOLD);
   });
 
-  it("renders nothing when the email is unconfirmed", () => {
-    const status = verificationStatus({
-      invited: true,
-      emailConfirmed: false,
-      displayName: "Ivy",
-      username: "ivy",
-      hasRecord: true,
-    });
-    const { container } = render(<VerifiedBadge status={status} />);
+  it("renders nothing without a record", () => {
+    /* The old gates cannot substitute for the grant: an invited,
+       confirmed, fully-named member with no record sees no tick —
+       there is no input left that could say otherwise. */
+    const { container } = render(<VerifiedBadge status={verificationStatus({ hasRecord: false })} />);
     expect(container.firstChild).toBeNull();
     expect(screen.queryByTestId("verified-badge")).toBeNull();
-  });
-
-  it("renders nothing without an invite, and nothing without the record", () => {
-    for (const input of [
-      /* Not invited — even with a record, the tick refuses (owner's rule). */
-      { invited: false, emailConfirmed: true, displayName: "Ivy", username: "ivy", hasRecord: true },
-      /* Every step done but the grant not recorded yet — no tick. */
-      { invited: true, emailConfirmed: true, displayName: "Ivy", username: "ivy", hasRecord: false },
-    ]) {
-      const { container, unmount } = render(<VerifiedBadge status={verificationStatus(input)} />);
-      expect(container.firstChild).toBeNull();
-      unmount();
-    }
-  });
-
-  it("renders nothing when the name or the handle is missing", () => {
-    for (const input of [
-      { invited: true, emailConfirmed: true, displayName: null, username: "ivy", hasRecord: true },
-      { invited: true, emailConfirmed: true, displayName: "Bloom User", username: "ivy", hasRecord: true },
-      { invited: true, emailConfirmed: true, displayName: "Ivy", username: null, hasRecord: true },
-      { invited: false, emailConfirmed: false, displayName: null, username: null, hasRecord: false },
-    ]) {
-      const { container, unmount } = render(<VerifiedBadge status={verificationStatus(input)} />);
-      expect(container.firstChild).toBeNull();
-      unmount();
-    }
   });
 });

@@ -1,31 +1,30 @@
 /**
- * Account verification — the blue tick, and the checkable process behind it.
+ * Account verification — the blue tick, and the record behind it.
  *
- * Verification v2 (owner directive, 2026-11-15): the tick is a RECORD, not
- * a derivation. A row in `public.account_verifications` is the tick — no
- * row, no tick, whatever the profile looks like — and records are granted
- * ONLY BY INVITES, through the security-definer
- * `claim_account_verification()` (see the 20261115 migration). The client
- * can read its own row and ask for the grant; it can never write one.
+ * Verification v3 (owner directive, 2026-11-22): the badge is
+ * GRANT-ONLY. A row in `public.account_verifications` is the tick — no
+ * row, no tick, whatever the profile looks like — and rows are created
+ * ONLY by the owner, from a trusted SQL session, through the
+ * service-role grant function in the 20261122 migration.
  *
- * The gates the grant checks server-side, and the steps this module
- * reports, are the same three:
+ * This supersedes v2 (2026-11-15), under which the record was granted
+ * by a client-reachable claim when three gates passed (invited member,
+ * confirmed email, complete profile). Bloom is invite-only, so those
+ * gates were effectively every member — the owner ended that: who is
+ * eligible is his call, released by him, and nothing a member is or
+ * completes earns the badge.
  *
- *   1. **Invited member** — the account email is on `app_invites`. Bloom
- *      is invite-only, and the tick is too: this is the owner's core rule.
- *   2. **Email confirmed** — the Supabase auth user's `email_confirmed_at`
- *      is set. Bloom signs people in with a magic link, so following the
- *      link sent to the account's email is what confirms it.
- *   3. **Basic profile complete** — a real display name (not the
- *      "Bloom User" placeholder a missing row reads back as) AND a
- *      username/handle.
+ * So the record is not one input among several; it is the whole truth,
+ * for the signed-in user exactly as for anyone else. There are no steps
+ * to report and no grant ever "on its way": a member without a record
+ * is simply not verified, full stop. Facts that have not loaded yet are
+ * passed in as unproven (false), never assumed — an unknown record
+ * state reads as "not verified", so the tick can appear once the facts
+ * land but can never show without them.
  *
- * `verified` here requires all three steps AND the record. Facts that have
- * not loaded yet are passed in as unproven (false), never assumed: an
- * unknown invite or record state reads as "not verified", so the tick can
- * appear once the facts land but can never show without them.
- * `verificationStatus` is the one place the criteria live: the hero badge,
- * the sidebar badge, the settings row and these tests all read it.
+ * `verificationStatus` is the one place that truth lives: the hero
+ * badge, the sidebar badge, the settings row and these tests all read
+ * it.
  */
 
 /**
@@ -38,11 +37,11 @@ export const VERIFIED_BLUE = "#1d9bf0";
 
 /**
  * Bloom gold — the rail's tone for the same badge (brief v4 Part 4;
- * M-91). The tick's MEANING is unchanged (it renders only when the
- * criteria below are met); inside the sidebar's gold palette the blue
- * read as an off-palette social-media import, so the rail wears the
- * badge in the app's own gold. Profile surfaces keep the blue, pending
- * the roll-out decision.
+ * M-91). The tick's MEANING is unchanged (it renders only when a record
+ * exists); inside the sidebar's gold palette the blue read as an
+ * off-palette social-media import, so the rail wears the badge in the
+ * app's own gold. Profile surfaces keep the blue, pending the roll-out
+ * decision.
  */
 export const VERIFIED_GOLD = "#dcc08f";
 
@@ -58,97 +57,51 @@ export interface VerificationStep {
 
 export interface VerificationStatus {
   verified: boolean;
-  /** How many of the criteria are still unmet (0 when every step passes). */
+  /**
+   * Always 0. Under v2 this counted the unmet claim gates; grant-only
+   * has no ladder left to climb. Kept so the status keeps the shape
+   * its readers were built against.
+   */
   remaining: number;
   /**
-   * Every step passes but the record has not landed yet — the grant is
-   * recorded by `claim_account_verification()` on the next facts read, so
-   * this state is a moment, not a destination. The settings row says
-   * "recording" rather than pretending a step is missing.
+   * Always false. Under v2 this marked "every step done, grant being
+   * recorded" — a promise that a grant was on its way from something
+   * the member did. No such promise exists any more, so the field is
+   * kept for shape and never set.
    */
   pendingRecord: boolean;
+  /**
+   * Always empty: there are no steps to report — not because they were
+   * skipped, but because verification is granted, not stepped through.
+   */
   steps: VerificationStep[];
 }
 
 export interface VerificationInput {
   /**
-   * The account email is on `app_invites`. False until proven — an
-   * unloaded or failed invite check must never read as invited.
-   */
-  invited: boolean;
-  /** From the auth user: `email_confirmed_at` is set. */
-  emailConfirmed: boolean;
-  /** `profiles.display_name` — the placeholder name does not count. */
-  displayName: string | null | undefined;
-  /** `profiles.username`. */
-  username: string | null | undefined;
-  /**
-   * A row exists in `account_verifications` for this account. False until
-   * proven — the record is the tick, so an unloaded read is no tick.
+   * A row exists in `account_verifications` for this account. False
+   * until proven — the record is the tick, so an unloaded read is no
+   * tick. It is the ONLY input: the record is the whole truth.
    */
   hasRecord: boolean;
 }
 
-/** The name a profile with no saved row reads back as — not a real name. */
-const PLACEHOLDER_NAME = "Bloom User";
-
-const hasRealName = (name: string | null | undefined): boolean => {
-  const trimmed = name?.trim() ?? "";
-  return trimmed.length > 0 && trimmed !== PLACEHOLDER_NAME;
-};
-
-const hasHandle = (username: string | null | undefined): boolean =>
-  (username?.trim() ?? "").length > 0;
-
 export function verificationStatus(input: VerificationInput): VerificationStatus {
-  const steps: VerificationStep[] = [
-    {
-      id: "invite",
-      label: "Join Bloom by invitation",
-      done: input.invited,
-      guidance:
-        "The blue tick is granted to invited members only — Bloom checks your account email against its invite list.",
-    },
-    {
-      id: "email",
-      label: "Confirm your email",
-      done: input.emailConfirmed,
-      guidance: "Use the sign-in link sent to your email to confirm it.",
-    },
-    {
-      id: "profile",
-      label: "Add your name and @username",
-      done: hasRealName(input.displayName) && hasHandle(input.username),
-      guidance: "Add your name and choose a @username in Edit profile.",
-    },
-  ];
-  const remaining = steps.filter((s) => !s.done).length;
   return {
-    verified: input.hasRecord && remaining === 0,
-    remaining,
-    pendingRecord: !input.hasRecord && remaining === 0,
-    steps,
-  };
-}
-
-/**
- * The status of SOMEONE ELSE, from the one public fact about their tick:
- * whether a record exists in `account_verifications`.
- *
- * Their steps are not ours to see — the invite list is never readable by
- * clients and another person's email state is private — and they do not
- * need re-checking here: a record can only have been created by
- * `claim_account_verification()`, which ran every gate server-side before
- * granting. So for anyone but the signed-in user, the record is not one
- * input among several; it is the whole truth, and this is the one place
- * that says so. `steps` is empty because there are no steps to report —
- * not because they were skipped.
- */
-export function verificationStatusFromRecord(hasRecord: boolean): VerificationStatus {
-  return {
-    verified: hasRecord,
+    verified: input.hasRecord,
     remaining: 0,
     pendingRecord: false,
     steps: [],
   };
+}
+
+/**
+ * The status of SOMEONE ELSE, from the one public fact about their
+ * tick: whether a record exists in `account_verifications`. Under
+ * grant-only this is the same truth as the signed-in reading — a
+ * record can only have been created by the owner's grant — so both
+ * readings share the one implementation above.
+ */
+export function verificationStatusFromRecord(hasRecord: boolean): VerificationStatus {
+  return verificationStatus({ hasRecord });
 }
