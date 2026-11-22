@@ -2,15 +2,15 @@
  * VerifiedBadge — the verified tick.
  *
  * Blue on purpose, even inside Bloom's gold palette: the universal
- * verification blue (VERIFIED_BLUE, defined with the criteria in
+ * verification blue (VERIFIED_BLUE, defined with the status in
  * lib/profile/verification) is what makes the mark read as "verified" at a
  * glance, the way it does everywhere else. It is a claim, not a decoration
- * — it renders ONLY for a status from `verificationStatus` whose criteria
- * are actually met, and callers pass the whole status so there is no
- * boolean to set by hand.
+ * — it renders ONLY for a status from `verificationStatus` that carries a
+ * granted record (grant-only, 2026-11-22), and callers pass the whole
+ * status so there is no boolean to set by hand.
  *
  * One tone exception (brief v4 Part 4; M-91): the sidebar rail passes
- * `tone="gold"` — same badge, same criteria, Bloom's own gold — because
+ * `tone="gold"` — same badge, same gate, Bloom's own gold — because
  * inside the rail the blue read as an off-palette social-media import.
  */
 

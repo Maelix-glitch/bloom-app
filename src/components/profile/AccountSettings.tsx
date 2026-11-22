@@ -133,12 +133,8 @@ export function AccountSettings({
   const highlights = highlightsBlock?.status === "ready" ? highlightsBlock.data : [];
 
   /* the verification the Account group's row reports — the same status
-     the profile hero's tick carries, from the space's own facts */
+     the profile hero's tick carries: the record fact, nothing else */
   const verification = verificationStatus({
-    invited: verificationFacts.invited,
-    emailConfirmed: identity.emailConfirmed,
-    displayName: identity.identity.displayName,
-    username: identity.identity.username,
     hasRecord: verificationFacts.hasRecord,
   });
 

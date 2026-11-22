@@ -194,21 +194,15 @@ function RailProfile() {
   const entitlement = useEntitlement();
   const signedIn = id.status === "signed-in";
   /* The verified tick beside the rail name, from the same status as the
-     Profile hero — verification v2: an invite-gated record in
-     account_verifications plus the confirmed email and name + @username
-     it was granted for. The badge component itself renders nothing
-     unless the status is verified, so the tick MEANS something real;
-     the rail wears it in Bloom gold (tone="gold") because the blue read
-     as an off-palette import inside the rail (brief v4; M-91). The rail
-     already maps a missing or placeholder name to null, which the
-     criteria read as "no name yet" — the conservative direction, as
-     are the unproven invite/record facts the identity carries until
-     its verification read lands. */
+     Profile hero — grant-only (2026-11-22): a record in
+     account_verifications, granted by the owner, is the whole truth.
+     The badge component itself renders nothing unless the status is
+     verified, so the tick MEANS something real; the rail wears it in
+     Bloom gold (tone="gold") because the blue read as an off-palette
+     import inside the rail (brief v4; M-91). The record fact the
+     identity carries is unproven until its verification read lands —
+     the conservative direction. */
   const verification = verificationStatus({
-    invited: id.verification.invited,
-    emailConfirmed: id.emailConfirmed,
-    displayName: id.displayName,
-    username: id.username,
     hasRecord: id.verification.hasRecord,
   });
   // While the session is still restoring, the name holds a skeleton bar

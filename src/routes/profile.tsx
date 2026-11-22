@@ -154,12 +154,11 @@ function ProfilePage() {
     if (authState === "signed-in") setSignInOpen(false);
   }, [authState]);
 
-  /* Verification v2 facts — invite membership plus the stored record in
-     account_verifications. Read when the account settles and again
-     whenever the identity changes, so finishing the profile in the
-     editor is followed at once by the claim that records the tick (the
-     service asks; the server-side gates decide). Unproven until a read
-     lands, so the tick can appear late but never unproven. */
+  /* Verification facts — the stored record in account_verifications,
+     the whole truth since grant-only (2026-11-22). Read when the
+     account settles and again whenever the identity changes. Unproven
+     until a read lands, so the tick can appear late but never
+     unproven. */
   const [verificationFacts, setVerificationFacts] =
     useState<VerificationFacts>(UNPROVEN_FACTS);
   useEffect(() => {
@@ -253,19 +252,14 @@ function ProfilePage() {
   const avatarSrc = identity ? resolveAvatar(identity.identity.avatarPath, objectUrl) : null;
   const ambient = useAvatarAmbient(avatarSrc);
 
-  /* Account verification (v2): the stored record is the tick, granted by
-     invitation only — the status combines the auth user's confirmed
-     email and the profile's name + @username (carried on the snapshot)
-     with the invite + record facts read above. See
+  /* Account verification: the stored record is the tick — granted by
+     the owner to eligible members (grant-only, 2026-11-22), read from
+     the record fact above and nothing else. See
      lib/profile/verification. */
   const verification = useMemo(
     () =>
       identity
         ? verificationStatus({
-            invited: verificationFacts.invited,
-            emailConfirmed: identity.emailConfirmed,
-            displayName: identity.identity.displayName,
-            username: identity.identity.username,
             hasRecord: verificationFacts.hasRecord,
           })
         : null,
