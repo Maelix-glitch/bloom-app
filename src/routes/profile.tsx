@@ -44,6 +44,12 @@ import {
   UNPROVEN_FACTS,
   type VerificationFacts,
 } from "@/lib/profile/verificationService";
+import { memberBadgesOf } from "@/lib/profile/badges";
+import {
+  loadBadgeFacts,
+  UNPROVEN_BADGE_FACTS,
+  type BadgeFacts,
+} from "@/lib/profile/badgeService";
 import { useAvatarAmbient } from "@/lib/profile/ambient";
 import { isStoryActive, type Milestone, type Story } from "@/lib/profile/types";
 import type { CreateStoryInput } from "@/lib/profile/storyService";
@@ -174,6 +180,26 @@ function ProfilePage() {
       alive = false;
     };
   }, [authState, identity]);
+
+  /* Badge facts — the trainer row and the granted member_badges rows
+     (M-209), read on the same settle as the verification record and
+     derived in the one place, lib/profile/badges. Unproven until a
+     read lands, so a pill can appear late but never unproven. */
+  const [badgeFacts, setBadgeFacts] = useState<BadgeFacts>(UNPROVEN_BADGE_FACTS);
+  useEffect(() => {
+    if (authState !== "signed-in") {
+      setBadgeFacts(UNPROVEN_BADGE_FACTS);
+      return;
+    }
+    let alive = true;
+    void loadBadgeFacts().then((facts) => {
+      if (alive) setBadgeFacts(facts);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [authState, identity]);
+  const memberBadges = useMemo(() => memberBadgesOf(badgeFacts), [badgeFacts]);
 
   // watch/unwatch state hydrates after mount (SSR-safe)
   useEffect(() => {
@@ -522,6 +548,7 @@ function ProfilePage() {
               <ProfileHero
                 identity={identity.identity}
                 verification={verification}
+                badges={memberBadges}
                 rankPill={<RankPill points={habits.points} />}
                 ambient={ambient}
                 pulse={record.pulse}

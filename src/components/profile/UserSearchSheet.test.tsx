@@ -45,6 +45,7 @@ const IVY: UserSearchResult = {
   avatarPath: null,
   accent: "sage",
   verified: true,
+  badges: [{ kind: "trainer", label: "Trainer" }],
 };
 const NOOR: UserSearchResult = {
   userId: "u-noor",
@@ -53,6 +54,7 @@ const NOOR: UserSearchResult = {
   avatarPath: null,
   accent: "rose",
   verified: false,
+  badges: [],
 };
 const HANDLESS: UserSearchResult = {
   userId: "u-anon",
@@ -61,6 +63,7 @@ const HANDLESS: UserSearchResult = {
   avatarPath: null,
   accent: "violet",
   verified: false,
+  badges: [],
 };
 
 const ok = (results: UserSearchResult[]): UserSearchOutcome => ({ status: "ok", results });
@@ -136,6 +139,19 @@ describe("UserSearchSheet", () => {
     await screen.findByText("Ivy Chen", undefined, { timeout: 3000 });
     expect(screen.getAllByTestId("verified-badge")).toHaveLength(1);
     expect(screen.getByLabelText("Verified account")).toBeTruthy();
+  });
+
+  it("wears member badges on the rows that hold them, and nowhere else", async () => {
+    h.search.mockResolvedValue(ok([IVY, NOOR, HANDLESS]));
+    renderSheet();
+    await typeTerm("iv");
+    await screen.findByText("Ivy Chen", undefined, { timeout: 3000 });
+    /* Ivy holds the trainer badge; Noor and the handle-less gardener
+       hold none, so exactly one badge group renders. */
+    expect(screen.getAllByTestId("member-badges")).toHaveLength(1);
+    expect(screen.getByText("Trainer")).toBeTruthy();
+    expect(screen.queryByText("Founder")).toBeNull();
+    expect(screen.queryByText("Tester")).toBeNull();
   });
 
   it("says honestly when no one matches", async () => {

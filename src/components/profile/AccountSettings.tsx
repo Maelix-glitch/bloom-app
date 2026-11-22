@@ -30,6 +30,12 @@ import {
   UNPROVEN_FACTS,
   type VerificationFacts,
 } from "@/lib/profile/verificationService";
+import { memberBadgesOf, type MemberBadge } from "@/lib/profile/badges";
+import {
+  loadBadgeFacts,
+  UNPROVEN_BADGE_FACTS,
+  type BadgeFacts,
+} from "@/lib/profile/badgeService";
 import { isStoryActive, type Story } from "@/lib/profile/types";
 import type { ProfileSpace } from "@/hooks/useProfileSpace";
 import type { MoodEntry } from "@/lib/mood/types";
@@ -120,6 +126,25 @@ export function AccountSettings({
     };
   }, [authState, identity]);
 
+  /* Badge facts (M-209) — the same read the profile page makes for its
+     hero pills: unproven until a read lands. No pending state is
+     needed beside it: the badges row exists only when badges are
+     held, so an in-flight read claims nothing either way. */
+  const [badgeFacts, setBadgeFacts] = useState<BadgeFacts>(UNPROVEN_BADGE_FACTS);
+  useEffect(() => {
+    if (authState !== "signed-in") {
+      setBadgeFacts(UNPROVEN_BADGE_FACTS);
+      return;
+    }
+    let alive = true;
+    void loadBadgeFacts().then((facts) => {
+      if (alive) setBadgeFacts(facts);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [authState, identity]);
+
   /* the archive/viewer chain marks stories seen in the same device
      store the profile page reads — marking here is marking there */
   const markSeen = useCallback((story: Story) => {
@@ -138,6 +163,10 @@ export function AccountSettings({
     hasRecord: verificationFacts.hasRecord,
   });
 
+  /* the badges the Account group's badges row lists — the same
+     derivation the hero's pills carry */
+  const memberBadges = memberBadgesOf(badgeFacts);
+
   return (
     <AccountSettingsInner
       space={space}
@@ -145,6 +174,7 @@ export function AccountSettings({
       moodEntries={moodEntries}
       verification={verification}
       verificationPending={authState === "signed-in" && !verificationFactsSettled}
+      badges={memberBadges}
       allStories={allStories}
       highlights={highlights}
       accent={accent}
@@ -219,6 +249,7 @@ function AccountSettingsInner({
   moodEntries,
   verification,
   verificationPending,
+  badges,
   allStories,
   highlights,
   accent,
@@ -229,6 +260,7 @@ function AccountSettingsInner({
   moodEntries: MoodEntry[];
   verification: ReturnType<typeof verificationStatus>;
   verificationPending: boolean;
+  badges: MemberBadge[];
   allStories: Story[];
   highlights: import("@/lib/profile/types").HighlightItem[];
   accent: import("@/lib/profile/types").ProfileIdentity["accent"];
@@ -387,6 +419,7 @@ function AccountSettingsInner({
           account={{ email: identity.email, memberSince: identity.memberSince }}
           verification={verification}
           verificationPending={verificationPending}
+          badges={badges}
           privacy={identity.privacy}
           stories={allStories}
           highlights={highlights}
