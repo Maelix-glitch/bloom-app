@@ -1628,6 +1628,26 @@
   align-items: center;
   gap: var(--space-3);
 }
+/* M-205 (F-25): the same-title draft group's disclosure row and its
+   expanded stack of ordinary rows. */
+.reward-admin-group-toggle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.reward-admin-group-rows {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
 .reward-admin-record-image,
 .reward-admin-record-icon {
   display: grid;

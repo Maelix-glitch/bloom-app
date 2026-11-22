@@ -262,6 +262,11 @@
 .ag-email {
   color: var(--foreground);
   font-weight: 600;
+  /* M-205 (F-35): access.css's break-all (pinned as-is there) wrapped
+     addresses mid-domain in the sent state; the confirmation reads the
+     address on one line. */
+  word-break: normal;
+  white-space: nowrap;
 }
 
 /* The field's label, in the kicker's dress (the preview field is
@@ -294,7 +299,9 @@
   color: var(--foreground);
 }
 .ag-input::placeholder {
-  color: color-mix(in oklab, var(--foreground) 66%, transparent);
+  /* M-205 (F-35): 66% read as a smudge on the frost; 82% keeps the
+     placeholder quiet but legible. */
+  color: color-mix(in oklab, var(--foreground) 82%, transparent);
 }
 .ag-input:focus-visible {
   border-color: var(--gold);

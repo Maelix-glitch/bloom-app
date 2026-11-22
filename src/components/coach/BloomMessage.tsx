@@ -50,11 +50,20 @@ function RichParagraphs({ paragraphs }: { paragraphs: string[] }) {
 
 /* ------------------------------ source footnote ----------------------------- */
 
-function SourceLine({ message }: { message: CoachMessage }) {
-  if (message.sources.length === 0 && !message.fellBackBecause) return null;
+function SourceLine({
+  message,
+  showSources = true,
+}: {
+  message: CoachMessage;
+  /* M-205 (F-13): the thread shows the attribution once per day-group,
+     on its first reply — under all 18 messages it was a metronome.
+     The on-device note is a different fact and always renders. */
+  showSources?: boolean;
+}) {
+  if ((message.sources.length === 0 || !showSources) && !message.fellBackBecause) return null;
   return (
     <p className="coach-msg-sources">
-      {message.sources.length > 0 ? (
+      {showSources && message.sources.length > 0 ? (
         <span className="coach-msg-sources-text">
           <span className="coach-src-dot" aria-hidden="true" />
           {message.sources.length === 1 && /^(your|Bloom's|my )/.test(message.sources[0] ?? "")
@@ -138,6 +147,10 @@ interface MessageActionsProps {
   onRegenerate: () => void;
   onTellMeMore: () => void;
   onMakePlan: () => void;
+  /* M-205 (F-13): the latest reply's actions stay visible; older
+     replies reveal theirs on hover/focus (the .is-forced hook the
+     stylesheet already carries). */
+  forceVisible?: boolean;
 }
 
 function MessageActions({
@@ -149,6 +162,7 @@ function MessageActions({
   onRegenerate,
   onTellMeMore,
   onMakePlan,
+  forceVisible = false,
 }: MessageActionsProps) {
   const isMobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -308,7 +322,7 @@ function MessageActions({
     );
   }
 
-  return <div className="coach-actions">{compact}</div>;
+  return <div className={cn("coach-actions", forceVisible && "is-forced")}>{compact}</div>;
 }
 
 /* -------------------------------- the message ------------------------------- */
@@ -323,9 +337,17 @@ export function BloomMessage({
   onMakePlan,
   onBlockAction,
   logEstimate,
+  showAttribution = true,
+  latest = false,
 }: {
   message: CoachMessage;
   fresh: boolean;
+  /* M-205 (F-13): the thread passes false for every reply after the
+     first of its day-group (the attribution stands once per day) and
+     true for `latest` on the newest reply (its actions stay visible).
+     Direct renders keep the old always-show behaviour. */
+  showAttribution?: boolean;
+  latest?: boolean;
   onRetry: (() => void) | undefined;
   /** Offered on failed sends: answer from the on-device knowledge engine. */
   onOfflineAnswer: (() => void) | undefined;
@@ -408,7 +430,7 @@ export function BloomMessage({
             {message.blocks.length > 0 ? (
               <ResponseBlocks blocks={message.blocks} onAction={onBlockAction} />
             ) : null}
-            <SourceLine message={message} />
+            <SourceLine message={message} showSources={showAttribution} />
             <SignatureNotice message={message} />
           </div>
           <MessageActions
@@ -420,6 +442,7 @@ export function BloomMessage({
             onRegenerate={() => onRegenerate?.()}
             onTellMeMore={onTellMeMore}
             onMakePlan={onMakePlan}
+            forceVisible={latest}
           />
           {logEstimate ? (
             <CoachLogAction messageId={message.id} estimate={logEstimate} />

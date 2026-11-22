@@ -11,7 +11,7 @@
  * and neither one is saved silently. Validation is inline and specific.
  */
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties } from "react";
 import { AlertCircle, ChevronDown, Plus, Sparkles, Trash2, X } from "lucide-react";
 
 import { Button, Card } from "./primitives";
@@ -773,7 +773,11 @@ export function LogPanel({
             {/* symptoms */}
             <fieldset className="ci-field" disabled={disabled}>
               <legend className="ci-label mb-1.5">
-                Symptoms <span className="ci-muted">({symptoms.length}/12)</span>
+                {/* M-205 (F-31): the denominator is the set the chips
+                    actually show — computed from SYMPTOMS so the counter
+                    can never drift from the list again. (The pick cap
+                    itself is validation and stays as it is.) */}
+                Symptoms <span className="ci-muted">({symptoms.length}/{SYMPTOMS.length})</span>
               </legend>
               <div className="ci-seg">
                 {SYMPTOMS.map((s) => (
@@ -889,7 +893,7 @@ export function LogPanel({
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <fieldset className="ci-field" disabled={disabled}>
                 <legend className="ci-label mb-1.5">Mood</legend>
-                <div className="ci-seg">
+                <div className="ci-seg ci-seg--grid" style={{ "--ci-seg-cols": 5 } as CSSProperties}>
                   {MOOD_VALUES.map((m) => (
                     <button
                       key={m}
@@ -906,12 +910,12 @@ export function LogPanel({
 
               <fieldset className="ci-field" disabled={disabled}>
                 <legend className="ci-label mb-1.5">Energy (1–5)</legend>
-                <div className="ci-seg">
+                <div className="ci-seg ci-seg--grid" style={{ "--ci-seg-cols": 5 } as CSSProperties}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button
                       key={n}
                       type="button"
-                      className="ci-seg-item ci-num"
+                      className="ci-seg-item ci-seg-item--scale ci-num"
                       aria-pressed={energy === n}
                       onClick={() => setEnergy(energy === n ? null : n)}
                     >
@@ -932,12 +936,12 @@ export function LogPanel({
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <fieldset className="ci-field" disabled={disabled}>
                 <legend className="ci-label mb-1.5">Pain (0–5)</legend>
-                <div className="ci-seg">
+                <div className="ci-seg ci-seg--grid" style={{ "--ci-seg-cols": 6 } as CSSProperties}>
                   {[0, 1, 2, 3, 4, 5].map((n) => (
                     <button
                       key={n}
                       type="button"
-                      className="ci-seg-item ci-num"
+                      className="ci-seg-item ci-seg-item--scale ci-num"
                       aria-pressed={pain === n}
                       onClick={() => setPain(pain === n ? null : n)}
                     >

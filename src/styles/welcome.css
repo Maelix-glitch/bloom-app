@@ -483,8 +483,13 @@
   /* The preview's weight is 700; 600 is the heaviest loaded face (R5). */
   font-weight: 600;
 }
+/* M-205 (F-33): the waiting pill keeps its shape, rim and a readable
+   label — the whole pill no longer fades to 38%. It is visibly waiting
+   (quieter label, no pointer welcome) and warms to the full treatment
+   the moment it enables. */
 .wl-next:disabled {
-  opacity: 0.38;
+  opacity: 1;
+  color: color-mix(in oklab, var(--foreground) 78%, transparent);
   cursor: not-allowed;
 }
 

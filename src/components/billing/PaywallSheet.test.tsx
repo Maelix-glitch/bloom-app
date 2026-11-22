@@ -167,7 +167,11 @@ describe("audit slice A — close, current-plan emphasis, status badges", () => 
     await act(async () => {
       requestPaywall("profile");
     });
-    expect(screen.getByText(/You're on/)).toBeTruthy();
+    /* M-205 (F-37) re-contract: a paid member's banner no longer
+       repeats "You're on …" — the card badge below is the single
+       current-plan mark; the banner leads with the credits line. */
+    expect(screen.getByText(/800 AI credits left this month/)).toBeTruthy();
+    expect(screen.queryByText(/You're on/)).toBeNull();
     const cards = [...document.querySelectorAll(".bill-card")];
     expect(cards.length).toBe(2);
     /* Order is Premium then Premium Plus. The owned Plus card is the
@@ -191,6 +195,26 @@ describe("audit slice A — close, current-plan emphasis, status badges", () => 
     /* Nothing on either card is an action for a top-tier member. */
     expect(screen.queryByRole("button", { name: "Go Premium" })).toBeNull();
     expect(screen.queryByRole("button", { name: "Upgrade to Plus" })).toBeNull();
+  });
+
+  it("a top-tier member gets exactly one clear action: manage the membership (M-205, F-37)", async () => {
+    plusMember();
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    expect(screen.getByRole("button", { name: "Manage your membership" })).toBeTruthy();
+    /* The Plus card now stands at the Premium card's full length. */
+    const plusCard = document.querySelectorAll(".bill-card")[1]!;
+    expect(plusCard.querySelectorAll(".bill-features li").length).toBe(6);
+  });
+
+  it("a visitor gets no manage action — the cards carry the actions (M-205, F-37)", async () => {
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    expect(screen.queryByRole("button", { name: "Manage your membership" })).toBeNull();
   });
 
   it("a visitor still meets Premium featured, with real action buttons", async () => {

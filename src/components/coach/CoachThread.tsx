@@ -133,6 +133,24 @@ export function CoachThread({
     return -1;
   })();
 
+  /* M-205 (F-13): the "From your record" attribution stands once per
+     conversation day — on the first coach reply of each local day.
+     Under every one of 18 replies it read as a metronome, not as
+     provenance. */
+  const attributionIndexes = (() => {
+    const seenDays = new Set<string>();
+    const indexes = new Set<number>();
+    messages.forEach((message, index) => {
+      if (message.role !== "coach") return;
+      const d = new Date(message.time);
+      const dayKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      if (seenDays.has(dayKey)) return;
+      seenDays.add(dayKey);
+      indexes.add(index);
+    });
+    return indexes;
+  })();
+
   return (
     <div
       ref={containerRef}
@@ -200,6 +218,8 @@ export function CoachThread({
                 onMakePlan={onMakePlan}
                 onBlockAction={onBlockAction}
                 logEstimate={logEstimate}
+                showAttribution={attributionIndexes.has(index)}
+                latest={isLastCoachMessage}
               />
             );
           })}

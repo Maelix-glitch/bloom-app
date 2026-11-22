@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import {
   Check,
+  ChevronDown,
   ChevronRight,
   CircleAlert,
   Clock3,
@@ -68,6 +69,15 @@ function toInputDate(value: string | null) {
 
 function statusLabel(status: RewardStatus) {
   return status.charAt(0).toUpperCase() + status.slice(1);
+}
+
+/* M-205 (F-25): full addresses are identification, not decoration —
+   lists show the masked form; the full address rides in the title
+   attribute wherever the admin actually needs it. */
+export function maskEmail(email: string): string {
+  const at = email.indexOf("@");
+  if (at <= 0) return email;
+  return `${email[0]}•••${email.slice(at)}`;
 }
 
 export function RewardsAdminPage() {
@@ -214,6 +224,65 @@ export function RewardsAdminPage() {
       </AdminShell>
     );
   }
+
+  /* M-205 (F-25): the inventory drowned in same-title draft clutter —
+     13 drafts of one reward read as 13 records. Drafts sharing a title
+     (two or more) collapse into ONE expandable group row; expanded,
+     every draft keeps its own row, date and Edit/Revoke — grouping is
+     presentation only, no admin data or action is hidden. Published
+     and singleton rows render exactly as before. */
+  const renderRewardRow = (reward: AdminReward) => (
+    <AdminRewardRow
+      key={reward.id}
+      reward={reward}
+      users={adminUsers}
+      onEdit={() => editReward(reward)}
+      onRevoke={() => void setRevoking(reward)}
+      onDeliveryStateChange={async (userId, state) => {
+        try {
+          await setDeliveryState(reward.id, userId, state);
+          await loadAdminWorkspace();
+          setMessageKind("success");
+          setMessage("Recipient delivery state updated.");
+        } catch (stateError) {
+          setMessageKind("error");
+          setMessage(
+            stateError instanceof Error ? stateError.message : "Could not update delivery state.",
+          );
+        }
+      }}
+    />
+  );
+  const inventoryItems = ((): (
+    | { kind: "row"; reward: AdminReward }
+    | { kind: "draft-group"; title: string; drafts: AdminReward[] }
+  )[] => {
+    const draftCounts = new Map<string, number>();
+    for (const reward of adminRewards) {
+      if (reward.state === "draft") {
+        draftCounts.set(reward.title, (draftCounts.get(reward.title) ?? 0) + 1);
+      }
+    }
+    const grouped = new Set<string>();
+    const items: (
+      | { kind: "row"; reward: AdminReward }
+      | { kind: "draft-group"; title: string; drafts: AdminReward[] }
+    )[] = [];
+    for (const reward of adminRewards) {
+      if (reward.state === "draft" && (draftCounts.get(reward.title) ?? 0) >= 2) {
+        if (grouped.has(reward.title)) continue;
+        grouped.add(reward.title);
+        items.push({
+          kind: "draft-group",
+          title: reward.title,
+          drafts: adminRewards.filter((d) => d.state === "draft" && d.title === reward.title),
+        });
+      } else {
+        items.push({ kind: "row", reward });
+      }
+    }
+    return items;
+  })();
 
   return (
     <AdminShell>
@@ -448,7 +517,9 @@ export function RewardsAdminPage() {
                   </span>
                   <span className="reward-admin-user-copy">
                     <span>{user.display_name || "Unnamed user"}</span>
-                    <small>{user.email || user.user_id}</small>
+                    <small title={user.email ?? undefined}>
+                      {user.email ? maskEmail(user.email) : user.user_id}
+                    </small>
                   </span>
                 </label>
               ))
@@ -479,30 +550,18 @@ export function RewardsAdminPage() {
         </div>
         {adminRewards.length ? (
           <div className="reward-admin-table">
-            {adminRewards.map((reward) => (
-              <AdminRewardRow
-                key={reward.id}
-                reward={reward}
-                users={adminUsers}
-                onEdit={() => editReward(reward)}
-                onRevoke={() => void setRevoking(reward)}
-                onDeliveryStateChange={async (userId, state) => {
-                  try {
-                    await setDeliveryState(reward.id, userId, state);
-                    await loadAdminWorkspace();
-                    setMessageKind("success");
-                    setMessage("Recipient delivery state updated.");
-                  } catch (stateError) {
-                    setMessageKind("error");
-                    setMessage(
-                      stateError instanceof Error
-                        ? stateError.message
-                        : "Could not update delivery state.",
-                    );
-                  }
-                }}
-              />
-            ))}
+            {inventoryItems.map((item) =>
+              item.kind === "row" ? (
+                renderRewardRow(item.reward)
+              ) : (
+                <DraftGroup
+                  key={`draft-group-${item.title}`}
+                  title={item.title}
+                  drafts={item.drafts}
+                  renderRow={renderRewardRow}
+                />
+              ),
+            )}
           </div>
         ) : (
           <div className="reward-admin-empty">
@@ -572,6 +631,52 @@ function AdminField({
       {hint ? <span className="reward-admin-field-hint">{hint}</span> : null}
       {children}
     </label>
+  );
+}
+
+/* M-205 (F-25): one expandable row standing in for two or more drafts
+   that share a title. Collapsed it is a single inventory line;
+   expanded, each draft renders through the ordinary row — its own
+   date, Edit and Revoke intact. */
+function DraftGroup({
+  title,
+  drafts,
+  renderRow,
+}: {
+  title: string;
+  drafts: AdminReward[];
+  renderRow: (reward: AdminReward) => React.ReactNode;
+}) {
+  const [open, setOpen] = useState(false);
+  return (
+    <article className="reward-admin-record">
+      <button
+        type="button"
+        className="reward-admin-group-toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((value) => !value)}
+      >
+        <span className="reward-admin-record-icon">
+          <Megaphone className="size-4" />
+        </span>
+        <span className="min-w-0 flex-1">
+          <span className="flex flex-wrap items-center gap-2">
+            <span className="text-[length:var(--text-callout)] font-medium">{title}</span>
+            <span className={cn("reward-admin-state", STATUS_STYLES.draft)}>
+              {statusLabel("draft")}
+            </span>
+          </span>
+          <span className="mt-1 block text-[length:var(--text-meta)] text-muted-foreground">
+            {drafts.length} drafts with this title
+          </span>
+        </span>
+        <ChevronDown
+          className={cn("size-4 shrink-0 transition-transform", open && "rotate-180")}
+          aria-hidden
+        />
+      </button>
+      {open ? <div className="reward-admin-group-rows">{drafts.map(renderRow)}</div> : null}
+    </article>
   );
 }
 
@@ -646,7 +751,11 @@ function AdminRewardRow({
             const user = users.find((candidate) => candidate.user_id === assignment.user_id);
             return (
               <label key={assignment.user_id} className="reward-admin-delivery">
-                <span>{user?.display_name || user?.email || assignment.user_id.slice(0, 8)}</span>
+                <span title={user?.email ?? undefined}>
+                  {user?.display_name ||
+                    (user?.email ? maskEmail(user.email) : null) ||
+                    assignment.user_id.slice(0, 8)}
+                </span>
                 <select
                   value={assignment.state}
                   onChange={(event) =>

@@ -102,7 +102,7 @@ export function AssessmentSummaryView({ summary }: { summary: AssessmentSummary 
                 </span>
               </div>
               {section.stats.length > 0 ? (
-                <div className="vstats mt-3">
+                <div className="vstats vstats--summary mt-3">
                   {section.stats.map((stat) => (
                     <div key={stat.label} className="vstat">
                       <b>{stat.value}</b>

@@ -12,6 +12,9 @@ export function BloomHeader() {
   const cycleActive = pathname === "/cycle" || pathname.startsWith("/cycle/");
   const trackersActive = pathname === "/trackers" || pathname.startsWith("/trackers/");
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
+  /* M-205 (F-39): /dashboard matched no section, so the label fell back
+     to "Bloom" and the header read "Bloom | Bloom" beside the wordmark. */
+  const dashboardActive = pathname === "/dashboard" || pathname.startsWith("/dashboard/");
 
   return (
     <header
@@ -53,7 +56,9 @@ export function BloomHeader() {
                       ? "Coach"
                       : profileActive
                         ? "Profile"
-                        : "Bloom"}
+                        : dashboardActive
+                          ? "Dashboard"
+                          : "Bloom"}
         </span>
       </div>
 
