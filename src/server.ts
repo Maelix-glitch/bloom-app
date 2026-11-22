@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { withSecurityHeaders } from "./lib/security-headers";
+import { withShellCache } from "./lib/shell-cache";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -49,10 +50,20 @@ export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
+      /* Document GETs may be served from the shell edge cache
+         (M-218, lib/shell-cache.ts): repeat loads within the TTL
+         skip the SSR render entirely — the fix for the load
+         test's Worker-CPU 1102s. The render below is unchanged;
+         the cache only decides whether it needs to run. */
+      const render = async () =>
+        normalizeCatastrophicSsrResponse(await handler.fetch(request, env, ctx));
+      const response = await withShellCache(request, {}, render);
       /* Every response — document, asset, redirect, error — carries
-         the security headers (see lib/security-headers.ts). */
-      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
+         the security headers (see lib/security-headers.ts). The
+         shell cache returns raw responses, so cache hits pass
+         through here exactly like fresh renders and carry the
+         identical header set. */
+      return withSecurityHeaders(response);
     } catch (error) {
       console.error(error);
       return withSecurityHeaders(
