@@ -54,7 +54,7 @@ beforeEach(() => {
 afterEach(() => cleanup());
 
 const MONTHLY_PREMIUM = /₹599|\$9\.99/;
-const YEARLY_PREMIUM = /₹3,999|\$59\.99/;
+const YEARLY_PREMIUM = /₹4,999|\$59\.99/;
 
 /** The price line's text (amount + period suffix live in one <p>). */
 function priceLines(): string[] {
@@ -88,7 +88,9 @@ describe("PaywallHost + PaywallSheet", () => {
     /* Yearly (the default) shows the per-month equivalent + saving. */
     expect(priceLines()[0]).toMatch(YEARLY_PREMIUM);
     expect(screen.getAllByText(/Works out to .* a month\./).length).toBe(2);
-    expect(screen.getByRole("button", { name: /Yearly/ }).textContent).toMatch(/save \d+%/);
+    /* M-214: the tiers save different shares now, so the toggle
+       states the best one, labelled "up to". */
+    expect(screen.getByRole("button", { name: /Yearly/ }).textContent).toMatch(/save up to \d+%/);
 
     fireEvent.click(screen.getByRole("button", { name: "Monthly" }));
     expect(priceLines()[0]).toMatch(MONTHLY_PREMIUM);
@@ -204,9 +206,26 @@ describe("audit slice A — close, current-plan emphasis, status badges", () => 
       requestPaywall("profile");
     });
     expect(screen.getByRole("button", { name: "Manage your membership" })).toBeTruthy();
-    /* The Plus card now stands at the Premium card's full length. */
+    /* The Plus card stands at least at the Premium card's length
+       (M-205, F-37) — under the M-214 split it carries one more
+       bullet: the intelligence layer it alone holds. */
     const plusCard = document.querySelectorAll(".bill-card")[1]!;
-    expect(plusCard.querySelectorAll(".bill-features li").length).toBe(6);
+    expect(plusCard.querySelectorAll(".bill-features li").length).toBe(7);
+  });
+
+  it("the cards sell the M-214 split: Premium is essentials, Plus carries Vitalis", async () => {
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    const [premiumCard, plusCard] = [...document.querySelectorAll(".bill-card")];
+    const premiumText = premiumCard!.textContent ?? "";
+    const plusText = plusCard!.textContent ?? "";
+    expect(premiumText).toContain("Unlimited habits");
+    expect(premiumText).not.toContain("Vitalis");
+    expect(plusText).toContain("Everything in Premium");
+    expect(plusText).toContain("Vitalis");
+    expect(plusText).toContain("Metabolic Twin");
   });
 
   it("a visitor gets no manage action — the cards carry the actions (M-205, F-37)", async () => {

@@ -14,6 +14,7 @@ export const PROGRESS_TEMPLATES = [
   /* 01 — The streak as a ring over fern-dark green, a photo band as proof. */
   tpl({
     id: "progress-streak-ring",
+    premium: true,
     name: "Streak, Circled",
     hint: "The ring says how long. The photo says how.",
     category: "progress",
@@ -85,6 +86,7 @@ export const PROGRESS_TEMPLATES = [
      archetype is genuinely typographic; the points card is its only data. */
   tpl({
     id: "progress-poster",
+    premium: true,
     name: "The Poster",
     hint: "Big type, no photo. For when the words are the win.",
     category: "progress",

@@ -43,6 +43,7 @@ export const MOOD_TEMPLATES = [
      stacked type on the right. */
   tpl({
     id: "mood-energy-arc",
+    premium: true,
     name: "Energy, Mapped",
     hint: "Where the day's energy actually went.",
     category: "mood",

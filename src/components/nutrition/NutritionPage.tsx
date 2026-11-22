@@ -22,6 +22,9 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
+import { peekEntitlement } from "@/lib/billing/entitlement";
+import { requestPaywall } from "@/lib/billing/paywall";
+import { canUse } from "@/lib/billing/plans";
 import { useNutrition, yesterdayOf } from "@/hooks/useNutrition";
 import { usePlan } from "@/hooks/usePlan";
 import { shiftDay } from "@/lib/localDay";
@@ -269,7 +272,26 @@ export function NutritionPage() {
           <button
             type="button"
             className="nut-btn nut-btn-ghost"
-            onClick={() => setCaptureOpen(true)}
+            onClick={() => {
+              /* M-214: photo-led logging (this capture flow) is
+                 Premium Plus; food-photo analysis in the Coach
+                 stays Premium. A KNOWN entitlement below Plus
+                 meets the paywall instead of the camera; an unread
+                 one never blocks (house rule), and the analysis
+                 itself still runs through the function's own gate.
+                 UI gate — the function cannot tell a capture photo
+                 from a Coach photo today (same contract), recorded
+                 in M-214. */
+              const entitlement = peekEntitlement();
+              if (
+                entitlement?.kind === "ready" &&
+                !canUse(entitlement.entitlement.tier, "photo_led_logging")
+              ) {
+                requestPaywall("premium_plus");
+                return;
+              }
+              setCaptureOpen(true);
+            }}
           >
             <Camera className="size-4" aria-hidden /> Photo estimate
           </button>

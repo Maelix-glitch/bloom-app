@@ -19,6 +19,14 @@
  *     refused with `premium_required` no matter its balance. The
  *     refusal is a 402-style JSON error the client renders as an
  *     upgrade prompt — never a crash, never a fake answer.
+ *   · Vitalis is a Premium Plus feature (M-214, owner decision
+ *     2026-11-22): the `vitalis` action AND `tts` (the spoken voice
+ *     is Vitalis's own — its only caller is the Vitalis speaker)
+ *     are refused with `premium_required` / feature "vitalis" for
+ *     every tier below premium_plus, balance irrelevant. This is
+ *     the expensive surface, so the gate lives here, server-side,
+ *     before any provider is called — the client check is only
+ *     presentation.
  *   · Credits are deducted AFTER a successful provider response,
  *     never for a failure. A completed answer is never withheld
  *     because a deduct raced an empty balance (the spend is
@@ -77,7 +85,7 @@ export type GateDecision =
   | { kind: "allow"; cost: number; reason: CreditReason }
   | { kind: "allow_uncharged" }
   | { kind: "deny_insufficient"; cost: number; balance: number; tier: BillingTier }
-  | { kind: "deny_premium"; feature: "food_photo_analysis"; tier: BillingTier }
+  | { kind: "deny_premium"; feature: "food_photo_analysis" | "vitalis"; tier: BillingTier }
   | { kind: "deny_unavailable" };
 
 function asTier(value: unknown): BillingTier {
@@ -129,6 +137,8 @@ export function costFor(action: BillingAction, hasMedia: boolean): { cost: numbe
  *                       (a future pre-migration deploy) does null
  *                       still mean allow_uncharged.
  *   free + photo      → deny_premium (feature gate, balance irrelevant)
+ *   vitalis/tts below → deny_premium, feature "vitalis" (M-214: the
+ *   premium_plus          Plus gate, balance irrelevant)
  *   balance < cost    → deny_insufficient
  *   otherwise         → allow with the flat cost to deduct on success
  */
@@ -144,6 +154,9 @@ export function decideGate(input: {
   }
   if (action === "coach" && hasMedia && entitlement.tier === "free") {
     return { kind: "deny_premium", feature: "food_photo_analysis", tier: entitlement.tier };
+  }
+  if ((action === "vitalis" || action === "tts") && entitlement.tier !== "premium_plus") {
+    return { kind: "deny_premium", feature: "vitalis", tier: entitlement.tier };
   }
   const { cost, reason } = costFor(action, hasMedia);
   if (entitlement.creditBalance < cost) {

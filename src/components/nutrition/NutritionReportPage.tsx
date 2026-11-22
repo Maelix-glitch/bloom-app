@@ -19,9 +19,12 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowLeft, Printer } from "lucide-react";
 
+import { PlusGate } from "@/components/billing/PlusGate";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useBodyProfile } from "@/hooks/useBodyProfile";
+import { useEntitlement } from "@/hooks/useEntitlement";
 import { useNutrition } from "@/hooks/useNutrition";
+import { canUse } from "@/lib/billing/plans";
 import { fmtDate, fmtGrams, fmtKcalApprox } from "@/lib/format";
 import { ACTIVITY_LABEL, GOAL_LABEL } from "@/lib/health/body";
 import { shiftDay } from "@/lib/localDay";
@@ -54,6 +57,7 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
   const nutrition = useNutrition();
   const body = useBodyProfile();
   const assessment = useAssessment();
+  const entitlementState = useEntitlement();
   const end = isRealDayKey(endDay) ? endDay : nutrition.today;
   const start = shiftDay(end, -6);
   const targets = nutrition.targetState.kind === "ready" ? nutrition.targetState.targets : null;
@@ -122,6 +126,23 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
       blurb: "Coach's estimate from a meal photo, confirmed by you before logging. An approximation, never a measurement.",
     },
   ];
+
+  /* M-214: the clinician report is one of the reports Premium Plus
+     carries. Same rule as the Weekly Report: a KNOWN entitlement
+     below Plus meets the invitation; an unread one never blocks.
+     UI gate — the report is built on-device from the person's own
+     entries. */
+  if (
+    entitlementState.kind === "ready" &&
+    !canUse(entitlementState.entitlement.tier, "advanced_analytics")
+  ) {
+    return (
+      <PlusGate
+        title="The nutrition report is part of Premium Plus"
+        body="Seven days of intake with its sources, ready to print or share with a clinician. Reports and advanced analytics live in Premium Plus, with Vitalis and the Metabolic Twin."
+      />
+    );
+  }
 
   return (
     <div className="nut-wrap nut-report">

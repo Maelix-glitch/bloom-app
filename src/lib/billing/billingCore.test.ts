@@ -111,15 +111,29 @@ describe("decideGate", () => {
         hasMedia: true,
       }),
     ).toEqual({ kind: "deny_insufficient", cost: 3, balance: 2, tier: "premium" });
-    expect(decideGate({ entitlement: snap({ creditBalance: 1 }), action: "vitalis", hasMedia: false })).toEqual({
+    /* PIN CHANGED (M-214): vitalis/tts below Plus never reach the
+       balance check — they are refused as a tier feature first (see
+       the Plus gate block below), so their insufficient cases now
+       run on a Plus snapshot. */
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium_plus", creditBalance: 1, monthlyAllowance: 800 }),
+        action: "vitalis",
+        hasMedia: false,
+      }),
+    ).toEqual({
       kind: "deny_insufficient",
       cost: 2,
       balance: 1,
-      tier: "free",
+      tier: "premium_plus",
     });
-    expect(decideGate({ entitlement: snap({ creditBalance: 0 }), action: "tts", hasMedia: false }).kind).toBe(
-      "deny_insufficient",
-    );
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium_plus", creditBalance: 0, monthlyAllowance: 800 }),
+        action: "tts",
+        hasMedia: false,
+      }).kind,
+    ).toBe("deny_insufficient");
   });
 
   it("balance at or above the cost → allow with that exact cost", () => {
@@ -135,7 +149,16 @@ describe("decideGate", () => {
         hasMedia: true,
       }),
     ).toEqual({ kind: "allow", cost: 3, reason: "coach_photo" });
-    expect(decideGate({ entitlement: snap({ creditBalance: 2 }), action: "vitalis", hasMedia: false })).toEqual({
+    /* PIN CHANGED (M-214): a free snapshot no longer reaches this
+       line for vitalis — the Plus gate refuses it first. The allow
+       case now runs on the tier that carries the feature. */
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium_plus", creditBalance: 2, monthlyAllowance: 800 }),
+        action: "vitalis",
+        hasMedia: false,
+      }),
+    ).toEqual({
       kind: "allow",
       cost: 2,
       reason: "vitalis_message",
@@ -147,6 +170,83 @@ describe("decideGate", () => {
         hasMedia: true,
       }).kind,
     ).toBe("allow");
+  });
+});
+
+describe("decideGate — the Vitalis Plus gate (M-214)", () => {
+  it("vitalis is refused below premium_plus, balance irrelevant", () => {
+    for (const tier of ["free", "premium"] as const) {
+      for (const creditBalance of [0, 20, 300]) {
+        expect(
+          decideGate({
+            entitlement: snap({ tier, creditBalance, monthlyAllowance: tier === "free" ? 20 : 300 }),
+            action: "vitalis",
+            hasMedia: false,
+          }),
+        ).toEqual({ kind: "deny_premium", feature: "vitalis", tier });
+      }
+    }
+  });
+
+  it("tts (Vitalis's voice) is refused below premium_plus too", () => {
+    for (const tier of ["free", "premium"] as const) {
+      expect(
+        decideGate({
+          entitlement: snap({ tier, creditBalance: 300, monthlyAllowance: 300 }),
+          action: "tts",
+          hasMedia: false,
+        }),
+      ).toEqual({ kind: "deny_premium", feature: "vitalis", tier });
+    }
+  });
+
+  it("premium_plus passes the tier gate and meets only the balance check", () => {
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium_plus", creditBalance: 800, monthlyAllowance: 800 }),
+        action: "vitalis",
+        hasMedia: false,
+      }),
+    ).toEqual({ kind: "allow", cost: 2, reason: "vitalis_message" });
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium_plus", creditBalance: 1, monthlyAllowance: 800 }),
+        action: "tts",
+        hasMedia: false,
+      }),
+    ).toEqual({ kind: "allow", cost: 1, reason: "tts_request" });
+  });
+
+  it("coach chat and coach photo are NOT Plus-gated — Premium keeps them", () => {
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium", creditBalance: 300, monthlyAllowance: 300 }),
+        action: "coach",
+        hasMedia: false,
+      }).kind,
+    ).toBe("allow");
+    expect(
+      decideGate({
+        entitlement: snap({ tier: "premium", creditBalance: 300, monthlyAllowance: 300 }),
+        action: "coach",
+        hasMedia: true,
+      }).kind,
+    ).toBe("allow");
+  });
+
+  it("the vitalis refusal is the 402 premium_required the client already renders", () => {
+    const decision = decideGate({
+      entitlement: snap({ tier: "premium", creditBalance: 300, monthlyAllowance: 300 }),
+      action: "vitalis",
+      hasMedia: false,
+    });
+    expect(gateErrorStatus(decision)).toBe(402);
+    expect(gateErrorBody(decision, "req-v")).toEqual({
+      error: "premium_required",
+      feature: "vitalis",
+      tier: "premium",
+      requestId: "req-v",
+    });
   });
 });
 

@@ -26,8 +26,11 @@ import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
 import { formatDate } from "@/lib/cycle/predict";
 import { shiftDay } from "@/lib/localDay";
+import { PlusGate } from "@/components/billing/PlusGate";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
+import { useEntitlement } from "@/hooks/useEntitlement";
 import { useHabits } from "@/hooks/useHabits";
+import { canUse } from "@/lib/billing/plans";
 import { useMoodSystem } from "@/hooks/useMoodSystem";
 import { usePeriodLog } from "@/hooks/usePeriodLog";
 import { useTrackers } from "@/hooks/useTrackers";
@@ -105,6 +108,7 @@ export function WeeklyReportPage() {
   const mood = useMoodSystem();
   const trackers = useTrackers();
   const cycle = usePeriodLog();
+  const entitlementState = useEntitlement();
   /* Both off switches, not just the period mode: the onboarding opt-out
      must remove the cycle from the report exactly as it does from Today.
      Checking `cycle.mode` alone let an opted-out person's cycle data
@@ -188,6 +192,22 @@ export function WeeklyReportPage() {
       ? `Week ${intro.tenureWeeks + 1} of your Bloom record starts ${starts} — it will read back whatever you log.`
       : `A new week starts ${starts} — it will read back whatever you log.`;
   }, [report.weekEnd, intro.tenureWeeks]);
+
+  /* M-214: the Weekly Report is advanced analytics — Premium Plus.
+     A KNOWN entitlement below Plus meets the invitation page; an
+     unread one never blocks (house rule). UI gate: the report
+     computes on-device from the person's own record. */
+  if (
+    entitlementState.kind === "ready" &&
+    !canUse(entitlementState.entitlement.tier, "advanced_analytics")
+  ) {
+    return (
+      <PlusGate
+        title="Your Weekly Report is part of Premium Plus"
+        body="Seven days of your record, read back with its patterns — mood, habits, body and cycle in one calm page. Reports and advanced analytics live in Premium Plus, with Vitalis and the Metabolic Twin."
+      />
+    );
+  }
 
   return (
     <div className="app-shell min-h-screen bg-background text-foreground">

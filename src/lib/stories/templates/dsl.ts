@@ -139,6 +139,13 @@ export interface StoryTemplateDef {
   hint: string;
   category: TemplateCategoryId;
   tags: string[];
+  /**
+   * M-214: a Premium Plus design. The browser shows it with a Plus
+   * mark and refuses the pick below Plus (the gate lives in
+   * TemplateBrowser, reading TIER_FEATURES' stories_premium_templates).
+   * Absent = a basic template, open to every tier.
+   */
+  premium?: boolean | undefined;
   tone: "light" | "dark";
   background: StoryBackgroundState;
   seeds: TemplateSeed[];

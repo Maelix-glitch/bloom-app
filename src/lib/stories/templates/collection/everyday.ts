@@ -46,6 +46,7 @@ export const EVERYDAY_TEMPLATES = [
      habits as the centrepiece, the streak as the sign-off. */
   tpl({
     id: "everyday-day-in-numbers",
+    premium: true,
     name: "The Day in Numbers",
     hint: "Your habits, counted — the day at a glance.",
     category: "everyday",
@@ -81,6 +82,7 @@ export const EVERYDAY_TEMPLATES = [
      the points the day earned. */
   tpl({
     id: "everyday-golden-arch",
+    premium: true,
     name: "Golden Arch",
     hint: "A portrait in the arch, lit gold.",
     category: "everyday",
