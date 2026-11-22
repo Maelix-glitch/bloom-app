@@ -34,6 +34,7 @@ const checking: RailIdentity = {
   username: null,
   emailConfirmed: false,
   verification: { invited: false, hasRecord: false },
+  badges: { hasTrainerRow: false, memberBadgeKinds: [] },
 };
 
 const signedIn: RailIdentity = {
@@ -45,6 +46,7 @@ const signedIn: RailIdentity = {
   username: "maelix",
   emailConfirmed: true,
   verification: { invited: true, hasRecord: true },
+  badges: { hasTrainerRow: false, memberBadgeKinds: [] },
 };
 
 const signedOut: RailIdentity = { ...checking, status: "signed-out" };

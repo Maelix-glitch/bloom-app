@@ -3,14 +3,19 @@
  * magnifying glass: given a term, find other members by display name or
  * @username.
  *
- * Every fact comes from the `search_profiles` RPC (migration 20261116),
- * a security-definer function that is the only way to see another person
- * at all: `profiles` RLS is owner-only, and `account_verifications` is
- * own-row-only, so no client query could assemble these rows — and no
- * policy was widened to make one possible. The function returns public
- * fields only (id, display name, @username, avatar path, accent) plus
- * `verified` — a row exists in `account_verifications`, which is exactly
- * the blue tick's truth for someone else (see verification.ts).
+ * Every fact comes from the `search_profiles` RPC (migration 20261116,
+ * restated by 20261122_member_badges), a security-definer function that
+ * is the only way to see another person at all: `profiles` RLS is
+ * owner-only, and `account_verifications` is own-row-only, so no client
+ * query could assemble these rows — and no policy was widened to make
+ * one possible. The function returns public fields only (id, display
+ * name, @username, avatar path, accent) plus `verified` — a row exists
+ * in `account_verifications`, which is exactly the blue tick's truth
+ * for someone else (see verification.ts) — and, since M-209, the badge
+ * facts: `is_trainer` (a `trainer_profiles` row exists) and `badges`
+ * (the `member_badges` kinds held), which lib/profile/badges derives
+ * into the labelled pills with the same one-truth-per-badge rule the
+ * person's own surfaces use.
  *
  * The server already excludes the caller, caps at 20 rows and lists only
  * profiles their owners made public; the filters are repeated here as
@@ -23,6 +28,7 @@
  */
 
 import { hasSupabaseConfig, supabase } from "@/lib/supabase";
+import { memberBadgesOf, type MemberBadge } from "./badges";
 import { normalizeAccent, type BloomAccent } from "./types";
 import { report } from "./errors";
 
@@ -34,6 +40,12 @@ export interface UserSearchResult {
   accent: BloomAccent;
   /** A record exists in `account_verifications` — the blue tick. */
   verified: boolean;
+  /**
+   * The member's badges, derived by lib/profile/badges from the RPC's
+   * trainer flag and granted kinds — display order already applied.
+   * Empty for a member who holds none.
+   */
+  badges: MemberBadge[];
 }
 
 export type UserSearchOutcome =
@@ -53,6 +65,8 @@ type SearchRow = {
   avatar_path?: unknown;
   accent?: unknown;
   verified?: unknown;
+  is_trainer?: unknown;
+  badges?: unknown;
 };
 
 const asText = (value: unknown): string | null =>
@@ -71,6 +85,17 @@ function toResult(row: SearchRow): UserSearchResult | null {
     /* Only a literal true is a tick — the same rule as every other fact
        in the verification story. */
     verified: row.verified === true,
+    /* The badges ride the same conservatism: the trainer flag must be
+       a literal true (it is the trainer row's existence, the badge's
+       one truth), and the kinds go through the one derivation, which
+       drops anything it does not recognise. A row from an older RPC
+       (no badge columns yet) reads as no badges. */
+    badges: memberBadgesOf({
+      hasTrainerRow: row.is_trainer === true,
+      memberBadgeKinds: Array.isArray(row.badges)
+        ? row.badges.filter((b): b is string => typeof b === "string")
+        : [],
+    }),
   };
 }
 

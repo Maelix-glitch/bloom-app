@@ -47,6 +47,8 @@ import { useSound } from "@/hooks/useSound";
 import { SEX_LABEL } from "@/lib/onboarding/profileKind";
 import { requestWelcomeReplay } from "@/lib/welcome/replayRequest";
 import { VERIFIED_BLUE, type VerificationStatus } from "@/lib/profile/verification";
+import type { MemberBadge } from "@/lib/profile/badges";
+import { MemberBadges } from "@/components/profile/MemberBadges";
 import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 import { ConsentSection } from "@/components/profile/ConsentSection";
 import { TrustSection } from "@/components/profile/TrustSection";
@@ -359,6 +361,34 @@ function VerificationRow({
   );
 }
 
+/**
+ * Your badges — the settings face of the member badges (M-209).
+ *
+ * Rendered ONLY for a member who holds at least one badge: for
+ * everyone else the row does not exist — the verification row above
+ * already carries the grant idea, and an empty "no badges" row would
+ * be a group existing for symmetry, which this file forbids. The row
+ * is read-only and says the one honest thing about where badges come
+ * from; there is nothing here to claim, request or edit.
+ */
+function BadgesRow({ badges }: { badges: readonly MemberBadge[] }) {
+  return (
+    <div className="pf-row" data-testid="pf-row-badges">
+      <span className="pf-row-icon" aria-hidden>
+        <IconSparkles />
+      </span>
+      <span className="pf-row-text">
+        <span className="pf-row-label">Your badges</span>
+        <span className="pf-row-hint">Badges are granted by Bloom.</span>
+      </span>
+      <span className="pf-row-value">
+        <MemberBadges badges={badges} size="sm" />
+      </span>
+      <span />
+    </div>
+  );
+}
+
 const ACCENT_LABEL: Record<ProfileIdentity["accent"], string> = {
   violet: "Violet",
   sky: "Sky",
@@ -372,6 +402,7 @@ export function AccountRow({
   account,
   verification,
   verificationPending,
+  badges = [],
   privacy,
   stories,
   isSignedIn,
@@ -397,6 +428,9 @@ export function AccountRow({
   /** M-194: the facts read behind the status is still in flight — the
       row holds a neutral no-claim state instead of the unproven one. */
   verificationPending?: boolean;
+  /** The member's badges (M-209), derived in lib/profile/badges. The
+      badges row renders only when this is non-empty. */
+  badges?: readonly MemberBadge[];
   privacy: ProfilePrivacy;
   stories: Story[];
   highlights: HighlightItem[];
@@ -429,6 +463,7 @@ export function AccountRow({
           value={account.email ?? "not connected"}
         />
         <VerificationRow verification={verification} pending={verificationPending} />
+        {badges.length > 0 ? <BadgesRow badges={badges} /> : null}
         <Row
           icon={<IconClock />}
           label="Tracking since"
