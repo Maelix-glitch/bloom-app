@@ -58,7 +58,7 @@ export function BloomShareCard({
         </span>
         <span
           className="display mt-1.5 block leading-snug"
-          style={{ color: bg.ink, fontSize: compact ? 14 : 19 }}
+          style={{ color: bg.ink, fontSize: compact ? 14 : 18 }}
         >
           {title}
         </span>

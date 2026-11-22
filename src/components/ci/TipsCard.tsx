@@ -52,15 +52,15 @@ export function TipsCard({
     <Card data-phase={phase}>
       <p className="ci-eyebrow">For this phase</p>
       <h2
-        className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]"
+        className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]"
         style={{ color: "var(--phase, var(--ci-text))" }}
       >
         {PHASE_LABEL[phase]}
       </h2>
-      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">{PHASE_BLURB[phase]}</p>
+      <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">{PHASE_BLURB[phase]}</p>
 
       {note ? (
-        <p className="mt-2 text-[12.5px] leading-relaxed" style={{ color: "var(--phase)" }}>
+        <p className="mt-2 text-[length:var(--text-support)] leading-relaxed" style={{ color: "var(--phase)" }}>
           {note}
         </p>
       ) : null}
@@ -71,14 +71,14 @@ export function TipsCard({
             <span className="ci-tip__mark" aria-hidden />
             <div>
               <p className="text-[13px] font-medium leading-snug">{tip.title}</p>
-              <p className="mt-1 text-[12.5px] leading-relaxed ci-soft">{tip.body}</p>
+              <p className="mt-1 text-[length:var(--text-support)] leading-relaxed ci-soft">{tip.body}</p>
             </div>
           </div>
         ))}
       </div>
 
       {!compact ? (
-        <p className="mt-4 border-t pt-3 text-[11.5px] leading-relaxed ci-muted ci-hair">
+        <p className="mt-4 border-t pt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted ci-hair">
           General wellness suggestions that tend to suit this phase — not medical advice, and not a
           diagnosis. Your own experience outranks any phase label on this page.
         </p>

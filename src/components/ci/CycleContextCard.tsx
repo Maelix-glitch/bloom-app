@@ -33,14 +33,14 @@ export function CycleContextCard({ context }: { context: CyclePhaseContext }) {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <p className="ci-eyebrow">Cycle context</p>
-          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+          <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
             {context.phaseLabel} · day {context.cycleDay} of your cycle
           </h2>
         </div>
         <ConfidenceBadge level={context.confidence} reason={context.confidenceReason} />
       </div>
 
-      <p className="mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+      <p className="mt-2 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
         {context.confidenceReason}
       </p>
 
@@ -53,9 +53,9 @@ export function CycleContextCard({ context }: { context: CyclePhaseContext }) {
         </p>
       ) : null}
 
-      <p className="mt-3 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">{context.note}</p>
+      <p className="mt-3 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">{context.note}</p>
 
-      <p className="mt-3 text-[11.5px] leading-relaxed ci-muted">
+      <p className="mt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted">
         {context.basis} Estimates from your own logged cycle — general information, not medical
         advice.
       </p>

@@ -457,7 +457,7 @@ export function StoryCreator({
         <div className="flex items-center justify-between px-5 pt-[max(16px,env(safe-area-inset-top))]">
           <div>
             <h2 className="display text-[22px]">New story</h2>
-            <p className="mt-0.5 text-[12.5px] text-muted-foreground">
+            <p className="mt-0.5 text-[length:var(--text-support)] text-muted-foreground">
               A little moment from your life.
             </p>
           </div>
@@ -489,7 +489,7 @@ export function StoryCreator({
                 <button
                   type="button"
                   onClick={() => void resumeDraft()}
-                  className="bsheet-primary h-9 px-4 text-[12.5px]"
+                  className="bsheet-primary h-9 px-4 text-[length:var(--text-support)]"
                 >
                   Resume
                 </button>
@@ -517,7 +517,7 @@ export function StoryCreator({
                   <m.icon className="size-4" strokeWidth={1.8} aria-hidden />
                 </span>
                 <span className="text-[14px] font-semibold text-white">{m.label}</span>
-                <span className="text-[11.5px] text-white/70">{busy ? "Preparing…" : m.hint}</span>
+                <span className="text-[length:var(--text-caption)] text-white/70">{busy ? "Preparing…" : m.hint}</span>
               </button>
             ))}
           </div>
@@ -571,7 +571,7 @@ export function StoryCreator({
                   className="group shrink-0 text-left"
                 >
                   <TemplateThumb def={def} width={124} data={null} />
-                  <span className="mt-1.5 block w-[124px] truncate px-0.5 text-[11.5px] font-medium">
+                  <span className="mt-1.5 block w-[124px] truncate px-0.5 text-[length:var(--text-caption)] font-medium">
                     {def.name}
                   </span>
                 </button>
@@ -690,7 +690,7 @@ export function StoryCreator({
               reflections.length === 0 &&
               rewards.length === 0 &&
               milestones.length === 0 ? (
-                <p className="rounded-2xl border border-dashed border-border px-4 py-5 text-center text-[12.5px] text-muted-foreground">
+                <p className="rounded-2xl border border-dashed border-border px-4 py-5 text-center text-[length:var(--text-support)] text-muted-foreground">
                   As you log moods and earn rewards, they'll wait for you here — ready to become
                   stories, only when you choose.
                 </p>
@@ -698,7 +698,7 @@ export function StoryCreator({
             </div>
           </section>
 
-          <p className="mt-6 text-center text-[11.5px] text-faint">
+          <p className="mt-6 text-center text-[length:var(--text-caption)] text-faint">
             Stories last 24 hours, then rest in your private archive.
           </p>
         </div>
@@ -797,8 +797,8 @@ function FromBloomRow({
           <Icon className="size-4" strokeWidth={1.8} aria-hidden />
         </span>
         <span className="min-w-0 flex-1">
-          <span className="block text-[13.5px] font-semibold">{label}</span>
-          <span className="block text-[11.5px] text-faint">{hint}</span>
+          <span className="block text-[length:var(--text-callout)] font-semibold">{label}</span>
+          <span className="block text-[length:var(--text-caption)] text-faint">{hint}</span>
         </span>
         <ArrowRight
           className={cn("size-4 shrink-0 text-faint transition-transform", open && "rotate-90")}

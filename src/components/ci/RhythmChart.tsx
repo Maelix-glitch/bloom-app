@@ -195,7 +195,7 @@ export function RhythmChart({
         </svg>
       ) : (
         <div style={{ height }} className="flex items-center">
-          <p className="text-[12.5px] ci-muted">
+          <p className="text-[length:var(--text-support)] ci-muted">
             {analysis.entryCount === 0
               ? "Your cycle lengths chart out here once you've logged a period."
               : "Two entries make a cycle — that's where this chart starts."}

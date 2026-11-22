@@ -103,7 +103,7 @@ export function ImportPeriods({
       </button>
       <SheetBody className="pb-5">
         <SheetItem className="px-5 pb-1 pr-14 pt-1 sm:px-6 sm:pr-16">
-          <h2 className="display text-[20px] leading-tight">Bring your history in</h2>
+          <h2 className="display text-[length:var(--text-title)] leading-tight">Bring your history in</h2>
           <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
             Paste the start days from your old app, or drop its CSV here. Bloom shows you what it
             understood before anything is saved — three or four cycles are enough to stop the
@@ -129,7 +129,7 @@ export function ImportPeriods({
             rows={7}
             spellCheck={false}
             placeholder={EXAMPLE}
-            className="mono w-full resize-y rounded-xl border border-border bg-background px-3 py-2.5 text-[12.5px] leading-relaxed outline-none focus:border-foreground/30"
+            className="mono w-full resize-y rounded-xl border border-border bg-background px-3 py-2.5 text-[length:var(--text-support)] leading-relaxed outline-none focus:border-foreground/30"
           />
           <div className="mt-2 flex flex-wrap items-center gap-2">
             <input
@@ -147,7 +147,7 @@ export function ImportPeriods({
               type="button"
               data-testid="cycle-import-file"
               onClick={() => fileRef.current?.click()}
-              className="pf-btn h-9 px-3 text-[12.5px]"
+              className="pf-btn h-9 px-3 text-[length:var(--text-support)]"
             >
               <FileUp className="size-3.5" aria-hidden /> Choose a file
             </button>
@@ -197,13 +197,13 @@ export function ImportPeriods({
                       key={`${row.line}-${row.start}`}
                       className="flex items-baseline justify-between gap-3 border-b border-border/60 px-4 py-2 last:border-b-0"
                     >
-                      <span className="mono text-[12.5px]">
+                      <span className="mono text-[length:var(--text-support)]">
                         {formatDate(row.start)}
                         {row.end ? ` – ${formatDate(row.end)}` : ""}
                       </span>
                       <span
                         className={cn(
-                          "text-[11.5px]",
+                          "text-[length:var(--text-caption)]",
                           row.status === "new" ? "text-foreground" : "text-faint",
                         )}
                         title={row.note ?? ""}
@@ -219,7 +219,7 @@ export function ImportPeriods({
             {plan.problems.length > 0 ? (
               <SheetItem className="px-5 pt-3 sm:px-6">
                 <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3">
-                  <p className="flex items-center gap-2 text-[12.5px]">
+                  <p className="flex items-center gap-2 text-[length:var(--text-support)]">
                     <AlertTriangle className="size-3.5" aria-hidden />
                     {plan.problems.length} {plan.problems.length === 1 ? "line" : "lines"} couldn't
                     be read — nothing here is guessed at.
@@ -243,7 +243,7 @@ export function ImportPeriods({
                 disabled={plan.counts.add === 0}
                 onClick={commit}
                 className={cn(
-                  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-[13.5px] transition-colors",
+                  "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-[length:var(--text-callout)] transition-colors",
                   plan.counts.add > 0
                     ? "border-border bg-foreground/5 hover:bg-foreground/10"
                     : "cursor-not-allowed border-border text-faint",

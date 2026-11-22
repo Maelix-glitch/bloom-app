@@ -11,8 +11,8 @@
    ink that sits on a lit accent. */
 :root {
   --sheet-scrim: #07080a;
-  --sheet-accent-deep: #2c2415;
-  --sheet-on-accent-ink: #2a1f10;
+  --sheet-accent-deep: var(--gold-deep);
+  --sheet-on-accent-ink: var(--gold-ink);
 }
 
 /* ------------------------------------------------------------ shell */
@@ -158,7 +158,7 @@
     inset 0 -1px 0 color-mix(in oklab, var(--foreground) 6%, transparent);
 }
 .bsheet.bsheet--phone .bsheet-panel {
-  border-radius: 28px 28px 0 0;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
   /* No bottom edge — it sits on the screen edge, and a line there reads as a
      seam rather than a border. The side borders stop with it. */
   border-bottom: 0;
@@ -396,7 +396,7 @@
   inset: 1px 1px -60px;
   z-index: -1;
   overflow: hidden;
-  border-radius: 27px 27px 0 0;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
   pointer-events: none;
 }
 /* the light catch along the top curve, over the photo rather than under it */
@@ -493,8 +493,8 @@
   object-fit: cover;
   transform: scale(1.02);
   transition:
-    transform var(--motion-signature) var(--ease-out-expo),
-    filter var(--motion-signature) var(--ease-out-expo);
+    transform var(--motion-page) var(--ease-out-expo),
+    filter var(--motion-page) var(--ease-out-expo);
   filter: saturate(0.92) brightness(0.9);
 }
 .bmoment-tile::before {
@@ -712,11 +712,11 @@
   padding: 26px 26px 22px;
   isolation: isolate;
   overflow: hidden;
-  border-radius: 28px 28px 0 0;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
 }
 @media (max-width: 640px) {
   .bedit-hero {
-    padding: 34px var(--space-5) 18px;
+    padding: 34px var(--space-5) var(--space-4);
   }
 }
 /* the photograph behind the header, faded into the glass below */
@@ -890,7 +890,7 @@
   place-items: center;
   width: 36px;
   height: 36px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
   background: color-mix(in oklab, var(--background) 40%, transparent);
   color: color-mix(in oklab, var(--foreground) 78%, transparent);
@@ -1150,7 +1150,7 @@ textarea.bedit-field-input {
   align-items: center;
   justify-content: space-between;
   gap: var(--space-3);
-  padding: var(--space-3) 26px 18px;
+  padding: var(--space-3) 26px var(--space-4);
   border-top: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
   background: color-mix(in oklab, var(--surface) 70%, transparent);
   backdrop-filter: blur(12px);

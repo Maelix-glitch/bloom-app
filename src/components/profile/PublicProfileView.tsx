@@ -46,7 +46,7 @@ export function PublicProfileView({
     return (
       <div className="mx-auto max-w-[480px] rounded-2xl border border-border bg-surface/40 p-8 text-center">
         <Lock className="mx-auto size-5 text-faint" strokeWidth={1.5} aria-hidden />
-        <p className="display mt-4 text-[20px]">This space is private.</p>
+        <p className="display mt-4 text-[length:var(--text-title)]">This space is private.</p>
         <p className="mx-auto mt-2 max-w-[42ch] text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
           {identity.username
             ? `${identity.displayName} keeps their Bloom to themselves right now — and that's okay.`

@@ -66,8 +66,8 @@ export function InsightsPanel({
           <div className="ci-flag" data-tone="calm">
             <Check size={16} className="ci-flag__icon" aria-hidden />
             <div>
-              <p className="text-[13.5px] font-medium">Nothing to flag right now</p>
-              <p className="mt-1 text-[12.5px] leading-relaxed ci-soft">
+              <p className="text-[length:var(--text-callout)] font-medium">Nothing to flag right now</p>
+              <p className="mt-1 text-[length:var(--text-support)] leading-relaxed ci-soft">
                 No missing entries, no impossible gaps, no lateness. Your predictions below are
                 doing what they can with what you've logged.
               </p>
@@ -80,8 +80,8 @@ export function InsightsPanel({
               <div key={flag.id} className="ci-flag" data-tone={flag.tone}>
                 <Icon size={16} className="ci-flag__icon" aria-hidden />
                 <div>
-                  <p className="text-[13.5px] font-medium leading-snug">{flag.title}</p>
-                  <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">{flag.body}</p>
+                  <p className="text-[length:var(--text-callout)] font-medium leading-snug">{flag.title}</p>
+                  <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">{flag.body}</p>
                   {flag.action && onAddSuggested ? (
                     <button
                       type="button"

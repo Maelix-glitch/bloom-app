@@ -226,7 +226,7 @@
      system, single-sourced so every card, sheet and CTA paints the same
      light. The gradient runs hi -> gold -> deep at 110deg, exactly as
      the prototype's text-gold-gradient. */
-  --gold-gradient: linear-gradient(110deg, #f6e9cd 0%, #dcc08f 45%, #c79d62 100%);
+  --gold-gradient: linear-gradient(110deg, var(--gold-bright) 0%, var(--gold) 45%, var(--gold-grad-lo) 100%);
   --glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018));
   --glass-border: rgba(255, 255, 255, 0.07);
   --glass-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 30px 60px -36px rgba(0, 0, 0, 0.8);
@@ -254,7 +254,7 @@
   /* ---- data visualisation -------------------------------------------- */
   --chart-1: #879dbb;
   --chart-2: #8fc7a2;
-  --chart-3: #dcc08f;
+  --chart-3: var(--gold);
   --chart-4: #a697d3;
   --chart-5: #e3919f;
   --chart-6: #c5a16b;
@@ -550,7 +550,7 @@
   }
   ::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.08);
-    border-radius: 10px;
+    border-radius: var(--radius-control);
     border: 3px solid var(--background);
   }
 
@@ -726,7 +726,7 @@
    judgement colour. */
 .meter {
   block-size: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface-3);
   overflow: hidden;
 }
@@ -761,8 +761,8 @@
   display: inline-flex;
   align-items: center;
   border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 0.125rem 0.5rem;
+  border-radius: var(--radius-pill);
+  padding: 0.125rem var(--space-2);
 }
 
 /* The note: safety and standing copy that must be READ. A visible
@@ -810,7 +810,7 @@
   place-items: center;
   width: 32px;
   height: 32px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--surface-2);
   color: var(--gold);
 }
@@ -844,7 +844,7 @@
   right: -10rem;
   width: 640px;
   height: 640px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background: rgba(220, 192, 143, 0.07);
   filter: blur(120px);
 }
@@ -854,7 +854,7 @@
   top: 50%;
   width: 480px;
   height: 480px;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background: rgba(143, 199, 162, 0.04);
   filter: blur(120px);
 }
@@ -1092,7 +1092,7 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  padding-block: 4px;
+  padding-block: var(--space-1);
 }
 .home-fact:nth-child(even) {
   padding-left: 16px;
@@ -1109,7 +1109,7 @@
 }
 @media (min-width: 1024px) {
   .home-fact:nth-child(n + 2) {
-    padding-left: 24px;
+    padding-left: var(--space-5);
   }
   .home-fact:nth-child(n + 2)::before {
     content: "";
@@ -1155,7 +1155,7 @@
     background-color: var(--surface);
     background-image: none;
     border: 0;
-    border-radius: 24px;
+    border-radius: var(--radius-card);
     box-shadow: var(--dbx-specular);
     backdrop-filter: none;
   }
@@ -1174,11 +1174,11 @@
   border: 0;
   border-top: 1px solid var(--dbx-hairline);
   border-radius: 0;
-  padding: 14px 4px;
+  padding: 14px var(--space-1);
 }
 .home-page .home-delta-row:first-child {
   border-top: 0;
-  padding-top: 4px;
+  padding-top: var(--space-1);
 }
 .home-page .home-delta-row:hover {
   background: var(--dbx-tone);
@@ -1194,7 +1194,7 @@
   background-color: var(--surface);
   background-image: none;
   border: 0;
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   box-shadow: var(--dbx-specular);
   backdrop-filter: none;
 }
@@ -1391,9 +1391,9 @@
 .orbit-grid {
   display: grid;
   grid-template-columns: minmax(0, 30rem) minmax(0, 1fr);
-  gap: var(--space-6, 1.5rem);
+  gap: var(--space-6, var(--space-5));
   align-items: start;
-  margin-top: var(--space-2, 0.5rem);
+  margin-top: var(--space-2, var(--space-2));
 }
 @media (max-width: 860px) {
   .orbit-grid {
@@ -1561,7 +1561,7 @@
 }
 
 .orbit-legend {
-  margin-top: var(--space-3, 0.75rem);
+  margin-top: var(--space-3, var(--space-3));
   text-align: center;
   font-size: var(--text-meta);
   color: var(--faint-strong);
@@ -1573,7 +1573,7 @@
 }
 .orbit-panel {
   display: grid;
-  gap: var(--space-2, 0.5rem);
+  gap: var(--space-2, var(--space-2));
   justify-items: start;
   min-height: 8.5rem;
 }
@@ -1619,11 +1619,11 @@
 .orbit-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-3, 0.75rem);
+  gap: var(--space-3, var(--space-3));
   align-items: center;
   width: 100%;
   min-height: 44px;
-  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
+  padding: var(--space-2, var(--space-2)) var(--space-3, var(--space-3));
   border: 0;
   border-radius: var(--radius-sm, 0.5rem);
   background: none;
@@ -1805,7 +1805,7 @@
 }
 .assess-orb {
   position: absolute;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   opacity: 0;
   animation: assess-orb-break var(--motion-signature) var(--ease-out-expo) forwards;
 }
@@ -2386,7 +2386,7 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   width: 100%;
   max-width: var(--container);
   margin-inline: auto;
-  padding-inline: 24px;
+  padding-inline: var(--space-5);
 }
 
 /* Touch floor (Brief v6 Slice 2): on coarse pointers the named small
@@ -2629,7 +2629,7 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 @media (min-width: 64rem) {
   .dock {
@@ -2829,7 +2829,7 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   content: "";
   position: absolute;
   inset: -55%;
-  border-radius: 9999px;
+  border-radius: var(--radius-pill);
   background: radial-gradient(
     circle,
     color-mix(in oklab, var(--gold) 34%, transparent) 0%,
@@ -3728,7 +3728,7 @@ body {
     height: 17rem;
   }
   .mood-page [data-testid="mood-journey"] [data-inview] > div:last-child {
-    font-size: 0.8rem;
+    font-size: var(--text-support);
   }
 
   /* P2 — week dots breathe a little on desktop. */

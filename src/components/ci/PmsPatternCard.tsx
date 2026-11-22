@@ -13,7 +13,7 @@ export function PmsPatternCard({ logs, days }: { logs: PeriodLog[]; days: DayLog
 
   if (view.cyclesTotal < 2) {
     return (
-      <p className="text-[12.5px] leading-relaxed ci-soft">
+      <p className="text-[length:var(--text-support)] leading-relaxed ci-soft">
         This view compares the five days before each period across cycles — it needs at least two
         periods after your first before a repeat can show.
       </p>
@@ -23,7 +23,7 @@ export function PmsPatternCard({ logs, days }: { logs: PeriodLog[]; days: DayLog
   const hasContent = view.symptoms.length > 0 || view.lowMoodCycles >= 2;
   if (!hasContent) {
     return (
-      <p className="text-[12.5px] leading-relaxed ci-soft">
+      <p className="text-[length:var(--text-support)] leading-relaxed ci-soft">
         Nothing repeats yet. A symptom needs to show up in the run-up to at least two of your{" "}
         {view.cyclesTotal} periods before it appears here.
       </p>
@@ -32,7 +32,7 @@ export function PmsPatternCard({ logs, days }: { logs: PeriodLog[]; days: DayLog
 
   return (
     <div data-testid="pms-patterns">
-      <p className="text-[12.5px] leading-relaxed ci-soft">
+      <p className="text-[length:var(--text-support)] leading-relaxed ci-soft">
         The five days before each period, across your last {view.cyclesTotal}{" "}
         {view.cyclesTotal === 1 ? "cycle" : "cycles"} — what keeps showing up there:
       </p>

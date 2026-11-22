@@ -19,7 +19,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: clamp(16px, 3vh, 28px);
+  gap: clamp(16px, 3vh, var(--space-6));
   padding: max(20px, env(safe-area-inset-top)) max(20px, env(safe-area-inset-right)) max(20px, env(safe-area-inset-bottom)) max(20px, env(safe-area-inset-left));
   background:
     radial-gradient(120% 80% at 50% 0%, color-mix(in oklab, var(--gold) 8%, var(--surface)), transparent 62%),
@@ -34,7 +34,7 @@
   width: 100%;
   max-width: 400px;
   margin-inline: auto;
-  padding: clamp(24px, 5vw, 36px) clamp(20px, 5vw, 32px);
+  padding: clamp(var(--space-5), 5vw, 36px) clamp(20px, 5vw, 32px);
   border: 1px solid oklch(1 0 0 / 0.07);
   border-radius: var(--radius-dialog);
   /* Reskin slice C2: glass light over a SOLID panel — the gate joins the
@@ -50,7 +50,7 @@
   place-items: center;
   width: 46px;
   height: 46px;
-  margin: 0 auto clamp(18px, 3.5vh, 26px);
+  margin: 0 auto clamp(var(--space-4), 3.5vh, 26px);
 }
 
 .ag-mark svg {
@@ -105,7 +105,7 @@
   height: 46px;
   padding: 0 14px;
   border: 1px solid oklch(1 0 0 / 0.12);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface-2);
   color: oklch(0.955 0.008 85);
   font-size: var(--text-body);
@@ -155,7 +155,7 @@
   height: 46px;
   margin-top: var(--space-4);
   border: 1px solid transparent;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: oklch(0.87 0.055 88);
   color: oklch(0.22 0.02 75);
   font-size: var(--text-callout);

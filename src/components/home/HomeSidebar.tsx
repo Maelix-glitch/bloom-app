@@ -296,7 +296,7 @@ export function HomeMobileBar() {
     <div className="app-nav app-mobile-bar fixed inset-x-0 top-0 z-20 flex h-[60px] items-center justify-between border-b border-border px-5 lg:hidden">
       <Link to="/" className="flex items-center gap-2.5 text-foreground" aria-label="Bloom — Today">
         <BloomLogo size={22} />
-        <span className="font-display text-[21px] leading-none tracking-wide">Bloom</span>
+        <span className="font-display text-[length:var(--text-title)] leading-none tracking-wide">Bloom</span>
       </Link>
       <div className="flex items-center gap-2">
         <PointsChip compact />

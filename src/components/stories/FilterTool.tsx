@@ -84,7 +84,7 @@ export function FilterTool({
             onClick={() => setShowAdjust((v) => !v)}
             aria-expanded={showAdjust}
             className={cn(
-              "rounded-full border px-4 py-2 text-[12.5px] font-semibold transition-colors",
+              "rounded-full border px-4 py-2 text-[length:var(--text-support)] font-semibold transition-colors",
               showAdjust
                 ? "border-border-strong bg-surface-3 text-foreground"
                 : "border-border text-muted-foreground",
@@ -99,7 +99,7 @@ export function FilterTool({
                 onFilter("none");
                 onAdjustments(DEFAULT_ADJUSTMENTS);
               }}
-              className="inline-flex items-center gap-1.5 text-[12.5px] text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex items-center gap-1.5 text-[length:var(--text-support)] text-muted-foreground transition-colors hover:text-foreground"
             >
               <RotateCcw className="size-3.5" aria-hidden /> Reset
             </button>
@@ -137,7 +137,7 @@ export function FilterTool({
         >
           {SLIDERS.map((s) => (
             <label key={s.id} className="grid grid-cols-[92px_1fr_40px] items-center gap-3">
-              <span className="text-[12.5px] text-muted-foreground">{s.label}</span>
+              <span className="text-[length:var(--text-support)] text-muted-foreground">{s.label}</span>
               <input
                 type="range"
                 min={s.min}
@@ -151,7 +151,7 @@ export function FilterTool({
               <span className="mono text-right text-[11px] text-faint">{adjustments[s.id]}</span>
             </label>
           ))}
-          <p className="text-[11.5px] text-faint">
+          <p className="text-[length:var(--text-caption)] text-faint">
             Adjustments layer over the filter and never touch your original.
           </p>
         </div>

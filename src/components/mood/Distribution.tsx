@@ -62,7 +62,7 @@ function DistributionImpl({
                   />
                   {b.label}
                 </p>
-                <p className="numeric mt-1.5 text-[20px] text-foreground">{b.count}</p>
+                <p className="numeric mt-1.5 text-[length:var(--text-title)] text-foreground">{b.count}</p>
                 <p className="mono text-[length:var(--text-micro)] text-faint-strong">
                   {b.share.toFixed(0)}% ·{" "}
                   <span
@@ -110,7 +110,7 @@ function DistributionImpl({
                   className="rounded-[12px] border border-border bg-surface-2/40 p-4"
                 >
                   <p className="eyebrow mb-2">{m.label}</p>
-                  <p className="numeric text-[20px] text-foreground">{m.value}</p>
+                  <p className="numeric text-[length:var(--text-title)] text-foreground">{m.value}</p>
                 </div>
               ))}
             </div>

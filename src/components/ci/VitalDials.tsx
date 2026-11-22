@@ -85,7 +85,7 @@ function Gauge({
           y={43}
           textAnchor="middle"
           className="ci-num"
-          fontSize={17}
+          fontSize={18}
           fill="var(--ci-text)"
         >
           {value === null ? "—" : value.toFixed(decimals)}
@@ -103,7 +103,7 @@ function Gauge({
           {`/${max}${suffix ?? ""}`}
         </text>
       </svg>
-      <p className="mt-1.5 text-[11.5px] font-medium">{label}</p>
+      <p className="mt-1.5 text-[length:var(--text-caption)] font-medium">{label}</p>
       <p className="text-[11px] leading-snug ci-muted">{caption}</p>
     </div>
   );

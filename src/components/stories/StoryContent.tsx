@@ -171,7 +171,7 @@ export function StoryContent({
         </div>
       ) : story.title ? (
         <figcaption
-          className={cn("display", compact ? "text-[15px]" : "text-[19px]")}
+          className={cn("display", compact ? "text-[15px]" : "text-[length:var(--text-section)]")}
           style={{ maxWidth: "36ch" }}
         >
           {story.title}

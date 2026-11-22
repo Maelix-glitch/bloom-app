@@ -894,7 +894,7 @@ function QuestionPiece({
     >
       <h4>{el.prompt}</h4>
       {sent ? (
-        <p className="rounded-full bg-[rgba(244,239,228,0.1)] px-3 py-2 text-[12.5px]">
+        <p className="rounded-full bg-[rgba(244,239,228,0.1)] px-3 py-2 text-[length:var(--text-support)]">
           Sent — thank you.
         </p>
       ) : (
@@ -912,7 +912,7 @@ function QuestionPiece({
             maxLength={280}
             disabled={!interaction || busy}
             aria-label="Your response"
-            className="min-w-0 flex-1 rounded-full border border-[rgba(244,239,228,0.2)] bg-[rgba(244,239,228,0.07)] px-3 py-2 text-[12.5px] text-[#f4efe4] outline-none placeholder:text-[rgba(244,239,228,0.45)] focus:border-[rgba(238,217,164,0.55)]"
+            className="min-w-0 flex-1 rounded-full border border-[rgba(244,239,228,0.2)] bg-[rgba(244,239,228,0.07)] px-3 py-2 text-[length:var(--text-support)] text-[#f4efe4] outline-none placeholder:text-[rgba(244,239,228,0.45)] focus:border-[rgba(238,217,164,0.55)]"
           />
           <button
             type="submit"
@@ -1058,7 +1058,7 @@ function CountdownPiece({
     >
       <h4>{el.title}</h4>
       {parts.done ? (
-        <p className="display text-[20px]">It's here.</p>
+        <p className="display text-[length:var(--text-title)]">It's here.</p>
       ) : (
         <div className="sx-countdown-digits">
           <div>
@@ -1173,7 +1173,7 @@ function MusicPiece({
         <Music2 className="size-3.5 text-[#221d33]" aria-hidden />
       </span>
       <span className="min-w-0 text-left leading-tight">
-        <span className="block truncate text-[12.5px] font-semibold">{el.title}</span>
+        <span className="block truncate text-[length:var(--text-support)] font-semibold">{el.title}</span>
         <span className="block truncate text-[11px] text-[color:var(--story-ink-dim)]">
           {el.artist}
         </span>
@@ -1431,7 +1431,7 @@ export function StoryCanvas({
       {failed ? (
         <div className="absolute inset-0 grid place-items-center px-8 text-center">
           <div>
-            <p className="display text-[17px] text-[color:var(--story-ink)]">
+            <p className="display text-[length:var(--text-section)] text-[color:var(--story-ink)]">
               This moment couldn't load.
             </p>
             <button

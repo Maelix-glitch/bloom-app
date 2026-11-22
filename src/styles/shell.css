@@ -223,7 +223,7 @@
     display: grid;
     place-items: center;
     transform-origin: 50% 10%;
-    transition: transform var(--motion-signature) var(--ease-out-expo);
+    transition: transform var(--motion-page) var(--ease-out-expo);
   }
 
   /* Hover leans the bell a touch; release springs it back. */
@@ -572,7 +572,7 @@
 }
 @media (max-width: 640px) {
   .ncenter-section {
-    margin: 18px 14px 0;
+    margin: var(--space-4) 14px 0;
   }
 }
 
@@ -813,7 +813,7 @@ a.ncenter-row:hover .ncenter-go {
   text-align: center;
   gap: 7px;
   margin-inline: var(--space-1);
-  padding: 22px 18px;
+  padding: 22px var(--space-4);
   border-radius: var(--radius-dialog);
   border: 1px dashed color-mix(in oklab, var(--foreground) 16%, transparent);
   background: color-mix(in oklab, var(--surface-2) 38%, transparent);
@@ -847,7 +847,7 @@ a.ncenter-row:hover .ncenter-go {
 }
 @media (max-width: 640px) {
   .ncenter-foot {
-    margin: var(--space-5) 18px var(--space-6);
+    margin: var(--space-5) var(--space-4) var(--space-6);
   }
 }
 

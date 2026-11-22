@@ -98,11 +98,10 @@
   background: var(--ci-surface);
   border: 1px solid var(--ci-line);
   border-radius: var(--ci-radius-lg);
-  box-shadow: var(--ci-shadow);
 }
 
 .ci-card--pad {
-  padding: clamp(16px, 2.6vw, 24px);
+  padding: clamp(16px, 2.6vw, var(--space-5));
 }
 
 .ci-hair {
@@ -652,7 +651,7 @@
 
 .at-territories {
   display: grid;
-  gap: 1.75rem;
+  gap: var(--space-6);
   margin: 0;
   padding: 0;
   list-style: none;
@@ -909,7 +908,7 @@
 }
 
 .at-contrasts {
-  margin: 1.75rem 0 0;
+  margin: var(--space-6) 0 0;
   padding: 0;
   list-style: none;
 }
@@ -1008,7 +1007,7 @@
   flex-wrap: wrap;
   gap: 0.4rem;
   margin: 0.55rem 0 0;
-  font-size: 0.74rem;
+  font-size: var(--text-caption);
   letter-spacing: var(--tracking-body);
   color: var(--ci-text-mute);
 }
@@ -1551,7 +1550,7 @@
   border-radius: 50%;
   background: transparent;
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: var(--text-support);
   cursor: pointer;
   transition: all var(--motion-standard) var(--ease-out-expo);
 }
@@ -1732,7 +1731,7 @@
 }
 
 .bsheet.bsheet--phone .bsheet-panel.tk2-log-panel {
-  border-radius: 24px 24px 0 0;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
 }
 
 /* Scoped by :has so every other sheet keeps the family backdrop; while
@@ -1767,7 +1766,7 @@ body:has(.tk2-log-sheet) .bsheet-backdrop {
 }
 
 .bsheet.bsheet--phone .bsheet-panel.tk2-snap-panel {
-  border-radius: 24px 24px 0 0;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
 }
 
 body:has(.tk2-snap-sheet) .bsheet-backdrop {
@@ -1816,7 +1815,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   padding: var(--space-4) 0;
   border-bottom: 1px solid color-mix(in oklab, var(--foreground) 0.03, transparent);
   color: var(--text-ultra-white);
-  font-size: 0.88rem;
+  font-size: var(--text-callout);
   /* OTT pass: 400, not 300 — light-weight prose was the readability trap
      on the panel's old translucent ground and stays one on any ground. */
   font-weight: 400;
@@ -1833,7 +1832,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   font-weight: 500;
   /* OTT pass: the house mono (IBM Plex Mono), not a foreign SF Mono stack. */
   font-family: var(--ci-font-mono);
-  font-size: 0.8rem;
+  font-size: var(--text-support);
 }
 
 .tk2-insight-list p {
@@ -1864,7 +1863,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .at-place {
-  font-size: 1.05rem;
+  font-size: var(--text-card);
   font-weight: 500;
   color: var(--text-ultra-white);
   letter-spacing: var(--tracking-heading);
@@ -1890,7 +1889,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 .tk2-unit, .tk2-root .tk2-target-field em {
   color: color-mix(in oklab, var(--foreground) 0.3, transparent);
-  font-size: 0.78rem;
+  font-size: var(--text-caption);
   margin-left: 1px;
 }
 
@@ -1930,7 +1929,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 
 .ci-table tbody th, .ci-table td {
   padding: var(--space-5) var(--space-6);
-  font-size: 0.85rem;
+  font-size: var(--text-callout);
   color: var(--text-ultra-white);
   font-weight: 400;
   vertical-align: middle;
@@ -1987,7 +1986,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   }
 
   .at-territory {
-    padding: 18px;
+    padding: var(--space-4);
   }
 
   .at-contrasts li {
@@ -2051,7 +2050,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 .tk2-sheet-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px var(--space-5);
+  gap: var(--space-4) var(--space-5);
   margin-top: 26px;
 }
 
@@ -2415,7 +2414,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
 }
 
 .bsheet.bsheet--phone .bsheet-panel.tk2-targets-panel {
-  border-radius: 24px 24px 0 0;
+  border-radius: var(--radius-dialog) var(--radius-dialog) 0 0;
 }
 
 body:has(.tk2-targets-sheet) .bsheet-backdrop {

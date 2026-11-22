@@ -184,7 +184,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 13px 14px 12px 16px;
+  padding: 13px 14px var(--space-3) 16px;
   border-bottom: 1px solid var(--border);
   flex: none;
 }
@@ -196,13 +196,13 @@
 
 .coach-orb-title {
   font-family: var(--font-display);
-  font-size: 17px;
+  font-size: var(--text-section);
   line-height: 1.15;
   color: var(--foreground);
 }
 
 .coach-orb-sub {
-  font-size: 11.5px;
+  font-size: var(--text-caption);
   line-height: 1.3;
   color: var(--muted-foreground);
   white-space: nowrap;
@@ -243,16 +243,16 @@
 .coach-orb-list {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  padding: 20px 18px 24px;
+  gap: var(--space-5);
+  padding: 20px var(--space-4) var(--space-5);
 }
 
 .coach-orb-welcome {
-  padding: 30px 22px 24px;
+  padding: 30px 22px var(--space-5);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .coach-orb-welcome-greeting {
@@ -260,11 +260,11 @@
   font-size: 22px;
   line-height: 1.2;
   color: var(--foreground);
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 .coach-orb-welcome-line {
-  font-size: 13.5px;
+  font-size: var(--text-callout);
   line-height: 1.5;
   color: var(--muted-foreground);
 }
@@ -272,15 +272,15 @@
 .coach-orb-starters {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
 }
 
 .coach-orb-starter {
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-pill);
-  padding: 7px 12px;
-  font-size: 12.5px;
+  padding: 7px var(--space-3);
+  font-size: var(--text-support);
   line-height: 1.3;
   color: var(--foreground);
   background: color-mix(in oklab, var(--foreground) 4%, transparent);
@@ -297,7 +297,7 @@
 .coach-orb-thinking {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   color: var(--muted-foreground);
   font-size: 13px;
 }
@@ -311,7 +311,7 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 12px 14px;
+  padding: var(--space-3) 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-control);
   background: var(--card);
@@ -320,7 +320,7 @@
 .coach-orb-stages-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   color: var(--muted-foreground);
   font-size: 13px;
   line-height: 1.45;
@@ -361,7 +361,7 @@
 .coach-orb-stage-pulse {
   width: 7px;
   height: 7px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--accent);
   animation: coach-orb-pulse 1.6s ease-in-out infinite;
 }
@@ -383,7 +383,7 @@
 
 .coach-orb-action-card {
   margin-top: 10px;
-  padding: 12px 14px;
+  padding: var(--space-3) 14px;
   border: 1px solid var(--border);
   border-radius: var(--radius-control);
   background: var(--card);
@@ -404,13 +404,13 @@
 
 .coach-orb-action-btns {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   margin-top: 10px;
 }
 
 .coach-orb-action-confirm {
   padding: 7px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--gold);
   color: var(--gold-foreground);
   font-size: 13px;
@@ -418,8 +418,8 @@
 }
 
 .coach-orb-action-dismiss {
-  padding: 7px 12px;
-  border-radius: 999px;
+  padding: 7px var(--space-3);
+  border-radius: var(--radius-pill);
   border: 1px solid var(--border);
   color: var(--muted-foreground);
   font-size: 13px;
@@ -429,7 +429,7 @@
   display: flex;
   align-items: center;
   gap: 5px;
-  margin-top: 8px;
+  margin-top: var(--space-2);
   font-size: 13px;
   color: var(--muted-foreground);
 }
@@ -443,7 +443,7 @@
 .coach-orb-reply[data-locked="true"] {
   border: 1px solid var(--border);
   border-radius: var(--radius-control);
-  padding: 12px 14px;
+  padding: var(--space-3) 14px;
 }
 
 .coach-orb-input:disabled {
@@ -462,7 +462,7 @@
 }
 
 .coach-orb-reply-author {
-  font-size: 12.5px;
+  font-size: var(--text-support);
   font-weight: 600;
   color: var(--foreground);
 }
@@ -474,7 +474,7 @@
 }
 
 .coach-orb-reply-p + .coach-orb-reply-p {
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 
 .coach-orb-reply[data-fresh="true"] {
@@ -496,8 +496,8 @@
 .coach-orb-error {
   display: flex;
   align-items: flex-start;
-  gap: 8px;
-  padding: 10px 12px;
+  gap: var(--space-2);
+  padding: 10px var(--space-3);
   border: 1px solid var(--border);
   border-radius: var(--radius-card);
   background: var(--surface-2);
@@ -546,7 +546,7 @@
   display: flex;
   align-items: flex-end;
   gap: 6px;
-  margin: 4px 12px 12px;
+  margin: var(--space-1) var(--space-3) var(--space-3);
   padding: 6px 6px 6px 14px;
   border: 1px solid var(--border-strong);
   border-radius: 22px;

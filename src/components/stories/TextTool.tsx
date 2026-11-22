@@ -186,7 +186,7 @@ export function TextTool({
                   fontFamily: f.fontFamily,
                   fontWeight: f.fontWeight,
                   fontStyle: f.fontStyle,
-                  fontSize: 21,
+                  fontSize: 22,
                   lineHeight: 1.2,
                 }}
               >
@@ -250,7 +250,7 @@ export function TextTool({
                 aria-checked={value.background === b.id}
                 onClick={() => setValue((v) => ({ ...v, background: b.id }))}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-[11.5px] font-semibold transition-colors",
+                  "rounded-full px-3 py-1.5 text-[length:var(--text-caption)] font-semibold transition-colors",
                   value.background === b.id ? "bg-white text-black" : "text-white/70",
                 )}
               >
@@ -271,7 +271,7 @@ export function TextTool({
                 aria-checked={value.animation === a.id}
                 onClick={() => setValue((v) => ({ ...v, animation: a.id }))}
                 className={cn(
-                  "rounded-full px-3 py-1.5 text-[11.5px] font-semibold transition-colors",
+                  "rounded-full px-3 py-1.5 text-[length:var(--text-caption)] font-semibold transition-colors",
                   value.animation === a.id ? "bg-white text-black" : "text-white/70",
                 )}
               >

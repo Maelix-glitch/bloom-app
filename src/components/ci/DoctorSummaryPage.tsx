@@ -79,7 +79,7 @@ export function DoctorSummaryPage() {
                   key={s.label}
                   className="flex items-baseline justify-between gap-3 border-b pb-1.5 ci-hair"
                 >
-                  <dt className="text-[12.5px] ci-muted">{s.label}</dt>
+                  <dt className="text-[length:var(--text-support)] ci-muted">{s.label}</dt>
                   <dd className="text-[13px] font-medium" style={{ color: "var(--ci-text)" }}>
                     {s.value}
                   </dd>
@@ -165,7 +165,7 @@ export function DoctorSummaryPage() {
           ) : null}
 
           <footer className="mt-8 border-t pt-3 ci-hair">
-            <p className="text-[11.5px] leading-relaxed ci-muted">
+            <p className="text-[length:var(--text-caption)] leading-relaxed ci-muted">
               Bloom is a tracking companion, not a medical device, and nothing here is a diagnosis.
               Dates and lengths are as logged; where Bloom estimates anything in the app, it labels
               it an estimate.

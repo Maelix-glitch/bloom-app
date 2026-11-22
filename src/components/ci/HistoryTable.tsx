@@ -116,11 +116,11 @@ export function HistoryTable({
                           {formatDate(entry.start)}
                         </span>
                         {entry.end ? (
-                          <span className="mt-0.5 block text-[11.5px] ci-muted">
+                          <span className="mt-0.5 block text-[length:var(--text-caption)] ci-muted">
                             {formatDateShort(entry.start)} – {formatDateShort(entry.end)}
                           </span>
                         ) : (
-                          <span className="mt-0.5 block text-[11.5px] ci-muted">
+                          <span className="mt-0.5 block text-[length:var(--text-caption)] ci-muted">
                             no last day logged
                           </span>
                         )}
@@ -139,7 +139,7 @@ export function HistoryTable({
                           <span className="ci-muted">first entry</span>
                         ) : gap && !gap.plausible ? (
                           <span
-                            className="inline-flex items-center gap-1.5 text-[12.5px]"
+                            className="inline-flex items-center gap-1.5 text-[length:var(--text-support)]"
                             style={{ color: "var(--ci-ovulation)" }}
                             title={gap.reason ?? undefined}
                           >
@@ -351,7 +351,7 @@ export function HistoryTable({
 
       {ordered.length > 0 ? (
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t pt-4 ci-hair">
-          <p className="text-[11.5px] ci-muted">
+          <p className="text-[length:var(--text-caption)] ci-muted">
             {ordered.length} {ordered.length === 1 ? "entry" : "entries"} ·{" "}
             {storedOn === "account" ? "on your account" : "stored on this device"}
           </p>

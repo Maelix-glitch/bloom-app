@@ -1096,7 +1096,7 @@ describe("UI guard: reskin foundation (R-1)", () => {
       "--foreground: #ece8e1",
       "--gold: #dcc08f",
       "--gold-soft: #f2e4c6",
-      "--gold-gradient: linear-gradient(110deg, #f6e9cd 0%, #dcc08f 45%, #c79d62 100%)",
+      "--gold-gradient: linear-gradient(110deg, var(--gold-bright) 0%, var(--gold) 45%, var(--gold-grad-lo) 100%)",
       "--success: #8fc7a2",
       "--rose: #e3919f",
       "--glass-bg: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.018))",
@@ -1350,8 +1350,8 @@ describe("UI guard: reskin slice C2 — sheets, gate, stories chrome, cycle", ()
 
   it("keeps the sheet kit staging darks and backdrop in the gold family", () => {
     expect(SHEET.text).toContain("--sheet-scrim: #07080a");
-    expect(SHEET.text).toContain("--sheet-accent-deep: #2c2415");
-    expect(SHEET.text).toContain("--sheet-on-accent-ink: #2a1f10");
+    expect(SHEET.text).toContain("--sheet-accent-deep: var(--gold-deep)");
+    expect(SHEET.text).toContain("--sheet-on-accent-ink: var(--gold-ink)");
     expect(SHEET.text).not.toContain("#2a2438");
     expect(SHEET.text).toContain("color-mix(in oklab, var(--gold) 10%, transparent)");
   });

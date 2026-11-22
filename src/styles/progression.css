@@ -269,7 +269,7 @@
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
-  gap: clamp(1.5rem, 4vw, 3.5rem);
+  gap: clamp(var(--space-5), 4vw, 3.5rem);
   /* M-194 (cascade truth): the ~150px void under the hero's points
      strip was three spaces stacked — this row gap at its 3.5rem top
      step, .pg-next's own margin-top, and the short copy column
@@ -279,7 +279,7 @@
      content fills its column), and the row gap is the token step. */
   row-gap: var(--space-6);
   align-items: start;
-  padding: clamp(1.75rem, 4vw, 3.4rem);
+  padding: clamp(var(--space-6), 4vw, 3.4rem);
   border-radius: 32px;
   border: 1px solid var(--pg-line-soft);
   background:
@@ -298,9 +298,7 @@
       color-mix(in oklab, var(--surface) 60%, transparent),
       color-mix(in oklab, var(--background) 88%, transparent)
     );
-  box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent),
-    var(--pg-shadow);
+  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent);
   overflow: hidden;
 }
 
@@ -410,7 +408,7 @@
   stroke: url(#pg-ring-gradient);
   stroke-width: 3;
   stroke-linecap: round;
-  transition: stroke-dashoffset var(--motion-signature) var(--ease-out-expo);
+  transition: stroke-dashoffset var(--motion-page) var(--ease-out-expo);
 }
 
 .pg-emblem-core {
@@ -493,7 +491,7 @@
 /* the count-up number */
 .pg-count {
   font-variant-numeric: tabular-nums;
-  transition: color var(--motion-signature) var(--ease-out-expo);
+  transition: color var(--motion-page) var(--ease-out-expo);
 }
 
 .pg-count-bump {
@@ -526,7 +524,7 @@
   gap: clamp(1rem, 3vw, 2.25rem);
   align-items: center;
   padding: 1.15rem 1.4rem;
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   border: 1px solid color-mix(in oklab, var(--gold) 22%, transparent);
   background:
     radial-gradient(
@@ -625,7 +623,7 @@
     color-mix(in oklab, var(--goal-tone, var(--gold)) 96%, transparent)
   );
   box-shadow: 0 0 12px -2px color-mix(in oklab, var(--goal-tone, var(--gold)) 60%, transparent);
-  transition: width var(--motion-signature) var(--ease-out-expo);
+  transition: width var(--motion-page) var(--ease-out-expo);
 }
 
 .pg-rail-fill[data-tone="sage"] {
@@ -777,7 +775,7 @@
 
 .pg-path-more {
   margin-top: var(--space-4);
-  padding-left: 72px;
+  padding-left: var(--space-14);
   font-size: var(--text-caption);
   line-height: 1.65;
   color: var(--faint-strong);
@@ -885,10 +883,10 @@
     );
   box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 4%, transparent);
   transition:
-    border-color var(--motion-signature) var(--ease-out-expo),
-    transform var(--motion-signature) var(--ease-out-expo),
-    box-shadow var(--motion-signature) var(--ease-out-expo),
-    background var(--motion-signature) var(--ease-out-expo);
+    border-color var(--motion-page) var(--ease-out-expo),
+    transform var(--motion-page) var(--ease-out-expo),
+    box-shadow var(--motion-page) var(--ease-out-expo),
+    background var(--motion-page) var(--ease-out-expo);
 }
 
 /* A hairline of the goal's own colour, so the grid reads as a set without
@@ -907,7 +905,7 @@
     transparent 78%
   );
   opacity: 0.75;
-  transition: opacity var(--motion-signature) var(--ease-out-expo);
+  transition: opacity var(--motion-page) var(--ease-out-expo);
 }
 
 .pg-goal[data-claimed="true"]::before {
@@ -1065,7 +1063,7 @@
   align-items: baseline;
   gap: 0.35rem;
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: var(--text-section);
   color: color-mix(in oklab, var(--gold) 90%, var(--foreground));
   font-variant-numeric: tabular-nums;
 }
@@ -1674,7 +1672,7 @@
 .pg-look-art {
   position: relative;
   height: 96px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   background: color-mix(in oklab, var(--background) 70%, transparent);
 }
@@ -2234,28 +2232,28 @@
   left: 13px;
   border-right: none;
   border-bottom: none;
-  border-top-left-radius: 12px;
+  border-top-left-radius: var(--radius-md);
 }
 .pg-hero-corner-tr {
   top: 13px;
   right: 13px;
   border-left: none;
   border-bottom: none;
-  border-top-right-radius: 12px;
+  border-top-right-radius: var(--radius-md);
 }
 .pg-hero-corner-bl {
   bottom: 13px;
   left: 13px;
   border-right: none;
   border-top: none;
-  border-bottom-left-radius: 12px;
+  border-bottom-left-radius: var(--radius-md);
 }
 .pg-hero-corner-br {
   bottom: 13px;
   right: 13px;
   border-left: none;
   border-top: none;
-  border-bottom-right-radius: 12px;
+  border-bottom-right-radius: var(--radius-md);
 }
 
 /* an occasional beam of light sweeps across the plaque */
@@ -3091,9 +3089,9 @@
       color-mix(in oklab, var(--background) 80%, transparent)
     );
   transition:
-    transform var(--motion-signature) var(--ease-out-expo),
-    border-color var(--motion-signature) var(--ease-out-expo),
-    box-shadow var(--motion-signature) var(--ease-out-expo);
+    transform var(--motion-page) var(--ease-out-expo),
+    border-color var(--motion-page) var(--ease-out-expo),
+    box-shadow var(--motion-page) var(--ease-out-expo);
 }
 
 .pg-hall-item[data-state="earned"] {

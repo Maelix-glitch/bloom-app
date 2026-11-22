@@ -42,7 +42,7 @@ const TOOLS: { id: Tool; label: string; hint: string; icon: typeof AtSign }[] = 
 const SLIDER_EMOJI = ["🌸", "😊", "❤️", "✨", "🌙", "🔥", "😴", "🎉"];
 
 const inputCls =
-  "w-full rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[13.5px] outline-none transition-colors placeholder:text-faint/70 focus:border-border-strong";
+  "w-full rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[length:var(--text-callout)] outline-none transition-colors placeholder:text-faint/70 focus:border-border-strong";
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -81,8 +81,8 @@ export function InteractiveTray({
                   <t.icon className="size-4" strokeWidth={1.8} aria-hidden />
                 </span>
                 <span className="min-w-0">
-                  <span className="block text-[13.5px] font-semibold">{t.label}</span>
-                  <span className="block truncate text-[11.5px] text-faint">{t.hint}</span>
+                  <span className="block text-[length:var(--text-callout)] font-semibold">{t.label}</span>
+                  <span className="block truncate text-[length:var(--text-caption)] text-faint">{t.hint}</span>
                 </span>
               </button>
             </li>
@@ -93,7 +93,7 @@ export function InteractiveTray({
           <button
             type="button"
             onClick={() => setTool(null)}
-            className="inline-flex w-fit items-center gap-1.5 text-[12.5px] text-muted-foreground transition-colors hover:text-foreground"
+            className="inline-flex w-fit items-center gap-1.5 text-[length:var(--text-support)] text-muted-foreground transition-colors hover:text-foreground"
           >
             <ArrowLeft className="size-3.5" aria-hidden /> All interactive
           </button>
@@ -177,7 +177,7 @@ function PollBuilder({ onAdd }: { onAdd: (el: StoryElement) => void }) {
           <button
             type="button"
             onClick={() => setOptions([...options, ""])}
-            className="rounded-xl border border-dashed border-border px-3 py-2 text-[12.5px] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
+            className="rounded-xl border border-dashed border-border px-3 py-2 text-[length:var(--text-support)] text-muted-foreground transition-colors hover:border-border-strong hover:text-foreground"
           >
             + Add option
           </button>
@@ -239,7 +239,7 @@ function SliderBuilder({ onAdd }: { onAdd: (el: StoryElement) => void }) {
               aria-label={`Use ${e}`}
               onClick={() => setEmoji(e)}
               className={cn(
-                "grid size-10 place-items-center rounded-xl border text-[20px] transition-all",
+                "grid size-10 place-items-center rounded-xl border text-[length:var(--text-title)] transition-all",
                 emoji === e ? "border-border-strong bg-surface-3" : "border-transparent",
               )}
             >

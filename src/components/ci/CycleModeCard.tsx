@@ -49,7 +49,7 @@ export function CycleModeCard({
 
   if (mode === "tracking" && !open) {
     return (
-      <p className="mt-3 text-[11.5px] ci-muted" data-testid="cycle-mode">
+      <p className="mt-3 text-[length:var(--text-caption)] ci-muted" data-testid="cycle-mode">
         {predictionsOff
           ? "Expecting periods — predictions hidden by you. "
           : "Expecting periods — predictions on. "}
@@ -99,7 +99,7 @@ export function CycleModeCard({
           <p className="mt-1.5 text-[14px] font-medium" data-testid="cycle-mode-status">
             {status}
           </p>
-          <p className="mt-1 max-w-[58ch] text-[12.5px] leading-relaxed ci-soft">
+          <p className="mt-1 max-w-[58ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
             {mode === "tracking"
               ? "Pregnancy, postpartum, contraception with no bleed, menopause, or just a break — tell Bloom and it stops predicting and never calls anything late. Your history stays."
               : mode === "paused"
@@ -186,7 +186,7 @@ export function CycleModeCard({
         >
           <div className="max-w-[58ch]">
             <p className="text-[13px] font-medium">Predictions</p>
-            <p className="mt-1 text-[12.5px] leading-relaxed ci-soft">
+            <p className="mt-1 text-[length:var(--text-support)] leading-relaxed ci-soft">
               {predictionsOff
                 ? "Hidden — no dates, phases or fertile estimates anywhere, and no cycle reminders. Logging works exactly as before, and your record keeps learning."
                 : "Shown — next period, phases and fertile estimates, all from your record. You can hide them without pausing if you'd rather just log."}
@@ -204,7 +204,7 @@ export function CycleModeCard({
       ) : null}
 
       {mode !== "off" ? (
-        <p className="mt-3 text-[11.5px] ci-muted">
+        <p className="mt-3 text-[length:var(--text-caption)] ci-muted">
           Don't track a cycle at all?{" "}
           <button
             type="button"

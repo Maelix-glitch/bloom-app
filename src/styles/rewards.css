@@ -381,7 +381,7 @@
   height: 3px;
   overflow: hidden;
   margin-top: 7px;
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
   background: var(--surface-3);
 }
 .reward-quest-track span {
@@ -389,7 +389,7 @@
   height: 100%;
   border-radius: inherit;
   box-shadow: 0 0 10px currentColor;
-  transition: width var(--motion-signature) var(--ease-out-expo);
+  transition: width var(--motion-page) var(--ease-out-expo);
 }
 .reward-quest-action {
   display: grid;
@@ -435,7 +435,7 @@
 .reward-xp-track {
   height: 4px;
   overflow: hidden;
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
   background: var(--surface-3);
 }
 .reward-xp-track span {
@@ -443,7 +443,7 @@
   height: 100%;
   border-radius: inherit;
   box-shadow: 0 0 10px currentColor;
-  transition: width var(--motion-signature) var(--ease-out-expo);
+  transition: width var(--motion-page) var(--ease-out-expo);
 }
 
 .claim-cinematic {
@@ -664,8 +664,8 @@
   mix-blend-mode: screen;
   filter: drop-shadow(0 20px 25px rgb(0 0 0 / 0.78));
   transition:
-    transform var(--motion-signature) var(--ease-out-expo),
-    filter var(--motion-signature) var(--ease-out-expo);
+    transform var(--motion-page) var(--ease-out-expo),
+    filter var(--motion-page) var(--ease-out-expo);
 }
 .claim-cinematic-crest-glow {
   position: absolute;
@@ -743,7 +743,7 @@
   }
   .claim-cinematic-copy-bottom {
     bottom: 8%;
-    padding: 0 18px;
+    padding: 0 var(--space-4);
   }
   .claim-cinematic-core {
     width: min(98vw, 470px);
@@ -807,7 +807,7 @@
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 28px;
+  gap: var(--space-6);
   animation: rise-in var(--motion-signature) var(--ease-out-expo) both;
 }
 
@@ -855,7 +855,7 @@
   margin-top: 52px;
   padding: 70px var(--space-6);
   border: 1px solid color-mix(in oklab, var(--gold) 21%, var(--border));
-  border-radius: 24px;
+  border-radius: var(--radius-card);
   text-align: center;
   background:
     radial-gradient(
@@ -1052,7 +1052,7 @@
   flex-wrap: wrap;
   align-items: end;
   justify-content: space-between;
-  gap: 18px;
+  gap: var(--space-4);
   margin-bottom: 22px;
 }
 .reward-delivery-count {
@@ -1071,7 +1071,7 @@
 .reward-delivery-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: var(--space-4);
 }
 .reward-delivery-reveal {
   animation: rise-in var(--motion-signature) var(--ease-out-expo) both;
@@ -1097,7 +1097,7 @@
     0 26px 55px -34px rgb(0 0 0 / 0.95),
     inset 0 1px 0 rgb(255 255 255 / 0.035);
   transition:
-    transform var(--motion-signature) var(--ease-out-expo),
+    transform var(--motion-page) var(--ease-out-expo),
     border-color var(--motion-page) var(--ease-out-expo),
     box-shadow var(--motion-page) var(--ease-out-expo);
 }
@@ -1129,7 +1129,7 @@
   position: absolute;
   inset: 10%;
   border: 1px solid color-mix(in oklab, var(--foreground) 8%, transparent);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   content: "";
 }
 .reward-delivery-image {
@@ -1139,7 +1139,7 @@
   width: 92px;
   height: 120px;
   filter: drop-shadow(0 15px 12px rgb(0 0 0 / 0.6));
-  transition: transform var(--motion-signature) var(--ease-out-expo);
+  transition: transform var(--motion-page) var(--ease-out-expo);
 }
 .reward-delivery-card:hover .reward-delivery-image {
   transform: translateY(-5px) scale(1.06) rotate(2deg);
@@ -1337,7 +1337,7 @@
   align-items: start;
   gap: 9px;
   border: 1px solid color-mix(in oklab, var(--violet) 28%, var(--border));
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: var(--space-3);
   color: var(--muted-foreground);
   background: color-mix(in oklab, var(--violet) 7%, transparent);
@@ -1372,7 +1372,7 @@
   align-items: center;
   justify-content: flex-end;
   gap: 14px;
-  margin-top: 28px;
+  margin-top: var(--space-6);
   border-top: 1px solid var(--border);
   padding-top: 19px;
 }
@@ -1389,7 +1389,7 @@
   display: flex;
   align-items: end;
   justify-content: space-between;
-  gap: 28px;
+  gap: var(--space-6);
   animation: rise-in var(--motion-signature) var(--ease-out-expo) both;
 }
 .reward-admin-layout {
@@ -1485,7 +1485,7 @@
   gap: 15px;
   margin-top: 25px;
   border-top: 1px solid var(--border);
-  padding-top: 18px;
+  padding-top: var(--space-4);
 }
 .reward-admin-security-note {
   display: inline-flex;
@@ -1583,7 +1583,7 @@
   gap: 9px;
   margin-top: var(--space-6);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: var(--space-3) 14px;
   font-size: var(--text-caption);
 }
@@ -1840,7 +1840,7 @@
   }
   .reward-empty-state {
     min-height: 0;
-    margin-top: 28px;
+    margin-top: var(--space-6);
     padding: 44px var(--space-5);
   }
   .reward-loading-state,
@@ -1874,7 +1874,7 @@
     -webkit-line-clamp: 4;
   }
   .reward-delivery-modal {
-    padding: 23px 17px 18px;
+    padding: 23px 17px var(--space-4);
   }
   .reward-admin-editor,
   .reward-admin-recipients,
@@ -2333,7 +2333,7 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: var(--space-2) var(--space-6);
-  margin-top: 18px;
+  margin-top: var(--space-4);
   padding: 0;
   list-style: none;
 }

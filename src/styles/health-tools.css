@@ -466,7 +466,7 @@
   min-height: 44px;
   padding: 0 0.7rem;
   border: 1px solid var(--bt-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: color-mix(in oklab, var(--background) 42%, transparent);
   transition: border-color var(--motion-standard) var(--ease-out-expo);
 }
@@ -491,7 +491,7 @@
   min-height: 44px;
   padding: 0 0.7rem;
   border: 1px solid var(--bt-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: color-mix(in oklab, var(--background) 42%, transparent);
   font-size: var(--text-callout);
 }
