@@ -3914,3 +3914,38 @@
   border-radius: 0;
   background: transparent;
 }
+
+/* M-205 (F-38): the goals filter disclosure + segmented sort control.
+   The de-box chip rules above stand; these rules only lay out the new
+   containers and give the sort group its single-track read. */
+.pg-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+/* .pg-chip-row's display:flex would otherwise defeat the hidden
+   attribute (author origin beats the UA rule) — pin the closed state. */
+.pg-chip-row[hidden] {
+  display: none;
+}
+.pg-filter-chevron {
+  transition: transform var(--motion-fast) var(--ease-out-expo);
+}
+.pg-filter-chevron.is-open {
+  transform: rotate(180deg);
+}
+.pg-sort-row {
+  align-items: center;
+}
+.pg-seg {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 0.04);
+}
+.pg-seg .pg-chip.is-on {
+  background: color-mix(in oklab, var(--gold) 14%, transparent);
+}

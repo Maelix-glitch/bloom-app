@@ -697,6 +697,27 @@
   color: var(--foreground);
 }
 
+/* M-205 (F-36): the Assessment summary's own stat rows (the modifier
+   scopes this to the summary — the Twin and Lab Reports keep the
+   shared atom untouched). Labels share one baseline however the
+   values wrap; long values step down a size so they fit their cell;
+   one hairline closes the row; small screens get a strict 2×2. */
+.vstats--summary {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.vstats--summary .vstat {
+  grid-template-rows: 1fr auto;
+}
+.vstats--summary .vstat b {
+  font-size: var(--text-card);
+}
+@media (max-width: 720px) {
+  .vstats--summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* The meter (rulebook v2 §6): a 6px track whose fill is the `--v`
    share. Always role="progressbar" with aria-valuemin/max/now at the
    call site. Added for the lab range position (anti-document

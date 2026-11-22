@@ -228,6 +228,11 @@
   border: 1px solid var(--border-strong);
   color: var(--foreground);
 }
+/* M-205 (F-37): the member's manage action spans the stack — it is
+   the sheet's one primary when no card carries an action. */
+.bill-manage {
+  width: 100%;
+}
 
 .bill-note {
   font-size: var(--text-callout);

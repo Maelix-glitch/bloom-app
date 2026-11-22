@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { Filter, LayoutGrid, MoreHorizontal, RotateCcw, Rows3, Star } from "lucide-react";
 
 import { accentVar } from "@/components/mood/primitives";
+import { StoryContent } from "@/components/stories/StoryContent";
 import { cn } from "@/lib/utils";
 import { isStoryActive, type Story, type StoryKind } from "@/lib/profile/types";
 import { storyMediaUrl } from "@/lib/profile/storyMeta";
@@ -61,6 +62,19 @@ function MomentCard({
 }) {
   const [imgOk, setImgOk] = useState(true);
   const media = story.kind === "photo" && story.mediaPath && imgOk ? storyMediaUrl(story) : null;
+  /* M-205 (F-28): a composed story (canvas, elements, background, filter or
+     music) carries its content on the canvas, not in title/body — the
+     owner's Nov 2026 note has empty title/body, so the old tile painted
+     only the accent field and read as a blank card. Render the composed
+     story itself as the tile fill, exactly as the viewer does; legacy
+     stories keep the hand-rolled title/body rendering below. */
+  const rich =
+    story.mediaType === "video" ||
+    story.elements.length > 0 ||
+    !!story.canvas ||
+    !!story.backgroundId ||
+    !!story.filterId ||
+    !!story.music;
   const varAccent = accentVar[story.accent];
   const active = isStoryActive(story);
 
@@ -76,7 +90,11 @@ function MomentCard({
           : `radial-gradient(130% 105% at 50% -10%, color-mix(in oklab, ${varAccent} 30%, var(--surface)), color-mix(in oklab, ${varAccent} 8%, var(--surface)) 55%, var(--surface) 100%)`,
       }}
     >
-      {media ? (
+      {rich ? (
+        <span aria-hidden className="pointer-events-none absolute inset-0 block overflow-hidden">
+          <StoryContent story={story} compact />
+        </span>
+      ) : media ? (
         <img
           src={media}
           alt=""
@@ -110,18 +128,22 @@ function MomentCard({
       </span>
 
       <span className="relative mt-auto block px-3 pb-3">
-        <span className="display line-clamp-2 text-[length:var(--text-card)] leading-snug text-[var(--foreground)] drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]">
-          {story.title || "A moment"}
-        </span>
-        {story.title && story.body ? (
-          <span className="mt-1 line-clamp-2 block text-[length:var(--text-caption)] leading-snug text-white/75">
-            {story.body}
-          </span>
-        ) : story.body ? (
-          <span className="line-clamp-3 text-[length:var(--text-caption)] leading-snug text-white/80">
-            {story.body}
-          </span>
-        ) : null}
+        {rich ? null : (
+          <>
+            <span className="display line-clamp-2 text-[length:var(--text-card)] leading-snug text-[var(--foreground)] drop-shadow-[0_1px_10px_rgba(0,0,0,0.45)]">
+              {story.title || "A moment"}
+            </span>
+            {story.title && story.body ? (
+              <span className="mt-1 line-clamp-2 block text-[length:var(--text-caption)] leading-snug text-white/75">
+                {story.body}
+              </span>
+            ) : story.body ? (
+              <span className="line-clamp-3 text-[length:var(--text-caption)] leading-snug text-white/80">
+                {story.body}
+              </span>
+            ) : null}
+          </>
+        )}
         <span className="mono mt-1.5 block text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-white/55">
           {dateLabel(story.createdAt)}
         </span>

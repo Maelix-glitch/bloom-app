@@ -11,7 +11,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, Sparkles } from "lucide-react";
+import { Check, ChevronDown, Sparkles, X } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -184,6 +184,12 @@ export function GoalsBoard({
   const [filter, setFilter] = useState<GoalFilter>("all");
   const [sort, setSort] = useState<GoalSort>("recommended");
   const [showAll, setShowAll] = useState(false);
+  /* M-205 (F-38): the 13-chip filter row was the densest element on
+     the page. It lives behind a Filter disclosure now; the active
+     filter stands as a chip beside it (tap to clear). */
+  const [filtersOpen, setFiltersOpen] = useState(false);
+  const activeFilterLabel =
+    filter === "all" ? null : filter === "wellness" ? "Wellness" : JOURNEY_DOMAIN_LABELS[filter];
 
   const domains = useMemo(() => {
     const set = new Set<JourneyDomain>();
@@ -263,7 +269,46 @@ export function GoalsBoard({
 
   return (
     <div>
-      <div className="pg-chip-row" role="group" aria-label="Filter goals by area">
+      {/* M-205 (F-38): one quiet Filter pill; the active filter stands
+          beside it as a chip (tap clears it). The full row stays in
+          the DOM behind the disclosure — nothing is renamed or lost. */}
+      <div className="pg-filter-bar">
+        <button
+          type="button"
+          className="pg-chip pg-filter-toggle"
+          aria-expanded={filtersOpen}
+          aria-controls="pg-goal-filters"
+          onClick={() => setFiltersOpen((value) => !value)}
+        >
+          Filter
+          <ChevronDown
+            width={13}
+            height={13}
+            aria-hidden
+            className={cn("pg-filter-chevron", filtersOpen && "is-open")}
+          />
+        </button>
+        {activeFilterLabel ? (
+          <button
+            type="button"
+            className="pg-chip is-on"
+            aria-pressed="true"
+            aria-label={`Clear the ${activeFilterLabel} filter`}
+            onClick={() => setFilter("all")}
+          >
+            {activeFilterLabel}
+            <X width={12} height={12} aria-hidden />
+          </button>
+        ) : null}
+      </div>
+
+      <div
+        id="pg-goal-filters"
+        className="pg-chip-row"
+        role="group"
+        aria-label="Filter goals by area"
+        hidden={!filtersOpen}
+      >
         <button
           type="button"
           className={cn("pg-chip", filter === "all" && "is-on")}
@@ -296,24 +341,28 @@ export function GoalsBoard({
         ))}
       </div>
 
-      <div className="pg-chip-row" role="group" aria-label="Sort goals">
-        {(
-          [
-            ["recommended", "Recommended"],
-            ["closest", "Closest"],
-            ["valuable", "Most valuable"],
-          ] as [GoalSort, string][]
-        ).map(([value, label]) => (
-          <button
-            key={value}
-            type="button"
-            className={cn("pg-chip", sort === value && "is-on")}
-            aria-pressed={sort === value}
-            onClick={() => setSort(value)}
-          >
-            {label}
-          </button>
-        ))}
+      {/* M-205 (F-38): the three sorts read as ONE quiet segmented
+          control, not three more chips in the crowd. */}
+      <div className="pg-chip-row pg-sort-row">
+        <span className="pg-seg" role="group" aria-label="Sort goals">
+          {(
+            [
+              ["recommended", "Recommended"],
+              ["closest", "Closest"],
+              ["valuable", "Most valuable"],
+            ] as [GoalSort, string][]
+          ).map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              className={cn("pg-chip", sort === value && "is-on")}
+              aria-pressed={sort === value}
+              onClick={() => setSort(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </span>
         <span className="pg-goal-note" style={{ alignSelf: "center", marginLeft: "0.4rem" }}>
           <Sparkles width={11} height={11} aria-hidden /> {visible.length} goals in this view
         </span>

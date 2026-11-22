@@ -222,6 +222,37 @@ describe("AssessmentProfileCard — previous assessments", () => {
     expect(screen.getByText("Maintain my weight")).toBeTruthy();
   });
 
+  it("groups same-day retakes under an 'Earlier that day' divider (M-205, F-30)", () => {
+    seed(completedState());
+    setPref(ASSESSMENT_HISTORY_KEY, {
+      version: 1,
+      entries: [
+        {
+          completedAt: "2026-11-18T15:00:00.000Z",
+          answers: { ...emptyAssessmentState(T0).answers, goal: "gain" },
+        },
+        {
+          completedAt: "2026-11-18T08:00:00.000Z",
+          answers: { ...emptyAssessmentState(T0).answers, goal: "lose" },
+        },
+        {
+          completedAt: "2026-11-15T09:00:00.000Z",
+          answers: { ...emptyAssessmentState(T0).answers, goal: "maintain" },
+        },
+      ],
+      pending: null,
+    });
+    resetPrefCache();
+
+    render(<AssessmentProfileCard />);
+    /* The day's last word headlines; the earlier same-day goal stands
+       under the divider, visibly superseded — not a flat contradiction. */
+    expect(screen.getByText("Earlier that day")).toBeTruthy();
+    expect(screen.getByText("Gain weight")).toBeTruthy();
+    expect(screen.getByText("Lose weight")).toBeTruthy();
+    expect(screen.getByText("Maintain my weight")).toBeTruthy();
+  });
+
   it("shows no history section when nothing has been archived", () => {
     seed(completedState());
     render(<AssessmentProfileCard />);

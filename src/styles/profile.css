@@ -431,12 +431,6 @@
   color: var(--muted-foreground);
   text-wrap: pretty;
 }
-.pf-bio--empty {
-  font-style: italic;
-  font-size: var(--text-support);
-  color: var(--faint-strong);
-}
-
 .pf-actions {
   display: flex;
   flex-wrap: wrap;

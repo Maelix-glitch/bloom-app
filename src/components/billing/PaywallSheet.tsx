@@ -14,6 +14,7 @@
  */
 
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Check } from "lucide-react";
 
 import { BloomIcon } from "@/components/icons/BloomIcon";
@@ -48,10 +49,18 @@ const FEATURE_BULLETS: Record<Exclude<PlanTier, "free">, string[]> = {
     "Full Nutrition & Overview intelligence",
     "Advanced analytics · Stories premium templates",
   ],
+  /* M-205 (F-37): the Plus card stood at half the Premium card's
+     height with three bullets against six, reading as the lesser
+     plan. The tiers' feature sets are identical (plans.ts) — the
+     honest differences are the credit allowance and what it makes
+     room for, so the card now says all of it, at the same length. */
   premium_plus: [
     "Everything in Premium",
-    "800 AI credits a month",
-    "Room for daily Vitalis voice conversations and photo-led logging",
+    "800 AI credits a month (Premium has 300)",
+    "Daily Vitalis voice conversations",
+    "Photo-led logging and food-photo analysis",
+    "Full Coach, Assessment and adaptive plans",
+    "Advanced analytics · Stories premium templates",
   ],
 };
 
@@ -88,6 +97,7 @@ export function PaywallSheet({
   context: PaywallContext;
 }) {
   const entitlementState = useEntitlement();
+  const navigate = useNavigate();
   const [period, setPeriod] = useState<BillingPeriod>("yearly");
   const [busyTier, setBusyTier] = useState<PlanTier | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -202,17 +212,20 @@ export function PaywallSheet({
 
           {entitlement ? (
             <p className="bill-status" role="status">
-              You're on <strong>{PLANS[entitlement.tier].name}</strong>
+              {/* M-205 (F-37): a paid member's plan is marked ONCE — on
+                  their card ("Your current plan"). The banner used to
+                  claim it a second time; it now leads with the facts a
+                  member opens the sheet for: credits and period. Free
+                  keeps its claim — Free is on no card to mark it. */}
               {entitlement.tier === "free" ? (
                 <>
-                  {" "}
-                  — {entitlement.creditBalance} of {entitlement.monthlyAllowance} AI credits left
+                  You're on <strong>{PLANS[entitlement.tier].name}</strong> —{" "}
+                  {entitlement.creditBalance} of {entitlement.monthlyAllowance} AI credits left
                   this month.
                 </>
               ) : (
                 <>
-                  {" "}
-                  — {entitlement.creditBalance} AI credits left this month
+                  {entitlement.creditBalance} AI credits left this month
                   {formatDate(entitlement.currentPeriodEnd)
                     ? ` · current period ends ${formatDate(entitlement.currentPeriodEnd)}`
                     : ""}
@@ -303,6 +316,25 @@ export function PaywallSheet({
               );
             })}
           </div>
+
+          {/* M-205 (F-37): a Premium Plus member's sheet used to have
+              NO primary action at all — both cards are badges for
+              them. One clear action: manage the membership where the
+              membership actually lives (Settings). Premium members
+              already have "Upgrade to Plus" as the sheet's primary;
+              this renders only when no card carries an action. */}
+          {entitlement && myTier === "premium_plus" ? (
+            <button
+              type="button"
+              className="bill-btn bill-btn-gold bill-manage"
+              onClick={() => {
+                onClose();
+                void navigate({ to: "/settings" });
+              }}
+            >
+              Manage your membership
+            </button>
+          ) : null}
 
           {notice ? (
             <p className="bill-note" role="status">

@@ -27,7 +27,7 @@
  * assessment. The summary opens in the same sheet chrome as the flow.)
  */
 
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { Fragment, useEffect, useRef, useState, type CSSProperties } from "react";
 import { Link } from "@tanstack/react-router";
 import { ClipboardCheck, ClipboardList, Info, X } from "lucide-react";
 
@@ -865,6 +865,24 @@ export function AssessmentProfileCard() {
   const [summaryOpen, setSummaryOpen] = useState(false);
   const summary = summaryOf(state);
 
+  /* M-205 (F-30): same-day retakes read as a flat contradiction (three
+     goals on one date). Group the archive by local day: the day's last
+     word is its headline row; anything earlier that day sits under an
+     "Earlier that day" divider, visibly superseded. Data untouched —
+     grouping only, in the order the archive already keeps. */
+  const historyGroups = (() => {
+    const groups: { dayKey: string; head: (typeof history)[number]; earlier: typeof history }[] =
+      [];
+    for (const entry of history) {
+      const d = new Date(entry.completedAt);
+      const dayKey = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      const last = groups[groups.length - 1];
+      if (last && last.dayKey === dayKey) last.earlier.push(entry);
+      else groups.push({ dayKey, head: entry, earlier: [] });
+    }
+    return groups;
+  })();
+
   const statusLine =
     state.status === "complete" && state.completedAt
       ? `Completed ${fmtDate(state.completedAt)}.`
@@ -954,13 +972,35 @@ export function AssessmentProfileCard() {
           {/* Bounded kv rows (system slice): the goal sits in the column
               next to its date — not at the card's far edge. */}
           <ul className="mt-1">
-            {history.map((entry) => (
-              <li key={entry.completedAt} className="kv-row">
-                <span className="kv-k tabular-nums">{fmtDate(entry.completedAt)}</span>
-                <span className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
-                  {entry.answers.goal ? GOAL_LABEL[entry.answers.goal] : "No goal stated"}
-                </span>
-              </li>
+            {historyGroups.map((group) => (
+              <Fragment key={group.head.completedAt}>
+                <li className="kv-row">
+                  <span className="kv-k tabular-nums">{fmtDate(group.head.completedAt)}</span>
+                  <span className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
+                    {group.head.answers.goal
+                      ? GOAL_LABEL[group.head.answers.goal]
+                      : "No goal stated"}
+                  </span>
+                </li>
+                {group.earlier.length > 0 ? (
+                  <>
+                    <li className="kv-row" aria-hidden="true">
+                      <span className="text-[length:var(--text-meta)] font-medium uppercase tracking-[var(--tracking-meta)] text-faint-strong">
+                        Earlier that day
+                      </span>
+                      <span />
+                    </li>
+                    {group.earlier.map((entry) => (
+                      <li key={entry.completedAt} className="kv-row">
+                        <span className="kv-k tabular-nums">{fmtDate(entry.completedAt)}</span>
+                        <span className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
+                          {entry.answers.goal ? GOAL_LABEL[entry.answers.goal] : "No goal stated"}
+                        </span>
+                      </li>
+                    ))}
+                  </>
+                ) : null}
+              </Fragment>
             ))}
           </ul>
         </div>

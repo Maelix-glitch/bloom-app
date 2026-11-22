@@ -506,6 +506,29 @@ textarea.ci-input {
   font-weight: 500;
 }
 
+/* M-205 (F-31): the scale groups (Mood, Energy, Pain) lay out as an
+   even grid — five values in a flex row wrapped 3+2 and Pain's last
+   number orphaned. The numeric scales share ONE shape, the circle,
+   so a number reads the same in Energy as it does in Pain. Word
+   chips (symptoms, severity) keep the flex row: their lengths differ
+   too much for a grid to mean anything. */
+.ci-seg--grid {
+  display: grid;
+  grid-template-columns: repeat(var(--ci-seg-cols, 5), minmax(0, 1fr));
+}
+.ci-seg--grid .ci-seg-item {
+  text-align: center;
+}
+.ci-seg-item--scale {
+  display: grid;
+  place-items: center;
+  width: min(38px, 100%);
+  aspect-ratio: 1;
+  margin-inline: auto;
+  padding: 0;
+  border-radius: 50%;
+}
+
 .ci-error {
   display: flex;
   gap: 6px;

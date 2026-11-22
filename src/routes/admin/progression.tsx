@@ -92,9 +92,10 @@ function PointAuditPage() {
             </p>
             <h1 className="mt-2 font-display text-3xl">Point audit</h1>
             <p className="mt-2 max-w-[60ch] text-[13px] leading-relaxed text-muted-foreground">
-              Read-only. Every row is a real award written by the server-verified{" "}
-              <code className="font-mono text-[12px]">award_progress()</code> function — the same
-              transaction that verified the goal against the person&rsquo;s own logs.
+              {/* M-205 (F-24): plain words, same meaning — the audit
+                  table is read by a person, not a compiler. */}
+              Read-only. Every row is a real award, checked by the server against the
+              person&rsquo;s own logs before the points were written.
             </p>
           </div>
           <div className="flex items-center gap-2">
@@ -153,17 +154,15 @@ function PointAuditPage() {
                     <td className="whitespace-nowrap px-4 py-2.5 text-muted-foreground">
                       {new Date(row.created_at).toLocaleString()}
                     </td>
-                    <td className="px-4 py-2.5">
+                    {/* M-205 (F-24): names and award titles stand alone;
+                        the raw ids ride in the cells' title attributes
+                        (hover) — still on the surface, no longer the
+                        loudest thing in it. */}
+                    <td className="px-4 py-2.5" title={row.profile_id}>
                       {row.profile_name ?? "Bloom user"}
-                      <span className="block font-mono text-[11px] text-muted-foreground">
-                        {row.profile_id.slice(0, 8)}
-                      </span>
                     </td>
-                    <td className="px-4 py-2.5">
+                    <td className="px-4 py-2.5" title={row.ref_id}>
                       {row.title}
-                      <span className="block font-mono text-[11px] text-muted-foreground">
-                        {row.ref_id}
-                      </span>
                     </td>
                     <td className="px-4 py-2.5 text-muted-foreground">{row.kind}</td>
                     <td className="px-4 py-2.5 text-right font-mono">

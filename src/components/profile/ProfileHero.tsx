@@ -348,9 +348,11 @@ export function ProfileHero({
                 </button>
               ) : null}
             </div>
-            <p className={cn("pf-bio", !identity.bio && "pf-bio--empty")}>
-              {identity.bio || "A line about you — what you're working on, what you track, why."}
-            </p>
+            {/* M-205 (F-29): no bio, no line — the placeholder sentence read
+                as the person's own words on their public hero. The
+                invitation to write one lives in the editor, where the
+                bio field's placeholder carries it. */}
+            {identity.bio ? <p className="pf-bio">{identity.bio}</p> : null}
             {completion.show ? (
               <p className="pf-eyebrow mt-2">
                 profile {completion.done} of {completion.total} complete
