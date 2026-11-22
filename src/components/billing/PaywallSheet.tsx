@@ -27,7 +27,12 @@ import { Check } from "lucide-react";
 import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { useEntitlement } from "@/hooks/useEntitlement";
-import { createOrder, payWithRazorpay, verifyPayment } from "@/lib/billing/checkout";
+import {
+  createOrder,
+  loadRazorpayCheckout,
+  payWithRazorpay,
+  verifyPayment,
+} from "@/lib/billing/checkout";
 import { invalidateEntitlement } from "@/lib/billing/entitlement";
 import {
   PAYWALL_HEADLINES,
@@ -105,6 +110,18 @@ export function PaywallSheet({
     if (open) setNotice(null);
   }, [open, context]);
 
+  /* M-217: warm the Razorpay script the moment the sheet opens —
+     checkout.js downloads while the member reads the plans, so a
+     tap only waits for the order round trip. The loader caches its
+     promise, so this fires once per open and costs nothing after
+     the first success; a failed preload stays silent here (the
+     loader clears its cache on failure, and the tap path retries
+     and reports the honest unavailable state). */
+  useEffect(() => {
+    if (!open) return;
+    void loadRazorpayCheckout().catch(() => {});
+  }, [open]);
+
   const headline = PAYWALL_HEADLINES[context];
   const entitlement = entitlementState.kind === "ready" ? entitlementState.entitlement : null;
   const myTier: PlanTier = entitlement?.tier ?? "free";
@@ -136,6 +153,11 @@ export function PaywallSheet({
   const go = async (tier: Exclude<PlanTier, "free">) => {
     setBusyTier(tier);
     setNotice(null);
+    /* M-217: start (or confirm) the checkout.js download BEFORE the
+       order round trip, never after it — payWithRazorpay awaits the
+       same cached promise, so the modal opens the moment the order
+       lands. No order is created here beyond the one below. */
+    void loadRazorpayCheckout().catch(() => {});
     try {
       const order = await createOrder(tier, period);
       if (order.state === "payments_not_configured") {

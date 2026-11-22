@@ -198,6 +198,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "manifest", href: "/manifest.webmanifest" },
+      /* M-217 — warm the Razorpay origins in the document head, so
+         the paywall's checkout.js download and the modal's own API
+         calls start from a connected socket instead of paying a
+         cold DNS + TLS handshake at tap time. (The CSP already
+         allows both origins — M-213.) */
+      { rel: "preconnect", href: "https://checkout.razorpay.com" },
+      { rel: "preconnect", href: "https://api.razorpay.com" },
       { rel: "apple-touch-icon", href: "/bloom/icons/icon-192.png" },
       /* B7 — iOS launch splash: no white flash when opening from home screen.
          Regenerate with `node scripts/pwa-splash.mjs` if the icon changes. */
