@@ -19,13 +19,21 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 
-vi.mock("@/lib/billing/checkout", () => ({
-  startCheckout: vi.fn(async () => ({ state: "payments_not_configured" as const })),
+/* Hoisted so the M-217 pins can count calls and steer single
+   calls; the defaults are the states the older tests exercise. */
+const checkoutMock = vi.hoisted(() => ({
   /* The buy action runs the Orders rail; unconfigured is the state
      these tests exercise (the honest "payments open soon" notice). */
   createOrder: vi.fn(async () => ({ state: "payments_not_configured" as const })),
   payWithRazorpay: vi.fn(async () => ({ kind: "dismissed" as const })),
+  loadRazorpayCheckout: vi.fn(async () => null),
+}));
+vi.mock("@/lib/billing/checkout", () => ({
+  startCheckout: vi.fn(async () => ({ state: "payments_not_configured" as const })),
+  createOrder: checkoutMock.createOrder,
+  payWithRazorpay: checkoutMock.payWithRazorpay,
   verifyPayment: vi.fn(async () => false),
+  loadRazorpayCheckout: checkoutMock.loadRazorpayCheckout,
 }));
 
 /* The entitlement the sheet sees, steered per test. The default is
@@ -45,6 +53,11 @@ import type { EntitlementState } from "@/lib/billing/entitlement";
 
 beforeEach(() => {
   entitlementMock.state = { kind: "unavailable" };
+  /* Call counts are per test; implementations are the hoisted
+     defaults unless a test steers one call with a *Once method. */
+  checkoutMock.createOrder.mockClear();
+  checkoutMock.payWithRazorpay.mockClear();
+  checkoutMock.loadRazorpayCheckout.mockClear();
   /* jsdom has no matchMedia; BloomSheet asks it about phone width
      (the same stub the CoachOrb tests use). */
   window.matchMedia = ((query: string) =>
@@ -439,5 +452,78 @@ describe("audit slice A — close, current-plan marking, plan states", () => {
     expect(heads()[0]!.className).not.toContain("bill-g-head--plus");
     /* No column is marked as anyone's plan for a visitor. */
     expect(screen.queryByRole("button", { name: "Your plan" })).toBeNull();
+  });
+});
+
+describe("M-217 — the checkout window opens fast", () => {
+  it("opening the sheet preloads checkout.js exactly once; closed, never", async () => {
+    render(<PaywallHost />);
+    /* Closed: the loader has not been touched. */
+    expect(checkoutMock.loadRazorpayCheckout).not.toHaveBeenCalled();
+
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    /* One open, one preload — the script downloads while the
+       member reads the plans. */
+    expect(checkoutMock.loadRazorpayCheckout).toHaveBeenCalledTimes(1);
+  });
+
+  it("at tap, the script load starts before the order settles", async () => {
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    expect(checkoutMock.loadRazorpayCheckout).toHaveBeenCalledTimes(1);
+
+    /* The order round trip hangs — the tap must not wait for it
+       before starting the script load. */
+    let settleOrder!: (v: { state: "payments_not_configured" }) => void;
+    const orderPromise = new Promise<{ state: "payments_not_configured" }>((resolve) => {
+      settleOrder = resolve;
+    });
+    checkoutMock.createOrder.mockImplementationOnce(() => orderPromise);
+
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Go Premium" }));
+    });
+    /* Order still in flight, yet the loader has been started again
+       (the cached promise), and the modal step has not run yet. */
+    expect(checkoutMock.loadRazorpayCheckout).toHaveBeenCalledTimes(2);
+    expect(checkoutMock.payWithRazorpay).not.toHaveBeenCalled();
+
+    await act(async () => {
+      settleOrder({ state: "payments_not_configured" });
+    });
+    const notice = await screen.findByText(/Payments open soon/);
+    expect(notice.textContent).toContain("Nothing has been charged.");
+  });
+
+  it("a failed preload stays silent, and the tap still reaches the honest unavailable state", async () => {
+    /* The preload REJECTS — the sheet must swallow it (no error
+       surfaces on open)… */
+    checkoutMock.loadRazorpayCheckout.mockRejectedValueOnce(new Error("offline"));
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    expect(screen.getByText("Two plans. One ledger.")).toBeTruthy();
+    expect(screen.queryByText(/couldn't load/)).toBeNull();
+
+    /* …and when the tap's own load genuinely cannot produce the
+       modal, the same unavailable copy as before is what shows. */
+    checkoutMock.createOrder.mockResolvedValueOnce({
+      state: "ready",
+      orderId: "order_1",
+      amount: 499900,
+      currency: "INR",
+      keyId: "rzp_test_key",
+    } as never);
+    checkoutMock.payWithRazorpay.mockResolvedValueOnce({ kind: "unavailable" } as never);
+    await act(async () => {
+      fireEvent.click(screen.getByRole("button", { name: "Go Premium" }));
+    });
+    const notice = await screen.findByText(/The secure payment window couldn't load/);
+    expect(notice.textContent).toContain("Nothing has been charged.");
   });
 });

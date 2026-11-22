@@ -203,16 +203,25 @@ export async function payWithRazorpay(input: {
   currency: string;
   description: string;
 }): Promise<ModalPaymentResult> {
-  const Razorpay = await loadRazorpayCheckout();
+  /* M-217: the checkout.js download and the prefill session fetch
+     run CONCURRENTLY — the modal opens when the slower of the two
+     lands, not after both in series. (In the sheet flow the script
+     is usually already warm: the sheet preloads it on open and the
+     tap starts it before the order round trip, so this await is
+     the cached promise resolving.) */
+  const [Razorpay, email] = await Promise.all([
+    loadRazorpayCheckout(),
+    (async (): Promise<string | undefined> => {
+      try {
+        const { data } = await supabase.auth.getSession();
+        return data.session?.user?.email ?? undefined;
+      } catch {
+        /* prefill is a courtesy; its absence never blocks a payment */
+        return undefined;
+      }
+    })(),
+  ]);
   if (!Razorpay) return { kind: "unavailable" };
-
-  let email: string | undefined;
-  try {
-    const { data } = await supabase.auth.getSession();
-    email = data.session?.user?.email ?? undefined;
-  } catch {
-    /* prefill is a courtesy; its absence never blocks a payment */
-  }
 
   return await new Promise<ModalPaymentResult>((resolve) => {
     let settled = false;
