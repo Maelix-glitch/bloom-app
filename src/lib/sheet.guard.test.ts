@@ -417,7 +417,8 @@ const PANELS: [string, string][] = [
   ["styles/shell.css", ".conn-notice"],
   ["styles/shell.css", ".conn-notice-chip"],
   ["styles/progression.css", ".pg-toast"],
-  ["styles/billing.css", ".bill-card"],
+  ["styles/billing.css", ".bill-g-head"],
+  ["styles/billing.css", ".bill-g-head--plus"],
 ];
 
 describe("sheet guard: every overlay panel is fully opaque", () => {

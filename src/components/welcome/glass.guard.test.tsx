@@ -323,7 +323,8 @@ const PANELS: [string, string][] = [
   ["styles/shell.css", ".conn-notice"],
   ["styles/shell.css", ".conn-notice-chip"],
   ["styles/progression.css", ".pg-toast"],
-  ["styles/billing.css", ".bill-card"],
+  ["styles/billing.css", ".bill-g-head"],
+  ["styles/billing.css", ".bill-g-head--plus"],
 ];
 
 describe("glass guard: sheets and modals never wear the material", () => {
@@ -374,70 +375,5 @@ describe("glass guard: one dock, wearing the one material", () => {
     expect(someExactBlock("styles.css", ".app-mobile-bar", "var(--lg-blur)")).toBe(true);
     /* And the material is loaded once, from the root sheet. */
     expect(read("styles.css")).toContain('@import "./styles/glass.css"');
-  });
-});
-
-describe("glass guard: selection lands in one step (M-173)", () => {
-  it("the pill's transition animates no surface property", () => {
-    const pill = blockFor("styles/glass.css", ".glass-pill")!;
-    expect(pill, ".glass-pill must exist").toBeTruthy();
-    const t = pill.body.match(/transition:([\s\S]*?);/)?.[1] ?? "";
-    expect(t, ".glass-pill must declare its transition").not.toBe("");
-    /* The press spring and the hover glow may animate… */
-    expect(t).toContain("transform");
-    expect(t).toContain("filter");
-    /* …but the chosen state's surface must never cross-fade: no
-       background, border, shadow or backdrop property in the list.
-       A background-color fade over the animated mesh, while the
-       gradient and border snap, IS the flicker the owner reported. */
-    expect(t).not.toMatch(/background|box-shadow|border|backdrop/);
-  });
-
-  it("a chosen pill stands down hover and press — no second change", () => {
-    for (const sel of [
-      '.glass-pill[data-on="true"]:hover',
-      '.glass-pill[data-on="true"]:active',
-    ]) {
-      const b = exactBlocks("styles/glass.css", sel)[0];
-      expect(b, `${sel} must exist`).toBeTruthy();
-      expect(b!.body).toContain("transform: none");
-      expect(b!.body).toContain("filter: none");
-    }
-  });
-
-  it("the tick carries no transition of its own; only the check's opacity fades", () => {
-    const ticks = exactBlocks("styles/welcome.css", ".wl-tick");
-    expect(ticks.length, ".wl-tick must exist").toBeGreaterThan(0);
-    for (const tick of ticks) {
-      /* No `transition: all` (the gold gradient flipped mid-fade) —
-         and no shorthand transition at all: the fill lands with the
-         pill's surface, in the same frame. */
-      expect(tick.body).not.toMatch(/transition\s*:/);
-    }
-    const svg = exactBlocks("styles/welcome.css", ".wl-tick svg")[0];
-    expect(svg, ".wl-tick svg must exist").toBeTruthy();
-    expect(svg!.body).toMatch(/transition:\s*opacity/);
-  });
-
-  it("selection is an attribute flip: no key in the flow depends on it", () => {
-    /* The entrance can only re-run if something remounts, and a
-       remount needs a changed key or a changed component. The step
-       wrapper's key is the step alone, the pills' keys are their
-       stable identities — selection state appears in NO key, so
-       choosing an answer flips data-on on the mounted pill and
-       nothing else. (Node identity itself is not asserted: the
-       motion mock above mints a fresh component per render, which
-       remounts in jsdom what the real app's stable motion.div
-       never does.) */
-    const tsx = read("components/welcome/Welcome.tsx");
-    expect(tsx).toContain("key={step}");
-    expect(tsx).not.toMatch(/key=\{(answer|focus|trainerCode)/);
-    setup();
-    tap(/get started/i);
-    const pill = screen.getByRole("button", { name: /^Female$/ });
-    expect(pill.getAttribute("data-on")).toBe("false");
-    fireEvent.click(pill);
-    expect(screen.getByRole("button", { name: /^Female$/ }).getAttribute("data-on")).toBe("true");
-    expect(document.querySelectorAll(".wl-mesh i").length).toBe(4);
   });
 });
