@@ -46,6 +46,8 @@ const row = (over: Record<string, unknown> = {}) => ({
   avatar_path: null,
   accent: "sage",
   verified: true,
+  is_trainer: false,
+  badges: [] as unknown,
   ...over,
 });
 
@@ -70,7 +72,33 @@ describe("searchProfiles", () => {
           avatarPath: null,
           accent: "sage",
           verified: true,
+          badges: [],
         },
+      ]);
+    }
+  });
+
+  it("derives badges from the RPC's trainer flag and granted kinds, in display order", async () => {
+    h.state.rpcResult = {
+      data: [
+        row({ user_id: "a", is_trainer: true, badges: ["tester", "founder"] }),
+        row({ user_id: "b", is_trainer: false, badges: ["founder"] }),
+        row({ user_id: "c", is_trainer: "yes", badges: "founder" }),
+        row({ user_id: "d", is_trainer: true, badges: ["admin", "trainer", 42] }),
+      ],
+      error: null,
+    };
+    const outcome = await searchProfiles("iv", "me");
+    expect(outcome.status).toBe("ok");
+    if (outcome.status === "ok") {
+      expect(outcome.results.map((r) => r.badges.map((b) => b.kind))).toEqual([
+        ["founder", "trainer", "tester"],
+        ["founder"],
+        [],
+        /* The trainer flag is the trainer badge's only truth here too:
+           a "trainer" string in the kinds array earns nothing, and
+           surprise values are dropped, never rendered. */
+        ["trainer"],
       ]);
     }
   });
@@ -159,6 +187,7 @@ describe("searchProfiles", () => {
           avatarPath: null,
           accent: "sage",
           verified: true,
+          badges: [],
         },
         {
           userId: "no-name",
@@ -167,6 +196,7 @@ describe("searchProfiles", () => {
           avatarPath: null,
           accent: "violet",
           verified: true,
+          badges: [],
         },
       ]);
     }

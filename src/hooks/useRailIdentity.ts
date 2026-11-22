@@ -16,6 +16,11 @@ import {
   UNPROVEN_FACTS,
   type VerificationFacts,
 } from "@/lib/profile/verificationService";
+import {
+  loadBadgeFacts,
+  UNPROVEN_BADGE_FACTS,
+  type BadgeFacts,
+} from "@/lib/profile/badgeService";
 import { syncPrefs } from "@/lib/prefs";
 
 export const PROFILE_CHANGED_EVENT = "bloom:profile-changed";
@@ -44,6 +49,13 @@ export type RailIdentity = {
    * unproven.
    */
   verification: VerificationFacts;
+  /**
+   * The badge facts (M-209): the trainer row's existence and the
+   * granted `member_badges` kinds, read via the badge service in the
+   * same pass. UNPROVEN (nothing held) until the read lands, so the
+   * rail's badge can appear late but never unproven.
+   */
+  badges: BadgeFacts;
 };
 
 const SIGNED_OUT: RailIdentity = {
@@ -55,6 +67,7 @@ const SIGNED_OUT: RailIdentity = {
   username: null,
   emailConfirmed: false,
   verification: UNPROVEN_FACTS,
+  badges: UNPROVEN_BADGE_FACTS,
 };
 
 /**
@@ -149,6 +162,8 @@ export function useRailIdentity(): RailIdentity {
          never throws and degrades to UNPROVEN; it only reads — the
          record is granted by the owner, never claimed from here. */
       const verification = await loadVerificationFacts();
+      /* The badge facts ride along too — same conservative contract. */
+      const badges = await loadBadgeFacts();
       const { data, error } = await supabase
         .from("profiles")
         .select("display_name, username, avatar_path, accent, bio")
@@ -156,7 +171,13 @@ export function useRailIdentity(): RailIdentity {
         .maybeSingle();
       if (!alive) return;
       if (error || !data) {
-        publishIdentity({ ...SIGNED_OUT, status: "signed-in", emailConfirmed, verification });
+        publishIdentity({
+          ...SIGNED_OUT,
+          status: "signed-in",
+          emailConfirmed,
+          verification,
+          badges,
+        });
         return;
       }
       const row = data as Row;
@@ -170,6 +191,7 @@ export function useRailIdentity(): RailIdentity {
         username: row.username?.trim() || null,
         emailConfirmed,
         verification,
+        badges,
       });
     }
 
