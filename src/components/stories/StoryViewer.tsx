@@ -664,7 +664,7 @@ export function StoryViewer({
                   type="button"
                   onClick={() => setSheet("insights")}
                   aria-label="Story insights"
-                  className="sv-react-btn !w-[46px] shrink-0 border !border-white/12 bg-white/5 text-[17px]"
+                  className="sv-react-btn !w-[46px] shrink-0 border !border-white/12 bg-white/5 text-[length:var(--text-section)]"
                 >
                   <Eye className="size-[18px] text-white/80" aria-hidden />
                 </button>

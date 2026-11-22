@@ -42,7 +42,7 @@
    the box-in-a-box this programme exists to remove). */
 .dbx-module {
   background-color: var(--dbx-tone);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   box-shadow: var(--dbx-specular);
 }
 
@@ -56,8 +56,8 @@
 .dbx-cell {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding-block: 4px;
+  gap: var(--space-1);
+  padding-block: var(--space-1);
   font-variant-numeric: tabular-nums;
 }
 .dbx-cell + .dbx-cell {

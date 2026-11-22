@@ -64,7 +64,7 @@ function SheetClose({ onClose }: { onClose: () => void }) {
 function SheetHead({ title, blurb }: { title: string; blurb: string }) {
   return (
     <SheetItem className="px-5 pb-1 pr-14 pt-1 sm:px-6 sm:pr-16">
-      <h2 className="display text-[20px] leading-tight">{title}</h2>
+      <h2 className="display text-[length:var(--text-title)] leading-tight">{title}</h2>
       <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
         {blurb}
       </p>
@@ -370,7 +370,7 @@ export function EraseSheet({
           <p className="flex items-center gap-2 text-[length:var(--text-caption)] uppercase tracking-[var(--tracking-meta)] text-red-400">
             <AlertTriangle className="size-3.5" aria-hidden /> This cannot be undone
           </p>
-          <h2 className="display mt-2 text-[20px] leading-tight">Erase everything</h2>
+          <h2 className="display mt-2 text-[length:var(--text-title)] leading-tight">Erase everything</h2>
           <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
             {isSignedIn
               ? "Your record is deleted from this device and from your account, and you are signed out."

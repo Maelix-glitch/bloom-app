@@ -99,7 +99,7 @@ export function CycleOverviewPanel({
         <div>
           <p className="ci-eyebrow">Cycle overview</p>
           <h2 className="ci-display mt-1.5 text-[24px] leading-tight sm:text-[30px]">{status}</h2>
-          <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+          <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
             {phase.key !== null ? `${phase.label} · ` : ""}
             {phase.certainty === "estimated" ? "estimated from your record" : phase.certainty === "observed" ? "recorded" : "not yet placeable"}
           </p>
@@ -182,7 +182,7 @@ export function CycleOverviewPanel({
             </li>
           ))}
         </ul>
-        <p className="mt-3 border-t pt-3 text-[11.5px] leading-relaxed ci-muted ci-hair">
+        <p className="mt-3 border-t pt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted ci-hair">
           The band is read off an internal heuristic index of{" "}
           <span className="ci-num">{confidence.score}</span> out of 100. The index ranks how much
           evidence stands behind the estimate for your record — it is not a probability, not a
@@ -212,7 +212,7 @@ export function CycleBriefPanel({ intel }: { intel: IntelligenceResult }) {
         <Sparkles size={16} aria-hidden className="ci-brief__icon" />
         <div className="min-w-0">
           <p className="ci-eyebrow">Your cycle brief</p>
-          <p className="ci-display mt-1.5 text-[19px] leading-snug sm:text-[22px]">
+          <p className="ci-display mt-1.5 text-[length:var(--text-section)] leading-snug sm:text-[22px]">
             {intel.brief.headline}
           </p>
           <ul className="ci-bullets mt-3">
@@ -279,7 +279,7 @@ export function PersonalPatternPanel({ intel }: { intel: IntelligenceResult }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="ci-eyebrow">Your personal pattern</p>
-          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+          <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
             What your record adds up to
           </h2>
         </div>
@@ -303,7 +303,7 @@ export function PersonalPatternPanel({ intel }: { intel: IntelligenceResult }) {
 export function InsightList({ insights }: { insights: Insight[] }) {
   if (insights.length === 0) {
     return (
-      <p className="text-[12.5px] leading-relaxed ci-muted">
+      <p className="text-[length:var(--text-support)] leading-relaxed ci-muted">
         Nothing in your record supports an observation yet. Bloom would rather say nothing than
         manufacture one.
       </p>
@@ -314,12 +314,12 @@ export function InsightList({ insights }: { insights: Insight[] }) {
       {insights.map((insight) => (
         <li key={insight.id} className="ci-insight">
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <p className="text-[13.5px] font-medium">{insight.title}</p>
+            <p className="text-[length:var(--text-callout)] font-medium">{insight.title}</p>
             <span className="ci-insight__strength" data-strength={insight.strength}>
               {insight.strength} evidence
             </span>
           </div>
-          <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">{insight.body}</p>
+          <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">{insight.body}</p>
           <ul className="ci-evidence" aria-label="Evidence">
             {insight.evidence.map((item) => (
               <li key={`${insight.id}-${item.label}`}>
@@ -339,11 +339,11 @@ export function WhatChangedPanel({ intel }: { intel: IntelligenceResult }) {
   return (
     <Card>
       <p className="ci-eyebrow">What changed</p>
-      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+      <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
         Against your own earlier record
       </h2>
       {changes.length === 0 ? (
-        <p className="mt-3 text-[12.5px] leading-relaxed ci-muted">
+        <p className="mt-3 text-[length:var(--text-support)] leading-relaxed ci-muted">
           No change stands out against your history. That is the finding, not a gap in the page — a
           shift needs several cycles to be visible.
         </p>
@@ -351,8 +351,8 @@ export function WhatChangedPanel({ intel }: { intel: IntelligenceResult }) {
         <ul className="ci-insights mt-4">
           {changes.map((finding) => (
             <li key={finding.id} className="ci-insight">
-              <p className="text-[13.5px] font-medium">{finding.headline}</p>
-              <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">{finding.detail}</p>
+              <p className="text-[length:var(--text-callout)] font-medium">{finding.headline}</p>
+              <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">{finding.detail}</p>
               <ul className="ci-evidence">
                 {finding.evidence.map((item) => (
                   <li key={`${finding.id}-${item.label}`}>
@@ -365,7 +365,7 @@ export function WhatChangedPanel({ intel }: { intel: IntelligenceResult }) {
           ))}
         </ul>
       )}
-      <p className="mt-4 border-t pt-3 text-[11.5px] leading-relaxed ci-muted ci-hair">
+      <p className="mt-4 border-t pt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted ci-hair">
         These are comparisons with your own logged history, not diagnoses. Persistent or worrying
         changes are worth discussing with a qualified clinician — Bloom cannot tell you what they
         mean.
@@ -383,10 +383,10 @@ export function CycleComparisonPanel({ intel }: { intel: IntelligenceResult }) {
   return (
     <Card>
       <p className="ci-eyebrow">Cycle comparison</p>
-      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+      <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
         Your last {rows.length} recorded cycles, side by side
       </h2>
-      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+      <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
         Differences only — a longer cycle is not a better or worse one.
       </p>
       <div className="ci-compare">
@@ -415,7 +415,7 @@ export function CycleComparisonPanel({ intel }: { intel: IntelligenceResult }) {
           </tbody>
         </table>
       </div>
-      <p className="mt-3 text-[11.5px] leading-relaxed ci-muted">{comparison.note}</p>
+      <p className="mt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted">{comparison.note}</p>
     </Card>
   );
 }
@@ -498,7 +498,7 @@ export function CollapsibleSection({
   return (
     <Card>
       <p className="ci-eyebrow">{eyebrow}</p>
-      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">{title}</h2>
+      <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">{title}</h2>
       <Details summary={summary}>{children}</Details>
     </Card>
   );

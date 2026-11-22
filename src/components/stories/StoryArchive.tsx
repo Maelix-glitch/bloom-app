@@ -99,8 +99,8 @@ export function StoryArchive({
               <span className="grid size-12 place-items-center rounded-full bg-surface-2 text-faint">
                 <Archive className="size-5" strokeWidth={1.5} aria-hidden />
               </span>
-              <p className="display text-[17px] text-muted-foreground">Nothing resting here yet.</p>
-              <p className="max-w-[32ch] text-[12.5px] leading-relaxed text-faint">
+              <p className="display text-[length:var(--text-section)] text-muted-foreground">Nothing resting here yet.</p>
+              <p className="max-w-[32ch] text-[length:var(--text-support)] leading-relaxed text-faint">
                 Stories you share settle here quietly after 24 hours — your personal history, kept
                 safe.
               </p>
@@ -196,7 +196,7 @@ function MenuButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "flex w-full items-center gap-3 rounded-2xl border border-border bg-surface/60 px-4 py-3.5 text-left text-[13.5px] font-medium transition-colors hover:border-border-strong",
+        "flex w-full items-center gap-3 rounded-2xl border border-border bg-surface/60 px-4 py-3.5 text-left text-[length:var(--text-callout)] font-medium transition-colors hover:border-border-strong",
         danger && "text-rose",
       )}
     >

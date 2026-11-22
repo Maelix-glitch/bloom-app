@@ -484,7 +484,7 @@ export function LogPanel({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="ci-eyebrow">{editing ? "Edit entry" : "Log"}</p>
-          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+          <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
             {editing ? "Change what you logged" : "Add a day"}
           </h2>
         </div>
@@ -505,7 +505,7 @@ export function LogPanel({
         </div>
       </div>
 
-      <p className="ci-num mt-3 text-[11.5px] ci-muted">
+      <p className="ci-num mt-3 text-[length:var(--text-caption)] ci-muted">
         {placement
           ? `${formatDate(date)} · cycle day ${placement.cycleDay} · ${placement.phase}${
               placement.reconstructed ? " (from your average)" : ""
@@ -518,7 +518,7 @@ export function LogPanel({
         {errorCount > 0 ? (
           <div
             role="alert"
-            className="mb-4 flex items-start gap-2 rounded-[var(--ci-radius-md)] border px-3 py-2.5 text-[12.5px]"
+            className="mb-4 flex items-start gap-2 rounded-[var(--ci-radius-md)] border px-3 py-2.5 text-[length:var(--text-support)]"
             style={{
               borderColor: "color-mix(in oklab, var(--ci-danger) 45%, transparent)",
               background: "color-mix(in oklab, var(--ci-danger) 10%, transparent)",
@@ -560,7 +560,7 @@ export function LogPanel({
 
         {/* ------------------------- where this day sits ------------------------- */}
         {!editing && nearPeriod && bleed !== null ? (
-          <p className="mt-2.5 text-[11.5px] leading-relaxed ci-muted" data-testid="log-context">
+          <p className="mt-2.5 text-[length:var(--text-caption)] leading-relaxed ci-muted" data-testid="log-context">
             {context?.kind === "inside"
               ? `Day ${context.dayOfPeriod} of the period that started ${formatDateShort(nearPeriod.start)}${
                   nearPeriodEnd
@@ -579,7 +579,7 @@ export function LogPanel({
           </p>
         ) : null}
         {!editing && context?.kind === "soon-after" && isPeriodBleed(bleed) ? (
-          <p className="mt-2.5 text-[11.5px] leading-relaxed ci-muted" data-testid="log-context">
+          <p className="mt-2.5 text-[length:var(--text-caption)] leading-relaxed ci-muted" data-testid="log-context">
             {context.daysSinceStart} days after your last period started — too soon to count as a
             new cycle, so if you log it as one the gap is left out of your average.
           </p>
@@ -588,7 +588,7 @@ export function LogPanel({
         {/* ---------------------- close / extend the current period --------------- */}
         {canCloseHere && nearPeriod ? (
           <div className="mt-4 rounded-[var(--ci-radius-md)] px-3.5 py-3 ci-hair">
-            <label className="flex items-start gap-2.5 text-[12.5px] leading-snug">
+            <label className="flex items-start gap-2.5 text-[length:var(--text-support)] leading-snug">
               <input
                 type="checkbox"
                 className="ci-check"
@@ -616,7 +616,7 @@ export function LogPanel({
         ) : null}
         {canExtendHere && nearPeriod && !startPeriod ? (
           <div className="mt-4 rounded-[var(--ci-radius-md)] px-3.5 py-3 ci-hair">
-            <label className="flex items-start gap-2.5 text-[12.5px] leading-snug">
+            <label className="flex items-start gap-2.5 text-[length:var(--text-support)] leading-snug">
               <input
                 type="checkbox"
                 className="ci-check"
@@ -653,7 +653,7 @@ export function LogPanel({
         {/* ---------------------------- period start ----------------------------- */}
         {isPeriodBleed(bleed) ? (
           <div className="mt-4 rounded-[var(--ci-radius-md)] px-3.5 py-3 ci-hair">
-            <label className="flex items-start gap-2.5 text-[12.5px] leading-snug">
+            <label className="flex items-start gap-2.5 text-[length:var(--text-support)] leading-snug">
               <input
                 type="checkbox"
                 className="ci-check"
@@ -705,7 +705,7 @@ export function LogPanel({
                 </div>
                 <div className="ci-field">
                   <span className="ci-label">Flow for the record</span>
-                  <p className="mt-1 text-[12.5px] ci-soft">
+                  <p className="mt-1 text-[length:var(--text-support)] ci-soft">
                     {bleed ? FLOW_LABEL[bleed as FlowLevel] : "—"}
                   </p>
                 </div>
@@ -719,7 +719,7 @@ export function LogPanel({
               </p>
             ) : null}
             {existingPeriod && !editing ? (
-              <p className="mt-2 text-[11.5px] ci-muted">
+              <p className="mt-2 text-[length:var(--text-caption)] ci-muted">
                 A period already starts on this date — saving will update it.
               </p>
             ) : null}
@@ -841,7 +841,7 @@ export function LogPanel({
                 <div className="mt-3 space-y-2" data-testid="symptom-severity">
                   {symptoms.map((s) => (
                     <div key={s} className="flex flex-wrap items-center gap-2">
-                      <span className="text-[12.5px] capitalize" style={{ color: "var(--ci-text)" }}>
+                      <span className="text-[length:var(--text-support)] capitalize" style={{ color: "var(--ci-text)" }}>
                         {s}
                       </span>
                       <div className="ci-seg" role="group" aria-label={`How severe was ${s}?`}>
@@ -986,7 +986,7 @@ export function LogPanel({
 
             {/* fertility signs */}
             <details className="group mt-4 rounded-[var(--ci-radius-md)] border px-3.5 py-2 ci-hair">
-              <summary className="cursor-pointer list-none py-1 text-[12.5px] font-medium ci-soft [&::-webkit-details-marker]:hidden">
+              <summary className="cursor-pointer list-none py-1 text-[length:var(--text-support)] font-medium ci-soft [&::-webkit-details-marker]:hidden">
                 <span className="ci-eyebrow">Fertility signs</span>
                 <span className="ml-2 ci-muted">temperature · mucus · LH</span>
               </summary>

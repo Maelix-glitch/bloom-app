@@ -227,11 +227,11 @@ export function CycleIntelligence({
           <h1 className="ci-display mt-2.5 text-[28px] leading-[1.1] sm:text-[36px]">
             Your cycle, read from your record.
           </h1>
-          <p className="mt-3 text-[13.5px] leading-relaxed ci-soft sm:text-[14px]">
+          <p className="mt-3 text-[length:var(--text-callout)] leading-relaxed ci-soft sm:text-[14px]">
             Dates, phases and patterns computed from what you log — with the evidence, the sample
             size and the uncertainty shown next to every estimate.
           </p>
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[11.5px] ci-soft">
+          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[length:var(--text-caption)] ci-soft">
             <SyncLine sync={store.sync} onRetry={store.syncNow} />
             <span aria-hidden>·</span>
             <span>estimates, not medical advice</span>
@@ -308,10 +308,10 @@ export function CycleIntelligence({
                           style={{ color: "var(--ci-ovulation)", marginTop: 2 }}
                         />
                         <div>
-                          <p className="text-[13.5px] font-medium">
+                          <p className="text-[length:var(--text-callout)] font-medium">
                             You have periods in an older Bloom log
                           </p>
-                          <p className="mt-1 text-[12.5px] leading-relaxed ci-soft">
+                          <p className="mt-1 text-[length:var(--text-support)] leading-relaxed ci-soft">
                             The previous version of this page logged individual days. We can group
                             those bleeding days into whole periods and bring them across — no
                             retyping, and nothing leaves your device.
@@ -357,10 +357,10 @@ export function CycleIntelligence({
                     ) : store.mode === "tracking" && store.predictionsOff ? (
                       <Card data-testid="cycle-predictions-off-note">
                         <p className="ci-eyebrow">Predictions off</p>
-                        <h2 className="ci-display mt-2 text-[19px] leading-tight sm:text-[22px]">
+                        <h2 className="ci-display mt-2 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
                           Estimates hidden — logging as usual.
                         </h2>
-                        <p className="mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                        <p className="mt-2 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
                           Your {analysis.entryCount} logged{" "}
                           {analysis.entryCount === 1 ? "period is" : "periods are"} kept below, and
                           the daily log still works — log bleeding or symptoms any day. Bloom is
@@ -372,10 +372,10 @@ export function CycleIntelligence({
                     ) : (
                       <Card data-testid="cycle-paused-note">
                         <p className="ci-eyebrow">Predictions paused</p>
-                        <h2 className="ci-display mt-2 text-[19px] leading-tight sm:text-[22px]">
+                        <h2 className="ci-display mt-2 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
                           Nothing is due, nothing is late.
                         </h2>
-                        <p className="mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                        <p className="mt-2 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
                           Your {analysis.entryCount} logged{" "}
                           {analysis.entryCount === 1 ? "period is" : "periods are"} kept below, and
                           the daily log still works — log bleeding or symptoms any day. When periods
@@ -416,12 +416,12 @@ export function CycleIntelligence({
                         <div className="flex flex-wrap items-end justify-between gap-3">
                           <div>
                             <p className="ci-eyebrow">This cycle</p>
-                            <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                            <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
                               {analysis.overdue
                                 ? `Day ${analysis.cycleDay} · ${analysis.overdueDays} past your usual cycle`
                                 : `Day ${analysis.cycleDay} of about ${Math.round(analysis.averageLength)}`}
                             </h2>
-                            <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                            <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
                               {analysis.phaseLabel}
                               {analysis.lastStart
                                 ? ` · started ${formatDate(analysis.lastStart)}`
@@ -445,7 +445,7 @@ export function CycleIntelligence({
                           <CycleDial analysis={analysis} days={store.days} />
                           <div>
                             <PhaseWave analysis={analysis} />
-                            <p className="mt-2 text-[11.5px] leading-relaxed ci-muted">
+                            <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed ci-muted">
                               An estimate, not a fact — both assume your next period lands on the
                               predicted date. Log a new start and they redraw immediately.
                             </p>
@@ -456,10 +456,10 @@ export function CycleIntelligence({
 
                     <Card>
                       <p className="ci-eyebrow">Rhythm map</p>
-                      <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                      <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
                         Twelve weeks, one cell per day
                       </h2>
-                      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                      <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
                         Each square is a day, coloured by the phase it fell in. Brighter squares
                         carry more logged detail; the outlined square is today.
                       </p>
@@ -476,10 +476,10 @@ export function CycleIntelligence({
                       <div className="grid gap-4 lg:grid-cols-2">
                         <Card>
                           <p className="ci-eyebrow">The four phases</p>
-                          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                          <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
                             This cycle, split into phases
                           </h2>
-                          <p className="mt-1.5 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+                          <p className="mt-1.5 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
                             From your own average, so the dates shift as your record shifts.
                           </p>
                           <div className="mt-4">
@@ -488,10 +488,10 @@ export function CycleIntelligence({
                         </Card>
                         <Card>
                           <p className="ci-eyebrow">Forward look</p>
-                          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                          <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
                             The next three cycles
                           </h2>
-                          <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                          <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
                             Projected from your average. Useful for planning, never a promise.
                           </p>
                           <div className="mt-4">
@@ -512,7 +512,7 @@ export function CycleIntelligence({
                       <h2 className="ci-display mt-1.5 text-[22px] leading-tight sm:text-[26px]">
                         Bloom understands your pattern.
                       </h2>
-                      <p className="mt-1.5 text-[12.5px] leading-relaxed ci-soft">
+                      <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
                         Only what your own records support — each line carries the count behind it.
                       </p>
                       <div className="mt-4">
@@ -533,10 +533,10 @@ export function CycleIntelligence({
                         </div>
                         <div className="min-w-0">
                           <p className="ci-eyebrow">Symptom patterns</p>
-                          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+                          <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
                             What shows up, and how often
                           </h2>
-                          <p className="mt-1.5 max-w-[52ch] text-[12.5px] leading-relaxed ci-soft">
+                          <p className="mt-1.5 max-w-[52ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
                             Counted from the days you logged. A symptom only appears once you have
                             recorded it — nothing here is suggested from a general list.
                           </p>
@@ -545,14 +545,14 @@ export function CycleIntelligence({
                               {intel.symptoms.patterns.slice(0, 5).map((pattern) => (
                                 <li key={pattern.symptom} className="min-w-0">
                                   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-                                    <span className="text-[12.5px] font-medium capitalize">
+                                    <span className="text-[length:var(--text-support)] font-medium capitalize">
                                       {pattern.symptom}
                                     </span>
                                     <span className="text-[11px] ci-muted">
                                       {pattern.cyclesSeen} of {pattern.totalCycles} cycles
                                     </span>
                                   </div>
-                                  <p className="mt-0.5 text-[11.5px] leading-relaxed ci-muted">
+                                  <p className="mt-0.5 text-[length:var(--text-caption)] leading-relaxed ci-muted">
                                     {pattern.daysLogged}{" "}
                                     {pattern.daysLogged === 1 ? "day" : "days"} logged
                                     {pattern.dominantPhase
@@ -592,8 +592,8 @@ export function CycleIntelligence({
                     >
                       <div className="grid gap-4 lg:grid-cols-[1.25fr_1fr]">
                         <div className="min-w-0">
-                          <p className="text-[12.5px] font-medium">Your rhythm over time</p>
-                          <p className="mt-1 max-w-[52ch] text-[11.5px] leading-relaxed ci-muted">
+                          <p className="text-[length:var(--text-support)] font-medium">Your rhythm over time</p>
+                          <p className="mt-1 max-w-[52ch] text-[length:var(--text-caption)] leading-relaxed ci-muted">
                             Each bar is one cycle. Dashed bars are outside the typical length used
                             for the median — kept on the chart, not deleted.
                           </p>
@@ -620,17 +620,17 @@ export function CycleIntelligence({
                     >
                       <div className="grid gap-5 lg:grid-cols-2">
                         <div className="min-w-0">
-                          <p className="text-[12.5px] font-medium">Across every logged day</p>
+                          <p className="text-[length:var(--text-support)] font-medium">Across every logged day</p>
                           <div className="mt-4">
                             <VitalDials dayAnalysis={store.dayAnalysis} />
                           </div>
                         </div>
                         <div className="min-w-0 space-y-3">
-                          <p className="text-[12.5px] font-medium">By estimated phase</p>
+                          <p className="text-[length:var(--text-support)] font-medium">By estimated phase</p>
                           {intel.symptoms.metrics.map((metric) => (
                             <div key={metric.metric}>
                               <div className="flex items-baseline justify-between gap-2">
-                                <p className="text-[12.5px] font-medium">{metric.label}</p>
+                                <p className="text-[length:var(--text-support)] font-medium">{metric.label}</p>
                                 <span className="text-[11px] ci-muted">
                                   {metric.n} {metric.n === 1 ? "log" : "logs"}
                                 </span>
@@ -656,7 +656,7 @@ export function CycleIntelligence({
                             </div>
                           ))}
                           {intel.symptoms.metrics.every((m) => !m.meaningful) ? (
-                            <p className="text-[11.5px] leading-relaxed ci-muted">
+                            <p className="text-[length:var(--text-caption)] leading-relaxed ci-muted">
                               Phase averages appear once a phase has at least three logged values.
                             </p>
                           ) : null}
@@ -730,7 +730,7 @@ export function CycleIntelligence({
                         store.sync.signedIn && !store.sync.periodsOnDevice ? "account" : "device"
                       }
                     />
-                    <p className="text-[12.5px] ci-soft">
+                    <p className="text-[length:var(--text-support)] ci-soft">
                       Taking this to a doctor?{" "}
                       <a href="/cycle-report" className="ci-link">
                         Open the one-page summary of your last twelve months

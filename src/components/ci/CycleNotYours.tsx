@@ -91,7 +91,7 @@ export function CycleNotYours() {
           </button>
         </div>
 
-        <p className="mt-5 text-[12.5px] text-muted-foreground/70">
+        <p className="mt-5 text-[length:var(--text-support)] text-muted-foreground/70">
           Switch it back off any time in Settings.
         </p>
       </motion.div>

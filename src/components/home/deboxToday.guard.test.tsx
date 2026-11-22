@@ -76,7 +76,7 @@ describe("Today de-box (M-183) — the stack's panels join the system at lg", ()
     expect(block).toContain("background-color: var(--surface);");
     expect(block).toContain("background-image: none;");
     expect(block).toContain("border: 0;");
-    expect(block).toContain("border-radius: 24px;");
+    expect(block).toContain("border-radius: var(--radius-card);");
     expect(block).toContain("box-shadow: var(--dbx-specular);");
     expect(block).toContain("backdrop-filter: none;");
     expect(block).not.toContain("1px solid");
@@ -112,7 +112,7 @@ describe("Today de-box (M-183) — Growth is the single tonal card", () => {
     const growth = ruleBlock(CSS, ".home-page .home-growth");
     expect(growth).toContain("background-color: var(--surface);");
     expect(growth).toContain("border: 0;");
-    expect(growth).toContain("border-radius: 24px;");
+    expect(growth).toContain("border-radius: var(--radius-card);");
     expect(growth).toContain("box-shadow: var(--dbx-specular);");
     expect(growth).toContain("backdrop-filter: none;");
     expect(growth).not.toContain("--glass-");
@@ -214,7 +214,7 @@ describe("Today de-box (M-183) — the freeze holds where the spec is silent", (
 
   it("the base .home-fact strip keeps its shape below lg", () => {
     const fact = ruleBlock(CSS, ".home-fact");
-    expect(fact).toContain("padding-block: 4px;");
+    expect(fact).toContain("padding-block: var(--space-1);");
     expect(fact).toContain("position: relative;");
   });
 

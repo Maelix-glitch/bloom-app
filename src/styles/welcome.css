@@ -197,7 +197,7 @@
 .wl-seg {
   width: 22px;
   height: 4px;
-  border-radius: 99px;
+  border-radius: var(--radius-pill);
   background: color-mix(in oklab, var(--foreground) 22%, transparent);
   transition: all var(--wl-dur-rail);
 }
@@ -502,7 +502,7 @@
   width: 100%;
   min-height: 56px;
   margin-top: 22px;
-  padding: var(--space-4) 18px;
+  padding: var(--space-4) var(--space-4);
   border-radius: var(--wl-radius-field);
   color: var(--foreground);
   font-size: var(--wl-text-field);
@@ -526,7 +526,7 @@
   background: var(--wl-recap-bg);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--wl-radius-recap);
-  padding: var(--space-4) 18px;
+  padding: var(--space-4) var(--space-4);
   margin-top: 22px;
 }
 

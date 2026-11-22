@@ -265,7 +265,7 @@ export function CycleDial({ analysis, days }: { analysis: CycleAnalysis; days?: 
         </text>
       </svg>
 
-      <p className="mt-1 text-[11.5px] ci-muted">
+      <p className="mt-1 text-[length:var(--text-caption)] ci-muted">
         {countdown ? (
           <>
             Next start{" "}

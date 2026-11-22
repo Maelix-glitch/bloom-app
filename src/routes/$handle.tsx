@@ -153,7 +153,7 @@ function PublicProfilePage() {
           </div>
         ) : state.status === "error" ? (
           <div className="panel mx-auto mt-14 max-w-[480px] p-8 text-center">
-            <p className="display text-[20px]">Something went wrong.</p>
+            <p className="display text-[length:var(--text-title)]">Something went wrong.</p>
             <button
               type="button"
               onClick={() => setState({ status: "retry" })}

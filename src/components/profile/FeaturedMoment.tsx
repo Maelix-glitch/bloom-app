@@ -48,7 +48,7 @@ export function FeaturedCard({
         {content.eyebrow}
       </p>
       <p
-        className="display text-[21px] leading-[1.25] text-balance sm:text-[24px]"
+        className="display text-[length:var(--text-title)] leading-[1.25] text-balance sm:text-[24px]"
         style={{ maxWidth: "34ch" }}
       >
         {content.title}

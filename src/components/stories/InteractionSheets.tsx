@@ -193,7 +193,7 @@ export function ReplySheet({
             maxLength={500}
             aria-label="Write a reply"
             autoFocus
-            className="h-11 min-w-0 flex-1 rounded-full border border-border bg-surface/60 px-4 text-[13.5px] outline-none transition-colors placeholder:text-faint/70 focus:border-border-strong"
+            className="h-11 min-w-0 flex-1 rounded-full border border-border bg-surface/60 px-4 text-[length:var(--text-callout)] outline-none transition-colors placeholder:text-faint/70 focus:border-border-strong"
           />
           <button
             type="submit"
@@ -216,7 +216,7 @@ export function ReplySheet({
         <div className="flex flex-col items-center gap-1.5 py-10 text-center">
           <MessageCircle className="size-5 text-faint" aria-hidden />
           <p className="display text-[15px] text-muted-foreground">No replies yet.</p>
-          <p className="max-w-[30ch] text-[12.5px] text-faint">
+          <p className="max-w-[30ch] text-[length:var(--text-support)] text-faint">
             {isOwner
               ? "When someone answers your story, it lands here."
               : "Say something kind — it goes straight to them."}
@@ -241,7 +241,7 @@ export function ReplySheet({
                       {reply.authorName ?? "Someone"} · {storyAge(reply.createdAt)}
                     </p>
                   ) : null}
-                  <p className="whitespace-pre-line text-[13.5px] leading-relaxed">{reply.body}</p>
+                  <p className="whitespace-pre-line text-[length:var(--text-callout)] leading-relaxed">{reply.body}</p>
                 </div>
               </li>
             );
@@ -396,7 +396,7 @@ export function StoryInsightsSheet({
               <button
                 type="button"
                 onClick={onShareAgain}
-                className="bsheet-primary h-10 px-4 text-[12.5px]"
+                className="bsheet-primary h-10 px-4 text-[length:var(--text-support)]"
               >
                 Share again · 24h
               </button>
@@ -405,7 +405,7 @@ export function StoryInsightsSheet({
               <button
                 type="button"
                 onClick={onAddToHighlight}
-                className="bsheet-ghost h-10 px-4 text-[12.5px]"
+                className="bsheet-ghost h-10 px-4 text-[length:var(--text-support)]"
               >
                 Add to highlight
               </button>
@@ -436,7 +436,7 @@ export function StoryInsightsSheet({
             className="flex flex-col items-center gap-1 rounded-2xl border border-border bg-surface/60 px-2 py-3"
           >
             <s.icon className="size-3.5 text-faint" aria-hidden />
-            <span className="display text-[19px] leading-none">{s.value}</span>
+            <span className="display text-[length:var(--text-section)] leading-none">{s.value}</span>
             <span className="mono text-[length:var(--text-micro)] uppercase tracking-[0.08em] text-faint">
               {s.label}
             </span>
@@ -477,7 +477,7 @@ function ViewersList({ viewers }: { viewers: StoryViewerEntry[] }) {
           <Eye className="size-4" />
         </span>
         <p className="display text-[15px] text-muted-foreground">No views yet.</p>
-        <p className="max-w-[26ch] text-[12.5px] text-faint">
+        <p className="max-w-[26ch] text-[length:var(--text-support)] text-faint">
           Moments take their time — this quiet page fills as people stop by.
         </p>
       </div>
@@ -516,7 +516,7 @@ function ViewersList({ viewers }: { viewers: StoryViewerEntry[] }) {
         <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">
           {label}
         </span>
-        <span className="text-[11.5px] text-muted-foreground">
+        <span className="text-[length:var(--text-caption)] text-muted-foreground">
           {entries.length} {entries.length === 1 ? "view" : "views"}
         </span>
       </li>
@@ -571,7 +571,7 @@ function ViewerRow({ v }: { v: StoryViewerEntry }) {
         >
           {v.name.trim().slice(0, 1).toUpperCase() || "·"}
         </span>
-        <span className="truncate text-[13.5px]">{v.name}</span>
+        <span className="truncate text-[length:var(--text-callout)]">{v.name}</span>
       </span>
       <span className="mono shrink-0 text-[11px] text-faint">{storyAge(v.viewedAt)}</span>
     </li>
@@ -606,7 +606,7 @@ function RepliesList({ storyId, userId }: { storyId: string; userId: string | nu
           <p className="mono mb-1 text-[length:var(--text-micro)] uppercase tracking-[0.08em] text-faint">
             {r.authorName ?? "Someone"} · {storyAge(r.createdAt)}
           </p>
-          <p className="whitespace-pre-line text-[13.5px] leading-relaxed">{r.body}</p>
+          <p className="whitespace-pre-line text-[length:var(--text-callout)] leading-relaxed">{r.body}</p>
         </li>
       ))}
     </ul>
@@ -642,7 +642,7 @@ function GiftsList({ storyId, userId }: { storyId: string; userId: string | null
           title={`${GIFT_META[g.gift].name} from ${g.senderName ?? "someone"} · ${storyAge(g.createdAt)}`}
           className="flex items-center gap-2 rounded-full border border-border bg-surface/60 py-1.5 pl-2 pr-3.5"
         >
-          <span className="text-[20px] leading-none" aria-hidden>
+          <span className="text-[length:var(--text-title)] leading-none" aria-hidden>
             {GIFT_META[g.gift].glyph}
           </span>
           <span className="text-[12px] text-muted-foreground">{g.senderName ?? "Someone"}</span>

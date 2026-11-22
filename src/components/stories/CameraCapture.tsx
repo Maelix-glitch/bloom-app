@@ -243,7 +243,7 @@ export function CameraCapture({
                   className="size-10 animate-spin rounded-full border-2 border-white/20 border-t-white/80"
                   aria-hidden
                 />
-                <p className="text-[13.5px] text-white/70">Opening your camera…</p>
+                <p className="text-[length:var(--text-callout)] text-white/70">Opening your camera…</p>
               </div>
             ) : (
               <div className="flex max-w-[300px] flex-col items-center gap-3">
@@ -293,7 +293,7 @@ export function CameraCapture({
                 onClick={() => !recording && setMode(m)}
                 aria-pressed={mode === m}
                 className={cn(
-                  "rounded-full px-4 py-1.5 text-[12.5px] font-semibold transition-colors",
+                  "rounded-full px-4 py-1.5 text-[length:var(--text-support)] font-semibold transition-colors",
                   mode === m ? "bg-white text-black" : "text-white/75",
                 )}
               >
@@ -320,7 +320,7 @@ export function CameraCapture({
         {recording ? (
           <div className="absolute left-1/2 top-[max(70px,calc(env(safe-area-inset-top)+56px))] flex -translate-x-1/2 items-center gap-2 rounded-full scam-scrim-b/50 px-3.5 py-1.5 backdrop-blur-md">
             <span className="scam-rec-dot size-2 rounded-full bg-[#e0685e]" aria-hidden />
-            <span className="mono text-[11.5px] tracking-wide text-white" role="timer">
+            <span className="mono text-[length:var(--text-caption)] tracking-wide text-white" role="timer">
               {(recordMs / 1000).toFixed(1)}s / 30s
             </span>
           </div>

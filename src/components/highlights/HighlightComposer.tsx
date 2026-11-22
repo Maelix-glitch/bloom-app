@@ -154,7 +154,7 @@ export function HighlightComposer({
             <div className="mt-5">
               <p className="eyebrow mb-2">Stories {allStories.length === 0 && "— none yet"}</p>
               {allStories.length === 0 ? (
-                <p className="rounded-xl border border-dashed border-border bg-surface-2/30 px-4 py-5 text-center text-[12.5px] text-muted-foreground">
+                <p className="rounded-xl border border-dashed border-border bg-surface-2/30 px-4 py-5 text-center text-[length:var(--text-support)] text-muted-foreground">
                   Highlights keep stories forever — once you've made a few stories, they'll appear
                   here to choose from.
                 </p>
@@ -206,7 +206,7 @@ export function HighlightComposer({
               )}
             </div>
 
-            {error ? <p className="mt-3 text-[12.5px] text-rose">{error}</p> : null}
+            {error ? <p className="mt-3 text-[length:var(--text-support)] text-rose">{error}</p> : null}
           </div>
 
           <div className="flex items-center justify-between gap-3 border-t border-border px-4 py-3">
@@ -219,7 +219,7 @@ export function HighlightComposer({
                 <Trash2 className="size-3.5" aria-hidden /> Delete
               </button>
             ) : (
-              <span className="text-[11.5px] text-faint">Highlights are permanent.</span>
+              <span className="text-[length:var(--text-caption)] text-faint">Highlights are permanent.</span>
             )}
             <button
               type="button"

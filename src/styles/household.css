@@ -122,7 +122,7 @@
 .hh-chip {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-pill);
-  padding: 0.25rem 0.7rem;
+  padding: var(--space-1) 0.7rem;
   font-size: var(--text-caption);
   line-height: var(--leading-callout);
   color: var(--text-secondary);

@@ -56,7 +56,7 @@ export function SectionHead({
     <div className={cn("flex flex-wrap items-end justify-between gap-3", className)}>
       <div>
         <Eyebrow>{eyebrow}</Eyebrow>
-        <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">{title}</h2>
+        <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">{title}</h2>
         {note ? (
           <p className="mt-1.5 max-w-[62ch] text-[13px] leading-relaxed ci-soft">{note}</p>
         ) : null}
@@ -128,7 +128,7 @@ export function Stat({
         <span className={cn(emphasis ? "ci-display" : "font-medium", "truncate")}>{value}</span>
         {unit ? <span className="text-[12px] ci-muted">{unit}</span> : null}
       </p>
-      {sub ? <p className="mt-1.5 text-[11.5px] leading-snug ci-muted">{sub}</p> : null}
+      {sub ? <p className="mt-1.5 text-[length:var(--text-caption)] leading-snug ci-muted">{sub}</p> : null}
     </div>
   );
 }
@@ -166,7 +166,7 @@ export function ConfidenceBadge({
 
 export function Disclaimer({ className }: { className?: string | undefined }) {
   return (
-    <p className={cn("text-[11.5px] leading-relaxed ci-muted", className)}>
+    <p className={cn("text-[length:var(--text-caption)] leading-relaxed ci-muted", className)}>
       Every date on this page is an estimate generated from the dates you logged — nothing more. It
       is not medical advice, it cannot diagnose anything, and the fertile window shown here is not
       contraception.

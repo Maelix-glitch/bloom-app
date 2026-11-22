@@ -33,7 +33,7 @@ function Toggle({
       className="flex w-full items-center justify-between gap-4 rounded-2xl border border-border bg-surface/60 px-4 py-3.5 text-left"
     >
       <span className="min-w-0">
-        <span className="block text-[13.5px] font-semibold">{label}</span>
+        <span className="block text-[length:var(--text-callout)] font-semibold">{label}</span>
         <span className="block text-[12px] text-muted-foreground">{hint}</span>
       </span>
       <span
@@ -143,11 +143,11 @@ export function StorySettings({ userId, onClose }: { userId: string | null; onCl
                   {settings.defaultAudience === o.key ? <Check className="size-3.5" /> : null}
                   {o.label}
                 </span>
-                <span className="mt-0.5 block text-[11.5px] text-muted-foreground">{o.hint}</span>
+                <span className="mt-0.5 block text-[length:var(--text-caption)] text-muted-foreground">{o.hint}</span>
               </button>
             ))}
           </div>
-          <p className="mt-2 text-[11.5px] leading-relaxed text-faint">
+          <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed text-faint">
             Close friends is for your innermost circle. You can still choose the audience on every
             story before you share it.
           </p>

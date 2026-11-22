@@ -52,7 +52,7 @@ export function CycleHeatmap({
 }) {
   if (analysis.entryCount === 0) {
     return (
-      <p className="text-[12.5px] ci-muted">
+      <p className="text-[length:var(--text-support)] ci-muted">
         Log a period and the last twelve weeks start filling in here.
       </p>
     );

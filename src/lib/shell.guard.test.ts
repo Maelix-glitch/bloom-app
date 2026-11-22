@@ -97,7 +97,7 @@ describe("Shell guard: one container (M-127, M-76 resolved by v6)", () => {
     const page = ruleBlock(css, ".page");
     expect(page).toContain("max-width: var(--container)");
     expect(page).toContain("margin-inline: auto");
-    expect(page).toContain("padding-inline: 24px");
+    expect(page).toContain("padding-inline: var(--space-5)");
   });
 
   it("every CSS page shell takes its measure from the token", () => {

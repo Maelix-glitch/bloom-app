@@ -1024,7 +1024,7 @@ export function StoryEditor({
           >
             <ArrowLeft className="size-5" />
           </button>
-          <p className="display text-[17px] text-white">Share to story</p>
+          <p className="display text-[length:var(--text-section)] text-white">Share to story</p>
           <button
             type="button"
             onClick={requestClose}
@@ -1079,7 +1079,7 @@ export function StoryEditor({
                     {visibility === o.key ? <Check className="size-3.5 text-[#eed9a4]" /> : null}
                     {o.label}
                   </span>
-                  <span className="mt-0.5 block text-[11.5px] text-white/55">{o.hint}</span>
+                  <span className="mt-0.5 block text-[length:var(--text-caption)] text-white/55">{o.hint}</span>
                 </button>
               ))}
             </div>
@@ -1102,7 +1102,7 @@ export function StoryEditor({
                     aria-checked={audience === o.key}
                     onClick={() => setAudience(o.key)}
                     className={cn(
-                      "rounded-full border px-3 py-2 text-[12.5px] font-semibold transition-all",
+                      "rounded-full border px-3 py-2 text-[length:var(--text-support)] font-semibold transition-all",
                       audience === o.key
                         ? "border-[rgba(238,217,164,0.6)] bg-[rgba(238,217,164,0.12)] text-white"
                         : "border-white/12 bg-white/5 text-white/65",
@@ -1113,7 +1113,7 @@ export function StoryEditor({
                 ))}
               </div>
             ) : null}
-            <p className="mt-2 text-[11.5px] text-white/45">
+            <p className="mt-2 text-[length:var(--text-caption)] text-white/45">
               {visibility === "public"
                 ? audience === "close"
                   ? "Only your close friends can see this. It expires in 24 hours."
@@ -1156,7 +1156,7 @@ export function StoryEditor({
         aria-label="Discard story draft"
       >
         <div className="w-full max-w-[340px] rounded-3xl border border-white/10 bg-[#1c1930] p-6 text-center">
-          <p className="display text-[19px] text-white">Leave the editor?</p>
+          <p className="display text-[length:var(--text-section)] text-white">Leave the editor?</p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-white/60">
             Your draft is saved on this device — except video, which can't be kept yet.
           </p>
@@ -1803,7 +1803,7 @@ function CaptionSheet({
             onChange={(e) => setT(e.target.value.slice(0, 120))}
             placeholder="A line for the archive…"
             maxLength={120}
-            className="display w-full rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[17px] outline-none transition-colors placeholder:text-faint/60 focus:border-border-strong"
+            className="display w-full rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[length:var(--text-section)] outline-none transition-colors placeholder:text-faint/60 focus:border-border-strong"
           />
         </label>
         <label className="flex flex-col gap-1.5">
@@ -1814,7 +1814,7 @@ function CaptionSheet({
             placeholder="Say as much or as little as you like."
             rows={3}
             maxLength={2000}
-            className="w-full resize-none rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[13.5px] leading-relaxed outline-none transition-colors placeholder:text-faint/60 focus:border-border-strong"
+            className="w-full resize-none rounded-xl border border-border bg-surface/60 px-3.5 py-2.5 text-[length:var(--text-callout)] leading-relaxed outline-none transition-colors placeholder:text-faint/60 focus:border-border-strong"
           />
         </label>
         {hasMedia ? (

@@ -301,7 +301,7 @@ export function TemplateBrowser({
         </button>
         <div>
           <h2 className="display text-[18px] leading-tight">Start somewhere</h2>
-          <p className="text-[11.5px] text-muted-foreground">
+          <p className="text-[length:var(--text-caption)] text-muted-foreground">
             {STORY_TEMPLATE_LIBRARY.length} designs — every one a starting point.
           </p>
         </div>

@@ -40,7 +40,7 @@ describe("Nutrition layout: the container is scoped to the tab page", () => {
   it("the container lives only under .nut-page, from the shared token", () => {
     const wide = block(/\.nut-wrap\.nut-page\s*\{([^}]*)\}/);
     expect(wide).toContain("max-width: var(--container)");
-    expect(wide).toContain("padding-inline: 24px");
+    expect(wide).toContain("padding-inline: var(--space-5)");
     /* The superseded 1280px measure occurs nowhere in the stylesheet,
        and the token is consumed exactly once — under the page scope. */
     expect(css.match(/max-width: 1280px/g)).toBeNull();

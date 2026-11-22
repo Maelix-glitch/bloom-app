@@ -56,7 +56,7 @@ export function PatternGuidanceCard({
             <HeartPulse size={16} className="ci-flag__icon" aria-hidden />
             <div className="min-w-0">
               <div className="flex items-start justify-between gap-2">
-                <p className="text-[13.5px] font-medium" style={{ color: "var(--ci-text)" }}>
+                <p className="text-[length:var(--text-callout)] font-medium" style={{ color: "var(--ci-text)" }}>
                   {notice.title}
                 </p>
                 <button
@@ -71,7 +71,7 @@ export function PatternGuidanceCard({
                   <X size={13} aria-hidden />
                 </button>
               </div>
-              <p className="mt-1 text-[12.5px] leading-relaxed ci-soft">{notice.body}</p>
+              <p className="mt-1 text-[length:var(--text-support)] leading-relaxed ci-soft">{notice.body}</p>
             </div>
           </div>
         ))}

@@ -181,10 +181,10 @@ export function DayLogInsights({
     return (
       <Card>
         <p className="ci-eyebrow">From your daily log</p>
-        <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+        <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
           Nothing logged day-by-day yet
         </h2>
-        <p className="mt-2 max-w-[62ch] text-[12.5px] leading-relaxed ci-soft">
+        <p className="mt-2 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
           The advanced log above is where this section comes from. One day with a symptom or a mood
           on it is enough to start; after a handful, the phase comparisons below start saying
           something real about your own pattern.
@@ -202,11 +202,11 @@ export function DayLogInsights({
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="ci-eyebrow">From your daily log</p>
-          <h2 className="ci-display mt-1.5 text-[19px] leading-tight sm:text-[22px]">
+          <h2 className="ci-display mt-1.5 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
             What your logged days show
           </h2>
         </div>
-        <dl className="flex flex-wrap gap-x-6 gap-y-1.5 text-[11.5px]">
+        <dl className="flex flex-wrap gap-x-6 gap-y-1.5 text-[length:var(--text-caption)]">
           <div>
             <dt className="ci-eyebrow">Days logged</dt>
             <dd className="ci-num mt-0.5 text-[15px]">{dayAnalysis.total}</dd>
@@ -225,7 +225,7 @@ export function DayLogInsights({
       {dayAnalysis.notes.length > 0 ? (
         <ul className="mt-4 space-y-1.5">
           {dayAnalysis.notes.map((note) => (
-            <li key={note} className="flex gap-2.5 text-[12.5px] leading-relaxed ci-soft">
+            <li key={note} className="flex gap-2.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
               <span
                 aria-hidden
                 className="mt-[7px] h-[5px] w-[5px] shrink-0 rotate-45 rounded-[1px]"
@@ -263,14 +263,14 @@ export function DayLogInsights({
                     }}
                   />
                 </span>
-                <span className="ci-num w-[74px] shrink-0 text-right text-[11.5px] ci-muted">
+                <span className="ci-num w-[74px] shrink-0 text-right text-[length:var(--text-caption)] ci-muted">
                   {s.count}d · {Math.round(s.share * 100)}%
                 </span>
               </div>
             ))}
           </div>
           {!compact && dayAnalysis.lhPositives.length > 0 ? (
-            <p className="mt-3 text-[11.5px] ci-muted">
+            <p className="mt-3 text-[length:var(--text-caption)] ci-muted">
               {dayAnalysis.lhPositives.length} positive LH{" "}
               {dayAnalysis.lhPositives.length === 1 ? "test" : "tests"} logged — most recently{" "}
               {formatDate(dayAnalysis.lhPositives[dayAnalysis.lhPositives.length - 1]!.date)}.
@@ -325,7 +325,7 @@ export function DayLogInsights({
         {dayAnalysis.flowCurve.length > 0 ? (
           <div>
             <p className="ci-eyebrow">Bleeding by day of period</p>
-            <p className="mt-1.5 text-[11.5px] leading-relaxed ci-muted">
+            <p className="mt-1.5 text-[length:var(--text-caption)] leading-relaxed ci-muted">
               Average intensity for each day of your period, from the days you logged bleeding.
             </p>
             <div className="mt-3 flex items-end gap-2" style={{ height: 92 }}>
@@ -356,7 +356,7 @@ export function DayLogInsights({
         {dayAnalysis.temperatures.length >= 2 ? (
           <div>
             <p className="ci-eyebrow">Temperature</p>
-            <p className="mt-1.5 text-[11.5px] leading-relaxed ci-muted">
+            <p className="mt-1.5 text-[length:var(--text-caption)] leading-relaxed ci-muted">
               {dayAnalysis.temperatures.length} readings. Dots are coloured by the phase each
               reading falls in.
             </p>
@@ -378,7 +378,7 @@ export function DayLogInsights({
                 className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-[var(--ci-radius-md)] border px-3 py-2.5 ci-hair"
               >
                 <span
-                  className="ci-num w-[96px] shrink-0 text-[12.5px]"
+                  className="ci-num w-[96px] shrink-0 text-[length:var(--text-support)]"
                   style={{ color: "var(--ci-text)" }}
                 >
                   {formatDate(day.date)}
@@ -428,7 +428,7 @@ export function DayLogInsights({
                     </span>
                   ) : null}
                   {day.notes ? (
-                    <span className="line-clamp-1 basis-full text-[11.5px] ci-muted">
+                    <span className="line-clamp-1 basis-full text-[length:var(--text-caption)] ci-muted">
                       {day.notes}
                     </span>
                   ) : null}

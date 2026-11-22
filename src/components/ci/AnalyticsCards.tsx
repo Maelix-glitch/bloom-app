@@ -100,7 +100,7 @@ export function FlowBreakdown({ analysis }: { analysis: CycleAnalysis }) {
   );
 
   if (total === 0) {
-    return <p className="text-[12.5px] ci-muted">Log a period and pick a flow to start this.</p>;
+    return <p className="text-[length:var(--text-support)] ci-muted">Log a period and pick a flow to start this.</p>;
   }
 
   return (
@@ -125,7 +125,7 @@ export function FlowBreakdown({ analysis }: { analysis: CycleAnalysis }) {
                   }}
                 />
               </span>
-              <span className="ci-num w-[52px] shrink-0 text-right text-[11.5px] ci-muted">
+              <span className="ci-num w-[52px] shrink-0 text-right text-[length:var(--text-caption)] ci-muted">
                 {count} · {share}%
               </span>
             </div>
@@ -203,14 +203,14 @@ export function PhaseCards({
               ) : null}
             </div>
 
-            <p className="ci-num mt-2 text-[11.5px] ci-muted">
+            <p className="ci-num mt-2 text-[length:var(--text-caption)] ci-muted">
               day {w.fromDay}–{w.toDay} · {days}d · {formatDate(w.from)} – {formatDate(w.to)}
             </p>
             {!compact ? (
               <>
                 {/* Long-form copy stays one tap away, so the card leads with the dates. */}
                 <details className="ci-details mt-2">
-                  <summary className="ci-details__summary text-[11.5px] list-none">
+                  <summary className="ci-details__summary text-[length:var(--text-caption)] list-none">
                     <span className="flex items-center gap-1.5">
                       <svg
                         className="ci-details__chev"
@@ -233,12 +233,12 @@ export function PhaseCards({
                   </summary>
                   <p className="mt-1.5 text-[12px] leading-relaxed ci-soft">{guide.summary}</p>
                 </details>
-                <p className="mt-2 text-[11.5px] leading-relaxed ci-muted">
+                <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed ci-muted">
                   Often reported: {guide.signals.join(", ")}.
                 </p>
               </>
             ) : (
-              <p className="mt-1.5 text-[11.5px] ci-soft">{guide.window}</p>
+              <p className="mt-1.5 text-[length:var(--text-caption)] ci-soft">{guide.window}</p>
             )}
           </div>
         );
@@ -259,7 +259,7 @@ export function ForecastStrip({
   const cycles = analysis.forecast;
   if (cycles.length === 0) {
     return (
-      <p className="text-[12.5px] ci-muted">
+      <p className="text-[length:var(--text-support)] ci-muted">
         The next three cycles appear here as soon as there's a period to project from.
       </p>
     );
@@ -270,7 +270,7 @@ export function ForecastStrip({
       {cycles.map((c) => (
         <div key={c.index} data-phase="menstrual">
           <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
-            <p className="text-[12.5px] font-medium">
+            <p className="text-[length:var(--text-support)] font-medium">
               {c.index === 1 ? "Next cycle" : `Cycle +${c.index - 1}`}
             </p>
             {/* A predicted start is a window, never a bare date — the same
@@ -278,7 +278,7 @@ export function ForecastStrip({
                 printed as a single date; the fertile window is the
                 estimate, and it disappears entirely (with the reason
                 below) when the record is too variable to support one. */}
-            <p className="ci-num text-[11.5px] ci-muted">
+            <p className="ci-num text-[length:var(--text-caption)] ci-muted">
               predicted {formatDate(c.startFrom)} – {formatDate(c.startTo)}
               {c.fertileStart && c.fertileEnd
                 ? ` · fertile window estimated ${formatDate(c.fertileStart)} – ${formatDate(c.fertileEnd)}`
@@ -307,9 +307,9 @@ export function ForecastStrip({
           </div>
           {!compact && c.index === 1 ? (
             analysis.fertileSuppressed && analysis.fertileNote ? (
-              <p className="mt-1.5 text-[11.5px] ci-muted">{analysis.fertileNote}</p>
+              <p className="mt-1.5 text-[length:var(--text-caption)] ci-muted">{analysis.fertileNote}</p>
             ) : (
-              <p className="mt-1.5 text-[11.5px] ci-muted">
+              <p className="mt-1.5 text-[length:var(--text-caption)] ci-muted">
                 Berry is the predicted bleed, gold is the estimated fertile window. Fertile dates
                 are estimated from your logged dates only — they move as your record grows.
               </p>

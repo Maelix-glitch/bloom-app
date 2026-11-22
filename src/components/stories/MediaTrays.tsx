@@ -131,7 +131,7 @@ export function MusicTray({
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search songs and artists…"
                 aria-label="Search music"
-                className="w-full bg-transparent text-[13.5px] outline-none placeholder:text-faint/70"
+                className="w-full bg-transparent text-[length:var(--text-callout)] outline-none placeholder:text-faint/70"
               />
             </label>
             <div
@@ -169,10 +169,10 @@ export function MusicTray({
             <Upload className="size-4" aria-hidden />
           </span>
           <span className="min-w-0 flex-1">
-            <span className="block text-[13.5px] font-semibold">
+            <span className="block text-[length:var(--text-callout)] font-semibold">
               {audioBusy ? "Reading your audio…" : "Use your own audio"}
             </span>
-            <span className="block text-[11.5px] text-faint">An MP3 of yours, up to 12 MB.</span>
+            <span className="block text-[length:var(--text-caption)] text-faint">An MP3 of yours, up to 12 MB.</span>
           </span>
         </button>
         <input
@@ -192,7 +192,7 @@ export function MusicTray({
           <div className="flex flex-col items-center gap-1.5 rounded-2xl border border-border bg-surface/40 px-4 py-8 text-center">
             <Disc3 className="size-5 text-faint" aria-hidden />
             <p className="display text-[15px] text-muted-foreground">No song catalog connected.</p>
-            <p className="max-w-[32ch] text-[12.5px] text-faint">
+            <p className="max-w-[32ch] text-[length:var(--text-support)] text-faint">
               Bloom only plays music it has the rights to. Your own audio above works beautifully.
             </p>
           </div>
@@ -232,7 +232,7 @@ export function MusicTray({
                     )}
                   </span>
                   <span className="min-w-0 flex-1 leading-tight">
-                    <span className="block truncate text-[13.5px] font-semibold">
+                    <span className="block truncate text-[length:var(--text-callout)] font-semibold">
                       {track.title}
                       {track.explicit ? (
                         <span className="mono ml-1.5 rounded border border-border px-1 text-[length:var(--text-micro)] text-faint">
@@ -271,7 +271,7 @@ export function MusicTray({
                         durationMs: track.durationMs,
                       })
                     }
-                    className="bsheet-primary h-9 shrink-0 px-4 text-[12.5px]"
+                    className="bsheet-primary h-9 shrink-0 px-4 text-[length:var(--text-support)]"
                   >
                     Use
                   </button>
@@ -345,7 +345,7 @@ export function CatalogSearchTray({
             onChange={(e) => setQuery(e.target.value)}
             placeholder={placeholder}
             aria-label={searchLabel}
-            className="w-full bg-transparent text-[13.5px] outline-none placeholder:text-faint/70"
+            className="w-full bg-transparent text-[length:var(--text-callout)] outline-none placeholder:text-faint/70"
           />
         </label>
 

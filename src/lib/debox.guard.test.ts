@@ -62,7 +62,7 @@ describe("de-box foundation (M-175)", () => {
   it(".dbx-module wears no border (no box-in-a-box)", () => {
     const block = ruleBlock(DEBOX, ".dbx-module");
     expect(block).not.toMatch(/border\s*:/);
-    expect(block).toContain("border-radius: 16px;");
+    expect(block).toContain("border-radius: var(--radius-lg);");
     expect(block).toContain("background-color: var(--dbx-tone);");
   });
 

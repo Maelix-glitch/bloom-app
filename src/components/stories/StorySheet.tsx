@@ -86,7 +86,7 @@ export function StorySheet({
           <div className="min-w-0">
             <h2 className="display text-[18px] leading-tight">{title}</h2>
             {subtitle ? (
-              <p className="mt-0.5 text-[12.5px] text-muted-foreground">{subtitle}</p>
+              <p className="mt-0.5 text-[length:var(--text-support)] text-muted-foreground">{subtitle}</p>
             ) : null}
           </div>
           <button
