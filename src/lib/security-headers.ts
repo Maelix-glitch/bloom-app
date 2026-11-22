@@ -13,8 +13,9 @@
  *     Start's SSR hydration emits inline scripts and React emits
  *     inline style attributes; removing it is a nonce migration,
  *     tracked separately. Even with it, the policy still blocks
- *     every EXTERNAL script origin, all plugins (object-src 'none')
- *     and all framing (frame-ancestors 'none').
+ *     every EXTERNAL script origin except Razorpay's checkout
+ *     (below), all plugins (object-src 'none') and all framing of
+ *     Bloom itself (frame-ancestors 'none').
  *   · images: 'self' (dish/food photos are bundled assets), data:
  *     and blob: (canvas/upload previews), Supabase storage (profile
  *     and story media), Giphy (story GIFs), iTunes artwork
@@ -25,6 +26,17 @@
  *     functions over https, realtime over wss), iTunes search and
  *     the Deezer API. ElevenLabs is NOT here — the client never
  *     calls it; speech goes through the coach edge function.
+ *   · payments (M-213): Razorpay's Standard Web Checkout. The
+ *     paywall loads checkout.js from checkout.razorpay.com, the
+ *     modal renders in an api.razorpay.com iframe, and the modal
+ *     calls and form-posts back to Razorpay to complete UPI and
+ *     netbanking payments. Razorpay's own integration guidance is
+ *     to whitelist the razorpay.com domain, so exactly
+ *     https://*.razorpay.com is added — to script-src, frame-src,
+ *     connect-src, img-src (bank and method marks inside the
+ *     modal) and form-action — and nowhere else. Without it the
+ *     browser refused the script and the paywall could not open
+ *     the payment window at all.
  *
  * No Permissions-Policy: Bloom legitimately uses camera and
  * microphone (Coach photo capture, voice input, Stories camera),
@@ -39,13 +51,14 @@ export const CONTENT_SECURITY_POLICY = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
-  "form-action 'self'",
-  "script-src 'self' 'unsafe-inline'",
+  "form-action 'self' https://*.razorpay.com",
+  "script-src 'self' 'unsafe-inline' https://*.razorpay.com",
   "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data: blob: https://*.supabase.co https://*.giphy.com https://*.mzstatic.com https://*.dzcdn.net",
+  "img-src 'self' data: blob: https://*.supabase.co https://*.giphy.com https://*.mzstatic.com https://*.dzcdn.net https://*.razorpay.com",
   "media-src 'self' blob: https://*.supabase.co https://*.giphy.com https://*.dzcdn.net",
   "font-src 'self' data:",
-  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://itunes.apple.com https://api.deezer.com",
+  "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://itunes.apple.com https://api.deezer.com https://*.razorpay.com",
+  "frame-src 'self' https://*.razorpay.com",
   "worker-src 'self' blob:",
   "manifest-src 'self'",
 ].join("; ");
