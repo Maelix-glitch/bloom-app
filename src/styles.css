@@ -2638,10 +2638,10 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
    white 7%, and the fill as a gold-soft → gold gradient whose width
    animates on the house page motion when an award lands. */
 .rail-points-card {
-  /* M-221: the card joins the rail's glass — a tint step over the
-     rail's material (plain fallback first, then the tint), the sheen
-     and the shared border/rim. No backdrop blur of its own: glass
-     never stacks on glass. */
+  /* M-221: the card takes a tint step over the rail (plain fallback
+     first, then the tint), the sheen and the shared border/rim, with
+     no backdrop blur of its own. M-223 kept this tint step when the
+     rail's own background went back to solid. */
   background-color: var(--lg-fallback);
   background-color: var(--lg-tint);
   background-image: var(--lg-sheen);
@@ -3982,23 +3982,28 @@ body {
  * ======================================================================== */
 .app-sidebar {
   border-right: none;
-  /* M-221 (owner's glass picks, 2026-11-23): the rail's surface joins
-     the ruled glass places — the shared material at strong tint over
-     the plain fallback first, the sheen, the 20px/180% blur. The
-     de-box separation stands: no right border returns; the material
-     itself now separates rail from canvas. The botanical scrim
-     inside keeps its own ≥88% legibility band for the quote. */
-  background-color: var(--lg-fallback-strong);
-  background-color: var(--lg-tint-strong);
-  background-image: var(--lg-sheen);
-  -webkit-backdrop-filter: var(--lg-blur);
-  backdrop-filter: var(--lg-blur);
+  /* M-223 SUPERSESSION (owner directive 2026-11-23, hours after the
+     glass picks shipped): the rail's background colour is restored —
+     SOLID. M-221 put the shared glass material here, and over the
+     near-black canvas the translucent tint read as no colour at all:
+     the panel disappeared. The rail is a structural panel, not a
+     floating surface, so it wears its pre-M-221 solid surface again
+     — var(--sidebar) (#0b0c10, the tonal step the de-box separation
+     rests on), restated at this winning block. No sheen, no backdrop
+     blur, no glass tokens. The de-box separation stands: no right
+     border returns. Inside the rail, the points card and the active
+     pill keep their M-221 tint steps (no blur of their own); the
+     botanical scrim keeps its own ≥88% legibility band for the
+     quote. */
+  background: var(--sidebar);
 }
 .app-nav-link-active {
-  /* M-221: on the glass rail the active destination takes the
-     preview's glass pill — a tint step with the specular rim, and no
-     second backdrop blur (glass never stacks on glass). The gold
-     tick, the glyph glow and full-cream text stay the signals. */
+  /* M-221: the active destination takes the preview's glass pill —
+     a tint step with the specular rim, and no backdrop blur of its
+     own. M-223 kept this tint step when the rail's own background
+     went back to solid (the owner's correction spared the in-rail
+     steps). The gold tick, the glyph glow and full-cream text stay
+     the signals. */
   background-color: var(--lg-fallback);
   background-color: var(--lg-tint);
   box-shadow: var(--lg-rim-soft);

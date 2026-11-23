@@ -10,8 +10,6 @@ import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { PLANS } from "@/lib/billing/plans";
 import { verificationStatus } from "@/lib/profile/verification";
-import { memberBadgesOf } from "@/lib/profile/badges";
-import { MemberBadges } from "@/components/profile/MemberBadges";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
 import { BloomLogo } from "@/components/BloomLogo";
@@ -207,14 +205,12 @@ function RailProfile() {
   const verification = verificationStatus({
     hasRecord: id.verification.hasRecord,
   });
-  /* The member badges (M-209), from the same identity read. The rail
-     is 220px wide and this row already truncates the name beside the
-     avatar and the settings link — three pills (~230px of labels)
-     cannot fit without crushing the name to nothing, so the rail
-     wears the single highest-priority badge (the derivation's order:
-     founder, trainer, tester) at the small size. The full set lives
-     on the Profile hero and in Settings. */
-  const railBadges = memberBadgesOf(id.badges);
+  /* No member-badge pill in the rail (M-223, owner directive
+     2026-11-23): the identity strip carries the name and the verified
+     tick ONLY. The M-209 badges themselves are untouched — the full
+     set still lives on the Profile hero, in user search rows and in
+     Settings — and the identity read still carries the badge facts
+     for those surfaces; only this rail rendering is gone. */
   // While the session is still restoring, the name holds a skeleton bar
   // (M-202, F-01) — painting "Sign in" here flashed guest copy at
   // signed-in users on every cold load, and an ellipsis reads as a
@@ -265,7 +261,6 @@ function RailProfile() {
               <span className="truncate">{name}</span>
             )}
             {signedIn ? <VerifiedBadge status={verification} size={14} tone="gold" /> : null}
-            {signedIn ? <MemberBadges badges={railBadges.slice(0, 1)} size="sm" /> : null}
           </span>
           <span className="block truncate text-[length:var(--text-caption)] leading-[var(--leading-caption)] text-muted-foreground">
             {linePending ? (
