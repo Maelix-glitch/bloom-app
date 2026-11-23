@@ -22,10 +22,13 @@
  *     includes. The button opens the shared paywall sheet.
  */
 
+import { useState } from "react";
+
 import { useEntitlement, type UseEntitlementState } from "@/hooks/useEntitlement";
 import { requestPaywall } from "@/lib/billing/paywall";
+import { cancelAutoRenew } from "@/lib/billing/checkout";
+import { invalidateEntitlement, type Entitlement } from "@/lib/billing/entitlement";
 import { CREDIT_WEIGHTS_LINE, PLANS } from "@/lib/billing/plans";
-import type { Entitlement } from "@/lib/billing/entitlement";
 
 import "@/styles/billing.css";
 
@@ -96,6 +99,41 @@ export function PremiumSection() {
   const state = useEntitlement();
   const fact = state.kind === "ready" ? periodFact(state.entitlement) : null;
 
+  /* M-222: cancel auto-renew. Shown only to a paid member whose
+     plan is live; the function answers honestly for every case —
+     including "no auto-renewing subscription", which is the truth
+     for a one-time Orders purchase or a manual grant (nothing
+     renews automatically there, so there is nothing to cancel).
+     Cancelling ends the mandate at the period end; the plan stays
+     live until then, and this card says so in those words. */
+  const [cancelBusy, setCancelBusy] = useState(false);
+  const [cancelNote, setCancelNote] = useState<string | null>(null);
+  const onCancelAutoRenew = async () => {
+    setCancelBusy(true);
+    try {
+      const result = await cancelAutoRenew();
+      if (result.state === "cancel_scheduled") {
+        const date = formatDate(result.periodEnd);
+        setCancelNote(
+          date
+            ? `Auto-renew is off — your plan stays active until ${date}, and nothing is charged after that.`
+            : "Auto-renew is off — your plan stays active until the current period ends, and nothing is charged after that.",
+        );
+        invalidateEntitlement();
+      } else if (result.state === "no_active_subscription") {
+        setCancelNote(
+          "No auto-renewing subscription was found on your account — your plan doesn't renew automatically, so there's nothing to cancel.",
+        );
+      } else if (result.state === "payments_not_configured") {
+        setCancelNote("Auto-renew can't be changed right now — Bloom's payment account isn't connected yet.");
+      } else {
+        setCancelNote("That didn't go through just now — try again in a moment.");
+      }
+    } finally {
+      setCancelBusy(false);
+    }
+  };
+
   return (
     <div className="pf-card bill-plan">
       <div className="bill-plan-head">
@@ -156,6 +194,31 @@ export function PremiumSection() {
               {state.entitlement.tier === "free" ? "See Premium plans" : "Manage or upgrade"}
             </button>
           </div>
+
+          {/* M-222: the auto-renew control, on the membership card
+              where the membership lives. A quiet ghost action under
+              the primary — cancelling is a right, not a dark
+              pattern, and its outcome line replaces the button. */}
+          {state.entitlement.tier !== "free" && state.entitlement.status === "active" ? (
+            cancelNote ? (
+              <p className="bill-plan-desc" role="status">
+                {cancelNote}
+              </p>
+            ) : (
+              <button
+                type="button"
+                className="bill-btn bill-btn-ghost"
+                disabled={cancelBusy}
+                onClick={() => void onCancelAutoRenew()}
+              >
+                {cancelBusy ? "Cancelling…" : "Cancel auto-renew"}
+              </button>
+            )
+          ) : cancelNote ? (
+            <p className="bill-plan-desc" role="status">
+              {cancelNote}
+            </p>
+          ) : null}
         </>
       )}
     </div>

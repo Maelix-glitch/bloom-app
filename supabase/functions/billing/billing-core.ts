@@ -86,6 +86,63 @@ export function planIdFor(config: RazorpayConfig, tier: PaidTier, period: PaidPe
   return config.planIds[`${tier}_${period}`] || null;
 }
 
+/* ------------------------------------------------------------------ */
+/* Autopay plans (M-222)                                              */
+/*                                                                    */
+/* The subscription rail's price lives in a Razorpay Plan. Plans are  */
+/* no longer only dashboard-made: the function ENSURES the four Bloom */
+/* plans exist — a dashboard plan id from the env secrets wins when   */
+/* set (the original arrangement), otherwise the id persisted in      */
+/* public.billing_plans, otherwise a plan created through the API     */
+/* from THIS price table and persisted. The amount a plan carries     */
+/* always comes from PLAN_PRICES_PAISE — the same server table the    */
+/* Orders rail prices from — never a second source, never the         */
+/* client. If the billing_plans table is absent (the M-222 migration  */
+/* not yet applied) the lookup fails and the caller answers the       */
+/* honest not-ready state: no plan id is ever fabricated.             */
+/* ------------------------------------------------------------------ */
+
+export function planKeyFor(tier: PaidTier, period: PaidPeriod): string {
+  return `${tier}_${period}`;
+}
+
+export interface RazorpayPlanBody {
+  name: string;
+  period: PaidPeriod;
+  interval: 1;
+  item: { name: string; amount: number; currency: "INR"; description: string };
+  notes: { kind: typeof ORDER_NOTES_KIND; tier: PaidTier; period: PaidPeriod };
+}
+
+const PLAN_DISPLAY_NAMES: Record<PaidTier, string> = {
+  premium: "Bloom Premium",
+  premium_plus: "Bloom Premium Plus",
+};
+
+export function buildPlanBody(tier: PaidTier, period: PaidPeriod): RazorpayPlanBody {
+  const name = `${PLAN_DISPLAY_NAMES[tier]} — ${period === "monthly" ? "Monthly" : "Yearly"}`;
+  return {
+    name,
+    period,
+    interval: 1,
+    item: {
+      name,
+      amount: orderAmountPaiseFor(tier, period),
+      currency: "INR",
+      description: `${PLAN_DISPLAY_NAMES[tier]} on Bloom Vitalis, billed ${period}.`,
+    },
+    notes: { kind: ORDER_NOTES_KIND, tier, period },
+  };
+}
+
+/** The M-222 subscription rail needs only the API credentials to
+ *  start: plan ids are resolved (env → billing_plans → ensured via
+ *  the API) rather than required up front the way the legacy
+ *  create_checkout rail required them. */
+export function subscriptionConfigured(config: RazorpayConfig): boolean {
+  return Boolean(config.keyId && config.keySecret);
+}
+
 export function parseCheckoutRequest(body: unknown): { tier: PaidTier; period: PaidPeriod } | null {
   if (!body || typeof body !== "object") return null;
   const b = body as Record<string, unknown>;
@@ -397,6 +454,23 @@ export function mapRazorpayEvent(payload: unknown): WebhookAction {
     case "subscription.cancelled":
       if (!userId) return { kind: "ignore", event };
       return { kind: "status", userId, status: "cancelled", periodEnd };
+    case "subscription.halted":
+      /* Razorpay halts a subscription when a charge fails past every
+         retry: no further debits will happen, but the period the
+         member already paid for still runs to current_end. The
+         entitlement write therefore uses the "cancelled" status —
+         the one billing_effective_tier keeps alive until the period
+         end — so the plan lapses AT the period end, never instantly
+         mid-paid-period (M-222). The raw provider status is kept in
+         the billing_subscriptions tracking row. */
+      if (!userId) return { kind: "ignore", event };
+      return { kind: "status", userId, status: "cancelled", periodEnd };
+    case "subscription.authenticated":
+      /* The mandate (UPI AutoPay / card e-mandate) was authorised.
+         No money has moved and nothing is owed yet: entitlement
+         arrives only with subscription.charged. Recorded in the
+         tracking row by the caller; never an entitlement write. */
+      return { kind: "ignore", event };
     case "subscription.expired":
     case "subscription.completed":
       if (!userId) return { kind: "ignore", event };
@@ -408,4 +482,72 @@ export function mapRazorpayEvent(payload: unknown): WebhookAction {
     default:
       return { kind: "ignore", event };
   }
+}
+
+/* ------------------------------------------------------------------ */
+/* Subscription tracking (M-222)                                      */
+/*                                                                    */
+/* public.billing_subscriptions is the autopay rail's own record:     */
+/* one row per provider subscription, written when the function       */
+/* creates the subscription and refreshed by every verified           */
+/* subscription webhook. It is NOT the entitlement — that stays the   */
+/* public.subscriptions row the RPCs write — so entitlement reads     */
+/* never change. The status kept here is the provider's own word      */
+/* (halted stays halted), even where the entitlement write above      */
+/* deliberately maps it onto the status vocabulary the RPC allows.   */
+/* ------------------------------------------------------------------ */
+
+export interface SubscriptionTrackingRow {
+  providerSubscriptionId: string;
+  userId: string;
+  planKey: string | null;
+  tier: PaidTier | null;
+  period: PaidPeriod | null;
+  status: string;
+  periodStart: string | null;
+  periodEnd: string | null;
+}
+
+const TRACKING_STATUS_BY_EVENT: Record<string, string> = {
+  "subscription.authenticated": "authenticated",
+  "subscription.activated": "active",
+  "subscription.charged": "active",
+  "subscription.pending": "pending",
+  "subscription.paused": "paused",
+  "subscription.resumed": "active",
+  "subscription.halted": "halted",
+  "subscription.cancelled": "cancelled",
+  "subscription.completed": "completed",
+  "subscription.expired": "expired",
+};
+
+/** Derive the tracking row for a verified subscription webhook
+ *  payload, or null when the payload carries no attributable
+ *  subscription (a payment event, a shapeless body, notes the
+ *  checkout never wrote). */
+export function trackingRowForEvent(payload: unknown): SubscriptionTrackingRow | null {
+  const root = asRecord(payload);
+  const event = typeof root?.["event"] === "string" ? (root["event"] as string) : "";
+  const status = TRACKING_STATUS_BY_EVENT[event];
+  if (!status) return null;
+  const entity = asRecord(asRecord(asRecord(root?.["payload"])?.["subscription"])?.["entity"]);
+  if (!entity) return null;
+  const subscriptionId = typeof entity["id"] === "string" ? entity["id"] : "";
+  const notes = asRecord(entity["notes"]) ?? {};
+  const userId = typeof notes["user_id"] === "string" ? notes["user_id"] : "";
+  if (!subscriptionId || !userId) return null;
+  const tier =
+    notes["tier"] === "premium" || notes["tier"] === "premium_plus" ? notes["tier"] : null;
+  const period =
+    notes["period"] === "monthly" || notes["period"] === "yearly" ? notes["period"] : null;
+  return {
+    providerSubscriptionId: subscriptionId,
+    userId,
+    planKey: tier && period ? planKeyFor(tier, period) : null,
+    tier,
+    period,
+    status,
+    periodStart: unixToIso(entity["current_start"]),
+    periodEnd: unixToIso(entity["current_end"]),
+  };
 }

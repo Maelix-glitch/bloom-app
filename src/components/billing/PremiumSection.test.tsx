@@ -23,6 +23,13 @@ vi.mock("@/lib/billing/paywall", () => ({
   requestPaywall: vi.fn(),
 }));
 
+const checkoutMock = vi.hoisted(() => ({
+  cancelAutoRenew: vi.fn(),
+}));
+vi.mock("@/lib/billing/checkout", () => ({
+  cancelAutoRenew: checkoutMock.cancelAutoRenew,
+}));
+
 import { PremiumSection } from "./PremiumSection";
 import { requestPaywall } from "@/lib/billing/paywall";
 import type { UseEntitlementState } from "@/hooks/useEntitlement";
@@ -207,5 +214,62 @@ describe("PremiumSection — the status card", () => {
 
     expect(screen.getByText("Loading your plan…")).toBeTruthy();
     expect(screen.queryByRole("meter")).toBeNull();
+  });
+});
+
+describe("PremiumSection — cancel auto-renew (M-222)", () => {
+  it("a live paid plan offers it; cancelling answers with the period-end truth", async () => {
+    checkoutMock.cancelAutoRenew.mockResolvedValue({
+      state: "cancel_scheduled",
+      periodEnd: "2027-01-15T00:00:00.000Z",
+    });
+    entitlementMock.state = ready({
+      tier: "premium",
+      status: "active",
+      currentPeriodEnd: "2027-01-15T00:00:00.000Z",
+      creditBalance: 300,
+      monthlyAllowance: 300,
+    });
+    render(<PremiumSection />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel auto-renew" }));
+    const note = await screen.findByText(/Auto-renew is off/);
+    expect(note.textContent).toContain("15 Jan 2027");
+    expect(note.textContent).toContain("nothing is charged after that");
+    /* The button is gone once the outcome is stated. */
+    expect(screen.queryByRole("button", { name: "Cancel auto-renew" })).toBeNull();
+  });
+
+  it("no auto-renewing subscription is stated plainly, not as an error", async () => {
+    checkoutMock.cancelAutoRenew.mockResolvedValue({ state: "no_active_subscription" });
+    entitlementMock.state = ready({
+      tier: "premium_plus",
+      status: "active",
+      currentPeriodEnd: "2126-11-18T12:00:00.000Z",
+      creditBalance: 800,
+      monthlyAllowance: 800,
+    });
+    render(<PremiumSection />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel auto-renew" }));
+    const note = await screen.findByText(/No auto-renewing subscription was found/);
+    expect(note.textContent).toContain("nothing to cancel");
+  });
+
+  it("free and non-active plans never offer it", () => {
+    entitlementMock.state = ready({ tier: "free", status: "none", creditBalance: 20, monthlyAllowance: 20 });
+    render(<PremiumSection />);
+    expect(screen.queryByRole("button", { name: "Cancel auto-renew" })).toBeNull();
+    cleanup();
+
+    entitlementMock.state = ready({
+      tier: "premium",
+      status: "cancelled",
+      currentPeriodEnd: "2027-01-15T00:00:00.000Z",
+      creditBalance: 300,
+      monthlyAllowance: 300,
+    });
+    render(<PremiumSection />);
+    expect(screen.queryByRole("button", { name: "Cancel auto-renew" })).toBeNull();
   });
 });
