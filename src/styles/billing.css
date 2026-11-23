@@ -3,6 +3,11 @@
  * Scoped under .bill-* so the pricing surfaces carry the house tokens
  * (gold gradient CTA, glass surfaces, the type scale) without leaking
  * into other routes. Imported by the billing components themselves.
+ *
+ * M-220: the paywall's composition is design A, "The Invitation" —
+ * its rules live in the M-220 section at the foot of this file, in
+ * the preview's literal values (the preview is the spec). The
+ * Profile membership card (.bill-plan / .bill-meter) is unchanged.
  * ------------------------------------------------------------------------- */
 
 .bill-stack {
@@ -24,32 +29,6 @@
   height: 44px;
 }
 
-.bill-eyebrow {
-  font-size: var(--text-meta);
-  font-weight: 500;
-  letter-spacing: var(--tracking-eyebrow);
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-}
-
-.bill-title {
-  font-family: var(--font-display);
-  font-size: var(--text-title);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-heading);
-  margin-top: var(--space-2);
-}
-
-.bill-body {
-  font-size: var(--text-callout);
-  line-height: var(--leading-callout);
-  color: var(--text-secondary);
-  margin-top: var(--space-2);
-  /* An editorial measure — the full 632px measure ran to ~95 characters
-     a line and read as a wall against the cards below. */
-  max-width: 56ch;
-}
-
 .bill-status {
   border: 1px solid color-mix(in oklab, var(--gold) 40%, transparent);
   background: color-mix(in oklab, var(--gold) 8%, transparent);
@@ -59,43 +38,39 @@
   line-height: var(--leading-callout);
 }
 
-/* Monthly / yearly switch — a quiet segmented control, centred on the
-   sheet's axis rather than hugging the left edge. */
-.bill-toggle-row {
-  display: flex;
-  justify-content: center;
-}
+/* Monthly / yearly switch — design A's period toggle (M-220): a
+   bordered pill on the panel tone, the chosen period wearing the
+   preview's gold gradient with ink words. The toggle lives inside
+   .bill-a-period (the M-220 section), beside its sage saving note. */
 .bill-toggle {
   display: inline-flex;
-  gap: 2px;
-  padding: 3px;
+  padding: var(--space-1);
+  border: 1px solid rgba(236, 232, 225, 0.1);
   border-radius: var(--radius-pill);
-  background: var(--surface-2);
-  border: 1px solid var(--border-subtle);
+  background: var(--surface);
 }
 .bill-toggle button {
-  min-height: 36px;
-  padding: 0.3rem 0.95rem;
+  border: 0;
   border-radius: var(--radius-pill);
-  font-size: var(--text-callout);
+  padding: var(--space-2) 20px;
+  background: transparent;
+  color: rgba(236, 232, 225, 0.64);
+  font-size: var(--bill-a-fs-toggle);
   font-weight: 600;
-  color: var(--text-secondary);
+  min-height: 38px;
   transition:
     background-color var(--motion-standard) var(--ease-out-expo),
     color var(--motion-standard) var(--ease-out-expo);
 }
 .bill-toggle button[aria-pressed="true"] {
-  background: var(--surface-3);
-  color: var(--foreground);
-}
-.bill-toggle .bill-save {
-  color: var(--gold);
-  font-weight: 600;
+  background: linear-gradient(180deg, var(--gold-grad-hi) 0%, var(--gold) 55%, var(--gold-grad-lo) 100%);
+  color: var(--bill-a-on-gold);
 }
 
 /* The context strip — what was reached, before any price appears.
-   The G head above it carries the design's own title; this carries
-   the context's specific headline (the sheet is specific first). */
+   Design A's head above it carries the invitation's own words; this
+   carries the context's specific headline (the sheet is specific
+   first). */
 .bill-context {
   font-size: var(--text-callout);
   line-height: var(--leading-callout);
@@ -106,172 +81,13 @@
   font-weight: 600;
 }
 
-.bill-price {
-  white-space: nowrap;
-  font-family: var(--font-display);
-  font-size: var(--text-page);
-  line-height: var(--leading-tight);
-  letter-spacing: var(--tracking-display);
-}
-.bill-price small {
-  font-family: var(--font-sans);
-  font-size: var(--text-callout);
-  color: var(--muted-foreground);
-  letter-spacing: var(--tracking-body);
-}
-
-.bill-equivalent {
-  font-size: var(--text-caption);
-  color: var(--faint-strong);
-}
-
-/* ------------------------------------------------- M-216 (design G) */
-/* The Comparison: two column heads over one shared ledger. The pair
-   is side by side at EVERY width — the columns tighten on a phone,
-   they never stack into cards, because side-by-side is the design. */
-.bill-g-heads {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-/* An opaque panel (owner's bleed-through rule, verified at creation):
-   a solid house surface token, no translucent fill, no backdrop
-   blur — and sheet.guard's census pins the winning background. */
-.bill-g-head {
-  border: 1px solid var(--border-subtle);
-  background: var(--surface-2);
-  border-radius: var(--radius-card);
-  padding: var(--space-3);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
-}
-.bill-g-head--plus {
-  background: linear-gradient(170deg, var(--surface-3), var(--surface-2));
-  border-color: color-mix(in oklab, var(--gold) 45%, transparent);
-}
-/* The member's own column: a sage edge under the gold where both
-   apply (declared after --plus so it wins for a Plus member). */
-.bill-g-head--mine {
-  border-color: color-mix(in oklab, var(--sage) 55%, transparent);
-}
-/* A Plus-bound context spotlights the Plus column. */
-.bill-g-head--spotlight {
-  border-color: var(--gold);
-  box-shadow: 0 14px 30px -18px color-mix(in oklab, var(--gold) 65%, transparent);
-}
-
-.bill-g-loved {
-  font-size: var(--text-meta);
-  font-weight: 700;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--gold);
-}
-.bill-g-plan {
-  font-size: var(--text-meta);
-  font-weight: 600;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.bill-g-head--plus .bill-g-plan {
-  color: var(--gold);
-}
-.bill-g-credits {
-  font-size: var(--text-caption);
-  color: var(--faint-strong);
-}
-/* The current-plan mark on its column head — a sage chip, pinned to
-   the head's foot so the pair of heads composes as one unit. */
-.bill-g-yours {
-  align-self: flex-start;
-  margin-top: auto;
-  border: 1px solid color-mix(in oklab, var(--sage) 45%, transparent);
-  background: color-mix(in oklab, var(--sage) 10%, transparent);
-  color: var(--sage);
-  border-radius: var(--radius-pill);
-  padding: 0.3rem 0.6rem;
-  font-size: var(--text-caption);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* The shared ledger: label + one cell per plan, hairline-ruled. */
-.bill-g-ledger {
-  display: grid;
-}
-.bill-g-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 3.25rem 3.25rem;
-  align-items: center;
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 7%, transparent);
-}
-.bill-g-row--head {
-  padding-top: 0;
-  border-bottom: 1px solid color-mix(in oklab, var(--gold) 30%, transparent);
-}
-.bill-g-row:last-child {
-  border-bottom: 0;
-}
-.bill-g-label {
-  font-size: var(--text-support);
-  line-height: 1.4;
-  color: color-mix(in oklab, var(--foreground) 88%, transparent);
-  padding-right: var(--space-2);
-}
-.bill-g-cell {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-.bill-g-cell svg {
-  flex: none;
-  width: 15px;
-  height: 15px;
-  color: var(--gold);
-}
-.bill-g-dash {
-  color: color-mix(in oklab, var(--foreground) 30%, transparent);
-  font-size: var(--text-callout);
-}
-.bill-g-colname {
-  font-size: var(--text-meta);
-  font-weight: 700;
-  letter-spacing: var(--tracking-caps);
-  text-transform: uppercase;
-  color: var(--muted-foreground);
-}
-.bill-g-colname--plus {
-  color: var(--gold);
-}
-
-/* One button per column, under its own column. */
-.bill-g-btns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-2);
-}
-.bill-g-btns .bill-btn {
-  width: 100%;
-  padding: 0.55rem var(--space-2);
-}
-/* The plan state as a disabled button: sage state treatment (the
-   card-era badge's), never the gold action fill, and not faded —
-   a state is a fact, not a dimmed action. */
-.bill-btn-state {
-  border: 1px solid color-mix(in oklab, var(--sage) 45%, transparent);
-  background: color-mix(in oklab, var(--sage) 10%, transparent);
-  color: var(--sage);
-  white-space: normal;
-  text-align: center;
-}
-.bill-btn.bill-btn-state:disabled {
-  opacity: 1;
-}
+/* ------------------------------------------------- M-216 → M-220 */
+/* Design G's comparison composition (the two column heads, the
+   shared ledger, the per-column buttons) was retired by M-220 —
+   design A, "The Invitation", replaced it wholesale. Its rules
+   lived here; the A rules live in the M-220 section at the foot of
+   this file. The comparison DATA (PAYWALL_COMPARISON in plans.ts)
+   is untouched — it still drives the gates and Free's drop-down. */
 
 .bill-btn {
   display: inline-flex;
@@ -328,15 +144,6 @@
   font-size: var(--text-caption);
   line-height: var(--leading-caption);
   color: var(--faint-strong);
-}
-
-/* M-215: the weighted-credits line under the sheet's status facts —
-   caption register, in the scroll flow (not the foot zone). */
-.bill-weights {
-  font-size: var(--text-caption);
-  line-height: var(--leading-caption);
-  color: var(--faint-strong);
-  margin-top: var(--space-3);
 }
 
 /* Profile membership card — the credits meter. */
@@ -446,4 +253,377 @@
    Pinned in touch.guard (M-202). */
 .bill-toggle button {
   min-height: 44px;
+}
+
+/* ------------------------------------------------- M-220 (design A) */
+/* "The Invitation" — the owner-approved membership preview, copied
+   exactly (owner, 2026-11-23: "copy exactly like the apple clean,
+   no change, even the background color"). The values below are the
+   preview's literals, the way M-170 carried the Welcome preview's:
+   the ink ground (the house --background token, whose value
+   it is), the four corner glows, the 340px column, Fraunces at
+   37px, the rows at 18px radius over rgba(23, 25, 31, .72) with the
+   preview's own 6px blur, and the gold pill in the preview's
+   180deg gradient (the --gold-grad-hi / --gold / --gold-grad-lo
+   stops at 0/55/100%, on-gold ink a scoped token below) —
+   not the house --gold-gradient, whose angle and stops differ. */
+
+/* The panel wears the preview's ground: ink, fully opaque (the
+   family's slab rule is untouched — only the tone changes, from
+   --surface to --background), and the foot zone flows onto the
+   same ground with no seam line, as the preview's fineprint does. */
+.bsheet-panel.bill-a-panel {
+  background: var(--background);
+}
+.bsheet-panel.bill-a-panel .bsheet-foot {
+  background: var(--background);
+  border-top: 0;
+}
+/* The scene and the foot ride above the glow layer. */
+.bsheet-panel.bill-a-panel .bsheet-scroll,
+.bsheet-panel.bill-a-panel .bsheet-foot {
+  position: relative;
+  z-index: 1;
+}
+
+/* The preview's four corner glows, fixed to the panel (the panel
+   clips them at its radius, exactly as the preview's stage does). */
+.bill-a-glows {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bill-a-glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(70px);
+}
+.bill-a-glow--gold-tl {
+  width: 340px;
+  height: 340px;
+  top: -150px;
+  left: -140px;
+  background: radial-gradient(circle, rgba(246, 233, 205, 0.5), rgba(246, 233, 205, 0) 65%);
+}
+.bill-a-glow--sage-r {
+  width: 320px;
+  height: 320px;
+  top: 24%;
+  right: -170px;
+  background: radial-gradient(circle, rgba(143, 199, 162, 0.42), rgba(143, 199, 162, 0) 65%);
+}
+.bill-a-glow--rose-bl {
+  width: 300px;
+  height: 300px;
+  bottom: -140px;
+  left: -120px;
+  background: radial-gradient(circle, rgba(227, 145, 159, 0.34), rgba(227, 145, 159, 0) 65%);
+}
+.bill-a-glow--gold-br {
+  width: 260px;
+  height: 260px;
+  bottom: -110px;
+  right: -90px;
+  background: radial-gradient(circle, rgba(220, 192, 143, 0.4), rgba(220, 192, 143, 0) 65%);
+}
+
+/* The preview's centred column. Its rhythm is the preview's own
+   margins, so the stack's grid gap must not add a second rhythm:
+   the wrap is the stack's single child, and inside it the pieces
+   space themselves. */
+.bill-a-wrap {
+  max-width: 340px;
+  margin: 0 auto;
+  width: 100%;
+  /* Scoped tokens (M-220): the preview values the shared scale does
+     not hold — the on-gold ink, the orb's gradient stops and core,
+     and the off-scale type sizes — born here as definitions, the
+     house form for exact-match work (M-170's --wl-* precedent). */
+  --bill-a-on-gold: #221806;
+  --bill-a-orb-hi: #f6e9cd;
+  --bill-a-orb-mid: #dcc08f;
+  --bill-a-orb-sage: #8fae94;
+  --bill-a-orb-deep: #5f7a63;
+  --bill-a-orb-core: #f8eed3;
+  --bill-a-orb-glint: #fffaf0;
+  --bill-a-fs-toggle: 13.5px;
+  --bill-a-fs-sub: 14.5px;
+  --bill-a-fs-price: 19px;
+  --bill-a-fs-pill: 9.5px;
+  --bill-a-fs-cta: 15.5px;
+}
+.bill-a-orb {
+  display: block;
+}
+.bill-a-orb .orb-s0 {
+  stop-color: var(--bill-a-orb-hi);
+}
+.bill-a-orb .orb-s1 {
+  stop-color: var(--bill-a-orb-mid);
+}
+.bill-a-orb .orb-s2 {
+  stop-color: var(--bill-a-orb-sage);
+}
+.bill-a-orb .orb-s3 {
+  stop-color: var(--bill-a-orb-deep);
+}
+.bill-a-orb-core {
+  fill: var(--bill-a-orb-core);
+}
+.bill-a-orb-glint {
+  fill: var(--bill-a-orb-glint);
+}
+.bill-a-eyebrow {
+  margin: 22px 0 14px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: rgba(236, 232, 225, 0.64);
+}
+.bill-a-title {
+  margin: 0 0 14px;
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 37px;
+  line-height: 1.12;
+  color: var(--foreground);
+}
+.bill-a-sub {
+  margin: 0 0 26px;
+  font-size: var(--bill-a-fs-sub);
+  line-height: 1.65;
+  color: rgba(236, 232, 225, 0.64);
+}
+/* The sheet's specific-first lines sit in the column under the
+   invitation's sub, in the preview's measure. */
+.bill-a-wrap .bill-context {
+  margin: 0 0 14px;
+}
+.bill-a-wrap .bill-status {
+  margin: 0 0 14px;
+}
+
+/* The period row: the toggle and its sage note, as the preview's
+   period bar composes them. */
+.bill-a-period {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  margin: 0 0 22px;
+}
+.bill-a-period-note {
+  font-size: 13px;
+  color: var(--sage);
+  font-weight: 500;
+}
+
+/* The plan rows — the preview's .plan-row, value for value. */
+.bill-a-rows {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 22px;
+}
+.bill-a-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  text-align: left;
+  padding: 15px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(236, 232, 225, 0.1);
+  background: rgba(23, 25, 31, 0.72);
+  color: var(--foreground);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  cursor: pointer;
+  font: inherit;
+}
+.bill-a-radio {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(236, 232, 225, 0.35);
+  display: grid;
+  place-items: center;
+}
+.bill-a-radio::after {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: transparent;
+}
+.bill-a-row[aria-checked="true"] {
+  border-color: rgba(220, 192, 143, 0.65);
+  background: rgba(220, 192, 143, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(220, 192, 143, 0.3),
+    0 14px 34px rgba(0, 0, 0, 0.35);
+}
+.bill-a-row[aria-checked="true"] .bill-a-radio {
+  border-color: var(--gold);
+}
+.bill-a-row[aria-checked="true"] .bill-a-radio::after {
+  background: linear-gradient(180deg, var(--gold-grad-hi) 0%, var(--gold) 55%, var(--gold-grad-lo) 100%);
+}
+.bill-a-row-main {
+  display: block;
+  min-width: 0;
+}
+.bill-a-name {
+  font-size: 15px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.bill-a-tag {
+  display: block;
+  font-size: 12px;
+  color: rgba(236, 232, 225, 0.64);
+  margin-top: 2px;
+  line-height: 1.45;
+}
+.bill-a-price {
+  margin-left: auto;
+  text-align: right;
+  flex: none;
+}
+.bill-a-amt {
+  display: block;
+  font-family: var(--font-display);
+  font-size: var(--bill-a-fs-price);
+  color: var(--gold-soft);
+  white-space: nowrap;
+}
+.bill-a-per {
+  display: block;
+  font-size: 11px;
+  color: rgba(236, 232, 225, 0.42);
+  margin-top: 1px;
+}
+.bill-a-pill {
+  font-size: var(--bill-a-fs-pill);
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  border-radius: var(--radius-pill);
+  padding: 3px var(--space-2);
+  white-space: nowrap;
+}
+.bill-a-pill--pop {
+  color: var(--bill-a-on-gold);
+  background: linear-gradient(180deg, var(--gold-grad-hi) 0%, var(--gold) 55%, var(--gold-grad-lo) 100%);
+}
+.bill-a-pill--plus {
+  color: var(--background);
+  background: var(--sage);
+}
+/* The member's own row: the state pill, in sage like the design's
+   Plus pill — a fact, in the design's own state colour. */
+.bill-a-pill--yours {
+  color: var(--background);
+  background: var(--sage);
+}
+
+/* The owner's amendment (2026-11-23): the glass drop-down under the
+   selected row — what is included in that plan. The surface is the
+   app's ONE glass material (.glass-panel, glass.css — its strong
+   tint keeps every line legible over the scene); this rule carries
+   only the drop-down's own layout and arrival. It is the single
+   recorded exception to glass-never-in-a-sheet (M-220). */
+.bill-a-includes {
+  margin-top: 10px;
+  padding: 16px var(--space-4);
+  animation: bill-a-includes-in 0.25s ease;
+}
+@keyframes bill-a-includes-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bill-a-includes {
+    animation: none;
+  }
+}
+.bill-a-includes-title {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-soft);
+  margin-bottom: 10px;
+}
+.bill-a-includes-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--space-2);
+}
+.bill-a-includes-list li {
+  display: flex;
+  gap: var(--space-2);
+  font-size: var(--bill-a-fs-toggle);
+  line-height: 1.55;
+  color: var(--foreground);
+}
+.bill-a-includes-list li svg {
+  flex: none;
+  width: 15px;
+  height: 15px;
+  margin-top: 3px;
+  color: var(--sage);
+}
+
+/* The one gold pill — the preview's .cta-gold, value for value. */
+.bill-a-cta {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: var(--radius-pill);
+  padding: 15px var(--space-5);
+  background: linear-gradient(180deg, var(--gold-grad-hi) 0%, var(--gold) 55%, var(--gold-grad-lo) 100%);
+  color: var(--bill-a-on-gold);
+  font-size: var(--bill-a-fs-cta);
+  font-weight: 600;
+  min-height: 44px;
+  cursor: pointer;
+  box-shadow:
+    0 12px 30px rgba(199, 157, 98, 0.28),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+.bill-a-cta:active {
+  transform: translateY(1px);
+}
+.bill-a-cta:disabled {
+  opacity: 0.55;
+  pointer-events: none;
+}
+/* A plan state wears the sage state treatment (the house language
+   for a fact that is not an action), never the gold fill — and it
+   is not faded: a state is a fact, not a dimmed action. */
+.bill-a-cta--state {
+  border: 1px solid color-mix(in oklab, var(--sage) 45%, transparent);
+  background: color-mix(in oklab, var(--sage) 10%, transparent);
+  color: var(--sage);
+  box-shadow: none;
+}
+.bill-a-cta.bill-a-cta--state:disabled {
+  opacity: 1;
+}
+/* The member's manage action and any checkout notice sit under the
+   pill, in the column's measure. */
+.bill-a-wrap .bill-manage {
+  margin-top: var(--space-3);
+}
+.bill-a-wrap .bill-note {
+  margin-top: 14px;
 }

@@ -8,11 +8,13 @@
  * provider is unconfigured ends in the honest "payments open soon —
  * nothing has been charged" notice, never an error or a fake charge.
  *
- * M-216: the composition is design G, "The Comparison" (owner pick,
- * 2026-11-22) — one shared feature ledger under two column heads,
- * driven by PAYWALL_COMPARISON in lib/billing/plans. The card-era
- * pins (per-card bullets, the featured card, status badges) were
- * rewritten for the ledger where the composition legitimately
+ * M-220: the composition is design A, "The Invitation" (owner pick,
+ * 2026-11-23) — the preview's three plan rows with radio marks, one
+ * gold pill CTA whose label follows the selection, and the owner's
+ * amendment: the selected row opens a glass drop-down listing what
+ * is included (PAYWALL_BULLETS from lib/billing/plans). The G-era
+ * pins (the shared ledger, the column heads, per-column buttons)
+ * were rewritten for the rows where the composition legitimately
  * changed; prices, contexts, checkout states and the close are
  * unchanged behaviour and keep their pins.
  */
@@ -38,7 +40,7 @@ vi.mock("@/lib/billing/checkout", () => ({
 
 /* The entitlement the sheet sees, steered per test. The default is
    "unavailable" — the signed-out state the original tests in this file
-   were written against (entitlement null, every column actionable). */
+   were written against (entitlement null, every plan actionable). */
 const entitlementMock = vi.hoisted(() => ({
   state: { kind: "unavailable" } as EntitlementState | { kind: "loading" },
 }));
@@ -48,7 +50,7 @@ vi.mock("@/hooks/useEntitlement", () => ({
 
 import { PaywallHost, PaywallSheet } from "./PaywallSheet";
 import { requestPaywall } from "@/lib/billing/paywall";
-import { PAYWALL_COMPARISON, comparisonHas } from "@/lib/billing/plans";
+import { PAYWALL_BULLETS, TIER_ORDER, type PlanTier } from "@/lib/billing/plans";
 import type { EntitlementState } from "@/lib/billing/entitlement";
 
 beforeEach(() => {
@@ -80,34 +82,29 @@ const YEARLY_PREMIUM = /₹4,999|\$59\.99/;
 const MONTHLY_PLUS = /₹999|\$14\.99/;
 const YEARLY_PLUS = /₹9,999|\$89\.99/;
 
-/** The price line's text (amount + period suffix live in one <p>). */
-function priceLines(): string[] {
-  return [...document.querySelectorAll(".bill-price")].map((el) => el.textContent ?? "");
+/** Design A's three plan rows, in TIER_ORDER. */
+function rows(): Element[] {
+  return [...document.querySelectorAll("[data-plan-row]")];
 }
 
-/** The two G column heads, Premium first. */
-function heads(): Element[] {
-  return [...document.querySelectorAll(".bill-g-head")];
-}
-
-/** One ledger row by its feature label. */
-function ledgerRow(label: string): Element {
-  const row = [...document.querySelectorAll("[data-comparison-row]")].find(
-    (el) => el.getAttribute("data-comparison-row") === label,
-  );
-  expect(row, `ledger row "${label}"`).toBeTruthy();
+function rowFor(tier: PlanTier): Element {
+  const row = document.querySelector(`[data-plan-row="${tier}"]`);
+  expect(row, `plan row "${tier}"`).toBeTruthy();
   return row!;
 }
 
-/** One ledger cell: data-included is the tick/dash truth. */
-function cell(row: Element, tier: "premium" | "premium_plus"): Element {
-  const c = row.querySelector(`[data-tier="${tier}"]`);
-  expect(c, `cell ${tier}`).toBeTruthy();
-  return c!;
+/** The price block's text (amount + per line live in one span). */
+function priceText(tier: PlanTier): string {
+  return rowFor(tier).querySelector(".bill-a-price")?.textContent ?? "";
+}
+
+/** The glass drop-down currently open, if any. */
+function openIncludes(): Element | null {
+  return document.querySelector("[data-includes-for]");
 }
 
 describe("PaywallHost + PaywallSheet", () => {
-  it("stays closed until a paywall is requested, then opens with the G head and the context headline", async () => {
+  it("stays closed until a paywall is requested, then opens with the A head and the context headline", async () => {
     render(<PaywallHost />);
     expect(screen.queryByText("You've used this month's AI credits")).toBeNull();
 
@@ -115,24 +112,26 @@ describe("PaywallHost + PaywallSheet", () => {
       requestPaywall("coach_credits");
     });
 
-    /* Design G's own head (owner-approved preview, round 2). */
+    /* Design A's own head (owner-approved preview, 2026-11-23). */
     expect(screen.getByText("Bloom Membership")).toBeTruthy();
-    expect(screen.getByText("Two plans. One ledger.")).toBeTruthy();
-    expect(screen.getByText(/Every feature, side by side/)).toBeTruthy();
+    expect(document.querySelector(".bill-a-title")!.textContent).toContain("full bloom.");
+    expect(screen.getByText(/Choose how much of Bloom you want/)).toBeTruthy();
     /* The context's specific headline still opens the story, in the
-       context strip under the G head. */
+       context strip under the A head. */
     expect(screen.getByText("You've used this month's AI credits")).toBeTruthy();
-    expect(heads().length).toBe(2);
-    expect(heads()[0]!.textContent).toContain("Premium");
-    expect(heads()[1]!.textContent).toContain("Premium Plus");
+    /* Three rows, in tier order; Premium is the pre-selected row. */
+    expect(rows().map((r) => r.getAttribute("data-plan-row"))).toEqual(TIER_ORDER);
+    expect(rowFor("premium").getAttribute("aria-checked")).toBe("true");
+    expect(rowFor("premium_plus").getAttribute("aria-checked")).toBe("false");
     /* The sheet opens on yearly — the better-value period. */
-    expect(priceLines()[0]).toMatch(YEARLY_PREMIUM);
-    expect(priceLines()[1]).toMatch(YEARLY_PLUS);
+    expect(priceText("premium")).toMatch(YEARLY_PREMIUM);
+    expect(priceText("premium_plus")).toMatch(YEARLY_PLUS);
+    expect(priceText("free")).toContain("forever");
     /* The free-keeps-working promise is part of the sheet. */
     expect(screen.getByText(/Free keeps working either way/)).toBeTruthy();
   });
 
-  it("the sheet says what a credit buys — the weighted line (M-215)", async () => {
+  it("the sheet says what a credit buys — the weighted line (M-215), in the foot zone", async () => {
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("coach_credits");
@@ -141,6 +140,9 @@ describe("PaywallHost + PaywallSheet", () => {
     const line = screen.getByText(/What uses credits/);
     expect(line.textContent).toContain("a food photo 5");
     expect(line.textContent).toContain("a Vitalis plan session 10");
+    /* M-220: design A's column has no room for the line, so it rides
+       in the always-visible foot zone (the brief's placement). */
+    expect(line.closest(".bsheet-foot")).toBeTruthy();
   });
 
   it("the period toggle re-prices from the same constants, with the yearly saving shown", async () => {
@@ -149,21 +151,22 @@ describe("PaywallHost + PaywallSheet", () => {
       requestPaywall("profile");
     });
 
-    /* Yearly (the default) shows the per-month equivalent + saving. */
-    expect(priceLines()[0]).toMatch(YEARLY_PREMIUM);
-    expect(priceLines()[1]).toMatch(YEARLY_PLUS);
-    const equivalents = screen.getAllByText(/Works out to .* a month\./);
-    expect(equivalents.length).toBe(2);
-    expect(equivalents[0]!.textContent).toMatch(/₹417|\$5\.00/);
-    expect(equivalents[1]!.textContent).toMatch(/₹833|\$7\.50/);
-    /* M-214: the tiers save different shares now, so the toggle
-       states the best one, labelled "up to". */
-    expect(screen.getByRole("button", { name: /Yearly/ }).textContent).toMatch(/save up to \d+%/);
+    /* Yearly (the default) shows the per-month equivalent in each
+       row's per line, and design A's own saving note beside the
+       toggle (India: ₹2,189 on Premium · ₹1,989 on Plus). */
+    expect(priceText("premium")).toMatch(YEARLY_PREMIUM);
+    expect(priceText("premium_plus")).toMatch(YEARLY_PLUS);
+    expect(priceText("premium")).toMatch(/₹417\/mo|\$5\.00\/mo/);
+    expect(priceText("premium_plus")).toMatch(/₹833\/mo|\$7\.50\/mo/);
+    expect(screen.getByText(/Yearly saves .* on Premium · .* on Plus/)).toBeTruthy();
 
     fireEvent.click(screen.getByRole("button", { name: "Monthly" }));
-    expect(priceLines()[0]).toMatch(MONTHLY_PREMIUM);
-    expect(priceLines()[1]).toMatch(MONTHLY_PLUS);
-    expect(screen.queryByText(/Works out to .* a month\./)).toBeNull();
+    expect(priceText("premium")).toMatch(MONTHLY_PREMIUM);
+    expect(priceText("premium_plus")).toMatch(MONTHLY_PLUS);
+    expect(priceText("premium")).toContain("per month");
+    /* M-214: the tiers save different shares, so the monthly note
+       states the best one, labelled "up to". */
+    expect(screen.getByText(/Switch to yearly to save up to \d+%/)).toBeTruthy();
   });
 
   it("a checkout attempt with no provider configured ends in the honest notice", async () => {
@@ -173,22 +176,24 @@ describe("PaywallHost + PaywallSheet", () => {
     });
     expect(screen.getByText("Free includes up to 5 habits")).toBeTruthy();
 
+    /* Premium is the pre-selected row, so the one gold pill is its. */
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Go Premium" }));
+      fireEvent.click(screen.getByRole("button", { name: "Continue with Premium" }));
     });
 
     const notice = await screen.findByText(/Payments open soon/);
     expect(notice.textContent).toContain("Nothing has been charged.");
   });
 
-  it("the Plus column's button runs the same checkout flow", async () => {
+  it("selecting the Plus row turns the pill into its checkout", async () => {
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("profile");
     });
 
+    fireEvent.click(rowFor("premium_plus"));
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Go Premium Plus" }));
+      fireEvent.click(screen.getByRole("button", { name: "Continue with Premium Plus" }));
     });
 
     const notice = await screen.findByText(/Payments open soon/);
@@ -211,7 +216,10 @@ describe("PaywallHost + PaywallSheet", () => {
     const scroll = stack!.closest(".bsheet-scroll");
     expect(scroll).toBeTruthy();
     expect(scroll!.closest(".bsheet-panel")).toBeTruthy();
-    expect(document.querySelector(".bill-toggle-row .bill-toggle")).toBeTruthy();
+    expect(document.querySelector(".bill-a-period .bill-toggle")).toBeTruthy();
+    /* The panel wears design A's ground, and the glows ride in it. */
+    expect(scroll!.closest(".bsheet-panel")!.className).toContain("bill-a-panel");
+    expect(document.querySelector(".bsheet-panel .bill-a-glows")).toBeTruthy();
   });
 
   it("different contexts open with their own headline", async () => {
@@ -239,95 +247,81 @@ describe("PaywallHost + PaywallSheet", () => {
   });
 });
 
-describe("M-216 — the comparison ledger (design G)", () => {
-  it("renders every row of PAYWALL_COMPARISON, in order, exactly once", async () => {
+describe("M-220 — design A rows and the glass drop-down", () => {
+  it("the selected row's drop-down lists that plan's inclusions from plans.ts", async () => {
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("profile");
     });
-    const labels = [...document.querySelectorAll("[data-comparison-row]")].map((el) =>
-      el.getAttribute("data-comparison-row"),
-    );
-    expect(labels).toEqual(PAYWALL_COMPARISON.map((r) => r.label));
-  });
-
-  it("every cell's tick or dash matches the tier truth in plans.ts", async () => {
-    render(<PaywallHost />);
-    await act(async () => {
-      requestPaywall("profile");
-    });
-    for (const row of PAYWALL_COMPARISON) {
-      const el = ledgerRow(row.label);
-      for (const tier of ["premium", "premium_plus"] as const) {
-        const c = cell(el, tier);
-        const included = comparisonHas(row, tier);
-        expect(c.getAttribute("data-included"), `${row.label} / ${tier}`).toBe(String(included));
-        /* A tick is an SVG check; a dash is the muted em dash — never
-           a tick wearing a dash's colour or vice versa. */
-        expect(c.querySelector("svg") !== null, `${row.label} / ${tier} tick`).toBe(included);
-        expect(c.textContent).toContain(included ? "Included" : "Not included");
-      }
+    /* Premium is pre-selected: its drop-down is open, listing
+       PAYWALL_BULLETS verbatim, and no other plan's is. */
+    const panel = openIncludes();
+    expect(panel).toBeTruthy();
+    expect(panel!.getAttribute("data-includes-for")).toBe("premium");
+    for (const bullet of PAYWALL_BULLETS.premium) {
+      expect(panel!.textContent).toContain(bullet);
     }
+    expect(document.querySelectorAll("[data-includes-for]").length).toBe(1);
+
+    /* Selecting Plus moves the drop-down to Plus's own list. */
+    fireEvent.click(rowFor("premium_plus"));
+    const plusPanel = openIncludes();
+    expect(plusPanel!.getAttribute("data-includes-for")).toBe("premium_plus");
+    for (const bullet of PAYWALL_BULLETS.premium_plus) {
+      expect(plusPanel!.textContent).toContain(bullet);
+    }
+    expect(plusPanel!.textContent).not.toContain(PAYWALL_BULLETS.premium[1]!);
   });
 
-  it("a Plus-only row can never show a Premium tick (the M-214 split, in the ledger)", async () => {
+  it("the drop-down wears the glass material — the owner's one in-sheet exception", async () => {
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("profile");
     });
-    for (const label of [
-      "Vitalis AI + daily voice",
-      "Plans that adapt and learn",
-      "Metabolic Twin",
-      "Advanced analytics & reports",
-      "Photo-led logging",
-      "Stories premium templates",
-      "Priority features",
-    ]) {
-      const row = ledgerRow(label);
-      expect(cell(row, "premium").getAttribute("data-included")).toBe("false");
-      expect(cell(row, "premium_plus").getAttribute("data-included")).toBe("true");
-    }
-    /* …and the shared essentials tick under both. */
-    for (const label of [
-      "Unlimited habits",
-      "Coach chat",
-      "Food-photo analysis",
-      "Assessment + standard plan",
-      "Grocery list",
-      "Trackers & mood",
-      "Basic Stories templates",
-    ]) {
-      const row = ledgerRow(label);
-      expect(cell(row, "premium").getAttribute("data-included")).toBe("true");
-      expect(cell(row, "premium_plus").getAttribute("data-included")).toBe("true");
-    }
+    const panel = openIncludes();
+    expect(panel!.className).toContain("glass-panel");
+    expect(panel!.className).toContain("bill-a-includes");
+    /* It expands directly under its row, inside the rows group. */
+    expect(panel!.closest(".bill-a-rows")).toBeTruthy();
+    expect(rowFor("premium").parentElement!.contains(panel)).toBe(true);
   });
 
-  it("the column heads carry the credit lines and Plus carries Most loved", async () => {
-    render(<PaywallHost />);
+  it("the Free row's drop-down is assembled from the same authorities, and its pill just stays", async () => {
+    const onClose = vi.fn();
+    render(<PaywallSheet open onClose={onClose} context="profile" />);
+    fireEvent.click(rowFor("free"));
+    const panel = openIncludes();
+    expect(panel!.getAttribute("data-includes-for")).toBe("free");
+    expect(panel!.textContent).toContain("Up to 5 habits");
+    expect(panel!.textContent).toContain("Trackers & mood");
+    expect(panel!.textContent).toContain("Basic Stories templates");
+    expect(panel!.textContent).toContain("20 AI credits a month");
+
     await act(async () => {
-      requestPaywall("profile");
+      fireEvent.click(screen.getByRole("button", { name: "Stay on Free" }));
     });
-    expect(heads()[0]!.textContent).toContain("300 AI credits a month");
-    expect(heads()[1]!.textContent).toContain("800 AI credits a month");
-    expect(heads()[1]!.textContent).toContain("Most loved");
-    expect(heads()[0]!.textContent).not.toContain("Most loved");
-    /* The ledger's own column names ride above the cells. */
-    const ledgerHead = document.querySelector(".bill-g-row--head");
-    expect(ledgerHead).toBeTruthy();
-    expect(ledgerHead!.textContent).toContain("Premium");
-    expect(ledgerHead!.textContent).toContain("Plus");
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(checkoutMock.createOrder).not.toHaveBeenCalled();
   });
 
-  it("a Plus-bound context spotlights the Plus column; a neutral one does not", async () => {
+  it("a Plus-bound context pre-selects the Plus row; a neutral one pre-selects Premium", async () => {
     const onClose = vi.fn();
     const { unmount } = render(<PaywallSheet open onClose={onClose} context="vitalis_plus" />);
-    expect(heads()[1]!.className).toContain("bill-g-head--spotlight");
-    expect(heads()[0]!.className).not.toContain("bill-g-head--spotlight");
+    expect(rowFor("premium_plus").getAttribute("aria-checked")).toBe("true");
+    expect(rowFor("premium").getAttribute("aria-checked")).toBe("false");
     unmount();
     render(<PaywallSheet open onClose={onClose} context="profile" />);
-    expect(heads()[1]!.className).not.toContain("bill-g-head--spotlight");
+    expect(rowFor("premium").getAttribute("aria-checked")).toBe("true");
+  });
+
+  it("the rows carry the preview's pills — Most popular on Premium, Vitalis on Plus", async () => {
+    render(<PaywallHost />);
+    await act(async () => {
+      requestPaywall("profile");
+    });
+    expect(rowFor("premium").textContent).toContain("Most popular");
+    expect(rowFor("premium_plus").textContent).toContain("Vitalis");
+    expect(rowFor("free").textContent).not.toContain("Most popular");
   });
 });
 
@@ -367,54 +361,60 @@ describe("audit slice A — close, current-plan marking, plan states", () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
-  it("a Premium Plus member's own column is the marked one, not Premium's", async () => {
+  it("a Premium Plus member's own row is the marked one, not Premium's", async () => {
     plusMember();
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("profile");
     });
     /* M-205 (F-37) re-contract: a paid member's banner no longer
-       repeats "You're on …" — the column's "Your plan" mark is the
+       repeats "You're on …" — the row's "Your plan" mark is the
        single current-plan claim; the banner leads with credits. */
     expect(screen.getByText(/800 AI credits left this month/)).toBeTruthy();
     expect(screen.queryByText(/You're on/)).toBeNull();
-    expect(heads().length).toBe(2);
-    expect(heads()[1]!.className).toContain("bill-g-head--mine");
-    expect(heads()[1]!.textContent).toContain("Your plan");
-    expect(heads()[0]!.className).not.toContain("bill-g-head--mine");
-    expect(heads()[0]!.textContent).toContain("Included");
+    expect(rowFor("premium_plus").textContent).toContain("Your plan");
+    expect(rowFor("premium_plus").getAttribute("aria-checked")).toBe("true");
+    expect(rowFor("premium").textContent).not.toContain("Your plan");
   });
 
-  it("plan states are disabled buttons in the button row, never gold actions", async () => {
+  it("plan states are a disabled pill in the state treatment, never a gold action", async () => {
     plusMember();
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("profile");
     });
-    /* Design G keeps one button per column so the pair composes;
-       a state is a DISABLED button in the state's own treatment —
-       it cannot be tapped and does not wear the gold action fill. */
-    for (const label of ["Your plan", "Included in your plan"]) {
-      const btn = screen.getByRole("button", { name: label }) as HTMLButtonElement;
-      expect(btn.disabled).toBe(true);
-      expect(btn.className).not.toContain("bill-btn-gold");
-      expect(btn.className).toContain("bill-btn-state");
-    }
-    expect(screen.queryByRole("button", { name: "Go Premium" })).toBeNull();
-    expect(screen.queryByRole("button", { name: "Go Premium Plus" })).toBeNull();
+    /* Design A keeps ONE pill under the rows; a state is that pill
+       DISABLED in the sage state treatment — it cannot be tapped
+       and does not wear the gold action fill. */
+    const mine = screen.getByRole("button", { name: "Your plan" }) as HTMLButtonElement;
+    expect(mine.disabled).toBe(true);
+    expect(mine.className).toContain("bill-a-cta--state");
+
+    fireEvent.click(rowFor("premium"));
+    const included = screen.getByRole("button", {
+      name: "Included in your plan",
+    }) as HTMLButtonElement;
+    expect(included.disabled).toBe(true);
+    expect(included.className).toContain("bill-a-cta--state");
+    expect(screen.queryByRole("button", { name: /Continue with/ })).toBeNull();
   });
 
-  it("a Premium member's own button is disabled; the Plus button stays live", async () => {
+  it("a Premium member's own pill is disabled; selecting Plus keeps the pill live", async () => {
     premiumMember();
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("profile");
     });
+    expect(rowFor("premium").textContent).toContain("Your plan");
     const mine = screen.getByRole("button", { name: "Your plan" }) as HTMLButtonElement;
     expect(mine.disabled).toBe(true);
-    const plus = screen.getByRole("button", { name: "Go Premium Plus" }) as HTMLButtonElement;
+
+    fireEvent.click(rowFor("premium_plus"));
+    const plus = screen.getByRole("button", {
+      name: "Continue with Premium Plus",
+    }) as HTMLButtonElement;
     expect(plus.disabled).toBe(false);
-    expect(heads()[0]!.textContent).toContain("Your plan");
+    expect(plus.className).not.toContain("bill-a-cta--state");
   });
 
   it("a top-tier member gets exactly one clear action: manage the membership (M-205, F-37)", async () => {
@@ -424,14 +424,12 @@ describe("audit slice A — close, current-plan marking, plan states", () => {
       requestPaywall("profile");
     });
     expect(screen.getByRole("button", { name: "Manage your membership" })).toBeTruthy();
-    /* The ledger still renders whole for a top-tier member — the
-       comparison is the sheet's content, whoever opens it. */
-    expect(document.querySelectorAll("[data-comparison-row]").length).toBe(
-      PAYWALL_COMPARISON.length,
-    );
+    /* The rows still render whole for a top-tier member — the
+       invitation is the sheet's content, whoever opens it. */
+    expect(rows().length).toBe(3);
   });
 
-  it("a visitor gets no manage action — the columns carry the actions (M-205, F-37)", async () => {
+  it("a visitor gets no manage action — the pill carries the action (M-205, F-37)", async () => {
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("profile");
@@ -439,19 +437,17 @@ describe("audit slice A — close, current-plan marking, plan states", () => {
     expect(screen.queryByRole("button", { name: "Manage your membership" })).toBeNull();
   });
 
-  it("a visitor meets both buttons live, and Plus carries the Most loved head", async () => {
+  it("a visitor meets the pill live on Premium, and no row is marked as anyone's plan", async () => {
     render(<PaywallHost />);
     await act(async () => {
       requestPaywall("profile");
     });
-    const goPremium = screen.getByRole("button", { name: "Go Premium" }) as HTMLButtonElement;
-    const goPlus = screen.getByRole("button", { name: "Go Premium Plus" }) as HTMLButtonElement;
-    expect(goPremium.disabled).toBe(false);
-    expect(goPlus.disabled).toBe(false);
-    expect(heads()[1]!.className).toContain("bill-g-head--plus");
-    expect(heads()[0]!.className).not.toContain("bill-g-head--plus");
-    /* No column is marked as anyone's plan for a visitor. */
-    expect(screen.queryByRole("button", { name: "Your plan" })).toBeNull();
+    const cta = screen.getByRole("button", {
+      name: "Continue with Premium",
+    }) as HTMLButtonElement;
+    expect(cta.disabled).toBe(false);
+    expect(cta.className).not.toContain("bill-a-cta--state");
+    expect(screen.queryByText("Your plan")).toBeNull();
   });
 });
 
@@ -485,7 +481,7 @@ describe("M-217 — the checkout window opens fast", () => {
     checkoutMock.createOrder.mockImplementationOnce(() => orderPromise);
 
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Go Premium" }));
+      fireEvent.click(screen.getByRole("button", { name: "Continue with Premium" }));
     });
     /* Order still in flight, yet the loader has been started again
        (the cached promise), and the modal step has not run yet. */
@@ -507,7 +503,7 @@ describe("M-217 — the checkout window opens fast", () => {
     await act(async () => {
       requestPaywall("profile");
     });
-    expect(screen.getByText("Two plans. One ledger.")).toBeTruthy();
+    expect(document.querySelector(".bill-a-title")).toBeTruthy();
     expect(screen.queryByText(/couldn't load/)).toBeNull();
 
     /* …and when the tap's own load genuinely cannot produce the
@@ -521,7 +517,7 @@ describe("M-217 — the checkout window opens fast", () => {
     } as never);
     checkoutMock.payWithRazorpay.mockResolvedValueOnce({ kind: "unavailable" } as never);
     await act(async () => {
-      fireEvent.click(screen.getByRole("button", { name: "Go Premium" }));
+      fireEvent.click(screen.getByRole("button", { name: "Continue with Premium" }));
     });
     const notice = await screen.findByText(/The secure payment window couldn't load/);
     expect(notice.textContent).toContain("Nothing has been charged.");

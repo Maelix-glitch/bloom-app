@@ -417,8 +417,12 @@ const PANELS: [string, string][] = [
   ["styles/shell.css", ".conn-notice"],
   ["styles/shell.css", ".conn-notice-chip"],
   ["styles/progression.css", ".pg-toast"],
-  ["styles/billing.css", ".bill-g-head"],
-  ["styles/billing.css", ".bill-g-head--plus"],
+  /* M-220: design A's panel is the paywall family's census entry —
+     the G column heads it replaces are retired. The panel's winning
+     background is var(--background): the preview's ink, fully
+     opaque. (The glass drop-down inside it is an inner element, not
+     a panel — the owner's recorded exception, M-220.) */
+  ["styles/billing.css", ".bsheet-panel.bill-a-panel"],
 ];
 
 describe("sheet guard: every overlay panel is fully opaque", () => {

@@ -7,15 +7,26 @@
  * is specific first (what was reached, in the context strip) and
  * commercial second.
  *
- * M-216 — the commercial composition is design G, "The Comparison"
- * (owner pick from preview round 2, 2026-11-22): two column heads
- * (price, works-out-to, credit line) over ONE shared feature ledger,
- * one button per column. The ledger renders PAYWALL_COMPARISON from
- * lib/billing/plans and resolves every tick or dash through
- * comparisonHas, so a row can never claim a Premium tick for a
- * Plus-only feature — the M-214 split is the ledger's dashes. The
- * checkout flow, period state, current-plan handling and notices
- * are the card era's, unchanged; only the presentation was rebuilt.
+ * M-220 — the commercial composition is design A, "The Invitation"
+ * (owner pick from the membership preview round, 2026-11-23): the
+ * invitation gate rebuilt as membership, copied EXACTLY from the
+ * approved preview — the ink ground with the four corner glows, the
+ * bloom orb, the centred 340px column, serif headline, the three
+ * plan rows with radio marks, one gold pill CTA whose label follows
+ * the selection. It replaces M-216's design G ("The Comparison");
+ * the shared ledger is retired from this sheet (the comparison data
+ * still lives in plans.ts and still drives the gates). The checkout
+ * flow, period state, current-plan handling and notices are the
+ * earlier eras', unchanged; only the presentation was rebuilt.
+ *
+ * The owner's one amendment to the preview (2026-11-23): when a plan
+ * is selected, a GLASS drop-down expands under its row listing what
+ * is included in that plan (PAYWALL_BULLETS, the sheet's own words
+ * from plans.ts). The drop-down is the ONE glass element inside a
+ * sheet — an explicit owner exception to the sheet-opacity rule,
+ * recorded in M-220; the panel itself stays the family's opaque
+ * slab (wearing the preview's ink tone), and the drop-down's text
+ * rides the glass material's strong tint so it stays fully legible.
  * Nothing here can grant Premium; only the provider's verified
  * webhook can.
  */
@@ -40,7 +51,9 @@ import {
   type PaywallContext,
 } from "@/lib/billing/paywall";
 import {
+  COACH_ACCESS,
   CREDIT_WEIGHTS_LINE,
+  PAYWALL_BULLETS,
   PAYWALL_COMPARISON,
   PLANS,
   TIER_ORDER,
@@ -55,10 +68,10 @@ import {
 
 import "@/styles/billing.css";
 
-/* Contexts that are ABOUT the Plus layer spotlight its column —
-   the member arrived from a Plus boundary (the Vitalis gate, the
-   Twin, the reports), so the ledger's right column is where their
-   eye should land. */
+/* Contexts that are ABOUT the Plus layer pre-select its row — the
+   member arrived from a Plus boundary (the Vitalis gate, the Twin,
+   the reports), so the invitation opens on the plan they reached
+   for. (Design G spotlighted the column; design A selects the row.) */
 const PLUS_SPOTLIGHT_CONTEXTS: ReadonlySet<PaywallContext> = new Set([
   "vitalis_plus",
   "premium_plus",
@@ -70,6 +83,68 @@ function formatDate(iso: string | null): string | null {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return null;
   return d.toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/** The preview's bloom orb, drawn exactly as the preview draws it —
+ *  the radial gold-to-sage core, the three ellipse strokes, the lit
+ *  centre. Ids are sheet-scoped so the gradient can never collide
+ *  with the Coach orb's own. */
+function InvitationOrb() {
+  return (
+    <svg
+      className="bill-a-orb"
+      width="76"
+      height="76"
+      viewBox="0 0 100 100"
+      aria-hidden="true"
+    >
+      <defs>
+        <radialGradient id="bill-a-orb-core" cx="42%" cy="38%" r="75%">
+          <stop offset="0%" className="orb-s0" />
+          <stop offset="45%" className="orb-s1" />
+          <stop offset="78%" className="orb-s2" />
+          <stop offset="100%" className="orb-s3" />
+        </radialGradient>
+      </defs>
+      <circle cx="50" cy="50" r="46" fill="url(#bill-a-orb-core)" />
+      <g fill="none" stroke="rgba(60, 50, 20, 0.28)" strokeWidth="2.4">
+        <ellipse cx="50" cy="50" rx="34" ry="17" />
+        <ellipse cx="50" cy="50" rx="34" ry="17" transform="rotate(60 50 50)" />
+        <ellipse cx="50" cy="50" rx="34" ry="17" transform="rotate(120 50 50)" />
+      </g>
+      <circle cx="50" cy="50" r="10.5" className="bill-a-orb-core" />
+      <circle cx="46.5" cy="46" r="3.4" className="bill-a-orb-glint" opacity="0.85" />
+    </svg>
+  );
+}
+
+/** What the drop-down lists for a tier — the sheet's own inclusion
+ *  words from plans.ts. Paid tiers carry PAYWALL_BULLETS verbatim;
+ *  Free's list is assembled from the same authorities (its habit
+ *  ceiling and credit allowance from PLANS, the always-included rows
+ *  of the comparison, its limited Coach access) so no line is
+ *  invented for it either. */
+function inclusionsFor(tier: PlanTier): string[] {
+  if (tier !== "free") return [...PAYWALL_BULLETS[tier]];
+  return [
+    `Up to ${PLANS.free.habitLimit} habits`,
+    ...PAYWALL_COMPARISON.filter((row) => comparisonHas(row, "free")).map((row) => row.label),
+    `Coach chat — ${COACH_ACCESS.free}`,
+    `${PLANS.free.monthlyCredits} AI credits a month`,
+  ];
+}
+
+/** The row's one-line summary, in the preview's words, with the
+ *  numbers read from PLANS so they can never drift from the offer. */
+function rowTagline(tier: PlanTier): string {
+  switch (tier) {
+    case "free":
+      return `${PLANS.free.habitLimit} habits · trackers & mood · ${PLANS.free.monthlyCredits} AI credits a month`;
+    case "premium":
+      return `Full Coach · food-photo logging · your personal plan · ${PLANS.premium.monthlyCredits} credits`;
+    case "premium_plus":
+      return `Vitalis with voice · adaptive intelligence · ${PLANS.premium_plus.monthlyCredits} credits`;
+  }
 }
 
 export function PaywallHost() {
@@ -100,14 +175,19 @@ export function PaywallSheet({
   const entitlementState = useEntitlement();
   const navigate = useNavigate();
   const [period, setPeriod] = useState<BillingPeriod>("yearly");
+  const [picked, setPicked] = useState<PlanTier | null>(null);
   const [busyTier, setBusyTier] = useState<PlanTier | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const region = useMemo(() => detectPriceRegion(), []);
 
   /* A fresh open starts clean — no stale checkout notice from the
-     last time the sheet was up. */
+     last time the sheet was up, and the selection back to its
+     default row. */
   useEffect(() => {
-    if (open) setNotice(null);
+    if (open) {
+      setNotice(null);
+      setPicked(null);
+    }
   }, [open, context]);
 
   /* M-217: warm the Razorpay script the moment the sheet opens —
@@ -120,7 +200,7 @@ export function PaywallSheet({
   useEffect(() => {
     if (!open) return;
     void loadRazorpayCheckout().catch(() => {});
-  }, [open]);
+  }, [open ]);
 
   const headline = PAYWALL_HEADLINES[context];
   const entitlement = entitlementState.kind === "ready" ? entitlementState.entitlement : null;
@@ -128,12 +208,22 @@ export function PaywallSheet({
   const myRank = TIER_ORDER.indexOf(myTier);
   const spotlightPlus = PLUS_SPOTLIGHT_CONTEXTS.has(context);
 
+  /* The row the invitation opens on: the member's own paid plan if
+     they have one, the Plus row from a Plus-bound context, otherwise
+     Premium — the preview's pre-selected row. */
+  const selected: PlanTier =
+    picked ?? (myRank > 0 ? myTier : spotlightPlus ? "premium_plus" : "premium");
+  const selectedRank = TIER_ORDER.indexOf(selected);
+  const selectedIsMine = entitlement !== null && selected === myTier;
+  const selectedIncluded = entitlement !== null && selectedRank < myRank;
+
   /* M-214: the two tiers no longer save the same share on yearly
      (India: Premium 30%, Plus 17% — the deeper allowance carries a
-     shallower discount). One number on the toggle must not claim
-     Plus saves what only Premium does, so the toggle states the
-     best saving, labelled "up to"; each head's own "works out to"
-     line carries its tier's real figure. */
+     shallower discount). One number must not claim Plus saves what
+     only Premium does, so the monthly note states the best saving,
+     labelled "up to"; the yearly note is design A's own line, its
+     amounts computed from the same constants (India: ₹2,189 on
+     Premium · ₹1,989 on Plus, the preview's figures). */
   const yearlySaving = useMemo(() => {
     const savingFor = (tier: Exclude<PlanTier, "free">) => {
       const monthly = priceFor(tier, "monthly", region).amount;
@@ -143,6 +233,21 @@ export function PaywallSheet({
     };
     return Math.max(savingFor("premium"), savingFor("premium_plus"));
   }, [region]);
+
+  const periodNote = useMemo(() => {
+    if (period === "monthly") {
+      return yearlySaving > 0 ? `Switch to yearly to save up to ${yearlySaving}%` : null;
+    }
+    const savedFor = (tier: Exclude<PlanTier, "free">) => {
+      const monthly = priceFor(tier, "monthly", region);
+      const yearly = priceFor(tier, "yearly", region);
+      return formatPrice({
+        amount: Math.max(0, Math.round((monthly.amount * 12 - yearly.amount) * 100) / 100),
+        currency: monthly.currency,
+      });
+    };
+    return `Yearly saves ${savedFor("premium")} on Premium · ${savedFor("premium_plus")} on Plus`;
+  }, [period, region, yearlySaving]);
 
   /* The buy action runs the Standard Web Checkout rail: the edge
      function creates a one-time Order priced from the server's own
@@ -211,10 +316,23 @@ export function PaywallSheet({
     }
   };
 
-  const paidTiers = ["premium", "premium_plus"] as const;
-
   return (
-    <BloomSheet open={open} onClose={onClose} title="Bloom Premium" size="lg">
+    <BloomSheet
+      open={open}
+      onClose={onClose}
+      title="Bloom Premium"
+      size="lg"
+      panelClassName="bill-a-panel"
+    >
+      {/* Design A's scene: the preview's four corner glows over the
+          ink ground, fixed to the panel while the column scrolls
+          above them. Decorative only. */}
+      <div className="bill-a-glows" aria-hidden="true">
+        <i className="bill-a-glow bill-a-glow--gold-tl" />
+        <i className="bill-a-glow bill-a-glow--sage-r" />
+        <i className="bill-a-glow bill-a-glow--rose-bl" />
+        <i className="bill-a-glow bill-a-glow--gold-br" />
+      </div>
       {/* The family's visible way out, like the tracker and data sheets
           carry: Escape and the backdrop already dismissed this sheet,
           but nothing on screen said so. It only dismisses. The 44px
@@ -234,235 +352,214 @@ export function PaywallSheet({
           scroll once it outgrows the panel cap. */}
       <div className="bsheet-scroll">
         <div className="bill-stack">
-          {/* Design G's head — the approved preview's words, verbatim. */}
-          <div>
-            <p className="bill-eyebrow">Bloom Membership</p>
-            <h3 className="bill-title">Two plans. One ledger.</h3>
-            <p className="bill-body">Every feature, side by side — so the difference is plain.</p>
-          </div>
-
-          {/* What was reached, stated plainly — the context's own
-              headline, kept from the card era: the sheet is specific
-              first, commercial second. */}
-          <p className="bill-context">
-            <strong>{headline.title}</strong> — {headline.body}
-          </p>
-
-          {entitlement ? (
-            <p className="bill-status" role="status">
-              {/* M-205 (F-37): a paid member's plan is marked ONCE — on
-                  their column ("Your plan"). The banner used to claim
-                  it a second time; it now leads with the facts a
-                  member opens the sheet for: credits and period. Free
-                  keeps its claim — Free is on no column to mark it. */}
-              {entitlement.tier === "free" ? (
-                <>
-                  You're on <strong>{PLANS[entitlement.tier].name}</strong> —{" "}
-                  {entitlement.creditBalance} of {entitlement.monthlyAllowance} AI credits left
-                  this month.
-                </>
-              ) : (
-                <>
-                  {entitlement.creditBalance} AI credits left this month
-                  {formatDate(entitlement.currentPeriodEnd)
-                    ? ` · current period ends ${formatDate(entitlement.currentPeriodEnd)}`
-                    : ""}
-                  .
-                </>
-              )}
+          <div className="bill-a-wrap">
+            {/* Design A's head — the approved preview's composition
+                and words, verbatim: orb, eyebrow, serif headline,
+                the invitation's own sub. */}
+            <InvitationOrb />
+            <p className="bill-a-eyebrow">Bloom Membership</p>
+            <h3 className="bill-a-title">
+              Bloom, in
+              <br />
+              full bloom.
+            </h3>
+            <p className="bill-a-sub">
+              Choose how much of Bloom you want. Every plan keeps your data, your history and
+              your streak — upgrading only opens more of the garden.
             </p>
-          ) : null}
 
-          {/* M-215: the sheet quotes the allowances (300 / 800), so it
-              also says what a credit buys — the weighted line set
-              every credit surface shares (plans.ts). */}
-          <p className="bill-weights">{CREDIT_WEIGHTS_LINE}</p>
+            {/* What was reached, stated plainly — the context's own
+                headline, kept from the card era: the sheet is specific
+                first, commercial second. */}
+            <p className="bill-context">
+              <strong>{headline.title}</strong> — {headline.body}
+            </p>
 
-          <div className="bill-toggle-row">
-            <div className="bill-toggle" role="group" aria-label="Billing period">
-              <button
-                type="button"
-                aria-pressed={period === "monthly"}
-                onClick={() => setPeriod("monthly")}
-              >
-                Monthly
-              </button>
-              <button
-                type="button"
-                aria-pressed={period === "yearly"}
-                onClick={() => setPeriod("yearly")}
-              >
-                Yearly{yearlySaving > 0 ? <span className="bill-save"> · save up to {yearlySaving}%</span> : null}
-              </button>
-            </div>
-          </div>
+            {entitlement ? (
+              <p className="bill-status" role="status">
+                {/* M-205 (F-37): a paid member's plan is marked ONCE —
+                    on their row ("Your plan"). The banner used to claim
+                    it a second time; it now leads with the facts a
+                    member opens the sheet for: credits and period. Free
+                    keeps its claim — Free is on no other mark. */}
+                {entitlement.tier === "free" ? (
+                  <>
+                    You're on <strong>{PLANS[entitlement.tier].name}</strong> —{" "}
+                    {entitlement.creditBalance} of {entitlement.monthlyAllowance} AI credits left
+                    this month.
+                  </>
+                ) : (
+                  <>
+                    {entitlement.creditBalance} AI credits left this month
+                    {formatDate(entitlement.currentPeriodEnd)
+                      ? ` · current period ends ${formatDate(entitlement.currentPeriodEnd)}`
+                      : ""}
+                    .
+                  </>
+                )}
+              </p>
+            ) : null}
 
-          {/* The two column heads. Plus carries the gold treatment and
-              the "Most loved" eyebrow (the preview's composition);
-              the member's own column is marked "Your plan", a lower
-              included column "Included". At phone width the pair
-              stays side by side — the columns tighten, never stack. */}
-          <div className="bill-g-heads">
-            {paidTiers.map((tier) => {
-              const plan = PLANS[tier];
-              const price = priceFor(tier, period, region);
-              const equivalent = monthlyEquivalent(tier, region);
-              const rank = TIER_ORDER.indexOf(tier);
-              const isMine = rank === myRank && entitlement !== null;
-              const included = rank < myRank;
-              return (
-                <div
-                  key={tier}
-                  data-plan-head={tier}
-                  className={
-                    `bill-g-head` +
-                    `${tier === "premium_plus" ? " bill-g-head--plus" : ""}` +
-                    `${isMine ? " bill-g-head--mine" : ""}` +
-                    `${tier === "premium_plus" && spotlightPlus ? " bill-g-head--spotlight" : ""}`
-                  }
-                >
-                  {tier === "premium_plus" ? <p className="bill-g-loved">Most loved</p> : null}
-                  <p className="bill-g-plan">{plan.name}</p>
-                  <p className="bill-price">
-                    {formatPrice(price)}
-                    <small> / {period === "monthly" ? "month" : "year"}</small>
-                  </p>
-                  {period === "yearly" ? (
-                    <p className="bill-equivalent">Works out to {formatPrice(equivalent)} a month.</p>
-                  ) : null}
-                  <p className="bill-g-credits">{plan.monthlyCredits} AI credits a month</p>
-                  {isMine ? (
-                    <p className="bill-g-yours">Your plan</p>
-                  ) : included ? (
-                    <p className="bill-g-yours">Included</p>
-                  ) : null}
-                </div>
-              );
-            })}
-          </div>
-
-          {/* The shared ledger. Every row is a PAYWALL_COMPARISON row;
-              every cell resolves through comparisonHas against the
-              tier data in plans.ts — a gold tick where the tier
-              carries the feature, an honest muted dash where it does
-              not. The words "Included" / "Not included" ride along
-              screen-reader-only, so the tick is never the only signal. */}
-          <div className="bill-g-ledger">
-            <div className="bill-g-row bill-g-row--head" aria-hidden="true">
-              <span />
-              <span className="bill-g-cell bill-g-colname">Premium</span>
-              <span className="bill-g-cell bill-g-colname bill-g-colname--plus">Plus</span>
-            </div>
-            {PAYWALL_COMPARISON.map((row) => (
-              <div key={row.label} className="bill-g-row" data-comparison-row={row.label}>
-                <span className="bill-g-label">{row.label}</span>
-                {paidTiers.map((tier) => {
-                  const included = comparisonHas(row, tier);
-                  return (
-                    <span
-                      key={tier}
-                      className="bill-g-cell"
-                      data-tier={tier}
-                      data-included={String(included)}
-                    >
-                      {included ? (
-                        <>
-                          <Check aria-hidden />
-                          <span className="sr-only">Included in {PLANS[tier].name}</span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="bill-g-dash" aria-hidden="true">
-                            —
-                          </span>
-                          <span className="sr-only">Not included in {PLANS[tier].name}</span>
-                        </>
-                      )}
-                    </span>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-
-          {/* One button per column. A plan state is a DISABLED button
-              in the sage state treatment — it holds the column's foot
-              so the pair composes, it cannot be tapped, and it never
-              wears the gold action fill. Only a real next step — go /
-              upgrade, including the tap that surfaces the honest
-              payments-open-soon notice — is a live gold button. */}
-          <div className="bill-g-btns">
-            {paidTiers.map((tier) => {
-              const rank = TIER_ORDER.indexOf(tier);
-              const isMine = rank === myRank && entitlement !== null;
-              const included = rank < myRank;
-              if (isMine || included) {
-                return (
-                  <button
-                    key={tier}
-                    type="button"
-                    className="bill-btn bill-btn-state"
-                    disabled
-                  >
-                    {isMine ? "Your plan" : "Included in your plan"}
-                  </button>
-                );
-              }
-              return (
+            {/* The preview's period switch: a bordered pill, the
+                chosen period in the gold gradient, the saving stated
+                beside it in sage. */}
+            <div className="bill-a-period">
+              <div className="bill-toggle" role="group" aria-label="Billing period">
                 <button
-                  key={tier}
                   type="button"
-                  className="bill-btn bill-btn-gold"
-                  disabled={busyTier !== null}
-                  onClick={() => void go(tier)}
+                  aria-pressed={period === "monthly"}
+                  onClick={() => setPeriod("monthly")}
                 >
-                  {busyTier === tier
-                    ? "Opening checkout…"
-                    : tier === "premium"
-                      ? "Go Premium"
-                      : "Go Premium Plus"}
+                  Monthly
                 </button>
-              );
-            })}
+                <button
+                  type="button"
+                  aria-pressed={period === "yearly"}
+                  onClick={() => setPeriod("yearly")}
+                >
+                  Yearly
+                </button>
+              </div>
+              {periodNote ? <span className="bill-a-period-note">{periodNote}</span> : null}
+            </div>
+
+            {/* The three rows of the invitation. Each is a radio;
+                the selected row opens the owner's glass drop-down
+                under it — what is included in that plan, in the
+                sheet's own words from plans.ts. The member's own row
+                carries the "Your plan" pill in place of the design's
+                marketing pill — a state outranks a slogan. */}
+            <div className="bill-a-rows" role="radiogroup" aria-label="Choose a plan">
+              {TIER_ORDER.map((tier) => {
+                const plan = PLANS[tier];
+                const price = priceFor(tier, period, region);
+                const isMine = entitlement !== null && tier === myTier;
+                const isSelected = tier === selected;
+                return (
+                  <div key={tier} className="bill-a-row-wrap">
+                    <button
+                      type="button"
+                      className="bill-a-row"
+                      role="radio"
+                      aria-checked={isSelected}
+                      data-plan-row={tier}
+                      onClick={() => setPicked(tier)}
+                    >
+                      <span className="bill-a-radio" aria-hidden="true" />
+                      <span className="bill-a-row-main">
+                        <span className="bill-a-name">
+                          {plan.name}
+                          {isMine ? (
+                            <span className="bill-a-pill bill-a-pill--yours">Your plan</span>
+                          ) : tier === "premium" ? (
+                            <span className="bill-a-pill bill-a-pill--pop">Most popular</span>
+                          ) : tier === "premium_plus" ? (
+                            <span className="bill-a-pill bill-a-pill--plus">Vitalis</span>
+                          ) : null}
+                        </span>
+                        <span className="bill-a-tag">{rowTagline(tier)}</span>
+                      </span>
+                      <span className="bill-a-price">
+                        <span className="bill-a-amt">{formatPrice(price)}</span>
+                        <span className="bill-a-per">
+                          {tier === "free"
+                            ? "forever"
+                            : period === "monthly"
+                              ? "per month"
+                              : `per year · ${formatPrice(monthlyEquivalent(tier, region))}/mo`}
+                        </span>
+                      </span>
+                    </button>
+                    {isSelected ? (
+                      <div
+                        className="glass-panel bill-a-includes"
+                        role="group"
+                        aria-label={`What's included in ${plan.name}`}
+                        data-includes-for={tier}
+                      >
+                        <p className="bill-a-includes-title">What's included</p>
+                        <ul className="bill-a-includes-list">
+                          {inclusionsFor(tier).map((line) => (
+                            <li key={line}>
+                              <Check aria-hidden />
+                              <span>{line}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* The one gold pill. Its label follows the selection, as
+                the preview's does; a plan state (yours, or included
+                in yours) is a DISABLED pill in the sage state
+                treatment — it cannot be tapped and never wears the
+                gold action fill. Free's pill simply stays: it closes
+                the sheet. */}
+            {selected === "free" ? (
+              <button type="button" className="bill-a-cta" onClick={onClose}>
+                Stay on Free
+              </button>
+            ) : selectedIsMine || selectedIncluded ? (
+              <button type="button" className="bill-a-cta bill-a-cta--state" disabled>
+                {selectedIsMine ? "Your plan" : "Included in your plan"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="bill-a-cta"
+                disabled={busyTier !== null}
+                onClick={() => void go(selected)}
+              >
+                {busyTier === selected
+                  ? "Opening checkout…"
+                  : `Continue with ${PLANS[selected].name}`}
+              </button>
+            )}
+
+            {/* M-205 (F-37): a Premium Plus member's sheet used to have
+                NO primary action at all — every plan is a state for
+                them. One clear action: manage the membership where the
+                membership actually lives (Settings). */}
+            {entitlement && myTier === "premium_plus" ? (
+              <button
+                type="button"
+                className="bill-btn bill-btn-gold bill-manage"
+                onClick={() => {
+                  onClose();
+                  void navigate({ to: "/settings" });
+                }}
+              >
+                Manage your membership
+              </button>
+            ) : null}
+
+            {notice ? (
+              <p className="bill-note" role="status">
+                {notice}
+              </p>
+            ) : null}
           </div>
-
-          {/* M-205 (F-37): a Premium Plus member's sheet used to have
-              NO primary action at all — both columns are states for
-              them. One clear action: manage the membership where the
-              membership actually lives (Settings). Premium members
-              already have "Go Premium Plus" as the sheet's primary;
-              this renders only when no column carries an action. */}
-          {entitlement && myTier === "premium_plus" ? (
-            <button
-              type="button"
-              className="bill-btn bill-btn-gold bill-manage"
-              onClick={() => {
-                onClose();
-                void navigate({ to: "/settings" });
-              }}
-            >
-              Manage your membership
-            </button>
-          ) : null}
-
-          {notice ? (
-            <p className="bill-note" role="status">
-              {notice}
-            </p>
-          ) : null}
         </div>
       </div>
       {/* M-202 (F-03): the closing lines are the sheet's footer, not
           scroll content — they live in the shell's always-visible foot
           zone (.bsheet-foot), so the panel cap can never slice them
           mid-line at the fold. The free-keeps-working promise first,
-          then the payment honesty lines, whole. */}
+          then what a credit buys (M-215 — the sheet quotes the
+          allowances in its rows, so the weighted line rides here,
+          where design A's composition has no room for it in the
+          column), then the payment honesty lines, whole. */}
       <div className="bsheet-foot bill-foot-zone">
         <p className="bill-foot">
           Free keeps working either way — trackers, habits, mood and your records are never held
           hostage. AI credits refill monthly; when they run out, the AI pauses and everything
           else carries on.
         </p>
+        <p className="bill-foot">{CREDIT_WEIGHTS_LINE}</p>
         <p className="bill-foot">
           Payments are handled securely by Razorpay — UPI, cards and netbanking.
         </p>
