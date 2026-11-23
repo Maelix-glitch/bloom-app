@@ -26,7 +26,7 @@
  * with a Markdown digest beside it, for pasting into the acceptance record.
  */
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -53,6 +53,8 @@ if (flag("--help") || flag("-h")) {
       "  --confirm-disposable   required; the target database may be destroyed",
       "  --project-ref <ref>    required; never read from config.toml",
       "  --rollback             also run the U6 role-rollback experiment",
+      "  --ca <path>            PEM chain for TLS verification (recommended)",
+      "  --insecure-tls         skip certificate verification (recorded risk)",
       "",
       "environment:",
       "  SUPABASE_DB_PASSWORD   required; database password (never printed)",
@@ -71,6 +73,8 @@ const password = process.env.SUPABASE_DB_PASSWORD ?? "";
 const anonKey = process.env.SUPABASE_ANON_KEY ?? "";
 const baseUrl = process.env.SUPABASE_URL ?? (projectRef ? `https://${projectRef}.supabase.co` : "");
 const includeRollback = flag("--rollback");
+const caPath = value("--ca");
+const insecureTls = flag("--insecure-tls");
 
 const problems = [];
 if (!flag("--confirm-disposable")) problems.push("--confirm-disposable is required");
@@ -86,6 +90,18 @@ if (problems.length) {
 // ---------------------------------------------------------------------------
 // Probes
 // ---------------------------------------------------------------------------
+
+/** Default is verified TLS; the platform chain is only known via `--ca`. */
+const ssl = (() => {
+  if (insecureTls) return { rejectUnauthorized: false };
+  if (!caPath) return { rejectUnauthorized: true };
+  try {
+    return { ca: readFileSync(resolve(root, caPath), "utf8"), rejectUnauthorized: true };
+  } catch (error) {
+    console.error(`refusing to run: cannot read the CA bundle at ${caPath}: ${error.message}`);
+    process.exit(2);
+  }
+})();
 
 const stamp = new Date().toISOString().replace(/[:.]/g, "-");
 const results = [];
@@ -107,7 +123,7 @@ function connect(host, port, user = dbUser(host)) {
     user,
     database: "postgres",
     password,
-    ssl: { rejectUnauthorized: false },
+    ssl,
     connectionTimeoutMillis: 20_000,
     statement_timeout: 30_000,
   });

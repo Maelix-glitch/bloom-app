@@ -22,11 +22,32 @@ import { fileURLToPath } from "node:url";
 import pg from "pg";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const [host, user] = process.argv.slice(2);
+const argv = process.argv.slice(2);
+const [host, user] = argv;
+const flag = (name) => argv.includes(name);
+const value = (name) => {
+  const i = argv.indexOf(name);
+  return i >= 0 ? argv[i + 1] : undefined;
+};
 if (!host || !user) {
-  console.error("usage: node verify/baseline.mjs <host> <user>");
+  console.error("usage: node verify/baseline.mjs <host> <user> [--ca <path>] [--insecure-tls]");
   process.exit(2);
 }
+
+const caPath = value("--ca");
+const insecureTls = flag("--insecure-tls");
+
+/** Default is verified TLS; the platform chain is only known via `--ca`. */
+const ssl = (() => {
+  if (insecureTls) return { rejectUnauthorized: false };
+  if (!caPath) return { rejectUnauthorized: true };
+  try {
+    return { ca: readFileSync(resolve(root, caPath), "utf8"), rejectUnauthorized: true };
+  } catch (error) {
+    console.error(`cannot read the CA bundle at ${caPath}: ${error.message}`);
+    process.exit(2);
+  }
+})();
 
 const VITALIS = /_vitalis_/;
 const files = readdirSync(join(root, "supabase/migrations"))
@@ -39,7 +60,7 @@ const client = new pg.Client({
   user,
   database: "postgres",
   password: process.env.PGPASSWORD,
-  ssl: { rejectUnauthorized: false },
+  ssl,
   statement_timeout: 120_000,
   connectionTimeoutMillis: 20_000,
 });
