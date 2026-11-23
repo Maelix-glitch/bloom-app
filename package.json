@@ -17,6 +17,8 @@
     "seed:evidence:check": "node scripts/vitalis-evidence-seed.mjs --check",
     "seed:usda": "node scripts/nutrition-usda-reference.mjs",
     "seed:usda:check": "node scripts/nutrition-usda-reference.mjs --check",
+    "seed:cofid": "node scripts/nutrition-cofid-reference.mjs",
+    "seed:cofid:check": "node scripts/nutrition-cofid-reference.mjs --check",
     "seed:food-images": "node scripts/nutrition-food-images.mjs",
     "seed:food-images:check": "node scripts/nutrition-food-images.mjs --check",
     "seed:dish-images": "node scripts/nutrition-dish-images.mjs",

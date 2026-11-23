@@ -355,22 +355,32 @@ im.save(sys.argv[2], "WEBP", quality=80)
 /* ------------------------------ generation ------------------------------- */
 
 async function referenceFoods() {
-  const data = await load("src/lib/nutrition/data/usdaReferenceData.ts");
-  return data.USDA_REFERENCE_FOODS_RAW.map((f) => ({
-    foodId: f.id,
-    fdc: Number(f.id.replace(/^usda-/, "")),
-    foodName: f.name,
-  }));
+  const usda = await load("src/lib/nutrition/data/usdaReferenceData.ts");
+  const cofid = await load("src/lib/nutrition/data/cofidReferenceData.ts");
+  return [
+    ...usda.USDA_REFERENCE_FOODS_RAW.map((f) => ({
+      foodId: f.id,
+      fdc: Number(f.id.replace(/^usda-/, "")),
+      foodName: f.name,
+    })),
+    /* Non-USDA foods have no FDC id: their pin key is the full food id. */
+    ...cofid.COFID_REFERENCE_FOODS_RAW.map((f) => ({
+      foodId: f.id,
+      fdc: f.id,
+      foodName: f.name,
+    })),
+  ];
 }
 
 function assertCoverage(foods) {
-  const pinned = new Set(PINS.map(([fdc]) => fdc));
-  const photoless = new Set(PHOTOLESS.map(([fdc]) => fdc));
-  if (pinned.size !== PINS.length) throw new Error("duplicate FDC id in PINS");
-  if (new Set(PINS.map(([, , slug]) => slug)).size !== PINS.length)
-    throw new Error("duplicate slug in PINS");
-  if (new Set(PINS.map(([, title]) => title)).size !== PINS.length)
-    throw new Error("duplicate Commons title in PINS");
+  const pinned = new Set([...PINS, ...EXTRA_PINS].map(([fdc]) => fdc));
+  const photoless = new Set([...PHOTOLESS, ...EXTRA_PHOTOLESS].map(([fdc]) => fdc));
+  const allPins = [...PINS, ...EXTRA_PINS];
+  if (pinned.size !== allPins.length) throw new Error("duplicate pin key in PINS/EXTRA_PINS");
+  if (new Set(allPins.map(([, , slug]) => slug)).size !== allPins.length)
+    throw new Error("duplicate slug in PINS/EXTRA_PINS");
+  if (new Set(allPins.map(([, title]) => title)).size !== allPins.length)
+    throw new Error("duplicate Commons title in PINS/EXTRA_PINS");
   for (const fdc of pinned)
     if (photoless.has(fdc)) throw new Error(`FDC ${fdc} is both pinned and photo-less`);
   for (const food of foods)
@@ -381,15 +391,26 @@ function assertCoverage(foods) {
       throw new Error(`pin/photo-less entry for FDC ${fdc}, which is not a reference food`);
 }
 
+/**
+ * M-229: reference foods from other sources (UK CoFID) carry no FDC id,
+ * so their pins and photo-less records key on the full food id instead
+ * of a bare FDC number. Everything else — the licence gate, the
+ * attribution read, the asset rules — is identical.
+ */
+const EXTRA_PINS = [
+  ["cofid-12-495", "Panir Paneer Indian cheese fresh.jpg", "paneer"], // fresh paneer (the Commons/Wikipedia lead depiction of paneer itself)
+];
+const EXTRA_PHOTOLESS = [];
+
 const ident = (slug) => slug.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
 
 async function generate() {
   const foods = await referenceFoods();
   assertCoverage(foods);
-  const pinByFdc = new Map(PINS.map(([fdc, title, slug]) => [fdc, { title, slug }]));
-  const photolessByFdc = new Map(PHOTOLESS.map(([fdc, reason]) => [fdc, reason]));
+  const pinByFdc = new Map([...PINS, ...EXTRA_PINS].map(([fdc, title, slug]) => [fdc, { title, slug }]));
+  const photolessByFdc = new Map([...PHOTOLESS, ...EXTRA_PHOTOLESS].map(([fdc, reason]) => [fdc, reason]));
 
-  const info = await fetchImageInfo(PINS.map(([, title]) => title));
+  const info = await fetchImageInfo([...PINS, ...EXTRA_PINS].map(([, title]) => title));
 
   mkdirSync(ASSETS_DIR, { recursive: true });
   const photos = [];
@@ -423,7 +444,7 @@ async function generate() {
     const assetPath = join(ASSETS_DIR, `${pin.slug}.webp`);
     let size = existsSync(assetPath) ? statSync(assetPath).size : 0;
     if (size <= 2048 || size >= 153600) {
-      const tmp = join(tmpdir(), `bloom-food-${food.fdc}.bin`);
+      const tmp = join(tmpdir(), `bloom-food-${String(food.fdc).replace(/[^a-zA-Z0-9]+/g, "-")}.bin`);
       let bytes = null;
       for (let attempt = 0; attempt < 5 && !bytes; attempt++) {
         /* PF-1 (2026-11-19): each attempt is time-boxed — a stalled
@@ -484,7 +505,7 @@ async function generate() {
     " * Regenerate with `npm run seed:food-images`; verify with `npm run seed:food-images:check`.",
     " *",
     " * Source: Wikimedia Commons (commons.wikimedia.org) — one real",
-    " * photograph per USDA reference food, pinned by Commons file title",
+    " * photograph per reference food, pinned by Commons file title",
     " * in the generator and reviewed against the food before pinning.",
     " * Licences: CC0, public domain, CC BY or CC BY-SA only; author and",
     " * licence below are read from each file's Commons metadata at",
@@ -566,16 +587,17 @@ async function check() {
 
   const foods = await referenceFoods();
   assertCoverage(foods);
-  const pinByFdc = new Map(PINS.map(([fdc, title, slug]) => [fdc, { title, slug }]));
-  const photolessByFdc = new Map(PHOTOLESS.map(([fdc, reason]) => [fdc, reason]));
+  const pinByFdc = new Map([...PINS, ...EXTRA_PINS].map(([fdc, title, slug]) => [fdc, { title, slug }]));
+  const photolessByFdc = new Map([...PHOTOLESS, ...EXTRA_PHOTOLESS].map(([fdc, reason]) => [fdc, reason]));
 
-  if (photos.length !== PINS.length) fail(`manifest holds ${photos.length} photos, the pin list has ${PINS.length}`);
-  if (photoless.length !== PHOTOLESS.length)
-    fail(`manifest holds ${photoless.length} photo-less records, the table has ${PHOTOLESS.length}`);
+  if (photos.length !== PINS.length + EXTRA_PINS.length)
+    fail(`manifest holds ${photos.length} photos, the pin lists have ${PINS.length + EXTRA_PINS.length}`);
+  if (photoless.length !== PHOTOLESS.length + EXTRA_PHOTOLESS.length)
+    fail(`manifest holds ${photoless.length} photo-less records, the tables have ${PHOTOLESS.length + EXTRA_PHOTOLESS.length}`);
 
   const seenAssets = new Set();
   for (const photo of photos) {
-    const fdc = Number(photo.foodId.replace(/^usda-/, ""));
+    const fdc = photo.foodId.startsWith("usda-") ? Number(photo.foodId.replace(/^usda-/, "")) : photo.foodId;
     const pin = pinByFdc.get(fdc);
     if (!pin) fail(`${photo.foodId} is in the manifest but not in the pin list`);
     if (pin.slug !== photo.slug) fail(`${photo.foodId}: manifest slug ${photo.slug} ≠ pin slug ${pin.slug}`);
@@ -590,7 +612,7 @@ async function check() {
     seenAssets.add(`${photo.slug}.webp`);
   }
   for (const entry of photoless) {
-    const fdc = Number(entry.foodId.replace(/^usda-/, ""));
+    const fdc = entry.foodId.startsWith("usda-") ? Number(entry.foodId.replace(/^usda-/, "")) : entry.foodId;
     if (photolessByFdc.get(fdc) !== entry.reason)
       fail(`${entry.foodId}: photo-less reason in manifest ≠ generator table`);
   }

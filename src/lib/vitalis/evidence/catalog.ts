@@ -125,6 +125,31 @@ export const CATALOG: EvidenceRegistry = {
         "Composition dataset. The shipped reference set (src/lib/nutrition/data/usdaReferenceData.ts) has since been checked entry by entry: every food carries its FoodData Central id and data type, Foundation and SR Legacy only — Branded and FNDDS are not shipped. Claim usda-fdc-composition-source cites this source for the dataset's provenance and licence only, not for the accuracy of any individual value.",
     },
     {
+      id: "uk-cofid-2021",
+      title: "McCance and Widdowson's Composition of Foods Integrated Dataset (CoFID)",
+      kind: "dataset",
+      publisher: "Public Health England",
+      authors: ["Public Health England"],
+      publicationYear: 2021,
+      url: "https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid",
+      license: "ogl-3.0",
+      licenseUrl: "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/",
+      licenseNote:
+        "The CoFID workbook is published under the Open Government Licence v3.0: it may be copied, published, distributed and adapted, including commercially, free of charge, provided the source is acknowledged. Bloom acknowledges Public Health England / McCance and Widdowson's CoFID wherever these values are shown.",
+      productUseAllowed: true,
+      permissionRequired: false,
+      peerReviewed: false,
+      retrievedOn: "2026-11-23",
+      publishedOn: "2021-03-19",
+      reviewedOn: "2026-11-23",
+      reviewIntervalMonths: 12,
+      reviewStatus: "approved",
+      version: 1,
+      supersededBy: null,
+      notes:
+        "UK national food-composition database (the McCance and Widdowson tables, maintained for the UK government). Registered for ONE shipped food (M-229, 2026-11-23): paneer, CoFID food code 12-495 ('Cheese, Paneer'), in src/lib/nutrition/data/cofidReferenceData.ts — the row's own data reference is 'LGC, Nutrient analysis of cheese, 1999' (9 samples, sampled in spring and autumn). USDA FoodData Central carries no paneer entry, and the Indian IFCT paneer row stays unusable until ICMR-NIN grants written permission, so CoFID is the licence-clean source for this food. Caveat recorded honestly: CoFID's paneer is a UK retail product, harder-pressed than typical Indian market paneer (46.8 g water per 100 g against roughly 54-57 g), so its protein, fat and energy run higher per 100 g; the values are CoFID's own and are labelled as such, never as USDA or IFCT values.",
+    },
+    {
       id: "fao-who-unu-2004-energy",
       title:
         "Human Energy Requirements: Report of a Joint FAO/WHO/UNU Expert Consultation (FAO Food and Nutrition Technical Report Series 1)",

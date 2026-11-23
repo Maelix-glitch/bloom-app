@@ -28,7 +28,7 @@ import {
   type PreparationProfile,
 } from "./types";
 
-const FOOD_KINDS: readonly FoodProvenanceKind[] = ["usda", "user_entered", "off", "ifct", "recipe"];
+const FOOD_KINDS: readonly FoodProvenanceKind[] = ["usda", "cofid", "user_entered", "off", "ifct", "recipe"];
 const FOOD_GROUPS: readonly FoodGroup[] = [
   "cereals_grains",
   "pulses_legumes",

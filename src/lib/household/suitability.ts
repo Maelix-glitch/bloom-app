@@ -29,7 +29,7 @@ import { DIETARY_LABEL } from "@/lib/assessment/questions";
 import { dishPatterns, type Dish } from "@/lib/nutrition/dishes";
 import type { Food } from "@/lib/nutrition/types";
 import { planPatternOf } from "@/lib/nutrition/plan";
-import { USDA_REFERENCE_FOODS } from "@/lib/nutrition/usdaReference";
+import { REFERENCE_FOODS } from "@/lib/nutrition/referenceFoods";
 import type { DietaryPattern } from "@/lib/vitalis/domain/profile";
 import type { HouseholdMember } from "./household";
 
@@ -109,7 +109,7 @@ export interface UnmatchedAllergy {
  *  in the reference set. These are surfaced, never dropped. */
 export function unmatchedAllergies(
   members: readonly TableMember[],
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): UnmatchedAllergy[] {
   const out: UnmatchedAllergy[] = [];
   for (const member of members) {
@@ -162,7 +162,7 @@ function dishFoods(dish: Dish, foods: readonly Food[]): Food[] {
 export function judgeDishForHousehold(
   dish: Dish,
   members: readonly TableMember[],
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): DishHouseholdResult {
   const patterns = dishPatterns(dish, foods);
   const ingredients = dishFoods(dish, foods);
@@ -220,7 +220,7 @@ export interface HouseholdSuitability {
 export function householdSuitability(
   members: readonly TableMember[],
   dishes: readonly Dish[],
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): HouseholdSuitability {
   const results = dishes.map((dish) => judgeDishForHousehold(dish, members, foods));
   const suiting = results.filter((r) => r.suitsEveryone).map((r) => r.dish);
@@ -241,7 +241,7 @@ export function householdSuitability(
  *  their dislikes. Nothing is inferred beyond the record. */
 export function caregiverLines(
   member: TableMember,
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): string[] {
   const lines: string[] = [];
   lines.push(

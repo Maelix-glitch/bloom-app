@@ -21,6 +21,8 @@ export * from "./store";
 export * from "./foods";
 export * from "./log";
 export * from "./usdaReference";
+export * from "./cofidReference";
+export * from "./referenceFoods";
 export * from "./foodImages";
 export * from "./coachLog";
 export * from "./overviewInput";

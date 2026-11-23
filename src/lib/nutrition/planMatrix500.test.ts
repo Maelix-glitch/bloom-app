@@ -28,7 +28,10 @@ import {
   planPatternOf,
   type DailyPlan,
 } from "./plan";
-import { USDA_REFERENCE_FOODS } from "./usdaReference";
+/* M-229: the matrix runs over the combined reference library — the
+   same pool the app hands the composer (usePlan) since paneer
+   (UK CoFID) joined the USDA set. */
+import { REFERENCE_FOODS } from "./referenceFoods";
 import type { Food } from "./types";
 
 /**
@@ -133,7 +136,7 @@ const PROTEIN_DISH_IDS = new Set(
   ),
 );
 const POWDER_IDS = new Set(["usda-173177", "usda-173181"]);
-const FOOD_BY_ID = new Map(USDA_REFERENCE_FOODS.map((f) => [f.id, f]));
+const FOOD_BY_ID = new Map(REFERENCE_FOODS.map((f) => [f.id, f]));
 const DISH_BY_ID = new Map(DISH_LIBRARY.map((d) => [d.id, d]));
 
 interface CellResult {
@@ -190,7 +193,7 @@ function gen(profile: HealthProfile, day: string, opts: { dishes?: boolean } = {
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, day),
-    foods: USDA_REFERENCE_FOODS,
+    foods: REFERENCE_FOODS,
     ...(opts.dishes === false ? {} : { dishes: DISH_LIBRARY }),
     day,
     now: NOW,
@@ -622,7 +625,7 @@ describe("plan matrix 500", () => {
             profile,
             safety,
             gatedOutcome: targetsFor(profile, safety, day),
-            foods: USDA_REFERENCE_FOODS,
+            foods: REFERENCE_FOODS,
             dishes: DISH_LIBRARY,
             day,
             now: NOW,

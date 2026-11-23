@@ -29,12 +29,13 @@ import {
   FoodListFullError,
   MAX_FOODS,
   MEALS,
-  USDA_REFERENCE_FOODS,
+  REFERENCE_FOODS,
+  cofidDatasetVersionLine,
   entryNutrientsFor,
   foodDisplayName,
   labelledFoodNutrients,
-  searchUsdaReference,
-  usdaDataStamp,
+  referenceDataStamp,
+  searchReferenceFoods,
   usdaDatasetVersionLine,
   type Amount,
   type EntrySource,
@@ -272,6 +273,12 @@ export function LogDialog({
               >
                 {usdaDatasetVersionLine()}
               </p>
+              <p
+                className="mt-1 text-[length:var(--text-caption)] text-muted-foreground"
+                data-testid="cofid-dataset-version"
+              >
+                {cofidDatasetVersionLine()}
+              </p>
             </>
           ) : null}
 
@@ -298,12 +305,12 @@ export function LogDialog({
                   ? `${selection.food.servings[0]!.label} ≈ ${selection.food.servings[0]!.grams} g · Per 100 g: ${nutrientLine(labelledFoodNutrients(selection.food).nutrients)}`
                   : `Per 100 g reference · ${nutrientLine(labelledFoodNutrients(selection.food).nutrients)}`}
               </p>
-              {usdaDataStamp(selection.food) ? (
+              {referenceDataStamp(selection.food) ? (
                 <p
                   className="mt-1 text-[length:var(--text-caption)] text-muted-foreground"
                   data-testid="usda-data-stamp"
                 >
-                  {usdaDataStamp(selection.food)}
+                  {referenceDataStamp(selection.food)}
                 </p>
               ) : null}
 
@@ -609,7 +616,7 @@ function SearchStep({
 
   const reference = useMemo(() => {
     if (role === "mine") return [];
-    const base = q ? searchUsdaReference(query) : USDA_BROWSE;
+    const base = q ? searchReferenceFoods(query) : REFERENCE_BROWSE;
     if (!roleDef.groups) return base;
     return base.filter(
       (food) => food.classification && roleDef.groups!.includes(food.classification.group),
@@ -721,8 +728,8 @@ function SearchStep({
 }
 
 /** The reference set browsable without a query (the prototype's Browse):
- *  the full USDA list, in its shipped order. */
-const USDA_BROWSE = USDA_REFERENCE_FOODS;
+ *  the full reference library, in its shipped order. */
+const REFERENCE_BROWSE = REFERENCE_FOODS;
 
 function FoodRow({
   food,

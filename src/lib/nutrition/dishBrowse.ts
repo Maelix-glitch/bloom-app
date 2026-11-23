@@ -30,7 +30,7 @@ import {
 import type { LabelledNutrients } from "./labels";
 import { eligiblePool, planPatternOf, type PlanPattern } from "./plan";
 import { dishRegion } from "./regions";
-import { USDA_REFERENCE_FOODS } from "./usdaReference";
+import { REFERENCE_FOODS } from "./referenceFoods";
 import type { Meal } from "./types";
 
 /* ------------------------------- browsing -------------------------------- */
@@ -258,7 +258,7 @@ export function dishIdeaFor(
   const categories: readonly DishCategory[] =
     meal === "breakfast" ? ["breakfast", "main"] : ["main"];
   const pattern = planPatternOf(profile.dietary.pattern);
-  const eligible = new Set(eligiblePool(profile, USDA_REFERENCE_FOODS).map((f) => f.id));
+  const eligible = new Set(eligiblePool(profile, REFERENCE_FOODS).map((f) => f.id));
   const qualifiers = dishes.filter((dish) => {
     if (excludeIds.has(dish.id)) return false;
     if (!categories.includes(dish.category)) return false;

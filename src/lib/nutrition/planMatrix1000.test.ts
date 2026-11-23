@@ -28,7 +28,10 @@ import {
   planPatternOf,
   type DailyPlan,
 } from "./plan";
-import { USDA_REFERENCE_FOODS } from "./usdaReference";
+/* M-229: the matrix runs over the combined reference library — the
+   same pool the app hands the composer (usePlan) since paneer
+   (UK CoFID) joined the USDA set. */
+import { REFERENCE_FOODS } from "./referenceFoods";
 import type { Food } from "./types";
 
 /**
@@ -157,7 +160,7 @@ const ANCHORS: { name: string; wakeTime: string | null; bedTime: string | null }
   { name: "owl-0930-0100", wakeTime: "09:30", bedTime: "01:00" },
 ];
 
-const FOOD_BY_ID = new Map(USDA_REFERENCE_FOODS.map((f) => [f.id, f]));
+const FOOD_BY_ID = new Map(REFERENCE_FOODS.map((f) => [f.id, f]));
 const DISH_BY_ID = new Map(DISH_LIBRARY.map((d) => [d.id, d]));
 
 function buildProfile(
@@ -561,7 +564,7 @@ function runBlock(from: number, to: number): void {
               safety,
               gatedOutcome: gated,
               fallbackTargets: null,
-              foods: USDA_REFERENCE_FOODS,
+              foods: REFERENCE_FOODS,
               dishes: DISH_LIBRARY,
               ...(anchor.wakeTime ? { wakeTime: anchor.wakeTime, bedTime: anchor.bedTime } : {}),
               day,
@@ -806,7 +809,7 @@ describe("plan matrix 1000 — the owner's dense-protein corner", () => {
           safety,
           gatedOutcome: gated,
           fallbackTargets: null,
-          foods: USDA_REFERENCE_FOODS,
+          foods: REFERENCE_FOODS,
           dishes: DISH_LIBRARY,
           day: cell.day,
           now: NOW,

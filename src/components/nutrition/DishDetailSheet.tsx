@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import {
   DISH_CATEGORY_LABEL,
   dishNutrients,
-  findUsdaReference,
+  findReferenceFood,
   foodDisplayName,
   type Dish,
   type Meal,
@@ -186,7 +186,7 @@ export function DishDetailSheet({
           <h3 className="nut-group-label mt-6">Ingredients · per serving</h3>
           <ul className="mt-2 divide-y divide-border-subtle">
             {dish.lines.map((line) => {
-              const food = findUsdaReference(line.foodId);
+              const food = findReferenceFood(line.foodId);
               const names = food
                 ? foodDisplayName(food)
                 : { en: line.foodId, hindi: null as string | null };

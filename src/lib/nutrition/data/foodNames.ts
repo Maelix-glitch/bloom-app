@@ -78,6 +78,9 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-329370": { display: "Mozzarella", hindi: "मोज़ेरेला चीज़" },
   "usda-325036": { display: "Parmesan", hindi: "पार्मेसन चीज़" },
   "usda-328841": { display: "Cottage cheese", hindi: "कॉटेज चीज़" },
+  /* M-229: the library's first non-USDA food — CoFID's "Cheese, Paneer"
+     wears its kitchen name here like every other reference food. */
+  "cofid-12-495": { display: "Paneer", hindi: "पनीर" },
   "usda-2346384": { display: "Cottage cheese (full-fat)", hindi: "कॉटेज चीज़" },
   "usda-323444": { display: "Ricotta", hindi: "रिकोटा चीज़" },
   "usda-173410": { display: "Butter", hindi: "मक्खन" },

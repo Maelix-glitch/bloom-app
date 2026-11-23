@@ -21,7 +21,7 @@ import {
   PHOTOLESS_REFERENCE_FOODS,
   foodPhotoFor,
 } from "./foodImages";
-import { USDA_REFERENCE_FOODS } from "./usdaReference";
+import { REFERENCE_FOODS } from "./referenceFoods";
 
 /** The free licences Bloom may ship: CC0, public domain, CC BY and
  *  CC BY-SA (any version, incl. ported jurisdictions like "3.0 us"). */
@@ -37,9 +37,10 @@ describe("food photograph manifest", () => {
     expect(new Set(photoless).size).toBe(photoless.length);
     /* Disjoint: no food is both photographed and listed photo-less. */
     expect(photographed.filter((id) => photoless.includes(id))).toEqual([]);
-    /* Complete: together they are exactly the reference set. */
+    /* Complete: together they are exactly the reference set (M-229: the
+       combined library — USDA + UK CoFID — not the USDA set alone). */
     const all = [...photographed, ...photoless].sort();
-    expect(all).toEqual(USDA_REFERENCE_FOODS.map((f) => f.id).sort());
+    expect(all).toEqual(REFERENCE_FOODS.map((f) => f.id).sort());
   });
 
   it("carries only free licences, with the attribution Commons recorded", () => {

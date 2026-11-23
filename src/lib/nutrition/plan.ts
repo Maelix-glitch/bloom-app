@@ -146,7 +146,7 @@ import { MICRO_RICH_SHARE, planLearningFor, type PlanLearning } from "./planAdap
 import { isRawBasisFood } from "./preparation";
 import { adjustedTargets } from "./targetAdjustment";
 import { nutritionTargetsFromOutcome, type NutritionTargets } from "./targets";
-import { USDA_REFERENCE_FOODS } from "./usdaReference";
+import { REFERENCE_FOODS } from "./referenceFoods";
 import {
   MEALS,
   type Food,
@@ -2522,7 +2522,7 @@ function dishPoolFor(
   activeModes: readonly ModeId[] = [],
 ): { data: DishPoolData | null; reasons: PlanReason[] } {
   const pattern = planPatternOf(profile.dietary.pattern);
-  const eligible = new Set(eligiblePool(profile, USDA_REFERENCE_FOODS).map((f) => f.id));
+  const eligible = new Set(eligiblePool(profile, REFERENCE_FOODS).map((f) => f.id));
   const budgetTier = profile.dietary.budgetTier;
   const candidates: DishCandidate[] = [];
   for (const dish of dishes) {

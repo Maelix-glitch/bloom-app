@@ -38,7 +38,7 @@ import {
   FOODS_KEY,
   FOODLOG_KEY,
   TARGET_ADJUSTMENT_KEY,
-  USDA_REFERENCE_FOODS,
+  REFERENCE_FOODS,
   adjustedTargets,
   compareTotalsToTargets,
   createEntryFromFood,
@@ -187,7 +187,7 @@ export function useNutrition(): NutritionStore {
   const targets = targetState.kind === "ready" ? targetState.targets : null;
 
   const recents = useMemo(
-    () => recentFoods(entries, [...foods, ...USDA_REFERENCE_FOODS], 8),
+    () => recentFoods(entries, [...foods, ...REFERENCE_FOODS], 8),
     [entries, foods],
   );
 
@@ -284,7 +284,7 @@ export function useNutrition(): NutritionStore {
       const entryFood = foodById(entry.foodId);
       if (!entryFood) return [];
       const profile = toHealthProfile(assessment.state, session.userId ?? "local");
-      const pool = eligiblePool(profile, USDA_REFERENCE_FOODS);
+      const pool = eligiblePool(profile, REFERENCE_FOODS);
       return swapsFor(entry, entryFood, pool, focus);
     },
     [assessment.state, session.userId, foodById],

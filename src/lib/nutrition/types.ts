@@ -51,11 +51,11 @@ export const OPTIONAL_NUTRIENT_KEYS = [
 
 export type OptionalNutrientKey = (typeof OPTIONAL_NUTRIENT_KEYS)[number];
 
-export type FoodProvenanceKind = "usda" | "user_entered" | "off" | "ifct" | "recipe";
+export type FoodProvenanceKind = "usda" | "cofid" | "user_entered" | "off" | "ifct" | "recipe";
 
 export interface FoodProvenance {
   kind: FoodProvenanceKind;
-  /** The source's own id for this food (USDA fdcId, OFF barcode, …). For a
+  /** The source's own id for this food (USDA fdcId, CoFID food code, OFF barcode, …). For a
    *  user-entered food, the food's own id. For a `recipe` provenance (a
    *  dish, D1), the dish's id — the values are computed from USDA
    *  ingredient data, and the label says so. */

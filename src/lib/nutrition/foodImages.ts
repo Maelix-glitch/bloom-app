@@ -1,5 +1,5 @@
 /**
- * Nutrition — real photographs for the USDA reference foods (P3-R).
+ * Nutrition — real photographs for the reference foods (P3-R).
  *
  * The owner rejected generated imagery outright: every reference food
  * that carries a picture carries a REAL photograph of that ingredient,
@@ -43,7 +43,7 @@ export const PHOTOLESS_REFERENCE_FOODS = FOOD_IMAGE_PHOTOLESS;
 const BY_FOOD_ID = new Map(FOOD_IMAGES_RAW.map((p) => [p.foodId, p]));
 
 /**
- * The photograph for a food id, or null. Only USDA reference ids can
+ * The photograph for a food id, or null. Only reference ids can
  * resolve — an own/custom food id, an unknown id, and a photo-less
  * reference food all answer null, and the UI renders those exactly as it
  * did before photos existed.
