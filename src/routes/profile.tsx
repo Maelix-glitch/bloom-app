@@ -221,7 +221,7 @@ function ProfilePage() {
     setSeenIds((prev) => (prev.has(story.id) ? prev : new Set([...prev, story.id])));
   }, []);
 
-  const accent = identity?.identity.accent ?? "violet";
+  const accent = identity?.identity.accent ?? "amber";
 
   const offlineToastShown = useRef(false);
   useEffect(() => {
@@ -750,8 +750,8 @@ function ProfilePage() {
                       className="grid size-10 shrink-0 place-items-center rounded-full"
                       style={{
                         background:
-                          "color-mix(in oklab, var(--profile-accent,var(--violet)) 12%, transparent)",
-                        color: "var(--profile-accent,var(--violet))",
+                          "color-mix(in oklab, var(--profile-accent,var(--amber)) 12%, transparent)",
+                        color: "var(--profile-accent,var(--amber))",
                       }}
                     >
                       <Sparkles className="size-4" strokeWidth={1.8} />

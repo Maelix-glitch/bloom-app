@@ -497,7 +497,7 @@ export function StoryViewer({
             <StoryAvatar
               name={viewerName}
               avatarPath={viewerAvatarPath ?? null}
-              accent={accent ?? "violet"}
+              accent={accent ?? "amber"}
               size={34}
               ring="none"
             />

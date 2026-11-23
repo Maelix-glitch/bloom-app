@@ -20,7 +20,7 @@ const LEGEND: { band: 1 | 2 | 3 | 4 | 5; tone: string }[] = [
   { band: 2, tone: "var(--gold)" },
   { band: 3, tone: "var(--rose)" },
   { band: 4, tone: "var(--gold)" },
-  { band: 5, tone: "var(--violet)" },
+  { band: 5, tone: "var(--gold)" },
 ];
 
 export function CrestHall({ points, rankTier }: { points: number; rankTier: number }) {

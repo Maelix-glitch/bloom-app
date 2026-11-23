@@ -53,7 +53,7 @@ export function cubicBezierEasing(x1: number, y1: number, x2: number, y2: number
 export const houseEasing = cubicBezierEasing(0.16, 1, 0.3, 1);
 
 const SERIES: { key: SeriesKey; label: string; color: string; type: "line"; dashed?: boolean }[] = [
-  { key: "mood", label: "Daily mood", color: "var(--violet)", type: "line" },
+  { key: "mood", label: "Daily mood", color: "var(--gold)", type: "line" },
   { key: "avg7", label: "7-day average", color: "var(--sky)", type: "line" },
   { key: "avg30", label: "30-day average", color: "var(--amber)", type: "line", dashed: true },
   { key: "energy", label: "Energy", color: "var(--sage)", type: "line" },
@@ -176,7 +176,7 @@ export function MoodChart({
                   colorStops: [
                     {
                       offset: 0,
-                      color: resolveCssColor("color-mix(in oklab, var(--violet) 55%, transparent)"),
+                      color: resolveCssColor("color-mix(in oklab, var(--gold) 55%, transparent)"),
                     },
                     { offset: 1, color: "rgba(0,0,0,0)" },
                   ],
@@ -257,7 +257,7 @@ export function MoodChart({
                </div>`;
             return `<div style="padding:12px 14px;min-width:200px">
               <div style="font-family:var(--font-display);font-size:14px;margin-bottom:8px">${dayjs(date).format("ddd, MMM D YYYY")}</div>
-              ${row("Mood", (model.mood[idx] ?? 0).toFixed(2), "var(--violet)")}
+              ${row("Mood", (model.mood[idx] ?? 0).toFixed(2), "var(--gold)")}
               ${row("Energy", (model.energy[idx] ?? 0).toFixed(2), "var(--sage)")}
               ${row("Stress", (model.stress[idx] ?? 0).toFixed(2), "var(--rose)")}
               ${model.avg7[idx] !== null ? row("7-day avg", (model.avg7[idx] as number).toFixed(2), "var(--sky)") : ""}
@@ -294,14 +294,14 @@ export function MoodChart({
 
   if (days.length < 2)
     return (
-      <Panel className="p-6" glow="violet">
+      <Panel className="p-6" glow="gold">
         <SectionHead eyebrow="Signal" title="Mood trajectory" />
         <Insufficient>At least 2 logged days are needed to draw a trajectory.</Insufficient>
       </Panel>
     );
 
   return (
-    <Panel className="p-6" glow="violet">
+    <Panel className="p-6" glow="gold">
       <SectionHead
         eyebrow="Signal"
         title="Mood trajectory"

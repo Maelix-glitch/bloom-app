@@ -34,7 +34,7 @@ import "@/styles/add-habit-modal.css";
 
 /* ============================ PUBLIC TYPES ================================ */
 
-export type HabitColor = "amber" | "sage" | "rose" | "sky" | "violet";
+export type HabitColor = "amber" | "sage" | "rose" | "sky" | "gold";
 export type HabitFrequency = "daily" | "weekly" | "custom";
 export type HabitPriority = "low" | "medium" | "high";
 export interface HabitIcon {
@@ -736,7 +736,7 @@ function AddHabitDialog({
                     ["sage", "Sage"],
                     ["rose", "Rose"],
                     ["sky", "Sky"],
-                    ["violet", "Violet"],
+                    ["gold", "Gold"],
                   ] as const
                 ).map(([c, label]) => (
                   <button

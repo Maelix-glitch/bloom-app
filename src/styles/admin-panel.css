@@ -8,8 +8,8 @@
  */
 
 .adm {
-  --ap-scrim: #05040a; /* near-black violet scrim ground — the launcher's own dark */
-  --ap-panel: #0d0b12; /* panel ground, a breath above the scrim */
+  --ap-scrim: #060607; /* near-black neutral scrim ground — the launcher's own dark */
+  --ap-panel: #0c0c0e; /* panel ground, a breath above the scrim */
   position: fixed;
   inset: 0;
   z-index: 3200;
@@ -293,7 +293,7 @@
   /* The bar mounts at the app root, outside .adm — the token is defined
      here too, or the background below never resolves and the pill paints
      transparent on every engine (sheet audit, production item #53). */
-  --ap-panel: #0d0b12;
+  --ap-panel: #0c0c0e;
   position: fixed;
   left: 12px;
   bottom: calc(12px + env(safe-area-inset-bottom));

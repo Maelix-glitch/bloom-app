@@ -247,7 +247,9 @@ describe("radius discipline (M-206, F-18)", () => {
     expect(read("styles/responsive.css")).toContain("--bloom-radius-sheet: var(--radius-dialog)");
     const cycle = read("styles/cycle.css");
     expect(cycle).not.toMatch(/--ci-radius-[a-z]+: 10px/);
-    expect(cycle).toContain("--ci-radius-md: var(--radius-control)");
+    /* M-225: this pin used to read the first nocturne block — provably fully
+       shadowed dead code, deleted in M-225. The winning block's value is pinned now. */
+    expect(cycle).toContain("--ci-radius-md: var(--radius-card, 12px)");
   });
 });
 
@@ -280,7 +282,7 @@ describe("palette discipline (M-206, F-19)", () => {
     expect(read("styles/nutrition.css")).toContain("--arc-stop-night: var(--success)");
     expect(read("styles/bloom-sheet.css")).toContain("--sheet-accent-deep: var(--gold-deep)");
     expect(read("styles/bloom-sheet.css")).toContain("--sheet-on-accent-ink: var(--gold-ink)");
-    expect(read("styles/stories.css")).toContain("--story-ink-deep: var(--violet-deep)");
+    expect(read("styles/stories.css")).toContain("--story-ink-deep: var(--gold-deep)"); /* M-225: violet-deep retired */
     expect(styles).toContain("--chart-3: var(--gold)");
     // Rewards' alias layer stays literal BY DESIGN (circularity — see
     // rewards.css); the lock is that its values equal the shared tokens.
@@ -292,7 +294,7 @@ describe("palette discipline (M-206, F-19)", () => {
       ["--sky", "--info"],
       ["--sage", "--success"],
       ["--rose", "--danger"],
-      ["--royal", "--violet"],
+      /* M-225: the ["--royal", "--violet"] lock pair is retired with both tokens. */
     ];
     for (const [alias, token] of locks) {
       const m = rewards.match(new RegExp(`${alias}:\\s*(#[0-9a-fA-F]{3,8})\\s*;`));

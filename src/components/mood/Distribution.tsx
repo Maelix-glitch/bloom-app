@@ -28,7 +28,7 @@ function DistributionImpl({
   const total = buckets.reduce((a, b) => a + b.count, 0);
 
   return (
-    <Panel className="p-6" glow="violet">
+    <Panel className="p-6" glow="gold">
       <SectionHead
         eyebrow="Shape"
         title="Distribution & stability"

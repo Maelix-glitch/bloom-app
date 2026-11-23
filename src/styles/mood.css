@@ -38,7 +38,7 @@
   --mp-anxious: oklch(0.71 0.08 30);
   --mp-angry: oklch(0.64 0.12 25);
 
-  --bmood-accent: var(--violet);
+  --bmood-accent: var(--gold);
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -187,7 +187,7 @@
   border-radius: var(--radius-pill);
   background: radial-gradient(
     circle,
-    color-mix(in oklab, var(--bmood-face-color, var(--violet)) 26%, transparent),
+    color-mix(in oklab, var(--bmood-face-color, var(--gold)) 26%, transparent),
     transparent 68%
   );
   opacity: 0;
@@ -305,9 +305,9 @@
   box-shadow: 0 0 0 2px color-mix(in oklab, var(--bmood-accent) 70%, transparent);
 }
 .bmood-chip[aria-pressed="true"] {
-  border-color: color-mix(in oklab, var(--chip-accent, var(--violet)) 52%, transparent);
-  background: color-mix(in oklab, var(--chip-accent, var(--violet)) 16%, transparent);
-  color: color-mix(in oklab, var(--chip-accent, var(--violet)) 88%, var(--foreground));
+  border-color: color-mix(in oklab, var(--chip-accent, var(--gold)) 52%, transparent);
+  background: color-mix(in oklab, var(--chip-accent, var(--gold)) 16%, transparent);
+  color: color-mix(in oklab, var(--chip-accent, var(--gold)) 88%, var(--foreground));
 }
 .bmood-band > .bmood-more:first-child {
   margin-top: var(--space-2);

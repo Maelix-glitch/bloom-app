@@ -62,7 +62,7 @@ const SIGNED_OUT: RailIdentity = {
   status: "signed-out",
   displayName: null,
   avatarPath: null,
-  accent: "violet",
+  accent: "amber",
   bio: null,
   username: null,
   emailConfirmed: false,

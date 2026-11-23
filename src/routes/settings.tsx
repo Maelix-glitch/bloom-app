@@ -69,7 +69,7 @@ function SettingsPage() {
     space.identityBlock === null ||
     space.identityBlock.status === "loading";
 
-  const accent = identity?.identity.accent ?? "violet";
+  const accent = identity?.identity.accent ?? "amber";
 
   return (
     <div

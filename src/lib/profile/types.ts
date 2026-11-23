@@ -13,12 +13,12 @@ import type {
   StorySlide,
 } from "@/lib/stories/types";
 
-export type BloomAccent = "violet" | "sky" | "amber" | "sage" | "rose";
+export type BloomAccent = "gold" | "sky" | "amber" | "sage" | "rose";
 
-export const BLOOM_ACCENTS: readonly BloomAccent[] = ["violet", "sky", "amber", "sage", "rose"];
+export const BLOOM_ACCENTS: readonly BloomAccent[] = ["gold", "sky", "amber", "sage", "rose"];
 
 export const ACCENT_LABELS: Record<BloomAccent, string> = {
-  violet: "Lavender",
+  gold: "Gold",
   sky: "Soft Blue",
   amber: "Warm Gold",
   sage: "Sage",
@@ -248,7 +248,10 @@ export function isStoryActive(story: Story, now: number = Date.now()): boolean {
   return new Date(story.expiresAt).getTime() > now;
 }
 
-export function normalizeAccent(value: unknown, fallback: BloomAccent = "violet"): BloomAccent {
+export function normalizeAccent(value: unknown, fallback: BloomAccent = "amber"): BloomAccent {
+  /* M-225: the retired "violet" accent (Lavender) migrates to gold —
+     stored profiles keep an accent, never the retired hue. */
+  if (value === "violet") return "gold";
   return typeof value === "string" && (BLOOM_ACCENTS as readonly string[]).includes(value)
     ? (value as BloomAccent)
     : fallback;

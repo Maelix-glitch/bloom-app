@@ -11,7 +11,7 @@ function mulberry32(seed: number) {
   };
 }
 
-const PALETTE = ["var(--violet)", "var(--sky)", "var(--amber)", "var(--sage)", "var(--rose)"];
+const PALETTE = ["var(--gold)", "var(--sky)", "var(--amber)", "var(--sage)", "var(--rose)"];
 
 const MOTES = (() => {
   const rand = mulberry32(1337);
@@ -72,7 +72,7 @@ function Spotlight() {
       className="absolute left-0 top-0 size-[640px] rounded-full"
       style={{
         background:
-          "radial-gradient(circle, color-mix(in oklab, var(--violet) 8%, transparent), transparent 62%)",
+          "radial-gradient(circle, color-mix(in oklab, var(--gold) 8%, transparent), transparent 62%)",
         willChange: "transform",
       }}
     />
@@ -88,7 +88,7 @@ export function Atmosphere() {
           className="animate-aurora size-full opacity-[0.07]"
           style={{
             background:
-              "conic-gradient(from 0deg, transparent, color-mix(in oklab, var(--violet) 42%, transparent) 12%, transparent 28%, color-mix(in oklab, var(--sky) 36%, transparent) 46%, transparent 62%, color-mix(in oklab, var(--amber) 26%, transparent) 78%, transparent)",
+              "conic-gradient(from 0deg, transparent, color-mix(in oklab, var(--gold) 42%, transparent) 12%, transparent 28%, color-mix(in oklab, var(--sky) 36%, transparent) 46%, transparent 62%, color-mix(in oklab, var(--amber) 26%, transparent) 78%, transparent)",
           }}
         />
       </div>
@@ -98,7 +98,7 @@ export function Atmosphere() {
         className="animate-drift absolute -left-52 -top-56 size-[760px] rounded-full opacity-45"
         style={{
           background:
-            "radial-gradient(circle, color-mix(in oklab, var(--violet) 18%, transparent), transparent 62%)",
+            "radial-gradient(circle, color-mix(in oklab, var(--gold) 18%, transparent), transparent 62%)",
           willChange: "transform",
         }}
       />

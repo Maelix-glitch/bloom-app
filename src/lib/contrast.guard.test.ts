@@ -91,7 +91,7 @@ const house = defs(blockWith(stylesCss, "--ink:"));
 const cycleCss = css("styles/cycle.css");
 const ciBase = defs(blockWith(cycleCss, "--ci-bg:"));
 const ciOrchid = { ...ciBase, ...defs(blockAfter(cycleCss, '[data-theme="orchid"]')) };
-const coach = defs(blockWith(css("styles/coach.css"), "--coach-lav:"));
+const coach = defs(blockWith(css("styles/coach.css"), "--coach-gold:"));
 const ahm = defs(blockWith(css("styles/add-habit-modal.css"), "--ahm-bg:"));
 const ap = defs(blockWith(css("styles/admin-panel.css"), "--ap-scrim:"));
 const accessCss = css("styles/access.css");

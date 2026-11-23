@@ -549,9 +549,9 @@ export function Composer({
               </Button>
               {/* Kit Button (U6): the press settle and focus ring are the
                   kit's; the coach-send rules keep the 38px geometry and
-                  the violet action gradient — Coach's scoped action
-                  colour. The gold-vs-accent rule is U7's call, not this
-                  pass. The thinking state still swaps in the bloom mark. */}
+                  the flat gold action colour (M-203 retired the violet
+                  gradient; M-225 removed its tokens). The thinking state
+                  still swaps in the bloom mark. */}
               <Button
                 type="submit"
                 variant="ghost"

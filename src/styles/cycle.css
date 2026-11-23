@@ -22,49 +22,6 @@
   color-scheme: dark;
 }
 
-/* ------------------------------- 1. Nocturne ------------------------------ */
-/*
- * Ink-plum ground, warm off-white type, amethyst + champagne + rose.
- *
- * This is the default, so it sets the tone for the whole feature. The earlier
- * teal-green read as clinical — closer to a hospital chart than to something
- * you'd want open on your own phone. Premium here means restraint: a near-black
- * ground with a violet bias rather than a colour cast, one metal (champagne)
- * carrying the highlights, and phase hues that are clearly distinct without any
- * of them shouting. Hairline cards, generous shadow, no neon anywhere.
- */
-.ci[data-theme="nocturne"] {
-  --ci-bg: #0d0b12;
-  --ci-bg-deep: #08070c;
-  --ci-surface: #16131e;
-  --ci-surface-2: #1d1927;
-  --ci-line: #241f30;
-  --ci-line-strong: #362f47;
-  --ci-text: #f2ecec;
-  --ci-text-soft: #c9c1d2;
-  --ci-text-mute: #8b849b;
-  --ci-menstrual: #cf6d8f;
-  --ci-follicular: #a58bff;
-  --ci-luteal: #8b74c9;
-  --ci-ovulation: var(--gold-champagne);
-  --ci-late: #7f8aa8;
-  --ci-accent: #a58bff;
-  --ci-accent-soft: rgba(165, 139, 255, 0.14);
-  --ci-focus: #c3b1ff;
-  --ci-ok: #8fbfa4;
-  --ci-warn: var(--gold-champagne);
-  --ci-danger: #dd7f74;
-  --ci-input-bg: #100d17;
-  --ci-veil:
-    radial-gradient(120% 80% at 12% -10%, rgba(165, 139, 255, 0.13), transparent 60%),
-    radial-gradient(90% 70% at 100% 0%, rgba(207, 109, 143, 0.09), transparent 55%);
-  --ci-radius-lg: 14px;
-  --ci-radius-md: var(--radius-control);
-  --ci-radius-sm: 8px;
-  --ci-shadow: 0 20px 44px -30px rgba(0, 0, 0, 0.9);
-  --ci-display-weight: 500;
-  --ci-display-track: -0.015em;
-}
 
 /* ------------------------------ 2. Orchid ink ----------------------------- */
 /* Charcoal-plum ground, orchid bleed, jade and brass. Glassier raised panels. */
@@ -1464,8 +1421,8 @@ textarea.ci-input {
   --ci-text-soft: var(--muted-foreground);
   --ci-text-mute: var(--faint-strong);
   --ci-menstrual: #c07d8a;
-  --ci-follicular: var(--violet);
-  --ci-luteal: #8d86a8;
+  --ci-follicular: var(--sky);
+  --ci-luteal: var(--sage);
   --ci-ovulation: var(--gold);
   --ci-late: #8f98ad;
   --ci-accent: var(--gold);

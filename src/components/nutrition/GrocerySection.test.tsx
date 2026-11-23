@@ -305,10 +305,14 @@ describe("GrocerySection — the Grocery Journey (M-201)", () => {
 
   it("each aisle carries its glyph and its own completion count", () => {
     const { container } = render(<GrocerySection />);
-    const icons = [...container.querySelectorAll(".shop-group-icon")].map((el) => el.textContent);
+    const icons = [...container.querySelectorAll(".shop-group-icon")];
     /* The dal list's aisles, in the lib's order: produce, pantry,
-       spices — the owner's glyphs, nothing invented. */
-    expect(icons).toEqual(["🥬", "🫒", "🌿"]);
+       spices. M-225: drawn Lucide glyphs — raw emoji icons are retired. */
+    expect(icons).toHaveLength(3);
+    for (const el of icons) {
+      expect(el.tagName.toLowerCase()).toBe("svg");
+      expect(el.textContent).toBe("");
+    }
     const counts = () =>
       [...container.querySelectorAll(".shop-group-count")].map((el) => el.textContent);
     expect(counts()).toEqual(["0 / 6 completed", "0 / 3 completed", "0 / 3 completed"]);

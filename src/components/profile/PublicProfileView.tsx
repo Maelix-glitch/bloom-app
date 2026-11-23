@@ -125,11 +125,11 @@ export function PublicProfileView({
             className="mono mt-4 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[length:var(--text-micro)] tracking-[var(--tracking-label)] text-muted-foreground uppercase transition-colors hover:text-foreground"
             style={{
               borderColor:
-                "color-mix(in oklab, var(--profile-accent, var(--violet)) 35%, transparent)",
+                "color-mix(in oklab, var(--profile-accent, var(--amber)) 35%, transparent)",
             }}
           >
             <span
-              className="size-1.5 rounded-full bg-[var(--profile-accent,var(--violet))]"
+              className="size-1.5 rounded-full bg-[var(--profile-accent,var(--amber))]"
               aria-hidden
             />
             {stories.length} {stories.length === 1 ? "story" : "stories"}

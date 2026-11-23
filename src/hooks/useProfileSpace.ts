@@ -176,7 +176,7 @@ export function useProfileSpace() {
             bio: local?.bio ?? null,
             avatarPath: local?.avatarPath ?? null,
             bannerPath: null,
-            accent: local?.accent ?? "violet",
+            accent: local?.accent ?? "amber",
             featured: null,
           },
           privacy: { profileVisibility: "private", storyVisibility: "private" },
@@ -478,7 +478,7 @@ export function useProfileSpace() {
       bio: null,
       avatarPath: null,
       bannerPath: null,
-      accent: "violet" as BloomAccent,
+      accent: "amber" as BloomAccent,
       featured: null,
     };
 

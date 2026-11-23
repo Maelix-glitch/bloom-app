@@ -44,8 +44,8 @@
   --ahm-rose-dim: rgba(201, 139, 160, 0.14);
   --ahm-sky: #7fa0c9;
   --ahm-sky-dim: rgba(127, 160, 201, 0.14);
-  --ahm-violet: #a48bc9;
-  --ahm-violet-dim: rgba(164, 139, 201, 0.14);
+  --ahm-gold: #e8cf9a;
+  --ahm-gold-dim: rgba(232, 207, 154, 0.14);
   --ahm-danger: var(--destructive);
 
   --space-1: 4px;
@@ -83,9 +83,9 @@
   --accent: var(--ahm-sky);
   --accent-dim: var(--ahm-sky-dim);
 }
-.bloom-add-habit [data-accent="violet"] {
-  --accent: var(--ahm-violet);
-  --accent-dim: var(--ahm-violet-dim);
+.bloom-add-habit [data-accent="gold"] {
+  --accent: var(--ahm-gold);
+  --accent-dim: var(--ahm-gold-dim);
 }
 
 .bloom-add-habit * {
@@ -586,8 +586,8 @@
 .bloom-add-habit .sw-sky {
   background: var(--ahm-sky);
 }
-.bloom-add-habit .sw-violet {
-  background: var(--ahm-violet);
+.bloom-add-habit .sw-gold {
+  background: var(--ahm-gold);
 }
 
 /* ---------- CHIPS ----------------------------------------------------- */

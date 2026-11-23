@@ -11,7 +11,7 @@
  */
 
 .pf {
-  --pf-accent: var(--profile-accent, var(--violet));
+  --pf-accent: var(--profile-accent, var(--amber));
   --pf-accent-soft: color-mix(in oklab, var(--pf-accent) 12%, transparent);
   --pf-accent-line: color-mix(in oklab, var(--pf-accent) 42%, transparent);
   --pf-card: color-mix(in oklab, var(--surface) 82%, transparent);
@@ -21,7 +21,7 @@
   --pf-cover-h: 172px;
   --pf-avatar: 124px;
   --pf-src-trackers: var(--sky);
-  --pf-src-mood: var(--violet);
+  --pf-src-mood: var(--gold);
   --pf-src-habits: var(--sage);
   --pf-src-cycle: var(--rose);
 }

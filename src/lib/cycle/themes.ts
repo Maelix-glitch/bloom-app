@@ -19,17 +19,17 @@ export const CYCLE_THEMES: CycleTheme[] = [
   {
     id: "nocturne",
     name: "Nocturne",
-    tagline: "Ink-plum ground, amethyst and champagne",
+    tagline: "Ink ground, champagne and rose",
     description:
-      "The default. A near-black ground with a violet bias, hairline-bordered cards, a rose bleed phase and champagne ovulation. Calm, editorial, and easy on the eyes at night — which is when most people check.",
+      "The default. A near-black neutral ink ground, hairline-bordered cards, a rose bleed phase and champagne ovulation. Calm, editorial, and easy on the eyes at night — which is when most people check.",
     palette: [
-      { label: "Ground", hex: "#0d0b12" },
-      { label: "Surface", hex: "#16131e" },
+      { label: "Ground", hex: "#0a0b0e" },
+      { label: "Surface", hex: "#111318" },
       { label: "Ink", hex: "#f2ecec" },
       { label: "Menstrual", hex: "#cf6d8f" },
-      { label: "Follicular", hex: "#a58bff" },
+      { label: "Follicular", hex: "#879dbb" },
       { label: "Ovulation", hex: "#e3c187" },
-      { label: "Luteal", hex: "#8b74c9" },
+      { label: "Luteal", hex: "#8fc7a2" },
     ],
     traits: ["Hairline 1px cards", "14px radius", "Fraunces + Inter", "Quiet radial glow"],
     best: "The main direction — calm, legible, distinctive without being loud.",

@@ -83,7 +83,6 @@
   --color-input: var(--border);
   --color-ring: var(--primary);
 
-  --color-violet: var(--violet);
   --color-sky: var(--sky);
   --color-amber: var(--amber);
   --color-sage: var(--sage);
@@ -97,8 +96,6 @@
   --color-gold-grad-lo: var(--gold-grad-lo);
   --color-ink: var(--ink);
   --color-panel: var(--panel);
-  --color-violet-bright: var(--violet-bright);
-  --color-violet-deep: var(--violet-deep);
   --color-rose-bright: var(--rose-bright);
   --color-cream-2: var(--cream-2);
 
@@ -233,17 +230,20 @@
   --hairline-gradient: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
   --accent-primary: var(--gold);
   --accent-primary-hover: var(--gold-soft);
-  --violet: #a697d3; /* secondary lavender */
-  --violet-bright: #b7a6e8; /* bright pair to --violet */
-  --violet-deep: #221d33; /* tinted dark ground behind violet elements */
-  --accent-secondary: var(--violet);
-  --accent-secondary-muted: #302a43;
+  /* M-225: the lavender secondary (the old --violet token family) is
+     retired. The secondary accent is sage; every former --violet
+     consumer was re-pointed to a brand token (gold / sage / rose /
+     cream) at its own rule. The rewards skins' accent channel now
+     writes --accent-secondary (see the skins block below). */
+  --accent-secondary: var(--sage);
+  --accent-secondary-muted: #22302a; /* sage-tinted dark ground */
 
   /* ---- semantic ------------------------------------------------------ */
   --success: #8fc7a2; /* sage (Reskin foundation) */
   --warning: #c5a16b;
   --danger: #e3919f; /* rose (Reskin foundation) */
   --rose-bright: #f0b3bf; /* bright pair to --rose/--danger (mood/cycle contexts) */
+  --silver: #cfd2d6; /* neutral silver (Crescent frame, Starlight — M-225) */
   --destructive: #e3919f;
   --info: #879dbb;
   --sage: var(--success);
@@ -255,7 +255,7 @@
   --chart-1: #879dbb;
   --chart-2: #8fc7a2;
   --chart-3: var(--gold);
-  --chart-4: #a697d3;
+  --chart-4: #f4f0e6; /* cream-2 — M-225: was lavender; cream keeps the slot distinct from gold/amber */
   --chart-5: #e3919f;
   --chart-6: #c5a16b;
 
@@ -358,15 +358,13 @@
   --cycle-menstrual: var(--rose);
   --cycle-follicular: var(--sky);
   --cycle-ovulation: var(--amber);
-  --cycle-luteal: var(--violet);
+  --cycle-luteal: var(--sage);
   --cycle-predicted: color-mix(in oklab, var(--foreground) 32%, transparent);
 
-  --grad-violet: linear-gradient(135deg, var(--violet), var(--sky));
-  --glow-violet:
-    0 0 0 1px color-mix(in oklab, var(--violet) 45%, transparent),
-    0 18px 50px -22px color-mix(in oklab, var(--violet) 70%, transparent);
+  /* M-225: --grad-violet / --glow-violet removed — dead tokens (unused,
+     guard-pinned absent from components) in the retired hue. */
   --shadow-depth: var(--elevation-panel);
-  --dim-violet: color-mix(in oklab, var(--violet) 14%, transparent);
+  --dim-gold: color-mix(in oklab, var(--gold) 14%, transparent);
   --dim-sky: color-mix(in oklab, var(--sky) 14%, transparent);
   --dim-amber: color-mix(in oklab, var(--amber) 14%, transparent);
   --dim-sage: color-mix(in oklab, var(--sage) 14%, transparent);
@@ -1076,7 +1074,9 @@
   border: 1px solid var(--glass-border);
   border-radius: calc(var(--radius) + 8px);
   box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(14px);
+  /* M-225: the leftover 14px backdrop frost is deleted — the M-224
+     reversion is now true in code, not just in effect (the ground
+     was already opaque, so nothing renders differently). */
 }
 
 /* The day's facts, de-boxed (M-174; de-box spec rule 2 — a single
@@ -3539,14 +3539,18 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
 
 /* ------------------------------- themes --------------------------------- */
 
+/* M-225: Velvet Night keeps its name and its deep-night character, but
+   the violet is gone — surfaces sit in the neutral ink family (a trace
+   of chroma at hue 250, no purple cast) and its accent channel writes
+   gold through --accent-secondary, like every skin below. */
 html[data-bloom-theme="th-velvet-night"] {
-  --background: oklch(0.155 0.03 290);
-  --surface: oklch(0.19 0.033 290);
-  --surface-2: oklch(0.225 0.036 290);
-  --surface-3: oklch(0.26 0.038 290);
-  --border: oklch(0.305 0.034 290);
-  --border-strong: oklch(0.38 0.036 290);
-  --violet: oklch(0.78 0.095 299);
+  --background: oklch(0.155 0.006 250);
+  --surface: oklch(0.19 0.007 250);
+  --surface-2: oklch(0.225 0.008 250);
+  --surface-3: oklch(0.26 0.009 250);
+  --border: oklch(0.305 0.008 250);
+  --border-strong: oklch(0.38 0.009 250);
+  --accent-secondary: oklch(0.82 0.09 85);
 }
 
 html[data-bloom-theme="th-honey-hour"] {
@@ -3556,7 +3560,7 @@ html[data-bloom-theme="th-honey-hour"] {
   --surface-3: oklch(0.275 0.03 55);
   --border: oklch(0.315 0.024 55);
   --border-strong: oklch(0.39 0.026 55);
-  --violet: oklch(0.85 0.1 85);
+  --accent-secondary: oklch(0.85 0.1 85);
 }
 
 html[data-bloom-theme="th-moss-rest"] {
@@ -3566,7 +3570,7 @@ html[data-bloom-theme="th-moss-rest"] {
   --surface-3: oklch(0.27 0.027 165);
   --border: oklch(0.31 0.022 165);
   --border-strong: oklch(0.385 0.024 165);
-  --violet: oklch(0.78 0.08 152);
+  --accent-secondary: oklch(0.78 0.08 152);
 }
 
 html[data-bloom-theme="th-dusk-rose"] {
@@ -3576,7 +3580,7 @@ html[data-bloom-theme="th-dusk-rose"] {
   --surface-3: oklch(0.275 0.032 20);
   --border: oklch(0.31 0.026 20);
   --border-strong: oklch(0.385 0.03 20);
-  --violet: oklch(0.8 0.075 10);
+  --accent-secondary: oklch(0.8 0.075 10);
 }
 
 html[data-bloom-theme="th-midnight-tide"] {
@@ -3586,7 +3590,7 @@ html[data-bloom-theme="th-midnight-tide"] {
   --surface-3: oklch(0.26 0.034 255);
   --border: oklch(0.3 0.028 255);
   --border-strong: oklch(0.375 0.03 255);
-  --violet: oklch(0.77 0.075 235);
+  --accent-secondary: oklch(0.77 0.075 235);
 }
 
 html[data-bloom-theme="th-ink-serenity"] {
@@ -3596,32 +3600,32 @@ html[data-bloom-theme="th-ink-serenity"] {
   --surface-3: oklch(0.275 0.016 280);
   --border: oklch(0.32 0.013 280);
   --border-strong: oklch(0.39 0.015 280);
-  --violet: oklch(0.79 0.05 230);
+  --accent-secondary: oklch(0.79 0.05 230);
 }
 
 /* ------------------------------- palettes ------------------------------- */
 
 html[data-bloom-palette="pl-lavender-mist"] {
-  --violet: oklch(0.78 0.095 299);
+  --accent-secondary: oklch(0.85 0.07 85);
 }
 html[data-bloom-palette="pl-honey-light"] {
-  --violet: oklch(0.85 0.1 85);
+  --accent-secondary: oklch(0.85 0.1 85);
 }
 html[data-bloom-palette="pl-sage-glow"] {
-  --violet: oklch(0.78 0.08 152);
+  --accent-secondary: oklch(0.78 0.08 152);
 }
 html[data-bloom-palette="pl-rose-dawn"] {
-  --violet: oklch(0.8 0.075 10);
+  --accent-secondary: oklch(0.8 0.075 10);
 }
 html[data-bloom-palette="pl-mist-blue"] {
-  --violet: oklch(0.79 0.05 230);
+  --accent-secondary: oklch(0.79 0.05 230);
 }
 
 /* ------------------------------ wallpapers ------------------------------ */
 
 html[data-bloom-wallpaper="wp-moonlit-garden"] {
   --bloom-wallpaper-image: url("/rewards/art/moonlit-garden.jpg");
-  --bloom-wallpaper-tint: oklch(0.72 0.1 295 / 0.35);
+  --bloom-wallpaper-tint: oklch(0.78 0.06 85 / 0.3);
 }
 html[data-bloom-wallpaper="wp-first-light"] {
   --bloom-wallpaper-image: url("/rewards/art/wellness-morning.jpg");
@@ -3649,7 +3653,7 @@ html[data-bloom-wallpaper="wp-still-water"] {
 }
 html[data-bloom-wallpaper="wp-night-sky"] {
   --bloom-wallpaper-image: url("/rewards/art/deep-rest.jpg");
-  --bloom-wallpaper-tint: oklch(0.72 0.08 295 / 0.36);
+  --bloom-wallpaper-tint: oklch(0.72 0.05 250 / 0.36); /* slate night (M-225: was violet) */
 }
 html[data-bloom-wallpaper="wp-golden-dusk"] {
   --bloom-wallpaper-image: url("/rewards/art/golden-hour.jpg");
@@ -3668,7 +3672,7 @@ html[data-bloom-effect="fx-rain-spark"] {
   --bloom-fx-color: oklch(0.79 0.05 230);
 }
 html[data-bloom-effect="fx-starlight"] {
-  --bloom-fx-color: oklch(0.78 0.07 295);
+  --bloom-fx-color: oklch(0.78 0.005 250); /* silver, per the effect's own copy (M-225: was violet) */
 }
 html[data-bloom-effect="fx-mist"] {
   --bloom-fx-color: oklch(0.78 0.08 152);

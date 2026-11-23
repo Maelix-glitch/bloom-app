@@ -83,7 +83,7 @@ function RankRing({ progress }: { progress: number }) {
         <linearGradient id="pg-ring-gradient" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="color-mix(in oklab, var(--gold) 55%, transparent)" />
           <stop offset="55%" stopColor="var(--gold)" />
-          <stop offset="100%" stopColor="color-mix(in oklab, var(--violet) 75%, var(--gold))" />
+          <stop offset="100%" stopColor="color-mix(in oklab, var(--sage) 75%, var(--gold))" />
         </linearGradient>
       </defs>
       <g className="pg-ring-ticks">

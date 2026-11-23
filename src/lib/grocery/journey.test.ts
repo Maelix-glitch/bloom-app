@@ -7,6 +7,7 @@
  * carries none.
  */
 
+import { Drumstick, LeafyGreen, Milk, Package, Sprout } from "lucide-react";
 import { describe, expect, it } from "vitest";
 
 import {
@@ -60,13 +61,13 @@ describe("groceryMessageFor", () => {
 });
 
 describe("GROCERY_CATEGORY_ICONS", () => {
-  it("carries exactly the owner's five categories", () => {
+  it("carries exactly the owner's five categories, as drawn glyphs (M-225)", () => {
     expect(GROCERY_CATEGORY_ICONS).toEqual({
-      produce: "🥬",
-      protein: "🍗",
-      dairy: "🥛",
-      pantry: "🫒",
-      spices: "🌿",
+      produce: LeafyGreen,
+      protein: Drumstick,
+      dairy: Milk,
+      pantry: Package,
+      spices: Sprout,
     });
     expect(GROCERY_CATEGORY_ICONS.other).toBeUndefined();
   });

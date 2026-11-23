@@ -98,13 +98,13 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
         </div>
       </div>
 
-      <Panel className="mt-8 overflow-hidden" glow="violet">
+      <Panel className="mt-8 overflow-hidden" glow="gold">
         <div className="grid divide-y divide-border sm:grid-cols-2 sm:divide-y-0 lg:grid-cols-4 lg:divide-x">
           <Metric
             label={`Average mood · ${range.label}`}
             value={a.avg}
             suffix="/10"
-            accent="violet"
+            accent="gold"
             decimals={2}
             sub={
               <span className="flex items-center gap-2">
@@ -145,7 +145,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
         <div className="hairline" />
         <div className="flex flex-wrap items-center gap-x-6 gap-y-2 px-5 py-3 text-[length:var(--text-meta)] text-faint-strong">
           <span className="flex items-center gap-2">
-            <Sparkles className="size-3 text-violet" /> depth: {a.tier.current.label}
+            <Sparkles className="size-3 text-gold" /> depth: {a.tier.current.label}
           </span>
           <span className="flex items-center gap-2">
             <Activity className="size-3 text-sky" /> {entries.length}{" "}

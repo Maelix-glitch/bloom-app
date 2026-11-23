@@ -43,7 +43,7 @@ const DEFAULTS = {
   displayName: "Bloom User",
   username: null,
   bio: null,
-  accent: "violet" as BloomAccent,
+  accent: "amber" as BloomAccent,
   avatarPath: null,
 };
 

@@ -5,7 +5,7 @@ import type { Insight } from "@/lib/mood/types";
 import { Insufficient, Panel, SectionHead } from "./primitives";
 
 const kindAccent: Record<Insight["kind"], string> = {
-  trend: "text-violet",
+  trend: "text-gold",
   consistency: "text-sky",
   emotion: "text-amber",
   correlation: "text-sage",
@@ -25,13 +25,13 @@ function InsightsImpl({
   };
 }) {
   return (
-    <Panel className="p-6" glow="violet">
+    <Panel className="p-6" glow="gold">
       <SectionHead
         eyebrow="Synthesis"
         title="Insights centre"
         sub="Plain-language statements generated strictly from your recorded data."
         right={
-          <span className="mono flex items-center gap-2 rounded-full border border-violet/40 bg-[var(--dim-violet)] px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-violet">
+          <span className="mono flex items-center gap-2 rounded-full border border-gold/40 bg-[var(--dim-gold)] px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-gold">
             <BrainCircuit className="size-3" /> {tier.current.label}
           </span>
         }
@@ -63,7 +63,7 @@ function InsightsImpl({
               key={t.label}
               className={`mono rounded-full border px-2.5 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] ${
                 t.label === tier.current.label
-                  ? "border-violet/60 bg-[var(--dim-violet)] text-violet"
+                  ? "border-gold/60 bg-[var(--dim-gold)] text-gold"
                   : "border-border text-faint"
               }`}
             >

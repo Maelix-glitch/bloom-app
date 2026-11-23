@@ -183,7 +183,7 @@ function Choice({
       <span
         className={cn(
           "mt-0.5 grid size-8 shrink-0 place-items-center rounded-full border",
-          checked ? "text-[var(--profile-accent,var(--violet))]" : "text-faint",
+          checked ? "text-[var(--profile-accent,var(--amber))]" : "text-faint",
         )}
         style={{ borderColor: "var(--border)" }}
         aria-hidden
@@ -200,7 +200,7 @@ function Choice({
         aria-hidden
         className={cn(
           "relative mt-1 h-5 w-9 shrink-0 rounded-full transition-colors",
-          checked ? "bg-[var(--profile-accent,var(--violet))]" : "bg-surface-3",
+          checked ? "bg-[var(--profile-accent,var(--amber))]" : "bg-surface-3",
         )}
       >
         <span

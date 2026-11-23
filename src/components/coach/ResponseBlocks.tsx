@@ -148,7 +148,7 @@ function ProposalBlock({
 /**
  * Structured pieces the grounded responder emits (metric / plan / proposal).
  * Each has its own quiet visual voice — a number with its real line, a next
- * step with a sage check, a weighed change in lavender. Nothing here is ever
+ * step with a sage check, a weighed change in gold. Nothing here is ever
  * synthesised; blocks arrive already grounded in the record.
  */
 export function ResponseBlocks({
