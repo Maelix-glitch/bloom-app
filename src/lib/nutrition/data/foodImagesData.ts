@@ -145,11 +145,20 @@ import tofu from "../../../assets/foods/tofu.webp";
 import tempeh from "../../../assets/foods/tempeh.webp";
 import edamame from "../../../assets/foods/edamame.webp";
 import atlanticMackerel from "../../../assets/foods/atlantic-mackerel.webp";
+import greekYogurtLowfat from "../../../assets/foods/greek-yogurt-lowfat.webp";
+import skimmedMilkPowder from "../../../assets/foods/skimmed-milk-powder.webp";
+import boiledEgg from "../../../assets/foods/boiled-egg.webp";
+import soyaChunks from "../../../assets/foods/soya-chunks.webp";
+import tofuExtraFirm from "../../../assets/foods/tofu-extra-firm.webp";
+import edamamePrepared from "../../../assets/foods/edamame-prepared.webp";
+import hempSeeds from "../../../assets/foods/hemp-seeds.webp";
+import chickenBreastRoasted from "../../../assets/foods/chicken-breast-roasted.webp";
+import turkeyBreastRoasted from "../../../assets/foods/turkey-breast-roasted.webp";
 
-export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-17";
+export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-19";
 
 /** SHA-256 over the canonicalised attribution records (see the generator). */
-export const FOOD_IMAGES_FINGERPRINT = "efd519ad6ca46a396ac63bfee4fd2d560c68d7ebdb08f3fcfdc1d4978d2fc030";
+export const FOOD_IMAGES_FINGERPRINT = "78c15cbead84f1c1e577d16e14bb51d52aaf45cba56ff9e7ea0f161e7301b9b7";
 
 export interface FoodImageRaw {
   foodId: string;
@@ -298,6 +307,15 @@ export const FOOD_IMAGES_RAW: readonly FoodImageRaw[] = [
   { "foodId": "usda-174272", "foodName": "Tempeh", "slug": "tempeh", "src": tempeh, "commonsTitle": "File:Tempeh 003.jpg", "author": "Ocdp", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Tempeh_003.jpg" },
   { "foodId": "usda-168410", "foodName": "Edamame, frozen, unprepared", "slug": "edamame", "src": edamame, "commonsTitle": "File:Shelled edamame beans.jpg", "author": "Fumikas Sagisavas", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Shelled_edamame_beans.jpg" },
   { "foodId": "usda-175119", "foodName": "Fish, mackerel, Atlantic, raw", "slug": "atlantic-mackerel", "src": atlanticMackerel, "commonsTitle": "File:Atlantic mackerel (Scomber scombrus).jpg", "author": "Petar Milošević", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Atlantic_mackerel_(Scomber_scombrus).jpg" },
+  { "foodId": "usda-170903", "foodName": "Yogurt, Greek, plain, lowfat", "slug": "greek-yogurt-lowfat", "src": greekYogurtLowfat, "commonsTitle": "File:Hangop bord.jpg", "author": "Kliek", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Hangop_bord.jpg" },
+  { "foodId": "usda-172195", "foodName": "Milk, dry, nonfat, regular, with added vitamin A and vitamin D", "slug": "skimmed-milk-powder", "src": skimmedMilkPowder, "commonsTitle": "File:Milk powder cropped.jpg", "author": "ProjectManhattan", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Milk_powder_cropped.jpg" },
+  { "foodId": "usda-173424", "foodName": "Egg, whole, cooked, hard-boiled", "slug": "boiled-egg", "src": boiledEgg, "commonsTitle": "File:Boiled Egg - Crossection.jpg", "author": "Ramesh NG", "license": "CC BY-SA 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Boiled_Egg_-_Crossection.jpg" },
+  { "foodId": "usda-174268", "foodName": "Meat extender", "slug": "soya-chunks", "src": soyaChunks, "commonsTitle": "File:Textured-Soy-Protein-(2006-02-16).jpg", "author": "Public domain", "license": "Public domain", "pageUrl": "https://commons.wikimedia.org/wiki/File:Textured-Soy-Protein-(2006-02-16).jpg" },
+  { "foodId": "usda-174290", "foodName": "Tofu, extra firm, prepared with nigari", "slug": "tofu-extra-firm", "src": tofuExtraFirm, "commonsTitle": "File:Fragrant pressed tofu.jpg", "author": "Fumikas Sagisavas", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Fragrant_pressed_tofu.jpg" },
+  { "foodId": "usda-168411", "foodName": "Edamame, frozen, prepared", "slug": "edamame-prepared", "src": edamamePrepared, "commonsTitle": "File:Edamame by Augapfel.jpg", "author": "Augapfel", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Edamame_by_Augapfel.jpg" },
+  { "foodId": "usda-170148", "foodName": "Seeds, hemp seed, hulled", "slug": "hemp-seeds", "src": hempSeeds, "commonsTitle": "File:Hemp seeds protein.jpg", "author": "MPart4", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Hemp_seeds_protein.jpg" },
+  { "foodId": "usda-171477", "foodName": "Chicken, broilers or fryers, breast, meat only, cooked, roasted", "slug": "chicken-breast-roasted", "src": chickenBreastRoasted, "commonsTitle": "File:Grilled Chicken Breasts (28905381261).jpg", "author": "Sharon Chen from Austin, United States", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Grilled_Chicken_Breasts_(28905381261).jpg" },
+  { "foodId": "usda-171496", "foodName": "Turkey, whole, breast, meat only, cooked, roasted", "slug": "turkey-breast-roasted", "src": turkeyBreastRoasted, "commonsTitle": "File:Cooked turkey breast - November 2023 - Sarah Stierch.jpg", "author": "Missvain", "license": "CC BY 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Cooked_turkey_breast_-_November_2023_-_Sarah_Stierch.jpg" },
 ];
 
 export interface FoodImagePhotoless {
@@ -318,4 +336,9 @@ export const FOOD_IMAGE_PHOTOLESS: readonly FoodImagePhotoless[] = [
   { "foodId": "usda-175139", "foodName": "Fish, sardine, Atlantic, canned in oil, drained solids with bone", "reason": "Hunted 2026-11 (multilingual and category searches): canned sardines appear only as closed branded tins or restaurant servings — no open, unbranded depiction of the fish themselves under a free licence." },
   { "foodId": "usda-173177", "foodName": "Beverages, Whey protein powder isolate", "reason": "Hunted 2026-11-17: whey protein powder isolate appears on Commons only as branded tubs and product containers — packaging is not the food — and an unbranded scoop of powder cannot be told apart from any other protein powder, so no photograph can truthfully depict this record." },
   { "foodId": "usda-173181", "foodName": "Beverages, Protein powder soy based", "reason": "Hunted 2026-11-17: soy-based protein powder appears on Commons only as branded tubs and product containers — packaging is not the food — and an unbranded scoop of powder cannot be told apart from any other protein powder, so no photograph can truthfully depict this record." },
+  { "foodId": "usda-2346384", "foodName": "Cottage cheese, full fat, large or small curd", "reason": "Hunted 2026-11-19: full-fat cottage cheese appears under free licences only in branded retail tubs (one with a visible barcode), as pressed dry-curd blocks (tvorog — a different texture), or inside composed dishes; the one clean curd photograph is already pinned to the low-fat cottage cheese record and Commons titles cannot repeat in this manifest." },
+  { "foodId": "usda-173427", "foodName": "Egg, white, dried, powder, stabilized, glucose reduced", "reason": "Hunted 2026-11-19: dried egg white powder — photo-less by the PW-1 powder precedent: no unbranded free-licence photograph of the powder itself, and a scoop of white powder cannot truthfully depict this record over any other." },
+  { "foodId": "usda-173180", "foodName": "Beverages, Protein powder whey based", "reason": "Hunted 2026-11-19: whey-based protein powder — photo-less by the PW-1 precedent pinned above for the whey isolate and soy powder records: branded tubs are packaging, and an unbranded scoop cannot be told apart from any other protein powder." },
+  { "foodId": "usda-168147", "foodName": "Vital wheat gluten", "reason": "Hunted 2026-11-19: vital wheat gluten is sold as a dry powder, but Commons' free-licence frames show only prepared seitan — the cooked product, a different form — never the powder itself unbranded." },
+  { "foodId": "usda-172449", "foodName": "Tofu, soft, prepared with calcium sulfate and magnesium chloride (nigari)", "reason": "Hunted 2026-11-19: the only clean free-licence photograph of a soft (silken) tofu block is already pinned to the regular tofu record and Commons titles cannot repeat in this manifest; the remaining silken-tofu frames are cooked dishes or a mislabelled meat aspic." },
 ];

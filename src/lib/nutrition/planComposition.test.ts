@@ -419,11 +419,19 @@ describe("plan · day floors", () => {
        (163 g) and the capped pool lands under the energy guide
        (3,153 kcal). Both notes state their true figures; the
        floors below still hold. */
+    /* PF-1 re-pin (2026-11-23): the protein-foods wave widened
+       this day's pool and the energy miss honestly closes — the
+       day now lands at 3,187 kcal, inside the guide band, so the
+       kcal note is gone. The day composes four PF-1 foods as
+       protein layers (skimmed milk powder, prepared edamame,
+       soft tofu at a full 120 g serving, hard-boiled egg);
+       protein still overshoots and is named at its new true
+       figure (156 g). The 7-group span is unchanged and still
+       named. Probed and verified at the re-pin, not assumed. */
     expect(plan.notes).toEqual([
       "You listed 3 meals a day; a snack spreads today across 4 sittings.",
       "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
-      "Today's suggestions reach about 163 g of protein — above your 116 g protein guide. The day's protein foods add up past it.",
-      "Today's suggestions reach about 3,153 kcal — below your ~3,350 kcal guide. The portion caps bind before the target does.",
+      "Today's suggestions reach about 156 g of protein — above your 116 g protein guide. The day's protein foods add up past it.",
     ]);
     const veg = allSuggestions(plan)
       .filter((s) => groupOf(s) === "vegetables")
@@ -527,9 +535,16 @@ describe("plan · rotation", () => {
        names it; the 16th lands inside the energy band (the
        1,855 kcal note is gone) and spans 5 groups. Her targets
        still never rotate; the composition still does. */
-    expect(d15.notes).toEqual([
-      "Today's suggestions reach about 142 g of protein — above your 126 g protein guide. The day's protein foods add up past it.",
-    ]);
+    /* PF-1 re-pin (2026-11-23): the protein-foods wave widened
+       her pool too — the 15th now composes PF-1 skimmed milk
+       powder and prepared edamame (a full 120 g serving) among
+       its protein layers and lands at ~138 g of protein: still
+       above the 126 g guide, but inside the naming band, so the
+       protein note the method-15 pin carried is honestly gone.
+       The day meets its floors and its energy band (1,631 of
+       1,654 kcal) and spans 8 groups, so it carries no notes.
+       Probed and verified at the re-pin, not assumed. */
+    expect(d15.notes).toEqual([]);
     /* 2026-11-16 rotates to a mix that spans 5 food groups; the
        span is named. */
     expect(d16.notes).toEqual([
@@ -545,10 +560,15 @@ describe("plan · rotation", () => {
        this time honestly. The whole-food-first top-up order closes
        the day's protein with a whole food from a group the day had
        not served, where a powder used to close it; the count is
-       the day's real foods either way, and the note names it.) */
-    expect(d17.notes).toEqual([
-      "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
-    ]);
+       the day's real foods either way, and the note names it.)
+       (PF-1 note, 2026-11-19: the day now carries no notes at all.
+       The protein-foods wave widened the pool and this day composes
+       three of the new foods — lowfat Greek yogurt, extra-firm tofu
+       and roasted turkey breast as protein layers — spanning all 8
+       food groups, so the group-span shortfall the note named is
+       genuinely met, and every gram floor and the energy band were
+       already met. Probed and verified at the re-pin, not assumed.) */
+    expect(d17.notes).toEqual([]);
   });
 });
 
@@ -731,11 +751,21 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
 /* ------------------------------- P4 soy caps ------------------------------- */
 
 describe("plan · P4 soy-form portion caps", () => {
-  it("the cooked-soy set names exactly the three FDC soy forms, all in the pulses group", () => {
+  it("the cooked-soy set names exactly the six FDC soy forms, all in the pulses group", () => {
     /* Keyed on the pinned reference ids (usda-<fdcId>): firm tofu
-       172448, tempeh 174272, edamame 168410. If the pool changes, this
-       fails loudly rather than the wider cap silently no-opping. */
-    expect([...COOKED_SOY_FORM_IDS].sort()).toEqual(["usda-168410", "usda-172448", "usda-174272"]);
+       172448, tempeh 174272, edamame 168410 — joined by PF-1
+       (2026-11-19) with extra-firm tofu 174290, soft tofu 172449 and
+       prepared edamame 168411, the same forms in their other shipped
+       records. If the pool changes, this fails loudly rather than
+       the wider cap silently no-opping. */
+    expect([...COOKED_SOY_FORM_IDS].sort()).toEqual([
+      "usda-168410",
+      "usda-168411",
+      "usda-172448",
+      "usda-172449",
+      "usda-174272",
+      "usda-174290",
+    ]);
     for (const id of COOKED_SOY_FORM_IDS) {
       expect(BY_ID.get(id)?.classification?.group, id).toBe("pulses_legumes");
     }
@@ -744,26 +774,33 @@ describe("plan · P4 soy-form portion caps", () => {
     expect(COOKED_SOY_FORM_IDS.has(soybeans.id)).toBe(false);
   });
 
-  it("a composed meal may carry a full cooked-form serving of tempeh", () => {
+  it("a composed meal may carry a full cooked-form serving of a soy form", () => {
     /* The owner's 2026-11-15: under the dry-pulse cap tempeh stopped
        at 60 g (half a serving, ~12 g protein); portioned as the cooked
        food it is, a meal carries the full 120 g.
        M-219: at the 116 g guide one full serving covers the day's
        soy-form need (the pin once counted two, at the 220 g guide);
        what is pinned is unchanged — a full 120 g serving is served,
-       as a protein layer, never capped back to 60 g. */
+       as a protein layer, never capped back to 60 g. At method 15
+       the seat's serving was tempeh portion-scaled to 105 g.
+       PF-1 re-pin (2026-11-23): the wave added three more cooked
+       soy forms to the pool (extra-firm tofu, soft tofu, prepared
+       edamame), and this day's rotation now seats the soft tofu
+       (usda-172449) in the soy-form seat — tempeh does not appear
+       in this day at all (probed, not assumed). The invariant this
+       test exists to hold is unchanged and is what is pinned now:
+       a cooked soy form IS served in the day, as a protein layer,
+       at a full serving far above the 60 g dry-pulse cap — here
+       the full 120 g. The form census above and the cap test
+       below pin the rule itself for every form, tempeh included. */
     const plan = gen(ownerProfile(), {
       fallbackTargets: { kcal: 3288, proteinG: 220 },
       day: "2026-11-15",
     });
-    const tempeh = allSuggestions(plan).filter((s) => s.foodId === "usda-174272");
-    expect(tempeh.length).toBeGreaterThanOrEqual(1);
-    expect(tempeh.every((s) => s.layer === "protein")).toBe(true);
-    /* M-219: the serving is portion-scaled to the day's need —
-       105 g at the 116 g guide (120 g at the old 220 g guide).
-       The pin's point stands: a cooked-form serving far above
-       the 60 g dry-pulse cap. */
-    expect(Math.max(...tempeh.map((s) => s.grams))).toBe(105);
+    const soyForms = allSuggestions(plan).filter((s) => COOKED_SOY_FORM_IDS.has(s.foodId));
+    expect(soyForms.length).toBeGreaterThanOrEqual(1);
+    expect(soyForms.every((s) => s.layer === "protein")).toBe(true);
+    expect(Math.max(...soyForms.map((s) => s.grams))).toBe(120);
   });
 
   it("dry pulses keep the 60 g cap across the owner week; soy forms never pass 120 g", () => {

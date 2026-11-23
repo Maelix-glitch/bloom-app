@@ -202,6 +202,18 @@ const PINS = [
   [174272, "Tempeh 003.jpg", "tempeh"],
   [168410, "Shelled edamame beans.jpg", "edamame"],
   [175119, "Atlantic mackerel (Scomber scombrus).jpg", "atlantic-mackerel"],
+  /* PF-1 (2026-11-19) dedicated protein foods wave. Every photograph
+     below was eyeballed before pinning: the food itself, unbranded,
+     no packaging, no composed dish. */
+  [170903, "Hangop bord.jpg", "greek-yogurt-lowfat"], // strained yogurt (hangop) — the same food as Greek yogurt, thick on a plate
+  [172195, "Milk powder cropped.jpg", "skimmed-milk-powder"], // milk powder with a scoop (the plainer "PowderedMilk.jpg" pile fails the attribution gate — Commons records no author for it)
+  [173424, "Boiled Egg - Crossection.jpg", "boiled-egg"], // two halved hard-boiled eggs
+  [174290, "Fragrant pressed tofu.jpg", "tofu-extra-firm"], // pressed tofu blocks — the extra-firm form
+  [168411, "Edamame by Augapfel.jpg", "edamame-prepared"], // steamed edamame pods on a plate
+  [170148, "Hemp seeds protein.jpg", "hemp-seeds"], // hulled hemp seeds in a bowl
+  [174268, "Textured-Soy-Protein-(2006-02-16).jpg", "soya-chunks"], // dry textured soy chunks
+  [171477, "Grilled Chicken Breasts (28905381261).jpg", "chicken-breast-roasted"], // sliced cooked chicken breast
+  [171496, "Cooked turkey breast - November 2023 - Sarah Stierch.jpg", "turkey-breast-roasted"], // sliced cooked turkey breast
 ];
 
 /**
@@ -229,6 +241,13 @@ const PHOTOLESS = [
      truthfully depict either record. */
   [173177, "Hunted 2026-11-17: whey protein powder isolate appears on Commons only as branded tubs and product containers — packaging is not the food — and an unbranded scoop of powder cannot be told apart from any other protein powder, so no photograph can truthfully depict this record."],
   [173181, "Hunted 2026-11-17: soy-based protein powder appears on Commons only as branded tubs and product containers — packaging is not the food — and an unbranded scoop of powder cannot be told apart from any other protein powder, so no photograph can truthfully depict this record."],
+  /* PF-1 (2026-11-19): the dedicated protein foods that stay
+     photo-less, each hunted on Commons and eyeballed. */
+  [2346384, "Hunted 2026-11-19: full-fat cottage cheese appears under free licences only in branded retail tubs (one with a visible barcode), as pressed dry-curd blocks (tvorog — a different texture), or inside composed dishes; the one clean curd photograph is already pinned to the low-fat cottage cheese record and Commons titles cannot repeat in this manifest."],
+  [172449, "Hunted 2026-11-19: the only clean free-licence photograph of a soft (silken) tofu block is already pinned to the regular tofu record and Commons titles cannot repeat in this manifest; the remaining silken-tofu frames are cooked dishes or a mislabelled meat aspic."],
+  [168147, "Hunted 2026-11-19: vital wheat gluten is sold as a dry powder, but Commons' free-licence frames show only prepared seitan — the cooked product, a different form — never the powder itself unbranded."],
+  [173180, "Hunted 2026-11-19: whey-based protein powder — photo-less by the PW-1 precedent pinned above for the whey isolate and soy powder records: branded tubs are packaging, and an unbranded scoop cannot be told apart from any other protein powder."],
+  [173427, "Hunted 2026-11-19: dried egg white powder — photo-less by the PW-1 powder precedent: no unbranded free-licence photograph of the powder itself, and a scoop of white powder cannot truthfully depict this record over any other."],
 ];
 
 /* ------------------------------ Commons API ------------------------------ */
@@ -394,24 +413,51 @@ async function generate() {
           `attribution gate: "${pin.title}" is ${meta.license} but Commons records no author — it cannot be attributed, refusing to ship it`,
         );
     }
-    /* Download the ~512px thumbnail and convert it to WebP. */
-    const tmp = join(tmpdir(), `bloom-food-${food.fdc}.bin`);
-    let bytes = null;
-    for (let attempt = 0; attempt < 5 && !bytes; attempt++) {
-      const res = await fetch(meta.thumburl, { headers: UA });
-      if (res.status === 429 || res.status === 503) {
-        await sleep(3000 * (attempt + 1));
-        continue;
-      }
-      if (!res.ok) throw new Error(`download failed for "${pin.title}": HTTP ${res.status}`);
-      bytes = Buffer.from(await res.arrayBuffer());
-    }
-    writeFileSync(tmp, bytes);
+    /* Download the ~512px thumbnail and convert it to WebP.
+       PF-1 (2026-11-19): a run that dies mid-list (Wikimedia throttles
+       this egress IP under sustained volume) used to restart every
+       download from pin one and die at the same wall. A valid asset
+       already on disk is now reused — the manifest entry is built
+       from the Commons metadata either way, so the output is
+       identical and re-runs make incremental progress. */
     const assetPath = join(ASSETS_DIR, `${pin.slug}.webp`);
-    await toWebp(tmp, assetPath);
-    const { size } = statSync(assetPath);
-    if (size <= 2048 || size >= 153600)
-      throw new Error(`asset size out of bounds for ${pin.slug}.webp: ${size} bytes`);
+    let size = existsSync(assetPath) ? statSync(assetPath).size : 0;
+    if (size <= 2048 || size >= 153600) {
+      const tmp = join(tmpdir(), `bloom-food-${food.fdc}.bin`);
+      let bytes = null;
+      for (let attempt = 0; attempt < 5 && !bytes; attempt++) {
+        /* PF-1 (2026-11-19): each attempt is time-boxed — a stalled
+           thumbnail response otherwise hangs the run forever — and a
+           network error or timeout retries like a 429 instead of
+           crashing the whole generation. Wikimedia answers sustained
+           volume with 429 and Retry-After 120, so the retries back
+           off in 30 s steps that span the throttle window. */
+        let res = null;
+        try {
+          res = await fetch(meta.thumburl, {
+            headers: UA,
+            signal: AbortSignal.timeout(60000),
+          });
+        } catch {
+          res = null;
+        }
+        if (!res || res.status === 429 || res.status === 503) {
+          await sleep(30000 * (attempt + 1));
+          continue;
+        }
+        if (!res.ok) throw new Error(`download failed for "${pin.title}": HTTP ${res.status}`);
+        bytes = Buffer.from(await res.arrayBuffer());
+      }
+      if (!bytes)
+        throw new Error(
+          `download failed for "${pin.title}" (${food.foodId}): throttled on every attempt — re-run later; completed assets are reused`,
+        );
+      writeFileSync(tmp, bytes);
+      await toWebp(tmp, assetPath);
+      size = statSync(assetPath).size;
+      if (size <= 2048 || size >= 153600)
+        throw new Error(`asset size out of bounds for ${pin.slug}.webp: ${size} bytes`);
+    }
     photos.push({
       foodId: food.foodId,
       foodName: food.foodName,

@@ -131,10 +131,15 @@ const dayProtein = (plan: DailyPlan) =>
 /* ------------------------------ the powders ------------------------------- */
 
 describe("P11 · protein powders", () => {
-  it("the powder identity matches exactly the two PW-1 records in the pinned set", () => {
+  it("the powder identity matches exactly the four powder records in the pinned set", () => {
+    /* The two PW-1 records, plus PF-1 (2026-11-19): the whey-based
+       powder (173180) and the egg-white powder (173427) — both sit
+       in "other" above the 40 g threshold, in reference-set order. */
     expect(USDA_REFERENCE_FOODS.filter(isProteinPowder).map((f) => f.id)).toEqual([
       "usda-173177",
       "usda-173181",
+      "usda-173427",
+      "usda-173180",
     ]);
   });
 

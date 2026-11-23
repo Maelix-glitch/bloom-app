@@ -43,6 +43,7 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-174288": { display: "Chickpea flour (besan)", hindi: "बेसन" },
   "usda-169714": { display: "Rice flour", hindi: "चावल का आटा" },
   "usda-168933": { display: "Semolina (sooji)", hindi: "सूजी" },
+  "usda-168147": { display: "Vital wheat gluten", hindi: "गेहूं का ग्लूटेन" },
 
   /* Pulses and legumes */
   "usda-2644283": { display: "Lentils (whole)", hindi: "साबुत दाल" },
@@ -53,9 +54,13 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-173745": { display: "Navy beans", hindi: "सफ़ेद राजमा" },
   "usda-175199": { display: "Pinto beans", hindi: "पिंटो बीन्स" },
   "usda-174270": { display: "Soybeans", hindi: "सोयाबीन" },
+  "usda-174268": { display: "Soya chunks (textured soy protein)", hindi: "सोया चंक्स" },
   "usda-172448": { display: "Tofu (firm)", hindi: "टोफू" },
+  "usda-174290": { display: "Tofu (extra firm)", hindi: "टोफू" },
+  "usda-172449": { display: "Tofu (soft)", hindi: "टोफू" },
   "usda-174272": { display: "Tempeh", hindi: "टेम्पेह" },
   "usda-168410": { display: "Edamame", hindi: "एडामामे" },
+  "usda-168411": { display: "Edamame (cooked)", hindi: "एडामामे" },
   "usda-172436": { display: "Pigeon peas (arhar dal)", hindi: "अरहर दाल" },
   "usda-174256": { display: "Mung beans (moong dal)", hindi: "मूंग दाल" },
   "usda-174259": { display: "Black gram (urad dal)", hindi: "उड़द दाल" },
@@ -65,12 +70,15 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   /* Dairy and fats */
   "usda-322892": { display: "Whole milk", hindi: "दूध" },
   "usda-322559": { display: "Skimmed milk", hindi: "बिना मलाई का दूध" },
+  "usda-172195": { display: "Skimmed milk powder", hindi: "स्किम्ड मिल्क पाउडर" },
   "usda-2259793": { display: "Yogurt (dahi)", hindi: "दही" },
   "usda-330137": { display: "Greek yogurt (hung curd)", hindi: "गाढ़ा दही" },
+  "usda-170903": { display: "Greek yogurt, low-fat (hung curd)", hindi: "गाढ़ा दही" },
   "usda-328637": { display: "Cheddar cheese", hindi: "चेडर चीज़" },
   "usda-329370": { display: "Mozzarella", hindi: "मोज़ेरेला चीज़" },
   "usda-325036": { display: "Parmesan", hindi: "पार्मेसन चीज़" },
   "usda-328841": { display: "Cottage cheese", hindi: "कॉटेज चीज़" },
+  "usda-2346384": { display: "Cottage cheese (full-fat)", hindi: "कॉटेज चीज़" },
   "usda-323444": { display: "Ricotta", hindi: "रिकोटा चीज़" },
   "usda-173410": { display: "Butter", hindi: "मक्खन" },
   "usda-171314": { display: "Ghee (clarified butter)", hindi: "घी" },
@@ -79,9 +87,11 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-171287": { display: "Egg", hindi: "अंडा" },
   "usda-172183": { display: "Egg white", hindi: "अंडे की सफ़ेदी" },
   "usda-172184": { display: "Egg yolk", hindi: "अंडे की ज़र्दी" },
+  "usda-173424": { display: "Boiled egg", hindi: "उबला अंडा" },
 
   /* Meat, poultry and fish */
   "usda-2646170": { display: "Chicken breast", hindi: "चिकन ब्रेस्ट" },
+  "usda-171477": { display: "Chicken breast, roasted", hindi: "चिकन ब्रेस्ट" },
   "usda-2646171": { display: "Chicken thigh", hindi: "चिकन थाई" },
   "usda-168608": { display: "Ground beef (keema)", hindi: "बीफ़ कीमा" },
   "usda-2514745": { display: "Ground pork", hindi: "पोर्क कीमा" },
@@ -89,6 +99,7 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-174370": { display: "Ground lamb (mutton keema)", hindi: "मटन कीमा" },
   "usda-2514747": { display: "Ground turkey", hindi: "टर्की कीमा" },
   "usda-171098": { display: "Turkey breast", hindi: "टर्की ब्रेस्ट" },
+  "usda-171496": { display: "Turkey breast, roasted", hindi: "टर्की ब्रेस्ट" },
   "usda-2684441": { display: "Salmon", hindi: "सैल्मन मछली" },
   "usda-2684444": { display: "Cod", hindi: "कॉड मछली" },
   "usda-2684442": { display: "Tilapia", hindi: "तिलापिया मछली" },
@@ -158,6 +169,7 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-172430": { display: "Peanuts (groundnuts)", hindi: "मूंगफली" },
   "usda-2515381": { display: "Sunflower seeds", hindi: "सूरजमुखी के बीज" },
   "usda-2515380": { display: "Pumpkin seeds (pepitas)", hindi: "कद्दू के बीज" },
+  "usda-170148": { display: "Hemp seeds", hindi: "भांग के बीज" },
   "usda-170150": { display: "Sesame seeds (til)", hindi: "तिल" },
   "usda-170169": { display: "Coconut (fresh)", hindi: "नारियल" },
   "usda-170172": { display: "Coconut milk", hindi: "नारियल का दूध" },
@@ -189,7 +201,9 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-334247": { display: "Sugar", hindi: "चीनी" },
   "usda-173469": { display: "Apple cider vinegar", hindi: "सेब का सिरका" },
   "usda-173177": { display: "Whey protein powder (isolate)", hindi: "व्हे प्रोटीन पाउडर" },
+  "usda-173180": { display: "Whey protein powder", hindi: "व्हे प्रोटीन पाउडर" },
   "usda-173181": { display: "Soy protein powder", hindi: "सोया प्रोटीन पाउडर" },
+  "usda-173427": { display: "Egg white powder", hindi: "अंडे की सफ़ेदी का पाउडर" },
 };
 
 /** The display + Hindi names for a reference food id, or null when the

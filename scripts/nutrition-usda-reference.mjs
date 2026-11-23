@@ -286,6 +286,50 @@ const PICKS = [
    * not dressed up as one. */
   { fdcId: 173177, dataType: "SR Legacy", expect: "Beverages, Whey protein powder isolate" },
   { fdcId: 173181, dataType: "SR Legacy", expect: "Beverages, Protein powder soy based" },
+  /* ---- Protein-foods wave (PF-1, 2026-11-19): the dedicated protein
+   * FOODS — the eat-as-is / log-as-is kind, added on the owner's word
+   * after the method-13 repair made the protein DISHES servable. The
+   * set already held the protein ingredients (dry dals, seeds, the raw
+   * flesh and fish records) and two powders; what it lacked was the
+   * ready protein foods a person actually logs: cooked eggs, cooked
+   * poultry breast, the strained yogurts, tofu in its other firmness
+   * forms, prepared edamame, soya chunks, skimmed milk powder, hemp
+   * seeds and the remaining generic powders. Same rules as every block
+   * above: Foundation first where a record exists (the full-fat
+   * cottage cheese), SR Legacy otherwise, pinned by id + exact
+   * description, unbranded records only.
+   * The whey-based powder (173180) is the third unbranded SR powder
+   * record PW-1 deliberately left out as a weaker isolate stand-in;
+   * it is picked now because this wave is foods, not shake
+   * ingredients — a concentrate-strength whey powder is a distinct
+   * food a person buys and logs, not a substitute for the isolate.
+   * Searched in both downloads and NOT present — never substituted:
+   * paneer (still no defensible generic fresh-cheese record; the D1
+   * finding stands, re-verified this run), quark, skyr, casein powder
+   * (only sodium caseinate inside a cream substitute), pea protein
+   * powder, nutritional yeast (only baker's yeast and a yeast-extract
+   * spread), silken tofu (branded records only — MORI-NU, Vitasoy,
+   * Azumaya), a cooked egg-white record (only dried/frozen forms),
+   * and every branded protein drink. Spirulina, dried (170495) HAS a
+   * record and is deliberately NOT picked: filed honestly it lands in
+   * the residual group at ~57 g protein per 100 g, where the plan's
+   * protein-powder rule would sweep it into 45 g top-up scoops — a
+   * portion nobody eats (a real serving is 3–7 g, ~2–4 g of protein),
+   * so it is not a dedicated protein food in practice. */
+  { fdcId: 2346384, dataType: "Foundation", expect: "Cottage cheese, full fat, large or small curd" },
+  { fdcId: 170903, dataType: "SR Legacy", expect: "Yogurt, Greek, plain, lowfat" },
+  { fdcId: 172195, dataType: "SR Legacy", expect: "Milk, dry, nonfat, regular, with added vitamin A and vitamin D" },
+  { fdcId: 173424, dataType: "SR Legacy", expect: "Egg, whole, cooked, hard-boiled" },
+  { fdcId: 173427, dataType: "SR Legacy", expect: "Egg, white, dried, powder, stabilized, glucose reduced" },
+  { fdcId: 173180, dataType: "SR Legacy", expect: "Beverages, Protein powder whey based" },
+  { fdcId: 168147, dataType: "SR Legacy", expect: "Vital wheat gluten" },
+  { fdcId: 174268, dataType: "SR Legacy", expect: "Meat extender" },
+  { fdcId: 174290, dataType: "SR Legacy", expect: "Tofu, extra firm, prepared with nigari" },
+  { fdcId: 172449, dataType: "SR Legacy", expect: "Tofu, soft, prepared with calcium sulfate and magnesium chloride (nigari)" },
+  { fdcId: 168411, dataType: "SR Legacy", expect: "Edamame, frozen, prepared" },
+  { fdcId: 170148, dataType: "SR Legacy", expect: "Seeds, hemp seed, hulled" },
+  { fdcId: 171477, dataType: "SR Legacy", expect: "Chicken, broilers or fryers, breast, meat only, cooked, roasted" },
+  { fdcId: 171496, dataType: "SR Legacy", expect: "Turkey, whole, breast, meat only, cooked, roasted" },
 ];
 
 /* --------------------- the pinned classification (P2) --------------------- */
@@ -425,6 +469,29 @@ const CLASSIFICATION = {
   // product and carries no animal flags.
   173177: cls("other", DAIRY),
   173181: cls("other"),
+  // Protein-foods wave (PF-1) — the strained yogurt and the skimmed
+  // milk powder are dairy (milk in its eaten forms; both join the
+  // pinned milk-and-curd census in plan.ts); the full-fat cottage
+  // cheese sits with the lowfat record already shipped — a protein
+  // food, not a floor food. The boiled egg is an egg. The two new
+  // powders follow the PW-1 precedent exactly: pantry supplements in
+  // `other`, identity flags telling the truth (whey is milk-derived,
+  // the egg-white powder is egg). Vital wheat gluten is a wheat-flour
+  // product and sits with the flours; the meat extender is textured
+  // soy protein and sits with the soy foods in pulses_legumes, as do
+  // the new tofu forms and the prepared edamame. Hemp seeds sit with
+  // the nuts & seeds (FDC's own grouping for seeds). The roasted
+  // breast meats are flesh in `other`, like their raw records.
+  2346384: cls("dairy", DAIRY), 170903: cls("dairy", DAIRY),
+  172195: cls("dairy", DAIRY),
+  173424: cls("eggs", EGG),
+  173427: cls("other", EGG),
+  173180: cls("other", DAIRY),
+  168147: cls("cereals_grains"),
+  174268: cls("pulses_legumes"), 174290: cls("pulses_legumes"),
+  172449: cls("pulses_legumes"), 168411: cls("pulses_legumes"),
+  170148: cls("nuts_seeds"),
+  171477: cls("other", FLESH), 171496: cls("other", FLESH),
 };
 
 /* ----------------- the pinned preparation basis (module 06) ------------ */
@@ -463,6 +530,20 @@ const PREPARATION = {
   173758: "raw",
   // cooked, method unspecified — manufactured prepared foods
   172448: "cooked_unspecified", 174272: "cooked_unspecified",
+  // PF-1 cooked forms — the values describe the food as eaten: the
+  // new tofu forms and the prepared edamame (manufactured/prepared
+  // soy, like the two records above), the hard-boiled egg and the
+  // roasted breast meats (cooked records; the gram on the plate is
+  // the cooked gram, so they stay top-up eligible like every
+  // non-raw-basis food).
+  174290: "cooked_unspecified", 172449: "cooked_unspecified",
+  168411: "cooked_unspecified", 173424: "cooked_unspecified",
+  171477: "cooked_unspecified", 171496: "cooked_unspecified",
+  // PF-1 raw basis — dry products cooked from dry before eating:
+  // vital wheat gluten (a dry flour-family powder) and the meat
+  // extender (dry textured soy, soaked and cooked from dry) join the
+  // dry staples above — never served as a plain-food portion.
+  168147: "raw", 174268: "raw",
   // as purchased — portioned in the form they are bought: fresh
   // produce, eggs, flesh, fish, dairy, oils, nuts & seeds, pantry
   322892: "as_purchased", 322559: "as_purchased", 2259793: "as_purchased", 330137: "as_purchased",
@@ -493,6 +574,12 @@ const PREPARATION = {
   174687: "as_purchased", 170172: "as_purchased", 169308: "as_purchased", 170069: "as_purchased",
   170483: "as_purchased", 168416: "as_purchased", 168410: "as_purchased", 171098: "as_purchased",
   175139: "as_purchased", 175119: "as_purchased", 173177: "as_purchased", 173181: "as_purchased",
+  // PF-1 as-purchased forms — portioned in the form they are bought:
+  // the strained yogurt, the full-fat cottage cheese, the skimmed
+  // milk powder and the two protein powders (scooped as bought, like
+  // the PW-1 powders above), and the hulled hemp seeds.
+  170903: "as_purchased", 2346384: "as_purchased", 172195: "as_purchased",
+  173427: "as_purchased", 173180: "as_purchased", 170148: "as_purchased",
 };
 
 /* ------------------------------ source data ------------------------------- */
