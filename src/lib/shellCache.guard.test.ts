@@ -21,6 +21,8 @@ import { join } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+import { SHELL_CACHE_SEARCH_PARAMS } from "./shell-cache";
+
 const SRC = join(process.cwd(), "src");
 
 const SERVER_VARIANCE_VECTORS = [
@@ -67,5 +69,70 @@ describe("no server-side per-request variance vectors exist in src", () => {
       if (headerRead.test(readFileSync(file, "utf8"))) offenders.push(file);
     }
     expect(offenders).toEqual([]);
+  });
+});
+
+/**
+ * The M-227 widenings stand on two censuses, pinned here.
+ *
+ * The cache key drops every search param except
+ * SHELL_CACHE_SEARCH_PARAMS. That is safe only while those are
+ * ALL the params any render can depend on: the routes that
+ * validate search are exactly the known two, every key they
+ * validate is allowlisted, and nothing reads the query string
+ * directly. And 404s for file-extension paths are cacheable
+ * only while no app route has a dot in a path segment — a
+ * dotted path reaching the worker is then provably a missing
+ * file, never a page.
+ */
+describe("M-227: the search-param and dotted-path censuses hold", () => {
+  const ROUTES = join(SRC, "routes");
+  /* The only routes that validate search today. Adding
+     validateSearch anywhere else must fail here first, so the
+     allowlist gets a deliberate update in the same change. */
+  const SEARCH_ROUTE_FILES = ["nutrition.report.tsx", "profile.tsx"];
+
+  it("validateSearch exists only in the known route files", () => {
+    const found: string[] = [];
+    for (const file of sourceFiles(ROUTES)) {
+      if (readFileSync(file, "utf8").includes("validateSearch")) {
+        found.push(file.slice(ROUTES.length + 1));
+      }
+    }
+    expect(found.sort()).toEqual([...SEARCH_ROUTE_FILES].sort());
+  });
+
+  it("every validated search key is in SHELL_CACHE_SEARCH_PARAMS — and vice versa", () => {
+    const validated = new Set<string>();
+    for (const name of SEARCH_ROUTE_FILES) {
+      const text = readFileSync(join(ROUTES, name), "utf8");
+      const schema = text.match(/\w*[Ss]earch\w*\s*=\s*z\.object\(\{([\s\S]*?)\}\)/);
+      expect(schema, `${name}: search schema not found`).not.toBeNull();
+      for (const line of schema![1].split("\n")) {
+        const key = line.match(/^\s*(\w+):/)?.[1];
+        if (key) validated.add(key);
+      }
+    }
+    expect([...validated].sort()).toEqual([...SHELL_CACHE_SEARCH_PARAMS].sort());
+  });
+
+  it("no non-test source reads the query string directly", () => {
+    const offenders: string[] = [];
+    for (const file of sourceFiles(SRC)) {
+      const text = readFileSync(file, "utf8");
+      if (text.includes("location.search")) offenders.push(`${file}: location.search`);
+      if (/new URLSearchParams\(\s*(window\.)?location/.test(text)) {
+        offenders.push(`${file}: URLSearchParams(location…)`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("no route path has a dot in any segment", () => {
+    const tree = readFileSync(join(SRC, "routeTree.gen.ts"), "utf8");
+    const paths = [...tree.matchAll(/fullPath: '([^']+)'/g)].map((m) => m[1]);
+    expect(paths.length).toBeGreaterThan(0);
+    const dotted = paths.filter((p) => p.split("/").some((seg) => seg.includes(".")));
+    expect(dotted).toEqual([]);
   });
 });

@@ -23,10 +23,13 @@
  *
  * The contract:
  *   · GET document requests only — never /api paths, never asset
- *     or file paths (hashed /assets are already immutable for a
- *     year via the generated _headers; they keep that handling),
- *     never a request carrying an Authorization header.
- *   · Only 200 text/html responses are stored.
+ *     paths (hashed /assets are already immutable for a year via
+ *     the generated _headers; they keep that handling), never a
+ *     request carrying an Authorization header. File-extension
+ *     paths engage only for 404s (see the M-227 note below).
+ *   · Only 200 and 404 text/html responses are stored (404s
+ *     since M-227 — the not-found document is as pure a
+ *     function of the URL as the shell is).
  *   · Entries live SHELL_CACHE_TTL_SECONDS. 120s is deliberate:
  *     long enough to collapse a burst (the load pattern was
  *     thousands of loads inside 20s — within the TTL they cost
@@ -68,12 +71,59 @@
  *     request a miss. Buffering costs the miss its streaming;
  *     a miss happens once per URL per TTL per colo, and the
  *     body is a few hundred KB of HTML the render just built.
+ *
+ * M-227 (CPU budget) — two widenings, each measured before it
+ * was made (local workerd profiling, 2026-11-23):
+ *
+ *   · The cache key no longer carries the raw query string.
+ *     Renders of the same path with different junk parameters
+ *     (?utm_source=…, ?fbclid=…, cache-busters) were verified
+ *     byte-identical except the router's per-render timestamp —
+ *     yet every variant keyed separately and paid a full SSR
+ *     render. The key now keeps ONLY the search params a route
+ *     actually validates and consumes (SHELL_CACHE_SEARCH_PARAMS:
+ *     the entire validateSearch census of the app — `d` on
+ *     /nutrition/report, whose SSR output provably varies with
+ *     it, and `story`/`view` on /profile), sorted for stability,
+ *     and drops everything else. The guard
+ *     (shellCache.guard.test.ts) fails if a route ever validates
+ *     a search param outside that list, or if any source starts
+ *     reading the request's query string directly.
+ *   · 404 document responses are stored under the same TTL
+ *     discipline. The router's 404 decision is a pure function
+ *     of the pathname (the one loader validates the handle's
+ *     FORMAT, never its existence), and the 404 document itself
+ *     was verified byte-identical across junk paths — yet every
+ *     bot probe and typo paid a full React render, forever
+ *     uncached. Paths whose last segment carries an extension
+ *     (/wp-login.php, /.env, …) engage the layer for 404s ONLY:
+ *     a request reaches this code at all only because the
+ *     assets layer already missed it, no app route has a dot in
+ *     a segment (guarded against routeTree.gen.ts), and a
+ *     non-404 render on such a path passes through untouched
+ *     and unstored, exactly as before.
  */
 
 export const SHELL_CACHE_TTL_SECONDS = 120;
 
-/** Bump to orphan every cached shell deliberately. */
-export const SHELL_CACHE_VERSION = 1;
+/** Bump to orphan every cached shell deliberately. Bumped to 2
+ *  by M-227: the key semantics (normalised query) and the stored
+ *  set (404 documents) both changed, so every v1 entry is
+ *  orphaned rather than reinterpreted. */
+export const SHELL_CACHE_VERSION = 2;
+
+/** The only search params that may appear in a cache key — the
+ *  complete validateSearch census of the app (M-227). A param is
+ *  listed because a route validates it and its component reads
+ *  it during render: `d` (/nutrition/report — SSR output varies
+ *  with it), `story` and `view` (/profile). Every other param is
+ *  presentation-neutral to the server render (verified: renders
+ *  differing only in junk params are byte-identical apart from
+ *  the router's render timestamp) and is dropped from the key,
+ *  so tracking parameters and cache-busters share the entry
+ *  they would have rendered. shellCache.guard.test.ts fails if
+ *  a route validates a param that is not listed here. */
+export const SHELL_CACHE_SEARCH_PARAMS: readonly string[] = ["d", "story", "view"];
 
 export const SHELL_CACHE_MARKER_HEADER = "x-bloom-shell-cache";
 const STORED_AT_HEADER = "x-bloom-shell-stored-at";
@@ -94,36 +144,76 @@ export interface ShellCacheDeps {
   now?: () => number;
 }
 
+/** The query string as the cache key sees it (M-227): only the
+ *  params in SHELL_CACHE_SEARCH_PARAMS survive, sorted by name
+ *  then value so parameter order never splits an entry. Returns
+ *  "" (no "?") when nothing survives. */
+function normalisedSearch(url: URL): string {
+  const kept: [string, string][] = [];
+  for (const [name, value] of url.searchParams) {
+    if (SHELL_CACHE_SEARCH_PARAMS.includes(name)) kept.push([name, value]);
+  }
+  if (kept.length === 0) return "";
+  kept.sort(([an, av], [bn, bv]) => (an === bn ? (av < bv ? -1 : av > bv ? 1 : 0) : an < bn ? -1 : 1));
+  const params = new URLSearchParams();
+  for (const [name, value] of kept) params.append(name, value);
+  return `?${params.toString()}`;
+}
+
 /** The cache key for a document request: same origin, a versioned
- *  synthetic prefix, then the full path + query — so two URLs
- *  never share an entry, and a version bump orphans them all. */
+ *  synthetic prefix, then the path + NORMALISED query — so two
+ *  URLs whose renders can differ never share an entry, URLs that
+ *  differ only in dropped params always do, and a version bump
+ *  orphans them all. */
 export function shellCacheKey(request: Request): Request {
   const url = new URL(request.url);
   return new Request(
-    `${url.origin}${KEY_PREFIX}/v${SHELL_CACHE_VERSION}${url.pathname}${url.search}`,
+    `${url.origin}${KEY_PREFIX}/v${SHELL_CACHE_VERSION}${url.pathname}${normalisedSearch(url)}`,
     { method: "GET" },
   );
 }
 
-function isDocumentPath(pathname: string): boolean {
-  if (pathname === "/api" || pathname.startsWith("/api/")) return false;
-  if (pathname.startsWith("/assets/")) return false;
-  /* Static files (favicon.ico, sw.js, manifest.webmanifest,
-     robots.txt, fonts, images) are not documents; their last
-     segment carries an extension. Bloom's document routes never
-     do — handles are [a-z0-9_], the rest are plain words. */
-  const lastSegment = pathname.split("/").pop() ?? "";
-  return !lastSegment.includes(".");
+function isExcludedPath(pathname: string): boolean {
+  if (pathname === "/api" || pathname.startsWith("/api/")) return true;
+  if (pathname.startsWith("/assets/")) return true;
+  return false;
 }
 
-/** Only plain, anonymous document GETs are cacheable. A request
- *  carrying an Authorization header is refused outright: document
- *  loads never send one today, and if one ever does, it must not
- *  share a cache entry with the anonymous shell. */
+function hasFileExtension(pathname: string): boolean {
+  /* Static files (favicon.ico, sw.js, manifest.webmanifest,
+     robots.txt, fonts, images) carry an extension in their last
+     segment. Bloom's document routes never do — handles are
+     [a-z0-9_], the rest are plain words. */
+  const lastSegment = pathname.split("/").pop() ?? "";
+  return lastSegment.includes(".");
+}
+
+/** How a request may use the cache (M-227):
+ *    "document"  — a document path: 200s and 404s are served
+ *                  from and stored to the cache.
+ *    "not-found" — a file-extension path: the layer engages for
+ *                  404s only. Such a request reaches the worker
+ *                  solely because the assets layer missed it —
+ *                  the file does not exist — and the render is
+ *                  the generic not-found document.
+ *    null        — the layer does not engage at all. */
+export type ShellCacheScope = "document" | "not-found" | null;
+
+export function shellCacheScope(request: Request): ShellCacheScope {
+  if (request.method !== "GET") return null;
+  /* A request carrying an Authorization header is refused
+     outright: document loads never send one today, and if one
+     ever does, it must not share a cache entry with the
+     anonymous shell. */
+  if (request.headers.get("authorization")) return null;
+  const pathname = new URL(request.url).pathname;
+  if (isExcludedPath(pathname)) return null;
+  return hasFileExtension(pathname) ? "not-found" : "document";
+}
+
+/** Only plain, anonymous document GETs are fully cacheable. */
 export function isShellCacheableRequest(request: Request): boolean {
-  if (request.method !== "GET") return false;
-  if (request.headers.get("authorization")) return false;
-  return isDocumentPath(new URL(request.url).pathname);
+  return shellCacheScope(request) === "document";
 }
 
 function platformCache(): ShellCacheLike | null {
@@ -133,8 +223,9 @@ function platformCache(): ShellCacheLike | null {
 
 /**
  * Serve a document request from the edge cache when possible;
- * otherwise render it (and store the render when it is a 200
- * HTML document). `render` is the app's normal SSR pipeline —
+ * otherwise render it (and store the render when it is a
+ * storable HTML document — a 200 shell, or a 404 document under
+ * the M-227 rules). `render` is the app's normal SSR pipeline —
  * this layer changes WHEN it runs, never what it produces.
  */
 export async function withShellCache(
@@ -142,7 +233,8 @@ export async function withShellCache(
   deps: ShellCacheDeps,
   render: () => Promise<Response>,
 ): Promise<Response> {
-  if (!isShellCacheableRequest(request)) return render();
+  const scope = shellCacheScope(request);
+  if (scope === null) return render();
 
   const cache = deps.cache !== undefined ? deps.cache : platformCache();
   if (!cache) return render();
@@ -156,7 +248,12 @@ export async function withShellCache(
       const storedAt = Number(cached.headers.get(STORED_AT_HEADER));
       const fresh =
         Number.isFinite(storedAt) && now() - storedAt <= SHELL_CACHE_TTL_SECONDS * 1000;
-      if (fresh) {
+      /* A "not-found"-scope request may only ever be served a
+         stored 404 — the store side never writes anything else
+         under such a key, and this keeps it that way even if a
+         future store rule changes. */
+      const servable = scope === "document" || cached.status === 404;
+      if (fresh && servable) {
         const headers = new Headers(cached.headers);
         headers.delete(STORED_AT_HEADER);
         /* Restore the render's own Cache-Control (documents send
@@ -185,7 +282,17 @@ export async function withShellCache(
   const response = await render();
 
   const contentType = response.headers.get("content-type") ?? "";
-  if (response.status !== 200 || !contentType.includes("text/html")) {
+  /* What may be stored (M-227): document scope stores its 200
+     shells and its 404 documents; not-found scope stores 404s
+     only — a file-extension path that renders anything else
+     passes through untouched and unmarked, exactly as it did
+     before the layer engaged for it at all. */
+  const storeable =
+    contentType.includes("text/html") &&
+    (scope === "document"
+      ? response.status === 200 || response.status === 404
+      : response.status === 404);
+  if (!storeable) {
     return response;
   }
 
