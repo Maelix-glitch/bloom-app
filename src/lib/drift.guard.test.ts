@@ -189,7 +189,7 @@ const RADIUS_CEILINGS: Record<string, number> = {
   "styles/access.css": 5,
   "styles/add-habit-modal.css": 7,
   "styles/admin-panel.css": 5,
-  "styles/billing.css": 3,
+  "styles/billing.css": 4, /* M-220: design A adds the preview's 18px row radius + 50% circles; the retired G section's --radius-card left — see docs/MISTAKES.md M-220 */
   "styles/bloom-sheet.css": 10,
   "styles/coach.css": 17,
   "styles/cycle.css": 11,

@@ -323,8 +323,12 @@ const PANELS: [string, string][] = [
   ["styles/shell.css", ".conn-notice"],
   ["styles/shell.css", ".conn-notice-chip"],
   ["styles/progression.css", ".pg-toast"],
-  ["styles/billing.css", ".bill-g-head"],
-  ["styles/billing.css", ".bill-g-head--plus"],
+  /* M-220: the paywall family's entry is design A's panel (the G
+     heads are retired). The owner's ONE exception — the glass
+     drop-down inside this sheet (PaywallSheet's .bill-a-includes,
+     wearing .glass-panel) — is an inner element recorded in M-220,
+     not a panel, and no panel block may borrow it. */
+  ["styles/billing.css", ".bsheet-panel.bill-a-panel"],
 ];
 
 describe("glass guard: sheets and modals never wear the material", () => {
