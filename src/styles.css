@@ -1067,18 +1067,16 @@
 }
 
 .home-panel {
-  /* M-221 (owner's glass picks, 2026-11-23): Today's panels wear the
-     shared Liquid Glass material — the plain strong fallback first,
-     the strong tint over it, the sheen, the 20px/180% blur and the
-     specular rim. Supersedes the M-174 sheen dress below lg. */
-  background-color: var(--lg-fallback-strong);
-  background-color: var(--lg-tint-strong);
-  background-image: var(--lg-sheen);
-  border: 1px solid var(--lg-border);
+  /* M-224 (owner's Liquid Glass correction, 2026-11-23): the M-221
+     glass placement on Today's panels is reverted — glass belongs
+     to the floating layer only. The panel returns to its M-174
+     dress below lg. */
+  background-color: var(--home-surface);
+  background-image: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: calc(var(--radius) + 8px);
-  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
-  -webkit-backdrop-filter: var(--lg-blur);
-  backdrop-filter: var(--lg-blur);
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: blur(14px);
 }
 
 /* The day's facts, de-boxed (M-174; de-box spec rule 2 — a single
@@ -1156,27 +1154,19 @@
    below (.home-growth, .home-open, the assessment callout, the
    delta rows) carry their treatment at every width.
 
-   M-221 SUPERSESSION (owner's glass picks, 2026-11-23): Today IS a
-   ruled glass place now. The lg tonal zone, the Growth tonal card
-   and the open overview below wear the shared Liquid Glass material
-   instead; the assessment callout stays unboxed (the owner kept the
-   Assessment sheet solid) and the delta rows stay hairline rows —
-   glass never stacks on glass. */
+   M-224 (owner's Liquid Glass correction, 2026-11-23): the M-221
+   glass supersession of this zone is reverted with the rest of the
+   panel placements — the tonal zone below is the standing truth
+   again. */
 @media (min-width: 1024px) {
   .home-page .home-panel,
   .home-page .home-band:not(.assess-prompt) {
-    /* M-221 supersedes the tonal zone for these elements: the owner's
-       glass picks (2026-11-23) put Today in glass — the shared
-       material at panel strength over the plain strong fallback,
-       the 24px radius kept. */
-    background-color: var(--lg-fallback-strong);
-    background-color: var(--lg-tint-strong);
-    background-image: var(--lg-sheen);
-    border: 1px solid var(--lg-border);
+    background-color: var(--surface);
+    background-image: none;
+    border: 0;
     border-radius: var(--radius-card);
-    box-shadow: var(--lg-rim-soft), var(--lg-shadow);
-    -webkit-backdrop-filter: var(--lg-blur);
-    backdrop-filter: var(--lg-blur);
+    box-shadow: var(--dbx-specular);
+    backdrop-filter: none;
   }
 }
 
@@ -1210,18 +1200,14 @@
    beside it. It carries the treatment at every width (the spec
    names the element, not a breakpoint). */
 .home-page .home-growth {
-  /* M-221: the Growth card wears the same glass as the rest of
-     Today's stack (the owner's picks glass the whole home page);
-     the "single tonal card" intent is superseded — coherence of
-     one material across the page replaces it. */
-  background-color: var(--lg-fallback-strong);
-  background-color: var(--lg-tint-strong);
-  background-image: var(--lg-sheen);
-  border: 1px solid var(--lg-border);
+  /* M-224: the M-221 glass on Growth is reverted — the single tonal
+     card stands again. */
+  background-color: var(--surface);
+  background-image: none;
+  border: 0;
   border-radius: var(--radius-card);
-  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
-  -webkit-backdrop-filter: var(--lg-blur);
-  backdrop-filter: var(--lg-blur);
+  box-shadow: var(--dbx-specular);
+  backdrop-filter: none;
 }
 
 /* Assessment ("Your starting point"): UNBOXED entirely, at every
@@ -1255,33 +1241,23 @@
    the lg panel block so, at equal specificity, the open treatment
    wins over the tonal zone at desktop too. */
 .home-page .home-open {
-  /* M-221: the bottom overview (WeekChart + ChangesCard + StatTiles)
-     is the VITALIS Overview surface on this page — the owner's picks
-     glass it. The glass takes back the card inset the de-box removed
-     (the components' authored p-5 / sm:p-7 values, declared here so
-     the winning rule carries them whole). */
-  background-color: var(--lg-fallback-strong);
-  background-color: var(--lg-tint-strong);
-  background-image: var(--lg-sheen);
-  border: 1px solid var(--lg-border);
-  border-radius: var(--radius-card);
-  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
-  -webkit-backdrop-filter: var(--lg-blur);
-  backdrop-filter: var(--lg-blur);
-  padding: var(--space-5);
+  /* M-224: the M-221 glass on the bottom overview is reverted — the
+     open treatment stands again, at every width. */
+  background: none;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  padding: 0;
 }
-@media (min-width: 40rem) {
-  .home-page .home-open {
-    padding: var(--space-6);
-  }
-}
-/* Between the two overview columns at desktop: the two glass panels
-   part on the grid gap alone — the de-box hairline and its inset
-   retire (M-221). */
+/* Between the two overview columns at desktop: a vertical hairline,
+   and the hairline plus the row gap plus this inset lands the
+   separation on ~48px, as the spec allows. */
 @media (min-width: 1024px) {
   .home-page .home-open-split {
-    border-left: 0;
-    padding-left: var(--space-6);
+    border-left: 1px solid var(--dbx-hairline);
+    padding-left: 16px;
   }
 }
 
@@ -1780,11 +1756,10 @@
   margin-top: var(--bloom-section-gap);
 }
 .home-band {
-  /* M-221: bands wear the same glass as the panels (see .home-panel). */
-  background-color: var(--lg-fallback-strong);
-  background-color: var(--lg-tint-strong);
-  background-image: var(--lg-sheen);
-  border: 1px solid var(--lg-border);
+  /* M-224: bands return to the M-174 dress with the panels. */
+  background-color: var(--home-surface);
+  background-image: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   border-radius: calc(var(--radius) + 8px);
   /* Card padding rhythm, shared with the .home-panel cards (p-5, then
      p-7 from sm). The one band in the stack (the assessment prompt)
@@ -1795,11 +1770,6 @@
      card in the phone column. From sm the desktop values apply and the
      effective inset is the panels' 28px, as before. */
   padding: var(--space-3) var(--space-3) var(--space-2);
-}
-.home-band:not(.assess-prompt) {
-  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
-  -webkit-backdrop-filter: var(--lg-blur);
-  backdrop-filter: var(--lg-blur);
 }
 @media (min-width: 40rem) {
   .home-band {
@@ -1950,8 +1920,18 @@
   min-height: 36px;
   padding: 0.4rem 0.85rem;
   border-radius: var(--radius-pill);
-  background: rgb(255 255 255 / 0.04);
-  border: 1px solid var(--border-subtle);
+  /* M-224 (owner's Liquid Glass correction, 2026-11-23): the hero's
+     quick-action pills are floating controls — they join the one
+     material at pill strength: the plain fallback first, the tint
+     overlay over the full-strength backdrop, the shared border and
+     the soft specular rim. Supersedes the M-183 flat fill. */
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  background-image: var(--lg-lens);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-rim-soft);
   color: var(--text-secondary);
   font-size: var(--text-support);
   line-height: 1.1;
@@ -1962,8 +1942,8 @@
     transform var(--motion-micro) var(--ease-out-expo);
 }
 .home-chip:hover {
-  /* Hover brightens the fill only — the rim never recolours. */
-  background: rgb(255 255 255 / 0.08);
+  /* Hover brightens the glass only — the rim never recolours. */
+  filter: brightness(1.16);
   color: var(--foreground);
 }
 /* Press (feel layer, v6 §3): the chips are actions; a tap lands on the
@@ -1995,8 +1975,13 @@
   color: var(--sage);
 }
 .home-chip--quiet {
+  /* The quiet chip is a ghost action, not a pill surface — it opts
+     out of the M-224 glass entirely (no tint, no blur, no rim). */
   background: transparent;
   border-color: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
   color: var(--faint);
 }
 .home-chip--quiet:hover {

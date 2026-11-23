@@ -295,11 +295,12 @@
   border-radius: var(--ig-radius-field);
   background-color: rgba(255, 255, 255, 0.05);
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
-  /* M-221: the gate's glass deepens (owner's picks) — the deep blur
-     over the gate's dimmed scene; the Welcome onboarding's pinned
-     values are untouched. */
-  -webkit-backdrop-filter: var(--lg-blur-deep);
-  backdrop-filter: var(--lg-blur-deep);
+  /* M-224 (owner's Liquid Glass correction): the gate wears the
+     material's CLEAR variant — the lighter blur over the gate's
+     colourful corner glows, so the glass has something real to
+     refract. The Welcome onboarding's pinned values are untouched. */
+  -webkit-backdrop-filter: var(--lg-blur-clear);
+  backdrop-filter: var(--lg-blur-clear);
   font-size: var(--ig-text-field);
   color: var(--foreground);
 }
@@ -355,9 +356,10 @@ form.ag-body > .ag-btn[type="submit"] {
   background-color: rgba(255, 255, 255, 0.05);
   background-image: linear-gradient(135deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.06));
   border-color: rgba(255, 255, 255, 0.24);
-  /* M-221: the quiet actions deepen with the gate (see .ag-input). */
-  -webkit-backdrop-filter: var(--lg-blur-deep);
-  backdrop-filter: var(--lg-blur-deep);
+  /* M-224: the quiet actions wear the same CLEAR variant as the
+     field (see .ag-input). */
+  -webkit-backdrop-filter: var(--lg-blur-clear);
+  backdrop-filter: var(--lg-blur-clear);
   color: var(--foreground);
   font-weight: 600;
 }

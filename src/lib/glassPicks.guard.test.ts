@@ -1,36 +1,46 @@
 /**
- * Glass picks guards (M-221) — the owner's glass programme, 2026-11-23.
+ * True Liquid Glass guards (M-224) — the owner's correction, 2026-11-23.
  *
- * The owner picked his areas from the 14-area before/after preview:
- * GLASS — Today, VITALIS Overview, Nutrition day plan, Grocery,
- * Trackers, Coach chat, Stories, Sidebar + TopBar, Dock + orb
- * (deepened), Welcome gate (deepened). SOLID — Profile, Rewards,
- * Assessment sheet, and every billing surface (M-220's territory).
+ * This file replaces the M-221 "glass picks" census wholesale. M-221
+ * spread the material across the owner's picked AREAS; the owner
+ * reviewed it live and ruled it "isn't correct glass", supplying
+ * Apple's iOS 26 Liquid Glass rules as the standard. Bloom is a web
+ * app — the native APIs do not apply, the RULES do:
  *
- * M-223 CORRECTION (owner directive 2026-11-23, hours after this
- * shipped): the SIDEBAR RAIL leaves the glass list. Its translucent
- * tint over the near-black canvas read as no background colour at
- * all — the panel disappeared — so the rail wears its solid
- * pre-M-221 surface again (pinned below). The TopBar sync pill
- * stays glass, and inside the rail the points card and the active
- * pill keep their tint steps. Every other picked area is unchanged.
+ *   1. Glass lives ONLY on the floating/control layer — floating
+ *      toolbars, pills, the dock, floating controls. Never on stacked
+ *      cards, list items or full content panels.
+ *   2. Never opacity < 1 on the glass element itself — the backdrop
+ *      layer renders at full strength; tint rides as an overlay
+ *      background layer on top of it.
+ *   3. Glass needs colourful/scrolling content behind it to refract —
+ *      over flat black it reads flat (why M-221's panels failed and
+ *      the sidebar lost its colour).
+ *   4. Shapes are pills or rounded rects ≥20px, so the specular edge
+ *      and lensing can show.
  *
  * The pins:
- *   1. the material extensions in glass.css carry their exact values
- *      (the deep blur/rim, the palette washes with their opacity
- *      ceilings — a wash may never deepen past its pinned stops);
- *   2. every picked area's winning block consumes the ONE material;
- *   3. READABILITY FLOOR: every text-bearing glass surface declares
- *      its plain fallback background (var(--lg-fallback) /
- *      var(--lg-fallback-strong)) BEFORE its color-mix tint line —
- *      so even with no backdrop-filter support the text sits on a
- *      ≥52% ink coat, never on live page content bleeding through;
- *      and no text surface rides on a wash alone;
- *   4. the keep-solid sheets carry no glass tokens at all;
- *   5. glass never stacks: no treated surface is a descendant of
- *      another, and the two surfaces that live INSIDE the rail
- *      (the points card, the active pill) take a tint step with no
- *      backdrop blur of their own.
+ *   1. the material in glass.css carries the rebuilt recipe — the
+ *      REGULAR variant (floating chrome) and the CLEAR variant
+ *      (lighter, for colourful grounds like the invitation gate),
+ *      the specular rim, the lensing gradient, the palette washes
+ *      kept as overlay tints under their opacity ceilings, and the
+ *      readability fallbacks at their floors;
+ *   2. the FLOATING-LAYER ALLOWLIST: exactly these surfaces consume
+ *      the material, each with a full-strength backdrop layer and no
+ *      sub-1 opacity of its own;
+ *   3. the PANEL BLOCKLIST: the surfaces M-221 glassed that this
+ *      correction returns to solid — their sheets carry no --lg-
+ *      token at all, and Today's home blocks carry none either;
+ *   4. the keep-solid invariants (Profile / Rewards / sheets /
+ *      billing) stand unchanged from M-221.
+ *
+ * Out of scope by name: the sidebar rail blocks in styles.css
+ * (.app-sidebar, .app-sidebar-profile, .rail-points-card,
+ * .app-nav-link-active) are M-223's territory — that slice restores
+ * the rail to solid under the same directive. This census neither
+ * allows nor blocks them; it pins only that no OTHER rail selector
+ * joins them while the two slices integrate.
  */
 
 import { readFileSync } from "node:fs";
@@ -67,21 +77,56 @@ const lastBlock = (text: string, selector: string) => {
   const all = exactBlocks(text, selector);
   return all[all.length - 1];
 };
-/** A block for the selector that carries the needle (the material block). */
 const materialBlock = (text: string, selector: string, needle: string) =>
   exactBlocks(text, selector).find((b) => b.body.includes(needle));
 
-describe("glass picks (M-221): the material extensions", () => {
-  it("the deep material carries its exact values", () => {
-    expect(GLASS).toContain("--lg-blur-deep: blur(24px) saturate(190%)");
-    expect(GLASS).toContain("--lg-rim-deep:");
-    expect(GLASS).toContain("rgba(255, 255, 255, 0.7)");
+/** Every selector whose block consumes a --lg- backdrop token. */
+const lgBackdropConsumers = (text: string): string[] =>
+  blocks(text)
+    .filter((b) => /backdrop-filter:\s*var\(--lg-/.test(b.body))
+    .map((b) => b.selector.trim().split(/\s+/).pop()!);
+
+const SUB_ONE_OPACITY = /(?:^|;)\s*opacity:\s*0?\.\d+/;
+
+describe("true liquid glass (M-224): the rebuilt material", () => {
+  it("the REGULAR variant: full-strength blur + saturate at 24px/180%", () => {
+    expect(GLASS).toContain("--lg-blur: blur(24px) saturate(180%)");
+    /* The deep name survives as the regular recipe's alias — the
+       dock and orb consume it, and one material means one recipe. */
+    expect(GLASS).toContain("--lg-blur-deep: blur(24px) saturate(180%)");
   });
 
-  it("the palette washes keep their opacity ceilings", () => {
-    /* The washes are decorative tint layers; their first stops are
-       the ceilings (gold 20%, sage 18%, rose 17%) — pinned so a wash
-       can never quietly become a fill. */
+  it("the CLEAR variant: a lighter recipe for colourful grounds", () => {
+    expect(GLASS).toContain("--lg-blur-clear: blur(14px) saturate(165%)");
+    expect(GLASS).toContain("--lg-fallback-clear: rgba(17, 19, 24, 0.32)");
+    expect(GLASS).toContain(
+      "--lg-tint-clear: color-mix(in oklab, var(--surface) 26%, transparent)",
+    );
+  });
+
+  it("the specular rim reads as light on a curved edge", () => {
+    /* A bright top edge at full specular strength, a soft shaded
+       lower inset — not the M-221 step rim. */
+    const rim = GLASS.match(/--lg-rim:\s*([^;]+);/)![1]!;
+    expect(rim).toContain("inset 0 1px 0 rgba(255, 255, 255, 0.62)");
+    expect(rim).toContain("inset 0 -14px 20px -16px rgba(0, 0, 0, 0.45)");
+    /* rim-soft stays inset-only (the drift card rule leans on it). */
+    const soft = GLASS.match(/--lg-rim-soft:\s*([^;]+);/)![1]!;
+    for (const layer of soft.split(/,(?![^()]*\)) /)) {
+      expect(layer.trim().startsWith("inset")).toBe(true);
+    }
+  });
+
+  it("the lensing gradient: bright at the rim, clearing to centre", () => {
+    const lens = GLASS.match(/--lg-lens:\s*([\s\S]*?);/)![1]!;
+    expect(lens).toContain("linear-gradient");
+    expect(lens).toContain("radial-gradient");
+    expect(lens).toContain("rgba(255, 255, 255, 0)");
+    /* The legacy sheen name keeps working, as the same lens. */
+    expect(GLASS).toContain("--lg-sheen: var(--lg-lens)");
+  });
+
+  it("the palette washes stay overlay tints under their ceilings", () => {
     expect(GLASS).toContain("rgba(220, 192, 143, 0.2)");
     expect(GLASS).toContain("rgba(143, 199, 162, 0.18)");
     expect(GLASS).toContain("rgba(227, 145, 159, 0.17)");
@@ -89,132 +134,150 @@ describe("glass picks (M-221): the material extensions", () => {
     expect(GLASS).toContain("--lg-wash-sage:");
     expect(GLASS).toContain("--lg-wash-rose:");
   });
+
+  it("the readability fallbacks hold their floors", () => {
+    expect(GLASS).toContain("--lg-fallback: rgba(17, 19, 24, 0.52)");
+    expect(GLASS).toContain("--lg-fallback-strong: rgba(17, 19, 24, 0.72)");
+    expect(GLASS).toContain(
+      "--lg-tint: color-mix(in oklab, var(--surface) 50%, transparent)",
+    );
+    expect(GLASS).toContain(
+      "--lg-tint-strong: color-mix(in oklab, var(--surface) 68%, transparent)",
+    );
+  });
+
+  it(".glass-panel is the rebuilt structure: backdrop layer, tint overlay, lens, rim", () => {
+    const panel = lastBlock(GLASS, ".glass-panel")!;
+    expect(panel.body).toContain("background-color: var(--lg-fallback-strong)");
+    expect(panel.body).toContain("background-color: var(--lg-tint-strong)");
+    expect(panel.body).toContain("background-image: var(--lg-lens)");
+    expect(panel.body).toContain("backdrop-filter: var(--lg-blur)");
+    expect(panel.body).toContain("box-shadow: var(--lg-rim), var(--lg-shadow)");
+    expect(panel.body).not.toMatch(SUB_ONE_OPACITY);
+  });
 });
 
-describe("glass picks (M-221): every picked area consumes the one material", () => {
-  it("Today: panels, bands, growth and the overview wear the material", () => {
-    expect(materialBlock(STYLES, ".home-panel", "var(--lg-tint-strong)")).toBeDefined();
-    expect(materialBlock(STYLES, ".home-band", "var(--lg-tint-strong)")).toBeDefined();
-    expect(materialBlock(STYLES, ".home-page .home-growth", "var(--lg-tint-strong)")).toBeDefined();
-    expect(materialBlock(STYLES, ".home-page .home-open", "var(--lg-tint-strong)")).toBeDefined();
-  });
-
-  it("TopBar: the sync pill wears the material — and the rail is SOLID again (M-223)", () => {
-    /* RE-CONTRACTED by M-223 (owner directive 2026-11-23): the rail
-       was pinned here as glassed under M-221; the owner ruled the
-       glass rail lost its background colour, so the winning
-       .app-sidebar block now carries the solid pre-M-221 surface —
-       background: var(--sidebar), no glass tokens, no backdrop
-       blur — and the de-box separation stands (no border returns).
-       The TopBar sync pill is untouched and stays glass. */
-    const rail = lastBlock(STYLES, ".app-sidebar")!;
-    expect(rail.body).toContain("background: var(--sidebar)");
-    expect(rail.body).not.toContain("--lg-");
-    expect(rail.body).not.toContain("backdrop-filter");
-    expect(rail.body).toContain("border-right: none");
-    expect(materialBlock(STYLES, ".home-sync-pill", "var(--lg-blur)")).toBeDefined();
-  });
-
-  it("inside the rail: tint steps only — the points card and active pill carry no blur of their own", () => {
-    const card = lastBlock(STYLES, ".rail-points-card")!;
-    expect(card.body).toContain("background-color: var(--lg-tint)");
-    expect(card.body).not.toContain("backdrop-filter");
-    const pill = lastBlock(STYLES, ".app-nav-link-active")!;
-    expect(pill.body).toContain("background-color: var(--lg-tint)");
-    expect(pill.body).not.toContain("backdrop-filter");
-  });
-
-  it("Dock + orb: deepened to the deep material, the orb on its pedestal", () => {
+describe("true liquid glass (M-224): the floating-layer allowlist", () => {
+  it("the dock + orb chrome wears the regular recipe (deep alias)", () => {
     expect(materialBlock(STYLES, ".dock__top", "var(--lg-blur-deep)")).toBeDefined();
     expect(materialBlock(STYLES, ".dock__log", "var(--lg-blur-deep)")).toBeDefined();
-    expect(materialBlock(STYLES, ".dock__top", "var(--lg-rim-deep)")).toBeDefined();
     expect(materialBlock(ORB, ".coach-orb", "var(--lg-blur-deep)")).toBeDefined();
     expect(materialBlock(ORB, ".coach-orb::before", "var(--lg-blur-deep)")).toBeDefined();
   });
 
-  it("Nutrition: the day card, the Twin tiles, the grocery plate and sticky bar", () => {
-    expect(lastBlock(NUTRITION, ".nut-day-card")!.body).toContain("var(--lg-tint-strong)");
-    expect(lastBlock(NUTRITION, ".tile")!.body).toContain("var(--lg-tint-strong)");
-    expect(lastBlock(NUTRITION, ".shop-progress")!.body).toContain("var(--lg-tint-strong)");
-    expect(lastBlock(NUTRITION, ".shop-sticky")!.body).toContain("var(--lg-tint-strong)");
-    expect(lastBlock(NUTRITION, ".shop-row.is-bought")!.body).toContain("var(--lg-wash-sage)");
+  it("the TopBar sync pill and the phone brand bar wear the regular recipe", () => {
+    expect(materialBlock(STYLES, ".home-sync-pill", "var(--lg-blur)")).toBeDefined();
+    expect(materialBlock(STYLES, ".app-mobile-bar", "var(--lg-blur)")).toBeDefined();
   });
 
-  it("Trackers: the territories are glass panes on the owner's hairline", () => {
-    const t = lastBlock(TRACKERS, ".tk2-root .at-territory")!;
-    expect(t.body).toContain("background-color: var(--lg-tint-strong)");
-    expect(t.body).toContain("backdrop-filter: var(--lg-blur)");
-    expect(t.body).toContain("border: 1px solid var(--border)");
-    expect(t.body).toContain("border-radius: var(--radius-xl)");
+  it("Today's quick-action pills join the floating layer — the quiet ghost opts out", () => {
+    const chip = materialBlock(STYLES, ".home-chip", "var(--lg-blur)");
+    expect(chip).toBeDefined();
+    expect(chip!.body).toContain("background-color: var(--lg-fallback)");
+    expect(chip!.body).toContain("background-color: var(--lg-tint)");
+    expect(chip!.body).toContain("border-radius: var(--radius-pill)");
+    const quiet = lastBlock(STYLES, ".home-chip--quiet")!;
+    expect(quiet.body).toContain("backdrop-filter: none");
   });
 
-  it("Coach: gold user bubbles, clear Bloom bubbles", () => {
-    const user = lastBlock(COACH, ".coach-user-bubble")!;
-    expect(user.body).toContain("background-image: var(--lg-wash-gold)");
-    expect(user.body).toContain("backdrop-filter: var(--lg-blur)");
-    const bloom = lastBlock(COACH, ".coach-msg-copy")!;
-    expect(bloom.body).toContain("background-color: var(--lg-tint)");
-    expect(bloom.body).toContain("backdrop-filter: var(--lg-blur)");
+  it("the invitation gate wears the CLEAR variant over its colourful ground", () => {
+    expect(materialBlock(INVITE, ".ag-input", "var(--lg-blur-clear)")).toBeDefined();
+    expect(materialBlock(INVITE, ".ag-btn--quiet", "var(--lg-blur-clear)")).toBeDefined();
   });
 
-  it("Stories: the template frames carry the rim and the sheen", () => {
-    const thumb = lastBlock(STORIES, ".stpl-thumb")!;
-    expect(thumb.body).toContain("border-color: var(--lg-border)");
-    expect(thumb.body).toContain("var(--lg-rim-soft)");
-    expect(materialBlock(STORIES, ".stpl-thumb::after", "var(--lg-sheen)")).toBeDefined();
-  });
-
-  it("Welcome gate: the field and the quiet actions deepen", () => {
-    expect(materialBlock(INVITE, ".ag-input", "var(--lg-blur-deep)")).toBeDefined();
-    expect(materialBlock(INVITE, ".ag-btn--quiet", "var(--lg-blur-deep)")).toBeDefined();
-  });
-});
-
-describe("glass picks (M-221): the readability floor", () => {
-  /* Every text-bearing treated surface: [sheet, selector]. The
-     material block must declare a plain fallback background-color
-     BEFORE its color-mix tint line, and must carry a tint (never a
-     wash alone) under its text. */
-  const TEXT_SURFACES: [string, string][] = [
-    [STYLES, ".home-panel"],
-    [STYLES, ".home-page .home-open"],
-    /* .app-sidebar stood here under M-221; M-223 took the rail off
-       glass entirely (solid var(--sidebar)), so there is no glass
-       material block left for the floor to read — the rail's own
-       solid pin lives in the Sidebar test above. */
-    [NUTRITION, ".nut-day-card"],
-    [NUTRITION, ".tile"],
-    [NUTRITION, ".shop-progress"],
-    [NUTRITION, ".shop-sticky"],
-    [TRACKERS, ".tk2-root .at-territory"],
-    [COACH, ".coach-user-bubble"],
-    [COACH, ".coach-msg-copy"],
-  ];
-
-  it("the plain fallback lands before the tint on every text surface", () => {
-    for (const [sheet, sel] of TEXT_SURFACES) {
-      const block = materialBlock(sheet, sel, "backdrop-filter: var(--lg-blur)")!;
+  it("no allowlisted surface fades its own element (rule 2)", () => {
+    const surfaces: [string, string][] = [
+      [STYLES, ".dock__top"],
+      [STYLES, ".dock__log"],
+      [STYLES, ".home-sync-pill"],
+      [STYLES, ".home-chip"],
+      [ORB, ".coach-orb"],
+      [INVITE, ".ag-input"],
+      [INVITE, ".ag-btn--quiet"],
+    ];
+    for (const [sheet, sel] of surfaces) {
+      const block = materialBlock(sheet, sel, "backdrop-filter")!;
       expect(block, `${sel} material block`).toBeDefined();
-      const fallback = block.body.search(
-        /background-color: var\(--lg-fallback(-strong)?\);/,
-      );
-      const tint = block.body.search(
-        /background-color: var\(--lg-tint(-strong)?\);/,
-      );
-      expect(fallback, `${sel} plain fallback`).toBeGreaterThanOrEqual(0);
-      expect(tint, `${sel} tint`).toBeGreaterThan(fallback);
+      expect(block.body, `${sel} sub-1 opacity`).not.toMatch(SUB_ONE_OPACITY);
     }
   });
 
-  it("the material itself guarantees the floor: fallbacks are ≥52% ink", () => {
-    expect(GLASS).toContain("--lg-fallback: rgba(17, 19, 24, 0.52)");
-    expect(GLASS).toContain("--lg-fallback-strong: rgba(17, 19, 24, 0.72)");
-    expect(GLASS).toContain("--lg-tint: color-mix(in oklab, var(--surface) 50%, transparent)");
-    expect(GLASS).toContain("--lg-tint-strong: color-mix(in oklab, var(--surface) 68%, transparent)");
+  it("the census is exact: no other surface consumes a --lg- backdrop", () => {
+    /* styles.css also holds the rail blocks (M-223's territory) —
+       named here so nothing new can hide among them. */
+    const rail = [".app-sidebar", ".app-sidebar-profile"];
+    const stylesConsumers = lgBackdropConsumers(STYLES)
+      .filter((s) => !rail.includes(s))
+      .sort();
+    expect(stylesConsumers).toEqual(
+      [".app-mobile-bar", ".dock__log", ".dock__top", ".home-chip", ".home-sync-pill"].sort(),
+    );
+    expect(lgBackdropConsumers(ORB).sort()).toEqual(
+      [".coach-orb", ".coach-orb::before"].sort(),
+    );
+    expect(lgBackdropConsumers(INVITE).sort()).toEqual(
+      [".ag-btn--quiet", ".ag-input"].sort(),
+    );
+    /* In glass.css itself only the material's own utility classes
+       may carry a backdrop filter. */
+    for (const sel of lgBackdropConsumers(GLASS)) {
+      expect(sel.startsWith(".glass-"), `${sel} in glass.css`).toBe(true);
+    }
   });
 });
 
-describe("glass picks (M-221): the solid list holds", () => {
+describe("true liquid glass (M-224): the panel blocklist — solid again", () => {
+  it("the removed areas' sheets carry no --lg- token at all", () => {
+    for (const [name, sheet] of [
+      ["nutrition.css", NUTRITION],
+      ["trackers.css", TRACKERS],
+      ["coach.css", COACH],
+      ["stories.css", STORIES],
+    ] as const) {
+      expect(sheet.includes("--lg-"), `${name} must be glass-free`).toBe(false);
+    }
+  });
+
+  it("Today's home blocks carry no liquid-glass material in any rule", () => {
+    for (const sel of [
+      ".home-panel",
+      ".home-band",
+      ".home-page .home-growth",
+      ".home-page .home-open",
+    ]) {
+      for (const b of exactBlocks(STYLES, sel)) {
+        expect(b.body, `${sel} glass token`).not.toContain("--lg-");
+        expect(b.body, `${sel} lg backdrop`).not.toMatch(
+          /backdrop-filter:\s*var\(--lg-/,
+        );
+      }
+    }
+    /* The restored panels are the de-box solids: the base panel is
+       the M-174 dress (its own legacy --glass-* tokens and 14px
+       frost — a different, older treatment, not this material),
+       Growth/open are the tonal/open treatments. */
+    const panel = lastBlock(STYLES, ".home-panel")!.body;
+    expect(panel).toContain("background-image: var(--glass-bg)");
+    expect(panel).toContain("backdrop-filter: blur(14px)");
+    expect(lastBlock(STYLES, ".home-page .home-growth")!.body).toContain(
+      "box-shadow: var(--dbx-specular)",
+    );
+    expect(lastBlock(STYLES, ".home-page .home-open")!.body).toContain(
+      "background-color: transparent",
+    );
+  });
+
+  it("the Coach bubbles are tonal again and the composer stayed solid", () => {
+    const user = lastBlock(COACH, ".coach-user-bubble")!;
+    expect(user.body).toContain("background: var(--dbx-tone)");
+    expect(user.body).not.toContain("backdrop-filter");
+    const composer = lastBlock(COACH, ".coach-composer")!;
+    expect(composer.body).not.toContain("backdrop-filter");
+    expect(composer.body).not.toContain("--lg-");
+  });
+});
+
+describe("true liquid glass (M-224): the solid list holds", () => {
   it("Profile, Rewards, the sheet kit and billing carry no glass tokens", () => {
     for (const rel of [
       "styles/profile.css",
@@ -226,13 +289,31 @@ describe("glass picks (M-221): the solid list holds", () => {
       expect(read(rel).includes("--lg-"), `${rel} must stay glass-free`).toBe(false);
     }
   });
+});
 
-  it("no treated surface nests inside another treated surface", () => {
-    const treated =
-      /(\.home-panel|\.home-band|\.home-open|\.tile|\.nut-day-card|\.at-territory|\.shop-progress|\.shop-sticky)\s+(\.home-panel|\.home-band|\.home-open|\.tile|\.nut-day-card|\.at-territory|\.shop-progress|\.shop-sticky)/;
-    for (const sheet of [STYLES, NUTRITION, TRACKERS, COACH]) {
-      const clean = sheet.replace(/\/\*[\s\S]*?\*\//g, " ");
-      expect(treated.test(clean)).toBe(false);
-    }
+describe("the sidebar rail — SOLID (M-223, spliced in at M-224 integration)", () => {
+  /* M-224's census above deliberately leaves the rail blocks out of
+     scope (M-223's territory). At integration the two slices land in
+     order, so M-223's positive rail pin is spliced in here verbatim:
+     the winning .app-sidebar block carries the solid surface —
+     background: var(--sidebar), no glass tokens, no backdrop blur —
+     and the de-box separation stands (no border returns). Inside the
+     rail, the points card and active pill keep their M-221 tint
+     steps with no blur of their own (M-223 kept them deliberately). */
+  it("the winning .app-sidebar block is solid: var(--sidebar), no --lg-, no backdrop-filter", () => {
+    const rail = lastBlock(STYLES, ".app-sidebar")!;
+    expect(rail.body).toContain("background: var(--sidebar)");
+    expect(rail.body).not.toContain("--lg-");
+    expect(rail.body).not.toContain("backdrop-filter");
+    expect(rail.body).toContain("border-right: none");
+  });
+
+  it("inside the rail: tint steps only — the points card and active pill carry no blur of their own", () => {
+    const card = lastBlock(STYLES, ".rail-points-card")!;
+    expect(card.body).toContain("background-color: var(--lg-tint)");
+    expect(card.body).not.toContain("backdrop-filter");
+    const pill = lastBlock(STYLES, ".app-nav-link-active")!;
+    expect(pill.body).toContain("background-color: var(--lg-tint)");
+    expect(pill.body).not.toContain("backdrop-filter");
   });
 });

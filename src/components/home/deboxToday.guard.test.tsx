@@ -1,17 +1,7 @@
 // @vitest-environment jsdom
 /**
  * The Today de-box guard (M-183) — the owner's complete de-box order
- * (every tab, desktop AND mobile), pinned for the Today page.
- *
- * M-221 SUPERSESSION (owner's glass picks, 2026-11-23, disclosed):
- * Today is a ruled glass place now. The lg zones, the Growth card
- * and the bottom overview wear the shared Liquid Glass material;
- * the pins for those three carry the glass values. Everything the
- * picks did NOT name keeps its M-183 contract below: the Assessment
- * callout stays unboxed, the deltas stay hairline rows, the facts
- * strip and hero chips are untouched.
- *
- * The original M-183 contract, for the record:
+ * (every tab, desktop AND mobile), pinned for the Today page:
  *   · at lg, Today's remaining panels and bands are borderless
  *     tonal zones (solid tonal step, 24px radius, specular depth,
  *     NO border, NO glass), via one .home-page-scoped lg block;
@@ -35,6 +25,15 @@
  *   · and the freeze holds for everything the spec did NOT name:
  *     the BASE .home-panel / .home-band rules carry their exact
  *     M-174 values, so un-named surfaces below lg render as before.
+ *
+ * M-221 SUPERSESSION, REVERTED by M-224 (owner's Liquid Glass
+ * correction, 2026-11-23, disclosed): M-221 re-contracted this
+ * guard's panel pins to glass values. M-224 restores the M-183
+ * contract for every panel surface (the glass was on content
+ * panels, which the owner's supplied rules bar) — the pins below
+ * are the pre-M-221 ones again. ONE pin moves the other way: the
+ * quick-action chips are floating pills, so they now wear the
+ * rebuilt material (see the hero test below).
  */
 
 import { readFileSync } from "node:fs";
@@ -81,21 +80,17 @@ describe("Today de-box (M-183) — the stack's panels join the system at lg", ()
     expect(block).toContain(".home-page .home-band:not(.assess-prompt)");
   });
 
-  it("the zones wear the M-221 glass: strong tint, sheen, rim — 24px radius kept", () => {
-    /* RE-CONTRACTED by M-221 (disclosed, owner's glass picks
-       2026-11-23): Today is a ruled glass place now. The tonal-zone
-       values are superseded by the shared Liquid Glass material at
-       panel strength; the 24px radius and the .home-page scoping
-       stand. */
+  it("the zones are borderless tonal: surface, 24px, specular — no border, no glass", () => {
     const block = m183LgBlock();
-    expect(block).toContain("background-color: var(--lg-fallback-strong);");
-    expect(block).toContain("background-color: var(--lg-tint-strong);");
-    expect(block).toContain("background-image: var(--lg-sheen);");
-    expect(block).toContain("border: 1px solid var(--lg-border);");
+    expect(block).toContain("background-color: var(--surface);");
+    expect(block).toContain("background-image: none;");
+    expect(block).toContain("border: 0;");
     expect(block).toContain("border-radius: var(--radius-card);");
-    expect(block).toContain("box-shadow: var(--lg-rim-soft), var(--lg-shadow);");
-    expect(block).toContain("backdrop-filter: var(--lg-blur);");
+    expect(block).toContain("box-shadow: var(--dbx-specular);");
+    expect(block).toContain("backdrop-filter: none;");
+    expect(block).not.toContain("1px solid");
     expect(block).not.toContain("--glass-");
+    expect(block).not.toContain("blur(");
   });
 });
 
@@ -120,49 +115,40 @@ describe("Today de-box (M-183) — Assessment is an open callout", () => {
   });
 });
 
-describe("Today de-box (M-183) — Growth wears the page's glass (M-221)", () => {
-  it("LevelCard carries the hook and the rule is M-221 glass at 24px", () => {
-    /* RE-CONTRACTED by M-221 (disclosed): the "single tonal card"
-       intent is superseded — the whole Today stack wears one
-       material, Growth included. */
+describe("Today de-box (M-183) — Growth is the single tonal card", () => {
+  it("LevelCard carries the hook and the rule is borderless tonal at 24px", () => {
     expect(LEVEL).toContain("home-growth");
     const growth = ruleBlock(CSS, ".home-page .home-growth");
-    expect(growth).toContain("background-color: var(--lg-tint-strong);");
-    expect(growth).toContain("border: 1px solid var(--lg-border);");
+    expect(growth).toContain("background-color: var(--surface);");
+    expect(growth).toContain("border: 0;");
     expect(growth).toContain("border-radius: var(--radius-card);");
-    expect(growth).toContain("box-shadow: var(--lg-rim-soft), var(--lg-shadow);");
-    expect(growth).toContain("backdrop-filter: var(--lg-blur);");
+    expect(growth).toContain("box-shadow: var(--dbx-specular);");
+    expect(growth).toContain("backdrop-filter: none;");
     expect(growth).not.toContain("--glass-");
   });
 });
 
-describe("Today de-box (M-183) — the bottom overview wears glass (M-221)", () => {
+describe("Today de-box (M-183) — the bottom overview sits on the canvas", () => {
   it("WeekChart and ChangesCard carry the open hooks", () => {
     expect(WEEK).toContain("home-open");
     expect(BAND).toContain("home-open home-open-split");
   });
 
-  it("the open rule now carries the M-221 glass at every width", () => {
-    /* RE-CONTRACTED by M-221 (disclosed): the bottom overview is the
-       VITALIS Overview surface — glassed by the owner's picks. The
-       glass takes back the card inset (the components' authored
-       p-5 / sm:p-7 values, declared in the rule). */
+  it("the open rule strips surface, border, shadow and padding at every width", () => {
     const open = ruleBlock(m183Flow(), ".home-page .home-open");
-    expect(open).toContain("background-color: var(--lg-tint-strong);");
-    expect(open).toContain("background-image: var(--lg-sheen);");
-    expect(open).toContain("border: 1px solid var(--lg-border);");
-    expect(open).toContain("border-radius: var(--radius-card);");
-    expect(open).toContain("box-shadow: var(--lg-rim-soft), var(--lg-shadow);");
-    expect(open).toContain("backdrop-filter: var(--lg-blur);");
-    expect(open).toContain("padding: var(--space-5);");
+    expect(open).toContain("background-color: transparent;");
+    expect(open).toContain("border: 0;");
+    expect(open).toContain("border-radius: 0;");
+    expect(open).toContain("box-shadow: none;");
+    expect(open).toContain("padding: 0;");
   });
 
-  it("the split column parts on the grid gap at lg — no hairline (M-221)", () => {
+  it("the split column takes a vertical hairline at lg", () => {
     const flow = m183Flow();
     const mediaStart = flow.indexOf("@media (min-width: 1024px)");
     const split = ruleBlock(flow.slice(mediaStart), ".home-page .home-open-split");
-    expect(split).toContain("border-left: 0;");
-    expect(split).toContain("padding-left: var(--space-6);");
+    expect(split).toContain("border-left: 1px solid var(--dbx-hairline);");
+    expect(split).toContain("padding-left: 16px;");
   });
 });
 
@@ -211,14 +197,22 @@ describe("Today de-box (M-183) — the facts strip and its 40% dividers", () => 
 });
 
 describe("Today de-box (M-183) — the hero floats openly", () => {
-  it("the quick-action chips wear the flat translucent fill, no blur", () => {
+  it("the quick-action chips wear the M-224 liquid glass (floating pills)", () => {
+    /* RE-CONTRACTED by M-224 (disclosed, owner's Liquid Glass
+       correction 2026-11-23): the chips are floating controls, so
+       they leave the M-183 flat fill for the one material — plain
+       fallback first, tint overlay, full-strength backdrop, rim.
+       The pill radius and the no-recolour hover discipline stand:
+       hover now brightens the glass, never the border. */
     const chip = ruleBlock(CSS, ".home-chip");
-    expect(chip).toContain("background: rgb(255 255 255 / 0.04);");
+    expect(chip).toContain("background-color: var(--lg-fallback);");
+    expect(chip).toContain("background-color: var(--lg-tint);");
+    expect(chip).toContain("backdrop-filter: var(--lg-blur);");
     expect(chip).toContain("border-radius: var(--radius-pill);");
-    expect(chip).not.toContain("backdrop-filter");
     const hover = ruleBlock(CSS, ".home-chip:hover");
-    expect(hover).toContain("background: rgb(255 255 255 / 0.08);");
+    expect(hover).toContain("filter: brightness(1.16);");
     expect(hover).not.toContain("border-strong");
+    expect(hover).not.toContain("border-color");
   });
 
   it("the hero photo keeps its media frame, without the drop shadow", () => {
@@ -228,16 +222,11 @@ describe("Today de-box (M-183) — the hero floats openly", () => {
 });
 
 describe("Today de-box (M-183) — the freeze holds where the spec is silent", () => {
-  it("the base .home-panel rule carries the M-221 material — the freeze is lifted for this class", () => {
-    /* RE-CONTRACTED by M-221 (disclosed): the owner's picks glass
-       Today at every width, so the base rule itself wears the
-       material now (plain strong fallback first, then the tint). */
+  it("the base .home-panel rule is untouched — un-named surfaces keep M-174's dress below lg", () => {
     const panel = ruleBlock(CSS, ".home-panel");
-    expect(panel).toContain("background-color: var(--lg-fallback-strong);");
-    expect(panel).toContain("background-color: var(--lg-tint-strong);");
-    expect(panel).toContain("background-image: var(--lg-sheen);");
-    expect(panel).toContain("border: 1px solid var(--lg-border);");
-    expect(panel).toContain("backdrop-filter: var(--lg-blur);");
+    expect(panel).toContain("background-image: var(--glass-bg);");
+    expect(panel).toContain("border: 1px solid var(--glass-border);");
+    expect(panel).toContain("backdrop-filter: blur(14px);");
   });
 
   it("the base .home-fact strip keeps its shape below lg", () => {

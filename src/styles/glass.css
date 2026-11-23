@@ -21,19 +21,37 @@
  * sheet.guard) — no --lg-* token and no .glass-* class may ever reach a
  * sheet panel, and glass.guard pins that. Glass never stacks on glass.
  *
- * M-221 (2026-11-23) — the owner's glass picks, from the 14-area
- * before/after preview: the placement rule above is superseded for the
- * areas he named. Glass now also lives on Today (home), the VITALIS
- * Overview surfaces, the Nutrition day plan, Grocery shopping mode,
- * the Trackers territories, Coach chat bubbles, Stories template
- * frames, and the desktop Sidebar + TopBar. Profile, Rewards and the
- * Assessment sheet stay solid, by the same ruling. Two lines from the
- * old rule survive untouched: SHEETS AND MODALS STAY FULLY OPAQUE (the
- * panel census in glass.guard/sheet.guard still holds), and glass
- * never stacks on glass. Every M-221 surface carries text on the
- * STRONG tint (panel-grade, below) over a plain fallback declared
- * first — the readability floor the preview's numbers-on-darkest-tint
- * note asks for, pinned by glassPicks.guard.
+ * M-221 (2026-11-23) spread this material across the owner's picked
+ * areas — Today panels, Nutrition, Grocery, Trackers, Coach bubbles,
+ * Stories, the sidebar. M-224 (2026-11-23, the owner's correction)
+ * SUPERSEDES that placement: he reviewed it live, ruled it "isn't
+ * correct glass", and supplied Apple's iOS 26 Liquid Glass rules as
+ * the standard. The rules, applied to this web material:
+ *   1. Glass lives ONLY on the floating/control layer — floating
+ *      toolbars, pills, the dock, floating controls. Never on stacked
+ *      cards, list items or full content panels (excess glass kills
+ *      legibility and frame rate). The M-221 panel placements are
+ *      reverted to their solid de-box surfaces; what keeps glass is
+ *      the floating layer: the dock + orb, the TopBar sync pill, the
+ *      phone brand bar, Today's quick-action pills, the invitation
+ *      gate's floating controls, and this file's utility classes
+ *      (Welcome + the membership drop-down).
+ *   2. Never opacity < 1 on the glass element — the backdrop layer
+ *      renders at FULL strength; tint rides as an overlay background
+ *      layer on top of it (the fallback → tint background stack).
+ *   3. Glass needs colourful/scrolling content behind it to refract;
+ *      over flat black it reads flat — exactly why the panels failed.
+ *   4. Shapes are pills or rounded rects ≥20px so the specular edge
+ *      and the lensing can show.
+ * The material below is rebuilt to those rules: a REGULAR variant
+ * (the floating-chrome recipe) and a CLEAR variant (lighter tint
+ * overlay + lighter blur, for colourful grounds — the gate), a
+ * specular rim that reads as light on a curved edge, and a lensing
+ * gradient (bright at the rim, clearing toward the centre) in place
+ * of the flat sheen. The palette washes survive as overlay tints
+ * only, under their M-221 opacity ceilings. Sheets and modals stay
+ * fully opaque slabs, glass never stacks on glass, and Profile,
+ * Rewards and the Assessment sheet stay solid — those lines hold.
  *
  * M-170 (2026-11-21) aligned the Welcome-facing utility classes below
  * (pill / cap / field / cta) to the owner-approved preview's exact
@@ -55,33 +73,59 @@
  */
 
 :root {
-  /* The optical recipe: 20px of blur, 180% saturation (owner spec). */
-  --lg-blur: blur(20px) saturate(180%);
-  /* Ink-tinted bases — Bloom's panel tone at glass strengths.
-     Panel text rides the strong tint (WCAG AA over the brightest mesh);
-     pills and capsules ride the lighter one. */
+  /* The optical recipe — M-224 REGULAR variant, the floating-chrome
+     recipe: 24px of blur, 180% saturation, always at full strength
+     (rule 2: the backdrop layer is never weakened; the tint overlay
+     above it is what varies). */
+  --lg-blur: blur(24px) saturate(180%);
+  /* Ink-tinted overlays — Bloom's panel tone, painted as background
+     layers OVER the full-strength backdrop. Text-bearing chrome
+     rides the strong tint (WCAG AA over the brightest mesh); pills
+     and capsules ride the lighter one. */
   --lg-tint: color-mix(in oklab, var(--surface) 50%, transparent);
   --lg-tint-strong: color-mix(in oklab, var(--surface) 68%, transparent);
   /* Plain fallbacks, declared before every color-mix line. */
   --lg-fallback: rgba(17, 19, 24, 0.52);
   --lg-fallback-strong: rgba(17, 19, 24, 0.72);
+  /* The CLEAR variant (M-224): a lighter blur and a lighter tint
+     overlay, for grounds with colour of their own to refract — the
+     invitation gate's corner glows. Text on clear glass is display
+     text and short labels only; the floor below is its no-blur
+     no-color-mix coat. */
+  --lg-blur-clear: blur(14px) saturate(165%);
+  --lg-tint-clear: color-mix(in oklab, var(--surface) 26%, transparent);
+  --lg-fallback-clear: rgba(17, 19, 24, 0.32);
   --lg-border: rgba(255, 255, 255, 0.14);
-  /* The specular rim: light catching a curved bevel — a crisp bright
-     top-left, a softer reflection bottom-right. */
+  /* The specular rim (M-224): light on a curved edge — a bright
+     specular line along the top, faint reflections down the sides,
+     and a soft shaded inset pooling at the bottom, the way a real
+     bevel darkens where it curves away. */
   --lg-rim:
-    inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 1px 0 0 rgba(255, 255, 255, 0.1),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.15), inset -1px 0 0 rgba(255, 255, 255, 0.05);
+    inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 1px 0 0 rgba(255, 255, 255, 0.14),
+    inset -1px 0 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -14px 20px -16px rgba(0, 0, 0, 0.45);
   /* The same rim at capsule scale, where the full strength would shout. */
-  --lg-rim-soft: inset 0 1px 0 rgba(255, 255, 255, 0.38), inset 0 -1px 0 rgba(255, 255, 255, 0.1);
+  --lg-rim-soft:
+    inset 0 1px 0 rgba(255, 255, 255, 0.42), inset 1px 0 0 rgba(255, 255, 255, 0.08),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.08), inset 0 -10px 14px -12px rgba(0, 0, 0, 0.4);
   /* Elevation: a soft, wide ambient shadow — the glass floats. */
   --lg-shadow: 0 24px 48px -16px rgba(0, 0, 0, 0.55), 0 4px 16px rgba(0, 0, 0, 0.32);
-  /* A quiet sheen across the face, brightest where the light lands. */
-  --lg-sheen: linear-gradient(
-    165deg,
-    rgba(255, 255, 255, 0.13),
-    rgba(255, 255, 255, 0.03) 52%,
-    rgba(255, 255, 255, 0.07)
-  );
+  /* The lensing (M-224, replaces the flat sheen): the face is
+     brightest at its rim — a diagonal light falloff plus a crown of
+     light along the top edge — and clears toward the centre, the
+     way a lens bends light at its edges and passes it in the
+     middle. Painted as a background-image layer over the tint. */
+  --lg-lens:
+    linear-gradient(
+      168deg,
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.04) 34%,
+      rgba(255, 255, 255, 0) 58%,
+      rgba(255, 255, 255, 0.05) 88%
+    ),
+    radial-gradient(130% 100% at 50% 0%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 55%);
+  /* The legacy sheen name keeps working — it IS the lens now. */
+  --lg-sheen: var(--lg-lens);
   /* The ink on the solid gold CTA (M-170): the preview's near-black
      gold ink — a deeper step than the house --gold-ink. */
   --lg-gold-ink: #171106;
@@ -134,30 +178,47 @@
     color-mix(in oklab, var(--rose) 6%, transparent) 58%,
     color-mix(in oklab, var(--rose) 11%, transparent)
   );
-  /* M-221: the deep recipe for the chrome that already wore glass —
-     the dock, the orb, the invitation gate. A deeper blur, a brighter
-     specular rim (the preview's "deeper blur, brighter rim" refinement
-     of the surfaces that were glass first). */
-  --lg-blur-deep: blur(24px) saturate(190%);
+  /* M-221 named a "deep" recipe for the chrome that wore glass first
+     (the dock, the orb). M-224 retires the distinction: there is one
+     REGULAR recipe for floating chrome, and the deep names survive
+     as its aliases so the dock/orb consumers keep working on the one
+     material. */
+  --lg-blur-deep: blur(24px) saturate(180%);
   --lg-rim-deep:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 1px 0 0 rgba(255, 255, 255, 0.14),
-    inset 0 -1px 0 rgba(255, 255, 255, 0.18), inset -1px 0 0 rgba(255, 255, 255, 0.07);
+    inset 0 1px 0 rgba(255, 255, 255, 0.62), inset 1px 0 0 rgba(255, 255, 255, 0.14),
+    inset -1px 0 0 rgba(255, 255, 255, 0.06), inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -14px 20px -16px rgba(0, 0, 0, 0.45);
 }
 
 /* ------------------------------------------------------------- the panel */
 
-/* The floating container: headline and copy live here. Text contrast is
-   carried by the strong tint over the blur — over the brightest mesh
-   stop the composite stays dark enough for cream at AA. */
+/* The floating container: headline and copy live here. The M-224
+   structure, per the owner's rules: the backdrop layer renders at
+   full strength (the element itself is never faded), the strong
+   tint rides as the background overlay above it, the lensing
+   gradient is the topmost paint, and the specular rim + ambient
+   shadow finish the edge. Text contrast is carried by the strong
+   tint over the blur — over the brightest mesh stop the composite
+   stays dark enough for cream at AA. */
 .glass-panel {
   background-color: var(--lg-fallback-strong);
   background-color: var(--lg-tint-strong);
-  background-image: var(--lg-sheen);
+  background-image: var(--lg-lens);
   -webkit-backdrop-filter: var(--lg-blur);
   backdrop-filter: var(--lg-blur);
   border: 1px solid var(--lg-border);
   border-radius: var(--radius-panel);
   box-shadow: var(--lg-rim), var(--lg-shadow);
+}
+
+/* The CLEAR variant of the panel (M-224): the lighter blur and the
+   lighter tint overlay, for floating controls over colourful or
+   imagery grounds (the invitation gate's recipe in utility form). */
+.glass-panel.glass--clear {
+  background-color: var(--lg-fallback-clear);
+  background-color: var(--lg-tint-clear);
+  -webkit-backdrop-filter: var(--lg-blur-clear);
+  backdrop-filter: var(--lg-blur-clear);
 }
 
 /* -------------------------------------------------------------- the pill */
@@ -322,7 +383,7 @@
 @supports (backdrop-filter: url("#lg-refract")) {
   @media (prefers-reduced-motion: no-preference) {
     .glass-refract {
-      backdrop-filter: url("#lg-refract") blur(20px) saturate(180%);
+      backdrop-filter: url("#lg-refract") blur(24px) saturate(180%);
     }
   }
 }
@@ -348,6 +409,11 @@
   .glass-cap,
   .glass-field,
   .glass-cta {
+    background-color: var(--lg-fallback-strong);
+  }
+  /* The clear panel strengthens to the same floor — clear is a
+     treatment for engines that CAN refract, never a paler coat. */
+  .glass-panel.glass--clear {
     background-color: var(--lg-fallback-strong);
   }
 }
