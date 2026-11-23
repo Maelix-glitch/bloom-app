@@ -1258,6 +1258,26 @@ describe("UI guard: reskin chrome (R-2)", () => {
     expect(STYLES.text).toContain(".app-sidebar-profile");
   });
 
+  it("the rail identity is name + verified tick ONLY — no member-badge pill (M-223)", () => {
+    /* M-209 put the single highest-priority member badge (Founder /
+       Trainer / Tester) beside the rail name. RE-CONTRACTED by
+       M-223 (owner directive 2026-11-23): the pill comes OUT of the
+       rail — the identity strip shows the member's name and the
+       grant-only verified tick, nothing else. The badge system is
+       untouched: the pills still render on the Profile hero, in
+       user search rows and in Settings (their own suites pin them),
+       and the rail identity read still carries the badge facts.
+       These pins read the component the rail actually renders:
+       the tick's exact JSX stays, and no badge rendering, derivation
+       or import may return to this file. */
+    expect(SIDEBAR.text).toContain(
+      '<VerifiedBadge status={verification} size={14} tone="gold" />',
+    );
+    expect(SIDEBAR.text).not.toContain("MemberBadges");
+    expect(SIDEBAR.text).not.toContain("memberBadgesOf");
+    expect(SIDEBAR.text).not.toContain("railBadges");
+  });
+
   it("speaks sync once: the TopBar pill owns it, the rail never repeats it", () => {
     /* The rail's botanical footer used to repeat the TopBar pill's
        "Synced with your account" line — one state, two voices on the

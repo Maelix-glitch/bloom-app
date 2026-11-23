@@ -7,6 +7,14 @@
  * (deepened), Welcome gate (deepened). SOLID — Profile, Rewards,
  * Assessment sheet, and every billing surface (M-220's territory).
  *
+ * M-223 CORRECTION (owner directive 2026-11-23, hours after this
+ * shipped): the SIDEBAR RAIL leaves the glass list. Its translucent
+ * tint over the near-black canvas read as no background colour at
+ * all — the panel disappeared — so the rail wears its solid
+ * pre-M-221 surface again (pinned below). The TopBar sync pill
+ * stays glass, and inside the rail the points card and the active
+ * pill keep their tint steps. Every other picked area is unchanged.
+ *
  * The pins:
  *   1. the material extensions in glass.css carry their exact values
  *      (the deep blur/rim, the palette washes with their opacity
@@ -20,7 +28,7 @@
  *      and no text surface rides on a wash alone;
  *   4. the keep-solid sheets carry no glass tokens at all;
  *   5. glass never stacks: no treated surface is a descendant of
- *      another, and the two surfaces that live INSIDE the glass rail
+ *      another, and the two surfaces that live INSIDE the rail
  *      (the points card, the active pill) take a tint step with no
  *      backdrop blur of their own.
  */
@@ -91,10 +99,18 @@ describe("glass picks (M-221): every picked area consumes the one material", () 
     expect(materialBlock(STYLES, ".home-page .home-open", "var(--lg-tint-strong)")).toBeDefined();
   });
 
-  it("Sidebar + TopBar: the rail, the sync pill — and no border returns", () => {
+  it("TopBar: the sync pill wears the material — and the rail is SOLID again (M-223)", () => {
+    /* RE-CONTRACTED by M-223 (owner directive 2026-11-23): the rail
+       was pinned here as glassed under M-221; the owner ruled the
+       glass rail lost its background colour, so the winning
+       .app-sidebar block now carries the solid pre-M-221 surface —
+       background: var(--sidebar), no glass tokens, no backdrop
+       blur — and the de-box separation stands (no border returns).
+       The TopBar sync pill is untouched and stays glass. */
     const rail = lastBlock(STYLES, ".app-sidebar")!;
-    expect(rail.body).toContain("background-color: var(--lg-tint-strong)");
-    expect(rail.body).toContain("backdrop-filter: var(--lg-blur)");
+    expect(rail.body).toContain("background: var(--sidebar)");
+    expect(rail.body).not.toContain("--lg-");
+    expect(rail.body).not.toContain("backdrop-filter");
     expect(rail.body).toContain("border-right: none");
     expect(materialBlock(STYLES, ".home-sync-pill", "var(--lg-blur)")).toBeDefined();
   });
@@ -162,7 +178,10 @@ describe("glass picks (M-221): the readability floor", () => {
   const TEXT_SURFACES: [string, string][] = [
     [STYLES, ".home-panel"],
     [STYLES, ".home-page .home-open"],
-    [STYLES, ".app-sidebar"],
+    /* .app-sidebar stood here under M-221; M-223 took the rail off
+       glass entirely (solid var(--sidebar)), so there is no glass
+       material block left for the floor to read — the rail's own
+       solid pin lives in the Sidebar test above. */
     [NUTRITION, ".nut-day-card"],
     [NUTRITION, ".tile"],
     [NUTRITION, ".shop-progress"],
