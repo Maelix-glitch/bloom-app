@@ -199,13 +199,23 @@ export function weekAggregates(
 /**
  * Reference intakes for the micronutrient spectrum: ICMR-NIN Recommended
  * Dietary Allowances 2020 for adults (the values the panel cites in its
- * footnote). Magnesium and iron are sex-specific in the RDA; potassium,
- * calcium and vitamin C are stated as single adult values; fibre follows
+ * footnote). Magnesium, iron and vitamin C are sex-specific in the RDA;
+ * potassium, calcium are stated as single adult values; fibre follows
  * the ICMR-NIN guidance figure; sodium is a CEILING (the RDA's upper
  * guidance), drawn as a limit, not a goal. When the profile does not
  * state a sex, the sex-specific rows use the male values as the stated
  * default and the panel's footnote stays generic ("common reference
  * intakes") — the default is named here rather than assumed silently.
+ *
+ * M-219 (audit F-09): magnesium used to carry the EAR figures
+ * (370/310) under an RDA citation — the RDA is 440 (M) / 370 (F) —
+ * which overstated magnesium coverage ~19% and desensitised the
+ * adaptation engine's micro-gap detection; vitamin C was coded 80
+ * for both sexes where the RDA is 80 (M) / 65 (F). Both are now the
+ * RDA values the footnote claims. (Iron 19/29 and calcium 1,000 were
+ * already correct RDAs; potassium and fibre were left as coded —
+ * the audit marked them unverified against the ICMR table, and an
+ * unverified value is not silently "corrected".)
  */
 export type SpectrumSex = "male" | "female" | null;
 
@@ -227,7 +237,7 @@ export function spectrumReferences(sex: SpectrumSex): SpectrumReference[] {
       key: "magnesiumMg",
       label: "Magnesium",
       unit: "mg",
-      reference: sex === "female" ? 310 : 370,
+      reference: sex === "female" ? 370 : 440,
       limit: false,
     },
     { key: "calciumMg", label: "Calcium", unit: "mg", reference: 1000, limit: false },
@@ -238,7 +248,13 @@ export function spectrumReferences(sex: SpectrumSex): SpectrumReference[] {
       reference: sex === "female" ? 29 : 19,
       limit: false,
     },
-    { key: "vitaminCMg", label: "Vitamin C", unit: "mg", reference: 80, limit: false },
+    {
+      key: "vitaminCMg",
+      label: "Vitamin C",
+      unit: "mg",
+      reference: sex === "female" ? 65 : 80,
+      limit: false,
+    },
     { key: "sodiumMg", label: "Sodium", unit: "mg", reference: 2000, limit: true },
   ];
 }

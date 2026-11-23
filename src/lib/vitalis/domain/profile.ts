@@ -328,5 +328,14 @@ export function toSafetyInput(profile: HealthProfile): SafetyInput {
     unexplainedWeightChange: profile.constraints.unexplainedWeightChange,
     symptoms: profile.constraints.symptoms,
     requestedRateKgPerWeek: profile.rateKgPerWeek,
+    targetBmi: targetBmiOf(profile),
   };
+}
+
+/** BMI at the stated target weight — the destination the goal names. */
+function targetBmiOf(profile: HealthProfile): number | null {
+  const heightCm = profileHeightCm(profile);
+  const targetKg = profileTargetWeightKg(profile);
+  if (heightCm === null || targetKg === null) return null;
+  return bmiOf(heightCm, targetKg);
 }

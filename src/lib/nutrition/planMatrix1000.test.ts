@@ -755,13 +755,13 @@ describe("plan matrix 1000 — the owner's dense-protein corner", () => {
     {
       pattern: "omnivore",
       goal: "recomp",
-      body: { name: "M45-178-105-sed", sex: "male", ageYears: 45, heightCm: 178, weightKg: 105, activity: "sedentary" },
+      body: { name: "F55-160-74-sed", sex: "female", ageYears: 55, heightCm: 160, weightKg: 74, activity: "sedentary" },
       day: "2026-11-20",
     },
     {
       pattern: "vegetarian",
       goal: "recomp",
-      body: { name: "F45-158-92-light", sex: "female", ageYears: 45, heightCm: 158, weightKg: 92, activity: "light" },
+      body: { name: "F30-165-60-sed", sex: "female", ageYears: 30, heightCm: 165, weightKg: 60, activity: "sedentary" },
       day: "2026-11-17",
     },
     {
@@ -773,7 +773,7 @@ describe("plan matrix 1000 — the owner's dense-protein corner", () => {
     {
       pattern: "eggetarian",
       goal: "lose",
-      body: { name: "M50-172-118-sed", sex: "male", ageYears: 50, heightCm: 172, weightKg: 118, activity: "sedentary" },
+      body: { name: "M50-185-90-sed", sex: "male", ageYears: 50, heightCm: 185, weightKg: 90, activity: "sedentary" },
       day: "2026-11-22",
     },
   ];
@@ -790,8 +790,17 @@ describe("plan matrix 1000 — the owner's dense-protein corner", () => {
         const t = gated.targets;
         /* The shape itself is asserted — a cell that stops being
            a dense-protein small-guide day fails loudly here rather
-           than silently testing something else. */
-        expect(t.proteinG / t.calorieTargetKcal).toBeGreaterThanOrEqual(0.095);
+           than silently testing something else.
+           M-219: the bar was 0.095, reachable only because protein
+           was dosed on actual body weight at high BMIs (audit
+           F-05). Under reference-weight dosing the honest corner
+           tops out at ≈0.088 (measured across these cells:
+           0.082–0.088); the bar sits just under that minimum, and
+           three of the original bodies — whose density was the
+           dosing artefact itself — were replaced with bodies that
+           are dense for real (floor-bound or low guides against a
+           substantial reference weight). */
+        expect(t.proteinG / t.calorieTargetKcal).toBeGreaterThanOrEqual(0.08);
         const outcome = generatePlan({
           profile,
           safety,

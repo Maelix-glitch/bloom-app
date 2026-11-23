@@ -12,9 +12,14 @@
  *     implies — is preserved exactly when the delta is applied on
  *     top of whatever target the engine resolves;
  *   · the delta is bounded (±750 kcal) and the adjusted target must
- *     stay inside the sane band (800–6000 kcal) or the adjustment is
+ *     stay inside the sane band (800–6000 kcal) AND at or above the
+ *     person's own calorie floor — the same sex-specific floor the
+ *     engine applied to the unadjusted target — or the adjustment is
  *     refused at apply time and the engine's targets stand — never
- *     a silent clamp inventing a number nobody confirmed;
+ *     a silent clamp inventing a number nobody confirmed. (The floor
+ *     half of that rule is M-219, audit F-01: the band alone let a
+ *     floor-bound person confirm 800 kcal/day — very-low-calorie
+ *     territory the floor exists to keep self-serve taps out of.)
  *   · dismissing a proposal stores nothing at all.
  *
  * Storage is a versioned prefs key, `health.targetAdjustment.v1`,
@@ -26,6 +31,7 @@
  * the person's own record.
  */
 
+import { calorieFloor, type BodySex } from "@/lib/health/body";
 import { clearPref, getPref, setPref } from "@/lib/prefs";
 import type { NutritionTargets } from "./targets";
 
@@ -114,18 +120,21 @@ export function clearTargetAdjustment(): void {
 
 /**
  * Apply a confirmed delta to resolved targets. Null when the result
- * would leave the sane band — the caller then keeps the engine's
- * targets untouched. A zero delta is the targets themselves.
- * Protein is never adjusted: it is a per-kilogram figure, not an
- * energy-balance figure.
+ * would leave the sane band OR drop below the person's calorie floor
+ * (`calorieFloor(sex)` — the floor the engine itself applied) — the
+ * caller then keeps the engine's targets untouched. A zero delta is
+ * the targets themselves. Protein is never adjusted: it is a
+ * per-kilogram figure, not an energy-balance figure.
  */
 export function adjustedTargets(
   targets: NutritionTargets,
   kcalDelta: number,
+  sex: BodySex,
 ): NutritionTargets | null {
   const delta = Math.round(kcalDelta);
   if (delta === 0) return targets;
   const kcal = targets.kcal + delta;
   if (kcal < ADJUSTED_TARGET_MIN_KCAL || kcal > ADJUSTED_TARGET_MAX_KCAL) return null;
+  if (kcal < calorieFloor(sex)) return null;
   return { kcal, proteinG: targets.proteinG };
 }

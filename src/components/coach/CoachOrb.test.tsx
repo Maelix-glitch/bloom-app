@@ -431,6 +431,58 @@ describe("CoachOrb — deliberation, actions and the lock", () => {
     resetPrefCache();
   }
 
+
+  /* M-219 (audit F-02): the deliberation's compose/swap actions build
+     the plan through the safety-gated Assessment path — a body
+     profile alone no longer supplies targets. These tests therefore
+     seed a completed Assessment carrying the same numbers as the
+     body profile below (answered fully, safety questions answered
+     "no"), which is also the orb's own stated scope: its tools read
+     the Assessment. */
+  function seedAssessment() {
+    seedPref("health.assessment.v1", {
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: {
+        ageYears: 30,
+        heightCm: 178,
+        weightKg: 80,
+        waistCm: null,
+        sex: "male",
+        goal: "maintain",
+        targetWeightKg: null,
+        rateKgPerWeek: null,
+        pregnantOrBreastfeeding: false,
+        eatingDisorderHistory: false,
+        unexplainedWeightChange: false,
+        conditions: [],
+        takesMedication: false,
+        medications: [],
+        symptoms: [],
+        dietaryPattern: "omnivore",
+        mealsPerDay: 3,
+        foodBudget: null,
+        cuisinePreference: null,
+        allergies: [],
+        intolerances: [],
+        dislikedFoods: [],
+        cuisines: [],
+        activity: "moderate",
+        sleepHoursTypical: null,
+        sleepQuality: null,
+        morningRestedness: null,
+        cookingAbility: null,
+        equipment: [],
+        prepTimeMaxMinutes: null,
+      },
+      consents: [],
+      startedAt: "2026-11-17T00:00:00.000Z",
+      completedAt: "2026-11-17T00:05:00.000Z",
+      updatedAt: "2026-11-17T00:05:00.000Z",
+    });
+  }
+
   function readPref(key: string): unknown {
     const raw = window.localStorage.getItem("bloom.prefs.v1");
     if (!raw) return undefined;
@@ -582,6 +634,7 @@ describe("CoachOrb — deliberation, actions and the lock", () => {
   });
 
   it("composes today's plan only after the confirm tap", async () => {
+    seedAssessment();
     seedPref("health.body.v1", {
       units: "metric",
       heightCm: 178,
@@ -610,6 +663,7 @@ describe("CoachOrb — deliberation, actions and the lock", () => {
   }, 20_000);
 
   it("swaps a plan dish only after the confirm tap", async () => {
+    seedAssessment();
     seedPref("health.body.v1", {
       units: "metric",
       heightCm: 178,

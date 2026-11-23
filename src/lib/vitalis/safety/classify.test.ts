@@ -14,6 +14,7 @@ const clear: SafetyInput = {
   unexplainedWeightChange: false,
   symptoms: [],
   requestedRateKgPerWeek: 0.5,
+  targetBmi: null,
 };
 
 const withInput = (overrides: Partial<SafetyInput>): SafetyInput => ({ ...clear, ...overrides });

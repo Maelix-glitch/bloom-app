@@ -63,9 +63,11 @@ describe("waterTargetMlOf — the resolver reads the plan's own guide", () => {
     expect(legacy).not.toBeNull();
     const targets = bodyTargetsOf(legacy!, DAY);
     expect(targets).not.toBeNull();
-    /* 80 kg × 35 + 500 (moderate) = 3,300, already on the 50 ml grid. */
-    expect(targets!.waterMl).toBe(3300);
-    expect(waterTargetMlOf(legacy!, DAY)).toBe(3300);
+    /* M-219 (audit F-07): the drinking-water basis — male base
+       1,900 + 300 (moderate) = 2,200. The old pin (80 kg × 35 +
+       500 = 3,300) was the total-water formula the audit retired. */
+    expect(targets!.waterMl).toBe(2200);
+    expect(waterTargetMlOf(legacy!, DAY)).toBe(2200);
   });
 
   it("is null when the body profile cannot produce targets", () => {
@@ -125,7 +127,7 @@ const ASSESSMENT_COMPLETE: AssessmentState = {
   updatedAt: "2026-11-15T03:05:00.000Z",
 };
 
-/* 80 kg · 178 cm · 30 · male · moderate → body-guide water 3,300 ml. */
+/* 80 kg · 178 cm · 30 · male · moderate → body-guide water 2,200 ml (M-219 basis). */
 const BODY_PROFILE: BodyProfile = {
   units: "metric",
   heightCm: 178,
@@ -146,8 +148,10 @@ describe("planWaterTargetMlOf — the plan's own resolution, shared", () => {
       bodyProfile: DEFAULT_BODY,
       today: DAY,
     });
-    /* 82 kg × 35 + 250 (light) = 3,120 → 3,100 on the 50 ml grid. */
-    expect(resolved).toBe(3100);
+    /* M-219 (audit F-07): female drinking base 1,500 + 150 (light)
+       = 1,650. The old pin (82 kg × 35 + 250 = 3,100) was the
+       retired total-water formula. */
+    expect(resolved).toBe(1650);
 
     const profile = toHealthProfile(ASSESSMENT_COMPLETE, "local");
     const safety = classifySafety(toSafetyInput(profile));
@@ -169,7 +173,7 @@ describe("planWaterTargetMlOf — the plan's own resolution, shared", () => {
   });
 
   it("when both sources exist and differ, the Assessment (gated) figure stands — the plan's order", () => {
-    /* Assessment guide: 3,100. Body-pref guide: 3,300. The plan's
+    /* Assessment guide: 1,650. Body-pref guide: 2,200. The plan's
        targets come from the gated outcome, so its water does too. */
     expect(
       planWaterTargetMlOf({
@@ -177,7 +181,7 @@ describe("planWaterTargetMlOf — the plan's own resolution, shared", () => {
         bodyProfile: BODY_PROFILE,
         today: DAY,
       }),
-    ).toBe(3100);
+    ).toBe(1650);
   });
 
   it("a body-pref-only account keeps the body guide's figure", () => {
@@ -187,7 +191,7 @@ describe("planWaterTargetMlOf — the plan's own resolution, shared", () => {
         bodyProfile: BODY_PROFILE,
         today: DAY,
       }),
-    ).toBe(3300);
+    ).toBe(2200);
   });
 
   it("is null when neither source can produce a figure", () => {

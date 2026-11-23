@@ -28,6 +28,7 @@ import { setPref } from "@/lib/prefs";
 import { BODY_KEY, bodyTargetsOf, type BodyProfile } from "@/lib/health/body";
 import {
   ASSESSMENT_KEY,
+  EMPTY_ANSWERS,
   beginAssessment,
   completeAssessment,
   emptyAssessmentState,
@@ -93,6 +94,24 @@ function log(food: Food, grams: number, day: string) {
 describe("NutritionReportPage", () => {
   it("renders the week's real aggregates, guides and provenance share", () => {
     setPref(BODY_KEY, PROFILE);
+    /* M-219 (audit F-02): the report's guides read the safety-gated
+       Assessment path (the page's own header: the profile of
+       record). Seed the Assessment with PROFILE's numbers, answered
+       fully — the gated guide equals the body guide's for identical
+       inputs, so every figure below stands as pinned. */
+    const complete = emptyAssessmentState("2026-11-15T00:00:00.000Z");
+    complete.answers = {
+      ...EMPTY_ANSWERS,
+      ageYears: 30,
+      sex: "male",
+      heightCm: 178,
+      weightKg: 72,
+      activity: "moderate",
+      goal: "maintain",
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
+    };
+    setPref(ASSESSMENT_KEY, complete);
     const today = todayLocal();
     const egg = findUsdaReference("usda-171287")!;
     log(egg, 100, today); /* 143 kcal, USDA */

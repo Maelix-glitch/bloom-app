@@ -175,6 +175,21 @@ function logEntry(day: string): LogEntry {
   };
 }
 
+/** A COMPLETE logged day (M-219, audit F-11): the day's totals
+ *  split across lunch and dinner. The adherence learning the Twin
+ *  strip carries reads complete days only — a single lunch entry
+ *  is a fragment, and fragments no longer steer anything. */
+function logDay(day: string): LogEntry[] {
+  const lunch = logEntry(day);
+  const dinner: LogEntry = {
+    ...logEntry(day),
+    meal: "dinner",
+    nutrients: { kcal: 900, proteinG: 45, carbsG: 90, fatG: 30 },
+  };
+  lunch.nutrients = { kcal: 900, proteinG: 45, carbsG: 90, fatG: 30 };
+  return [lunch, dinner];
+}
+
 /* -------------------------------- test --------------------------------- */
 
 describe("anti-document guard — the absorbed insight strip (strict)", () => {
@@ -184,7 +199,11 @@ describe("anti-document guard — the absorbed insight strip (strict)", () => {
     /* Three logged days before today: enough for the adherence
        learning (>= 2 recent days) — the conclusion the old block
        stacked as prose and the strip now carries as a card. */
-    writeFoodLog([logEntry(shiftDay(today, -1)), logEntry(shiftDay(today, -2)), logEntry(shiftDay(today, -3))]);
+    writeFoodLog([
+      ...logDay(shiftDay(today, -1)),
+      ...logDay(shiftDay(today, -2)),
+      ...logDay(shiftDay(today, -3)),
+    ]);
 
     const first = render(
       <>

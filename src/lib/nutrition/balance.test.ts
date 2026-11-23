@@ -135,7 +135,10 @@ describe("dayBalance — the flower's tally", () => {
   });
 
   it("the guideline constants equal the composer's own reason values", () => {
-    const plan = planFor(ROTATION, "2026-11-18");
+    /* Day choice: at the M-219 targets this profile's 2026-11-18
+       composition meets the fruit floor; 2026-11-19 still exercises
+       both shortfall reasons this pin exists to compare. */
+    const plan = planFor(ROTATION, "2026-11-19");
     const veg = plan.reasons?.find((r) => r.kind === "veg-shortfall");
     const fruit = plan.reasons?.find((r) => r.kind === "fruit-shortfall");
     if (!veg || veg.kind !== "veg-shortfall") throw new Error("fixture lost its veg shortfall");

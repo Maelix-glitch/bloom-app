@@ -34,7 +34,9 @@ const NOW = "2026-11-17T03:00:00.000Z";
 const PROVENANCE = { source: "user_reported", recordedAt: "2026-06-01T07:00:00Z" } as const;
 
 /** The owner's shape (as planDishes.test.ts): eggetarian, 100 kg,
- *  gain, safety unanswered — targets from the body-profile fallback. */
+ *  gain. Since M-219 the safety questions are answered and the
+ *  targets are the gated engine's — the body-profile fallback this
+ *  fixture once rode is retired. */
 function ownerProfile(): HealthProfile {
   return {
     ...emptyProfile("user-1", "2026-06-01T07:00:00Z"),
@@ -48,19 +50,19 @@ function ownerProfile(): HealthProfile {
     dietary: { ...EMPTY_DIETARY, pattern: "eggetarian", mealsPerDay: 3, budgetTier: null },
     constraints: {
       ...EMPTY_CONSTRAINTS,
-      pregnantOrBreastfeeding: null,
-      eatingDisorderHistory: null,
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
     },
   };
 }
 
 let seq = 0;
-function entry(day: string, kcal: number, proteinG: number): LogEntry {
+function entry(day: string, kcal: number, proteinG: number, meal: LogEntry["meal"] = "lunch"): LogEntry {
   seq += 1;
   return {
     id: `e-${seq}`,
     day,
-    meal: "lunch",
+    meal,
     foodId: null,
     snapshot: null,
     name: "logged",
@@ -72,13 +74,28 @@ function entry(day: string, kcal: number, proteinG: number): LogEntry {
   };
 }
 
+/* A COMPLETE logged day (M-219): the day's totals split across a
+   lunch and a dinner entry — the only shape the adaptation reads
+   since the completeness gate. Totals preserved exactly. */
+function dayEntries(day: string, kcal: number, proteinG: number): LogEntry[] {
+  const kcalA = Math.round(kcal / 2);
+  const proteinA = Math.round(proteinG / 2);
+  return [
+    entry(day, kcalA, proteinA, "lunch"),
+    entry(day, kcal - kcalA, proteinG - proteinA, "dinner"),
+  ];
+}
+
 function gen(
   profile: HealthProfile,
   opts: {
     day: string;
     foods?: readonly Food[];
     dishes?: readonly Dish[];
-    fallbackTargets: { kcal: number; proteinG: number };
+    /** Accepted for fixture compatibility and deliberately NOT
+     *  forwarded: M-219 retired the fallback — targets come from
+     *  the gated engine alone. */
+    fallbackTargets?: { kcal: number; proteinG: number };
     recentLog?: readonly LogEntry[];
   },
 ): DailyPlan {
@@ -87,7 +104,6 @@ function gen(
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, opts.day),
-    fallbackTargets: opts.fallbackTargets,
     foods: opts.foods ?? USDA_REFERENCE_FOODS,
     dishes: opts.dishes ?? DISH_LIBRARY,
     ...(opts.recentLog ? { recentLog: opts.recentLog } : {}),
@@ -132,23 +148,26 @@ const topUps = (plan: DailyPlan) =>
   plan.meals.flatMap((m) => m.suggestions.filter((s) => s.layer === "topup"));
 
 const OWNER_DAY = "2026-11-18";
-const OWNER_TARGETS = { kcal: 3288, proteinG: 220 };
-/** Three logged days averaging 120 g protein against the 220 g guide. */
+/** The gated engine's targets for the owner fixture (M-219):
+ *  BMR 1,968 × 1.55 + 275 gain surplus = 3,325 kcal; protein on the
+ *  healthy-ceiling reference weight, 72.6 kg × 1.6 = 116 g. */
+const OWNER_TARGETS = { kcal: 3325, proteinG: 116 };
+/** Three complete logged days averaging 70 g protein against the
+ *  116 g guide — a shortfall under the M-219 targets. */
 const SHORTFALL_LOG: LogEntry[] = [
-  entry("2026-11-15", 3000, 120),
-  entry("2026-11-16", 3100, 130),
-  entry("2026-11-17", 2900, 110),
+  ...dayEntries("2026-11-15", 3000, 70),
+  ...dayEntries("2026-11-16", 3100, 75),
+  ...dayEntries("2026-11-17", 2900, 65),
 ];
 
 describe("no usable log — the P5 plan, unchanged", () => {
   const base = gen(ownerProfile(), { day: OWNER_DAY, fallbackTargets: OWNER_TARGETS });
 
   it("no recentLog field at all", () => {
-    /* Method 10 = the behavioural pass (spec §10): the pin moves
-       with the version; the behaviour pinned here — no log, no learning
-       notes — is unchanged. (Moved again at method 13, the dish-first
-       repair, and at method 14, the accompaniment + snack placement.) */
-    expect(base.methodVersion).toBe(14);
+    /* Method 15 = the engine evidence-audit fixes (M-219): the pin
+       moves with the version; the behaviour pinned here — no log,
+       no learning notes — is unchanged. */
+    expect(base.methodVersion).toBe(15);
     expect(base.notes.some((n) => n.startsWith("From your log"))).toBe(false);
   });
 
@@ -165,7 +184,7 @@ describe("no usable log — the P5 plan, unchanged", () => {
     const oneDay = gen(ownerProfile(), {
       day: OWNER_DAY,
       fallbackTargets: OWNER_TARGETS,
-      recentLog: [entry("2026-11-17", 2900, 110)],
+      recentLog: dayEntries("2026-11-17", 2900, 65),
     });
     expect(oneDay).toEqual(base);
   });
@@ -174,7 +193,7 @@ describe("no usable log — the P5 plan, unchanged", () => {
     const onTarget = gen(ownerProfile(), {
       day: OWNER_DAY,
       fallbackTargets: OWNER_TARGETS,
-      recentLog: [entry("2026-11-16", 3200, 205), entry("2026-11-17", 3300, 215)],
+      recentLog: [...dayEntries("2026-11-16", 3300, 115), ...dayEntries("2026-11-17", 3350, 118)],
     });
     expect(onTarget).toEqual(base);
   });
@@ -192,7 +211,7 @@ describe("a protein-shortfall log", () => {
     /* Brief v4 (Slice 1): notes[0] is the log-protein-shortfall
        reason's derived detail (reasons.ts) — same log numbers. */
     expect(biased.notes[0]).toBe(
-      "Your last 3 logged days averaged 120 g protein against a 220 g target. Target unchanged.",
+      "Your last 3 logged days averaged 70 g protein against a 116 g target. Target unchanged.",
     );
   });
 
@@ -240,44 +259,70 @@ describe("a protein-shortfall log", () => {
        is gravy-style, so its steamed-rice base rides in both
        days' totals, and the whole-plate judging moves the leaned
        day's breakfast anchor. The lift (+14 g) and the ceiling
-       are unchanged. */
-    const day = "2026-11-23";
+       are unchanged.
+       Method 15 re-pin (M-219): the fixture moved to a lose
+       profile whose protein guide the composer must actually work
+       for. At the owner fixture's M-219 targets (116 g) the
+       un-leaned composer already lands 119–127 g every probed
+       day — the old 220 g guide was unreachable, which is what
+       made the lean visible there; at a reachable guide it has
+       nothing left to rescue on that profile. On this profile
+       (90 kg, 170 cm, lose; guide 1,632 kcal / 119 g) the
+       un-leaned 2026-11-22 lands exactly on 119 g and the lean
+       swaps anchors for denser ones and lifts the day to 124 g,
+       inside the 110% ceiling. The mechanism assertions are
+       unchanged. */
+    const leanProfile: HealthProfile = {
+      ...ownerProfile(),
+      height: observation(quantity(170, "cm"), PROVENANCE),
+      weight: observation(quantity(90, "kg"), PROVENANCE),
+      goal: "lose",
+      activity: "sedentary",
+      rateKgPerWeek: 0.5,
+      dietary: { ...EMPTY_DIETARY, pattern: "omnivore", mealsPerDay: 3, budgetTier: null },
+    };
+    const day = "2026-11-22";
     const log: LogEntry[] = [
-      entry("2026-11-20", 3000, 120),
-      entry("2026-11-21", 3100, 130),
-      entry("2026-11-22", 2900, 110),
+      ...dayEntries("2026-11-19", 1500, 60),
+      ...dayEntries("2026-11-20", 1550, 65),
+      ...dayEntries("2026-11-21", 1450, 55),
     ];
-    const baseDay = gen(ownerProfile(), { day, fallbackTargets: OWNER_TARGETS });
-    const biasedDay = gen(ownerProfile(), {
+    const baseDay = gen(leanProfile, { day, fallbackTargets: OWNER_TARGETS });
+    const biasedDay = gen(leanProfile, {
       day,
       fallbackTargets: OWNER_TARGETS,
       recentLog: log,
     });
     expect(anchorIds(biasedDay)).not.toEqual(anchorIds(baseDay));
-    expect(Math.round(dayTotals(baseDay).proteinG)).toBe(223);
-    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(237);
+    expect(Math.round(dayTotals(baseDay).proteinG)).toBe(119);
+    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(124);
     expect(dayTotals(biasedDay).proteinG).toBeGreaterThan(dayTotals(baseDay).proteinG);
-    expect(dayTotals(biasedDay).proteinG).toBeLessThanOrEqual(1.1 * 220);
+    expect(dayTotals(biasedDay).proteinG).toBeLessThanOrEqual(1.1 * 119);
     expect(meanAnchorDensity(biasedDay)).toBeGreaterThan(meanAnchorDensity(baseDay));
   });
 });
 
 describe("an energy-overshoot log", () => {
   /* A dal-only dish pool: three light mains (~285 kcal each) leave a
-     2,000 kcal day far under its guide, so the unbiased composer
+     3,325 kcal day far under its guide, so the unbiased composer
      spends energy top-ups; the overshoot log must stop it. Protein
-     (45 g logged vs a 40 g target) raises no protein signal. */
+     (120 g logged vs the 116 g target) raises no protein signal.
+     (M-219 re-base: the targets are the owner fixture's gated ones —
+     the custom {2000, 40} pair this describe once injected through
+     the retired fallback no longer exists as a path.) */
   const dishes = [
     findDish("dish-dal-fry")!,
     findDish("dish-moong-dal-tadka")!,
     findDish("dish-urad-dal")!,
   ];
-  const targets = { kcal: 2000, proteinG: 40 };
-  const overshootLog: LogEntry[] = [entry("2026-11-16", 2300, 45), entry("2026-11-17", 2300, 45)];
-  const base = gen(ownerProfile(), { day: OWNER_DAY, fallbackTargets: targets, dishes });
+  const overshootLog: LogEntry[] = [
+    ...dayEntries("2026-11-16", 3800, 120),
+    ...dayEntries("2026-11-17", 3800, 120),
+  ];
+  const base = gen(ownerProfile(), { day: OWNER_DAY, fallbackTargets: OWNER_TARGETS, dishes });
   const biased = gen(ownerProfile(), {
     day: OWNER_DAY,
-    fallbackTargets: targets,
+    fallbackTargets: OWNER_TARGETS,
     dishes,
     recentLog: overshootLog,
   });
@@ -288,13 +333,20 @@ describe("an energy-overshoot log", () => {
   });
 
   it("the overshoot plan leaves them out and says why, with the numbers", () => {
-    expect(topUps(biased)).toEqual([]);
+    /* M-219 re-pin: at the 116 g protein guide the dal pool leaves
+       a protein gap the closing pass still fills — the two small
+       Greek-yogurt top-ups (61 + 31 kcal) are protein closers, not
+       energy top-ups. What the overshoot removes is the ENERGY
+       spend: every remaining top-up is ≤100 kcal and the day lands
+       ~770 kcal under the unbiased day. */
+    expect(topUps(biased).length).toBeGreaterThan(0);
+    expect(topUps(biased).every((s) => s.nutrients.kcal <= 100)).toBe(true);
     expect(dayTotals(biased).kcal).toBeLessThan(dayTotals(base).kcal);
     /* Brief v4 (Slice 1): the log-energy-overshoot reason's derived
        detail (reasons.ts) — same log numbers. */
     expect(biased.notes[0]).toBe(
-      "Your last 2 logged days averaged 2,300 kcal against a 2,000 kcal target, so energy top-ups stay out.",
+      "Your last 2 logged days averaged 3,800 kcal against a 3,325 kcal target, so energy top-ups stay out.",
     );
-    expect(biased.targets).toEqual(targets);
+    expect(biased.targets).toEqual(OWNER_TARGETS);
   });
 });

@@ -7,21 +7,20 @@
  * through the lib's pref-backed operations, which re-validate everything
  * they store.
  *
- * Targets resolve through the safety-gated engine first (`targetsFor` over
+ * Targets resolve through the safety-gated engine (`targetsFor` over
  * the Assessment's domain profile): a `safety_blocked` outcome means NO
- * targets, ever — the body-profile fallback below it must not resurrect a
- * number the gate refused (design §4.5). Only a completeness refusal falls
- * back to `useBodyProfile`'s targets — the same computation /trackers
- * shows, so the two surfaces can never disagree.
+ * targets, ever — no body-profile fallback resurrects a number the gate
+ * refused, and since M-219 (audit F-02) that holds for absence blocks
+ * exactly as for substantive ones: unanswered safety questions fail
+ * closed. The body profile still feeds the micronutrient spectrum's
+ * sex default and the Trackers surfaces; it never supplies a calorie
+ * or protein target here.
  *
- * One distinction inside `safety_blocked` matters: the classifier also
- * blocks on ABSENCE — `age_missing` and `safety_answers_missing` fire when
- * the person was never asked, which is an information gap, not a finding
- * about them. A block carrying only absence rules is treated like the
- * completeness refusal (the fallback applies — it is exactly the state of
- * a person who only ever filled in Trackers). A block carrying any
- * substantive rule (eating-disorder history, pregnancy, an urgent
- * symptom, a high-risk condition…) is final: no target from any path.
+ * One distinction inside `safety_blocked` remains, and it is purely
+ * presentational: a block whose blocking findings are all absence
+ * rules (the person was never asked) renders as the "no target yet"
+ * state, which names the next step; a block carrying any substantive
+ * finding renders as the refusal. Neither state carries a target.
  */
 
 import { useCallback, useMemo } from "react";
@@ -33,7 +32,6 @@ import { useSession } from "@/hooks/useSession";
 import { shiftDay, todayLocal } from "@/lib/localDay";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { toSafetyInput } from "@/lib/vitalis/domain/profile";
-import { hasSubstantiveBlock } from "@/lib/vitalis/domain/safety";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
 import { targetsFor } from "@/lib/vitalis/calc/body";
 import {
@@ -52,7 +50,6 @@ import {
   entryNutrientsFor,
   findUsdaReference,
   logEntry,
-  nutritionTargetsFromBodyTargets,
   nutritionTargetsFromOutcome,
   parseFoodLogValue,
   parseFoodsValue,
@@ -143,31 +140,49 @@ export function useNutrition(): NutritionStore {
 
   const targetState = useMemo<NutritionTargetState>(() => {
     const profile = toHealthProfile(assessment.state, session.userId ?? "local");
-    const outcome = targetsFor(profile, classifySafety(toSafetyInput(profile)), today);
+    const safety = classifySafety(toSafetyInput(profile));
+    const outcome = targetsFor(profile, safety, today);
     /* A user-confirmed expenditure adjustment (P7) applies LAST, on
-       top of whichever path resolved the targets — the same rule
-       the plan engine applies (targetAdjustment.ts), so the day
-       view and the plan can never disagree about the target. */
+       top of the gated targets — the same rule the plan engine
+       applies (targetAdjustment.ts), so the day view and the plan
+       can never disagree about the target. The adjustment is judged
+       against the person's own calorie floor (M-219, audit F-01). */
     const applyAdjustment = (targets: NutritionTargets): NutritionTargetState =>
       targetAdjustment
         ? {
             kind: "ready",
-            targets: adjustedTargets(targets, targetAdjustment.kcalDelta) ?? targets,
+            targets:
+              adjustedTargets(targets, targetAdjustment.kcalDelta, profile.sex) ?? targets,
           }
         : { kind: "ready", targets };
     if (outcome.ok) {
       const gated = nutritionTargetsFromOutcome(outcome);
       if (gated) return applyAdjustment(gated);
-    } else if (outcome.reason === "safety_blocked") {
-      /* A substantive refusal is final — no fallback may override it
-         (§4.5). An absence-only block falls through to the fallback.
-         The absence/substantive distinction itself lives in the safety
-         domain (`hasSubstantiveBlock`), shared with plan generation. */
-      if (hasSubstantiveBlock(outcome.blockingFindings)) return { kind: "blocked" };
+      return { kind: "none" };
     }
-    const fallback = nutritionTargetsFromBodyTargets(body.targets);
-    return fallback ? applyAdjustment(fallback) : { kind: "none" };
-  }, [assessment.state, session.userId, body.targets, targetAdjustment, today]);
+    /* M-219 (audit F-02): a safety block is FINAL here — including a
+       block that rests only on unanswered questions. The legacy
+       body-profile fallback that used to resurrect targets over an
+       absence-only block is retired: no classification, no targets.
+       The one distinction left is honesty of presentation, and it
+       changes no number: a block whose blocking findings are ALL
+       absence rules (age / safety answers never given) is an
+       information gap, so the day view shows its "no target yet"
+       state and names the next step; any substantive finding shows
+       the refusal. Neither state carries a target. A merely
+       incomplete profile (no block, missing measurements) is also
+       "none" — totals show as totals until the Assessment exists. */
+    if (outcome.reason === "safety_blocked") {
+      const absenceOnly = safety.findings
+        .filter((finding) => finding.blocking)
+        .every(
+          (finding) =>
+            finding.ruleId === "age_missing" || finding.ruleId === "safety_answers_missing",
+        );
+      return absenceOnly ? { kind: "none" } : { kind: "blocked" };
+    }
+    return { kind: "none" };
+  }, [assessment.state, session.userId, targetAdjustment, today]);
 
   const targets = targetState.kind === "ready" ? targetState.targets : null;
 

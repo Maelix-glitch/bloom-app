@@ -11,6 +11,7 @@ import {
 import { observation } from "@/lib/vitalis/domain/provenance";
 import { quantity } from "@/lib/vitalis/domain/units";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
+import { targetsFor } from "@/lib/vitalis/calc/body";
 import { DISH_LIBRARY } from "./data/dishLibrary";
 import { dishIsGravyStyle } from "./gravyStyle";
 import { generatePlan, type DailyPlan, type PlanMeal } from "./plan";
@@ -37,11 +38,20 @@ const BY_ID = new Map(DISH_LIBRARY.map((d) => [d.id, d]));
 const BASE_IDS = new Set(["dish-steamed-rice", "dish-phulka-roti"]);
 
 function gen(profile: HealthProfile, day: string, kcal: number, proteinG: number): DailyPlan {
+  /* M-219: the (kcal, proteinG) pair is accepted for call-site
+     compatibility and deliberately NOT used — this suite once ran
+     on a hand-built not-ok gated outcome plus the body-profile
+     fallback; that path is retired, so targets come from the
+     gated engine for the fixture's own profile. The guides the
+     call sites pass are the pre-M-219 figures, kept visible in
+     the call text for history. */
+  void kcal;
+  void proteinG;
+  const safety = classifySafety(toSafetyInput(profile));
   const outcome = generatePlan({
     profile,
-    safety: classifySafety(toSafetyInput(profile)),
-    gatedOutcome: { ok: false, reason: "profile_incomplete", missing: [] },
-    fallbackTargets: { kcal, proteinG },
+    safety,
+    gatedOutcome: targetsFor(profile, safety, day),
     foods: USDA_REFERENCE_FOODS,
     dishes: DISH_LIBRARY,
     day,
@@ -120,43 +130,47 @@ const dayTotals = (plan: DailyPlan) =>
 /* ------------------------- the owner's day, before/after ------------------------ */
 
 describe("method 14 · the owner's day (2026-11-19)", () => {
+  /* M-219 re-pin: the day is composed at the gated guide
+     (2,050 kcal / 112 g — this fixture's activity is light, so no
+     floor binds). The composition differs from the pre-M-219 day
+     (Chicken Rezala lunch / Bakso Ayam dinner at the old
+     1,350/171 fallback guide); the accompaniment facts pinned
+     are the same rule at work: the gravy dinner carries its
+     base, the dry lunch does not, breakfast and the snack never
+     do, and the day lands on its guide with the base counted. */
   const plan = gen(ownerCornerProfile(), "2026-11-19", 1350, 171);
   const byMeal = new Map(plan.meals.map((m) => [m.meal, m]));
 
-  it("the gravy lunch (Chicken Rezala) is served WITH a base", () => {
-    const lunch = byMeal.get("lunch")!;
-    expect(lunch.dishes[0]!.dishId).toBe("dish-chicken-rezala");
-    expect(lunch.dishes.length).toBe(2);
-    const base = lunch.dishes[1]!;
+  it("the gravy dinner (Kadala Mutta Curry) is served WITH a base", () => {
+    const dinner = byMeal.get("dinner")!;
+    expect(dinner.dishes[0]!.dishId).toBe("dish-kadala-mutta-curry");
+    expect(dinner.dishes.length).toBe(2);
+    const base = dinner.dishes[1]!;
     expect(base.role).toBe("base");
     expect(base.servings).toBe(0.5);
-    /* Rezala is an eastern dish, not North Indian: the base is
-       steamed rice, not phulka. */
+    /* A South-Indian curry: the base is steamed rice, not phulka. */
     expect(base.dishId).toBe("dish-steamed-rice");
   });
 
   it("the base is counted in the meal — its kcal are part of the meal's sum", () => {
-    const lunch = byMeal.get("lunch")!;
-    const anchor = lunch.dishes[0]!;
-    const base = lunch.dishes[1]!;
+    const dinner = byMeal.get("dinner")!;
+    const anchor = dinner.dishes[0]!;
+    const base = dinner.dishes[1]!;
     expect(base.nutrients.kcal).toBeGreaterThan(0);
-    expect(mealKcal(lunch)).toBeCloseTo(
+    expect(mealKcal(dinner)).toBeCloseTo(
       anchor.nutrients.kcal +
         base.nutrients.kcal +
-        lunch.suggestions.reduce((x, s) => x + s.nutrients.kcal, 0),
+        dinner.suggestions.reduce((x, s) => x + s.nutrients.kcal, 0),
       5,
     );
   });
 
-  it("the dinner (Bakso Ayam, a soup) gets NO base", () => {
-    /* Method 13's dinner was Mathi Pepper Fry; with the lunch
-       base on the plate the day guard re-picks dinner — judged
-       as whole plates now, so a gravy candidate is priced WITH
-       its rice — and lands on a soup, which the derivation
-       rightly refuses: a soup is already complete. */
-    const dinner = byMeal.get("dinner")!;
-    expect(dinner.dishes[0]!.dishId).toBe("dish-id-bakso-ayam");
-    expect(dinner.dishes.length).toBe(1);
+  it("the lunch (Mutta Thoran, a dry stir-fry) gets NO base", () => {
+    /* A thoran is not gravy-style — the derivation rightly
+       refuses it a base: the dish is already complete. */
+    const lunch = byMeal.get("lunch")!;
+    expect(lunch.dishes[0]!.dishId).toBe("dish-mutta-thoran");
+    expect(lunch.dishes.length).toBe(1);
   });
 
   it("breakfast and the snack never carry a base", () => {
@@ -170,8 +184,8 @@ describe("method 14 · the owner's day (2026-11-19)", () => {
 
   it("the day still lands on its guide with the base counted", () => {
     const totals = dayTotals(plan);
-    expect(Math.abs(totals.kcal - 1350) / 1350).toBeLessThan(0.1);
-    expect(totals.proteinG).toBeGreaterThanOrEqual(160);
+    expect(Math.abs(totals.kcal - 2050) / 2050).toBeLessThan(0.1);
+    expect(totals.proteinG).toBeGreaterThanOrEqual(106);
   });
 });
 
@@ -181,14 +195,16 @@ describe("method 14 · the accompaniment rule's shape, over real weeks", () => {
   const weeks: { profile: HealthProfile; kcal: number; proteinG: number; days: string[] }[] = [
     {
       profile: ownerCornerProfile(),
-      kcal: 1350,
-      proteinG: 171,
+      /* The gated guide for this fixture (M-219). */
+      kcal: 2050,
+      proteinG: 112,
       days: ["2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20"],
     },
     {
       profile: plainOmnivore,
-      kcal: 2200,
-      proteinG: 140,
+      /* The gated guide for this fixture (M-219). */
+      kcal: 2740,
+      proteinG: 102,
       days: ["2026-11-16", "2026-11-17", "2026-11-18", "2026-11-19", "2026-11-20"],
     },
   ];
@@ -243,7 +259,7 @@ describe("method 14 · the accompaniment rule's shape, over real weeks", () => {
 
   it("bases actually appear across the owner's week — the fix is not theoretical", () => {
     const based = weeks[0]!.days.flatMap((day) =>
-      gen(ownerCornerProfile(), day, 1350, 171).meals.filter((m) => m.dishes.length === 2),
+      gen(ownerCornerProfile(), day, 2050, 112).meals.filter((m) => m.dishes.length === 2),
     );
     expect(based.length).toBeGreaterThanOrEqual(3);
   });

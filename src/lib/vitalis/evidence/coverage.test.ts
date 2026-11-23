@@ -101,7 +101,7 @@ const RULES: readonly RulePin[] = [
   {
     rule: "E7",
     recommendationId: "vitalis.safety.rate-cap",
-    claimId: "rate-cap-1kg-per-week",
+    claimId: "rate-cap-0-75kg-per-week",
     file: "src/lib/vitalis/domain/safety.ts",
     marker: "MAX_RATE_KG_PER_WEEK",
   },
@@ -129,9 +129,9 @@ const RULES: readonly RulePin[] = [
   {
     rule: "E11",
     recommendationId: "vitalis.body.hydration-target",
-    claimId: "water-35ml-per-kg",
+    claimId: "water-efsa-drinking-share",
     file: "src/lib/health/body.ts",
-    marker: "weightKg * 35",
+    marker: "drinkingBaseMl",
   },
   {
     rule: "E12",
@@ -266,10 +266,14 @@ describe("unverified rules are recorded as unverified, never dressed up", () => 
     // The attribution the code carries is stated, and nothing is cited.
     expect(claim!.statement).toContain("ICMR-NIN Recommended Dietary Allowances 2020");
     expect(claim!.sources).toEqual([]);
-    // The values themselves are untouched: the code still carries them.
+    // The values the code carries are the corrected ones: M-219
+    // (audit F-09) replaced the magnesium EAR figures with the
+    // RDA and made vitamin C sex-specific, as ICMR-NIN 2020
+    // states them.
     const dayView = fileText("src/lib/nutrition/dayView.ts");
     expect(dayView).toContain("ICMR-NIN Recommended");
-    expect(dayView).toContain("reference: 80");
+    expect(dayView).toContain('sex === "female" ? 370 : 440');
+    expect(dayView).toContain('sex === "female" ? 65 : 80');
   });
 });
 

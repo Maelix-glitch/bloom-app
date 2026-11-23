@@ -659,8 +659,11 @@ export function NutritionPlanSection() {
   const proposalApplicable =
     proposalDelta !== null &&
     Math.abs(proposalDelta) <= MAX_TARGET_ADJUSTMENT_KCAL &&
-    adjustedTargets({ kcal: engineTargetKcal, proteinG: plan.targets.proteinG }, proposalDelta) !==
-      null;
+    adjustedTargets(
+      { kcal: engineTargetKcal, proteinG: plan.targets.proteinG },
+      proposalDelta,
+      body.profile.sex,
+    ) !== null;
   /* M-214: the expenditure proposal is Adaptation — a Premium Plus
      behaviour. Below Plus it is neither shown nor confirmable (the
      Confirm button lives on the card this flag renders). A KNOWN

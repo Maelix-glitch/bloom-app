@@ -72,7 +72,15 @@ function daysFrom(from: string, count: number, kcal: number): LogEntry[] {
   const out: LogEntry[] = [];
   const start = Date.parse(`${from}T12:00:00Z`);
   for (let i = 0; i < count; i += 1) {
-    out.push(dayEntry(new Date(start + i * 86_400_000).toISOString().slice(0, 10), kcal));
+    /* M-219 (audit F-11): each day is split across lunch and dinner —
+       a complete logged day (≥2 entries, ≥2 meals) is what the
+       expenditure estimate and the plan's learning now read. The
+       day's total is unchanged. */
+    const day = new Date(start + i * 86_400_000).toISOString().slice(0, 10);
+    const lunch = dayEntry(day, Math.ceil(kcal / 2));
+    const dinner = dayEntry(day, kcal - Math.ceil(kcal / 2));
+    dinner.meal = "dinner";
+    out.push(lunch, dinner);
   }
   return out;
 }

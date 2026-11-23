@@ -48,7 +48,11 @@ import {
   type VitalisGoal,
 } from "@/lib/vitalis/domain/profile";
 import type { ConsentRecord } from "@/lib/vitalis/domain/consent";
-import { URGENT_SYMPTOMS, type UrgentSymptom } from "@/lib/vitalis/domain/safety";
+import {
+  MAX_RATE_KG_PER_WEEK,
+  URGENT_SYMPTOMS,
+  type UrgentSymptom,
+} from "@/lib/vitalis/domain/safety";
 import type { Observation } from "@/lib/vitalis/domain/provenance";
 import type { Quantity } from "@/lib/vitalis/domain/units";
 import { ASSESSMENT_STEPS, type AssessmentStep, type SleepQuality } from "./questions";
@@ -205,6 +209,11 @@ function numOrNull(value: unknown, min: number, max: number): number | null {
   return Math.round(value * 10) / 10;
 }
 
+/** Clamp a parsed pace to the safety cap (M-219, audit F-04). */
+function clampRateAnswer(rate: number | null): number | null {
+  return rate === null ? null : Math.min(MAX_RATE_KG_PER_WEEK, rate);
+}
+
 function intOrNull(value: unknown, min: number, max: number): number | null {
   const n = numOrNull(value, min, max);
   return n === null ? null : Math.round(n);
@@ -313,7 +322,10 @@ export function parseAnswers(raw: unknown): AssessmentAnswers {
     sex: oneOf<Sex>(r["sex"], ["female", "male", "unspecified"]) ?? "unspecified",
     goal: oneOf(r["goal"], GOALS),
     targetWeightKg: numOrNull(r["targetWeightKg"], 25, 350),
-    rateKgPerWeek: numOrNull(r["rateKgPerWeek"], 0.25, 1),
+    /* A pace stored before the M-219 cap (audit F-04) can read 1.0;
+       it clamps to the cap at parse rather than nulling — the person
+       chose "fastest", and the fastest honest pace is what they get. */
+    rateKgPerWeek: clampRateAnswer(numOrNull(r["rateKgPerWeek"], 0.25, 1)),
     pregnantOrBreastfeeding: boolOrNull(r["pregnantOrBreastfeeding"]),
     eatingDisorderHistory: boolOrNull(r["eatingDisorderHistory"]),
     unexplainedWeightChange: boolOrNull(r["unexplainedWeightChange"]),

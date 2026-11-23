@@ -56,8 +56,10 @@ function ownerProfile(): HealthProfile {
     dietary: { ...EMPTY_DIETARY, pattern: "eggetarian", mealsPerDay: 3 },
     constraints: {
       ...EMPTY_CONSTRAINTS,
-      pregnantOrBreastfeeding: null,
-      eatingDisorderHistory: null,
+      /* M-219: answered — the unanswered fixture rode the retired
+         absence fallback (audit F-02). */
+      pregnantOrBreastfeeding: false,
+      eatingDisorderHistory: false,
     },
   };
 }
@@ -69,7 +71,6 @@ function ownerPlan(): DailyPlan {
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, "2026-11-17"),
-    fallbackTargets: { kcal: 3288, proteinG: 220 },
     foods: USDA_REFERENCE_FOODS,
     dishes: DISH_LIBRARY,
     day: "2026-11-17",

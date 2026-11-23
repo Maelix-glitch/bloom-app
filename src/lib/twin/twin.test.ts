@@ -31,7 +31,12 @@ function dayEntry(day: string, kcal: number, proteinG = 0, extra: Partial<LogEnt
   };
 }
 
-/** `count` consecutive logged days from `from`. */
+/** `count` consecutive logged days from `from`. Each day is TWO
+ *  entries across lunch and dinner with the day's totals split
+ *  between them — M-219 (audit F-11): a complete logged day is
+ *  ≥2 entries across ≥2 meals, and the expenditure estimate these
+ *  fixtures feed reads complete days only. The totals are the
+ *  same ones the single-entry version carried. */
 function loggedDays(
   from: string,
   count: number,
@@ -42,7 +47,20 @@ function loggedDays(
   const out: LogEntry[] = [];
   const start = Date.parse(`${from}T12:00:00Z`);
   for (let i = 0; i < count; i += 1) {
-    out.push(dayEntry(new Date(start + i * 86_400_000).toISOString().slice(0, 10), kcal, proteinG, extra));
+    const day = new Date(start + i * 86_400_000).toISOString().slice(0, 10);
+    const lunchKcal = Math.ceil(kcal / 2);
+    const lunchProtein = Math.ceil(proteinG / 2);
+    const lunchExtra: Partial<LogEntry["nutrients"]> = {};
+    const dinnerExtra: Partial<LogEntry["nutrients"]> = {};
+    for (const [key, value] of Object.entries(extra)) {
+      const half = Math.ceil((value as number) / 2);
+      (lunchExtra as Record<string, number>)[key] = half;
+      (dinnerExtra as Record<string, number>)[key] = (value as number) - half;
+    }
+    out.push(dayEntry(day, lunchKcal, lunchProtein, lunchExtra));
+    const dinner = dayEntry(day, kcal - lunchKcal, proteinG - lunchProtein, dinnerExtra);
+    dinner.meal = "dinner";
+    out.push(dinner);
   }
   return out;
 }

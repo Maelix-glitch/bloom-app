@@ -92,7 +92,6 @@ function gen(
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, day),
-    fallbackTargets: opts.fallbackTargets ?? null,
     foods: opts.foods ?? USDA_REFERENCE_FOODS,
     dishes: opts.dishes ?? DISH_LIBRARY,
     ...(opts.storedPlan !== undefined ? { storedPlan: opts.storedPlan } : {}),
@@ -119,9 +118,9 @@ function cloneDish(over: Partial<Dish> & { id: string }): Dish {
 /* ------------------------------ the record ------------------------------ */
 
 describe("P10 · method and record", () => {
-  it("plans carry method version 13", () => {
-    expect(PLAN_METHOD_VERSION).toBe(14);
-    expect(gen(profileWith({})).methodVersion).toBe(14);
+  it("plans carry method version 15", () => {
+    expect(PLAN_METHOD_VERSION).toBe(15);
+    expect(gen(profileWith({})).methodVersion).toBe(15);
   });
 
   it("the snapshot records the behavioural answers, outside the fingerprint", () => {
@@ -468,9 +467,12 @@ describe("P10 · pick shaping", () => {
     /* Measured on this library and fixture: 7 of 21 serves are
        long-method for a confident cook, 2 of 21 for a basic one.
        The pin is the direction and a clear margin, not the exact
-       counts — the pool's fits still lead. */
+       counts — the pool's fits still lead.
+       M-219 re-measurement (gated guide 2,740 kcal / 102 g, four
+       stated meals): 12 of 34 serves long-method for a confident
+       cook, 5 of 34 for a basic one. Direction and margin hold. */
     expect(basic).toBeLessThan(confident);
-    expect(basic).toBeLessThanOrEqual(3);
+    expect(basic).toBeLessThanOrEqual(6);
   }, 60_000);
 
   it("the hunger pattern moves the dinner split, not the day (plan-level)", () => {
