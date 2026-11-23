@@ -130,7 +130,12 @@ describe("glass guard: the material is defined once, to spec", () => {
   const glass = read("styles/glass.css");
 
   it("carries the owner's optical recipe and the specular rim", () => {
-    expect(glass).toContain("blur(20px) saturate(180%)");
+    /* M-224 (owner's Liquid Glass correction, 2026-11-23): the
+       recipe is the rebuilt REGULAR variant — 24px/180% at full
+       strength — and the rim's specular line brightens to 0.62
+       with the shaded lower inset (glass.css carries the values;
+       glassPicks.guard pins the rim's structure). */
+    expect(glass).toContain("blur(24px) saturate(180%)");
     /* Crisp bright top-left, softer bottom-right (owner spec §1). */
     expect(glass).toContain("rgba(255, 255, 255, 0.55)");
     expect(glass).toContain("rgba(255, 255, 255, 0.15)");
@@ -179,7 +184,7 @@ describe("glass guard: the material is defined once, to spec", () => {
     expect(glass).toContain('@supports (backdrop-filter: url("#lg-refract"))');
     const gate = glass.slice(glass.indexOf("@supports (backdrop-filter: url("));
     expect(gate).toContain("prefers-reduced-motion: no-preference");
-    expect(gate).toContain('url("#lg-refract") blur(20px) saturate(180%)');
+    expect(gate).toContain('url("#lg-refract") blur(24px) saturate(180%)');
     /* No-blur engines strengthen the tint instead of floating pale. */
     expect(glass).toContain("@supports not ((backdrop-filter: blur(1px))");
   });
@@ -355,13 +360,13 @@ describe("glass guard: sheets and modals never wear the material", () => {
   });
 
   it("the sheet-kit stylesheets carry no glass tokens at all", () => {
-    /* M-221 (owner's glass picks, 2026-11-23): trackers.css leaves
-       this list — its PAGE zones (the territories) wear glass now.
-       Its sheet PANELS stay in the opaque census above, which is the
-       pin that protects them. The other sheet-kit sheets are
-       untouched by the picks and stay glass-free. */
+    /* M-224 (owner's Liquid Glass correction, 2026-11-23):
+       trackers.css REJOINS this list — M-221 took it out when the
+       territories wore glass; that glass is removed, so the whole
+       sheet is glass-free again, panels and page zones alike. */
     for (const rel of [
       "styles/bloom-sheet.css",
+      "styles/trackers.css",
       "styles/billing.css",
       "styles/admin-panel.css",
     ]) {
@@ -377,8 +382,10 @@ describe("glass guard: one dock, wearing the one material", () => {
   });
 
   it("the dock chrome and the phone brand bar consume the material tokens", () => {
-    /* M-221 deepens the dock + orb to the deep blur; the phone brand
-       bar keeps the base material. */
+    /* M-221 deepened the dock + orb to the deep blur; M-224 retires
+       the deep/base split — the deep token is now the one REGULAR
+       recipe's alias, and the pins below read the same names at the
+       unified values (glass.css carries the recipe). */
     expect(someExactBlock("styles.css", ".dock__top", "var(--lg-blur-deep)")).toBe(true);
     expect(someExactBlock("styles.css", ".dock__log", "var(--lg-blur-deep)")).toBe(true);
     expect(someExactBlock("styles/orb.css", ".coach-orb", "var(--lg-blur-deep)")).toBe(true);

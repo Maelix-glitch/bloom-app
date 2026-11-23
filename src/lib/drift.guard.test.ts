@@ -191,7 +191,7 @@ const RADIUS_CEILINGS: Record<string, number> = {
   "styles/admin-panel.css": 5,
   "styles/billing.css": 4, /* M-220: design A adds the preview's 18px row radius + 50% circles; the retired G section's --radius-card left — see docs/MISTAKES.md M-220 */
   "styles/bloom-sheet.css": 10,
-  "styles/coach.css": 18, // M-221: +1 — the clear-glass reply bubble's mirrored radius (6px 19px 19px 19px)
+  "styles/coach.css": 17, // M-224: back from M-221's 18 — the glass reply bubble (and its radius) is removed
   "styles/cycle.css": 11,
   "styles/debox.css": 2,
   "styles/glass.css": 2,
@@ -323,22 +323,12 @@ function shadowLayers(body: string): string[] {
 }
 
 describe("card rule (M-206, F-21): the named in-flow cards carry no drop shadow", () => {
-  /* M-221 exception, narrow and proven below: var(--lg-rim-soft) is
-     an inset-only token (glass.css defines it as inset layers), so a
-     named card wearing the glass rim keeps the inset finish this
-     rule protects. The drop component of the material
-     (var(--lg-shadow)) stays banned here — the day card drops it. */
-  const INSET_TOKENS = new Set(["var(--lg-rim-soft)"]);
-
-  it("the rim token the exception names is inset-only at its definition", () => {
-    const glass = read("styles/glass.css");
-    const m = glass.match(/--lg-rim-soft:\s*([^;]+);/);
-    expect(m).not.toBeNull();
-    const layers = shadowLayers(`box-shadow: ${m![1]};`);
-    expect(layers.length).toBeGreaterThan(0);
-    for (const layer of layers) expect(layer.startsWith("inset")).toBe(true);
-  });
-
+  /* M-224 (owner's Liquid Glass correction, 2026-11-23): the M-221
+     exception that let a named card wear var(--lg-rim-soft) is
+     RETIRED with the glass it excused — no named in-flow card wears
+     the material now, so the rule below is the original strict
+     form. (That rim-soft stays inset-only at its definition is now
+     pinned by glassPicks.guard, M-224 census §1.) */
   const cases: [string, string][] = [
     ["styles/nutrition.css", ".nut-card"],
     ["styles/nutrition.css", ".nut-day-card"],
@@ -351,7 +341,7 @@ describe("card rule (M-206, F-21): the named in-flow cards carry no drop shadow"
       for (const b of bodies) {
         for (const layer of shadowLayers(b.body)) {
           expect(
-            layer === "none" || layer.startsWith("inset") || INSET_TOKENS.has(layer),
+            layer === "none" || layer.startsWith("inset"),
             `${sel} shadow layer "${layer}" is a drop shadow`,
           ).toBe(true);
         }

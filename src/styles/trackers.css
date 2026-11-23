@@ -2600,28 +2600,25 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
      it; the R8 house law bars the literal) — an outline only: the
      fill stays transparent and the shadow stays none, so the box
      itself does not come back.
-     M-221 (owner's glass picks, 2026-11-23): the territories become
-     the preview's tinted glass panes. The M-200 hairline and the
-     radius stay exactly as the owner directed; the fill becomes the
-     shared material — plain strong fallback first, the strong tint,
-     the sheen, the 20px/180% blur, the specular rim. */
-  background-color: var(--lg-fallback-strong);
-  background-color: var(--lg-tint-strong);
-  background-image: var(--lg-sheen);
+     M-224 (owner's Liquid Glass correction, 2026-11-23): the M-221
+     glass panes here are reverted — the territories are content
+     zones, not floating chrome. The M-200 truth stands again: the
+     hairline and the radius, the fill transparent, the shadow
+     none — the box itself does not come back. */
+  background: transparent;
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
-  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
-  -webkit-backdrop-filter: var(--lg-blur);
-  backdrop-filter: var(--lg-blur);
+  box-shadow: none;
   padding: var(--space-5);
 }
 .tk2-root .at-territory:hover {
-  /* The press affordance is the flat 4% tonal step (M-183), translated
-     onto the glass: a 4% white layer over the sheen, the tint and the
-     rim untouched — hover only, never a lift or a frame change, and
-     the resting hairline carries through unchanged (M-200). */
-  background-image: linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04)), var(--lg-sheen);
+  /* The press affordance is the flat 4% tonal step the de-boxed hero
+     chips use (M-183) — hover only, never a lift or panel. M-200: this
+     rule declares no border of its own, so the resting hairline the
+     owner asked for carries through the hover unchanged. */
+  background: rgb(255 255 255 / 0.04);
   transform: none;
+  box-shadow: none;
 }
 .tk2-root .at-board,
 .tk2-root .at-flower-col,
