@@ -68,7 +68,7 @@ import { usePrefValue } from "@/lib/prefsStore";
 import {
   DISH_LIBRARY,
   PLAN_KEY,
-  USDA_REFERENCE_FOODS,
+  REFERENCE_FOODS,
   foodDisplayName,
   parsePlanValue,
 } from "@/lib/nutrition";
@@ -232,7 +232,7 @@ export function GrocerySection() {
   const [pulse, setPulse] = useState(false);
 
   const foods = useMemo(
-    () => [...nutrition.foods, ...USDA_REFERENCE_FOODS],
+    () => [...nutrition.foods, ...REFERENCE_FOODS],
     [nutrition.foods],
   );
 

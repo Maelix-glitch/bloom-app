@@ -124,6 +124,7 @@ export function searchUsdaReference(query: string, limit = 20): Food[] {
  */
 const REGISTRY_SOURCE_BY_KIND: Partial<Record<FoodProvenanceKind, string>> = {
   usda: "usda-fooddata-central",
+  cofid: "uk-cofid-2021",
   ifct: "icmr-nin-ifct-2017",
 };
 

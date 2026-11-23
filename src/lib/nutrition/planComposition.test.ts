@@ -29,6 +29,9 @@ import {
 import { isRawBasisFood } from "./preparation";
 import type { Food, FoodClassification, FoodGroup } from "./types";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
+/* M-229: composed plans draw on the combined reference library
+   (USDA + UK CoFID), the pool the app passes since paneer joined. */
+import { REFERENCE_FOODS } from "./referenceFoods";
 
 /**
  * P2 acceptance: the layered, patterned, capped composer. The P1 suite
@@ -90,7 +93,7 @@ function gen(
     profile,
     safety,
     gatedOutcome: targetsFor(profile, safety, day),
-    foods: opts.foods ?? USDA_REFERENCE_FOODS,
+    foods: opts.foods ?? REFERENCE_FOODS,
     day,
     now: NOW,
     id: "plan-p2",
@@ -99,7 +102,7 @@ function gen(
   return outcome.plan;
 }
 
-const BY_ID = new Map(USDA_REFERENCE_FOODS.map((f) => [f.id, f]));
+const BY_ID = new Map(REFERENCE_FOODS.map((f) => [f.id, f]));
 const clsOf = (s: PlanSuggestion): FoodClassification | undefined =>
   BY_ID.get(s.foodId)?.classification;
 const groupOf = (s: PlanSuggestion): FoodGroup | undefined => clsOf(s)?.group;

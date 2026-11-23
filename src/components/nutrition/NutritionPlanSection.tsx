@@ -84,7 +84,7 @@ import {
   buildPlanView,
   DISH_LIBRARY,
   MAX_TARGET_ADJUSTMENT_KCAL,
-  USDA_REFERENCE_FOODS,
+  REFERENCE_FOODS,
   adjustedTargets,
   confirmTargetAdjustment,
   dishIdeaFor,
@@ -408,7 +408,7 @@ export function NutritionPlanSection() {
   const foodById = useMemo(
     () =>
       new Map(
-        [...nutrition.foods, ...USDA_REFERENCE_FOODS].map((f) => [f.id, f] as const),
+        [...nutrition.foods, ...REFERENCE_FOODS].map((f) => [f.id, f] as const),
       ),
     [nutrition.foods],
   );

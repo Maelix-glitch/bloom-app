@@ -41,7 +41,7 @@ import {
   PLAN_LOG_KEY,
   SNACK_PLACEMENT_KEY,
   TARGET_ADJUSTMENT_KEY,
-  USDA_REFERENCE_FOODS,
+  REFERENCE_FOODS,
   clearTargetAdjustment,
   parseSnackPlacement,
   parseTargetAdjustment,
@@ -172,7 +172,7 @@ export function usePlan(): PlanStore {
   const buildInput = useCallback(
     (now: string): PlanGenerationInput => ({
       ...assembled,
-      foods: [...nutrition.foods, ...USDA_REFERENCE_FOODS],
+      foods: [...nutrition.foods, ...REFERENCE_FOODS],
       /* P5: the plan composes dish-first from the shipped library;
          the engine judges every dish against the person's own gates. */
       dishes: DISH_LIBRARY,

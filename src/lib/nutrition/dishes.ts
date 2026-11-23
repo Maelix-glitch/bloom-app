@@ -27,7 +27,7 @@ import { EQUIPMENT_ITEMS } from "@/lib/vitalis/domain/profile";
 import type { LabelledNutrients } from "./labels";
 import { nutrientsForGrams, sumNutrients } from "./math";
 import { patternAllowsClassification, type PlanPattern } from "./plan";
-import { USDA_REFERENCE_FOODS } from "./usdaReference";
+import { REFERENCE_FOODS } from "./referenceFoods";
 import type { Food, FoodGroup, FoodProvenance } from "./types";
 
 export const RECIPE_PROVENANCE_LABEL = "Built from USDA ingredient data";
@@ -154,7 +154,7 @@ function foodById(foods: readonly Food[], dish: Dish, foodId: string): Food {
  */
 export function dishNutrients(
   dish: Dish,
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): LabelledNutrients {
   const parts = dish.lines.map((line) =>
     nutrientsForGrams(foodById(foods, dish, line.foodId).per100g, line.grams / dish.servings),
@@ -182,7 +182,7 @@ const ALL_PATTERNS: readonly PlanPattern[] = [
  */
 export function dishPatterns(
   dish: Dish,
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): PlanPattern[] {
   const lineFoods = dish.lines.map((line) => foodById(foods, dish, line.foodId));
   if (lineFoods.some((f) => !f.classification)) return [];
@@ -275,7 +275,7 @@ export const BUDGET_TIER_2_MAX_PER_SERVING = 45;
 /** The estimated ingredient cost of one serving, in ₹ (heuristic above). */
 export function dishCostPerServingEstimate(
   dish: Dish,
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): number {
   let total = 0;
   for (const line of dish.lines) {
@@ -288,7 +288,7 @@ export function dishCostPerServingEstimate(
 /** The budget tier the heuristic assigns a dish (1–3). */
 export function computeBudgetTier(
   dish: Dish,
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): 1 | 2 | 3 {
   const perServing = dishCostPerServingEstimate(dish, foods);
   if (perServing <= BUDGET_TIER_1_MAX_PER_SERVING) return 1;
@@ -434,7 +434,7 @@ export function parseDishList(raw: unknown): Dish[] {
  */
 export function validateDish(
   dish: Dish,
-  foods: readonly Food[] = USDA_REFERENCE_FOODS,
+  foods: readonly Food[] = REFERENCE_FOODS,
 ): string[] {
   const problems: string[] = [];
   const byId = new Map(foods.map((f) => [f.id, f]));

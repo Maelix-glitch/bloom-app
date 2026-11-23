@@ -8,8 +8,8 @@
 --   verify           npm run seed:evidence:check
 --
 -- format version   2
--- catalogue hash   sha256:a4f12a7ccc4fafcf3bfe592350ab339b00f9e09cc5096d13383a0754bc02927f
--- rows             6 sources, 22 claims, 4 citations, 18 recommendations, 27 revisions
+-- catalogue hash   sha256:a319036faa2d84f90c14c79b21aa5086305fc098e51d91f3c15ac94070245228
+-- rows             7 sources, 22 claims, 4 citations, 18 recommendations, 27 revisions
 --
 -- What this file does, and does not do:
 --
@@ -66,7 +66,7 @@ begin
   -- 1. Rows the catalogue does not describe.
   select string_agg(d.id, ', ' order by d.id) into offenders
     from public.evidence_sources d
-   where d.id not in ('dga-2025-2030', 'dga-2020-2025', 'usda-fooddata-central', 'fao-who-unu-2004-energy', 'icmr-nin-dgi-2024', 'icmr-nin-ifct-2017');
+   where d.id not in ('dga-2025-2030', 'dga-2020-2025', 'usda-fooddata-central', 'uk-cofid-2021', 'fao-who-unu-2004-energy', 'icmr-nin-dgi-2024', 'icmr-nin-ifct-2017');
 
   if offenders is not null then
     raise exception 'seed refused: evidence_sources holds rows the catalogue does not describe: %', offenders
@@ -80,6 +80,7 @@ begin
             ('dga-2025-2030', 1),
             ('dga-2020-2025', 2),
             ('usda-fooddata-central', 2),
+            ('uk-cofid-2021', 1),
             ('fao-who-unu-2004-energy', 1),
             ('icmr-nin-dgi-2024', 1),
             ('icmr-nin-ifct-2017', 1)
@@ -98,6 +99,7 @@ begin
             ('dga-2025-2030', null::text),
             ('dga-2020-2025', 'dga-2025-2030'),
             ('usda-fooddata-central', null::text),
+            ('uk-cofid-2021', null::text),
             ('fao-who-unu-2004-energy', null::text),
             ('icmr-nin-dgi-2024', null::text),
             ('icmr-nin-ifct-2017', null::text)
@@ -117,6 +119,7 @@ begin
             ('dga-2025-2030', 'approved'),
             ('dga-2020-2025', 'superseded'),
             ('usda-fooddata-central', 'approved'),
+            ('uk-cofid-2021', 'approved'),
             ('fao-who-unu-2004-energy', 'approved'),
             ('icmr-nin-dgi-2024', 'approved'),
             ('icmr-nin-ifct-2017', 'approved')
@@ -456,6 +459,37 @@ insert into public.evidence_sources as target (
   id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
 ) values (
   'icmr-nin-ifct-2017', 'Indian Food Composition Tables 2017', 'dataset', 'National Institute of Nutrition, Indian Council of Medical Research, Hyderabad, India', array['T. Longvah', 'R. Ananthan', 'K. Bhaskarachary', 'K. Venkaiah']::text[], 2017, 'https://www.nin.res.in/ebooks/IFCT2017.pdf', 'nin-copyright-restricted', 'https://www.nin.res.in/', 'Copyright 2017 National Institute of Nutrition. The publisher encourages use and dissemination and permits personal reproduction with full acknowledgement, but states that no part of the publication may be stored or reproduced in any electronic format for creating a product without the prior written permission of NIN, Hyderabad.', false, true, false, '2026-11-05'::date, null, '2026-11-05'::date, 12, 'approved', 1, null, 'Import blocked. 528 key foods and 151 components, and the closest thing to an authoritative Indian composition table, but the terms forbid loading it into a product''s electronic database without written permission. Not imported in this phase; see the methodology document.'
+) on conflict (id) do update set
+    title = excluded.title,
+    kind = excluded.kind,
+    publisher = excluded.publisher,
+    authors = excluded.authors,
+    publication_year = excluded.publication_year,
+    url = excluded.url,
+    license_id = excluded.license_id,
+    license_url = excluded.license_url,
+    license_note = excluded.license_note,
+    product_use_allowed = excluded.product_use_allowed,
+    permission_required = excluded.permission_required,
+    peer_reviewed = excluded.peer_reviewed,
+    retrieved_on = excluded.retrieved_on,
+    published_on = excluded.published_on,
+    reviewed_on = excluded.reviewed_on,
+    review_interval_months = excluded.review_interval_months,
+    review_status = excluded.review_status,
+    version = excluded.version,
+    superseded_by = excluded.superseded_by,
+    notes = excluded.notes,
+    updated_at = now()
+  where excluded.version >= target.version
+    and (target.superseded_by is null or target.superseded_by = excluded.superseded_by)
+    and to_jsonb(excluded) - 'created_at' - 'updated_at'
+        is distinct from to_jsonb(target) - 'created_at' - 'updated_at';
+
+insert into public.evidence_sources as target (
+  id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
+) values (
+  'uk-cofid-2021', 'McCance and Widdowson''s Composition of Foods Integrated Dataset (CoFID)', 'dataset', 'Public Health England', array['Public Health England']::text[], 2021, 'https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid', 'ogl-3.0', 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/', 'The CoFID workbook is published under the Open Government Licence v3.0: it may be copied, published, distributed and adapted, including commercially, free of charge, provided the source is acknowledged. Bloom acknowledges Public Health England / McCance and Widdowson''s CoFID wherever these values are shown.', true, false, false, '2026-11-23'::date, '2021-03-19'::date, '2026-11-23'::date, 12, 'approved', 1, null, 'UK national food-composition database (the McCance and Widdowson tables, maintained for the UK government). Registered for ONE shipped food (M-229, 2026-11-23): paneer, CoFID food code 12-495 (''Cheese, Paneer''), in src/lib/nutrition/data/cofidReferenceData.ts — the row''s own data reference is ''LGC, Nutrient analysis of cheese, 1999'' (9 samples, sampled in spring and autumn). USDA FoodData Central carries no paneer entry, and the Indian IFCT paneer row stays unusable until ICMR-NIN grants written permission, so CoFID is the licence-clean source for this food. Caveat recorded honestly: CoFID''s paneer is a UK retail product, harder-pressed than typical Indian market paneer (46.8 g water per 100 g against roughly 54-57 g), so its protein, fat and energy run higher per 100 g; the values are CoFID''s own and are labelled as such, never as USDA or IFCT values.'
 ) on conflict (id) do update set
     title = excluded.title,
     kind = excluded.kind,

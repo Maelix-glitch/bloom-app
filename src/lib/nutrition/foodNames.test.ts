@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { FOOD_NAMES, foodNamesFor } from "./data/foodNames";
+import { REFERENCE_FOODS } from "./referenceFoods";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
 
 /**
@@ -12,13 +13,15 @@ import { USDA_REFERENCE_FOODS } from "./usdaReference";
  */
 
 describe("food display + Hindi names", () => {
+  /* M-229: the library ships from two sources now (USDA + UK CoFID), so
+     coverage is asserted over the combined reference set. */
   it("covers every reference food, exactly — no gaps, no orphans", () => {
-    const ids = USDA_REFERENCE_FOODS.map((f) => f.id).sort();
+    const ids = REFERENCE_FOODS.map((f) => f.id).sort();
     expect(Object.keys(FOOD_NAMES).sort()).toEqual(ids);
   });
 
   it("every entry carries both names, non-empty", () => {
-    for (const food of USDA_REFERENCE_FOODS) {
+    for (const food of REFERENCE_FOODS) {
       const names = foodNamesFor(food.id);
       expect(names, food.id).not.toBeNull();
       expect(names!.display.trim().length, food.id).toBeGreaterThan(0);

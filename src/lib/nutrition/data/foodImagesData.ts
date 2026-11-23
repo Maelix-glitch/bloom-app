@@ -3,7 +3,7 @@
  * Regenerate with `npm run seed:food-images`; verify with `npm run seed:food-images:check`.
  *
  * Source: Wikimedia Commons (commons.wikimedia.org) — one real
- * photograph per USDA reference food, pinned by Commons file title
+ * photograph per reference food, pinned by Commons file title
  * in the generator and reviewed against the food before pinning.
  * Licences: CC0, public domain, CC BY or CC BY-SA only; author and
  * licence below are read from each file's Commons metadata at
@@ -154,11 +154,12 @@ import edamamePrepared from "../../../assets/foods/edamame-prepared.webp";
 import hempSeeds from "../../../assets/foods/hemp-seeds.webp";
 import chickenBreastRoasted from "../../../assets/foods/chicken-breast-roasted.webp";
 import turkeyBreastRoasted from "../../../assets/foods/turkey-breast-roasted.webp";
+import paneer from "../../../assets/foods/paneer.webp";
 
-export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-19";
+export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-23";
 
 /** SHA-256 over the canonicalised attribution records (see the generator). */
-export const FOOD_IMAGES_FINGERPRINT = "78c15cbead84f1c1e577d16e14bb51d52aaf45cba56ff9e7ea0f161e7301b9b7";
+export const FOOD_IMAGES_FINGERPRINT = "fb03809e3ec7a82daeb7dbf8eb63cd878cbcc3428e92f89047e792fc43366e7a";
 
 export interface FoodImageRaw {
   foodId: string;
@@ -316,6 +317,7 @@ export const FOOD_IMAGES_RAW: readonly FoodImageRaw[] = [
   { "foodId": "usda-170148", "foodName": "Seeds, hemp seed, hulled", "slug": "hemp-seeds", "src": hempSeeds, "commonsTitle": "File:Hemp seeds protein.jpg", "author": "MPart4", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Hemp_seeds_protein.jpg" },
   { "foodId": "usda-171477", "foodName": "Chicken, broilers or fryers, breast, meat only, cooked, roasted", "slug": "chicken-breast-roasted", "src": chickenBreastRoasted, "commonsTitle": "File:Grilled Chicken Breasts (28905381261).jpg", "author": "Sharon Chen from Austin, United States", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Grilled_Chicken_Breasts_(28905381261).jpg" },
   { "foodId": "usda-171496", "foodName": "Turkey, whole, breast, meat only, cooked, roasted", "slug": "turkey-breast-roasted", "src": turkeyBreastRoasted, "commonsTitle": "File:Cooked turkey breast - November 2023 - Sarah Stierch.jpg", "author": "Missvain", "license": "CC BY 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Cooked_turkey_breast_-_November_2023_-_Sarah_Stierch.jpg" },
+  { "foodId": "cofid-12-495", "foodName": "Cheese, Paneer", "slug": "paneer", "src": paneer, "commonsTitle": "File:Panir Paneer Indian cheese fresh.jpg", "author": "Sonja Pauen - Stanhopea", "license": "CC BY 2.0 de", "pageUrl": "https://commons.wikimedia.org/wiki/File:Panir_Paneer_Indian_cheese_fresh.jpg" },
 ];
 
 export interface FoodImagePhotoless {
