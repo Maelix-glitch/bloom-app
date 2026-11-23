@@ -210,7 +210,7 @@ export function AvatarEditor({
               value={zoom}
               onChange={(e) => setZoom(Number(e.target.value))}
               aria-label="Photo zoom"
-              className="h-1 w-full appearance-none rounded-full bg-surface-3 accent-[var(--profile-accent,var(--violet))]"
+              className="h-1 w-full appearance-none rounded-full bg-surface-3 accent-[var(--profile-accent,var(--amber))]"
             />
           </label>
           <div className="flex items-center justify-center gap-2">

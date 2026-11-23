@@ -80,7 +80,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
           if (!date) return <span key={`e${i}`} className="aspect-square" />;
           const day = map.get(date);
           const isToday = date === dayjs().format("YYYY-MM-DD");
-          const accent = (day ? bucketOf(day.mood).accent : "violet") as Accent;
+          const accent = (day ? bucketOf(day.mood).accent : "gold") as Accent;
           const strength = day ? Math.max(0.12, Math.min(1, (day.mood - 2.5) / 7)) : 0;
           return (
             <button
@@ -91,7 +91,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
               className={cn(
                 "group relative aspect-square rounded-control border transition-all duration-[var(--motion-page)]",
                 day ? "border-transparent hover:scale-[1.06]" : "border-dashed border-border/60",
-                selected === date && "ring-1 ring-violet",
+                selected === date && "ring-1 ring-gold",
                 isToday && "border-border-strong",
               )}
               style={
@@ -157,7 +157,7 @@ function CalendarImpl({ days }: { days: DayAggregate[] }) {
                 <span className="mono w-14 shrink-0 text-faint">
                   {dayjs(e.timestamp).format("HH:mm")}
                 </span>
-                <span className="numeric w-8 shrink-0 text-violet">{e.mood.toFixed(1)}</span>
+                <span className="numeric w-8 shrink-0 text-gold">{e.mood.toFixed(1)}</span>
                 <span className="text-muted-foreground">{e.note ?? e.tags.join(" · ") ?? ""}</span>
               </div>
             ))}

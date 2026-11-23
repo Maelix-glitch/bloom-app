@@ -258,7 +258,9 @@ describe("true liquid glass (M-224): the panel blocklist — solid again", () =>
        Growth/open are the tonal/open treatments. */
     const panel = lastBlock(STYLES, ".home-panel")!.body;
     expect(panel).toContain("background-image: var(--glass-bg)");
-    expect(panel).toContain("backdrop-filter: blur(14px)");
+    /* M-225: the panel's leftover 14px frost is REMOVED — glass discipline
+       keeps backdrop blur on the floating layer only. */
+    expect(panel).not.toContain("backdrop-filter");
     expect(lastBlock(STYLES, ".home-page .home-growth")!.body).toContain(
       "box-shadow: var(--dbx-specular)",
     );

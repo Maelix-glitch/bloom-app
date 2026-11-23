@@ -24,8 +24,8 @@ const MILESTONE_NODE: Record<string, { icon: LucideIcon; tint: string }> = {
   "first-checkin": { icon: CalendarCheck, tint: "var(--sage)" },
   "first-reflection": { icon: NotebookPen, tint: "var(--sky)" },
   "days-7": { icon: Flame, tint: "var(--amber)" },
-  "days-30": { icon: Trophy, tint: "var(--violet)" },
-  "first-reward": { icon: Gift, tint: "var(--violet)" },
+  "days-30": { icon: Trophy, tint: "var(--gold)" },
+  "first-reward": { icon: Gift, tint: "var(--rose)" },
   "first-story": { icon: Sparkles, tint: "var(--rose)" },
   "first-highlight": { icon: Star, tint: "var(--amber)" },
   "checkins-100": { icon: CalendarCheck, tint: "var(--sky)" },
@@ -95,7 +95,7 @@ export function JourneyCard({
         </div>
         <div className="pf-miles" role="list" aria-label="Milestones">
           {[...earned, ...locked].map((m) => {
-            const node = MILESTONE_NODE[m.id] ?? { icon: Star, tint: "var(--violet)" };
+            const node = MILESTONE_NODE[m.id] ?? { icon: Star, tint: "var(--gold)" };
             const Icon = node.icon;
             const got = achieved.get(m.id);
             const shareable = Boolean(got && onShareMilestone);

@@ -286,9 +286,9 @@ export function MomentsGrid({
       >
         <span
           aria-hidden
-          className="grid size-8 shrink-0 place-items-center rounded-full text-[length:var(--text-body)] leading-none text-[var(--profile-accent,var(--violet))]"
+          className="grid size-8 shrink-0 place-items-center rounded-full text-[length:var(--text-body)] leading-none text-[var(--profile-accent,var(--amber))]"
           style={{
-            background: "color-mix(in oklab, var(--profile-accent,var(--violet)) 12%, transparent)",
+            background: "color-mix(in oklab, var(--profile-accent,var(--amber)) 12%, transparent)",
           }}
         >
           +
@@ -411,7 +411,7 @@ export function MomentsGrid({
                     </span>
                   </span>
                   {isStoryActive(story) ? (
-                    <span className="mono rounded-full border border-[color:var(--profile-accent-border)] px-2 py-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-[var(--profile-accent,var(--violet))]">
+                    <span className="mono rounded-full border border-[color:var(--profile-accent-border)] px-2 py-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-[var(--profile-accent,var(--amber))]">
                       live
                     </span>
                   ) : null}

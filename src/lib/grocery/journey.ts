@@ -11,6 +11,8 @@
  * bought count and the percentage alone.
  */
 
+import { Drumstick, LeafyGreen, Milk, Package, Sprout, type LucideIcon } from "lucide-react";
+
 import type { GroceryCategory } from "./groceryList";
 
 /**
@@ -51,15 +53,16 @@ export function groceryMessageFor(boughtCount: number, pct: number): string {
 }
 
 /**
- * The categories' small glyphs — the five the owner named in the
- * brief, keyed by the lib's own category ids. A category outside
- * the five (the lib's honest "other" bucket) gets NO glyph rather
- * than an invented one.
+ * The categories' small glyphs — drawn Lucide marks (M-225: the raw
+ * emoji these replaced were the app's last emoji-as-icon surface),
+ * keyed by the lib's own category ids. A category outside the five
+ * (the lib's honest "other" bucket) gets NO glyph rather than an
+ * invented one.
  */
-export const GROCERY_CATEGORY_ICONS: Partial<Record<GroceryCategory, string>> = {
-  produce: "🥬",
-  protein: "🍗",
-  dairy: "🥛",
-  pantry: "🫒",
-  spices: "🌿",
+export const GROCERY_CATEGORY_ICONS: Partial<Record<GroceryCategory, LucideIcon>> = {
+  produce: LeafyGreen,
+  protein: Drumstick,
+  dairy: Milk,
+  pantry: Package,
+  spices: Sprout,
 };

@@ -120,7 +120,7 @@ const SIGNALS: {
     key: "study",
     label: "Study",
     unit: "min",
-    color: "oklch(0.74 0.08 285)",
+    color: "oklch(0.74 0.08 85)",
     format: (v) => `${Math.round(v)} min`,
   },
   {

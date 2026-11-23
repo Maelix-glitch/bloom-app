@@ -8,8 +8,8 @@
    and actions are pills. Sheets/palette/menus stay fully opaque slabs
    (the sheet guards' contract is untouched).
    ---------------------------------------------------------------------------
-   A premium personal-AI workspace on deep indigo-black: editorial serif
-   moments, quiet lavender, warm ivory type, hairline borders and controlled
+   A premium personal-AI workspace on deep ink-black: editorial serif
+   moments, quiet gold, warm ivory type, hairline borders and controlled
    light. The conversation owns the page; everything else recedes.
    ==========================================================================*/
 
@@ -20,25 +20,16 @@
      fonts, radii, motion, gold) now resolves to the house tokens
      directly; the atmosphere/stage depths are color-mixes of
      --background/--surface at the use sites. What stays here is what is
-     genuinely Coach's own: the lavender voice, its pastel companions,
-     the mark gradient, the violet action gradient and a danger pair
-     tuned brighter for legibility on near-black. */
-  --coach-lav: #b9a7e9;
-  --coach-lav-soft: #cdbdf5;
-  --coach-lav-dim: color-mix(in oklab, var(--coach-lav) 13%, transparent);
+     genuinely Coach's own: the gold voice (M-225 retired the lavender
+     voice and the unused violet action-gradient tokens — send has been
+     flat gold since M-203), its pastel companions, the mark gradient
+     and a danger pair tuned brighter for legibility on near-black. */
+  --coach-gold: var(--gold);
+  --coach-gold-soft: var(--gold-soft);
+  --coach-gold-dim: color-mix(in oklab, var(--coach-gold) 13%, transparent);
   --coach-sage: #9dc7a6;
   --coach-rose: #dda8ba;
-  --coach-sky: #9cc3e6;
-
-  /* The violet action gradient (send, primary buttons). Both stops were
-     deepened by the 2026-11-18 contrast audit (oklab lightness x0.84,
-     spread preserved): --coach-on-violet text on stop a measured 3.10:1
-     — below WCAG AA for the button's support-size label. It now measures
-     4.75:1 on a and 6.80:1 on b. Pinned by
-     src/lib/contrast.guard.test.ts. */
-  --coach-violet-a: #715db6;
-  --coach-violet-b: #5544a5;
-  --coach-on-violet: #f4f0ff;
+  --coach-cream: #e3dcc8;
 
   --coach-danger: #e08a80;
   --coach-danger-soft: #f2c1b9; /* danger text on hover */
@@ -57,7 +48,7 @@
 }
 
 /* ---------------------------------------------------------------------------
-   Atmosphere — a soft pool of lavender light on deep indigo, vignetted edges.
+   Atmosphere — a soft pool of gold light on deep ink, vignetted edges.
    Pure CSS; nothing moves, nothing competes with the conversation.
    -------------------------------------------------------------------------*/
 .coach-page::before {
@@ -67,9 +58,9 @@
   pointer-events: none;
   z-index: 0;
   background:
-    radial-gradient(52rem 30rem at 68% -6rem, rgb(151 126 214 / 0.13), transparent 62%),
-    radial-gradient(44rem 26rem at -8rem 108%, rgb(125 157 255 / 0.05), transparent 60%),
-    radial-gradient(30rem 20rem at 50% 118%, rgb(168 138 214 / 0.06), transparent 70%),
+    radial-gradient(52rem 30rem at 68% -6rem, rgb(220 192 143 / 0.13), transparent 62%),
+    radial-gradient(44rem 26rem at -8rem 108%, rgb(242 228 198 / 0.05), transparent 60%),
+    radial-gradient(30rem 20rem at 50% 118%, rgb(143 199 162 / 0.06), transparent 70%),
     linear-gradient(180deg, color-mix(in oklab, var(--background) 88%, black) 0%, var(--background) 34%, color-mix(in oklab, var(--background) 72%, black) 100%);
 }
 
@@ -88,13 +79,13 @@
 }
 
 .coach-page :focus-visible {
-  outline: 2px solid rgb(185 167 233 / 0.85);
+  outline: 2px solid rgb(220 192 143 / 0.85);
   outline-offset: 2px;
   border-radius: 6px;
 }
 
 .coach-page ::selection {
-  background: rgb(185 167 233 / 0.28);
+  background: rgb(220 192 143 / 0.28);
 }
 
 /* ===========================================================================
@@ -165,7 +156,7 @@
 }
 
 .coach-sidebar-toggle:hover {
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
   background: var(--surface);
 }
 
@@ -196,7 +187,7 @@
   padding: 0 14px;
   border-radius: var(--radius-pill);
   border: none;
-  background: linear-gradient(135deg, rgb(185 167 233 / 0.13), rgb(185 167 233 / 0.05));
+  background: linear-gradient(135deg, rgb(220 192 143 / 0.13), rgb(220 192 143 / 0.05));
   color: var(--foreground);
   font-size: var(--text-support);
   font-weight: 500;
@@ -210,7 +201,7 @@
 }
 
 .coach-new-chat:hover {
-  background: linear-gradient(135deg, rgb(185 167 233 / 0.19), rgb(185 167 233 / 0.08));
+  background: linear-gradient(135deg, rgb(220 192 143 / 0.19), rgb(220 192 143 / 0.08));
 }
 
 .coach-new-chat:active {
@@ -220,7 +211,7 @@
 .coach-new-chat-icon {
   width: 15px;
   height: 15px;
-  color: var(--coach-lav);
+  color: var(--coach-gold);
 }
 
 .coach-side-modes {
@@ -320,7 +311,7 @@
 }
 
 .coach-conv-row.is-active {
-  background: linear-gradient(90deg, rgb(185 167 233 / 0.14), rgb(185 167 233 / 0.05));
+  background: linear-gradient(90deg, rgb(220 192 143 / 0.14), rgb(220 192 143 / 0.05));
 }
 
 .coach-conv-row-main {
@@ -364,8 +355,8 @@
   width: 5px;
   height: 5px;
   border-radius: var(--radius-pill);
-  background: var(--coach-lav);
-  box-shadow: 0 0 10px rgb(185 167 233 / 0.8);
+  background: var(--coach-gold);
+  box-shadow: 0 0 10px rgb(220 192 143 / 0.8);
   flex-shrink: 0;
 }
 
@@ -410,7 +401,7 @@
 .coach-conv-rename {
   flex: 1;
   min-width: 0;
-  border: 1px solid color-mix(in oklab, var(--coach-lav) 22%, transparent);
+  border: 1px solid color-mix(in oklab, var(--coach-gold) 22%, transparent);
   border-radius: 7px;
   padding: 2px 7px;
   background: var(--surface);
@@ -550,7 +541,7 @@
 }
 
 .coach-side-foot-glyph {
-  color: var(--coach-lav);
+  color: var(--coach-gold);
   flex-shrink: 0;
 }
 
@@ -570,8 +561,8 @@
   place-items: center;
   border-radius: var(--radius-md);
   border: none;
-  background: linear-gradient(135deg, rgb(185 167 233 / 0.16), rgb(185 167 233 / 0.05));
-  color: var(--coach-lav-soft);
+  background: linear-gradient(135deg, rgb(220 192 143 / 0.16), rgb(220 192 143 / 0.05));
+  color: var(--coach-gold-soft);
   cursor: pointer;
   transition:
     transform var(--motion-standard) var(--ease-out-expo),
@@ -611,8 +602,8 @@
 }
 
 .coach-rail-mode.is-active {
-  color: var(--coach-lav-soft);
-  background: var(--coach-lav-dim);
+  color: var(--coach-gold-soft);
+  background: var(--coach-gold-dim);
 }
 
 /* ===========================================================================
@@ -656,8 +647,8 @@
 }
 
 .coach-header-glyph {
-  color: var(--coach-lav);
-  filter: drop-shadow(0 0 12px rgb(185 167 233 / 0.45));
+  color: var(--coach-gold);
+  filter: drop-shadow(0 0 12px rgb(220 192 143 / 0.45));
   flex-shrink: 0;
 }
 
@@ -727,8 +718,8 @@
 }
 
 .coach-palette-btn:hover {
-  color: var(--coach-lav-soft);
-  background: var(--coach-lav-dim);
+  color: var(--coach-gold-soft);
+  background: var(--coach-gold-dim);
 }
 
 .coach-palette-btn kbd {
@@ -848,8 +839,8 @@
 }
 
 .coach-thread-center-mark {
-  color: var(--coach-lav);
-  filter: drop-shadow(0 0 18px rgb(185 167 233 / 0.4));
+  color: var(--coach-gold);
+  filter: drop-shadow(0 0 18px rgb(220 192 143 / 0.4));
 }
 
 .coach-thread-center-mark .coach-glyph svg {
@@ -999,7 +990,7 @@
 .coach-user-attachment-icon {
   width: 16px;
   height: 16px;
-  color: var(--coach-lav);
+  color: var(--coach-gold);
   flex-shrink: 0;
 }
 
@@ -1016,7 +1007,7 @@
 }
 
 .coach-msg-head .coach-glyph {
-  color: var(--coach-lav);
+  color: var(--coach-gold);
 }
 
 .coach-msg-author {
@@ -1082,7 +1073,7 @@
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--coach-lav);
+  background: var(--coach-gold);
   opacity: 0.8;
 }
 
@@ -1159,11 +1150,11 @@
 }
 
 .coach-action.is-on {
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
 }
 
 .coach-action.is-on.coach-action-icon-only {
-  background: var(--coach-lav-dim);
+  background: var(--coach-gold-dim);
 }
 
 /* mobile: only the more button, always visible */
@@ -1192,7 +1183,7 @@
 }
 
 .coach-thinking-head .coach-glyph {
-  color: var(--coach-lav);
+  color: var(--coach-gold);
   position: relative;
 }
 
@@ -1205,7 +1196,7 @@
   position: absolute;
   inset: -7px;
   border-radius: 50%;
-  background: radial-gradient(circle, rgb(185 167 233 / 0.24), transparent 70%);
+  background: radial-gradient(circle, rgb(220 192 143 / 0.24), transparent 70%);
   animation: coach-breathe 2s ease-in-out infinite;
   pointer-events: none;
 }
@@ -1244,7 +1235,7 @@
   height: 100%;
   width: 46%;
   border-radius: var(--radius-pill);
-  background: linear-gradient(90deg, transparent, rgb(185 167 233 / 0.55), transparent);
+  background: linear-gradient(90deg, transparent, rgb(220 192 143 / 0.55), transparent);
   animation: coach-sweep 1.5s var(--ease-out-expo) infinite;
 }
 
@@ -1364,10 +1355,10 @@
 }
 
 .coach-welcome-mark {
-  color: var(--coach-lav);
+  color: var(--coach-gold);
   margin-bottom: 22px;
-  filter: drop-shadow(0 0 24px rgb(185 167 233 / 0.45));
-  /* the seal: the welcome mark sits in a thin lavender ring — a designed
+  filter: drop-shadow(0 0 24px rgb(220 192 143 / 0.45));
+  /* the seal: the welcome mark sits in a thin gold ring — a designed
      medallion, not a floating icon (OTT creative pass, 2026-11-19) */
   display: grid;
   place-items: center;
@@ -1375,7 +1366,7 @@
   height: 76px;
   border-radius: 50%;
   border: none;
-  background: var(--coach-lav-dim);
+  background: var(--coach-gold-dim);
   box-shadow: var(--dbx-specular);
 }
 
@@ -1469,7 +1460,7 @@
 }
 
 .coach-starter:hover {
-  background: linear-gradient(120deg, rgb(185 167 233 / 0.1), rgb(185 167 233 / 0.03));
+  background: linear-gradient(120deg, rgb(220 192 143 / 0.1), rgb(220 192 143 / 0.03));
   color: var(--foreground);
 }
 
@@ -1494,7 +1485,7 @@
 }
 
 .coach-starter:hover .coach-starter-arrow {
-  color: var(--coach-lav);
+  color: var(--coach-gold);
   transform: translate(2px, -2px);
 }
 
@@ -1544,7 +1535,7 @@
 
 .coach-followup:hover {
   color: var(--foreground);
-  background: var(--coach-lav-dim);
+  background: var(--coach-gold-dim);
 }
 
 .coach-followup:active {
@@ -1616,12 +1607,12 @@
   height: 100%;
 }
 
-.coach-spark-violet {
-  color: var(--coach-lav);
+.coach-spark-gold {
+  color: var(--coach-gold);
 }
 
 .coach-spark-sky {
-  color: var(--coach-sky);
+  color: var(--coach-cream);
 }
 
 .coach-spark-amber {
@@ -1637,16 +1628,16 @@
 }
 
 .coach-metric:not([class*="coach-spark-"]) .coach-spark {
-  color: var(--coach-lav);
+  color: var(--coach-gold);
 }
 
 /* accent tints for structured blocks (accent value comes from the engine) */
-.coach-accent-violet {
-  background: rgb(185 167 233 / 0.06);
+.coach-accent-gold {
+  background: rgb(220 192 143 / 0.06);
 }
 
 .coach-accent-sky {
-  background: rgb(156 195 230 / 0.06);
+  background: rgb(227 220 200 / 0.06);
 }
 
 .coach-accent-amber {
@@ -1661,12 +1652,12 @@
   background: rgb(221 168 186 / 0.06);
 }
 
-.coach-accent-violet .coach-block-label {
-  color: var(--coach-lav-soft);
+.coach-accent-gold .coach-block-label {
+  color: var(--coach-gold-soft);
 }
 
 .coach-accent-sky .coach-block-label {
-  color: var(--coach-sky);
+  color: var(--coach-cream);
 }
 
 .coach-accent-amber .coach-block-label {
@@ -1756,7 +1747,7 @@
 
 /* proposal */
 .coach-proposal {
-  background: rgb(185 167 233 / 0.05);
+  background: rgb(220 192 143 / 0.05);
 }
 
 .coach-proposal-title {
@@ -1789,7 +1780,7 @@
   font-size: var(--text-caption);
   padding: var(--space-2) 11px;
   border-radius: var(--radius-control);
-  background: rgb(185 167 233 / 0.07);
+  background: rgb(220 192 143 / 0.07);
   border: none;
 }
 
@@ -1812,7 +1803,7 @@
 }
 
 .coach-proposal-change-path strong {
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
   font-weight: 500;
 }
 
@@ -1833,8 +1824,8 @@
   padding: 0 14px;
   border-radius: var(--radius-pill);
   border: none;
-  background: rgb(185 167 233 / 0.12);
-  color: var(--coach-lav-soft);
+  background: rgb(220 192 143 / 0.12);
+  color: var(--coach-gold-soft);
   font-size: var(--text-caption);
   cursor: pointer;
   transition:
@@ -1843,7 +1834,7 @@
 }
 
 .coach-block-action-primary:hover {
-  background: rgb(185 167 233 / 0.19);
+  background: rgb(220 192 143 / 0.19);
 }
 
 .coach-block-action-primary:active {
@@ -1897,11 +1888,11 @@
 }
 
 .coach-noticed-toggle:hover {
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
 }
 
 .coach-noticed-glyph {
-  color: var(--coach-lav);
+  color: var(--coach-gold);
   opacity: 0.9;
 }
 
@@ -1923,7 +1914,7 @@
 }
 
 .coach-noticed-inner {
-  border-left: 1px solid color-mix(in oklab, var(--coach-lav) 22%, transparent);
+  border-left: 1px solid color-mix(in oklab, var(--coach-gold) 22%, transparent);
   margin: 2px 0 0 10px;
   padding: 9px 0 9px var(--space-4);
 }
@@ -1955,7 +1946,7 @@
 .coach-noticed-item-copy strong {
   font-size: var(--text-caption);
   font-weight: 600;
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
   letter-spacing: var(--tracking-body);
 }
 
@@ -2022,7 +2013,7 @@
 .coach-notice-icon {
   width: 13px;
   height: 13px;
-  color: var(--coach-sky);
+  color: var(--coach-cream);
   flex-shrink: 0;
 }
 
@@ -2090,7 +2081,7 @@
     transform var(--motion-standard) var(--ease-out-expo);
 }
 
-/* Focus lives on the outer composer alone: an extremely faint lavender
+/* Focus lives on the outer composer alone: an extremely faint gold
    ambient glow settles in, the object lifts 1px. No ring is drawn around
    anything inside, and no border brightens — there is no border. */
 .coach-composer:focus-within {
@@ -2101,8 +2092,8 @@
     linear-gradient(180deg, rgb(255 255 255 / 0.045), rgb(255 255 255 / 0.016)),
     color-mix(in srgb, var(--surface-2) 94%, transparent);
   box-shadow:
-    0 0 0 1px rgb(185 167 233 / 0.1),
-    0 0 26px -8px rgb(185 167 233 / 0.16),
+    0 0 0 1px rgb(220 192 143 / 0.1),
+    0 0 26px -8px rgb(220 192 143 / 0.16),
     0 1px 0 rgb(255 255 255 / 0.03) inset,
     0 20px 48px -26px rgb(0 0 8 / 0.85);
   transform: translateY(-1px);
@@ -2130,7 +2121,7 @@
   -webkit-appearance: none;
   background: transparent;
   color: var(--foreground);
-  caret-color: var(--coach-lav-soft);
+  caret-color: var(--coach-gold-soft);
   font: inherit;
   font-size: var(--text-body);
   line-height: var(--leading-body);
@@ -2259,7 +2250,7 @@
 .coach-attach-menu-icon {
   width: 15px;
   height: 15px;
-  color: var(--coach-lav);
+  color: var(--coach-gold);
 }
 
 /* send */
@@ -2312,11 +2303,11 @@
 }
 
 .coach-send.is-thinking {
-  background: var(--coach-lav-dim);
+  background: var(--coach-gold-dim);
 }
 
 .coach-send.is-thinking .coach-glyph {
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
 }
 
 /* composer foot */
@@ -2358,8 +2349,8 @@
   object-fit: cover;
   display: grid;
   place-items: center;
-  background: rgb(185 167 233 / 0.1);
-  color: var(--coach-lav);
+  background: rgb(220 192 143 / 0.1);
+  color: var(--coach-gold);
   flex-shrink: 0;
 }
 
@@ -2525,7 +2516,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--coach-lav);
+  color: var(--coach-gold);
 }
 
 .coach-panel-title {
@@ -2629,8 +2620,8 @@
   width: 6px;
   height: 6px;
   border-radius: 50%;
-  background: var(--coach-lav);
-  box-shadow: 0 0 8px rgb(185 167 233 / 0.5);
+  background: var(--coach-gold);
+  box-shadow: 0 0 8px rgb(220 192 143 / 0.5);
   flex-shrink: 0;
 }
 
@@ -2717,7 +2708,7 @@
   display: inline-block;
   margin-top: 14px;
   font-size: var(--text-caption);
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
   text-decoration: none;
 }
 
@@ -2748,8 +2739,8 @@
 }
 
 .coach-memory-filter.is-active {
-  color: var(--coach-lav-soft);
-  background: var(--coach-lav-dim);
+  color: var(--coach-gold-soft);
+  background: var(--coach-gold-dim);
 }
 
 .coach-memory-list {
@@ -2826,7 +2817,7 @@
 }
 
 .coach-memory-action.is-on {
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
 }
 
 /* ===========================================================================
@@ -2883,7 +2874,7 @@
 }
 
 .coach-sheet-row.is-on {
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
 }
 
 .coach-sheet-row-icon {
@@ -2893,7 +2884,7 @@
 }
 
 .coach-sheet-row.is-on .coach-sheet-row-icon {
-  color: var(--coach-lav);
+  color: var(--coach-gold);
 }
 
 /* --------------------- Coach "Log this" sheet (N5) ---------------------- */
@@ -3088,7 +3079,7 @@
 .coach-palette-search-icon {
   width: 15px;
   height: 15px;
-  color: var(--coach-lav);
+  color: var(--coach-gold);
 }
 
 .coach-palette-search kbd {
@@ -3135,7 +3126,7 @@
 
 .coach-palette-row:hover,
 .coach-palette-row.is-active {
-  background: rgb(185 167 233 / 0.09);
+  background: rgb(220 192 143 / 0.09);
 }
 
 .coach-palette-row strong {
@@ -3159,7 +3150,7 @@
   place-items: center;
   border-radius: 9px;
   background: rgb(255 255 255 / 0.04);
-  color: var(--coach-lav);
+  color: var(--coach-gold);
   flex-shrink: 0;
 }
 
@@ -3173,7 +3164,7 @@
 }
 
 .coach-palette-row.is-active .coach-palette-row-dot {
-  background: var(--coach-lav);
+  background: var(--coach-gold);
 }
 
 .coach-palette-conv-copy {
@@ -3236,7 +3227,7 @@
   font-size: var(--text-micro);
   letter-spacing: var(--tracking-wide);
   text-transform: uppercase;
-  color: var(--coach-lav);
+  color: var(--coach-gold);
 }
 
 .coach-camera-title {
@@ -3303,7 +3294,7 @@
   padding: 0;
   border: 0;
   background: none;
-  color: var(--coach-lav-soft);
+  color: var(--coach-gold-soft);
   font-size: var(--text-caption);
   cursor: pointer;
 }

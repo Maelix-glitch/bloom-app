@@ -36,7 +36,7 @@ function EmotionsImpl({
             <button
               type="button"
               onClick={() => onFilter(null)}
-              className="mono rounded-full border border-violet/50 bg-[var(--dim-violet)] px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-violet transition-colors hover:border-violet"
+              className="mono rounded-full border border-gold/50 bg-[var(--dim-gold)] px-3 py-1.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-gold transition-colors hover:border-gold"
             >
               clear filter · {filter}
             </button>

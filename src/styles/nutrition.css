@@ -536,8 +536,10 @@
   gap: 0.6rem;
 }
 .shop-group-icon {
-  font-size: var(--text-card);
-  line-height: 1;
+  width: 1.05rem;
+  height: 1.05rem;
+  flex: none;
+  color: var(--sage);
 }
 .shop-group-count {
   font-size: var(--text-caption);
@@ -2143,7 +2145,7 @@ a.nut-chip {
   --macro-protein: #8fbf9f;
   --macro-carb: #c9b8a0;
   --macro-fat: #8aa4c4;
-  --macro-fibre: #a99bc9;
+  --macro-fibre: #c48b9d; /* muted rose (M-225: was lavender) */
 }
 /* The meal card's foot and its .macros list retired with brief
    v7 N3: the macros live in the rows' fixed table (.meal-macros),

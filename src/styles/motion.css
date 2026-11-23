@@ -69,7 +69,7 @@
  */
 @keyframes bm-changed {
   0% {
-    background-color: color-mix(in oklab, var(--violet) 30%, transparent);
+    background-color: color-mix(in oklab, var(--gold) 30%, transparent);
   }
   100% {
     background-color: transparent;

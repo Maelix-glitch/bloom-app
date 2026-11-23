@@ -348,8 +348,8 @@ export function Composer({
   };
 
   const accent: Accent = face
-    ? (EMOTIONS.find((e) => e.key === PAGE_MOOD_PRESETS[face].emotion)?.accent ?? "violet")
-    : "violet";
+    ? (EMOTIONS.find((e) => e.key === PAGE_MOOD_PRESETS[face].emotion)?.accent ?? "gold")
+    : "gold";
   const accentCss = accentVar[accent];
 
   const title = editing ? "Refine this moment" : "How are you feeling?";

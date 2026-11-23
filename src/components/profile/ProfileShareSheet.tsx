@@ -42,7 +42,7 @@ export function ProfileShareSheet({
   const [copied, setCopied] = useState(false);
   const [sharing, setSharing] = useState(false);
 
-  const accent = identity?.accent ?? "violet";
+  const accent = identity?.accent ?? "amber";
   const username = identity?.username ?? null;
   const displayName = identity?.displayName ?? "Your Bloom";
   const bio = identity?.bio ?? null;

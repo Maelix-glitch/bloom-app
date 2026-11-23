@@ -40,7 +40,7 @@ function Toggle({
         aria-hidden
         className={cn(
           "relative h-7 w-12 shrink-0 rounded-full transition-colors",
-          on ? "bg-[color:var(--profile-accent,var(--violet))]" : "bg-surface-3",
+          on ? "bg-[color:var(--profile-accent,var(--amber))]" : "bg-surface-3",
         )}
       >
         <span

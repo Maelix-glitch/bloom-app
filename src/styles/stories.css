@@ -8,20 +8,20 @@
  */
 
 .bstory {
-  --story-ring: linear-gradient(135deg, #e0d5f0 0%, #f4e0ec 48%, #ffe8d6 100%);
-  --story-ring-close-friends: linear-gradient(135deg, #d5c5e0 0%, #e0d5f0 50%, #f4e0ec 100%);
+  --story-ring: linear-gradient(135deg, #f6e9cd 0%, #dcc08f 48%, #e3919f 100%);
+  --story-ring-close-friends: linear-gradient(135deg, #8fc7a2 0%, #dcc08f 50%, #f2e4c6 100%);
   --story-ring-seen: color-mix(in oklab, var(--foreground) 20%, transparent);
   --story-ink: var(--cream-2); /* == the house cream-2 exactly */
-  --story-ink-deep: var(--violet-deep); /* dark ink on cream story chips */
+  --story-ink-deep: var(--gold-deep); /* dark ink on cream story chips (M-225: was --violet-deep) */
   --story-danger-soft: #ff9d9d; /* the editor's delete-zone hot pink */
   --story-recording: #e0685e; /* the camera's recording red */
   --story-paper: #fbf8f1; /* polaroid paper */
   --story-paper-window: #f6f1e6; /* window-frame paper */
   --story-paper-torn: #f7f2e6; /* torn-paper frame */
-  --story-frame-film: #14121c; /* film-stock frame */
+  --story-frame-film: #121214; /* film-stock frame */
   --story-ink-dim: rgba(244, 239, 228, 0.6);
   --story-ink-faint: rgba(244, 239, 228, 0.38);
-  --story-veil: rgba(12, 8, 20, 0.5);
+  --story-veil: rgba(10, 11, 14, 0.5);
   --story-chip: rgba(22, 19, 33, 0.65);
   --story-chip-line: rgba(244, 239, 228, 0.12);
   --story-radius: 20px;

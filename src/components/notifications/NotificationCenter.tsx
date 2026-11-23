@@ -95,7 +95,7 @@ function groupNotices(notices: Notice[]): { label: string; items: Notice[] }[] {
   return groups;
 }
 
-type Tint = "gold" | "violet" | "sage" | "rose" | "amber" | "sky";
+type Tint = "gold" | "sage" | "rose" | "amber" | "sky";
 
 const KIND_META: Record<Notice["kind"], { label: string; icon: LucideIcon; tint: Tint }> = {
   habit: { label: "Habit", icon: Sprout, tint: "sage" },
@@ -105,7 +105,7 @@ const KIND_META: Record<Notice["kind"], { label: string; icon: LucideIcon; tint:
   /* The discreet finish-the-entry reminder keeps a neutral label here too —
      the row's own title/body already say everything, in safe words. */
   "open-entry": { label: "Reminder", icon: NotebookPen, tint: "gold" },
-  insight: { label: "Insight", icon: Sparkles, tint: "violet" },
+  insight: { label: "Insight", icon: Sparkles, tint: "gold" },
   system: { label: "Bloom", icon: BellRing, tint: "gold" },
 };
 
@@ -313,14 +313,14 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
               <SectionHead
                 id="nc-insights"
                 icon={Sparkles}
-                tint="violet"
+                tint="gold"
                 title="Insights"
                 count={insights.length}
               />
               {insights.length === 0 ? (
                 <Empty
                   icon={Sparkles}
-                  tint="violet"
+                  tint="gold"
                   title="No insights yet"
                   sub="They appear once there's a little more in your record to read."
                 />
@@ -329,7 +329,7 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
                   {insights.map((i) => (
                     <li key={i.id}>
                       <Link to="/cycle" onClick={close} className="ncenter-row">
-                        <span className="ncenter-orb" data-tint="violet" aria-hidden="true">
+                        <span className="ncenter-orb" data-tint="gold" aria-hidden="true">
                           <Sparkles />
                         </span>
                         <span className="ncenter-row-text">

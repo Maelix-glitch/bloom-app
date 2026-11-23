@@ -37,9 +37,9 @@ export function ProgressRing({
         />
         <defs>
           <linearGradient id="homeRingGrad" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="oklch(0.72 0.13 255)" />
-            <stop offset="60%" stopColor="oklch(0.78 0.14 320)" />
-            <stop offset="100%" stopColor="oklch(0.9 0.08 340)" />
+            <stop offset="0%" stopColor="oklch(0.78 0.12 85)" />
+            <stop offset="60%" stopColor="oklch(0.74 0.11 15)" />
+            <stop offset="100%" stopColor="oklch(0.9 0.06 45)" />
           </linearGradient>
         </defs>
         <circle

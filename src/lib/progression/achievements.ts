@@ -71,7 +71,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     target: 10,
     rarity: "notable",
     domain: "study",
-    tone: "var(--violet)",
+    tone: "var(--sky)",
     emblem: "budding",
   },
   {
@@ -95,7 +95,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     target: 7,
     rarity: "notable",
     domain: "recovery",
-    tone: "var(--violet)",
+    tone: "var(--sage)",
     emblem: "bloom",
   },
   {
@@ -131,7 +131,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     target: 60,
     rarity: "rare",
     domain: "sleep",
-    tone: "var(--violet)",
+    tone: "var(--cream-2)",
     emblem: "perennial",
   },
   {
@@ -215,7 +215,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     target: 1,
     rarity: "signature",
     domain: "milestones",
-    tone: "var(--violet)",
+    tone: "var(--gold)",
     emblem: "everbloom",
   },
   {

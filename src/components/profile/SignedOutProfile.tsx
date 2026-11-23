@@ -110,7 +110,7 @@ export function SignedOutProfile({
             onClick={() => void submit()}
             disabled={state === "sending"}
             className="inline-flex h-9 shrink-0 items-center gap-2 rounded-full px-4 text-[length:var(--text-support)] font-medium text-[var(--primary-foreground)] transition-transform duration-[var(--motion-page)] enabled:hover:scale-[1.02] disabled:opacity-60"
-            style={{ background: "linear-gradient(135deg, var(--violet), var(--sky))" }}
+            style={{ background: "var(--gold-gradient)" }}
           >
             {state === "sending" ? <Loader2 className="size-3.5 animate-spin" aria-hidden /> : null}
             {state === "sending" ? "Sending…" : "Send link"}

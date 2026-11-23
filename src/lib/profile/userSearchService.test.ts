@@ -194,7 +194,8 @@ describe("searchProfiles", () => {
           displayName: "Bloom User",
           username: null,
           avatarPath: null,
-          accent: "violet",
+          /* M-225: an unknown accent falls back to the amber default (was violet). */
+          accent: "amber",
           verified: true,
           badges: [],
         },

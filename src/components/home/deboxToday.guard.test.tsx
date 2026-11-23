@@ -226,7 +226,8 @@ describe("Today de-box (M-183) — the freeze holds where the spec is silent", (
     const panel = ruleBlock(CSS, ".home-panel");
     expect(panel).toContain("background-image: var(--glass-bg);");
     expect(panel).toContain("border: 1px solid var(--glass-border);");
-    expect(panel).toContain("backdrop-filter: blur(14px);");
+    /* M-225 exception: the inert 14px frost is removed (glass = floating layer only). */
+    expect(panel).not.toContain("backdrop-filter");
   });
 
   it("the base .home-fact strip keeps its shape below lg", () => {

@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 import { SectionHead as SharedSectionHead } from "@/components/ui/SectionHead";
 import type { Evidence } from "@/lib/mood/types";
 
-export type Accent = "violet" | "sky" | "amber" | "sage" | "rose";
+export type Accent = "gold" | "sky" | "amber" | "sage" | "rose";
 
 export const accentText: Record<Accent, string> = {
-  violet: "text-violet",
+  gold: "text-gold",
   sky: "text-sky",
   amber: "text-amber",
   sage: "text-sage",
@@ -14,7 +14,7 @@ export const accentText: Record<Accent, string> = {
 };
 
 export const accentVar: Record<Accent, string> = {
-  violet: "var(--violet)",
+  gold: "var(--gold)",
   sky: "var(--sky)",
   amber: "var(--amber)",
   sage: "var(--sage)",
@@ -171,7 +171,7 @@ export function Metric({
   value,
   suffix,
   sub,
-  accent = "violet",
+  accent = "gold",
   decimals = 1,
   raw,
 }: {

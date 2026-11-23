@@ -17,14 +17,13 @@
   /* the meta contrast step (P2-2, R3) — same step as the global token */
   --faint-strong: #aba69c;
   --muted-foreground: #bcb7ad;
-  --violet: #a697d3;
   --sky: #879dbb;
   --sage: #8fc7a2;
   --rose: #e3919f;
   --font-display: "Fraunces", ui-serif, Georgia, serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
-  --dim-violet: color-mix(in oklab, var(--violet) 14%, transparent);
+  --dim-gold: color-mix(in oklab, var(--gold) 14%, transparent);
   --dim-sky: color-mix(in oklab, var(--sky) 14%, transparent);
   --dim-amber: color-mix(in oklab, var(--gold) 14%, transparent);
   --dim-sage: color-mix(in oklab, var(--sage) 14%, transparent);
@@ -48,10 +47,6 @@
 .rewards-delivery-page .text-rose,
 .rewards-admin-page .text-rose {
   color: var(--rose);
-}
-.rewards-delivery-page .text-violet,
-.rewards-admin-page .text-violet {
-  color: var(--violet);
 }
 .rewards-delivery-page .text-amber,
 .rewards-admin-page .text-amber {
@@ -316,7 +311,7 @@
   border-color: color-mix(in oklab, var(--sky) 20%, var(--border));
 }
 .reward-chronos-hero::after {
-  border-color: color-mix(in oklab, var(--violet) 18%, transparent);
+  border-color: color-mix(in oklab, var(--gold) 18%, transparent);
 }
 .reward-chronos-crest-wrap {
   position: relative;
@@ -409,9 +404,9 @@
 }
 .reward-quest-action:hover:not(:disabled) {
   transform: translateX(3px);
-  border-color: var(--violet);
+  border-color: var(--gold);
   color: var(--foreground);
-  background: var(--dim-violet);
+  background: var(--dim-gold);
 }
 .reward-quest-action-done {
   border-color: color-mix(in oklab, var(--sage) 42%, var(--border));
@@ -447,9 +442,9 @@
 }
 
 .claim-cinematic {
-  --claim-bg: #070711; /* the claim stage's deep navy ground */
-  --claim-bg-2: #141126;
-  --claim-bg-3: #090d1c;
+  --claim-bg: #070708; /* the claim stage's deep ink ground */
+  --claim-bg-2: #121214;
+  --claim-bg-3: #0a0a0c;
   --claim-gold-tint: #fff1c9; /* pale gold stop in the title's shimmer */
   position: fixed;
   inset: 0;
@@ -469,7 +464,7 @@
   background:
     radial-gradient(
       circle at 50% 49%,
-      color-mix(in oklab, var(--violet) 22%, transparent),
+      color-mix(in oklab, var(--gold) 22%, transparent),
       transparent 19%
     ),
     radial-gradient(
@@ -553,7 +548,7 @@
   margin-top: 10px;
   font-size: clamp(36px, 6vw, 70px);
   line-height: 0.98;
-  background: linear-gradient(110deg, var(--amber), var(--claim-gold-tint) 30%, var(--violet) 67%, var(--sky));
+  background: linear-gradient(110deg, var(--amber), var(--claim-gold-tint) 30%, var(--gold) 67%, var(--gold-soft));
   background-size: 200% auto;
   -webkit-background-clip: text;
   background-clip: text;
@@ -596,11 +591,11 @@
 .claim-cinematic-radar {
   position: absolute;
   inset: 15%;
-  border: 1px solid color-mix(in oklab, var(--violet) 35%, transparent);
+  border: 1px solid color-mix(in oklab, var(--gold) 35%, transparent);
   border-radius: 50%;
   box-shadow:
     0 0 0 1px color-mix(in oklab, var(--sky) 10%, transparent),
-    inset 0 0 50px color-mix(in oklab, var(--violet) 12%, transparent);
+    inset 0 0 50px color-mix(in oklab, var(--gold) 12%, transparent);
   animation: chronos-charge 2.2s ease-in-out infinite;
 }
 .claim-cinematic-radar::before,
@@ -671,14 +666,14 @@
   position: absolute;
   inset: 19%;
   border-radius: 50%;
-  background: color-mix(in oklab, var(--violet) 26%, transparent);
+  background: color-mix(in oklab, var(--gold) 26%, transparent);
   filter: blur(31px);
   animation: breathe 2.4s ease-in-out infinite;
 }
 .claim-cinematic-charging .claim-cinematic-crest {
   opacity: 0.4;
   filter: grayscale(0.25) saturate(0.7) brightness(0.76)
-    drop-shadow(0 0 18px color-mix(in oklab, var(--violet) 45%, transparent));
+    drop-shadow(0 0 18px color-mix(in oklab, var(--gold) 45%, transparent));
   transform: scale(0.66) rotateY(-22deg) rotateX(13deg);
   animation: chronos-charge 1.5s ease-in-out infinite;
 }
@@ -865,7 +860,7 @@
     ),
     linear-gradient(
       145deg,
-      color-mix(in oklab, var(--surface) 96%, var(--royal)),
+      color-mix(in oklab, var(--surface) 96%, var(--sage)),
       color-mix(in oklab, var(--surface-2) 82%, var(--background))
     );
   box-shadow:
@@ -889,7 +884,7 @@
 .reward-empty-state::after {
   inset: 17% 31%;
   transform: rotate(39deg) scaleY(0.68);
-  border-color: color-mix(in oklab, var(--violet) 13%, transparent);
+  border-color: color-mix(in oklab, var(--gold) 13%, transparent);
 }
 .reward-empty-state-glow {
   position: absolute;
@@ -919,7 +914,7 @@
 .reward-empty-state-orbit-two {
   width: 175px;
   height: 300px;
-  border-color: color-mix(in oklab, var(--violet) 23%, transparent);
+  border-color: color-mix(in oklab, var(--gold) 23%, transparent);
   transform: rotate(37deg);
   animation: spin-reverse 29s linear infinite;
 }
@@ -1027,7 +1022,7 @@
 .reward-loading-orb::before {
   position: absolute;
   inset: 11px;
-  border: 1px dashed color-mix(in oklab, var(--violet) 42%, transparent);
+  border: 1px dashed color-mix(in oklab, var(--gold) 42%, transparent);
   border-radius: 50%;
   content: "";
   animation: spin-reverse 3.2s linear infinite;
@@ -1272,7 +1267,7 @@
   padding: 31px;
   background: linear-gradient(
     145deg,
-    color-mix(in oklab, var(--surface-2) 96%, var(--royal)),
+    color-mix(in oklab, var(--surface-2) 96%, var(--sage)),
     color-mix(in oklab, var(--surface) 96%, var(--background))
   );
   box-shadow: var(--elevation-dialog);
@@ -1285,7 +1280,7 @@
   left: 15%;
   height: 1px;
   content: "";
-  background: linear-gradient(90deg, transparent, var(--gold), var(--violet), transparent);
+  background: linear-gradient(90deg, transparent, var(--gold), var(--gold-soft), transparent);
 }
 .reward-delivery-modal-close {
   position: absolute;
@@ -1336,18 +1331,18 @@
   display: flex;
   align-items: start;
   gap: 9px;
-  border: 1px solid color-mix(in oklab, var(--violet) 28%, var(--border));
+  border: 1px solid color-mix(in oklab, var(--gold) 28%, var(--border));
   border-radius: var(--radius-md);
   padding: var(--space-3);
   color: var(--muted-foreground);
-  background: color-mix(in oklab, var(--violet) 7%, transparent);
+  background: color-mix(in oklab, var(--gold) 7%, transparent);
   font-size: var(--text-caption);
   line-height: var(--leading-body);
 }
 .reward-delivery-message svg {
   flex: 0 0 auto;
   margin-top: 2px;
-  color: var(--violet);
+  color: var(--gold);
 }
 .reward-delivery-value {
   border-left: 2px solid var(--gold);
@@ -2069,8 +2064,8 @@
   width: var(--star-size);
   height: var(--star-size);
   border-radius: var(--radius-pill);
-  background: color-mix(in oklab, var(--foreground) 72%, var(--violet));
-  box-shadow: 0 0 12px color-mix(in oklab, var(--violet) 70%, transparent);
+  background: color-mix(in oklab, var(--foreground) 72%, var(--gold));
+  box-shadow: 0 0 12px color-mix(in oklab, var(--gold) 70%, transparent);
   animation: reward-twinkle 4.8s ease-in-out infinite;
   animation-delay: var(--star-delay);
 }
@@ -2092,8 +2087,8 @@
     110deg,
     var(--gold),
     var(--gold-soft) 30%,
-    var(--violet) 68%,
-    var(--sky)
+    var(--rose) 68%,
+    var(--gold)
   );
   background-size: 220% auto;
   -webkit-background-clip: text;
@@ -2183,7 +2178,7 @@
 }
 .reward-secondary-button:hover {
   transform: translateY(-2px);
-  border-color: var(--violet);
+  border-color: var(--gold);
   background: var(--surface-3);
 }
 .reward-text-button {
@@ -2266,13 +2261,12 @@
 
 /* Core reward palette used by the gradients, orbit lines, and empty-state seal.
    Reskin slice C1: aligned to the official tokens — gold is Bloom gold, and
-   the old saturated royal purple becomes Bloom's secondary lavender token
-   (an accent particle hue in the claim cinematic, never a surface wash). */
+   the old saturated royal purple is retired (M-225) — the accent particle
+   hue in the claim cinematic is Bloom sage now, never a surface wash. */
 .rewards-delivery-page,
 .rewards-admin-page {
   --gold: #dcc08f;
   --gold-soft: #f2e4c6;
-  --royal: #a697d3;
 }
 
 /* Keep the Rewards atmosphere above the page background but below content. */

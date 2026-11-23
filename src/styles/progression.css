@@ -11,20 +11,20 @@
 .pg-page {
   --pg-gold: var(--gold);
   --pg-ivory: oklch(0.95 0.02 85);
-  --pg-lavender: color-mix(in oklab, var(--violet) 80%, white);
+  --pg-goldsoft: color-mix(in oklab, var(--gold) 80%, white);
   --pg-line: color-mix(in oklab, var(--gold) 22%, transparent);
   --pg-line-soft: var(--hairline-soft);
   --pg-shadow: 0 30px 80px -40px color-mix(in oklab, black 70%, transparent);
   /* Raw colour values live here, in the definitions — rules below mix and
      reference tokens only (the U5/U6 tokenisation standard). */
   --pg-gold-ink: oklch(0.19 0.03 85); /* ink on the gold primary */
-  --pg-scrim: oklch(0.09 0.02 285); /* ceremony backdrop base */
-  --pg-scrim-far: oklch(0.1 0.02 279); /* sky vignette base */
-  --pg-crest-base-hi: oklch(0.24 0.03 285); /* crest ribbon, lit stop */
-  --pg-crest-base: oklch(0.21 0.03 285); /* crest ribbon, low stop */
-  --pg-crest-base-lo: oklch(0.18 0.025 285); /* crest ribbon, mid stop */
-  --pg-crest-tail-hi: oklch(0.2 0.03 285); /* ribbon tail, lit stop */
-  --pg-crest-tail-lo: oklch(0.15 0.02 285); /* ribbon tail, low stop */
+  --pg-scrim: oklch(0.09 0.02 85); /* ceremony backdrop base */
+  --pg-scrim-far: oklch(0.1 0.02 85); /* sky vignette base */
+  --pg-crest-base-hi: oklch(0.24 0.03 85); /* crest ribbon, lit stop */
+  --pg-crest-base: oklch(0.21 0.03 85); /* crest ribbon, low stop */
+  --pg-crest-base-lo: oklch(0.18 0.025 85); /* crest ribbon, mid stop */
+  --pg-crest-tail-hi: oklch(0.2 0.03 85); /* ribbon tail, lit stop */
+  --pg-crest-tail-lo: oklch(0.15 0.02 85); /* ribbon tail, low stop */
   position: relative;
   isolation: isolate;
 }
@@ -50,7 +50,7 @@
   background:
     radial-gradient(
       120% 80% at 50% -10%,
-      color-mix(in oklab, var(--violet) 12%, transparent),
+      color-mix(in oklab, var(--gold) 12%, transparent),
       transparent 60%
     ),
     linear-gradient(
@@ -111,7 +111,7 @@
   height: 52vw;
   background: radial-gradient(
     circle,
-    color-mix(in oklab, var(--violet) 12%, transparent),
+    color-mix(in oklab, var(--gold) 12%, transparent),
     transparent 64%
   );
   animation: pg-breathe 42s ease-in-out infinite alternate;
@@ -290,7 +290,7 @@
     ),
     radial-gradient(
       90% 100% at 6% 100%,
-      color-mix(in oklab, var(--violet) 7%, transparent),
+      color-mix(in oklab, var(--gold) 7%, transparent),
       transparent 60%
     ),
     linear-gradient(
@@ -308,7 +308,7 @@
   inset: -40% 40% 50% -20%;
   background: radial-gradient(
     closest-side,
-    color-mix(in oklab, var(--violet) 10%, transparent),
+    color-mix(in oklab, var(--gold) 10%, transparent),
     transparent 70%
   );
   pointer-events: none;
@@ -631,13 +631,6 @@
     90deg,
     color-mix(in oklab, var(--sage) 50%, transparent),
     var(--sage)
-  );
-}
-.pg-rail-fill[data-tone="violet"] {
-  background: linear-gradient(
-    90deg,
-    color-mix(in oklab, var(--violet) 50%, transparent),
-    var(--violet)
   );
 }
 .pg-rail-fill[data-tone="sky"] {
@@ -1232,8 +1225,8 @@
 }
 
 .pg-rarity[data-rarity="signature"] {
-  border-color: color-mix(in oklab, var(--violet) 44%, transparent);
-  color: color-mix(in oklab, var(--violet) 88%, var(--foreground));
+  border-color: color-mix(in oklab, var(--gold) 44%, transparent);
+  color: color-mix(in oklab, var(--gold) 88%, var(--foreground));
 }
 
 .pg-ach-condition {
@@ -1318,7 +1311,7 @@
 }
 
 .pg-history-rank .pg-history-points {
-  color: color-mix(in oklab, var(--violet) 85%, var(--foreground));
+  color: color-mix(in oklab, var(--gold) 85%, var(--foreground));
 }
 
 .pg-empty {
@@ -1892,7 +1885,7 @@
     ),
     radial-gradient(
       1px 1px at 57% 12%,
-      color-mix(in oklab, var(--pg-lavender) 80%, transparent),
+      color-mix(in oklab, var(--pg-goldsoft) 80%, transparent),
       transparent 55%
     ),
     radial-gradient(
@@ -1912,7 +1905,7 @@
     ),
     radial-gradient(
       1px 1px at 8% 44%,
-      color-mix(in oklab, var(--pg-lavender) 65%, transparent),
+      color-mix(in oklab, var(--pg-goldsoft) 65%, transparent),
       transparent 55%
     ),
     radial-gradient(
@@ -1941,7 +1934,7 @@
     ),
     radial-gradient(
       1.5px 1.5px at 34% 20%,
-      color-mix(in oklab, var(--pg-lavender) 75%, transparent),
+      color-mix(in oklab, var(--pg-goldsoft) 75%, transparent),
       transparent 55%
     ),
     radial-gradient(
@@ -1961,7 +1954,7 @@
     ),
     radial-gradient(
       1px 1px at 91% 7%,
-      color-mix(in oklab, var(--pg-lavender) 70%, transparent),
+      color-mix(in oklab, var(--pg-goldsoft) 70%, transparent),
       transparent 55%
     ),
     radial-gradient(
@@ -1991,7 +1984,7 @@
   background:
     radial-gradient(
       52% 68% at 30% 40%,
-      color-mix(in oklab, var(--violet) 11%, transparent),
+      color-mix(in oklab, var(--gold) 11%, transparent),
       transparent 70%
     ),
     radial-gradient(
@@ -2192,7 +2185,7 @@
     color-mix(in oklab, var(--foreground) 10%, transparent) 30%,
     color-mix(in oklab, var(--gold) 52%, transparent) 50%,
     color-mix(in oklab, var(--foreground) 10%, transparent) 70%,
-    color-mix(in oklab, var(--violet) 30%, transparent)
+    color-mix(in oklab, var(--gold) 30%, transparent)
   );
   background-size: 300% 300%;
   -webkit-mask:
@@ -2389,8 +2382,8 @@
   width: 3px;
   height: 3px;
   animation-delay: -1.2s;
-  background: color-mix(in oklab, var(--pg-lavender) 90%, white);
-  box-shadow: 0 0 9px 2px color-mix(in oklab, var(--violet) 45%, transparent);
+  background: color-mix(in oklab, var(--pg-goldsoft) 90%, white);
+  box-shadow: 0 0 9px 2px color-mix(in oklab, var(--gold) 45%, transparent);
 }
 
 .pg-orbit-spark-3 {
@@ -2431,7 +2424,7 @@
     color-mix(in oklab, var(--gold) 10%, transparent) 40deg,
     transparent 90deg,
     transparent 180deg,
-    color-mix(in oklab, var(--violet) 8%, transparent) 230deg,
+    color-mix(in oklab, var(--gold) 8%, transparent) 230deg,
     transparent 290deg
   );
   filter: blur(10px);
@@ -2847,8 +2840,8 @@
   --pg-badge-lo: color-mix(in oklab, var(--gold) 70%, oklch(0.6 0.1 85));
 }
 .pg-crest[data-band="5"] {
-  --pg-badge-hi: color-mix(in oklab, var(--violet) 55%, var(--gold));
-  --pg-badge-lo: color-mix(in oklab, var(--violet) 75%, oklch(0.55 0.12 300));
+  --pg-badge-hi: color-mix(in oklab, var(--sage) 55%, var(--gold));
+  --pg-badge-lo: color-mix(in oklab, var(--sage) 75%, oklch(0.55 0.1 150));
 }
 
 .pg-crest-art {
@@ -3361,7 +3354,7 @@
     ),
     radial-gradient(
       68% 68% at 50% 50%,
-      color-mix(in oklab, var(--violet) 7%, transparent),
+      color-mix(in oklab, var(--gold) 7%, transparent),
       transparent 78%
     );
   pointer-events: none;
@@ -3617,14 +3610,14 @@
 }
 
 .pg-rarity[data-rarity="signature"] {
-  color: color-mix(in oklab, var(--violet) 88%, var(--foreground));
+  color: color-mix(in oklab, var(--gold) 88%, var(--foreground));
   background: linear-gradient(
     180deg,
     transparent,
-    color-mix(in oklab, var(--violet) 15%, transparent) 38%,
-    color-mix(in oklab, var(--violet) 24%, transparent)
+    color-mix(in oklab, var(--gold) 15%, transparent) 38%,
+    color-mix(in oklab, var(--gold) 24%, transparent)
   );
-  border-top-color: color-mix(in oklab, var(--violet) 40%, transparent);
+  border-top-color: color-mix(in oklab, var(--gold) 40%, transparent);
 }
 
 /* ------------------------- section title flourish ------------------------ */

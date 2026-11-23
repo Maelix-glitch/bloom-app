@@ -22,8 +22,9 @@ export type AvatarRing = "none" | "quiet" | "story-unseen" | "story-seen";
  */
 const FRAME_RINGS: Record<string, CSSProperties> = {
   "fr-crescent": {
-    border: `1px solid color-mix(in oklab, var(--violet) 65%, transparent)`,
-    boxShadow: `inset 0 0 0 1px color-mix(in oklab, var(--violet) 22%, transparent)`,
+    /* Silver, per the frame's own catalog description ("silver-crescent"). */
+    border: `1px solid color-mix(in oklab, var(--silver) 65%, transparent)`,
+    boxShadow: `inset 0 0 0 1px color-mix(in oklab, var(--silver) 22%, transparent)`,
   },
   "fr-laurel": {
     border: `1px solid color-mix(in oklab, var(--sage) 78%, transparent)`,
@@ -45,7 +46,7 @@ const FRAME_RINGS: Record<string, CSSProperties> = {
 export function ProfileAvatar({
   name,
   avatarPath,
-  accent = "violet",
+  accent = "amber",
   size = 96,
   ring = "none",
   className,

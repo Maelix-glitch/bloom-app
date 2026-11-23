@@ -30,7 +30,7 @@ export type CoachBlock =
       value: string;
       detail?: string;
       series: number[];
-      accent?: "violet" | "sky" | "amber" | "sage" | "rose";
+      accent?: "gold" | "sky" | "amber" | "sage" | "rose";
     }
   | {
       type: "plan";
@@ -291,7 +291,7 @@ function trackerAnswer(topic: Topic, record: CoachRecord): CoachResponse | null 
       series: values.slice(-14),
       accent:
         id === "sleep"
-          ? "violet"
+          ? "gold"
           : id === "water"
             ? "sky"
             : id === "study"
@@ -459,7 +459,7 @@ function moodAnswer(topic: Topic, context: CoachContext, mode: CoachMode): Coach
       series: [mood.previous.mood, mood.recent.mood, mood.month.mood].filter((v): v is number =>
         Number.isFinite(v),
       ),
-      accent: "violet",
+      accent: "gold",
     });
   }
 
@@ -621,7 +621,7 @@ function generalAnswer(record: CoachRecord, context: CoachContext): CoachRespons
         value: strongest.format(Math.round(strongest.avg7 ?? values[values.length - 1] ?? 0)),
         detail: `${plural(strongest.daysLogged, "day")} logged`,
         series: values.slice(-14),
-        accent: "violet",
+        accent: "gold",
       });
       sources.push(`Trackers · ${strongest.name}`);
     }

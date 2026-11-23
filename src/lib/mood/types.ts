@@ -22,7 +22,7 @@ export interface EmotionMeta {
   label: string;
   valence: Valence;
   /** Accent token used for visualisation. */
-  accent: "violet" | "sky" | "amber" | "sage" | "rose";
+  accent: "gold" | "sky" | "amber" | "sage" | "rose";
 }
 
 export const EMOTIONS: EmotionMeta[] = [
@@ -30,16 +30,16 @@ export const EMOTIONS: EmotionMeta[] = [
   { key: "calm", label: "Calm", valence: "positive", accent: "sage" },
   { key: "excited", label: "Excited", valence: "positive", accent: "rose" },
   { key: "focused", label: "Focused", valence: "positive", accent: "sky" },
-  { key: "motivated", label: "Motivated", valence: "positive", accent: "violet" },
+  { key: "motivated", label: "Motivated", valence: "positive", accent: "gold" },
   { key: "confident", label: "Confident", valence: "positive", accent: "amber" },
   { key: "grateful", label: "Grateful", valence: "positive", accent: "sage" },
   { key: "neutral", label: "Neutral", valence: "neutral", accent: "sky" },
-  { key: "tired", label: "Tired", valence: "negative", accent: "violet" },
+  { key: "tired", label: "Tired", valence: "negative", accent: "gold" },
   { key: "anxious", label: "Anxious", valence: "negative", accent: "rose" },
   { key: "sad", label: "Sad", valence: "negative", accent: "sky" },
   { key: "angry", label: "Angry", valence: "negative", accent: "rose" },
   { key: "frustrated", label: "Frustrated", valence: "negative", accent: "amber" },
-  { key: "overwhelmed", label: "Overwhelmed", valence: "negative", accent: "violet" },
+  { key: "overwhelmed", label: "Overwhelmed", valence: "negative", accent: "gold" },
   { key: "lonely", label: "Lonely", valence: "negative", accent: "sky" },
 ];
 
@@ -125,7 +125,7 @@ export interface DetectedPattern {
   evidence: Evidence;
   metrics: { label: string; value: string }[];
   delta?: string | undefined;
-  accent: "violet" | "sky" | "amber" | "sage" | "rose";
+  accent: "gold" | "sky" | "amber" | "sage" | "rose";
 }
 
 export interface Anomaly {

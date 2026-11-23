@@ -31,7 +31,7 @@ export function RewardClaimCinematic({
         x: `${50 + Math.cos(index * 1.7) * (15 + (index % 5) * 8)}%`,
         y: `${47 + Math.sin(index * 2.3) * (12 + (index % 4) * 10)}%`,
         delay: `${(index % 9) * 0.04}s`,
-        hue: index % 3 === 0 ? "var(--gold)" : index % 3 === 1 ? "var(--royal)" : "var(--sky)",
+        hue: index % 3 === 0 ? "var(--gold)" : index % 3 === 1 ? "var(--sage)" : "var(--sky)",
         size: `${3 + (index % 3) * 2}px`,
       })),
     [],

@@ -421,16 +421,12 @@ export function GrocerySection() {
 
   const renderGroup = (group: GroceryGroup, items: GroceryItem[]) => {
     const done = group.items.filter((item) => bought.has(item.foodId)).length;
-    const icon = GROCERY_CATEGORY_ICONS[group.category];
+    const Icon = GROCERY_CATEGORY_ICONS[group.category];
     return (
       <div key={group.category} className="shop-group">
         <div className="shop-group-head">
           <h3 className="nut-group-title shop-group-title">
-            {icon ? (
-              <span className="shop-group-icon" aria-hidden>
-                {icon}
-              </span>
-            ) : null}
+            {Icon ? <Icon className="shop-group-icon" aria-hidden /> : null}
             {group.label}
           </h3>
           <span className="shop-group-count">

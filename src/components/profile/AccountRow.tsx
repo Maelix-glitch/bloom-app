@@ -390,7 +390,7 @@ function BadgesRow({ badges }: { badges: readonly MemberBadge[] }) {
 }
 
 const ACCENT_LABEL: Record<ProfileIdentity["accent"], string> = {
-  violet: "Violet",
+  gold: "Gold",
   sky: "Sky",
   amber: "Amber",
   sage: "Sage",

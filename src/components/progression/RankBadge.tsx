@@ -10,7 +10,7 @@
  *   band 2 · tiers 4–6    Gilded   — a hex plate with a crown gem  (gold)
  *   band 3 · tiers 7–9    Laurel   — a shield framed by laurels    (rose-gold)
  *   band 4 · tiers 10–12  Radiant  — a winged star with a diadem   (bright gold)
- *   band 5 · cycle ranks  Mythic   — a rosette inside an orbit     (violet-gold)
+ *   band 5 · cycle ranks  Mythic   — a rosette inside an orbit     (gold-sage)
  *
  * Everything is stroke-drawn SVG — crisp at 64px in a gallery and 300px in the
  * ceremony — and fully deterministic, so SSR and the client always agree.

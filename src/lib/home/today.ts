@@ -1014,7 +1014,8 @@ export function habitColorVar(color: string): string {
       return "sky";
     case "violet":
     case "purple":
-      return "violet";
+      /* M-225: the retired violet habit colour renders gold. */
+      return "gold";
     default:
       return "amber";
   }

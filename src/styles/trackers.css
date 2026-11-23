@@ -1740,7 +1740,7 @@ body:has(.tk2-log-sheet) .bsheet-backdrop {
   background:
     radial-gradient(
       80% 60% at 50% 100%,
-      color-mix(in oklab, var(--violet) 10%, transparent),
+      color-mix(in oklab, var(--gold) 10%, transparent),
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 86%, transparent);
@@ -1773,7 +1773,7 @@ body:has(.tk2-snap-sheet) .bsheet-backdrop {
   background:
     radial-gradient(
       80% 60% at 50% 100%,
-      color-mix(in oklab, var(--violet) 10%, transparent),
+      color-mix(in oklab, var(--gold) 10%, transparent),
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 86%, transparent);
@@ -2421,7 +2421,7 @@ body:has(.tk2-targets-sheet) .bsheet-backdrop {
   background:
     radial-gradient(
       80% 60% at 50% 100%,
-      color-mix(in oklab, var(--violet) 10%, transparent),
+      color-mix(in oklab, var(--gold) 10%, transparent),
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 86%, transparent);

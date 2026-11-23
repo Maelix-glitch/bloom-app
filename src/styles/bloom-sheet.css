@@ -504,7 +504,7 @@
   z-index: -1;
   background: linear-gradient(
     180deg,
-    color-mix(in oklab, var(--bmoment-tint, var(--violet)) 18%, transparent),
+    color-mix(in oklab, var(--bmoment-tint, var(--gold)) 18%, transparent),
     color-mix(in oklab, var(--sheet-scrim) 62%, transparent) 60%,
     color-mix(in oklab, var(--sheet-scrim) 82%, transparent) 100%
   );
@@ -518,7 +518,7 @@
   border-radius: inherit;
   background: radial-gradient(
     120% 90% at 50% 100%,
-    color-mix(in oklab, var(--bmoment-tint, var(--violet)) 22%, transparent),
+    color-mix(in oklab, var(--bmoment-tint, var(--gold)) 22%, transparent),
     transparent 60%
   );
   opacity: 0.85;
@@ -579,7 +579,7 @@
   border: 1px solid color-mix(in oklab, white 28%, transparent);
   background: color-mix(
     in oklab,
-    var(--bmoment-tint, var(--violet)) 40%,
+    var(--bmoment-tint, var(--gold)) 40%,
     rgba(255, 255, 255, 0.08)
   );
   color: white;
@@ -631,7 +631,7 @@
   background: linear-gradient(
     90deg,
     color-mix(in oklab, var(--amber) 10%, transparent),
-    color-mix(in oklab, var(--violet) 10%, transparent)
+    color-mix(in oklab, var(--gold) 10%, transparent)
   );
 }
 @media (max-width: 640px) {
@@ -655,7 +655,7 @@
   border-radius: var(--radius-pill);
   border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
   background: color-mix(in oklab, var(--background) 45%, transparent);
-  color: color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, white);
+  color: color-mix(in oklab, var(--profile-accent, var(--amber)) 70%, white);
 }
 .bmoment-foot-orb svg {
   animation: bsheet-glow 3.2s ease-in-out infinite;
@@ -668,7 +668,7 @@
   }
   50% {
     filter: drop-shadow(
-      0 0 6px color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, transparent)
+      0 0 6px color-mix(in oklab, var(--profile-accent, var(--amber)) 70%, transparent)
     );
     opacity: 1;
   }
@@ -781,12 +781,12 @@
   padding: 3px;
   background: linear-gradient(
     135deg,
-    color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, white),
-    color-mix(in oklab, var(--profile-accent, var(--violet)) 25%, transparent) 60%,
+    color-mix(in oklab, var(--profile-accent, var(--amber)) 70%, white),
+    color-mix(in oklab, var(--profile-accent, var(--amber)) 25%, transparent) 60%,
     color-mix(in oklab, white 30%, transparent)
   );
   box-shadow:
-    0 24px 60px -24px color-mix(in oklab, var(--profile-accent, var(--violet)) 80%, transparent),
+    0 24px 60px -24px color-mix(in oklab, var(--profile-accent, var(--amber)) 80%, transparent),
     0 18px 40px -22px rgba(0, 0, 0, 0.9);
 }
 .bedit-avatar > img,
@@ -808,7 +808,7 @@
   height: 38px;
   border-radius: var(--radius-pill);
   border: 2px solid color-mix(in oklab, var(--surface) 90%, transparent);
-  background: color-mix(in oklab, var(--profile-accent, var(--violet)) 35%, var(--sheet-accent-deep));
+  background: color-mix(in oklab, var(--profile-accent, var(--amber)) 35%, var(--sheet-accent-deep));
   color: white;
   box-shadow: 0 10px 22px -10px rgba(0, 0, 0, 0.9);
   transition: transform var(--motion-fast) var(--ease-out-expo);
@@ -1043,8 +1043,8 @@ textarea.bedit-field-input {
 .bedit-photo[data-selected="true"] .bedit-photo-disc {
   box-shadow:
     0 0 0 2px var(--surface),
-    0 0 0 4px color-mix(in oklab, var(--profile-accent, var(--violet)) 80%, white),
-    0 0 26px -4px color-mix(in oklab, var(--profile-accent, var(--violet)) 70%, transparent);
+    0 0 0 4px color-mix(in oklab, var(--profile-accent, var(--amber)) 80%, white),
+    0 0 26px -4px color-mix(in oklab, var(--profile-accent, var(--amber)) 70%, transparent);
   transform: scale(1.06);
 }
 .bedit-photo[data-selected="true"] {
@@ -1223,7 +1223,7 @@ textarea.bedit-field-input {
   scroll-snap-align: start;
   border: 1px solid color-mix(in oklab, var(--foreground) 14%, transparent);
   /* the tint is the photo's own dominant hue, so selection never clashes */
-  box-shadow: 0 0 0 0 color-mix(in oklab, var(--preset-tint, var(--violet)) 80%, transparent);
+  box-shadow: 0 0 0 0 color-mix(in oklab, var(--preset-tint, var(--gold)) 80%, transparent);
   transition:
     transform var(--motion-page) var(--ease-out-expo),
     box-shadow var(--motion-page) var(--ease-out-expo),
@@ -1246,8 +1246,8 @@ textarea.bedit-field-input {
   border-color: transparent;
   box-shadow:
     0 0 0 2px var(--surface),
-    0 0 0 4px color-mix(in oklab, var(--preset-tint, var(--violet)) 85%, white),
-    0 8px 22px -8px color-mix(in oklab, var(--preset-tint, var(--violet)) 75%, transparent);
+    0 0 0 4px color-mix(in oklab, var(--preset-tint, var(--gold)) 85%, white),
+    0 8px 22px -8px color-mix(in oklab, var(--preset-tint, var(--gold)) 75%, transparent);
 }
 .bedit-preset[data-on="true"] img {
   filter: saturate(1.05) brightness(1);
@@ -1259,7 +1259,7 @@ textarea.bedit-field-input {
   display: grid;
   place-items: center;
   color: var(--sheet-on-accent-ink);
-  background: color-mix(in oklab, var(--preset-tint, var(--violet)) 55%, transparent);
+  background: color-mix(in oklab, var(--preset-tint, var(--gold)) 55%, transparent);
   opacity: 0;
   transition: opacity var(--motion-standard) var(--ease-out-expo);
 }
@@ -1331,7 +1331,7 @@ body:has(.assess-sheet) .bsheet-backdrop {
   background:
     radial-gradient(
       80% 60% at 50% 100%,
-      color-mix(in oklab, var(--violet) 10%, transparent),
+      color-mix(in oklab, var(--gold) 10%, transparent),
       transparent 70%
     ),
     color-mix(in oklab, var(--background) 86%, transparent);

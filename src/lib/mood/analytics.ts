@@ -109,7 +109,7 @@ export function calculateEmotionDistribution(entries: MoodEntry[]) {
     .map(([key, v]) => ({
       key,
       label: EMOTION_MAP[key]?.label ?? key,
-      accent: EMOTION_MAP[key]?.accent ?? "violet",
+      accent: EMOTION_MAP[key]?.accent ?? "gold",
       valence: EMOTION_MAP[key]?.valence ?? "neutral",
       count: v.count,
       /* Share of CHECK-INS carrying the emotion — a check-in can carry
@@ -255,7 +255,7 @@ export const MOOD_BUCKETS = [
   { key: "good", label: "Good", min: 7, accent: "sky" },
   { key: "neutral", label: "Neutral", min: 5.5, accent: "amber" },
   { key: "difficult", label: "Difficult", min: 4, accent: "rose" },
-  { key: "very-difficult", label: "Very difficult", min: 0, accent: "violet" },
+  { key: "very-difficult", label: "Very difficult", min: 0, accent: "gold" },
 ] as const;
 
 export function bucketOf(mood: number) {
@@ -372,7 +372,7 @@ export function detectPatterns(days: DayAggregate[]): DetectedPattern[] {
           { label: names[worst.wd]!, value: round(worst.m, 1).toFixed(1) },
         ],
         delta: `+${round(best.m - worst.m, 1).toFixed(1)}`,
-        accent: "violet",
+        accent: "gold",
       });
     }
   }

@@ -89,7 +89,7 @@ export function MilestoneArchive({
       sub: "Rank",
       points: event.atPoints > 0 ? event.atPoints : null,
       emblem: "bloom",
-      tone: "var(--violet)",
+      tone: "var(--gold)",
       kind: "rank" as const,
     })),
     ...ledger
