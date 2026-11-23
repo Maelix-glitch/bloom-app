@@ -1101,6 +1101,13 @@ export const MILK_CURD_FOOD_IDS: ReadonlySet<string> = new Set([
   "usda-322892", // Milk, whole, 3.25% milkfat
   "usda-2259793", // Yogurt, plain, whole milk
   "usda-330137", // Yogurt, Greek, plain, nonfat (hung curd)
+  /* PF-1 (2026-11-19): the lowfat Greek yogurt is the same curd at a
+     lower fat level — it joins its nonfat sibling; the skimmed milk
+     powder is milk in dry form (36 g of protein per 100 g, so the
+     protein heuristic alone would miss it) — it is milk, and a
+     serving made from it tallies as milk. */
+  "usda-170903", // Yogurt, Greek, plain, lowfat (hung curd)
+  "usda-172195", // Milk, dry, nonfat (skimmed milk powder)
 ]);
 
 /** Whether a SERVED portion counts toward the day's milk-and-curd
@@ -1229,18 +1236,26 @@ export const COOKED_SOY_FORM_IDS: ReadonlySet<string> = new Set([
   "usda-172448", // Tofu, firm — FDC 172448
   "usda-174272", // Tempeh — FDC 174272
   "usda-168410", // Edamame, frozen — FDC 168410
+  /* PF-1 (2026-11-19): the same cooked soy forms in their other
+     shipped records — tofu at the other firmness levels and the
+     prepared edamame — take the same protein-layer cap. */
+  "usda-174290", // Tofu, extra firm — FDC 174290
+  "usda-172449", // Tofu, soft — FDC 172449
+  "usda-168411", // Edamame, frozen, prepared — FDC 168411
 ]);
 
 /** A protein powder (P11): a food whose whole purpose is protein —
  *  in the reference set's classification it sits in the "other"
  *  group, is neither flesh nor fish, and carries at least 40 g of
  *  protein per 100 g. The threshold is a census fact about the
- *  pinned set, not a guess: exactly two records meet it — the PW-1
- *  whey isolate (58.14 g/100 g) and soy powder (55.56 g/100 g) —
- *  and the next-densest "other" food sits at 26 g/100 g. Powders
- *  are supplement foods: they never carry a meal's protein layer
- *  and never compose a plate, but a top-up — a simple food that
- *  closes a day's gap — is exactly what they are for. */
+ *  pinned set, not a guess: four records meet it — the PW-1 whey
+ *  isolate (58.14 g/100 g) and soy powder (55.56 g/100 g), joined by
+ *  PF-1 (2026-11-19) with the whey-based powder (78.13 g/100 g) and
+ *  the egg-white powder (82.4 g/100 g) — and the next-densest
+ *  "other" food sits at 26 g/100 g. Powders are supplement foods:
+ *  they never carry a meal's protein layer and never compose a
+ *  plate, but a top-up — a simple food that closes a day's gap —
+ *  is exactly what they are for. */
 export function isProteinPowder(food: Food): boolean {
   const cls = food.classification;
   if (!cls || cls.group !== "other" || cls.isFlesh || cls.isFish) return false;

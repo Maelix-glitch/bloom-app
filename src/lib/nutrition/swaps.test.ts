@@ -62,7 +62,21 @@ describe("swapsFor", () => {
     } as unknown as HealthProfile;
     const pool = eligiblePool(eggetarianProfile, USDA_REFERENCE_FOODS);
     expect(pool.some((f) => f.id === chicken.id)).toBe(false);
-    expect(swapsFor(entry, chicken, pool, "protein")).toEqual([]);
+    /* PF-1 (2026-11-19): this used to equal [] because the eggetarian
+       pool held no same-group ("other"), calorie-matched protein swap
+       for chicken at all. The wave added two eggetarian-legal group-
+       "other" powders, so swaps now exist — the invariant this test
+       guards is unchanged and now exercised against real candidates:
+       every offered swap is flesh-free and fish-free. */
+    const eggetarianSwaps = swapsFor(entry, chicken, pool, "protein");
+    expect(eggetarianSwaps.map((o) => o.food.id).sort()).toEqual([
+      "usda-173180",
+      "usda-173427",
+    ]);
+    for (const option of eggetarianSwaps) {
+      expect(option.food.classification?.isFlesh).toBe(false);
+      expect(option.food.classification?.isFish).toBe(false);
+    }
     /* …while the unfiltered pool does offer same-group options. */
     expect(swapsFor(entry, chicken, USDA_REFERENCE_FOODS, "protein").length).toBeGreaterThan(0);
   });

@@ -53,7 +53,10 @@ describe("the milk-and-curd serving tally", () => {
        cottage cheese and the hard cheeses are protein foods and
        stay out of the floor tally — a data refresh that adds a
        dairy food fails here until the set is re-judged. */
-    expect(MILK_CURD_FOOD_IDS.size).toBe(4);
+    /* 6 since PF-1 (2026-11-19): the lowfat Greek yogurt (the same
+       curd as its nonfat sibling) and the skimmed milk powder (milk
+       in dry form) joined the set — see plan.ts at the set. */
+    expect(MILK_CURD_FOOD_IDS.size).toBe(6);
     expect(countsTowardMilkCurdFloor(food("usda-330137"))).toBe(true); // Greek yogurt (hung curd)
     expect(countsTowardMilkCurdFloor(food("usda-323444"))).toBe(false); // ricotta
     expect(countsTowardMilkCurdFloor(food("usda-328841"))).toBe(false); // cottage cheese

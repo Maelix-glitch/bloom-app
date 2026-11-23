@@ -30,13 +30,49 @@ import {
 
 describe("the USDA reference set", () => {
   it("ships a curated staple set, parsed whole by the strict N1 parser", () => {
-    expect(USDA_REFERENCE_FOODS_RAW.length).toBe(144);
+    /* 158 since PF-1 (2026-11-19) added the 14 dedicated protein
+       foods to the original 144. */
+    expect(USDA_REFERENCE_FOODS_RAW.length).toBe(158);
     // Nothing drops: every generated entry survives parsing.
     expect(USDA_REFERENCE_FOODS.length).toBe(USDA_REFERENCE_FOODS_RAW.length);
     const ids = new Set(USDA_REFERENCE_FOODS.map((f) => f.id));
     expect(ids.size).toBe(USDA_REFERENCE_FOODS.length);
     const fdcIds = new Set(USDA_REFERENCE_FOODS.map((f) => f.provenance.sourceId));
     expect(fdcIds.size).toBe(USDA_REFERENCE_FOODS.length);
+  });
+
+  it("PF-1 census: the dedicated protein foods wave is in the set, at its USDA values", () => {
+    /* The protein-foods wave (2026-11-19): 14 eat-as-is / log-as-is
+       protein foods added to the 144 — pinned here by FDC id with
+       the protein USDA published for each, so a data refresh that
+       drops or re-points one fails loudly. Values are per 100 g. */
+    const wave = new Map<string, number>([
+      ["usda-2346384", 11.62], // Cottage cheese, full fat
+      ["usda-170903", 9.95], // Yogurt, Greek, plain, lowfat
+      ["usda-172195", 36.16], // Skimmed milk powder
+      ["usda-173424", 12.58], // Egg, whole, cooked, hard-boiled
+      ["usda-173427", 82.4], // Egg white powder
+      ["usda-173180", 78.13], // Whey-based protein powder
+      ["usda-168147", 75.16], // Vital wheat gluten
+      ["usda-174268", 41.71], // Meat extender (soya chunks)
+      ["usda-174290", 9.98], // Tofu, extra firm
+      ["usda-172449", 7.17], // Tofu, soft
+      ["usda-168411", 11.91], // Edamame, frozen, prepared
+      ["usda-170148", 31.56], // Hemp seeds, hulled
+      ["usda-171477", 31.02], // Chicken breast, cooked, roasted
+      ["usda-171496", 30.13], // Turkey breast, cooked, roasted
+    ]);
+    expect(USDA_REFERENCE_FOODS.length).toBe(158);
+    for (const [id, proteinG] of wave) {
+      const food = USDA_REFERENCE_FOODS.find((f) => f.id === id);
+      expect(food, id).toBeDefined();
+      expect(food!.per100g.proteinG, id).toBeCloseTo(proteinG, 1);
+    }
+    /* The protein-dense census (≥15 g protein per 100 g): 47 before
+       the wave, 55 after — the wave's eight dense additions are the
+       milk powder, the two new powders, the gluten, the soya chunks,
+       the hemp seeds and the two roasted breast meats. */
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.per100g.proteinG >= 15).length).toBe(55);
   });
 
   it("keeps provenance intact on every entry, FDC id and data type included", () => {
@@ -183,16 +219,21 @@ describe("food-group classification (P2)", () => {
       const group = food.classification!.group;
       counts.set(group, (counts.get(group) ?? 0) + 1);
     }
+    /* PF-1 (2026-11-19): +1 cereals (vital wheat gluten), +4 pulses
+       (meat extender, two tofu forms, prepared edamame), +3 dairy
+       (Greek lowfat, skimmed milk powder, full-fat cottage cheese),
+       +1 eggs (boiled egg), +1 nuts_seeds (hemp), +4 other (whey-based
+       and egg-white powders, roasted chicken and turkey breast). */
     expect(Object.fromEntries(counts)).toEqual({
-      cereals_grains: 17,
-      pulses_legumes: 16,
-      dairy: 9,
+      cereals_grains: 18,
+      pulses_legumes: 20,
+      dairy: 12,
       fats_oils: 10,
-      eggs: 3,
+      eggs: 4,
       vegetables: 26,
       fruits: 13,
-      nuts_seeds: 9,
-      other: 41,
+      nuts_seeds: 10,
+      other: 45,
     });
   });
 
@@ -206,13 +247,17 @@ describe("food-group classification (P2)", () => {
       /* Butter and ghee are dairy by ingredient, fats by group. */
       if (food.name.startsWith("Butter")) expect(c.containsDairy).toBe(true);
     }
-    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsEgg)).toHaveLength(3);
-    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsDairy)).toHaveLength(12);
-    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh)).toHaveLength(16);
+    /* PF-1 (2026-11-19): egg 3→5 (boiled egg, egg-white powder),
+       dairy 12→16 (Greek lowfat, skimmed milk powder, full-fat
+       cottage cheese, whey-based powder), flesh 16→18 and
+       flesh-not-fish 8→10 (roasted chicken and turkey breast). */
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsEgg)).toHaveLength(5);
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.containsDairy)).toHaveLength(16);
+    expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh)).toHaveLength(18);
     expect(USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFish)).toHaveLength(8);
     expect(
       USDA_REFERENCE_FOODS.filter((f) => f.classification!.isFlesh && !f.classification!.isFish),
-    ).toHaveLength(8);
+    ).toHaveLength(10);
   });
 
   it("an entry that loses its classification in parsing fails the set", () => {

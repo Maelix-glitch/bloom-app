@@ -204,7 +204,9 @@ describe("NutritionPage — search & add flow", () => {
       usdaDatasetVersionLine(),
     );
     expect(usdaDatasetVersionLine()).toContain("USDA FoodData Central reference set");
-    expect(usdaDatasetVersionLine()).toContain("fingerprint 7760eaf6");
+    /* Fingerprint of the 158-food set since PF-1 (2026-11-19) added
+       the dedicated protein foods (was 7760eaf6 at 144 foods). */
+    expect(usdaDatasetVersionLine()).toContain("fingerprint 305140fd");
   });
 
   it("preselects a default portion, so logging never needs an amount decision first", () => {

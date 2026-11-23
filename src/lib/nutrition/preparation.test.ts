@@ -63,6 +63,9 @@ const RAW_BASIS_IDS = [
   "usda-174288",
   "usda-169714",
   "usda-168933",
+  /* PF-1 (2026-11-19): vital wheat gluten — a dry flour-family
+     powder, cooked from dry like the flours above. */
+  "usda-168147",
   // dry pulses & legumes (mature seeds, dry/raw form)
   "usda-2644283",
   "usda-174284",
@@ -77,11 +80,15 @@ const RAW_BASIS_IDS = [
   "usda-174259",
   "usda-170419",
   "usda-173758",
+  /* PF-1 (2026-11-19): the meat extender — dry textured soy protein,
+     soaked and cooked from dry like the dry pulses above. */
+  "usda-174268",
 ];
 
 describe("preparation · the shipped reference set", () => {
   it("every reference food carries a pinned preparation state (spec §12.1 #4)", () => {
-    expect(USDA_REFERENCE_FOODS.length).toBe(144);
+    /* 158 since PF-1 (2026-11-19) added the dedicated protein foods. */
+    expect(USDA_REFERENCE_FOODS.length).toBe(158);
     for (const food of USDA_REFERENCE_FOODS) {
       expect(food.preparation, food.id).toBeDefined();
       expect(PREPARATION_STATES).toContain(food.preparation!.state);
