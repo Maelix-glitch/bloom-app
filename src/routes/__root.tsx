@@ -147,7 +147,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      {
+        name: "viewport",
+        /* Zoom is locked (owner directive, 2026-11-23): Bloom is an app,
+           not a document — pinch/page zoom only ever strands the layout
+           (a phone on Brave rendered the whole app shrunk into one side
+           of the screen). minimum+maximum-scale pin the initial scale so
+           a remembered per-site zoom cannot reopen the trap; the guard in
+           src/lib/viewport.guard.test.ts pins this string. */
+        content:
+          "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
+      },
       { title: "Bloom — Mood Intelligence" },
       {
         name: "description",
