@@ -39,9 +39,12 @@ import { BloomIcon } from "@/components/icons/BloomIcon";
 import { BloomSheet } from "@/components/ui/bloom-sheet";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import {
+  CHECKOUT_RAIL,
   createOrder,
+  createSubscription,
   loadRazorpayCheckout,
   payWithRazorpay,
+  payWithRazorpaySubscription,
   verifyPayment,
 } from "@/lib/billing/checkout";
 import { invalidateEntitlement } from "@/lib/billing/entitlement";
@@ -249,12 +252,14 @@ export function PaywallSheet({
     return `Yearly saves ${savedFor("premium")} on Premium · ${savedFor("premium_plus")} on Plus`;
   }, [period, region, yearlySaving]);
 
-  /* The buy action runs the Standard Web Checkout rail: the edge
-     function creates a one-time Order priced from the server's own
-     table, Razorpay's modal opens in-page, and the signature the
-     modal returns is confirmed through the function. The plan
-     itself is switched on by the provider's verified webhook —
-     this flow only ever reports what honestly happened. */
+  /* The buy action runs the rail CHECKOUT_RAIL selects (checkout.ts):
+     Autopay by default (M-222 — a Razorpay Subscription with a
+     mandate), the Standard Web Checkout Orders rail as the fallback
+     (a one-time Order priced from the server's own table, the
+     modal's signature confirmed through the function). Either way
+     the plan itself is switched on by the provider's verified
+     webhook — this flow only ever reports what honestly happened. */
+
   const go = async (tier: Exclude<PlanTier, "free">) => {
     setBusyTier(tier);
     setNotice(null);
@@ -264,6 +269,57 @@ export function PaywallSheet({
        lands. No order is created here beyond the one below. */
     void loadRazorpayCheckout().catch(() => {});
     try {
+      /* M-222: the default rail is Autopay — the function ensures
+         the plan and creates a Razorpay Subscription, and the modal
+         opens in subscription mode: the member authorises a mandate
+         (UPI AutoPay / card) and the first charge, and renewals
+         debit automatically until cancelled. The Orders rail below
+         is the fallback, selected by CHECKOUT_RAIL in checkout.ts.
+         Either way the plan switches on ONLY from the provider's
+         verified webhook; this flow reports what honestly happened. */
+      if (CHECKOUT_RAIL === "subscription") {
+        const sub = await createSubscription(tier, period);
+        if (sub.state === "payments_not_configured") {
+          setNotice(
+            "Payments open soon — Bloom's payment account isn't connected yet, so checkout can't start today. Nothing has been charged. The moment it connects, this button goes straight to a secure checkout.",
+          );
+          return;
+        }
+        if (sub.state !== "ready") {
+          setNotice("Checkout couldn't start just now — nothing has been charged. Try again in a moment.");
+          return;
+        }
+        const pay = await payWithRazorpaySubscription({
+          keyId: sub.keyId,
+          subscriptionId: sub.subscriptionId,
+          description: `${PLANS[tier].name} — ${period === "monthly" ? "monthly" : "yearly"}`,
+        });
+        if (pay.kind === "dismissed") {
+          setNotice("Checkout closed — nothing has been charged.");
+          return;
+        }
+        if (pay.kind === "unavailable") {
+          setNotice(
+            "The secure payment window couldn't load — check your connection and try again. Nothing has been charged.",
+          );
+          return;
+        }
+        if (pay.kind === "failed") {
+          setNotice(
+            `Payment didn't go through — ${pay.message} No plan was started; if your bank shows a debit for it, Razorpay refunds it automatically.`,
+          );
+          return;
+        }
+        /* Mandate authorised + first charge accepted. The webhook
+           does the actual switching-on; refresh the entitlement now
+           and once more shortly after, as the Orders flow does. */
+        invalidateEntitlement();
+        setNotice(
+          "Payment received — your plan is switching on now. It renews automatically each period until you cancel; cancel auto-renew anytime from your Profile. It can take a few seconds to show here.",
+        );
+        window.setTimeout(() => invalidateEntitlement(), 4000);
+        return;
+      }
       const order = await createOrder(tier, period);
       if (order.state === "payments_not_configured") {
         setNotice(
@@ -564,8 +620,9 @@ export function PaywallSheet({
           Payments are handled securely by Razorpay — UPI, cards and netbanking.
         </p>
         <p className="bill-foot">
-          The first payment confirms your plan. Renewals are charged manually in this version —
-          nothing is taken automatically, and you keep Premium until the period ends.
+          {CHECKOUT_RAIL === "subscription"
+            ? "The first payment confirms your plan, and it renews automatically each period until you cancel. Cancel auto-renew anytime from your Profile — you keep Premium until the period ends, and nothing is charged after that."
+            : "The first payment confirms your plan. Renewals are charged manually in this version — nothing is taken automatically, and you keep Premium until the period ends."}
         </p>
       </div>
     </BloomSheet>

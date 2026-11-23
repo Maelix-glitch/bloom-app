@@ -24,16 +24,21 @@ import { act, cleanup, fireEvent, render, screen } from "@testing-library/react"
 /* Hoisted so the M-217 pins can count calls and steer single
    calls; the defaults are the states the older tests exercise. */
 const checkoutMock = vi.hoisted(() => ({
-  /* The buy action runs the Orders rail; unconfigured is the state
-     these tests exercise (the honest "payments open soon" notice). */
+  /* This suite pins the Orders rail (CHECKOUT_RAIL below): the
+     M-222 Autopay branch of the buy action has its own suite
+     (PaywallSheetAutopay.test.tsx). Unconfigured is the state these
+     tests exercise (the honest "payments open soon" notice). */
   createOrder: vi.fn(async () => ({ state: "payments_not_configured" as const })),
   payWithRazorpay: vi.fn(async () => ({ kind: "dismissed" as const })),
   loadRazorpayCheckout: vi.fn(async () => null),
 }));
 vi.mock("@/lib/billing/checkout", () => ({
+  CHECKOUT_RAIL: "order" as const,
   startCheckout: vi.fn(async () => ({ state: "payments_not_configured" as const })),
   createOrder: checkoutMock.createOrder,
   payWithRazorpay: checkoutMock.payWithRazorpay,
+  createSubscription: vi.fn(async () => ({ state: "payments_not_configured" as const })),
+  payWithRazorpaySubscription: vi.fn(async () => ({ kind: "dismissed" as const })),
   verifyPayment: vi.fn(async () => false),
   loadRazorpayCheckout: checkoutMock.loadRazorpayCheckout,
 }));
