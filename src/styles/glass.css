@@ -21,6 +21,20 @@
  * sheet.guard) — no --lg-* token and no .glass-* class may ever reach a
  * sheet panel, and glass.guard pins that. Glass never stacks on glass.
  *
+ * M-221 (2026-11-23) — the owner's glass picks, from the 14-area
+ * before/after preview: the placement rule above is superseded for the
+ * areas he named. Glass now also lives on Today (home), the VITALIS
+ * Overview surfaces, the Nutrition day plan, Grocery shopping mode,
+ * the Trackers territories, Coach chat bubbles, Stories template
+ * frames, and the desktop Sidebar + TopBar. Profile, Rewards and the
+ * Assessment sheet stay solid, by the same ruling. Two lines from the
+ * old rule survive untouched: SHEETS AND MODALS STAY FULLY OPAQUE (the
+ * panel census in glass.guard/sheet.guard still holds), and glass
+ * never stacks on glass. Every M-221 surface carries text on the
+ * STRONG tint (panel-grade, below) over a plain fallback declared
+ * first — the readability floor the preview's numbers-on-darkest-tint
+ * note asks for, pinned by glassPicks.guard.
+ *
  * M-170 (2026-11-21) aligned the Welcome-facing utility classes below
  * (pill / cap / field / cta) to the owner-approved preview's exact
  * recipe: a WHITE frost — linear-gradient(135deg, white .15, white .06)
@@ -78,6 +92,56 @@
     color-mix(in oklab, var(--gold) 9%, transparent) 58%,
     color-mix(in oklab, var(--gold) 16%, transparent)
   );
+  /* M-221: the palette washes for page surfaces — the preview's tints
+     (gold / sage / rose), painted as a background-image OVER the strong
+     tint, never instead of it, so a tinted surface keeps the strong
+     tint's contrast. Each wash has a plain rgba twin (the no-color-mix
+     coat): consumers declare the plain line first, the color-mix line
+     over it, exactly as the tints pair --lg-fallback with --lg-tint. */
+  --lg-wash-gold-plain: linear-gradient(
+    165deg,
+    rgba(220, 192, 143, 0.2),
+    rgba(220, 192, 143, 0.07) 58%,
+    rgba(220, 192, 143, 0.13)
+  );
+  --lg-wash-gold: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--gold) 20%, transparent),
+    color-mix(in oklab, var(--gold) 7%, transparent) 58%,
+    color-mix(in oklab, var(--gold) 13%, transparent)
+  );
+  --lg-wash-sage-plain: linear-gradient(
+    165deg,
+    rgba(143, 199, 162, 0.18),
+    rgba(143, 199, 162, 0.06) 58%,
+    rgba(143, 199, 162, 0.11)
+  );
+  --lg-wash-sage: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--sage) 18%, transparent),
+    color-mix(in oklab, var(--sage) 6%, transparent) 58%,
+    color-mix(in oklab, var(--sage) 11%, transparent)
+  );
+  --lg-wash-rose-plain: linear-gradient(
+    165deg,
+    rgba(227, 145, 159, 0.17),
+    rgba(227, 145, 159, 0.06) 58%,
+    rgba(227, 145, 159, 0.11)
+  );
+  --lg-wash-rose: linear-gradient(
+    165deg,
+    color-mix(in oklab, var(--rose) 17%, transparent),
+    color-mix(in oklab, var(--rose) 6%, transparent) 58%,
+    color-mix(in oklab, var(--rose) 11%, transparent)
+  );
+  /* M-221: the deep recipe for the chrome that already wore glass —
+     the dock, the orb, the invitation gate. A deeper blur, a brighter
+     specular rim (the preview's "deeper blur, brighter rim" refinement
+     of the surfaces that were glass first). */
+  --lg-blur-deep: blur(24px) saturate(190%);
+  --lg-rim-deep:
+    inset 0 1px 0 rgba(255, 255, 255, 0.7), inset 1px 0 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.18), inset -1px 0 0 rgba(255, 255, 255, 0.07);
 }
 
 /* ------------------------------------------------------------- the panel */

@@ -58,7 +58,7 @@ describe("trackers de-box complete (M-190) — the six trackers", () => {
     expect(BLOCK).toContain(".tk2-root .at-territories");
   });
 
-  it("each territory wears the owner's hairline, still no fill and no specular (M-200)", () => {
+  it("each territory wears the owner's hairline, now on M-221 glass (M-200, M-221)", () => {
     /* M-190's borderless tonal zone still read as a dark panel live
        (post-deploy sweep, 2026-11-21): a solid --surface fill at a
        20px radius is a box to the eye. M-193 opens the zones fully —
@@ -69,26 +69,35 @@ describe("trackers de-box complete (M-190) — the six trackers", () => {
        border — it looks bad without it." The border and radius pins
        below therefore flip to the hairline at the zone's recorded
        20px radius; the fill and specular pins stand unchanged — the
-       box does NOT come back, only its outline. */
+       box does NOT come back, only its outline.
+       RE-CONTRACTED by M-221 (disclosed, owner's glass picks
+       2026-11-23): the territories are the preview's tinted glass
+       panes. The M-200 hairline and radius pins stand; the fill is
+       now the shared material (strong tint over the plain fallback,
+       sheen, blur, rim) — pinned at the same strictness. */
     const zone = rule(/\.tk2-root \.at-territory \{([^}]*)\}/);
     expect(zone).not.toBeNull();
-    expect(zone![1]).toContain("background: transparent;");
+    expect(zone![1]).toContain("background-color: var(--lg-fallback-strong);");
+    expect(zone![1]).toContain("background-color: var(--lg-tint-strong);");
+    expect(zone![1]).toContain("background-image: var(--lg-sheen);");
     expect(zone![1]).toContain("border: 1px solid var(--border);");
     expect(zone![1]).toContain("border-radius: var(--radius-xl);");
-    expect(zone![1]).toContain("box-shadow: none;");
+    expect(zone![1]).toContain("box-shadow: var(--lg-rim-soft), var(--lg-shadow);");
+    expect(zone![1]).toContain("backdrop-filter: var(--lg-blur);");
     expect(zone![1]).not.toContain("var(--surface)");
     expect(zone![1]).not.toContain("var(--dbx-specular)");
   });
 
-  it("hover is the flat 4% tonal step, never a lift — and never strips the hairline", () => {
+  it("hover is the flat 4% step on the glass, never a lift — and never strips the hairline", () => {
     /* RE-CONTRACTED by M-200 (disclosed): this pin used to require
        "border: none;" in the hover rule — the hover stripping the
        frame M-194 had already removed. With the owner's hairline
        restored at rest, the hover rule must declare NO border of its
-       own, so the resting frame carries through the state change. */
+       own, so the resting frame carries through the state change.
+       M-221: the 4% step is a gradient layer over the sheen. */
     const hover = rule(/\.tk2-root \.at-territory:hover \{([^}]*)\}/);
     expect(hover).not.toBeNull();
-    expect(hover![1]).toContain("background: rgb(255 255 255 / 0.04);");
+    expect(hover![1]).toContain("linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04)), var(--lg-sheen);");
     expect(hover![1]).not.toContain("border: none;");
     expect(hover![1]).toContain("transform: none;");
     expect(hover![1]).not.toContain("border-color");
@@ -158,6 +167,9 @@ describe("trackers de-box complete (M-190) — sheets stay opaque and untouched"
     expect(BLOCK).not.toContain("bsheet");
     expect(BLOCK).not.toContain("tk2-log");
     expect(BLOCK).not.toContain("tk2-targets-sheet");
-    expect(BLOCK).not.toContain("backdrop");
+    /* M-221: the territory's own backdrop-filter (its glass material)
+       is a property, not a backdrop surface — the pin now bars a
+       backdrop CLASS selector, which is what the contract protects. */
+    expect(BLOCK).not.toMatch(/\.[\w-]*backdrop[\w-]*\s*\{/);
   });
 });

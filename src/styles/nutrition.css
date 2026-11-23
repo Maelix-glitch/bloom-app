@@ -1543,6 +1543,74 @@ button.nut-chip,
 a.nut-chip {
   min-height: var(--bloom-touch-min);
 }
+
+/* ------------------------------------------------- M-221 glass picks */
+/*
+ * The owner's glass picks (2026-11-23) reach Nutrition's day plan and
+ * the grocery run. The material is the shared one (styles/glass.css):
+ * the plain fallback first, the strong tint over it, the sheen, the
+ * 20px/180% blur, the specular rim. This supersedes the grocery
+ * brief's "solid surfaces only" line for the pieces named here; the
+ * meal slots, the gold hero, the date strip and the week/spectrum
+ * column keep their de-boxed open treatment (deboxComplete pins) —
+ * glass never stacks on glass, and nothing here nests inside another
+ * treated surface.
+ */
+
+/* The day card: the plan's target strip — the preview's deep-tint
+   panel. Its numbers sit on the strong tint, never on a wash. */
+.nut-day-card {
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
+  /* Inset finish only — the card rule (M-206, F-21): an in-flow card
+     carries no drop shadow, glass or not. The rim is the finish. */
+  box-shadow: var(--lg-rim-soft);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+}
+
+/* The Metabolic Twin tiles: the intelligence panes wear glass. */
+.tile {
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+}
+
+/* Grocery: the progress panel is a glass plate over the list. */
+.shop-progress {
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
+  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+}
+
+/* Shopping mode's pinned bar: floating glass chrome over the
+   scrolling list — the tint is the strong one, so the count and the
+   bar stay readable over whatever scrolls beneath. */
+.shop-sticky {
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+}
+
+/* A ticked item sinks into the sage wash — a tint step, no blur of
+   its own (the row sits inside the page, not over a backdrop). */
+.shop-row.is-bought {
+  background-image: var(--lg-wash-sage-plain);
+  background-image: var(--lg-wash-sage);
+  border-radius: var(--radius);
+}
 /* Sub-navigation (Plan B): anchors to the today view's named
    sections. Since brief v4 Slice 3 the bar is STICKY under the app
    chrome: it offsets by the shell's own --app-top-bar token (60px
