@@ -15,9 +15,14 @@
  *     without rendering again;
  *   · the security headers — CSP included — are byte-identical on
  *     hits and misses once src/server.ts applies its standard set;
- *   · only 200 text/html responses to GET document requests are
- *     stored — errors, assets, /api paths, non-GET requests and
- *     Authorization-bearing requests never enter the cache;
+ *   · only text/html responses to GET document requests are
+ *     stored — 200 shells and (M-227) 404 documents; other
+ *     statuses, assets, /api paths, non-GET requests and
+ *     Authorization-bearing requests never enter the cache.
+ *     File-extension paths engage for 404s only;
+ *   · the cache key carries the path plus only the search
+ *     params a route validates (M-227) — junk params share an
+ *     entry, validated params (d, story, view) never do;
  *   · entries die at the TTL, and the internal bookkeeping
  *     headers never leak to a real response;
  *   · the store lands WITHOUT any execution context — the nitro
@@ -86,18 +91,42 @@ describe("miss then hit", () => {
     expect(await hit.text()).toBe(HTML);
   });
 
-  it("keys by the full URL — different query strings are different entries", async () => {
+  it("keys by path + validated params only — junk params share one entry (M-227)", async () => {
     const cache = new FakeCache();
     const r = renderer();
 
-    await withShellCache(doc("/?a=1"), { cache }, r.render);
-    await withShellCache(doc("/?a=2"), { cache }, r.render);
+    /* Before M-227 every query string keyed its own entry and
+       paid its own render; renders differing only in junk params
+       are byte-identical, so they now collapse. */
+    await withShellCache(doc("/?utm_source=share"), { cache }, r.render);
+    const hit = await withShellCache(doc("/?fbclid=xyz&cb=123"), { cache }, r.render);
+    expect(r.calls()).toBe(1);
+    expect(cache.store.size).toBe(1);
+    expect(hit.headers.get("x-bloom-shell-cache")).toBe("hit");
+  });
+
+  it("validated search params still split entries — and order never does (M-227)", async () => {
+    const cache = new FakeCache();
+    const r = renderer();
+
+    await withShellCache(doc("/nutrition/report?d=2026-11-01"), { cache }, r.render);
+    await withShellCache(doc("/nutrition/report?d=2026-08-15"), { cache }, r.render);
     expect(r.calls()).toBe(2);
     expect(cache.store.size).toBe(2);
 
-    const hit = await withShellCache(doc("/?a=1"), { cache }, r.render);
+    /* Same validated params, junk added, order shuffled: a hit. */
+    const hit = await withShellCache(
+      doc("/nutrition/report?utm_source=x&d=2026-11-01"),
+      { cache },
+      r.render,
+    );
     expect(hit.headers.get("x-bloom-shell-cache")).toBe("hit");
     expect(r.calls()).toBe(2);
+
+    await withShellCache(doc("/profile?story=a&view=b"), { cache }, r.render);
+    const profileHit = await withShellCache(doc("/profile?view=b&story=a"), { cache }, r.render);
+    expect(profileHit.headers.get("x-bloom-shell-cache")).toBe("hit");
+    expect(r.calls()).toBe(3);
   });
 });
 
@@ -176,16 +205,52 @@ describe("headers on hits and misses", () => {
 });
 
 describe("what never enters the cache", () => {
-  it("does not store non-200 responses — a 404 renders again next time", async () => {
+  it("stores 404 documents — the not-found page renders once per TTL (M-227)", async () => {
     const cache = new FakeCache();
     const r = renderer(404, "<!doctype html><html><body>branded 404</body></html>");
 
     const first = await withShellCache(doc("/nope"), { cache }, r.render);
     expect(first.status).toBe(404);
+    expect(first.headers.get("x-bloom-shell-cache")).toBe("miss");
+    expect(cache.store.size).toBe(1);
+
+    const second = await withShellCache(doc("/nope"), { cache }, r.render);
+    expect(second.status).toBe(404);
+    expect(second.headers.get("x-bloom-shell-cache")).toBe("hit");
+    expect(r.calls()).toBe(1);
+  });
+
+  it("still never stores other statuses — a 500 renders again next time", async () => {
+    const cache = new FakeCache();
+    const r = renderer(500, "<!doctype html><html><body>error</body></html>");
+
+    const first = await withShellCache(doc("/boom"), { cache }, r.render);
+    expect(first.status).toBe(500);
     expect(cache.store.size).toBe(0);
 
-    await withShellCache(doc("/nope"), { cache }, r.render);
+    await withShellCache(doc("/boom"), { cache }, r.render);
     expect(r.calls()).toBe(2);
+  });
+
+  it("engages file-extension paths for 404s only (M-227)", async () => {
+    const cache = new FakeCache();
+    const r = renderer(404, "<!doctype html><html><body>branded 404</body></html>");
+
+    const first = await withShellCache(doc("/wp-login.php"), { cache }, r.render);
+    expect(first.status).toBe(404);
+    expect(first.headers.get("x-bloom-shell-cache")).toBe("miss");
+    expect(cache.store.size).toBe(1);
+
+    const second = await withShellCache(doc("/wp-login.php"), { cache }, r.render);
+    expect(second.headers.get("x-bloom-shell-cache")).toBe("hit");
+    expect(r.calls()).toBe(1);
+
+    /* …but a file path rendering anything else passes through
+       untouched and unmarked, as it always has. */
+    const ok = renderer(200);
+    const res = await withShellCache(doc("/favicon.ico"), { cache }, ok.render);
+    expect(res.headers.get("x-bloom-shell-cache")).toBeNull();
+    expect(cache.store.size).toBe(1);
   });
 
   it("does not store non-HTML responses", async () => {
@@ -258,9 +323,19 @@ describe("TTL and key shape", () => {
     expect(again.headers.get("x-bloom-shell-cache")).toBe("miss");
   });
 
-  it("builds keys with an explicit version segment over the full path + query", () => {
-    const key = shellCacheKey(doc("/nutrition?a=1"));
-    expect(key.url).toContain(`/__bloom-shell/v${SHELL_CACHE_VERSION}/nutrition?a=1`);
+  it("builds keys with an explicit version segment over the path + normalised query", () => {
+    /* Junk params never reach the key (M-227). */
+    const key = shellCacheKey(doc("/nutrition?utm_source=x&cb=9"));
+    expect(key.url).toContain(`/__bloom-shell/v${SHELL_CACHE_VERSION}/nutrition`);
+    expect(key.url).not.toContain("utm_source");
+    expect(key.url).not.toContain("cb=");
+    /* Validated params do — sorted, so order cannot split an entry. */
+    expect(shellCacheKey(doc("/nutrition/report?d=2026-11-01&utm_source=x")).url).toContain(
+      "/nutrition/report?d=2026-11-01",
+    );
+    expect(shellCacheKey(doc("/profile?view=b&story=a")).url).toBe(
+      shellCacheKey(doc("/profile?story=a&view=b")).url,
+    );
     expect(shellCacheKey(doc("/")).url).toContain(`/__bloom-shell/v${SHELL_CACHE_VERSION}/`);
     expect(shellCacheKey(doc("/trackers")).url).not.toBe(key.url);
   });
