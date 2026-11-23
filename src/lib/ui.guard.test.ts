@@ -1195,7 +1195,7 @@ describe("UI guard: reskin chrome (R-2)", () => {
   const blockFor = (text: string, selector: string) =>
     blocks(text).find((b) => b.selector.trim().endsWith(selector) || b.selector.includes(selector));
 
-  it("marks the active rail item with the gold bar and no filled box", () => {
+  it("marks the active rail item with the gold bar and the M-221 glass pill", () => {
     /* Pin updated for brief v4 Slice 2 (M-46/M-89): the reskin's white-7%
        pill and the tick at the rail's outer edge (left:-1rem) are
        superseded by the brief's §20 form — active = filled --surface-2,
@@ -1207,7 +1207,10 @@ describe("UI guard: reskin chrome (R-2)", () => {
        shadow; the signal is the tick (pinned below, unchanged), the
        gold glyph and full-cream text. The cascade-end M-186 block in
        styles.css is the rendered winner, so the LAST exact
-       .app-nav-link-active block is what this pin now reads. */
+       .app-nav-link-active block is what this pin now reads.
+       Pin re-contracted for M-221 (owner's glass picks, 2026-11-23):
+       the rail wears glass and the active link takes the preview's
+       glass pill — the tint step + rim, still no --surface-2 fill. */
     expect(SIDEBAR.text).toContain("app-nav-tick");
     const tick = blockFor(STYLES.text, ".app-nav-tick")!;
     expect(tick.body).toContain("width: 3px");
@@ -1218,8 +1221,8 @@ describe("UI guard: reskin chrome (R-2)", () => {
     );
     expect(activeBlocks.length).toBeGreaterThanOrEqual(2);
     const active = activeBlocks[activeBlocks.length - 1]!;
-    expect(active.body).toContain("background: transparent");
-    expect(active.body).toContain("box-shadow: none");
+    expect(active.body).toContain("background-color: var(--lg-tint)");
+    expect(active.body).toContain("box-shadow: var(--lg-rim-soft)");
     expect(active.body).not.toContain("var(--surface-2)");
   });
 

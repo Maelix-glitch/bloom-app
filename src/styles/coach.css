@@ -3726,3 +3726,33 @@
 .coach-log-chip {
   min-height: 44px;
 }
+
+/* ------------------------------------------------- M-221 glass picks */
+/*
+ * Coach chat (owner's glass picks, 2026-11-23), the preview's recipe:
+ * the user's bubbles are gold-tinted glass, Bloom's replies are clear
+ * glass. One material (styles/glass.css), the plain fallback first.
+ * The reply copy gains the bubble the preview draws — sources and
+ * actions stay outside it, as siblings in .coach-msg-main.
+ */
+.coach-user-bubble {
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  background-image: var(--lg-wash-gold-plain);
+  background-image: var(--lg-wash-gold);
+  border: 1px solid rgba(242, 228, 198, 0.35);
+  box-shadow: var(--lg-rim-soft);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+}
+.coach-msg-copy {
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
+  border-radius: 6px 19px 19px 19px;
+  padding: var(--space-3) var(--space-4);
+  box-shadow: var(--lg-rim-soft);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+}

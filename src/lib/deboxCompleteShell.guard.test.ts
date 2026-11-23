@@ -72,10 +72,16 @@ describe("de-box complete: the shell (M-186)", () => {
     expect(STYLES).toContain("--background: #0a0b0e");
   });
 
-  it("the active nav link renders with no fill and no inset shadow", () => {
+  it("the active nav link wears the M-221 glass pill on the glass rail", () => {
+    /* RE-CONTRACTED by M-221 (disclosed, owner's glass picks
+       2026-11-23): the rail is glass now and the active destination
+       takes the preview's glass pill — a tint step with the rim, no
+       second backdrop blur. The gold tick/glyph signals below are
+       unchanged. */
     const active = lastBlock(STYLES, ".app-nav-link-active")!;
-    expect(active.body).toContain("background: transparent");
-    expect(active.body).toContain("box-shadow: none");
+    expect(active.body).toContain("background-color: var(--lg-tint)");
+    expect(active.body).toContain("box-shadow: var(--lg-rim-soft)");
+    expect(active.body).not.toContain("backdrop-filter");
   });
 
   it("the gold signal survives: tick and active glyph rules untouched", () => {

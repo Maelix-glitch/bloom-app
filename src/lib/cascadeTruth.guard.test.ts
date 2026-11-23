@@ -259,33 +259,43 @@ const firstPercent = (v: string | null): number => {
 };
 
 describe("cascade truth (M-194) — computed outcomes, not pinned blocks", () => {
-  it("territories compute fill-less at rest, wearing the owner's hairline (M-200)", () => {
+  it("territories compute as tinted glass panes, wearing the owner's hairline (M-200, M-221)", () => {
     /* RE-CONTRACTED by M-200 (disclosed): M-194 pinned the territory
        fully open — border "none", radius "0". The owner reviewed the
        de-boxed page live (2026-11-22) and directed: the zones "need
        at least a border — it looks bad without it." The hairline
        therefore computes back in at the winning rule, with the
        radius the M-190 programme comment records for the zone (20px,
-       as var(--radius-xl) — R8 bars the literal). What does NOT come
-       back: the fill and the shadow — those pins stand at their
-       M-194 strictness, unchanged. */
-    expect(computed(TERRITORY, "background")).toBe("transparent");
+       as var(--radius-xl) — R8 bars the literal).
+       RE-CONTRACTED by M-221 (disclosed, owner's glass picks
+       2026-11-23): the territories are the preview's tinted glass
+       panes — the shared material at strong tint over its plain
+       fallback, the sheen, the blur, the rim. The M-200 hairline
+       and radius pins stand unchanged; the fill/shadow pins now
+       hold the glass values at the same strictness. */
+    expect(computed(TERRITORY, "background-color")).toBe("var(--lg-tint-strong)");
+    expect(computed(TERRITORY, "background-image")).toBe("var(--lg-sheen)");
+    expect(computed(TERRITORY, "backdrop-filter")).toBe("var(--lg-blur)");
     expect(computed(TERRITORY, "border-radius")).toBe("var(--radius-xl)");
-    expect(computed(TERRITORY, "box-shadow")).toBe("none");
+    expect(computed(TERRITORY, "box-shadow")).toBe("var(--lg-rim-soft), var(--lg-shadow)");
     expect(computed(TERRITORY, "border")).toBe("1px solid var(--border)");
   });
 
-  it("territory hover is the flat 4% step only — no lift, no shadow, the hairline stays", () => {
-    expect(computed(TERRITORY, "background", "hover")).toBe("rgb(255 255 255 / 0.04)");
+  it("territory hover is the flat 4% step on the glass — no lift, the hairline stays", () => {
+    /* M-221: the 4% step rides over the sheen as a second image
+       layer; the tint, the rim and the shadow carry through. */
+    expect(computed(TERRITORY, "background-image", "hover")).toBe(
+      "linear-gradient(rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.04)), var(--lg-sheen)",
+    );
     expect(computed(TERRITORY, "transform", "hover")).toBe("none");
-    expect(computed(TERRITORY, "box-shadow", "hover")).toBe("none");
+    expect(computed(TERRITORY, "box-shadow", "hover")).toBe("var(--lg-rim-soft), var(--lg-shadow)");
     /* M-200: hover must not strip the resting hairline — the winning
        hover rule declares no border of its own, so the frame the
        owner asked for survives the state change. */
     expect(computed(TERRITORY, "border", "hover")).toBe("1px solid var(--border)");
   });
 
-  it("no rule anywhere (media queries included) carries a resting fill for the territory", () => {
+  it("no rule anywhere (media queries included) carries a resting fill for the territory beyond the M-221 glass", () => {
     for (const r of ALL_RULES) {
       // Only rules whose selector actually TARGETS the territory element
       // (descendant rules — the quick-increment pills inside it — are
@@ -293,10 +303,10 @@ describe("cascade truth (M-194) — computed outcomes, not pinned blocks", () =>
       if (!selectorMatches(r.sel, TERRITORY, "rest")) continue;
       const bg = r.decls["background"] ?? r.decls["background-color"];
       if (bg) {
-        expect(["transparent", "none"]).toContain(bg);
+        expect(["transparent", "none", "var(--lg-tint-strong)"]).toContain(bg);
       }
       const sh = r.decls["box-shadow"];
-      if (sh) expect(sh).toBe("none");
+      if (sh) expect(["none", "var(--lg-rim-soft), var(--lg-shadow)"]).toContain(sh);
     }
   });
 

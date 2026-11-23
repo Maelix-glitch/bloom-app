@@ -355,9 +355,13 @@ describe("glass guard: sheets and modals never wear the material", () => {
   });
 
   it("the sheet-kit stylesheets carry no glass tokens at all", () => {
+    /* M-221 (owner's glass picks, 2026-11-23): trackers.css leaves
+       this list — its PAGE zones (the territories) wear glass now.
+       Its sheet PANELS stay in the opaque census above, which is the
+       pin that protects them. The other sheet-kit sheets are
+       untouched by the picks and stay glass-free. */
     for (const rel of [
       "styles/bloom-sheet.css",
-      "styles/trackers.css",
       "styles/billing.css",
       "styles/admin-panel.css",
     ]) {
@@ -373,9 +377,11 @@ describe("glass guard: one dock, wearing the one material", () => {
   });
 
   it("the dock chrome and the phone brand bar consume the material tokens", () => {
-    expect(someExactBlock("styles.css", ".dock__top", "var(--lg-blur)")).toBe(true);
-    expect(someExactBlock("styles.css", ".dock__log", "var(--lg-blur)")).toBe(true);
-    expect(someExactBlock("styles/orb.css", ".coach-orb", "var(--lg-blur)")).toBe(true);
+    /* M-221 deepens the dock + orb to the deep blur; the phone brand
+       bar keeps the base material. */
+    expect(someExactBlock("styles.css", ".dock__top", "var(--lg-blur-deep)")).toBe(true);
+    expect(someExactBlock("styles.css", ".dock__log", "var(--lg-blur-deep)")).toBe(true);
+    expect(someExactBlock("styles/orb.css", ".coach-orb", "var(--lg-blur-deep)")).toBe(true);
     expect(someExactBlock("styles.css", ".app-mobile-bar", "var(--lg-blur)")).toBe(true);
     /* And the material is loaded once, from the root sheet. */
     expect(read("styles.css")).toContain('@import "./styles/glass.css"');

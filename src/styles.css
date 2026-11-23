@@ -1067,12 +1067,18 @@
 }
 
 .home-panel {
-  background-color: var(--home-surface);
-  background-image: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  /* M-221 (owner's glass picks, 2026-11-23): Today's panels wear the
+     shared Liquid Glass material — the plain strong fallback first,
+     the strong tint over it, the sheen, the 20px/180% blur and the
+     specular rim. Supersedes the M-174 sheen dress below lg. */
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
   border-radius: calc(var(--radius) + 8px);
-  box-shadow: var(--glass-shadow);
-  backdrop-filter: blur(14px);
+  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
 }
 
 /* The day's facts, de-boxed (M-174; de-box spec rule 2 — a single
@@ -1148,16 +1154,29 @@
    radius, depth from the one specular catch, NO border. Below lg
    the un-named sections keep M-174's dress; the named elements
    below (.home-growth, .home-open, the assessment callout, the
-   delta rows) carry their treatment at every width. */
+   delta rows) carry their treatment at every width.
+
+   M-221 SUPERSESSION (owner's glass picks, 2026-11-23): Today IS a
+   ruled glass place now. The lg tonal zone, the Growth tonal card
+   and the open overview below wear the shared Liquid Glass material
+   instead; the assessment callout stays unboxed (the owner kept the
+   Assessment sheet solid) and the delta rows stay hairline rows —
+   glass never stacks on glass. */
 @media (min-width: 1024px) {
   .home-page .home-panel,
   .home-page .home-band:not(.assess-prompt) {
-    background-color: var(--surface);
-    background-image: none;
-    border: 0;
+    /* M-221 supersedes the tonal zone for these elements: the owner's
+       glass picks (2026-11-23) put Today in glass — the shared
+       material at panel strength over the plain strong fallback,
+       the 24px radius kept. */
+    background-color: var(--lg-fallback-strong);
+    background-color: var(--lg-tint-strong);
+    background-image: var(--lg-sheen);
+    border: 1px solid var(--lg-border);
     border-radius: var(--radius-card);
-    box-shadow: var(--dbx-specular);
-    backdrop-filter: none;
+    box-shadow: var(--lg-rim-soft), var(--lg-shadow);
+    -webkit-backdrop-filter: var(--lg-blur);
+    backdrop-filter: var(--lg-blur);
   }
 }
 
@@ -1191,12 +1210,18 @@
    beside it. It carries the treatment at every width (the spec
    names the element, not a breakpoint). */
 .home-page .home-growth {
-  background-color: var(--surface);
-  background-image: none;
-  border: 0;
+  /* M-221: the Growth card wears the same glass as the rest of
+     Today's stack (the owner's picks glass the whole home page);
+     the "single tonal card" intent is superseded — coherence of
+     one material across the page replaces it. */
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
   border-radius: var(--radius-card);
-  box-shadow: var(--dbx-specular);
-  backdrop-filter: none;
+  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
 }
 
 /* Assessment ("Your starting point"): UNBOXED entirely, at every
@@ -1230,21 +1255,33 @@
    the lg panel block so, at equal specificity, the open treatment
    wins over the tonal zone at desktop too. */
 .home-page .home-open {
-  background: none;
-  background-color: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  padding: 0;
+  /* M-221: the bottom overview (WeekChart + ChangesCard + StatTiles)
+     is the VITALIS Overview surface on this page — the owner's picks
+     glass it. The glass takes back the card inset the de-box removed
+     (the components' authored p-5 / sm:p-7 values, declared here so
+     the winning rule carries them whole). */
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  padding: var(--space-5);
 }
-/* Between the two overview columns at desktop: a vertical hairline,
-   and the hairline plus the row gap plus this inset lands the
-   separation on ~48px, as the spec allows. */
+@media (min-width: 40rem) {
+  .home-page .home-open {
+    padding: var(--space-6);
+  }
+}
+/* Between the two overview columns at desktop: the two glass panels
+   part on the grid gap alone — the de-box hairline and its inset
+   retire (M-221). */
 @media (min-width: 1024px) {
   .home-page .home-open-split {
-    border-left: 1px solid var(--dbx-hairline);
-    padding-left: 16px;
+    border-left: 0;
+    padding-left: var(--space-6);
   }
 }
 
@@ -1708,7 +1745,15 @@
    never pops), and a colour glide on the dot when the state changes —
    saving → synced reads as one continuous story, not a swap. */
 .home-sync-pill {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  /* M-221: the TopBar's pill wears the shared glass (owner's picks —
+     Sidebar + TopBar): the tint stack over the plain fallback, the
+     blur, the shared border and rim, over its inset highlight. */
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
+  border-color: var(--lg-border);
+  box-shadow: var(--lg-rim-soft), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   animation: home-sync-in var(--motion-page) var(--ease-out-expo) both;
 }
 @keyframes home-sync-in {
@@ -1735,9 +1780,11 @@
   margin-top: var(--bloom-section-gap);
 }
 .home-band {
-  background-color: var(--home-surface);
-  background-image: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  /* M-221: bands wear the same glass as the panels (see .home-panel). */
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
   border-radius: calc(var(--radius) + 8px);
   /* Card padding rhythm, shared with the .home-panel cards (p-5, then
      p-7 from sm). The one band in the stack (the assessment prompt)
@@ -1748,6 +1795,11 @@
      card in the phone column. From sm the desktop values apply and the
      effective inset is the panels' 28px, as before. */
   padding: var(--space-3) var(--space-3) var(--space-2);
+}
+.home-band:not(.assess-prompt) {
+  box-shadow: var(--lg-rim-soft), var(--lg-shadow);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
 }
 @media (min-width: 40rem) {
   .home-band {
@@ -2586,10 +2638,16 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
    white 7%, and the fill as a gold-soft → gold gradient whose width
    animates on the house page motion when an award lands. */
 .rail-points-card {
-  background-image: var(--glass-bg);
-  border: 1px solid var(--glass-border);
+  /* M-221: the card joins the rail's glass — a tint step over the
+     rail's material (plain fallback first, then the tint), the sheen
+     and the shared border/rim. No backdrop blur of its own: glass
+     never stacks on glass. */
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  background-image: var(--lg-sheen);
+  border: 1px solid var(--lg-border);
   border-radius: var(--radius-lg);
-  box-shadow: inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent);
+  box-shadow: var(--lg-rim-soft);
 }
 .rail-points-track {
   height: 4px;
@@ -2654,15 +2712,16 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   display: grid;
   place-items: center;
   /* Night Glass (M-169): the dock's chrome is glass — the shared
-     material's tokens over a plain fallback, rim lit, floating. */
+     material's tokens over a plain fallback, rim lit, floating.
+     M-221 deepens it (owner's picks): the deep blur + deep rim. */
   background: var(--lg-fallback);
   background: var(--lg-tint);
-  -webkit-backdrop-filter: var(--lg-blur);
-  backdrop-filter: var(--lg-blur);
+  -webkit-backdrop-filter: var(--lg-blur-deep);
+  backdrop-filter: var(--lg-blur-deep);
   border: 1px solid var(--border);
   color: var(--muted-foreground);
   box-shadow:
-    var(--lg-rim-soft),
+    var(--lg-rim-deep),
     0 8px 24px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -2709,15 +2768,16 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   border-radius: var(--radius-pill);
   display: grid;
   place-items: center;
-  /* Night Glass (M-169): same glass as the rest of the dock's chrome. */
+  /* Night Glass (M-169): same glass as the rest of the dock's chrome.
+     M-221 deepens it with the dock (deep blur + deep rim). */
   background: var(--lg-fallback);
   background: var(--lg-tint);
-  -webkit-backdrop-filter: var(--lg-blur);
-  backdrop-filter: var(--lg-blur);
+  -webkit-backdrop-filter: var(--lg-blur-deep);
+  backdrop-filter: var(--lg-blur-deep);
   border: 1px solid var(--border);
   color: var(--muted-foreground);
   box-shadow:
-    var(--lg-rim-soft),
+    var(--lg-rim-deep),
     0 8px 24px rgba(0, 0, 0, 0.4);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -2786,8 +2846,12 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
    photograph, split from the tagline block by the one hairline. */
 .app-sidebar-profile {
   border-top: 1px solid var(--border);
-  background: color-mix(in oklab, var(--background) 30%, transparent);
-  backdrop-filter: blur(12px);
+  /* M-221: the identity strip takes the rail's material values —
+     the tint stack at rail strength over the plain fallback. */
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
 }
 
 /* --------------------------------------------------------------------------
@@ -3918,10 +3982,26 @@ body {
  * ======================================================================== */
 .app-sidebar {
   border-right: none;
+  /* M-221 (owner's glass picks, 2026-11-23): the rail's surface joins
+     the ruled glass places — the shared material at strong tint over
+     the plain fallback first, the sheen, the 20px/180% blur. The
+     de-box separation stands: no right border returns; the material
+     itself now separates rail from canvas. The botanical scrim
+     inside keeps its own ≥88% legibility band for the quote. */
+  background-color: var(--lg-fallback-strong);
+  background-color: var(--lg-tint-strong);
+  background-image: var(--lg-sheen);
+  -webkit-backdrop-filter: var(--lg-blur);
+  backdrop-filter: var(--lg-blur);
 }
 .app-nav-link-active {
-  background: transparent;
-  box-shadow: none;
+  /* M-221: on the glass rail the active destination takes the
+     preview's glass pill — a tint step with the specular rim, and no
+     second backdrop blur (glass never stacks on glass). The gold
+     tick, the glyph glow and full-cream text stay the signals. */
+  background-color: var(--lg-fallback);
+  background-color: var(--lg-tint);
+  box-shadow: var(--lg-rim-soft);
 }
 
 /* ========================================================================

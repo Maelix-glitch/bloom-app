@@ -3003,3 +3003,23 @@
   position: absolute;
   inset: -9px;
 }
+
+/* ------------------------------------------------- M-221 glass picks */
+/*
+ * Stories (owner's glass picks, 2026-11-23): the template frames read
+ * as prints under glass — the shared border and specular rim over
+ * the frame's own shadow, plus a sheen laid across the artwork. The
+ * artwork itself is untouched; no text sits on these surfaces, so no
+ * tint floor applies.
+ */
+.stpl-thumb {
+  border-color: var(--lg-border);
+  box-shadow: var(--lg-rim-soft), 0 12px 28px -18px rgba(0, 0, 0, 0.6);
+}
+.stpl-thumb::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--lg-sheen);
+  pointer-events: none;
+}

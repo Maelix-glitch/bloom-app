@@ -25,6 +25,14 @@ import { describe, expect, it } from "vitest";
  *      stays an opaque slab (solid fallback first, per the legacy-engine
  *      rule) and no treated surface gains glass — backdrop-filter may
  *      not appear outside the pre-existing camera backdrop.
+ *
+ * M-221 SUPERSESSION (owner's glass picks, 2026-11-23, disclosed):
+ * Coach chat is a ruled glass place. The two thread bubbles wear the
+ * shared material — the user's gold-tinted, Bloom's clear — via the
+ * cascade-end M-221 blocks in coach.css, and the pins for those two
+ * read the WINNING (last) blocks (the M-176 lesson). Contract items
+ * 2–5 stand untouched; the backdrop-filter census gains exactly the
+ * two bubbles.
  */
 
 const SRC = join(process.cwd(), "src");
@@ -42,27 +50,53 @@ function ruleBlock(css: string, selector: string): string {
   return m[1]!;
 }
 
+/** The LAST flat rule block for a selector — the cascade winner when
+ *  a slice appends its override at the file's end (M-221). */
+function ruleBlockLast(css: string, selector: string): string {
+  const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const all = [...css.matchAll(new RegExp(`${escaped}\\s*\\{([^}]*)\\}`, "g"))];
+  if (all.length === 0) throw new Error(`rule block not found: ${selector}`);
+  return all[all.length - 1]![1]!;
+}
+
 /** A visible border declaration (a `border:` shorthand that paints). */
 const PAINTED_BORDER = /border:\s*1px\s+solid|border:\s*1px\s+dashed/;
 
 describe("de-box Coach: the thread is an open canvas", () => {
-  it("the user bubble is a borderless tonal module, radius 16–20px", () => {
-    const block = ruleBlock(COACH, ".coach-user-bubble");
-    expect(block).not.toMatch(PAINTED_BORDER);
-    expect(block).toContain("border: none;");
-    expect(block).toContain("background: var(--dbx-tone);");
-    expect(block).toContain("box-shadow: var(--dbx-specular);");
-    const radius = block.match(/border-radius:\s*(\d+)px/);
+  it("the user bubble is gold-tinted glass (M-221), radius 16–20px", () => {
+    /* RE-CONTRACTED by M-221 (disclosed): the tonal module is
+       superseded by the preview's gold-tinted glass. Geometry stays
+       in the base block; the material is pinned on the WINNING
+       (cascade-end) block. */
+    const base = ruleBlock(COACH, ".coach-user-bubble");
+    const radius = base.match(/border-radius:\s*(\d+)px/);
     expect(radius).not.toBeNull();
     const px = Number(radius![1]);
     expect(px).toBeGreaterThanOrEqual(16);
     expect(px).toBeLessThanOrEqual(20);
+    const block = ruleBlockLast(COACH, ".coach-user-bubble");
+    expect(block).toContain("background-color: var(--lg-fallback);");
+    expect(block).toContain("background-color: var(--lg-tint);");
+    expect(block).toContain("background-image: var(--lg-wash-gold);");
+    expect(block).toContain("border: 1px solid rgba(242, 228, 198, 0.35);");
+    expect(block).toContain("backdrop-filter: var(--lg-blur);");
     expect(USER_MESSAGE).toContain("coach-user-bubble dbx-module");
   });
 
-  it("Bloom's message copy sits fully open — no bubble background or border", () => {
-    const block = ruleBlock(COACH, ".coach-msg-copy");
-    expect(block).not.toMatch(/background|border\s*:/);
+  it("Bloom's message copy wears clear glass (M-221)", () => {
+    /* RE-CONTRACTED by M-221 (disclosed): the open copy gains the
+       preview's clear-glass bubble — the material at panel tint,
+       sources and actions still outside it. Pinned on the winning
+       block; the base typography block stays paint-free. */
+    const base = ruleBlock(COACH, ".coach-msg-copy");
+    expect(base).not.toMatch(/background|border\s*:/);
+    const block = ruleBlockLast(COACH, ".coach-msg-copy");
+    expect(block).toContain("background-color: var(--lg-fallback);");
+    expect(block).toContain("background-color: var(--lg-tint);");
+    expect(block).toContain("background-image: var(--lg-sheen);");
+    expect(block).toContain("border: 1px solid var(--lg-border);");
+    expect(block).toContain("border-radius: 6px 19px 19px 19px;");
+    expect(block).toContain("backdrop-filter: var(--lg-blur);");
   });
 
   it("structured blocks are tonal modules, never bordered cards", () => {
@@ -148,10 +182,10 @@ describe("de-box Coach: lists are hairline rows, sheets stay slabs", () => {
     expect(attach).toContain("background: var(--surface-2);");
   });
 
-  it("no new glass: backdrop-filter survives only on the camera backdrop", () => {
+  it("backdrop-filter survives only on the camera backdrop and the two M-221 thread bubbles", () => {
     const hits = [...COACH.matchAll(/\.([a-z-]+)\s*\{[^}]*backdrop-filter/g)].map(
       (m) => m[1],
     );
-    expect(hits).toEqual(["coach-camera-backdrop"]);
+    expect(hits).toEqual(["coach-camera-backdrop", "coach-user-bubble", "coach-msg-copy"]);
   });
 });
