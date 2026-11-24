@@ -110,7 +110,7 @@ export function HighlightRail({
         <span>
           <span className="block text-[13px] font-medium text-foreground">Create a highlight</span>
           <span className="block text-[12px] text-muted-foreground">
-            Keep something worth remembering — choose the stories, name it, done.
+            Keep something worth remembering, choose the stories, name it, done.
           </span>
         </span>
       </button>

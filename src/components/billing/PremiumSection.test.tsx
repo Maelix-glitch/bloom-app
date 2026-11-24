@@ -56,7 +56,7 @@ beforeEach(() => {
 
 afterEach(() => cleanup());
 
-describe("PremiumSection — the status card", () => {
+describe("PremiumSection, the status card", () => {
   it("identity row: plan name, and the renewal fact with its real date", () => {
     entitlementMock.state = ready({
       tier: "premium_plus",
@@ -97,7 +97,7 @@ describe("PremiumSection — the status card", () => {
     expect(fill.getAttribute("data-level")).toBeNull();
   });
 
-  it("the balance card also says what things cost — the weighted line (M-215)", () => {
+  it("the balance card also says what things cost, the weighted line (M-215)", () => {
     entitlementMock.state = ready({
       tier: "premium",
       status: "active",
@@ -125,13 +125,13 @@ describe("PremiumSection — the status card", () => {
     render(<PremiumSection />);
 
     expect(
-      screen.getByText("Deep AI allowance — daily Vitalis conversations and photo-led logging."),
+      screen.getByText("Deep AI allowance, daily Vitalis conversations and photo-led logging."),
     ).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Manage or upgrade" }));
     expect(requestPaywall).toHaveBeenCalledWith("profile");
   });
 
-  it("a cancelled plan Ends — it does not Renew", () => {
+  it("a cancelled plan Ends, it does not Renew", () => {
     entitlementMock.state = ready({
       tier: "premium",
       status: "cancelled",
@@ -198,7 +198,7 @@ describe("PremiumSection — the status card", () => {
     expect(screen.getByRole("button", { name: "See Premium plans" })).toBeTruthy();
   });
 
-  it("unavailable: no numbers are invented — just the invitation", () => {
+  it("unavailable: no numbers are invented, just the invitation", () => {
     entitlementMock.state = { kind: "unavailable" };
     render(<PremiumSection />);
 
@@ -217,7 +217,7 @@ describe("PremiumSection — the status card", () => {
   });
 });
 
-describe("PremiumSection — cancel auto-renew (M-222)", () => {
+describe("PremiumSection, cancel auto-renew (M-222)", () => {
   it("a live paid plan offers it; cancelling answers with the period-end truth", async () => {
     checkoutMock.cancelAutoRenew.mockResolvedValue({
       state: "cancel_scheduled",

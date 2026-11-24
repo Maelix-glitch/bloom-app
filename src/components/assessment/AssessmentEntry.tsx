@@ -265,18 +265,18 @@ function AssessmentSettledCard({
     switch (s.kind) {
       case "ready":
         return s.staleness.stale
-          ? `Since your plan was composed, ${joinNames(s.staleness.changed)} changed — recompose it in Nutrition.`
+          ? `Since your plan was composed, ${joinNames(s.staleness.changed)} changed, recompose it in Nutrition.`
           : `Today's plan is composed in Nutrition, aimed at ${GOAL_LABEL[s.plan.goal].toLowerCase()}.`;
       case "outdated":
-        return `Your last plan was made for ${formatPlanDay(s.plan.day)} — plans are built for a single day; create today's in Nutrition.`;
+        return `Your last plan was made for ${formatPlanDay(s.plan.day)}, plans are built for a single day; create today's in Nutrition.`;
       case "can_generate":
-        return "No plan yet — Bloom can compose one from these numbers in Nutrition.";
+        return "No plan yet. Bloom can compose one from these numbers in Nutrition.";
       case "refused":
         /* A safety refusal is already carried by the targets line below;
            the card never pushes a plan the gate refused. */
         return s.refusal.kind === "safety_blocked"
           ? null
-          : "No plan yet — a few body numbers are still missing.";
+          : "No plan yet, a few body numbers are still missing.";
     }
   })();
 
@@ -337,7 +337,7 @@ function AssessmentSettledCard({
                 <span className="whitespace-nowrap text-foreground">
                   {Math.round(targetState.targets.proteinG)} g protein
                 </span>{" "}
-                a day — estimates from your body numbers (Mifflin–St Jeor), a guide, not a
+                a day, estimates from your body numbers (Mifflin–St Jeor), a guide, not a
                 prescription.
               </p>
             ) : targetState.kind === "blocked" ? (
@@ -346,7 +346,7 @@ function AssessmentSettledCard({
               </p>
             ) : (
               <p className="mt-2 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                No daily target yet — targets come from your body numbers on Trackers.
+                No daily target yet, targets come from your body numbers on Trackers.
               </p>
             )}
             {planLine ? (
@@ -703,7 +703,7 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
         </ul>
       ) : (
         <p className="mt-2 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-          Nothing newer recorded yet — weigh-ins and logged days will appear here as they happen.
+          Nothing newer recorded yet, weigh-ins and logged days will appear here as they happen.
         </p>
       )}
 
@@ -747,7 +747,7 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
             </div>
           </div>
           <div>
-            <p className={fieldLabel}>Sleep — typical hours</p>
+            <p className={fieldLabel}>Sleep, typical hours</p>
             <Input
               className="mt-1.5 max-w-[12rem]"
               inputMode="decimal"
@@ -824,7 +824,7 @@ function LivingAssessmentSection({ state }: { state: AssessmentState }) {
           </div>
           <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             Your eating pattern, budget and reflective answers stay exactly as your assessment
-            recorded them — those change only in a retake.
+            recorded them, those change only in a retake.
           </p>
           <div className="flex flex-wrap items-center gap-2">
             <Button type="button" size="sm" onClick={save}>

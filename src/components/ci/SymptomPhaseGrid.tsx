@@ -22,7 +22,7 @@ export function SymptomPhaseGrid({
   if (rows.length === 0) {
     return (
       <p className="text-[length:var(--text-support)] leading-relaxed ci-muted">
-        Log symptoms on a few days and this grid fills in — each cell is how often that symptom
+        Log symptoms on a few days and this grid fills in, each cell is how often that symptom
         landed in that phase.
       </p>
     );
@@ -73,7 +73,7 @@ function GridRow({ row, index }: { row: SymptomPhaseRow; index: number }) {
     <>
       <span
         className="flex items-center pr-2 text-[length:var(--text-caption)] capitalize ci-soft"
-        title={`${row.key} — ${row.total} ${row.total === 1 ? "day" : "days"}`}
+        title={`${row.key} - ${row.total} ${row.total === 1 ? "day" : "days"}`}
       >
         <span className="truncate">{row.key}</span>
       </span>

@@ -118,7 +118,7 @@ describe("CoachThread attribution rhythm (M-205, F-13)", () => {
  * day divider opens each local day so the rhythm is visible as days,
  * not as a metronome.
  */
-describe("CoachThread — the resumed multi-day thread (M-207, F-13 live shape)", () => {
+describe("CoachThread, the resumed multi-day thread (M-207, F-13 live shape)", () => {
   const turn = (
     id: string,
     time: string,
@@ -181,10 +181,10 @@ describe("CoachThread — the resumed multi-day thread (M-207, F-13 live shape)"
     /* Every day-first caption but the last is the live-data one; the
        variant stands exactly once, on its own day's first reply. */
     for (const caption of captions.slice(0, -1)) {
-      expect(caption.textContent).toContain("From your record — live-data");
+      expect(caption.textContent).toContain("From your record, live-data");
     }
     expect(captions[captions.length - 1]?.textContent).toContain(
-      "From your record — Last 7 days · Last 30 days · Mood record",
+      "From your record, Last 7 days · Last 30 days · Mood record",
     );
     /* Same-day followers carry no caption: reply two shares reply
        one's local day in both IST and UTC, reply eight shares seven's. */

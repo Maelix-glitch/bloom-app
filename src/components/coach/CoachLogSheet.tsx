@@ -81,7 +81,7 @@ export function CoachLogSheet({
     });
     if (!entry) {
       setSaveError(
-        "Bloom couldn't log that — the numbers may be beyond what one meal can carry. Try a smaller portion.",
+        "Bloom couldn't log that, the numbers may be beyond what one meal can carry. Try a smaller portion.",
       );
       return;
     }
@@ -94,7 +94,7 @@ export function CoachLogSheet({
         <p className="coach-log-note">
           <span className="coach-log-note-label">{COACH_ESTIMATE_LABEL}</span>
           Bloom estimated this from your photo. Check the numbers and change
-          anything that looks off — it stays labelled an estimate in your log.
+          anything that looks off, it stays labelled an estimate in your log.
         </p>
 
         <div className="coach-log-field">
@@ -173,7 +173,7 @@ export function CoachLogSheet({
         <p className="coach-log-parse" aria-live="polite">
           {totals
             ? `≈ ${totals.kcal} kcal · ${totals.proteinG} g protein · ${totals.carbsG} g carbs · ${totals.fatG} g fat`
-            : "Numbers need to be plain values — kcal above zero, protein, carbs and fat zero or more."}
+            : "Numbers need to be plain values, kcal above zero, protein, carbs and fat zero or more."}
         </p>
 
         <div className="coach-log-field">

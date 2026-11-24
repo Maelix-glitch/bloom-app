@@ -123,7 +123,7 @@ function BodyForm({ initial, onDone }: { initial: BodyProfile; onDone: () => voi
       return;
     }
     if (!ageValue || ageValue < 13 || ageValue > 110) {
-      setError("Add an age between 13 and 110 — the metabolism estimate needs it.");
+      setError("Add an age between 13 and 110, the metabolism estimate needs it.");
       return;
     }
     if (goal !== "maintain" && targetKg !== null && (targetKg < 30 || targetKg > 300)) {
@@ -287,7 +287,7 @@ export function HealthTools({ className }: { className?: string }) {
     if (!value) return;
     body.logWeight(value);
     setWeighIn("");
-    setSaved(`Today's weight saved — ${value} kg.`);
+    setSaved(`Today's weight saved, ${value} kg.`);
     window.setTimeout(() => setSaved(null), 3200);
   };
 
@@ -353,7 +353,7 @@ export function HealthTools({ className }: { className?: string }) {
                 />
               </div>
               <p className="bt-card__foot">
-                Healthy weight for your height: {targets.healthyWeight.min}–{targets.healthyWeight.max} kg
+                Healthy weight for your height: {targets.healthyWeight.min}-{targets.healthyWeight.max} kg
               </p>
             </article>
 
@@ -391,7 +391,7 @@ export function HealthTools({ className }: { className?: string }) {
               </dl>
               {targets.floorApplied ? (
                 <p className="bt-card__foot bt-card__foot--warn">
-                  Held at the safe minimum for your selection — a faster pace isn't worth eating
+                  Held at the safe minimum for your selection, a faster pace isn't worth eating
                   less than this.
                 </p>
               ) : null}
@@ -408,7 +408,7 @@ export function HealthTools({ className }: { className?: string }) {
               </p>
               <p className="bt-card__sub">
                 {hydration!.met
-                  ? `${fmtCount(hydration!.drank)} ml logged — target met.`
+                  ? `${fmtCount(hydration!.drank)} ml logged, target met.`
                   : `You've logged ${fmtCount(hydration!.drank)} ml of ${fmtCount(targets.waterMl)} ml today.`}
               </p>
               <div className="bt-bar" aria-hidden>
@@ -416,7 +416,7 @@ export function HealthTools({ className }: { className?: string }) {
               </div>
               <p className="bt-card__foot">
                 {hydration!.met
-                  ? "Nothing more to chase — sip when thirsty."
+                  ? "Nothing more to chase, sip when thirsty."
                   : `About ${hydration!.glasses} × 250 ml glass${hydration!.glasses === 1 ? "" : "es"} to go.`}
               </p>
               <a className="bt-inline-link" href="#trackers">
@@ -446,7 +446,7 @@ export function HealthTools({ className }: { className?: string }) {
               {targets.weeksToGoal && targets.goalDate ? (
                 <p className="bt-card__foot">
                   At that pace: about {targets.weeksToGoal} weeks, around{" "}
-                  {formatDate(targets.goalDate)}. A slower week is not a failure — the date moves
+                  {formatDate(targets.goalDate)}. A slower week is not a failure, the date moves
                   with the record, not against you.
                 </p>
               ) : (
@@ -514,7 +514,7 @@ export function HealthTools({ className }: { className?: string }) {
             )}
             {confirmClear ? (
               <p className="bt-note" role="status">
-                Tapping again resets your body details — height, weight and goal — and deletes
+                Tapping again resets your body details, height, weight and goal, and deletes
                 every weigh-in you have logged. This cannot be undone.
               </p>
             ) : null}

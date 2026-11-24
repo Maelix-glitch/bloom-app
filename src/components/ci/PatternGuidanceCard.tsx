@@ -48,7 +48,7 @@ export function PatternGuidanceCard({
       <SectionHead
         eyebrow="Worth knowing"
         title="Patterns in your record"
-        note="Bloom reads patterns, it doesn't diagnose. If something here sounds familiar, it's written to take to a doctor — your full history is under History, and you can export it any time to bring along."
+        note="Bloom reads patterns, it doesn't diagnose. If something here sounds familiar, it's written to take to a doctor, your full history is under History, and you can export it any time to bring along."
       />
       <div className="mt-3 space-y-3">
         {notices.map((notice) => (

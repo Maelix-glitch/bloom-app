@@ -77,7 +77,7 @@ describe("PaywallSheet on the Autopay rail", () => {
     expect(notice.textContent).toContain("Nothing has been charged.");
   });
 
-  it("an authorised mandate reports the plan switching on — and the auto-renew truth", async () => {
+  it("an authorised mandate reports the plan switching on, and the auto-renew truth", async () => {
     checkoutMock.createSubscription.mockResolvedValueOnce({
       state: "ready",
       subscriptionId: "sub_77",
@@ -101,7 +101,7 @@ describe("PaywallSheet on the Autopay rail", () => {
     expect(checkoutMock.payWithRazorpaySubscription).toHaveBeenCalledWith({
       keyId: "rzp_live_x",
       subscriptionId: "sub_77",
-      description: "Premium Plus — yearly",
+      description: "Premium Plus - yearly",
     });
     const notice = await screen.findByText(/Payment received/);
     expect(notice.textContent).toContain("renews automatically each period until you cancel");

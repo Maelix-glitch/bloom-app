@@ -62,7 +62,7 @@ export function CoachLogAction({
         <Plus className="coach-action-icon" aria-hidden="true" />
         <span className="coach-action-label">Log this</span>
       </button>
-      <span className="coach-log-hint">Photo estimate — you confirm the numbers first</span>
+      <span className="coach-log-hint">Photo estimate, you confirm the numbers first</span>
       <CoachLogSheet
         open={open}
         onClose={() => setOpen(false)}

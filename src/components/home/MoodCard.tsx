@@ -80,7 +80,7 @@ export function MoodCard({
           />
           <p className="mt-3 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             {selected
-              ? "Logged — thank you. Tap a face to change it, any time today."
+              ? "Logged, thank you. Tap a face to change it, any time today."
               : "One tap. It takes five seconds, and it is what your week is read from."}
           </p>
           <button

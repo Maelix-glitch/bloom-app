@@ -121,9 +121,9 @@ function ProposalBlock({
             <li key={`${change.label}-${index}`} className="coach-proposal-change">
               <span className="coach-proposal-change-label">{change.label}</span>
               <span className="coach-proposal-change-path">
-                <em>{change.from || "—"}</em>
+                <em>{change.from || "-"}</em>
                 <span aria-hidden="true">→</span>
-                <strong>{change.to || "—"}</strong>
+                <strong>{change.to || "-"}</strong>
               </span>
             </li>
           ))}

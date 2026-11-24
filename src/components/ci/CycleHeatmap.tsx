@@ -123,7 +123,7 @@ export function CycleHeatmap({
                 <button
                   key={cell.date}
                   type="button"
-                  title={`${label} — tap to log this day`}
+                  title={`${label}, tap to log this day`}
                   aria-label={`${label}. Log this day.`}
                   onClick={() => onSelectDay(cell.date)}
                   className="h-[13px] cursor-pointer rounded-[2px] border-0 p-0 transition-transform hover:scale-[1.35] focus-visible:scale-[1.35] focus-visible:outline focus-visible:outline-1 focus-visible:outline-[var(--ci-text)]"
@@ -184,5 +184,5 @@ function describe(
   if (typeof cell.day.sleep === "number") parts.push(`${cell.day.sleep}h sleep`);
   const place = placeDate(analysis, cell.date);
   const head = `${formatDate(cell.date)} · day ${place?.cycleDay ?? "?"} · ${cell.phase ?? "?"}`;
-  return parts.length > 0 ? `${head} — ${parts.join(" · ")}` : `${head} — logged`;
+  return parts.length > 0 ? `${head} - ${parts.join(" · ")}` : `${head}, logged`;
 }

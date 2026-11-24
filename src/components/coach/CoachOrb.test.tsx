@@ -157,7 +157,7 @@ function renderApp(path = "/") {
    marker text Vitalis must never show, send, or disturb. */
 const COACH_STORE_KEY = "bloom.coach.conversations.v1.profile-test";
 const COACH_LEGACY_KEY = "bloom.coach.thread.profile-test";
-const COACH_MARKER = "Coach thread marker — never Vitalis's";
+const COACH_MARKER = "Coach thread marker, never Vitalis's";
 
 function seedCoachThread() {
   const value = JSON.stringify({
@@ -253,7 +253,7 @@ async function sendMessage(text: string) {
   fireEvent.submit(form);
 }
 
-describe("Vitalis orb — placement", () => {
+describe("Vitalis orb, placement", () => {
   it("renders the orb on a main tab and on Trackers", async () => {
     renderApp("/");
     await screen.findByText("Today page");
@@ -278,7 +278,7 @@ describe("Vitalis orb — placement", () => {
   });
 });
 
-describe("Vitalis window — the popup", () => {
+describe("Vitalis window, the popup", () => {
   it("opens on tap, takes focus, and closes by its close button, returning focus to the orb", async () => {
     renderApp("/");
     await screen.findByText("Today page");
@@ -306,7 +306,7 @@ describe("Vitalis window — the popup", () => {
     await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
   });
 
-  it("greets as Vitalis, states its scope, and offers the mute toggle — never a Listen button", async () => {
+  it("greets as Vitalis, states its scope, and offers the mute toggle, never a Listen button", async () => {
     renderApp("/");
     await screen.findByText("Today page");
     await openPopup();
@@ -318,7 +318,7 @@ describe("Vitalis window — the popup", () => {
   });
 });
 
-describe("Vitalis window — session isolation from the Coach thread", () => {
+describe("Vitalis window, session isolation from the Coach thread", () => {
   it("never shows the seeded Coach thread, and leaves its storage byte-identical", async () => {
     const seeded = seedCoachThread();
     renderApp("/");
@@ -378,7 +378,7 @@ describe("Vitalis window — session isolation from the Coach thread", () => {
   });
 });
 
-describe("Vitalis window — sending and auto-voice", () => {
+describe("Vitalis window, sending and auto-voice", () => {
   it("sends with a Nutrition + Assessment context and speaks the reply automatically", async () => {
     renderApp("/");
     await screen.findByText("Today page");
@@ -394,7 +394,7 @@ describe("Vitalis window — sending and auto-voice", () => {
       contextText: string;
     };
     expect(call.text).toBe("How is my protein today?");
-    expect(call.contextText).toContain("THE PERSON — FROM THEIR ASSESSMENT");
+    expect(call.contextText).toContain("THE PERSON: FROM THEIR ASSESSMENT");
     expect(call.contextText).toContain("TARGETS");
 
     /* Spoken without being asked — and there is still no Listen button. */
@@ -438,7 +438,7 @@ describe("Vitalis window — sending and auto-voice", () => {
 
 import { resetPrefCache } from "@/lib/prefsStore";
 
-describe("CoachOrb — deliberation, actions and the lock", () => {
+describe("CoachOrb, deliberation, actions and the lock", () => {
   function seedPref(key: string, value: unknown) {
     const raw = window.localStorage.getItem("bloom.prefs.v1");
     const doc = raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
@@ -571,7 +571,7 @@ describe("CoachOrb — deliberation, actions and the lock", () => {
     expect(screen.queryByLabelText("Vitalis is working")).toBeNull();
   }, 20_000);
 
-  it("logs a dish only after the confirm tap — never on arrival", async () => {
+  it("logs a dish only after the confirm tap, never on arrival", async () => {
     hoisted.askVitalis.mockImplementation(
       (params: { record?: { dishes: { id: string }[] } }) => {
         const dish = params.record?.dishes[0];
@@ -626,7 +626,7 @@ describe("CoachOrb — deliberation, actions and the lock", () => {
     await sendMessage("What should I have for lunch?");
     expect(await screen.findByText("Shall I log it?")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Not now" }));
-    expect(await screen.findByText("Dismissed — nothing changed.")).toBeTruthy();
+    expect(await screen.findByText("Dismissed, nothing changed.")).toBeTruthy();
     expect(foodLogEntries()).toHaveLength(0);
   });
 
@@ -739,7 +739,7 @@ describe("CoachOrb — deliberation, actions and the lock", () => {
     /* Nothing has moved yet — the card is a proposal, not a deed. */
     expect(readPref("health.plan.v1")).toEqual(before);
     fireEvent.click(screen.getByRole("button", { name: "Swap dish" }));
-    expect(await screen.findByText(/Swapped —/, undefined, { timeout: 5000 })).toBeTruthy();
+    expect(await screen.findByText(/Swapped,/, undefined, { timeout: 5000 })).toBeTruthy();
     const after = readPref("health.plan.v1") as { plan: { meals: { dishes: { dishId: string }[] }[] } };
     const afterIds = after.plan.meals.flatMap((m) => m.dishes.map((d) => d.dishId));
     expect(afterIds).not.toEqual(beforeIds);

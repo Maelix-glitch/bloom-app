@@ -273,11 +273,11 @@ export function Composer({
   const addFile = (file: File) => {
     onNotice(null);
     if (file.size === 0) {
-      onNotice("That file is empty — choose another.");
+      onNotice("That file is empty, choose another.");
       return;
     }
     if (!isSupportedFile(file)) {
-      onNotice("That file type isn't supported here — try an image, audio, text or PDF.");
+      onNotice("That file type isn't supported here, try an image, audio, text or PDF.");
       return;
     }
     if (file.size > MAX_BYTES) {
@@ -334,7 +334,7 @@ export function Composer({
          never happened and invited an accidental duplicate. */
       setDraftState("");
       removeAttachment();
-      onNotice("That reply didn't make it — tap Try again on your message above.");
+      onNotice("That reply didn't make it, tap Try again on your message above.");
     }
     /* "rejected": nothing was sent at all; the draft stays as it was. */
   };

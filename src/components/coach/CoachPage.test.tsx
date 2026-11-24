@@ -204,7 +204,7 @@ function deferred<T>() {
   return { promise, resolve, reject };
 }
 
-describe("CoachPage — the accepted signal fires at append, not at reply", () => {
+describe("CoachPage, the accepted signal fires at append, not at reply", () => {
   it("puts the message in the thread and clears the composer while the reply is in flight", async () => {
     const flight = deferred<unknown>();
     hoisted.requestResponse.mockImplementation(() => flight.promise);
@@ -242,14 +242,14 @@ describe("CoachPage — the accepted signal fires at append, not at reply", () =
     await waitFor(() => expect(screen.getAllByTestId("thread-message")).toHaveLength(2));
     await waitFor(() =>
       expect(
-        screen.getByText("That reply didn't make it — tap Try again on your message above."),
+        screen.getByText("That reply didn't make it, tap Try again on your message above."),
       ).toBeTruthy(),
     );
     expect(textbox().value).toBe("");
   });
 });
 
-describe("CoachPage — the AI consent gate (M-232)", () => {
+describe("CoachPage, the AI consent gate (M-232)", () => {
   /** Back to never-asked: no consent records, no per-surface ask flags. */
   function clearAiConsent() {
     const at = "2026-03-04T09:15:00.000Z";

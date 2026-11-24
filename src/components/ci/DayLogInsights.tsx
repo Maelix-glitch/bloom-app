@@ -272,7 +272,7 @@ export function DayLogInsights({
           {!compact && dayAnalysis.lhPositives.length > 0 ? (
             <p className="mt-3 text-[length:var(--text-caption)] ci-muted">
               {dayAnalysis.lhPositives.length} positive LH{" "}
-              {dayAnalysis.lhPositives.length === 1 ? "test" : "tests"} logged — most recently{" "}
+              {dayAnalysis.lhPositives.length === 1 ? "test" : "tests"} logged, most recently{" "}
               {formatDate(dayAnalysis.lhPositives[dayAnalysis.lhPositives.length - 1]!.date)}.
             </p>
           ) : null}
@@ -283,7 +283,7 @@ export function DayLogInsights({
           <p className="ci-eyebrow">Across the phases</p>
           <div className="mt-3 grid gap-4 sm:grid-cols-2">
             <div>
-              <p className="mb-1.5 text-[12px] font-medium">Pain (0–5)</p>
+              <p className="mb-1.5 text-[12px] font-medium">Pain (0-5)</p>
               <PhaseTable
                 rows={dayAnalysis.painByPhase}
                 max={5}
@@ -292,7 +292,7 @@ export function DayLogInsights({
               />
             </div>
             <div>
-              <p className="mb-1.5 text-[12px] font-medium">Energy (1–5)</p>
+              <p className="mb-1.5 text-[12px] font-medium">Energy (1-5)</p>
               <PhaseTable
                 rows={dayAnalysis.energyByPhase}
                 max={5}
@@ -301,7 +301,7 @@ export function DayLogInsights({
               />
             </div>
             <div>
-              <p className="mb-1.5 text-[12px] font-medium">Mood (1–5)</p>
+              <p className="mb-1.5 text-[12px] font-medium">Mood (1-5)</p>
               <PhaseTable
                 rows={dayAnalysis.moodByPhase}
                 max={5}

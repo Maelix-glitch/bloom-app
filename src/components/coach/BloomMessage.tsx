@@ -68,13 +68,13 @@ function SourceLine({
           <span className="coach-src-dot" aria-hidden="true" />
           {message.sources.length === 1 && /^(your|Bloom's|my )/.test(message.sources[0] ?? "")
             ? `From ${message.sources[0]}`
-            : `From your record — ${message.sources.join(" · ")}`}
+            : `From your record, ${message.sources.join(" · ")}`}
         </span>
       ) : null}
       {message.fellBackBecause ? (
         <span className="coach-msg-ondevice" title={message.fellBackBecause}>
           {message.fellBackBecause === "offline"
-            ? "offline — answered from Bloom's own knowledge"
+            ? "offline, answered from Bloom's own knowledge"
             : "answered on this device"}
         </span>
       ) : null}
@@ -111,7 +111,7 @@ function SignatureNotice({ message }: { message: CoachMessage }) {
           >
             <div className="coach-noticed-inner">
               <p className="coach-noticed-lede">
-                This isn&rsquo;t a diagnosis or a verdict — just a quiet read of what your own logs
+                This isn&rsquo;t a diagnosis or a verdict, just a quiet read of what your own logs
                 show.
               </p>
               <ul className="coach-noticed-list">
@@ -120,7 +120,7 @@ function SignatureNotice({ message }: { message: CoachMessage }) {
                     <span className="coach-noticed-item-copy">
                       <strong>{notice.label}</strong>
                       <span>
-                        {notice.value} on average — {TREND_WORD[notice.trend]} across the window
+                        {notice.value} on average, {TREND_WORD[notice.trend]} across the window
                         shown
                       </span>
                       {notice.detail ? <em>{notice.detail}</em> : null}
@@ -405,7 +405,7 @@ export function BloomMessage({
                 type="button"
                 className="coach-error-knowledge"
                 onClick={onOfflineAnswer}
-                title="Bloom's built-in knowledge, on this device — no connection needed"
+                title="Bloom's built-in knowledge, on this device, no connection needed"
               >
                 Answer from Bloom&rsquo;s own knowledge
               </button>

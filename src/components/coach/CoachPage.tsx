@@ -101,7 +101,7 @@ function CoachPageView({ coach }: { coach: CoachSystem }) {
     const allowed = await gateEnsure();
     if (!allowed) {
       noticeRef.current(
-        "Nothing was sent — AI replies need your permission first. You can turn them on any time in Profile → Privacy → Your consent.",
+        "Nothing was sent. AI replies need your permission first. You can turn them on any time in Profile → Privacy → Your consent.",
       );
     }
     return allowed;

@@ -189,7 +189,7 @@ export function PhaseWave({
       ? `Cycle map: about ${model.length} days. Today is day ${analysis.cycleDay ?? "unknown"}, ${analysis.overdueDays} days past the expected length. Bloom has not started a new cycle: log the first day of a period when one starts and the count restarts from there.`
       : `Cycle map: about ${model.length} days. Today is day ${analysis.cycleDay ?? "unknown"} of the cycle, in the ${analysis.phaseLabel} phase. Ovulation is estimated around day ${model.ovDay}, ${
           analysis.fertileSuppressed
-            ? "and no fertile window is shown — the recent cycles vary too much for that estimate to mean anything."
+            ? "and no fertile window is shown, the recent cycles vary too much for that estimate to mean anything."
             : `the fertile window around days ${Math.max(1, model.ovDay - 5)} to ${model.ovDay + 1}, estimated from your logged dates only,`
         } and the next period is predicted at day ${model.length + 1}.`
     : "Cycle map: empty until a period is logged.";

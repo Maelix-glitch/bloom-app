@@ -103,7 +103,7 @@ export function CycleDial({ analysis, days }: { analysis: CycleAnalysis; days?: 
             ? `Cycle dial: day ${today} of ${length}, ${analysis.phaseLabel}. ${
                 fertile ? `Fertile window estimated day ${fertile.from} to ${fertile.to}.` : ""
               }`
-            : "Cycle dial — log a period start to fill it."
+            : "Cycle dial, log a period start to fill it."
         }
       >
         {/* track */}
@@ -233,7 +233,7 @@ export function CycleDial({ analysis, days }: { analysis: CycleAnalysis; days?: 
           fontSize={44}
           fill="var(--ci-text)"
         >
-          {today ?? "—"}
+          {today ?? "-"}
         </text>
         <text
           x={C}

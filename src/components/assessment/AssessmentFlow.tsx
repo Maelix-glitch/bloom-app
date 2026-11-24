@@ -365,7 +365,7 @@ function PastAttemptsField({
       ) : null}
       {attempts.length === 0 ? (
         <p className="text-[length:var(--text-support)] text-muted-foreground">
-          Leave this empty if this is your first try — that is useful to know too.
+          Leave this empty if this is your first try, that is useful to know too.
         </p>
       ) : null}
     </div>
@@ -577,7 +577,7 @@ export function AssessmentFlow({
               <SheetItem className="mt-1 flex flex-col gap-5">
                 <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
                   Eight short sections: how you eat, move, sleep and recover, what you want to
-                  change, and a few safety questions. Your answers become a summary you own — the
+                  change, and a few safety questions. Your answers become a summary you own, the
                   starting point for any plan Bloom suggests. Nothing is locked behind it, and you
                   can retake it at any time.
                 </p>
@@ -655,7 +655,7 @@ export function AssessmentFlow({
                     onChange={(v) => patch({ waistCm: v })}
                   />
                   <p className="text-[length:var(--text-support)] text-muted-foreground">
-                    Optional — measured around your navel. Skip it if you don't know it; Bloom
+                    Optional, measured around your navel. Skip it if you don't know it; Bloom
                     never guesses it.
                   </p>
                 </div>
@@ -930,7 +930,7 @@ export function AssessmentFlow({
                 </div>
                 <div className="flex flex-col gap-2">
                   <FieldLabel>
-                    How often does eating follow your feelings — stress, boredom, a hard day?
+                    How often does eating follow your feelings, stress, boredom, a hard day?
                   </FieldLabel>
                   <ChoiceGroup
                     ariaLabel="Eating and feelings"
@@ -962,7 +962,7 @@ export function AssessmentFlow({
                   />
                 </div>
                 <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-                  Every question on this step can be skipped — leave anything you would rather
+                  Every question on this step can be skipped, leave anything you would rather
                   not answer, and Bloom will simply not use it.
                 </p>
               </SheetItem>

@@ -8,9 +8,9 @@ import type { CoachMode } from "@/lib/coach/intelligence";
 import { cn } from "@/lib/utils";
 
 const MODE_LABEL: Record<CoachMode, string> = {
-  ask: "Ask — a clear read",
-  reflect: "Reflect — slow down",
-  plan: "Plan — a next step",
+  ask: "Ask - a clear read",
+  reflect: "Reflect - slow down",
+  plan: "Plan - a next step",
 };
 
 /**
@@ -124,8 +124,8 @@ export function QuickPalette({
                     <BloomIcon name={item} size={15} />
                   </span>
                   <span>
-                    <strong>{MODE_LABEL[item].split(" — ")[0]}</strong>
-                    <small>{MODE_LABEL[item].split(" — ")[1]}</small>
+                    <strong>{MODE_LABEL[item].split(" - ")[0]}</strong>
+                    <small>{MODE_LABEL[item].split(" - ")[1]}</small>
                   </span>
                 </button>
               ))}
