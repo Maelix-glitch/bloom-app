@@ -357,6 +357,8 @@ im.save(sys.argv[2], "WEBP", quality=80)
 async function referenceFoods() {
   const usda = await load("src/lib/nutrition/data/usdaReferenceData.ts");
   const cofid = await load("src/lib/nutrition/data/cofidReferenceData.ts");
+  const afcd = await load("src/lib/nutrition/data/afcdReferenceData.ts");
+  const cnf = await load("src/lib/nutrition/data/cnfReferenceData.ts");
   return [
     ...usda.USDA_REFERENCE_FOODS_RAW.map((f) => ({
       foodId: f.id,
@@ -365,6 +367,16 @@ async function referenceFoods() {
     })),
     /* Non-USDA foods have no FDC id: their pin key is the full food id. */
     ...cofid.COFID_REFERENCE_FOODS_RAW.map((f) => ({
+      foodId: f.id,
+      fdc: f.id,
+      foodName: f.name,
+    })),
+    ...afcd.AFCD_REFERENCE_FOODS_RAW.map((f) => ({
+      foodId: f.id,
+      fdc: f.id,
+      foodName: f.name,
+    })),
+    ...cnf.CNF_REFERENCE_FOODS_RAW.map((f) => ({
       foodId: f.id,
       fdc: f.id,
       foodName: f.name,
@@ -399,8 +411,27 @@ function assertCoverage(foods) {
  */
 const EXTRA_PINS = [
   ["cofid-12-495", "Panir Paneer Indian cheese fresh.jpg", "paneer"], // fresh paneer (the Commons/Wikipedia lead depiction of paneer itself)
+  /* M-230 (2026-11-24): the second multi-source wave. Each photograph was
+     viewed before pinning: it depicts the shipped food itself, in the
+     shipped form, with no branded packaging in frame. */
+  ["afcd-F000416", "Fava Beans Dried.JPG", "broad-beans"], // dried broad (fava) beans on a plate — the shipped dry form
+  ["afcd-F006543", "Split pea.jpg", "split-peas"], // yellow split peas, full frame
+  ["afcd-F008209", "Semillas de Chía.jpg", "chia-seeds"], // dry chia seeds (the soaked-gel cup photograph was rejected — a prepared form, not the shipped dry seed)
+  ["afcd-F008210", "Brown Flax Seeds.jpg", "flaxseed"], // brown flax seeds, full frame
+  ["cnf-6995", "Skimmed milk quark on plate.jpg", "quark"], // plain skimmed-milk quark — the shipped fat-free plain form
+  ["cnf-6999", "Kefir glass london feb 10.jpg", "kefir"], // a plain glass of kefir; the pouring photographs were rejected (branded cartons in frame)
+  ["cnf-6330", "004-soymilk.jpg", "soya-milk"], // soy milk in a glass and an unbranded bottle, soybeans beside
 ];
-const EXTRA_PHOTOLESS = [];
+const EXTRA_PHOTOLESS = [
+  [
+    "afcd-F005249",
+    "Hunted 2026-11-24: Commons offers lupin only as brined whole lupini beans in bowls (a prepared snack form, skins on) or as botanical specimens of dried pods — neither depicts the dry dehulled splits this record ships, so no photograph is pinned.",
+  ],
+  [
+    "afcd-F000061",
+    "Hunted 2026-11-24: Commons offers the amaranth grain only under a microscope on a ruler, as unthreshed mixed seed with chaff, or as a black-seeded variety in a jar — the AFCD row describes light sandy/beige grains, and no photograph verifiably depicts that cleaned grain, so no photograph is pinned.",
+  ],
+];
 
 const ident = (slug) => slug.replace(/-([a-z0-9])/g, (_, c) => c.toUpperCase());
 

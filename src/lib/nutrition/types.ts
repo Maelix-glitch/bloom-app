@@ -51,7 +51,15 @@ export const OPTIONAL_NUTRIENT_KEYS = [
 
 export type OptionalNutrientKey = (typeof OPTIONAL_NUTRIENT_KEYS)[number];
 
-export type FoodProvenanceKind = "usda" | "cofid" | "user_entered" | "off" | "ifct" | "recipe";
+export type FoodProvenanceKind =
+  | "usda"
+  | "cofid"
+  | "afcd"
+  | "cnf"
+  | "user_entered"
+  | "off"
+  | "ifct"
+  | "recipe";
 
 export interface FoodProvenance {
   kind: FoodProvenanceKind;

@@ -150,7 +150,9 @@ describe("the CoFID reference set (M-229)", () => {
   it("joins the combined library without touching the USDA set", () => {
     expect(USDA_REFERENCE_FOODS.length).toBe(158);
     expect(USDA_REFERENCE_FOODS.every((f) => f.provenance.kind === "usda")).toBe(true);
-    expect(REFERENCE_FOODS.length).toBe(159);
+    /* 159 at M-229; M-230 (2026-11-24) added the AFCD (6) and CNF (3)
+       sets to the combined pool — the CoFID set itself is unchanged. */
+    expect(REFERENCE_FOODS.length).toBe(168);
     expect(findReferenceFood(PANEER_ID)?.provenance.kind).toBe("cofid");
     expect(searchReferenceFoods("paneer")[0]?.id).toBe(PANEER_ID);
     /* The stamp dispatch keeps each set's own name on its own foods. */

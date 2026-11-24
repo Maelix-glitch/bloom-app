@@ -22,6 +22,8 @@ export * from "./foods";
 export * from "./log";
 export * from "./usdaReference";
 export * from "./cofidReference";
+export * from "./afcdReference";
+export * from "./cnfReference";
 export * from "./referenceFoods";
 export * from "./foodImages";
 export * from "./coachLog";

@@ -155,11 +155,18 @@ import hempSeeds from "../../../assets/foods/hemp-seeds.webp";
 import chickenBreastRoasted from "../../../assets/foods/chicken-breast-roasted.webp";
 import turkeyBreastRoasted from "../../../assets/foods/turkey-breast-roasted.webp";
 import paneer from "../../../assets/foods/paneer.webp";
+import broadBeans from "../../../assets/foods/broad-beans.webp";
+import splitPeas from "../../../assets/foods/split-peas.webp";
+import chiaSeeds from "../../../assets/foods/chia-seeds.webp";
+import flaxseed from "../../../assets/foods/flaxseed.webp";
+import quark from "../../../assets/foods/quark.webp";
+import kefir from "../../../assets/foods/kefir.webp";
+import soyaMilk from "../../../assets/foods/soya-milk.webp";
 
 export const FOOD_IMAGES_RETRIEVED_ON = "2026-11-23";
 
 /** SHA-256 over the canonicalised attribution records (see the generator). */
-export const FOOD_IMAGES_FINGERPRINT = "fb03809e3ec7a82daeb7dbf8eb63cd878cbcc3428e92f89047e792fc43366e7a";
+export const FOOD_IMAGES_FINGERPRINT = "c13ab8e6aad9acdafa8fac3571c36c3f0a19fa4729c4f939e4ced48d3ba450b4";
 
 export interface FoodImageRaw {
   foodId: string;
@@ -318,6 +325,13 @@ export const FOOD_IMAGES_RAW: readonly FoodImageRaw[] = [
   { "foodId": "usda-171477", "foodName": "Chicken, broilers or fryers, breast, meat only, cooked, roasted", "slug": "chicken-breast-roasted", "src": chickenBreastRoasted, "commonsTitle": "File:Grilled Chicken Breasts (28905381261).jpg", "author": "Sharon Chen from Austin, United States", "license": "CC BY 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Grilled_Chicken_Breasts_(28905381261).jpg" },
   { "foodId": "usda-171496", "foodName": "Turkey, whole, breast, meat only, cooked, roasted", "slug": "turkey-breast-roasted", "src": turkeyBreastRoasted, "commonsTitle": "File:Cooked turkey breast - November 2023 - Sarah Stierch.jpg", "author": "Missvain", "license": "CC BY 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Cooked_turkey_breast_-_November_2023_-_Sarah_Stierch.jpg" },
   { "foodId": "cofid-12-495", "foodName": "Cheese, Paneer", "slug": "paneer", "src": paneer, "commonsTitle": "File:Panir Paneer Indian cheese fresh.jpg", "author": "Sonja Pauen - Stanhopea", "license": "CC BY 2.0 de", "pageUrl": "https://commons.wikimedia.org/wiki/File:Panir_Paneer_Indian_cheese_fresh.jpg" },
+  { "foodId": "afcd-F000416", "foodName": "Bean, broad, dried", "slug": "broad-beans", "src": broadBeans, "commonsTitle": "File:Fava Beans Dried.JPG", "author": "Miansari66", "license": "CC0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Fava_Beans_Dried.JPG" },
+  { "foodId": "afcd-F006543", "foodName": "Pea, split, dried", "slug": "split-peas", "src": splitPeas, "commonsTitle": "File:Split pea.jpg", "author": "Sanjay Acharya", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Split_pea.jpg" },
+  { "foodId": "afcd-F008209", "foodName": "Seed, chia, dried", "slug": "chia-seeds", "src": chiaSeeds, "commonsTitle": "File:Semillas de Chía.jpg", "author": "Magister Mathematicae", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Semillas_de_Chía.jpg" },
+  { "foodId": "afcd-F008210", "foodName": "Seed, linseed or flaxseed", "slug": "flaxseed", "src": flaxseed, "commonsTitle": "File:Brown Flax Seeds.jpg", "author": "Sanjay Acharya", "license": "CC BY-SA 3.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Brown_Flax_Seeds.jpg" },
+  { "foodId": "cnf-6995", "foodName": "Yogourt (yogurt), fresh cheese-type (quark), fat free, plain, unsalted", "slug": "quark", "src": quark, "commonsTitle": "File:Skimmed milk quark on plate.jpg", "author": "SKopp", "license": "CC BY-SA 4.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Skimmed_milk_quark_on_plate.jpg" },
+  { "foodId": "cnf-6999", "foodName": "Kefir, plain, low fat (0.5-1.9% M.F.)", "slug": "kefir", "src": kefir, "commonsTitle": "File:Kefir glass london feb 10.jpg", "author": "secretlondon123", "license": "CC BY-SA 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:Kefir_glass_london_feb_10.jpg" },
+  { "foodId": "cnf-6330", "foodName": "Plant-based beverage, soy beverage, plain, unsweetened, fortified, refrigerated and/or shelf-stable", "slug": "soya-milk", "src": soyaMilk, "commonsTitle": "File:004-soymilk.jpg", "author": "Kjokkenutstyr", "license": "CC BY-SA 2.0", "pageUrl": "https://commons.wikimedia.org/wiki/File:004-soymilk.jpg" },
 ];
 
 export interface FoodImagePhotoless {
@@ -343,4 +357,6 @@ export const FOOD_IMAGE_PHOTOLESS: readonly FoodImagePhotoless[] = [
   { "foodId": "usda-173180", "foodName": "Beverages, Protein powder whey based", "reason": "Hunted 2026-11-19: whey-based protein powder — photo-less by the PW-1 precedent pinned above for the whey isolate and soy powder records: branded tubs are packaging, and an unbranded scoop cannot be told apart from any other protein powder." },
   { "foodId": "usda-168147", "foodName": "Vital wheat gluten", "reason": "Hunted 2026-11-19: vital wheat gluten is sold as a dry powder, but Commons' free-licence frames show only prepared seitan — the cooked product, a different form — never the powder itself unbranded." },
   { "foodId": "usda-172449", "foodName": "Tofu, soft, prepared with calcium sulfate and magnesium chloride (nigari)", "reason": "Hunted 2026-11-19: the only clean free-licence photograph of a soft (silken) tofu block is already pinned to the regular tofu record and Commons titles cannot repeat in this manifest; the remaining silken-tofu frames are cooked dishes or a mislabelled meat aspic." },
+  { "foodId": "afcd-F005249", "foodName": "Lupin, dehulled, splits, uncooked", "reason": "Hunted 2026-11-24: Commons offers lupin only as brined whole lupini beans in bowls (a prepared snack form, skins on) or as botanical specimens of dried pods — neither depicts the dry dehulled splits this record ships, so no photograph is pinned." },
+  { "foodId": "afcd-F000061", "foodName": "Amaranth, grain, whole, uncooked", "reason": "Hunted 2026-11-24: Commons offers the amaranth grain only under a microscope on a ruler, as unthreshed mixed seed with chaff, or as a black-seeded variety in a jar — the AFCD row describes light sandy/beige grains, and no photograph verifiably depicts that cleaned grain, so no photograph is pinned." },
 ];
