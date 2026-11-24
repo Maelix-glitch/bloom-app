@@ -11,6 +11,7 @@
 
 import { supabase, hasSupabaseConfig } from "@/lib/supabase";
 import { report } from "@/lib/profile/errors";
+import { listBlockCounterparts } from "@/lib/profile/safetyService";
 import {
   normalizeGift,
   normalizeReaction,
@@ -181,7 +182,10 @@ export interface StoryViewerEntry {
   viewedAt: string;
 }
 
-export async function listViewers(storyId: string): Promise<StoryViewerEntry[]> {
+export async function listViewers(
+  storyId: string,
+  userId?: string | null,
+): Promise<StoryViewerEntry[]> {
   if (!hasSupabaseConfig) return [];
   try {
     const { data, error } = await supabase
@@ -194,13 +198,20 @@ export async function listViewers(storyId: string): Promise<StoryViewerEntry[]> 
       if (!isMissingBackend(error)) report("story:viewers", error);
       return [];
     }
-    return (
+    const entries = (
       (data ?? []) as { viewer_id: string; viewer_name: string | null; viewed_at: string }[]
     ).map((row) => ({
       viewerId: row.viewer_id,
       name: row.viewer_name?.trim() || "Someone in Bloom",
       viewedAt: row.viewed_at,
     }));
+    /* Blocks hide both directions (M-232): when the reader is known, a
+       blocked counterpart's views leave the owner's insights list. */
+    if (userId) {
+      const blocked = await listBlockCounterparts(userId);
+      if (blocked.size > 0) return entries.filter((e) => !blocked.has(e.viewerId));
+    }
+    return entries;
   } catch (error) {
     report("story:viewers", error);
     return [];
@@ -351,9 +362,13 @@ export async function listReplies(
     }));
     // Local-only replies (sent while offline) join by id.
     const ids = new Set(server.map((r) => r.id));
-    return [...server, ...local.filter((r) => !ids.has(r.id))].sort((a, b) =>
+    const merged = [...server, ...local.filter((r) => !ids.has(r.id))].sort((a, b) =>
       a.createdAt.localeCompare(b.createdAt),
     );
+    /* Blocks hide both directions (M-232): a blocked counterpart's
+       replies leave the list, whichever side placed the block. */
+    const blocked = await listBlockCounterparts(userId);
+    return blocked.size > 0 ? merged.filter((r) => !blocked.has(r.userId)) : merged;
   } catch (error) {
     report("story:replies-read", error);
     return local;
@@ -459,7 +474,10 @@ export async function listGifts(
       })
       .filter((g): g is StoryGiftRecord => g !== null);
     const ids = new Set(server.map((g) => g.id));
-    return [...server, ...local.filter((g) => !ids.has(g.id))];
+    const merged = [...server, ...local.filter((g) => !ids.has(g.id))];
+    /* Blocks hide both directions (M-232), as with replies above. */
+    const blocked = await listBlockCounterparts(userId);
+    return blocked.size > 0 ? merged.filter((g) => !blocked.has(g.senderId)) : merged;
   } catch (error) {
     report("story:gifts-read", error);
     return local;

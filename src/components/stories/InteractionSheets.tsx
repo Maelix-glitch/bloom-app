@@ -6,9 +6,10 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Eye, Gift as GiftIcon, Heart, MessageCircle, Send, Trash2 } from "lucide-react";
+import { Eye, Flag, Gift as GiftIcon, Heart, MessageCircle, Send, Trash2 } from "lucide-react";
 
 import { StorySheet } from "./StorySheet";
+import { ReportSheet } from "@/components/profile/SafetyActions";
 import { GIFT_META, REACTION_META } from "@/lib/stories/catalogs";
 import {
   STORY_GIFTS,
@@ -28,6 +29,7 @@ import {
   type StoryViewerEntry,
 } from "@/lib/stories/interactions";
 import { storyAge } from "@/lib/stories/time";
+import type { StoryReplyRecord } from "@/lib/stories/types";
 import type { Story } from "@/lib/profile/types";
 import { isStoryActive } from "@/lib/profile/types";
 import { cn } from "@/lib/utils";
@@ -353,7 +355,7 @@ export function StoryInsightsSheet({
 
   useEffect(() => {
     let alive = true;
-    void listViewers(story.id).then((v) => alive && setViewers(v));
+    void listViewers(story.id, userId).then((v) => alive && setViewers(v));
     void getReactionState(story.id, userId).then((r) => alive && setReactions(r));
     void listReplies(story.id, userId).then((r) => alive && setReplyCount(r.length));
     void listGifts(story.id, userId).then((g) => alive && setGiftCount(g.length));
@@ -580,6 +582,9 @@ function ViewerRow({ v }: { v: StoryViewerEntry }) {
 
 function RepliesList({ storyId, userId }: { storyId: string; userId: string | null }) {
   const [replies, setReplies] = useState<Awaited<ReturnType<typeof listReplies>> | null>(null);
+  /* Report a reply (M-232): the owner can report someone else's reply
+     on their own story, right where they read it. */
+  const [reportTarget, setReportTarget] = useState<StoryReplyRecord | null>(null);
   useEffect(() => {
     let alive = true;
     void listReplies(storyId, userId).then((r) => alive && setReplies(r));
@@ -600,16 +605,41 @@ function RepliesList({ storyId, userId }: { storyId: string; userId: string | nu
     return <p className="py-6 text-center text-[13px] text-faint">No replies yet.</p>;
   }
   return (
-    <ul className="flex flex-col gap-2">
-      {replies.map((r) => (
-        <li key={r.id} className="rounded-2xl border border-border bg-surface/60 px-3.5 py-2.5">
-          <p className="mono mb-1 text-[length:var(--text-micro)] uppercase tracking-[0.08em] text-faint">
-            {r.authorName ?? "Someone"} · {storyAge(r.createdAt)}
-          </p>
-          <p className="whitespace-pre-line text-[length:var(--text-callout)] leading-relaxed">{r.body}</p>
-        </li>
-      ))}
-    </ul>
+    <>
+      <ul className="flex flex-col gap-2">
+        {replies.map((r) => (
+          <li key={r.id} className="rounded-2xl border border-border bg-surface/60 px-3.5 py-2.5">
+            <p className="mono mb-1 flex items-center justify-between gap-2 text-[length:var(--text-micro)] uppercase tracking-[0.08em] text-faint">
+              <span>
+                {r.authorName ?? "Someone"} · {storyAge(r.createdAt)}
+              </span>
+              {userId && r.userId !== userId ? (
+                <button
+                  type="button"
+                  onClick={() => setReportTarget(r)}
+                  className="inline-flex items-center gap-1 normal-case tracking-normal text-faint transition-colors hover:text-foreground"
+                  aria-label={`Report reply by ${r.authorName ?? "someone"}`}
+                >
+                  <Flag className="size-3" aria-hidden /> Report
+                </button>
+              ) : null}
+            </p>
+            <p className="whitespace-pre-line text-[length:var(--text-callout)] leading-relaxed">{r.body}</p>
+          </li>
+        ))}
+      </ul>
+      {reportTarget ? (
+        <ReportSheet
+          open={reportTarget !== null}
+          onClose={() => setReportTarget(null)}
+          reporterId={userId}
+          targetKind="reply"
+          targetId={reportTarget.id}
+          targetUserId={reportTarget.userId}
+          targetName={reportTarget.authorName ?? "Someone in Bloom"}
+        />
+      ) : null}
+    </>
   );
 }
 

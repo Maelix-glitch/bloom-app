@@ -438,6 +438,10 @@ export async function removeBanner(path: string | null): Promise<void> {
 
 export interface PublicProfileResponse {
   private?: boolean;
+  /** The profile owner's user id (M-232) — the Report / Block target.
+      Absent from the private shape and from payloads served before the
+      20261124 migration; every safety affordance hides without it. */
+  user_id?: string;
   username?: string;
   display_name?: string;
   bio?: string | null;

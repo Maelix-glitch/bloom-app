@@ -50,7 +50,9 @@ import { VERIFIED_BLUE, type VerificationStatus } from "@/lib/profile/verificati
 import type { MemberBadge } from "@/lib/profile/badges";
 import { MemberBadges } from "@/components/profile/MemberBadges";
 import { VerifiedBadge } from "@/components/profile/VerifiedBadge";
+import { BlockedSection } from "@/components/profile/BlockedSection";
 import { ConsentSection } from "@/components/profile/ConsentSection";
+import { ModerationSection } from "@/components/profile/ModerationSection";
 import { TrustSection } from "@/components/profile/TrustSection";
 
 import type {
@@ -518,6 +520,8 @@ export function AccountRow({
           testId="pf-row-privacy"
         />
         <ConsentSection />
+        <BlockedSection />
+        <ModerationSection />
         <TrustSection />
         <Row
           icon={<IconEye />}

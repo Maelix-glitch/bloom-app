@@ -5,12 +5,13 @@
  */
 
 import { useState } from "react";
-import { Lock } from "lucide-react";
+import { Flag, Lock } from "lucide-react";
 
 import { accentVar } from "@/components/mood/primitives";
 import { cn } from "@/lib/utils";
 import type { ProfileViewModel } from "@/components/profile/ProfileView";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { SafetyMenuSheet } from "@/components/profile/SafetyActions";
 import { StoryRing } from "@/components/profile/StoryRing";
 import { StoryViewer } from "@/components/stories/StoryViewer";
 import { HighlightRail } from "@/components/highlights/HighlightRail";
@@ -22,14 +23,19 @@ export function PublicProfileView({
   asPreview = false,
   visitorId = null,
   visitorName = null,
+  onBlocked,
 }: {
   model: ProfileViewModel;
   asPreview?: boolean;
   visitorId?: string | null;
   visitorName?: string | null;
+  /** Called after the visitor blocks this person, so the route can
+      reload — the profile RPC then answers with its private shape. */
+  onBlocked?: (() => void) | undefined;
 }) {
   const [viewer, setViewer] = useState<number | null>(null);
   const [highlightViewIndex, setHighlightViewIndex] = useState<number | null>(null);
+  const [safetyOpen, setSafetyOpen] = useState(false);
   const [, setSeenTick] = useState(0);
 
   const { identity, stories, highlights, featured } = model;
@@ -42,6 +48,41 @@ export function PublicProfileView({
     highlightViewIndex !== null ? (highlights[highlightViewIndex] ?? null) : null;
   const hasContent = stories.length > 0 || highlights.length > 0 || Boolean(featured);
 
+  /* Report / Block (M-232): only for a signed-in visitor looking at
+     someone else's profile, and only when the payload carried the
+     owner's user id to aim at. Never in the owner's own preview. */
+  const authorId = identity.userId ?? null;
+  const canActOnPerson = Boolean(
+    !asPreview && visitorId && authorId && visitorId !== authorId,
+  );
+  const safetySheet = canActOnPerson ? (
+    <SafetyMenuSheet
+      open={safetyOpen}
+      onClose={() => setSafetyOpen(false)}
+      reporterId={visitorId}
+      targetKind="profile"
+      targetId={authorId ?? ""}
+      targetUserId={authorId}
+      targetName={identity.displayName}
+      onBlocked={() => {
+        setViewer(null);
+        setHighlightViewIndex(null);
+        onBlocked?.();
+      }}
+    />
+  ) : null;
+  const safetyButton = canActOnPerson ? (
+    <button
+      type="button"
+      onClick={() => setSafetyOpen(true)}
+      data-testid="pub-safety-open"
+      className="mono inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-label)] text-muted-foreground transition-colors hover:text-foreground"
+    >
+      <Flag className="size-3" aria-hidden />
+      Report or block
+    </button>
+  ) : null;
+
   if (!hasContent && !asPreview) {
     return (
       <div className="mx-auto max-w-[480px] rounded-2xl border border-border bg-surface/40 p-8 text-center">
@@ -52,6 +93,8 @@ export function PublicProfileView({
             ? `${identity.displayName} keeps their Bloom to themselves right now — and that's okay.`
             : "This profile hasn't been shared yet."}
         </p>
+        {safetyButton ? <div className="mt-5 flex justify-center">{safetyButton}</div> : null}
+        {safetySheet}
       </div>
     );
   }
@@ -135,6 +178,7 @@ export function PublicProfileView({
             {stories.length} {stories.length === 1 ? "story" : "stories"}
           </button>
         ) : null}
+        {safetyButton ? <div className="mt-3">{safetyButton}</div> : null}
       </header>
 
       {highlights.length > 0 ? (
@@ -160,6 +204,12 @@ export function PublicProfileView({
         viewerName={identity.displayName}
         viewerAvatarPath={identity.avatarPath}
         accent={identity.accent}
+        authorId={authorId}
+        reporterId={visitorId}
+        onBlockedAuthor={() => {
+          setViewer(null);
+          onBlocked?.();
+        }}
         onClose={() => setViewer(null)}
       />
       <StoryViewer
@@ -167,8 +217,15 @@ export function PublicProfileView({
         viewerName={`${highlightView?.name ?? ""} — highlight`}
         viewerAvatarPath={identity.avatarPath}
         accent={highlightView?.accent ?? identity.accent}
+        authorId={authorId}
+        reporterId={visitorId}
+        onBlockedAuthor={() => {
+          setHighlightViewIndex(null);
+          onBlocked?.();
+        }}
         onClose={() => setHighlightViewIndex(null)}
       />
+      {safetySheet}
     </div>
   );
 }

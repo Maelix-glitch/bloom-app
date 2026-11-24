@@ -146,3 +146,44 @@ describe("ConsentSection", () => {
     expect(detail.textContent).not.toMatch(/Given on|Withdrawn on/);
   });
 });
+
+describe("ConsentSection — the AI-explanations permission (M-232)", () => {
+  it("shows the AI permission with the provider line, and Allow records a real grant", () => {
+    seed(withConsents(consentDecision("health_data_processing", true, GRANTED_AT)));
+    render(<ConsentSection />);
+
+    const detail = expand();
+    const ai = screen.getByTestId("pf-consent-ai");
+    expect(ai.textContent).toContain(CONSENT_COPY.ai_assistance.label);
+    expect(ai.textContent).toContain(CONSENT_COPY.ai_assistance.description);
+    /* What is sent and to whom, in the Privacy page's terms. */
+    expect(ai.textContent).toContain("ElevenLabs");
+    expect(ai.textContent).toContain("Not given");
+    /* The health list does not double-report the AI purpose. */
+    expect(detail.querySelectorAll("li")).toHaveLength(2);
+
+    fireEvent.click(screen.getByTestId("pf-consent-ai-on"));
+
+    /* The grant lands in the same stored records the Assessment writes,
+       and the row now reports it with its own date and offers Turn off. */
+    const after = screen.getByTestId("pf-consent-ai");
+    expect(after.textContent).toContain("Given on");
+    expect(screen.getByTestId("pf-consent-ai-off")).toBeTruthy();
+  });
+
+  it("Turn off records a withdrawal, and the state line says so", () => {
+    seed(withConsents(consentDecision("ai_assistance", true, GRANTED_AT)));
+    render(<ConsentSection />);
+
+    expand();
+    expect(screen.getByTestId("pf-consent-ai").textContent).toContain(
+      `Given on ${fmt(GRANTED_AT)}`,
+    );
+
+    fireEvent.click(screen.getByTestId("pf-consent-ai-off"));
+
+    const after = screen.getByTestId("pf-consent-ai");
+    expect(after.textContent).toContain("Withdrawn on");
+    expect(screen.getByTestId("pf-consent-ai-on")).toBeTruthy();
+  });
+});

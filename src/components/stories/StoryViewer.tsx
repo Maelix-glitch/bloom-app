@@ -23,6 +23,7 @@ import {
   Eye,
   EyeOff,
   Gift as GiftIcon,
+  MoreHorizontal,
   Pause,
   Play,
   Trash2,
@@ -38,6 +39,7 @@ import { StoryAvatar } from "./StoryAvatar";
 import { StoryCanvas, type CanvasInteraction, type CanvasMedia } from "./StoryCanvas";
 import { StoryContent } from "./StoryContent";
 import { GiftSheet, ReactionBar, ReplySheet, StoryInsightsSheet } from "./InteractionSheets";
+import { SafetyMenuSheet } from "@/components/profile/SafetyActions";
 import { GIFT_META } from "@/lib/stories/catalogs";
 import { recordView } from "@/lib/stories/interactions";
 import { slideDurationMs } from "@/lib/stories/slides";
@@ -86,6 +88,9 @@ export function StoryViewer({
   userId = null,
   userName = null,
   ownerId = null,
+  authorId = null,
+  reporterId = null,
+  onBlockedAuthor,
   onShareAgain,
   onAddToHighlight,
 }: {
@@ -99,6 +104,14 @@ export function StoryViewer({
   userId?: string | null | undefined;
   userName?: string | null | undefined;
   ownerId?: string | null | undefined;
+  /** Report / Block (M-232): the story author's user id and the viewing
+      person's id. The safety menu appears only when both are known and
+      differ — never on your own stories, never signed out. */
+  authorId?: string | null | undefined;
+  reporterId?: string | null | undefined;
+  /** Called after the viewer blocks the author, so the host can drop
+      this author's stories from whatever list fed the viewer. */
+  onBlockedAuthor?: ((authorId: string) => void) | undefined;
   onShareAgain?: ((story: Story) => void) | undefined;
   onAddToHighlight?: ((story: Story) => void) | undefined;
 }) {
@@ -117,6 +130,12 @@ export function StoryViewer({
   const story = current?.story;
   const slide = current?.slide;
   const isOwner = Boolean(onDelete) || (ownerId !== null && userId !== null && ownerId === userId);
+  /* Report / Block (M-232): another person's story, a signed-in viewer,
+     and a known author — the three facts the safety menu needs. */
+  const [safetyOpen, setSafetyOpen] = useState(false);
+  const canReport = Boolean(
+    !isOwner && reporterId && authorId && reporterId !== authorId,
+  );
 
   const elapsedRef = useRef(0);
   const rafRef = useRef(0);
@@ -264,9 +283,9 @@ export function StoryViewer({
   /* pause while any sheet is open; resume after */
   useEffect(() => {
     if (!open) return;
-    if (sheet) setPhase("paused");
+    if (sheet || safetyOpen) setPhase("paused");
     else setPhase("viewing");
-  }, [sheet, open]);
+  }, [sheet, safetyOpen, open]);
 
   useEffect(() => {
     const onHide = () => {
@@ -538,6 +557,17 @@ export function StoryViewer({
                 <Trash2 className="size-4" />
               </button>
             ) : null}
+            {canReport ? (
+              <button
+                type="button"
+                onClick={() => setSafetyOpen(true)}
+                aria-label="Report or block"
+                className="sv-icon-btn"
+                data-testid="sv-safety-open"
+              >
+                <MoreHorizontal className="size-[18px]" />
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={close}
@@ -747,6 +777,21 @@ export function StoryViewer({
           onSent={(gift) => {
             fireBurst(gift);
             toast(`${GIFT_META[gift].glyph} Sent to ${viewerName}.`);
+          }}
+        />
+      ) : null}
+      {canReport ? (
+        <SafetyMenuSheet
+          open={safetyOpen}
+          onClose={() => setSafetyOpen(false)}
+          reporterId={reporterId}
+          targetKind="story"
+          targetId={story.id}
+          targetUserId={authorId}
+          targetName={viewerName}
+          onBlocked={(blockedId) => {
+            onBlockedAuthor?.(blockedId);
+            close();
           }}
         />
       ) : null}

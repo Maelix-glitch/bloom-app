@@ -194,6 +194,7 @@ function PublicProfilePage() {
             model={model}
             visitorId={visitor?.id ?? null}
             visitorName={visitor?.name ?? null}
+            onBlocked={() => setState({ status: "loading" })}
           />
         )}
       </main>
@@ -343,6 +344,7 @@ function mapPublicProfile(payload: PublicProfileResponse, handle: string): Profi
 
   return {
     identity: {
+      userId: payload.user_id ?? null,
       displayName: payload.display_name ?? "A person in Bloom",
       username: payload.username ?? handle,
       bio: payload.bio ?? null,
