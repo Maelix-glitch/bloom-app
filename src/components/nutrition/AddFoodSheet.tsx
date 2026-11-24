@@ -30,6 +30,8 @@ import {
   MAX_FOODS,
   MEALS,
   REFERENCE_FOODS,
+  afcdDatasetVersionLine,
+  cnfDatasetVersionLine,
   cofidDatasetVersionLine,
   entryNutrientsFor,
   foodDisplayName,
@@ -278,6 +280,18 @@ export function LogDialog({
                 data-testid="cofid-dataset-version"
               >
                 {cofidDatasetVersionLine()}
+              </p>
+              <p
+                className="mt-1 text-[length:var(--text-caption)] text-muted-foreground"
+                data-testid="afcd-dataset-version"
+              >
+                {afcdDatasetVersionLine()}
+              </p>
+              <p
+                className="mt-1 text-[length:var(--text-caption)] text-muted-foreground"
+                data-testid="cnf-dataset-version"
+              >
+                {cnfDatasetVersionLine()}
               </p>
             </>
           ) : null}

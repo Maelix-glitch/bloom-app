@@ -35,6 +35,8 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-2710842": { display: "Sorghum (jowar)", hindi: "ज्वार" },
   "usda-2512378": { display: "Buckwheat (kuttu)", hindi: "कूटू" },
   "usda-168874": { display: "Quinoa", hindi: "किनोआ" },
+  /* M-230: AFCD amaranth — rajgira, the Indian kitchen name for the grain. */
+  "afcd-F000061": { display: "Amaranth (rajgira)", hindi: "राजगीरा" },
   "usda-170284": { display: "Barley", hindi: "जौ" },
   "usda-168893": { display: "Whole wheat flour (atta)", hindi: "गेहूं का आटा" },
   "usda-168936": { display: "Refined wheat flour (maida)", hindi: "मैदा" },
@@ -66,6 +68,12 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-174259": { display: "Black gram (urad dal)", hindi: "उड़द दाल" },
   "usda-170419": { display: "Green peas", hindi: "हरी मटर" },
   "usda-173758": { display: "Cowpeas (lobia)", hindi: "लोबिया" },
+  /* M-230: the second multi-source wave — AFCD pulses and the CNF soy
+     beverage wear their kitchen names here like every other food. */
+  "afcd-F005249": { display: "Lupin splits", hindi: "ल्यूपिन" },
+  "afcd-F000416": { display: "Broad beans (bakla)", hindi: "बकला" },
+  "afcd-F006543": { display: "Split peas (matar dal)", hindi: "मटर दाल" },
+  "cnf-6330": { display: "Soya milk (unsweetened)", hindi: "सोया दूध" },
 
   /* Dairy and fats */
   "usda-322892": { display: "Whole milk", hindi: "दूध" },
@@ -81,6 +89,9 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   /* M-229: the library's first non-USDA food — CoFID's "Cheese, Paneer"
      wears its kitchen name here like every other reference food. */
   "cofid-12-495": { display: "Paneer", hindi: "पनीर" },
+  /* M-230: the CNF's two fermented dairy foods. */
+  "cnf-6995": { display: "Quark", hindi: "क्वार्क" },
+  "cnf-6999": { display: "Kefir", hindi: "केफ़िर" },
   "usda-2346384": { display: "Cottage cheese (full-fat)", hindi: "कॉटेज चीज़" },
   "usda-323444": { display: "Ricotta", hindi: "रिकोटा चीज़" },
   "usda-173410": { display: "Butter", hindi: "मक्खन" },
@@ -173,6 +184,9 @@ export const FOOD_NAMES: Readonly<Record<string, FoodNames>> = {
   "usda-2515381": { display: "Sunflower seeds", hindi: "सूरजमुखी के बीज" },
   "usda-2515380": { display: "Pumpkin seeds (pepitas)", hindi: "कद्दू के बीज" },
   "usda-170148": { display: "Hemp seeds", hindi: "भांग के बीज" },
+  /* M-230: AFCD chia and flaxseed (alsi). */
+  "afcd-F008209": { display: "Chia seeds", hindi: "चिया बीज" },
+  "afcd-F008210": { display: "Flaxseed (alsi)", hindi: "अलसी" },
   "usda-170150": { display: "Sesame seeds (til)", hindi: "तिल" },
   "usda-170169": { display: "Coconut (fresh)", hindi: "नारियल" },
   "usda-170172": { display: "Coconut milk", hindi: "नारियल का दूध" },

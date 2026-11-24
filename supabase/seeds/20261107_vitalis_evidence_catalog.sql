@@ -8,8 +8,8 @@
 --   verify           npm run seed:evidence:check
 --
 -- format version   2
--- catalogue hash   sha256:a319036faa2d84f90c14c79b21aa5086305fc098e51d91f3c15ac94070245228
--- rows             7 sources, 22 claims, 4 citations, 18 recommendations, 27 revisions
+-- catalogue hash   sha256:6c880595da3a491c1e9125de9ec187b4252ab76b18280fdc00b2e6f51e908774
+-- rows             9 sources, 22 claims, 4 citations, 18 recommendations, 27 revisions
 --
 -- What this file does, and does not do:
 --
@@ -66,7 +66,7 @@ begin
   -- 1. Rows the catalogue does not describe.
   select string_agg(d.id, ', ' order by d.id) into offenders
     from public.evidence_sources d
-   where d.id not in ('dga-2025-2030', 'dga-2020-2025', 'usda-fooddata-central', 'uk-cofid-2021', 'fao-who-unu-2004-energy', 'icmr-nin-dgi-2024', 'icmr-nin-ifct-2017');
+   where d.id not in ('dga-2025-2030', 'dga-2020-2025', 'usda-fooddata-central', 'uk-cofid-2021', 'au-afcd-release-3', 'ca-cnf-2026', 'fao-who-unu-2004-energy', 'icmr-nin-dgi-2024', 'icmr-nin-ifct-2017');
 
   if offenders is not null then
     raise exception 'seed refused: evidence_sources holds rows the catalogue does not describe: %', offenders
@@ -81,6 +81,8 @@ begin
             ('dga-2020-2025', 2),
             ('usda-fooddata-central', 2),
             ('uk-cofid-2021', 1),
+            ('au-afcd-release-3', 1),
+            ('ca-cnf-2026', 1),
             ('fao-who-unu-2004-energy', 1),
             ('icmr-nin-dgi-2024', 1),
             ('icmr-nin-ifct-2017', 1)
@@ -100,6 +102,8 @@ begin
             ('dga-2020-2025', 'dga-2025-2030'),
             ('usda-fooddata-central', null::text),
             ('uk-cofid-2021', null::text),
+            ('au-afcd-release-3', null::text),
+            ('ca-cnf-2026', null::text),
             ('fao-who-unu-2004-energy', null::text),
             ('icmr-nin-dgi-2024', null::text),
             ('icmr-nin-ifct-2017', null::text)
@@ -120,6 +124,8 @@ begin
             ('dga-2020-2025', 'superseded'),
             ('usda-fooddata-central', 'approved'),
             ('uk-cofid-2021', 'approved'),
+            ('au-afcd-release-3', 'approved'),
+            ('ca-cnf-2026', 'approved'),
             ('fao-who-unu-2004-energy', 'approved'),
             ('icmr-nin-dgi-2024', 'approved'),
             ('icmr-nin-ifct-2017', 'approved')
@@ -331,6 +337,68 @@ begin
 end
 $$;
 -- section: sources
+insert into public.evidence_sources as target (
+  id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
+) values (
+  'au-afcd-release-3', 'Australian Food Composition Database (AFCD), Release 3', 'dataset', 'Food Standards Australia New Zealand (FSANZ)', array['Food Standards Australia New Zealand']::text[], 2025, 'https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd/about-afcd', 'fsanz-data-user-licence', 'https://www.foodstandards.gov.au/science-data/monitoringnutrients/afcd/datauserlicenceagreement', 'The AFCD is published under FSANZ''s Data User Licence Agreement (modelled on CC BY-SA 3.0 AU): the data may be reproduced, adapted and distributed, including commercially, provided FSANZ is attributed, the licence is linked, the Limitation of Data Statement travels with the data, and the data are identified as Australian data that may not be appropriate for use in other countries. Bloom attributes Food Standards Australia New Zealand / the Australian Food Composition Database wherever these values are shown, and carries the statement: this data is based on Australian data, and Australian data may not be appropriate for use in other countries.', true, false, false, '2026-11-23'::date, null, '2026-11-23'::date, 12, 'approved', 1, null, 'Australian national food-composition database. Registered for SIX shipped foods (M-230, 2026-11-24), all with AFCD Derivation ''Analysed'' — the majority of each row''s data from Australian laboratory analysis of representative samples — in src/lib/nutrition/data/afcdReferenceData.ts: lupin splits (F005249), broad beans dried (F000416), split peas dried (F006543), amaranth grain (F000061), chia seeds (F008209) and flaxseed/linseed (F008210). AFCD publishes energy in kilojoules only; Bloom''s kcal figure is the pinned kJ value divided by 4.184 and rounded, and the generator pins the kJ so the derivation is checkable. Fields AFCD''s own sampling notes attribute to another database are NOT shipped: vitamin C is omitted for lupin splits (borrowed from Kohajkova et al. 2011) and for broad beans (borrowed from USDA SR28) rather than letting a borrowed value wear an AFCD label. Limitation of Data Statement (FSANZ): there are limitations associated with food composition databases — the data represent an average of the nutrient content of a particular sample of foods, determined at a particular time, and composition can vary substantially between batches and brands with season, processing, ingredient source and methods of calculation.'
+) on conflict (id) do update set
+    title = excluded.title,
+    kind = excluded.kind,
+    publisher = excluded.publisher,
+    authors = excluded.authors,
+    publication_year = excluded.publication_year,
+    url = excluded.url,
+    license_id = excluded.license_id,
+    license_url = excluded.license_url,
+    license_note = excluded.license_note,
+    product_use_allowed = excluded.product_use_allowed,
+    permission_required = excluded.permission_required,
+    peer_reviewed = excluded.peer_reviewed,
+    retrieved_on = excluded.retrieved_on,
+    published_on = excluded.published_on,
+    reviewed_on = excluded.reviewed_on,
+    review_interval_months = excluded.review_interval_months,
+    review_status = excluded.review_status,
+    version = excluded.version,
+    superseded_by = excluded.superseded_by,
+    notes = excluded.notes,
+    updated_at = now()
+  where excluded.version >= target.version
+    and (target.superseded_by is null or target.superseded_by = excluded.superseded_by)
+    and to_jsonb(excluded) - 'created_at' - 'updated_at'
+        is distinct from to_jsonb(target) - 'created_at' - 'updated_at';
+
+insert into public.evidence_sources as target (
+  id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
+) values (
+  'ca-cnf-2026', 'Canadian Nutrient File (CNF)', 'dataset', 'Health Canada', array['Health Canada']::text[], 2026, 'https://open.canada.ca/data/en/dataset/1b6139bd-ed7e-4043-bc28-ff00e10f3109', 'ogl-canada-2.0', 'https://open.canada.ca/en/open-government-licence-canada', 'The Canadian Nutrient File is published by Health Canada through the Government of Canada''s open data portal under the Open Government Licence – Canada v2.0: the data may be copied, modified, published, translated, adapted and distributed for commercial or non-commercial purposes, with attribution to the source and no suggestion of official endorsement. Bloom attributes Health Canada''s Canadian Nutrient File wherever these values are shown.', true, false, false, '2026-11-23'::date, null, '2026-11-23'::date, 12, 'approved', 1, null, 'Canadian national food-composition database. Registered for THREE shipped foods (M-230, 2026-11-24) in src/lib/nutrition/data/cnfReferenceData.ts: quark (food code 6995), kefir plain low fat (6999) and unsweetened fortified soy beverage (6330). Every shipped row carries CNF Food Source Code 37 — Health Canada''s own CNF Sampling and Analysis Program (SNAP-CAN). CNF rows whose food source is code 0 (''based on data from USDA: no changes'') were deliberately NOT shipped from this wave: natto, lupins, amaranth, spirulina and broad beans exist in the CNF only as USDA data under a Canadian label, and lifting them would mislabel USDA values as Canadian — the same honesty rule that keeps IFCT values out until ICMR-NIN grants written permission.'
+) on conflict (id) do update set
+    title = excluded.title,
+    kind = excluded.kind,
+    publisher = excluded.publisher,
+    authors = excluded.authors,
+    publication_year = excluded.publication_year,
+    url = excluded.url,
+    license_id = excluded.license_id,
+    license_url = excluded.license_url,
+    license_note = excluded.license_note,
+    product_use_allowed = excluded.product_use_allowed,
+    permission_required = excluded.permission_required,
+    peer_reviewed = excluded.peer_reviewed,
+    retrieved_on = excluded.retrieved_on,
+    published_on = excluded.published_on,
+    reviewed_on = excluded.reviewed_on,
+    review_interval_months = excluded.review_interval_months,
+    review_status = excluded.review_status,
+    version = excluded.version,
+    superseded_by = excluded.superseded_by,
+    notes = excluded.notes,
+    updated_at = now()
+  where excluded.version >= target.version
+    and (target.superseded_by is null or target.superseded_by = excluded.superseded_by)
+    and to_jsonb(excluded) - 'created_at' - 'updated_at'
+        is distinct from to_jsonb(target) - 'created_at' - 'updated_at';
+
 insert into public.evidence_sources as target (
   id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
 ) values (

@@ -16,6 +16,8 @@ export const USER_ENTERED_LABEL = "Your value";
 const KIND_FALLBACK: Record<FoodProvenance["kind"], string> = {
   usda: "USDA FoodData Central",
   cofid: "UK CoFID (McCance and Widdowson)",
+  afcd: "Australian AFCD (FSANZ)",
+  cnf: "Canadian Nutrient File (Health Canada)",
   user_entered: USER_ENTERED_LABEL,
   off: "Open Food Facts",
   ifct: "ICMR-NIN IFCT",

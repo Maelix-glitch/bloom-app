@@ -1,36 +1,46 @@
 /**
- * Nutrition — the combined reference library (M-229).
+ * Nutrition — the combined reference library (M-229, extended M-230).
  *
  * The library ships from more than one genuine source: the USDA FoodData
- * Central set (`usdaReference.ts`) and the UK CoFID set
- * (`cofidReference.ts`). Each set keeps its own generator, fingerprint and
- * provenance; this module is the one door through which consumers that
- * want "the reference foods" — the plan composer, dish resolution, the
- * add-food flow — read them together. A food's provenance always names
- * its own source: nothing here relabels a CoFID value as USDA or the
- * reverse, and the per-set stamps stay per-set.
+ * Central set (`usdaReference.ts`), the UK CoFID set
+ * (`cofidReference.ts`), the Australian AFCD set (`afcdReference.ts`) and
+ * the Canadian Nutrient File set (`cnfReference.ts`). Each set keeps its
+ * own generator, fingerprint and provenance; this module is the one door
+ * through which consumers that want "the reference foods" — the plan
+ * composer, dish resolution, the add-food flow — read them together. A
+ * food's provenance always names its own source: nothing here relabels
+ * one source's value as another's, and the per-set stamps stay per-set.
  */
 
+import { AFCD_REFERENCE_FOODS, afcdDataStamp, findAfcdReference } from "./afcdReference";
+import { CNF_REFERENCE_FOODS, cnfDataStamp, findCnfReference } from "./cnfReference";
 import { COFID_REFERENCE_FOODS, cofidDataStamp, findCofidReference } from "./cofidReference";
 import { USDA_REFERENCE_FOODS, findUsdaReference, usdaDataStamp } from "./usdaReference";
 import type { Food } from "./types";
 
 /** Every shipped reference food: the USDA set first (its shipped order),
- *  then the CoFID set. */
-export const REFERENCE_FOODS: readonly Food[] = [...USDA_REFERENCE_FOODS, ...COFID_REFERENCE_FOODS];
+ *  then the CoFID, AFCD and CNF sets. */
+export const REFERENCE_FOODS: readonly Food[] = [
+  ...USDA_REFERENCE_FOODS,
+  ...COFID_REFERENCE_FOODS,
+  ...AFCD_REFERENCE_FOODS,
+  ...CNF_REFERENCE_FOODS,
+];
 
 export function findReferenceFood(id: string): Food | null {
-  return findUsdaReference(id) ?? findCofidReference(id);
+  return (
+    findUsdaReference(id) ?? findCofidReference(id) ?? findAfcdReference(id) ?? findCnfReference(id)
+  );
 }
 
 /**
  * The data-version line for a reference food, from whichever set it
  * shipped in — the USDA stamp for a USDA food, the CoFID stamp for a
- * CoFID food, null for anything else (a user's own food has no dataset
- * version to stamp).
+ * CoFID food, and so on — null for anything else (a user's own food has
+ * no dataset version to stamp).
  */
 export function referenceDataStamp(food: Food): string | null {
-  return usdaDataStamp(food) ?? cofidDataStamp(food);
+  return usdaDataStamp(food) ?? cofidDataStamp(food) ?? afcdDataStamp(food) ?? cnfDataStamp(food);
 }
 
 /**
