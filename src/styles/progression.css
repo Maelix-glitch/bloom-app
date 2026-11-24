@@ -1703,6 +1703,250 @@
   color: var(--faint-strong);
 }
 
+/* --------------------- themes gallery (M-238) ---------------------- */
+/* The Atelier's dedicated themes presentation: one composed card per    */
+/* theme and a detail sheet. Solid surfaces and hairline borders only:   */
+/* unlike the generic shelf tile, a theme card never sits on a           */
+/* translucent mix, because the card is showing colours for judgement.   */
+
+.thg-note {
+  max-width: 62ch;
+  margin-bottom: 1.1rem;
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+  color: var(--faint-strong);
+}
+
+.thg-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+@media (min-width: 860px) {
+  .thg-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.thg-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 0.9rem;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--pg-line-soft);
+  background: var(--surface);
+}
+
+.thg-card.is-equipped {
+  border-color: color-mix(in oklab, var(--gold) 55%, transparent);
+}
+
+.thg-open {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.thg-open:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+  border-radius: 14px;
+}
+
+.thg-art {
+  display: block;
+  aspect-ratio: 16 / 8;
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--background);
+}
+
+.thg-art img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.thg-head {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.thg-title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  line-height: var(--leading-page);
+  color: var(--foreground);
+}
+
+.thg-world {
+  font-size: var(--text-caption);
+  line-height: var(--leading-caption);
+  color: var(--faint-strong);
+}
+
+.thg-swatches {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.thg-swatch {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  border: 1px solid color-mix(in oklab, var(--foreground) 16%, transparent);
+}
+
+.thg-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: auto;
+  min-height: 32px;
+}
+
+.thg-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: var(--text-meta);
+  color: var(--faint-strong);
+}
+
+.thg-state.is-equipped {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* The detail sheet body scrolls inside BloomSheet's capped panel. */
+.thg-sheet-body {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.thg-sheet-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1.4rem;
+}
+
+.thg-figure {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.thg-figure img {
+  display: block;
+  width: 100%;
+  border-radius: 14px;
+  object-fit: cover;
+}
+
+.thg-figure-hero img {
+  aspect-ratio: 16 / 9;
+}
+
+.thg-figure figcaption {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-meta);
+  text-transform: uppercase;
+  color: var(--faint-strong);
+}
+
+.thg-trio {
+  display: grid;
+  grid-template-columns: 0.72fr 1fr;
+  gap: 0.9rem;
+}
+
+.thg-trio .thg-figure img {
+  height: 180px;
+}
+
+.thg-sheet-title {
+  font-family: var(--font-display);
+  font-size: var(--text-title);
+  line-height: var(--leading-page);
+  color: var(--foreground);
+}
+
+.thg-sheet-world {
+  font-size: var(--text-body);
+  color: var(--faint-strong);
+}
+
+.thg-sheet-detail {
+  max-width: 60ch;
+  font-size: var(--text-support);
+  line-height: var(--leading-body);
+  color: color-mix(in oklab, var(--foreground) 82%, transparent);
+}
+
+.thg-sheet-sub {
+  margin-top: 0.4rem;
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--faint-strong);
+}
+
+.thg-palette {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.thg-palette-row {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.8rem;
+  padding: var(--space-2) 0;
+  border-top: 1px solid var(--pg-line-soft);
+}
+
+.thg-palette-label {
+  font-size: var(--text-caption);
+  color: var(--foreground);
+}
+
+.thg-palette-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  color: var(--faint-strong);
+}
+
+.thg-surfaces {
+  font-size: var(--text-caption);
+  color: var(--faint-strong);
+}
+
+.thg-sheet-foot {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--pg-line-soft);
+}
+
 /* --------------------------------- footer -------------------------------- */
 
 .pg-footer {

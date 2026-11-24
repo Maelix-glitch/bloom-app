@@ -7,6 +7,10 @@
  *
  * Equipping remains real: it republishes the shared skin attributes, so the
  * equipped theme, palette, wallpaper, frame and effect apply across Bloom.
+ *
+ * Themes are presented by their own gallery (M-238, ThemesGallery): a
+ * composed card per theme with its artwork, palette and state, plus a
+ * detail sheet. The other kinds keep the shelf below.
  */
 
 import { useMemo, useState } from "react";
@@ -28,6 +32,7 @@ import {
 import { sanitizeProfile, type ActiveSkin } from "@/lib/rewards/customization";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { Emblem } from "@/components/progression/Emblem";
+import { ThemesGallery } from "@/components/progression/ThemesGallery";
 import { formatPoints } from "@/lib/progression/format";
 import { cn } from "@/lib/utils";
 import { useEffect } from "react";
@@ -140,7 +145,10 @@ export function AtelierPage() {
               {SLOTS.map(({ slot, kind: slotKind }) => {
                 const id = equipped[slot];
                 const comp = id ? componentsById.get(id) : null;
-                const locked = tier < RANK_GATE[slotKind] && !(id && owned.has(id));
+                /* Themes are free for every user (owner, 2026-11-24): the
+                   theme slot never rank-locks. The other kinds keep theirs. */
+                const locked =
+                  slotKind !== "theme" && tier < RANK_GATE[slotKind] && !(id && owned.has(id));
                 return (
                   <div key={slot} className="pg-slot" data-locked={locked ? "true" : "false"}>
                     <span className="pg-slot-kind">{COMPONENT_KIND_LABELS[slotKind]}</span>
@@ -176,11 +184,21 @@ export function AtelierPage() {
                   onClick={() => setKind(slotKind)}
                 >
                   {COMPONENT_KIND_LABELS[slotKind]}
-                  <span className="pg-chip-count">{tier >= RANK_GATE[slotKind] ? "open" : `rank ${RANK_GATE[slotKind]}`}</span>
+                  <span className="pg-chip-count">{slotKind === "theme" || tier >= RANK_GATE[slotKind] ? "open" : `rank ${RANK_GATE[slotKind]}`}</span>
                 </button>
               ))}
             </div>
 
+            {kind === "theme" ? (
+              <ThemesGallery
+                themes={looks}
+                equippedThemeId={equipped.themeId}
+                onEquip={(theme) => {
+                  setEquipped({ themeId: theme.id });
+                  setStore(loadRewardsStore());
+                }}
+              />
+            ) : (
             <div className="pg-shelf-grid">
               {looks.map((comp) => {
                 const isOwned = owned.has(comp.id);
@@ -229,10 +247,12 @@ export function AtelierPage() {
                 );
               })}
             </div>
+            )}
 
             <p className="pg-goal-note" style={{ marginTop: "1.2rem" }}>
-              Effects and palettes open first because they change the least; themes and wallpapers
-              come later. None of them are required to use Bloom.
+              Effects and palettes open first because they change the least; wallpapers come
+              later. The twelve themes are free for everyone. None of them are required to use
+              Bloom.
             </p>
           </div>
         </div>

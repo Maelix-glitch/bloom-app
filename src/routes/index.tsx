@@ -49,6 +49,7 @@ import type { AddHabitPrefill } from "@/components/tk/AddHabitModal";
 import windowDusk from "@/assets/home/window-dusk.jpg";
 import { componentsById } from "@/lib/rewards/catalog";
 import { loadRewardsStore, subscribeRewards } from "@/lib/rewards/store";
+import { themeArtFor } from "@/lib/rewards/themeArt";
 import { genuineFirstDay, sublineFor } from "@/lib/home/subline";
 import { localDay } from "@/lib/localDay";
 import { offlineNotice } from "@/lib/offline/syncState";
@@ -87,9 +88,10 @@ function useNow(intervalMs = 60_000): Date {
 }
 
 /**
- * The hero ambience on Today. When a wallpaper reward is equipped it becomes
- * the hero artwork (the same asset the Rewards page shows) — customization is
- * real, not a preview-only flourish.
+ * The hero ambience on Today. Precedence (M-237, design §6): an explicitly
+ * equipped wallpaper wins, as a deliberate choice should; next, the
+ * equipped theme's own overview artwork; last, the historic dusk-window
+ * photograph. Customization is real, not a preview-only flourish.
  */
 function WallpaperFigure() {
   const [art, setArt] = useState<string | null>(null);
@@ -97,7 +99,10 @@ function WallpaperFigure() {
     const sync = () => {
       const equipped = loadRewardsStore().equipped;
       const wallpaperId = equipped.wallpaperId;
-      setArt(wallpaperId ? (componentsById.get(wallpaperId)?.art ?? null) : null);
+      const wallpaperArt = wallpaperId
+        ? (componentsById.get(wallpaperId)?.art ?? null)
+        : null;
+      setArt(wallpaperArt ?? themeArtFor(equipped.themeId)?.overview ?? null);
     };
     sync();
     return subscribeRewards(sync);

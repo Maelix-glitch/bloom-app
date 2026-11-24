@@ -80,6 +80,7 @@ import { MoodJourneyChart } from "./MoodJourneyChart";
 import { MoodDonut } from "./MoodDonut";
 import { MoodGraph, MoodGraphSkeleton } from "./MoodGraph";
 import { useEverReady } from "@/hooks/useEverReady";
+import { useThemeArt } from "@/hooks/useThemeArt";
 
 export type MoodPageIdentity = {
   displayName: string | null;
@@ -347,6 +348,9 @@ function Hero({
      gradient veils — never an empty dark block that the photo later fills.
      A cached image may complete before onLoad attaches, so check on mount. */
   const [photoIn, setPhotoIn] = useState(false);
+  /* M-237: an equipped theme brings its own Mood hero artwork; the
+     window photograph stays the fallback when no theme is equipped. */
+  const themeArt = useThemeArt();
   const heroImgRef = useRef<HTMLImageElement | null>(null);
   useEffect(() => {
     const img = heroImgRef.current;
@@ -357,8 +361,12 @@ function Hero({
     <section className="mp-hero relative overflow-hidden rounded-[calc(var(--radius)+0.5rem)] bg-surface-2">
       <img
         ref={heroImgRef}
-        src={heroWindow}
-        alt="Arched window at golden hour with white flowers, books and a candle on the sill"
+        src={themeArt?.mood ?? heroWindow}
+        alt={
+          themeArt
+            ? "Artwork from your equipped Bloom theme"
+            : "Arched window at golden hour with white flowers, books and a candle on the sill"
+        }
         width={1376}
         height={768}
         onLoad={() => setPhotoIn(true)}

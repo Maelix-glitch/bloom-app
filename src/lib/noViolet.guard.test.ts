@@ -244,19 +244,21 @@ describe("M-233 · no violet anywhere in Bloom", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("Midnight Tide grounds on warm ink, its depth steps unchanged (M-236)", () => {
+  it("Midnight Tide grounds on wet stone, hue 160 at a trace of chroma (M-237, superseding M-236)", () => {
     const css = stripComments(readFileSync(join(SRC, "styles.css"), "utf8"));
     const block = css.match(/html\[data-bloom-theme="th-midnight-tide"\]\s*\{[^}]*\}/)?.[0] ?? "";
     expect(block).not.toBe("");
-    // Same lightness ladder as the retired hue-255 block, hue 85 throughout.
-    for (const step of ["0.15", "0.19", "0.225", "0.26", "0.3", "0.375"]) {
+    // M-236 landed Tide on warm ink (hue 85) as an interim re-ground.
+    // M-237 gives it the approved founded end state: wet stone, hue 160,
+    // chroma at most 0.007, compressed steps, cut-edge border-strong.
+    for (const step of ["0.165", "0.195", "0.22", "0.245", "0.34", "0.4"]) {
       expect(block).toContain(`oklch(${step} `);
     }
     for (const m of block.matchAll(/oklch\(\s*[\d.]+\s+([\d.]+)\s+([\d.]+)/g)) {
-      expect(parseFloat(m[2])).toBe(85);
-      expect(parseFloat(m[1])).toBeLessThanOrEqual(0.09);
+      expect(parseFloat(m[2])).toBe(160);
+      expect(parseFloat(m[1])).toBeLessThanOrEqual(0.012);
     }
-    expect(block).toContain("--accent-secondary: oklch(0.82 0.09 85)");
+    expect(block).toContain("--accent-secondary: oklch(0.86 0.012 160)");
   });
 
   it("the grocery group icons are glyphs, never raw emoji", () => {
