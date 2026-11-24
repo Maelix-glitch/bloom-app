@@ -81,7 +81,7 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
               This page didn't <span className="display-em">load</span>
             </>
           }
-          description="Something went wrong on our end. You can try again, or head back home — your record is safe either way."
+          description="Something went wrong on our end. You can try again, or head back home, your record is safe either way."
           action={
             <div className="flex flex-wrap justify-center gap-2">
               <Button
@@ -158,13 +158,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover",
       },
-      { title: "Bloom — Mood Intelligence" },
+      { title: "Bloom - Mood Intelligence" },
       {
         name: "description",
         content:
           "Bloom is a private record of your mood, sleep, habits and cycle, with the patterns worked out from what you log.",
       },
-      { property: "og:title", content: "Bloom — Mood Intelligence" },
+      { property: "og:title", content: "Bloom - Mood Intelligence" },
       {
         property: "og:description",
         content:

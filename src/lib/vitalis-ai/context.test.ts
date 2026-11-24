@@ -70,11 +70,11 @@ function fullInput(): VitalisContextInput {
   };
 }
 
-describe("buildVitalisContext — the nutrition + assessment record", () => {
+describe("buildVitalisContext, the nutrition + assessment record", () => {
   it("assembles the person, targets, plan, log and library sections", () => {
     const { text, sections } = buildVitalisContext(fullInput());
-    expect(sections).toContain("THE PERSON — FROM THEIR ASSESSMENT");
-    expect(sections).toContain("TARGETS — COMPUTED BY BLOOM'S ENGINE, QUOTE EXACTLY");
+    expect(sections).toContain("THE PERSON: FROM THEIR ASSESSMENT");
+    expect(sections).toContain("TARGETS: COMPUTED BY BLOOM'S ENGINE, QUOTE EXACTLY");
     expect(sections).toContain("THEIR CURRENT PLAN");
     expect(sections).toContain("LOGGED TODAY (2026-11-17)");
     expect(sections).toContain("RECENT DAYS");
@@ -113,7 +113,7 @@ describe("buildVitalisContext — the nutrition + assessment record", () => {
   });
 });
 
-describe("buildVitalisContext — nothing from other domains can appear", () => {
+describe("buildVitalisContext, nothing from other domains can appear", () => {
   it("drops decoy habit, mood and points data fed through the input", () => {
     const decoyed = {
       ...fullInput(),
@@ -145,7 +145,7 @@ describe("buildVitalisContext — nothing from other domains can appear", () => 
   });
 });
 
-describe("buildVitalisContext — honest absences, never invented numbers", () => {
+describe("buildVitalisContext, honest absences, never invented numbers", () => {
   it("a blocked gate means NO target numbers are handed over", () => {
     const input = fullInput();
     input.targets = null;

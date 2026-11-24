@@ -5,7 +5,7 @@ import { LegalPage } from "@/components/legal/LegalPage";
 export const Route = createFileRoute("/refund")({
   head: () => ({
     meta: [
-      { title: "Bloom — Refund policy" },
+      { title: "Bloom - Refund policy" },
       {
         name: "description",
         content:
@@ -21,18 +21,18 @@ function RefundRoute() {
     <LegalPage
       title="Refunds, plainly stated."
       updated="19 November 2026"
-      intro="Paid plans are processed by Razorpay. This page is the whole refund policy — short, because it is meant to be used, not decoded. To ask for a refund, email maelix67@gmail.com from your account email."
+      intro="Paid plans are processed by Razorpay. This page is the whole refund policy, short, because it is meant to be used, not decoded. To ask for a refund, email maelix67@gmail.com from your account email."
       sections={[
         {
           heading: "Failed or duplicate charges",
           paras: [
-            "If a payment fails after money has left your account, or you are charged twice for the same purchase, the charge is refunded in full, automatically. You do not need to ask — but if you notice it first, email us and we will chase it.",
+            "If a payment fails after money has left your account, or you are charged twice for the same purchase, the charge is refunded in full, automatically. You do not need to ask, but if you notice it first, email us and we will chase it.",
           ],
         },
         {
           heading: "Your first purchase",
           paras: [
-            "If Bloom is not for you, a first purchase can be refunded within 7 days of the payment. Email maelix67@gmail.com and ask — that is all it takes.",
+            "If Bloom is not for you, a first purchase can be refunded within 7 days of the payment. Email maelix67@gmail.com and ask, that is all it takes.",
           ],
         },
         {
@@ -44,7 +44,7 @@ function RefundRoute() {
         {
           heading: "How refunds reach you",
           paras: [
-            "Approved refunds go back to the payment method you paid with — the same card, UPI or bank account — through Razorpay, within 5–7 business days of approval. We cannot send a refund to a different method.",
+            "Approved refunds go back to the payment method you paid with, the same card, UPI or bank account, through Razorpay, within 5-7 business days of approval. We cannot send a refund to a different method.",
           ],
         },
       ]}

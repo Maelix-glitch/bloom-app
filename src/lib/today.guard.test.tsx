@@ -239,7 +239,7 @@ function expectedAdjustedRows(reasons: readonly PlanReason[]) {
 
 /* -------------------------------- tests ------------------------------- */
 
-describe("today guard — the owner's corner, composed through the page", () => {
+describe("today guard, the owner's corner, composed through the page", () => {
   it("(a) one primary in the day section: the clock's Log meal; macros are dots, never coloured text", async () => {
     seedAssessment(OWNER_ANSWERS);
     const today = todayLocal();
@@ -344,7 +344,7 @@ describe("today guard — the owner's corner, composed through the page", () => 
   }, 30000);
 });
 
-describe("today guard — the rotation's stored plan", () => {
+describe("today guard, the rotation's stored plan", () => {
   function renderRotation() {
     const answers = {
       ageYears: 30,
@@ -447,7 +447,7 @@ describe("today guard — the rotation's stored plan", () => {
     expect(section.querySelectorAll("article.insight").length).toBe(0);
     expect(section.querySelectorAll(".empty-row").length).toBe(1);
     expect(
-      within(section).getByText("No adjustments today — the plan follows your Assessment as set."),
+      within(section).getByText("No adjustments today, the plan follows your Assessment as set."),
     ).toBeTruthy();
   });
 });

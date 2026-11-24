@@ -95,7 +95,7 @@ export function buildCycleContext(input: {
   if (input.mode === "off") {
     return unavailable(
       "tracking-off",
-      "Cycle tracking is off, so Bloom keeps no cycle context. Your logged history is still yours — turn tracking back on and the context returns from the same record.",
+      "Cycle tracking is off, so Bloom keeps no cycle context. Your logged history is still yours, turn tracking back on and the context returns from the same record.",
     );
   }
   if (input.mode === "paused") {
@@ -115,7 +115,7 @@ export function buildCycleContext(input: {
   if (analysis.entryCount === 0) {
     return unavailable(
       "no-entries",
-      "Nothing is logged yet, so there is no cycle context to show. Log the first day of a period and Bloom starts building context from your own record — never from a generic pattern.",
+      "Nothing is logged yet, so there is no cycle context to show. Log the first day of a period and Bloom starts building context from your own record, never from a generic pattern.",
     );
   }
 
@@ -125,7 +125,7 @@ export function buildCycleContext(input: {
   if (analysis.confidence === "none" || analysis.isGeneric) {
     return unavailable(
       "not-personalised",
-      "Your record is still too thin for a personal cycle context — so far the estimates rest on a general pattern, not your cycles. Log one more period start and the context becomes yours.",
+      "Your record is still too thin for a personal cycle context, so far the estimates rest on a general pattern, not your cycles. Log one more period start and the context becomes yours.",
     );
   }
 
@@ -163,6 +163,6 @@ export function buildCycleContext(input: {
     nextWindow,
     nextSummary: describeNextPeriod(analysis),
     note,
-    basis: `Estimates from your own logged cycle — ${analysis.stats.cyclesLogged} completed ${analysis.stats.cyclesLogged === 1 ? "cycle" : "cycles"} in your record.`,
+    basis: `Estimates from your own logged cycle, ${analysis.stats.cyclesLogged} completed ${analysis.stats.cyclesLogged === 1 ? "cycle" : "cycles"} in your record.`,
   };
 }

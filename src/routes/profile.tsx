@@ -103,7 +103,7 @@ export const Route = createFileRoute("/profile")({
       { rel: "stylesheet", href: storiesFontsCss },
     ],
     meta: [
-      { title: "Bloom — Profile" },
+      { title: "Bloom - Profile" },
       {
         name: "description",
         content:
@@ -530,7 +530,7 @@ function ProfilePage() {
               {authState === "signed-out" ? (
                 hasSupabaseConfig ? (
                   <p className="mb-2 text-center text-[length:var(--text-caption)] text-faint">
-                    preview — nothing is saved until you{" "}
+                    preview, nothing is saved until you{" "}
                     <button
                       type="button"
                       onClick={() => setSignInOpen(true)}
@@ -541,7 +541,7 @@ function ProfilePage() {
                   </p>
                 ) : (
                   <p className="mb-2 text-center text-[length:var(--text-caption)] text-faint">
-                    no account connected — your profile is saved on this device
+                    no account connected, your profile is saved on this device
                   </p>
                 )
               ) : null}
@@ -760,7 +760,7 @@ function ProfilePage() {
                       <span className="font-medium text-foreground">
                         Pin one moment that feels like you.
                       </span>{" "}
-                      A story, a reflection, a reward, a milestone — only one.
+                      A story, a reflection, a reward, a milestone, only one.
                     </span>
                     <span className="mono hidden shrink-0 text-[length:var(--text-micro)] tracking-[var(--tracking-meta)] text-faint-strong uppercase transition-colors group-hover:text-foreground sm:block">
                       Choose

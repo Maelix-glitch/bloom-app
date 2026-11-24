@@ -147,12 +147,12 @@ export function dayGreeting(voice: PersonalVoice): string {
  */
 const WELCOME_WITH_NAME: Record<Daypart, string[]> = {
   night: [
-    "Good night, {name}. I'm here — late thoughts welcome.",
+    "Good night, {name}. I'm here, late thoughts welcome.",
     "The quiet hours suit this place. What's on your mind, {name}?",
   ],
   morning: [
     "Morning, {name}. What's today looking like?",
-    "You're up, {name} — shall we look at the day?",
+    "You're up, {name}, shall we look at the day?",
   ],
   afternoon: [
     "Afternoon, {name}. How's the day treating you?",
@@ -165,7 +165,7 @@ const WELCOME_WITH_NAME: Record<Daypart, string[]> = {
 };
 
 const WELCOME_GENERIC: Record<Daypart, string[]> = {
-  night: ["Good night. Late thoughts are welcome here.", "The quiet hours — what's on your mind?"],
+  night: ["Good night. Late thoughts are welcome here.", "The quiet hours, what's on your mind?"],
   morning: ["Morning. What's today looking like?", "A new day. Shall we look at it together?"],
   afternoon: ["Afternoon. How's the day treating you?", "Good to see you. What shall we look at?"],
   evening: ["Evening. How did today actually go?", "Winding down? A good time to think out loud."],

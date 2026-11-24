@@ -23,7 +23,7 @@ export interface TrustClaim {
 export const TRUST_CLAIMS: readonly TrustClaim[] = [
   {
     id: "server-paywall",
-    line: "Premium is enforced on Bloom's server, not just hidden in the app — only the server can grant a plan or credits.",
+    line: "Premium is enforced on Bloom's server, not just hidden in the app, only the server can grant a plan or credits.",
     surface: "Membership, in this Profile",
   },
   {
@@ -33,7 +33,7 @@ export const TRUST_CLAIMS: readonly TrustClaim[] = [
   },
   {
     id: "credits-ledger",
-    line: "Every AI credit in or out is written to a ledger with the balance it produced — and the app cannot edit or delete ledger rows.",
+    line: "Every AI credit in or out is written to a ledger with the balance it produced, and the app cannot edit or delete ledger rows.",
     surface: "The AI credits meter in Membership",
   },
   {
@@ -43,12 +43,12 @@ export const TRUST_CLAIMS: readonly TrustClaim[] = [
   },
   {
     id: "consent-record",
-    line: "The permissions you gave in your Assessment are recorded — and you can read them back whenever you like.",
+    line: "The permissions you gave in your Assessment are recorded, and you can read them back whenever you like.",
     surface: "Your consent, in this Privacy group",
   },
   {
     id: "export-and-erase",
-    line: "You can download everything Bloom holds for you, or erase it — from this device and from your account.",
+    line: "You can download everything Bloom holds for you, or erase it, from this device and from your account.",
     surface: "Sharing & data, below",
   },
   {
@@ -58,8 +58,8 @@ export const TRUST_CLAIMS: readonly TrustClaim[] = [
   },
   {
     id: "provenance-labels",
-    line: "Every nutrition number says where it came from — a verified database, a recipe's ingredients, or a labelled estimate. Estimates are never dressed up as measurements.",
-    surface: "Nutrition — every entry is labelled",
+    line: "Every nutrition number says where it came from, a verified database, a recipe's ingredients, or a labelled estimate. Estimates are never dressed up as measurements.",
+    surface: "Nutrition, every entry is labelled",
   },
 ] as const;
 

@@ -288,7 +288,7 @@ export function validateDay(draft: DayEntry, today: string): DayFieldErrors {
   const errors: DayFieldErrors = {};
 
   if (!isValidDateKey(draft.date)) {
-    errors.date = "Pick a real date — the log hangs off it.";
+    errors.date = "Pick a real date, the log hangs off it.";
   } else if (diffDays(today, draft.date) > 0) {
     errors.date = "That day hasn't happened yet. Log today or an earlier one.";
   }
@@ -542,14 +542,14 @@ function correlationsOf(entries: readonly DayEntry[], map: Map<string, DayEntry>
     if (r === null) continue;
     const strength: Correlation["strength"] =
       Math.abs(r) >= 0.6 ? "strong" : Math.abs(r) >= 0.35 ? "moderate" : "weak";
-    const dir = r > 0 ? "" : "in the opposite direction — ";
+    const dir = r > 0 ? "" : "in the opposite direction, ";
     out.push({
       a,
       b,
       n: xs.length,
       r: Math.round(r * 100) / 100,
       strength,
-      sentence: `Across ${xs.length} days where you logged both, ${phrase} (${strength}, r = ${(Math.round(r * 100) / 100).toFixed(2)})${dir ? ` — ${dir}as one goes up, the other tends to come down.` : "."}`,
+      sentence: `Across ${xs.length} days where you logged both, ${phrase} (${strength}, r = ${(Math.round(r * 100) / 100).toFixed(2)})${dir ? ` - ${dir}as one goes up, the other tends to come down.` : "."}`,
     });
   }
   /* Strongest relationship first. */
@@ -770,11 +770,11 @@ export function advancedInsightOf(entries: readonly DayEntry[]): AdvancedInsight
 
   if (bright.length < 3 || low.length < 3) {
     const detail = [
-      `So far: ${bright.length} day${bright.length === 1 ? "" : "s"} at 4–5 energy, ${low.length} at 1–2.`,
+      `So far: ${bright.length} day${bright.length === 1 ? "" : "s"} at 4-5 energy, ${low.length} at 1-2.`,
     ];
     if (bestDay) {
       detail.push(
-        `${bestDay.weekday}s carry the most study — ${trackerDef("study").format(bestDay.value)} a day across ${bestDay.days} of them.`,
+        `${bestDay.weekday}s carry the most study, ${trackerDef("study").format(bestDay.value)} a day across ${bestDay.days} of them.`,
       );
     }
     return {
@@ -782,7 +782,7 @@ export function advancedInsightOf(entries: readonly DayEntry[]): AdvancedInsight
       low: low.length,
       contrasts: [],
       bestDay,
-      headline: "Not yet — three bright days and three low days, and this writes itself.",
+      headline: "Not yet, three bright days and three low days, and this writes itself.",
       detail,
     };
   }
@@ -829,7 +829,7 @@ export function advancedInsightOf(entries: readonly DayEntry[]): AdvancedInsight
   }
   if (bestDay) {
     detail.push(
-      `${bestDay.weekday}s carry the most study — ${trackerDef("study").format(bestDay.value)} a day across ${bestDay.days} of them.`,
+      `${bestDay.weekday}s carry the most study, ${trackerDef("study").format(bestDay.value)} a day across ${bestDay.days} of them.`,
     );
   }
   detail.push(
@@ -861,14 +861,14 @@ function observationsOf(
     if (Math.abs(gap) >= 20) {
       out.push(
         gap > 0
-          ? `Sleep has averaged ${trackerDef("sleep").format(Math.round(sleep.avg7))} over the last seven nights — ${trackerDef("sleep").format(Math.round(gap))} under your ${trackerDef("sleep").format(sleep.goal)} target.`
+          ? `Sleep has averaged ${trackerDef("sleep").format(Math.round(sleep.avg7))} over the last seven nights, ${trackerDef("sleep").format(Math.round(gap))} under your ${trackerDef("sleep").format(sleep.goal)} target.`
           : `Sleep has averaged ${trackerDef("sleep").format(Math.round(sleep.avg7))} over the last seven nights, which is at or above your target.`,
       );
     }
   }
   if (sleep.trend && sleep.trend.dir !== "flat" && Math.abs(sleep.trend.delta) >= 20) {
     out.push(
-      `Nights have been getting ${sleep.trend.dir === "up" ? "longer" : "shorter"} — about ${Math.abs(Math.round(sleep.trend.delta))} minutes on average against the week before.`,
+      `Nights have been getting ${sleep.trend.dir === "up" ? "longer" : "shorter"}, about ${Math.abs(Math.round(sleep.trend.delta))} minutes on average against the week before.`,
     );
   }
 
@@ -876,7 +876,7 @@ function observationsOf(
   if (sleep.spread !== null && sleep.daysLogged >= 5) {
     out.push(
       sleep.spread <= 45
-        ? `Your nights sit close together — about ${Math.round(sleep.spread)} minutes either side of your average.`
+        ? `Your nights sit close together, about ${Math.round(sleep.spread)} minutes either side of your average.`
         : `Your nights move around: about ${Math.round(sleep.spread)} minutes either side of your average.`,
     );
   }
@@ -887,7 +887,7 @@ function observationsOf(
     if (stat.streak >= 3) {
       out.push(
         `${trackerDef(id).name} goal met ${stat.streak} days running${
-          stat.bestStreak > stat.streak ? ` — your longest run is ${stat.bestStreak}.` : "."
+          stat.bestStreak > stat.streak ? `, your longest run is ${stat.bestStreak}.` : "."
         }`,
       );
     }
@@ -907,14 +907,14 @@ function observationsOf(
   if (subjects.length >= 2 && subjects[0]) {
     const total = subjects.reduce((sum, s) => sum + s.minutes, 0);
     out.push(
-      `Most of your study time has gone to ${subjects[0].subject} — ${pct(subjects[0].minutes / total)} of everything logged.`,
+      `Most of your study time has gone to ${subjects[0].subject} - ${pct(subjects[0].minutes / total)} of everything logged.`,
     );
   }
   if (studyHours.length > 0 && studyHours[0]) {
     const top = studyHours[0];
     const label = `${String(top.hour).padStart(2, "0")}:00`;
     out.push(
-      `Sessions starting near ${label} have logged the most minutes — ${trackerDef("study").format(top.minutes)} of them.`,
+      `Sessions starting near ${label} have logged the most minutes, ${trackerDef("study").format(top.minutes)} of them.`,
     );
   }
 
@@ -962,7 +962,7 @@ function observationsOf(
        Profile's all-record number (mood, habits and cycle included), and
        the two sat side by side as if they measured the same thing. */
     out.push(
-      `Your trackers have entries on ${inWindow} of the last ${window} days. The gaps are left empty on purpose — nothing here is filled in for you.`,
+      `Your trackers have entries on ${inWindow} of the last ${window} days. The gaps are left empty on purpose, nothing here is filled in for you.`,
     );
   }
 

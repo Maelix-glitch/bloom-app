@@ -5,11 +5,11 @@ import { LegalPage } from "@/components/legal/LegalPage";
 export const Route = createFileRoute("/privacy")({
   head: () => ({
     meta: [
-      { title: "Bloom — Privacy" },
+      { title: "Bloom - Privacy" },
       {
         name: "description",
         content:
-          "What Bloom stores, where it lives, and the controls you keep — in plain words, written from what the code actually does.",
+          "What Bloom stores, where it lives, and the controls you keep, in plain words, written from what the code actually does.",
       },
     ],
   }),
@@ -26,14 +26,14 @@ function PrivacyRoute() {
         {
           heading: "Who is responsible",
           paras: [
-            "Bloom is run by Bloom Vitalis. For anything about your data — a question, a correction, a complaint — write to maelix67@gmail.com. That inbox is also our grievance contact under India's Digital Personal Data Protection Act, 2023 (the DPDP Act).",
+            "Bloom is run by Bloom Vitalis. For anything about your data, a question, a correction, a complaint, write to maelix67@gmail.com. That inbox is also our grievance contact under India's Digital Personal Data Protection Act, 2023 (the DPDP Act).",
           ],
         },
         {
           heading: "What Bloom holds",
           paras: [
-            "Your account email — it is how you sign in. And the record you build: food logs and nutrition, habits, activity, sleep, cycle logs, body measurements, mood check-ins and your assessment answers.",
-            "Photos only when you choose a photo feature — for example, asking for an estimate of a meal. Preferences and settings live on your device. If you never sign in, your record stays on this device only, and the app tells you so on screen.",
+            "Your account email, it is how you sign in. And the record you build: food logs and nutrition, habits, activity, sleep, cycle logs, body measurements, mood check-ins and your assessment answers.",
+            "Photos only when you choose a photo feature, for example, asking for an estimate of a meal. Preferences and settings live on your device. If you never sign in, your record stays on this device only, and the app tells you so on screen.",
           ],
         },
         {
@@ -46,8 +46,8 @@ function PrivacyRoute() {
         {
           heading: "The AI features",
           paras: [
-            "Bloom has two AI companions, Coach and Vitalis. When you use them, only the content needed for that reply is sent to our AI providers — your message and the parts of your record the reply depends on. A photo you send for an estimate goes to the AI provider for that estimate, and when a reply is spoken aloud, its text goes to ElevenLabs, which provides the voice.",
-            "AI answers are conversation and estimates — labelled as estimates where numbers are involved — never a diagnosis.",
+            "Bloom has two AI companions, Coach and Vitalis. When you use them, only the content needed for that reply is sent to our AI providers, your message and the parts of your record the reply depends on. A photo you send for an estimate goes to the AI provider for that estimate, and when a reply is spoken aloud, its text goes to ElevenLabs, which provides the voice.",
+            "AI answers are conversation and estimates, labelled as estimates where numbers are involved, never a diagnosis.",
           ],
         },
         {
@@ -59,13 +59,13 @@ function PrivacyRoute() {
         {
           heading: "Payments",
           paras: [
-            "Paid plans are processed by Razorpay. Bloom never sees or stores your card or UPI details — Razorpay handles them. What we keep is the billing record: your plan, its status, and the current period.",
+            "Paid plans are processed by Razorpay. Bloom never sees or stores your card or UPI details. Razorpay handles them. What we keep is the billing record: your plan, its status, and the current period.",
           ],
         },
         {
           heading: "No selling, no ad trackers",
           paras: [
-            "Your data is never sold, and Bloom carries no advertising trackers. Two narrow exceptions, both in the open: if the app itself breaks, it may send a technical error report — the error message and the screen it happened on, with addresses and sign-in tokens stripped out — so the fault can be fixed; it never includes your health entries. And if you search for a GIF or sticker in Stories, your search words go to Giphy, which provides that library.",
+            "Your data is never sold, and Bloom carries no advertising trackers. Two narrow exceptions, both in the open: if the app itself breaks, it may send a technical error report, the error message and the screen it happened on, with addresses and sign-in tokens stripped out, so the fault can be fixed; it never includes your health entries. And if you search for a GIF or sticker in Stories, your search words go to Giphy, which provides that library.",
             "If you turn on push reminders, your browser registers a public key so notifications can reach this device. Reminders are ones you configured, and you can mute or remove them at any time.",
           ],
         },
@@ -75,7 +75,7 @@ function PrivacyRoute() {
             "Export: one tap in the app downloads your whole record as a file you can read without Bloom.",
             "Correction: most of your record is editable in the app. For anything you cannot change there, email us and we will correct it.",
             "Erasure: “Erase everything” in the app deletes your account data, and erasing the device removes the copy held in this browser.",
-            "Grievances: write to maelix67@gmail.com — the same address as above — and we will take it up.",
+            "Grievances: write to maelix67@gmail.com, the same address as above, and we will take it up.",
           ],
         },
         {
@@ -87,7 +87,7 @@ function PrivacyRoute() {
         {
           heading: "Security, without overclaiming",
           paras: [
-            "Sign-in is by an emailed link — there is no Bloom password to steal. Data travels over encrypted connections, and each account's record is fenced off from every other account's. No system is perfect, which is one more reason the export exists: your record is never trapped inside Bloom.",
+            "Sign-in is by an emailed link, there is no Bloom password to steal. Data travels over encrypted connections, and each account's record is fenced off from every other account's. No system is perfect, which is one more reason the export exists: your record is never trapped inside Bloom.",
           ],
         },
         {

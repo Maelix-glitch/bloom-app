@@ -6,7 +6,7 @@ import { DoctorSummaryPage } from "@/components/ci/DoctorSummaryPage";
  *  a real route, like the Nutrition report, so Print/PDF gets a clean page. */
 export const Route = createFileRoute("/cycle-report")({
   head: () => ({
-    meta: [{ title: "Bloom — Cycle summary for your doctor" }],
+    meta: [{ title: "Bloom - Cycle summary for your doctor" }],
   }),
   component: DoctorSummaryPage,
 });

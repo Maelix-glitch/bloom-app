@@ -67,7 +67,7 @@ function messageOf(error: unknown): string {
     else if (typeof e.code === "number") parts.push(`[${e.code}]`);
     if (typeof e.details === "string" && e.details) parts.push(e.details);
     if (typeof e.hint === "string" && e.hint) parts.push(`hint: ${e.hint}`);
-    if (parts.length > 0) return parts.join(" — ");
+    if (parts.length > 0) return parts.join(" - ");
     try {
       return JSON.stringify(error) ?? "unknown";
     } catch {

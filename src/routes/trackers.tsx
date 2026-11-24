@@ -8,11 +8,11 @@ import { useCycleTheme } from "@/hooks/usePeriodLog";
 export const Route = createFileRoute("/trackers")({
   head: () => ({
     meta: [
-      { title: "Bloom — Trackers" },
+      { title: "Bloom - Trackers" },
       {
         name: "description",
         content:
-          "Sleep, water, study, movement, energy and screen time — one day at a time, drawn as a map: a Bloom flower of today's targets, six territories, and a route through the last fortnight, all computed only from what you log.",
+          "Sleep, water, study, movement, energy and screen time, one day at a time, drawn as a map: a Bloom flower of today's targets, six territories, and a route through the last fortnight, all computed only from what you log.",
       },
     ],
     links: [{ rel: "stylesheet", href: trackersCss }],

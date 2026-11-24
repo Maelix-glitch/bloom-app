@@ -187,7 +187,7 @@ function weightTrendFor(weighIns: readonly WeighIn[], day: string): TwinField<We
       state: "insufficient",
       reason: "No weigh-ins on record yet.",
       unlock: "Log your weight on two different days and the trend appears.",
-      provenance: "From your weigh-ins — none recorded",
+      provenance: "From your weigh-ins, none recorded",
       progress: [{ label: "Weigh-ins", have: 0, need: 2 }],
     };
   }
@@ -197,7 +197,7 @@ function weightTrendFor(weighIns: readonly WeighIn[], day: string): TwinField<We
       state: "insufficient",
       reason: `One weigh-in on record: ${last.kg} kg on ${last.date}.`,
       unlock: "One more weigh-in on a different day starts the trend.",
-      provenance: "From your weigh-ins — 1 recorded",
+      provenance: "From your weigh-ins, 1 recorded",
       progress: [{ label: "Weigh-ins", have: 1, need: 2 }],
     };
   }
@@ -240,7 +240,7 @@ function habitAdherenceFor(
       state: "insufficient",
       reason: "No active habits.",
       unlock: "Add a habit and its completion pattern joins your twin.",
-      provenance: "From your habits — none active",
+      provenance: "From your habits, none active",
     };
   }
   const completed = new Set(habitLogs.map((l) => `${l.habitId}|${l.date}`));
@@ -333,7 +333,7 @@ function nutrientGapsFor(
   if (loggedDays.size < MICRO_MIN_DAYS) {
     return {
       state: "insufficient",
-      reason: `${loggedDays.size} ${plural(loggedDays.size, "logged day", "logged days")} on record — a nutrient pattern needs at least ${MICRO_MIN_DAYS}.`,
+      reason: `${loggedDays.size} ${plural(loggedDays.size, "logged day", "logged days")} on record, a nutrient pattern needs at least ${MICRO_MIN_DAYS}.`,
       unlock: `Log ${MICRO_MIN_DAYS} or more days and the nutrients your foods report can be judged against their references.`,
       provenance: "From your food log's nutrient panels",
       progress: [{ label: "Logged days", have: loggedDays.size, need: MICRO_MIN_DAYS }],
@@ -367,7 +367,7 @@ export function buildTwinSnapshot(inputs: TwinInputs): TwinSnapshot {
       : {
           state: "insufficient",
           reason: `${expenditureResult.loggedDays} of the ${EXPENDITURE_MIN_LOGGED_DAYS} logged days, and ${expenditureResult.weightPoints} ${plural(expenditureResult.weightPoints, "weigh-in", "weigh-ins")} spanning ${expenditureResult.spanDays} ${plural(expenditureResult.spanDays, "day", "days")}, are on record.`,
-          unlock: `Log food on ${EXPENDITURE_MIN_LOGGED_DAYS} days between two weigh-ins at least 10 days apart and your maintenance estimate appears — no formula guess in the meantime.`,
+          unlock: `Log food on ${EXPENDITURE_MIN_LOGGED_DAYS} days between two weigh-ins at least 10 days apart and your maintenance estimate appears, no formula guess in the meantime.`,
           provenance: "From your food log and weigh-ins so far",
           progress: [
             {

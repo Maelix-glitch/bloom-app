@@ -12,7 +12,7 @@ import { MoodPage } from "@/components/mood/page/MoodPage";
 export const Route = createFileRoute("/mood/")({
   head: () => ({
     meta: [
-      { title: "Bloom — Mood" },
+      { title: "Bloom - Mood" },
       {
         name: "description",
         content:

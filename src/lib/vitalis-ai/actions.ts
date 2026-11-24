@@ -61,7 +61,7 @@ export function describeProposal(
       return {
         title: `Log ${name}`,
         detail: dish
-          ? `One serving for ${proposal.meal} — ${Math.round(dish.kcal)} kcal, ${dish.proteinG} g protein. Added to today's food log when you confirm.`
+          ? `One serving for ${proposal.meal} - ${Math.round(dish.kcal)} kcal, ${dish.proteinG} g protein. Added to today's food log when you confirm.`
           : `One serving for ${proposal.meal}. Added to today's food log when you confirm.`,
         confirmLabel: "Log it",
       };
@@ -79,7 +79,7 @@ export function describeProposal(
       return {
         title: "Compose today's plan",
         detail:
-          "Bloom's engine builds today's plan from your assessment and targets — the same plan the Nutrition tab would compose. Your current plan is replaced only when you confirm.",
+          "Bloom's engine builds today's plan from your assessment and targets, the same plan the Nutrition tab would compose. Your current plan is replaced only when you confirm.",
         confirmLabel: "Compose plan",
       };
     case "swap_dish": {
@@ -97,8 +97,8 @@ export function describeProposal(
       return {
         title: `Swap ${fromName} for ${toName}`,
         detail: to
-          ? `In your ${proposal.meal} plan, ${toName} (${Math.round(to.kcal)} kcal, ${to.proteinG} g protein per serving) takes ${fromName}'s place. Your targets do not change — only the dish does, and only when you confirm.`
-          : `In your ${proposal.meal} plan, ${toName} takes ${fromName}'s place. Your targets do not change — only the dish does, and only when you confirm.`,
+          ? `In your ${proposal.meal} plan, ${toName} (${Math.round(to.kcal)} kcal, ${to.proteinG} g protein per serving) takes ${fromName}'s place. Your targets do not change, only the dish does, and only when you confirm.`
+          : `In your ${proposal.meal} plan, ${toName} takes ${fromName}'s place. Your targets do not change, only the dish does, and only when you confirm.`,
         confirmLabel: "Swap dish",
       };
     }
@@ -106,7 +106,7 @@ export function describeProposal(
       const { field, value } = proposal;
       const detail =
         field === "goal"
-          ? `Your goal becomes "${GOAL_LABEL[value as keyof typeof GOAL_LABEL] ?? String(value)}". Your plan and targets read from this — the plan itself is not regenerated until you ask.`
+          ? `Your goal becomes "${GOAL_LABEL[value as keyof typeof GOAL_LABEL] ?? String(value)}". Your plan and targets read from this, the plan itself is not regenerated until you ask.`
           : field === "dietaryPattern"
             ? `Your eating pattern becomes ${PATTERN_WORDS[String(value)] ?? String(value)}. Dishes and plans honour it from the next build.`
             : field === "mealsPerDay"

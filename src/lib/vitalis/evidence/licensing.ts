@@ -114,7 +114,7 @@ export const LICENSE_TERMS: Record<LicenseId, LicenseTerms> = {
   },
   "fao-noncommercial": {
     id: "fao-noncommercial",
-    label: "FAO — non-commercial reuse only",
+    label: "FAO, non-commercial reuse only",
     url: "https://www.fao.org/contact-us/terms/en",
     redistributable: true,
     commercialUse: false,
@@ -124,7 +124,7 @@ export const LICENSE_TERMS: Record<LicenseId, LicenseTerms> = {
   },
   "nin-copyright-restricted": {
     id: "nin-copyright-restricted",
-    label: "ICMR-NIN copyright — product use needs permission",
+    label: "ICMR-NIN copyright, product use needs permission",
     url: "https://www.nin.res.in/",
     redistributable: false,
     commercialUse: false,
@@ -134,7 +134,7 @@ export const LICENSE_TERMS: Record<LicenseId, LicenseTerms> = {
   },
   "proprietary-permission-required": {
     id: "proprietary-permission-required",
-    label: "Proprietary — permission required",
+    label: "Proprietary, permission required",
     url: null,
     redistributable: false,
     commercialUse: false,

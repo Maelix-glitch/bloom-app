@@ -20,7 +20,7 @@ import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 export const Route = createFileRoute("/admin/progression")({
   head: () => ({
     meta: [
-      { title: "Bloom — Point Audit" },
+      { title: "Bloom - Point Audit" },
       { name: "description", content: "Read-only audit of Bloom Point awards." },
     ],
   }),
@@ -166,7 +166,7 @@ function PointAuditPage() {
                     </td>
                     <td className="px-4 py-2.5 text-muted-foreground">{row.kind}</td>
                     <td className="px-4 py-2.5 text-right font-mono">
-                      {row.points > 0 ? `+${row.points.toLocaleString()}` : "—"}
+                      {row.points > 0 ? `+${row.points.toLocaleString()}` : "-"}
                     </td>
                   </tr>
                 ))}
