@@ -226,7 +226,7 @@ export function buildMoodGraph(input: {
       evidence: c.evidence,
       statement:
         c.evidence === "insufficient"
-          ? `${s.label}: ${c.n} paired day${c.n === 1 ? "" : "s"} so far — log it on 8+ days for a reading.`
+          ? `${s.label}: ${c.n} paired day${c.n === 1 ? "" : "s"} so far, log it on 8+ days for a reading.`
           : phrase(s.label, c.r, c.n),
     });
   }
@@ -268,7 +268,7 @@ export function buildMoodGraph(input: {
       r: pull,
       n: v.count,
       evidence: v.count >= 8 ? (Math.abs(pull) >= 0.25 ? "moderate" : "low") : "insufficient",
-      statement: `"${meta?.label ?? key}" on ${v.count} entr${v.count === 1 ? "y" : "ies"} — average mood ${emoMood.toFixed(1)} when it's present.`,
+      statement: `"${meta?.label ?? key}" on ${v.count} entr${v.count === 1 ? "y" : "ies"}, average mood ${emoMood.toFixed(1)} when it's present.`,
     });
   }
 

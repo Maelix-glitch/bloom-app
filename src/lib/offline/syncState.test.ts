@@ -19,17 +19,17 @@ import {
 describe("effectiveSyncState", () => {
   const ALL: SyncStoreState[] = ["off", "loading", "signed-out", "saved", "pending", "error"];
 
-  it("online changes nothing — every state passes through", () => {
+  it("online changes nothing, every state passes through", () => {
     for (const state of ALL) {
       expect(effectiveSyncState(state, true)).toBe(state);
     }
   });
 
-  it("offline downgrades the synced claim — sage may not stand without a network", () => {
+  it("offline downgrades the synced claim, sage may not stand without a network", () => {
     expect(effectiveSyncState("saved", false)).toBe("offline");
   });
 
-  it("offline downgrades a save in flight — it is held on the device, not saving", () => {
+  it("offline downgrades a save in flight, it is held on the device, not saving", () => {
     expect(effectiveSyncState("pending", false)).toBe("offline");
   });
 
@@ -46,14 +46,14 @@ describe("effectiveSyncState", () => {
 
 describe("offline wording", () => {
   it("the pill names the device truth in full and in compact form", () => {
-    expect(OFFLINE_PILL_LABEL).toBe("On this device — will sync when you're back");
+    expect(OFFLINE_PILL_LABEL).toBe("On this device, will sync when you're back");
     expect(OFFLINE_PILL_SHORT_LABEL).toBe("Offline");
   });
 
   it("the Today line exists only while offline, and promises only what the stores guarantee", () => {
     expect(offlineNotice(true)).toBeNull();
     expect(offlineNotice(false)).toBe(
-      "You're offline — everything is saved on this device and will sync when you're back.",
+      "You're offline, everything is saved on this device and will sync when you're back.",
     );
   });
 });

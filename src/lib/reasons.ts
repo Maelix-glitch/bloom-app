@@ -197,13 +197,13 @@ export function reasonCopy(reason: PlanReason): ReasonCopy | null {
       case "kitchen-cap-raised":
         return {
           title: "Prep time stretched",
-          detail: `Your kitchen answers aim for about ${reason.capMinutes} minutes to cook a main meal; today's dishes take up to about ${reason.stageMinutes} minutes — the closest fit.`,
+          detail: `Your kitchen answers aim for about ${reason.capMinutes} minutes to cook a main meal; today's dishes take up to about ${reason.stageMinutes} minutes, the closest fit.`,
           source: ASSESSMENT,
         };
       case "kitchen-cap-quickest":
         return {
           title: "Prep time stretched",
-          detail: `Your kitchen answers aim for about ${reason.capMinutes} minutes, and every main dish takes longer — today uses the quickest there are.`,
+          detail: `Your kitchen answers aim for about ${reason.capMinutes} minutes, and every main dish takes longer, today uses the quickest there are.`,
           source: ASSESSMENT,
         };
       case "snack-added":
@@ -215,25 +215,25 @@ export function reasonCopy(reason: PlanReason): ReasonCopy | null {
       case "veg-shortfall":
         return {
           title: "Vegetables under guideline",
-          detail: `Today's suggestions reach ${fmtGrams(reason.actualG)} g of vegetables — the ICMR-NIN guideline aims for at least ${fmtGrams(reason.guidelineG)} g across the day.`,
+          detail: `Today's suggestions reach ${fmtGrams(reason.actualG)} g of vegetables, the ICMR-NIN guideline aims for at least ${fmtGrams(reason.guidelineG)} g across the day.`,
           source: GUIDELINE,
         };
       case "fruit-shortfall":
         return {
           title: "Fruit under guideline",
-          detail: `Today's suggestions reach ${fmtGrams(reason.actualG)} g of fruit — the ICMR-NIN guideline aims for at least ${fmtGrams(reason.guidelineG)} g across the day.`,
+          detail: `Today's suggestions reach ${fmtGrams(reason.actualG)} g of fruit, the ICMR-NIN guideline aims for at least ${fmtGrams(reason.guidelineG)} g across the day.`,
           source: GUIDELINE,
         };
       case "milk-curd-shortfall":
         return {
           title: "Milk and curd under guideline",
-          detail: `Today's suggestions reach ${fmtGrams(reason.actualG)} g of milk and curd — the ICMR-NIN guideline aims for at least ${fmtGrams(reason.guidelineG)} g across the day.`,
+          detail: `Today's suggestions reach ${fmtGrams(reason.actualG)} g of milk and curd, the ICMR-NIN guideline aims for at least ${fmtGrams(reason.guidelineG)} g across the day.`,
           source: GUIDELINE,
         };
       case "protein-sources-few":
         return {
           title: "Few protein sources",
-          detail: `Today's protein comes from ${reason.count} source${reason.count === 1 ? "" : "s"} — three or more across the day is the aim, for variety.`,
+          detail: `Today's protein comes from ${reason.count} source${reason.count === 1 ? "" : "s"}, three or more across the day is the aim, for variety.`,
           source: PLAN_TOTALS,
         };
       case "food-groups-few":
@@ -241,21 +241,21 @@ export function reasonCopy(reason: PlanReason): ReasonCopy | null {
           title: "Few food groups",
           detail:
             reason.poolCount !== null
-              ? `The foods Bloom can plan with today span ${reason.poolCount} food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.`
-              : `Today's suggestions span ${reason.count} food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.`,
+              ? `The foods Bloom can plan with today span ${reason.poolCount} food groups, the ICMR-NIN guideline aims for foods from at least 8 groups a day.`
+              : `Today's suggestions span ${reason.count} food groups, the ICMR-NIN guideline aims for foods from at least 8 groups a day.`,
           source: GUIDELINE,
         };
       case "protein-under": {
-        /* Every variant carries the shared stem "…g protein guide —"
+        /* Every variant carries the shared stem "…g protein guide -"
            plus its true blocker clause: the plan matrices' honesty
            judge keys on that stem (its own documented contract), and
            a reader scanning the notes meets the same shape each time. */
-        const lead = `Protein reaches about ${Math.round(reason.actualG)} g of your ${Math.round(reason.targetG)} g protein guide —`;
+        const lead = `Protein reaches about ${Math.round(reason.actualG)} g of your ${Math.round(reason.targetG)} g protein guide -`;
         return {
           title: "Protein under guide",
           detail:
             reason.blocker === "caps"
-              ? `Today's suggestions reach about ${Math.round(reason.actualG)} g of your ${Math.round(reason.targetG)} g protein guide — the portion caps bind before the target does.`
+              ? `${lead} the portion caps bind before the target does.`
               : reason.blocker === "energy-topup-in-day"
                 ? `${lead} a top-up is in the day, but the day is already over its energy guide.`
                 : `${lead} the day is already over its energy guide, so no top-up was added.`,
@@ -265,19 +265,19 @@ export function reasonCopy(reason: PlanReason): ReasonCopy | null {
       case "protein-over":
         return {
           title: "Protein over guide",
-          detail: `Today's suggestions reach about ${Math.round(reason.actualG)} g of protein — above your ${Math.round(reason.targetG)} g protein guide. The day's protein foods add up past it.`,
+          detail: `Today's suggestions reach about ${Math.round(reason.actualG)} g of protein, above your ${Math.round(reason.targetG)} g protein guide. The day's protein foods add up past it.`,
           source: PLAN_TOTALS,
         };
       case "kcal-off-guide":
         return reason.direction === "over"
           ? {
               title: "Energy over guide",
-              detail: `Today's suggestions reach about ${fmtCount(reason.actualKcal)} kcal — above your ${fmtKcalApprox(reason.targetKcal)} guide. The day's guideline floors add up past it.`,
+              detail: `Today's suggestions reach about ${fmtCount(reason.actualKcal)} kcal, above your ${fmtKcalApprox(reason.targetKcal)} guide. The day's guideline floors add up past it.`,
               source: PLAN_TOTALS,
             }
           : {
               title: "Energy under guide",
-              detail: `Today's suggestions reach about ${fmtCount(reason.actualKcal)} kcal — below your ${fmtKcalApprox(reason.targetKcal)} guide. The portion caps bind before the target does.`,
+              detail: `Today's suggestions reach about ${fmtCount(reason.actualKcal)} kcal, below your ${fmtKcalApprox(reason.targetKcal)} guide. The portion caps bind before the target does.`,
               source: PLAN_TOTALS,
             };
       case "meal-empty":
@@ -289,7 +289,7 @@ export function reasonCopy(reason: PlanReason): ReasonCopy | null {
       case "meal-missing-layers":
         return {
           title: "Part of this meal is missing",
-          detail: `Part of this meal is missing: ${reason.layers.join(", ")} — no food with known values fits yet. Add a food you eat, then regenerate the plan.`,
+          detail: `Part of this meal is missing: ${reason.layers.join(", ")}, no food with known values fits yet. Add a food you eat, then regenerate the plan.`,
           source: LIBRARY,
         };
       default:
@@ -432,7 +432,7 @@ export function adjustmentCopy(a: AdjustmentLike | null | undefined): Adjustment
         return {
           icon: "clock",
           title: "Prep time stretched",
-          detail: `Your answers aim for about ${a.capMinutes} minutes a main; today's dishes take up to about ${a.stageMinutes} minutes — the closest fit.`,
+          detail: `Your answers aim for about ${a.capMinutes} minutes a main; today's dishes take up to about ${a.stageMinutes} minutes, the closest fit.`,
         };
       }
       case "kitchen-cap-quickest": {
@@ -440,7 +440,7 @@ export function adjustmentCopy(a: AdjustmentLike | null | undefined): Adjustment
         return {
           icon: "clock",
           title: "Prep time stretched",
-          detail: `Your answers aim for about ${a.capMinutes} minutes, and every main dish takes longer — today uses the quickest there are.`,
+          detail: `Your answers aim for about ${a.capMinutes} minutes, and every main dish takes longer, today uses the quickest there are.`,
         };
       }
       case "log-energy-overshoot": {

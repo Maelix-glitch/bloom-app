@@ -89,7 +89,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
   {
     id: "ach-deep-rest",
     title: "Deep Rest",
-    condition: "Honour rest on seven days — sleep that met your own goal.",
+    condition: "Honour rest on seven days, sleep that met your own goal.",
     earnedLine: "You gave rest its place.",
     spec: { on: "recoveryDays", window: 400 },
     target: 7,
@@ -186,7 +186,7 @@ export const ACHIEVEMENTS: AchievementDef[] = [
     id: "ach-flourish",
     title: "Flourish",
     condition: "Reach the rank of Flourish.",
-    earnedLine: "Not just keeping up — growing.",
+    earnedLine: "Not just keeping up, growing.",
     spec: { on: "rankTier", tier: 6 },
     target: 1,
     rarity: "rare",

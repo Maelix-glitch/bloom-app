@@ -191,7 +191,7 @@ describe("plan · dietary patterns", () => {
     expect(suggestions.some((s) => clsOf(s)?.containsDairy)).toBe(true);
   });
 
-  it("vegan plan contains no egg, no dairy and no flesh — and says so about the milk floor", () => {
+  it("vegan plan contains no egg, no dairy and no flesh, and says so about the milk floor", () => {
     const plan = gen(fullProfile("vegan"));
     const suggestions = allSuggestions(plan);
     expect(suggestions.some((s) => clsOf(s)?.containsEgg)).toBe(false);
@@ -217,7 +217,7 @@ describe("plan · dietary patterns", () => {
 /* --------------------------------- layers ---------------------------------- */
 
 describe("plan · layered composition", () => {
-  it("every main meal carries protein + ≥2 vegetables + a finishing layer — and names its missing grain base", () => {
+  it("every main meal carries protein + ≥2 vegetables + a finishing layer, and names its missing grain base", () => {
     /* Module 06 (spec §4.4) changed this pin's shape: every classified
        cereal in the reference set is a raw/dry-basis record, so the
        layered composer has no grain base it may honestly serve. The
@@ -258,7 +258,7 @@ describe("plan · layered composition", () => {
     }
   });
 
-  it("a pool of only raw-basis foods serves nothing — and names the empty day", () => {
+  it("a pool of only raw-basis foods serves nothing, and names the empty day", () => {
     /* Module 06 (spec §4.4) inverted this fixture: brown rice and
        lentils are both raw/dry-basis records, and the pre-basis pin —
        rice served as the base, lentils as the protein — was the
@@ -335,7 +335,7 @@ describe("plan · portion caps", () => {
     expectCapsHold(gen(ownerProfile(), { fallbackTargets: { kcal: 3288, proteinG: 220 } }), 116);
   });
 
-  it("caps hold at the engine's own targets — no caller-supplied figure can break a cap", () => {
+  it("caps hold at the engine's own targets, no caller-supplied figure can break a cap", () => {
     /* M-219: this test once injected adversarial targets
        (9,000 kcal / 600 g) through the body-profile fallback. That
        injection path is retired — targets come only from the gated
@@ -433,8 +433,8 @@ describe("plan · day floors", () => {
        named. Probed and verified at the re-pin, not assumed. */
     expect(plan.notes).toEqual([
       "You listed 3 meals a day; a snack spreads today across 4 sittings.",
-      "Today's suggestions span 7 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
-      "Today's suggestions reach about 156 g of protein — above your 116 g protein guide. The day's protein foods add up past it.",
+      "Today's suggestions span 7 food groups, the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+      "Today's suggestions reach about 156 g of protein, above your 116 g protein guide. The day's protein foods add up past it.",
     ]);
     const veg = allSuggestions(plan)
       .filter((s) => groupOf(s) === "vegetables")
@@ -551,7 +551,7 @@ describe("plan · rotation", () => {
     /* 2026-11-16 rotates to a mix that spans 5 food groups; the
        span is named. */
     expect(d16.notes).toEqual([
-      "Today's suggestions span 5 food groups — the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
+      "Today's suggestions span 5 food groups, the ICMR-NIN guideline aims for foods from at least 8 groups a day.",
     ]);
     /* 2026-11-17 reaches every gram floor and the energy band; only
        the group-span aim is missed, and named. (P12 note: an early
@@ -611,7 +611,7 @@ describe("plan · method version", () => {
 /* ------------------------------ owner's day -------------------------------- */
 
 describe("plan · the owner's day (worked example)", () => {
-  it("gain · 3,325 kcal · 116 g protein · eggetarian — balanced layers, eggs in, flesh out", () => {
+  it("gain · 3,325 kcal · 116 g protein · eggetarian, balanced layers, eggs in, flesh out", () => {
     const plan = gen(ownerProfile(), { fallbackTargets: { kcal: 3288, proteinG: 220 } });
     /* M-219: targets come from the gated engine (source
        "assessment"); the fallback pair passed above is ignored. */
@@ -678,7 +678,7 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
     ),
   });
 
-  it("suggested energy lands within ±5% of the guide — or the miss is named with its true figure", () => {
+  it("suggested energy lands within ±5% of the guide, or the miss is named with its true figure", () => {
     /* Module 06 changed what this week can promise: with the dry
        staples unservable, the capped layered pool lands at
        2,747–3,045 kcal against the 3,288 guide — outside the ±5%
@@ -697,7 +697,7 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
     }
   });
 
-  it("protein reaches 95% of the guide — or the shortfall is named with its true figure", () => {
+  it("protein reaches 95% of the guide, or the shortfall is named with its true figure", () => {
     for (const { day, plan } of week) {
       const { proteinG } = totals(plan);
       /* M-219: the guide is the gated 116 g. */
@@ -731,7 +731,7 @@ describe("plan · P3 maturity (owner week 2026-11-16 → 2026-11-22)", () => {
     }
   });
 
-  it("no chilli or spice ever fills a vegetables layer — a 14-day sweep", () => {
+  it("no chilli or spice ever fills a vegetables layer, a 14-day sweep", () => {
     for (let i = 0; i < 14; i++) {
       const day = `2026-11-${String(10 + i).padStart(2, "0")}`;
       const plan = gen(ownerProfile(), { fallbackTargets: { kcal: 3288, proteinG: 220 }, day });

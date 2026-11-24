@@ -129,13 +129,13 @@ export function resolveSleepNeed(
     return {
       minutes,
       source: "assessment",
-      label: `your Assessment answer — you usually sleep about ${formatSleepMinutes(minutes)}`,
+      label: `your Assessment answer, you usually sleep about ${formatSleepMinutes(minutes)}`,
     };
   }
   return {
     minutes: DEFAULT_NEED_MINUTES,
     source: "default",
-    label: "the general 8-hour guide — you haven't given Bloom your own number in the Assessment",
+    label: "the general 8-hour guide, you haven't given Bloom your own number in the Assessment",
   };
 }
 
@@ -254,8 +254,8 @@ export function recoveryState(window: SleepWindow, need: SleepNeed): RecoverySta
       label: BAND_LABEL["not-enough-data"],
       inputsLine:
         window.nightsRecorded === 0
-          ? "No nights recorded in the last 7 days — there is nothing to read yet."
-          : `Only ${window.nightsRecorded} night${window.nightsRecorded === 1 ? "" : "s"} recorded in the last 7 days — a recovery read needs at least ${MIN_RECORDED_NIGHTS}.`,
+          ? "No nights recorded in the last 7 days, there is nothing to read yet."
+          : `Only ${window.nightsRecorded} night${window.nightsRecorded === 1 ? "" : "s"} recorded in the last 7 days, a recovery read needs at least ${MIN_RECORDED_NIGHTS}.`,
     };
   }
 
@@ -353,17 +353,17 @@ export function recoveryLines(snapshot: RecoverySnapshot): string[] {
     lines.push("No nights recorded in the last 7 days, so there is no sleep debt to read.");
   } else if (debt.debtMinutes === 0) {
     lines.push(
-      `No sleep debt across the ${debt.nightsRecorded} recorded night${debt.nightsRecorded === 1 ? "" : "s"} of the last 7 days — each one reached ${formatSleepMinutes(need.minutes)} (${need.label}).`,
+      `No sleep debt across the ${debt.nightsRecorded} recorded night${debt.nightsRecorded === 1 ? "" : "s"} of the last 7 days, each one reached ${formatSleepMinutes(need.minutes)} (${need.label}).`,
     );
   } else {
     lines.push(
-      `Sleep debt of ${formatSleepMinutes(debt.debtMinutes)} across the last 7 days — ${debt.nightsShort} of ${debt.nightsRecorded} recorded night${debt.nightsRecorded === 1 ? "" : "s"} fell short of ${formatSleepMinutes(need.minutes)} (${need.label}).`,
+      `Sleep debt of ${formatSleepMinutes(debt.debtMinutes)} across the last 7 days, ${debt.nightsShort} of ${debt.nightsRecorded} recorded night${debt.nightsRecorded === 1 ? "" : "s"} fell short of ${formatSleepMinutes(need.minutes)} (${need.label}).`,
     );
   }
 
   if (window.nightsNotRecorded > 0 && window.nightsRecorded > 0) {
     lines.push(
-      `${window.nightsNotRecorded} of the last 7 nights have no sleep recorded — they are left out of every figure here, not assumed.`,
+      `${window.nightsNotRecorded} of the last 7 nights have no sleep recorded, they are left out of every figure here, not assumed.`,
     );
   }
 
@@ -376,12 +376,12 @@ export function recoveryLines(snapshot: RecoverySnapshot): string[] {
     const prev = formatSleepMinutes(trend.previousAverageMinutes ?? 0);
     lines.push(
       trend.direction === "about-the-same"
-        ? `Nights are about the same as the week before — ${cur} a night on average against ${prev}.`
-        : `Nights have been getting ${trend.direction} — ${cur} a night on average against ${prev} the week before (${trend.deltaMinutes > 0 ? "+" : "−"}${formatSleepMinutes(Math.abs(trend.deltaMinutes))}).`,
+        ? `Nights are about the same as the week before, ${cur} a night on average against ${prev}.`
+        : `Nights have been getting ${trend.direction} - ${cur} a night on average against ${prev} the week before (${trend.deltaMinutes > 0 ? "+" : "−"}${formatSleepMinutes(Math.abs(trend.deltaMinutes))}).`,
     );
   } else if (window.nightsRecorded >= MIN_RECORDED_NIGHTS) {
     lines.push(
-      `No week-on-week trend yet — the week before holds ${trend.previousNights} recorded night${trend.previousNights === 1 ? "" : "s"}, and a trend needs at least ${MIN_RECORDED_NIGHTS} in both weeks.`,
+      `No week-on-week trend yet, the week before holds ${trend.previousNights} recorded night${trend.previousNights === 1 ? "" : "s"}, and a trend needs at least ${MIN_RECORDED_NIGHTS} in both weeks.`,
     );
   }
 

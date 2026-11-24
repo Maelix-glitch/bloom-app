@@ -41,10 +41,10 @@ export function validateImageFile(file: File): string | null {
 /** Validate decoded dimensions before any canvas work happens on them. */
 export function validateImageDimensions(width: number, height: number): string | null {
   if (!width || !height) {
-    return "That image could not be read — the file could not be opened. Try a different file.";
+    return "That image could not be read, the file could not be opened. Try a different file.";
   }
   if (width > MAX_IMAGE_EDGE || height > MAX_IMAGE_EDGE || width * height > MAX_IMAGE_PIXELS) {
-    return "That image is extremely large — enormous in pixel terms. Pick a smaller copy of it.";
+    return "That image is extremely large, enormous in pixel terms. Pick a smaller copy of it.";
   }
   return null;
 }

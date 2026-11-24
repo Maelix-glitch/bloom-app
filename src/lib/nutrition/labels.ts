@@ -32,7 +32,7 @@ export function provenanceLabel(provenance: EntryProvenance): string {
   // render a blank badge next to a number.
   const stored = provenance.label.trim();
   if (provenance.kind === "coach_estimate") {
-    return stored || "Estimate — based on your photo";
+    return stored || "Estimate, based on your photo";
   }
   if (provenance.kind === "user_entered") return USER_ENTERED_LABEL;
   return stored || KIND_FALLBACK[provenance.kind];

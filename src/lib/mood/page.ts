@@ -164,8 +164,8 @@ export function distributionNote(days: DayAggregate[], rangeLabel: string): stri
   const top = [...slices].sort((a, b) => b.value - a.value)[0]!;
   const share = Math.round((top.value / days.length) * 100);
   const noun = top.label.toLowerCase();
-  if (days.length === 1) return `One day logged in the ${rangeLabel.toLowerCase()} — it read as ${noun}.`;
-  return `${top.label} days are your most common ones — ${share}% of the ${days.length} days logged in the ${rangeLabel.toLowerCase()}.`;
+  if (days.length === 1) return `One day logged in the ${rangeLabel.toLowerCase()}, it read as ${noun}.`;
+  return `${top.label} days are your most common ones, ${share}% of the ${days.length} days logged in the ${rangeLabel.toLowerCase()}.`;
 }
 
 /* ------------------------------ insights --------------------------------- */
@@ -244,7 +244,7 @@ export function quickInsights(input: {
     out.push({
       id: "emotion",
       icon: "sun",
-      text: `"${topEmotion.label}" shows up in ${Math.round(topEmotion.share)}% of your entries — your most frequent note this period.`,
+      text: `"${topEmotion.label}" shows up in ${Math.round(topEmotion.share)}% of your entries, your most frequent note this period.`,
     });
   }
 
@@ -253,7 +253,7 @@ export function quickInsights(input: {
     out.push({
       id: "best",
       icon: "sun",
-      text: `${shortDate(best.date)} was your brightest day of the period — it read as ${moodLabel(best.mood).toLowerCase()}.`,
+      text: `${shortDate(best.date)} was your brightest day of the period, it read as ${moodLabel(best.mood).toLowerCase()}.`,
     });
   }
 
@@ -302,7 +302,7 @@ export function consistencyDelta(days: DayAggregate[], today: string): number | 
 export function streakLine(streak: number, delta: number | null, loggedThisWeek: number): string {
   if (streak === 0 && loggedThisWeek === 0) return "Your first check-in starts the streak.";
   if (delta !== null && delta > 0) return "You've been more consistent this week.";
-  if (delta !== null && delta < 0) return "A lighter week — one check-in brings it back.";
+  if (delta !== null && delta < 0) return "A lighter week, one check-in brings it back.";
   if (streak >= 7) return "A full week, kept up gently.";
   return "Small check-ins, kept up gently.";
 }

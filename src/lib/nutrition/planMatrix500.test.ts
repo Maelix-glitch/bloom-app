@@ -276,10 +276,10 @@ const failures: string[] = [];
  *  band rates alongside — a named miss is honest, a silent one is
  *  a failure. */
 const kcalNamed = (plan: DailyPlan) =>
-  plan.notes.some((n) => n.includes("kcal — above your") || n.includes("kcal — below your"));
+  plan.notes.some((n) => n.includes("kcal, above your") || n.includes("kcal, below your"));
 const proteinNamed = (plan: DailyPlan, over: boolean) =>
   over
-    ? plan.notes.some((n) => n.includes("g of protein — above your"))
+    ? plan.notes.some((n) => n.includes("g of protein, above your"))
     : /* Any shortfall note that states the figure against the guide
          names the miss — the caps-bind wording ("— the portion caps
          bind…") or the energy-bind wordings ("— a top-up is in the
@@ -291,7 +291,7 @@ const proteinNamed = (plan: DailyPlan, over: boolean) =>
          a gravy anchor's rice base can carry the day over its
          energy guide, and the top-up discipline then honestly
          withholds the protein top-up and says so. */
-      plan.notes.some((n) => n.includes("protein guide —"));
+      plan.notes.some((n) => n.includes("protein guide -"));
 
 /** Method 13: the notes that honestly label a plan whose mains
  *  could not all be dish-composed — a kitchen relaxation, a budget

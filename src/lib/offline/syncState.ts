@@ -43,7 +43,7 @@ export function effectiveSyncState(state: SyncStoreState, online: boolean): Effe
 }
 
 /** The pill's full wording for the offline effective state. */
-export const OFFLINE_PILL_LABEL = "On this device — will sync when you're back";
+export const OFFLINE_PILL_LABEL = "On this device, will sync when you're back";
 
 /** The pill's compact wording for the offline effective state. */
 export const OFFLINE_PILL_SHORT_LABEL = "Offline";
@@ -56,5 +56,5 @@ export const OFFLINE_PILL_SHORT_LABEL = "Offline";
  */
 export function offlineNotice(online: boolean): string | null {
   if (online) return null;
-  return "You're offline — everything is saved on this device and will sync when you're back.";
+  return "You're offline, everything is saved on this device and will sync when you're back.";
 }

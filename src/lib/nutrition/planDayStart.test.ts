@@ -186,7 +186,7 @@ describe("P11 · protein powders", () => {
     }
   });
 
-  it("a vegan plan never sees whey (dairy) — the pattern gate judges powders too", () => {
+  it("a vegan plan never sees whey (dairy), the pattern gate judges powders too", () => {
     const dishes = [
       findDish("dish-dal-fry")!,
       findDish("dish-moong-dal-tadka")!,
@@ -307,7 +307,7 @@ describe("P11 · protein overshoot", () => {
       dishes: null,
     });
     const protein = dayProtein(plan);
-    const named = plan.notes.some((n) => n.includes("g of protein — above your"));
+    const named = plan.notes.some((n) => n.includes("g of protein, above your"));
     expect(protein <= 1.1 * plan.targets.proteinG || named).toBe(true);
     expect(protein).toBeLessThan(127);
   });

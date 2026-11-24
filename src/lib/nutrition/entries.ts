@@ -15,7 +15,7 @@ import { entryNutrientsFor } from "./math";
 import { parseLogEntry } from "./parse";
 import type { Amount, EntrySource, Food, LogEntry, Meal, Nutrients } from "./types";
 
-export const COACH_ESTIMATE_LABEL = "Estimate — based on your photo";
+export const COACH_ESTIMATE_LABEL = "Estimate, based on your photo";
 
 export function createEntryFromFood(input: {
   food: Food;

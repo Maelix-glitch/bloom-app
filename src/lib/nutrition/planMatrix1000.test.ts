@@ -268,17 +268,17 @@ const records: RunRecord[] = [];
 const hardFailures: string[] = [];
 
 const kcalNamed = (plan: DailyPlan) =>
-  plan.notes.some((n) => n.includes("kcal — above your") || n.includes("kcal — below your"));
+  plan.notes.some((n) => n.includes("kcal, above your") || n.includes("kcal, below your"));
 const proteinNamed = (plan: DailyPlan, over: boolean) =>
   over
-    ? plan.notes.some((n) => n.includes("g of protein — above your"))
+    ? plan.notes.some((n) => n.includes("g of protein, above your"))
     : /* Any shortfall note that states the figure against the guide
          names the miss: "— the portion caps bind…", or P12's
          energy-bind wordings ("— the day is already over its
          energy guide, so no top-up was added…" / "— a protein
          top-up is in the day…"). The detector keys on the shared
          "protein guide —" stem, not one sentence. */
-      plan.notes.some((n) => n.includes("protein guide —"));
+      plan.notes.some((n) => n.includes("protein guide -"));
 
 const minutesOf = (time: string): number => {
   const [h, m] = time.split(":").map(Number);
@@ -736,7 +736,7 @@ describe("plan matrix 1000", () => {
  * WHY — the energy, not silence. These cells pin that contract on
  * the shape itself, across patterns.
  */
-describe("plan matrix 1000 — the owner's dense-protein corner", () => {
+describe("plan matrix 1000, the owner's dense-protein corner", () => {
   const CELLS: {
     pattern: DietaryPattern;
     goal: HealthProfile["goal"];

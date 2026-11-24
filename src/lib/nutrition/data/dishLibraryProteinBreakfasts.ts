@@ -46,11 +46,11 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Cut the chicken into small bite-size pieces; season with the salt and turmeric and set aside for 10 minutes.",
-      "Heat half the oil in a pan over medium heat; fry the onion for 5–6 minutes until deep golden at the edges.",
+      "Heat half the oil in a pan over medium heat; fry the onion for 5-6 minutes until deep golden at the edges.",
       "Add the garlic, ginger and green chilli; fry 1 minute, then add the tomato and cumin and cook 5 minutes into a thick, glossy masala.",
-      "Add the chicken; sear for 3 minutes, then pour in the coconut milk and 100 ml water, cover and simmer 8–10 minutes until the chicken is cooked through and the gravy coats a spoon.",
-      "Meanwhile whisk the eggs with a pinch of the remaining salt; heat the rest of the oil in a non-stick pan and make a plain folded omelette, 2–3 minutes per side, set but still soft in the middle.",
-      "Cut the omelette into wide strips, lay them over plates and spoon the hot chicken gravy generously over — the Goan way, the omelette soaking in the ros.",
+      "Add the chicken; sear for 3 minutes, then pour in the coconut milk and 100 ml water, cover and simmer 8-10 minutes until the chicken is cooked through and the gravy coats a spoon.",
+      "Meanwhile whisk the eggs with a pinch of the remaining salt; heat the rest of the oil in a non-stick pan and make a plain folded omelette, 2-3 minutes per side, set but still soft in the middle.",
+      "Cut the omelette into wide strips, lay them over plates and spoon the hot chicken gravy generously over, the Goan way, the omelette soaking in the ros.",
       "Rest 1 minute so the egg drinks up the gravy, and serve at once.",
     ],
     timeMinutes: 35,
@@ -79,9 +79,9 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Knead the flour with the salt and about 70 ml warm water into a soft dough; rest 20 minutes, then roll into 4 thin parottas and cook on a dry hot tawa 1–2 minutes per side until puffed and spotted. Tear into bite-size pieces.",
+      "Knead the flour with the salt and about 70 ml warm water into a soft dough; rest 20 minutes, then roll into 4 thin parottas and cook on a dry hot tawa 1-2 minutes per side until puffed and spotted. Tear into bite-size pieces.",
       "Cut the chicken into small strips; toss with the turmeric, chili powder and half the salt.",
-      "Heat half the oil on a large tawa or heavy pan over high heat; sear the chicken 4–5 minutes until cooked through and charred at the edges. Set aside.",
+      "Heat half the oil on a large tawa or heavy pan over high heat; sear the chicken 4-5 minutes until cooked through and charred at the edges. Set aside.",
       "In the same pan, add the remaining oil; fry the onion, pepper, garlic and ginger for 3 minutes until softening, then the tomato for 3 minutes into a rough masala.",
       "Return the chicken and the torn parotta; toss everything together for 2 minutes, chopping and mixing with two spatulas in the kothu rhythm until the bread drinks up the masala.",
       "Push to one side, pour in the beaten eggs, scramble them softly for 1 minute, then fold through the whole mixture for a final minute.",
@@ -112,12 +112,12 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the black gram for 5 hours; grind to a fluffy batter, stir in the rice flour and salt, and ferment 8–12 hours until risen and lightly sour (the standard idli batter).",
-      "Steam the batter in idli moulds for 10–12 minutes, until a skewer comes out clean; cool 10 minutes and quarter each idli.",
+      "Soak the black gram for 5 hours; grind to a fluffy batter, stir in the rice flour and salt, and ferment 8-12 hours until risen and lightly sour (the standard idli batter).",
+      "Steam the batter in idli moulds for 10-12 minutes, until a skewer comes out clean; cool 10 minutes and quarter each idli.",
       "Beat the eggs with a pinch of salt. Heat a wide pan over medium heat, add a third of the mustard oil and scramble the eggs softly for 2 minutes; set aside still glossy.",
-      "In the same pan heat the remaining oil; crackle the mustard seeds, then fry the onion and green chilli for 3–4 minutes until golden.",
+      "In the same pan heat the remaining oil; crackle the mustard seeds, then fry the onion and green chilli for 3-4 minutes until golden.",
       "Add the tomato and curry powder; cook 3 minutes into a thick masala that leaves the sides of the pan.",
-      "Add the idli quarters; toss and fry 3–4 minutes until their cut faces crisp and take on the masala's colour.",
+      "Add the idli quarters; toss and fry 3-4 minutes until their cut faces crisp and take on the masala's colour.",
       "Fold the scrambled eggs and coriander leaves through for 1 minute and serve hot.",
     ],
     timeMinutes: 45,
@@ -148,7 +148,7 @@ export const PW2_DISHES: readonly Dish[] = [
       "Divide the dough into 4 balls; roll each into a thin 18 cm disc, keeping the edges thinner than the centre.",
       "Heat a tawa over medium heat and brush with a little ghee; lay on a disc and cook 1 minute until the underside firms.",
       "Spoon a quarter of the egg mixture into the centre; fold the edges in to make a sealed square parcel, pressing gently.",
-      "Cook 2–3 minutes per side in the remaining ghee, pressing with a spatula, until deep golden, puffed and the egg inside is just set — it should feel springy, not liquid, when pressed.",
+      "Cook 2-3 minutes per side in the remaining ghee, pressing with a spatula, until deep golden, puffed and the egg inside is just set, it should feel springy, not liquid, when pressed.",
       "Repeat for the remaining parathas and serve hot, cut corner to corner.",
     ],
     timeMinutes: 40,
@@ -177,11 +177,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the mung beans for 4 hours (or overnight); drain, cover with fresh water and simmer 20–25 minutes until completely soft and beginning to break down. Keep the cooking liquor.",
-      "Melt half the butter in a heavy pan; fry the onion for 6–7 minutes until deep golden — the dhaba colour comes from patience here.",
+      "Soak the mung beans for 4 hours (or overnight); drain, cover with fresh water and simmer 20-25 minutes until completely soft and beginning to break down. Keep the cooking liquor.",
+      "Melt half the butter in a heavy pan; fry the onion for 6-7 minutes until deep golden, the dhaba colour comes from patience here.",
       "Add the garlic, ginger, cumin, turmeric and chili powder; fry 1 minute, then the tomato and cook 5 minutes into a dark, thick masala.",
       "Add the cooked mung beans with enough of their liquor for a thick, spoonable dal; simmer 5 minutes, mashing a few beans against the side so the tadka turns creamy. Season with the salt.",
-      "Beat the eggs and stir them into the hot dal in a thin stream, stirring constantly for 2 minutes — they should set in soft ribbons through the dal, not scramble into lumps.",
+      "Beat the eggs and stir them into the hot dal in a thin stream, stirring constantly for 2 minutes, they should set in soft ribbons through the dal, not scramble into lumps.",
       "Finish with the remaining butter melting over the top and the coriander leaves; serve at once with bread or rice.",
     ],
     timeMinutes: 40,
@@ -207,11 +207,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Make the bread first: knead the flour with the salt and about 70 ml warm water into a firm dough; rest 15 minutes, shape into a small loaf and bake at 200°C for 22–25 minutes until it sounds hollow when tapped. Cool completely, then cut 4 thick slices.",
+      "Make the bread first: knead the flour with the salt and about 70 ml warm water into a firm dough; rest 15 minutes, shape into a small loaf and bake at 200°C for 22-25 minutes until it sounds hollow when tapped. Cool completely, then cut 4 thick slices.",
       "Whisk the eggs with the milk, turmeric and a pinch of salt; stir in the finely chopped onion, green chilli and coriander leaves.",
-      "Soak each bread slice in the egg mixture for 30 seconds per side — the crumb should drink the egg right through, not just wear it.",
+      "Soak each bread slice in the egg mixture for 30 seconds per side, the crumb should drink the egg right through, not just wear it.",
       "Melt half the butter in a non-stick pan over medium heat until foaming.",
-      "Fry the soaked slices 2–3 minutes per side until deep golden and puffed, the egg set all the way through with no wet shine in the centre.",
+      "Fry the soaked slices 2-3 minutes per side until deep golden and puffed, the egg set all the way through with no wet shine in the centre.",
       "Repeat with the remaining butter and slices; serve hot, cut diagonally.",
     ],
     timeMinutes: 45,
@@ -237,11 +237,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Cut the potatoes into thin matchsticks (or grate coarsely); rinse in cold water and dry very well in a cloth — dry potato crisps, wet potato steams.",
+      "Cut the potatoes into thin matchsticks (or grate coarsely); rinse in cold water and dry very well in a cloth, dry potato crisps, wet potato steams.",
       "Heat the oil in a wide non-stick pan over medium-high heat; spread the potato in an even layer with half the salt and fry undisturbed for 5 minutes until a golden crust forms underneath.",
-      "Scatter the onion and green chilli over, toss once, and fry 4–5 minutes more until the sali is crisp at the edges and tender in the middle.",
+      "Scatter the onion and green chilli over, toss once, and fry 4-5 minutes more until the sali is crisp at the edges and tender in the middle.",
       "Whisk the eggs with the egg whites, black pepper and remaining salt; pour evenly over the potato bed.",
-      "Cover and cook on the lowest heat for 5–6 minutes, until the egg is just set on top with a slight wobble — the Parsi way is soft-set, never rubbery.",
+      "Cover and cook on the lowest heat for 5-6 minutes, until the egg is just set on top with a slight wobble, the Parsi way is soft-set, never rubbery.",
       "Shower with coriander leaves, slide onto a warm plate in one piece if you can, and serve at once.",
     ],
     timeMinutes: 30,
@@ -269,9 +269,9 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Make the bread first: knead the flour with half the salt and about 65 ml warm water into a firm dough; rest 15 minutes, shape a small loaf and bake at 200°C for 22–25 minutes until hollow-sounding. Cool, then cut into 2 cm cubes and toast in a pan for 3 minutes until crisp at the edges.",
+      "Make the bread first: knead the flour with half the salt and about 65 ml warm water into a firm dough; rest 15 minutes, shape a small loaf and bake at 200°C for 22-25 minutes until hollow-sounding. Cool, then cut into 2 cm cubes and toast in a pan for 3 minutes until crisp at the edges.",
       "Beat the eggs with the remaining salt; scramble them softly in a third of the mustard oil for 2 minutes and set aside still glossy.",
-      "Heat the remaining oil; crackle the mustard seeds, then fry the onion, ginger and green chilli for 3–4 minutes until golden.",
+      "Heat the remaining oil; crackle the mustard seeds, then fry the onion, ginger and green chilli for 3-4 minutes until golden.",
       "Add the tomato and peas; cook 3 minutes until the tomato softens into the onion and the peas are bright and tender.",
       "Add the bread cubes; toss for 2 minutes so they drink up the masala and crisp again in spots.",
       "Fold the scrambled eggs and coriander leaves through for 1 minute; serve hot.",
@@ -302,11 +302,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the black gram 5 hours; grind fluffy, stir in the rice flour and salt, and ferment 8–12 hours into a dosa batter (the standard batter).",
+      "Soak the black gram 5 hours; grind fluffy, stir in the rice flour and salt, and ferment 8-12 hours into a dosa batter (the standard batter).",
       "Mince the chicken finely by hand. Heat half the coconut oil; fry the onion, garlic and ginger for 3 minutes, then the tomato, turmeric and chili powder for 3 minutes into a thick masala.",
-      "Add the chicken with a pinch of salt; cook 6–7 minutes, breaking it fine, until cooked through and dry-ish — a spreadable kari, not a curry. Set aside; the egg goes on the dosa itself.",
-      "Heat a cast-iron tawa until very hot; sprinkle water — it should sizzle off at once. Wipe, grease lightly, and spread a ladle of batter into a thick-ish dosa (kari dosa is never paper-thin).",
-      "Drizzle with the remaining coconut oil; when the base is golden and crisp (2–3 minutes), spread a quarter of the chicken kari over the top and press gently.",
+      "Add the chicken with a pinch of salt; cook 6-7 minutes, breaking it fine, until cooked through and dry-ish, a spreadable kari, not a curry. Set aside; the egg goes on the dosa itself.",
+      "Heat a cast-iron tawa until very hot; sprinkle water, it should sizzle off at once. Wipe, grease lightly, and spread a ladle of batter into a thick-ish dosa (kari dosa is never paper-thin).",
+      "Drizzle with the remaining coconut oil; when the base is golden and crisp (2-3 minutes), spread a quarter of the chicken kari over the top and press gently.",
       "Beat the eggs, pour a thin layer over the kari, cover and cook 2 minutes until the egg just sets into the topping.",
       "Fold and serve at once; repeat for the remaining dosas.",
     ],
@@ -337,11 +337,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Make the idiyappam: knead the rice flour with the salt and about 130 ml just-boiled water into a soft dough; press through an idiyappam mould into nests and steam 8–10 minutes until set and glossy. Cool and tease the nests apart into strands.",
+      "Make the idiyappam: knead the rice flour with the salt and about 130 ml just-boiled water into a soft dough; press through an idiyappam mould into nests and steam 8-10 minutes until set and glossy. Cool and tease the nests apart into strands.",
       "Cut the chicken into small strips; season with the black pepper, chili powder and half the salt.",
-      "Heat the coconut oil in a wide pan over high heat; sear the chicken 4–5 minutes until cooked and charred at the edges. Set aside.",
+      "Heat the coconut oil in a wide pan over high heat; sear the chicken 4-5 minutes until cooked and charred at the edges. Set aside.",
       "In the same pan fry the onion, pepper and garlic for 3 minutes, then the tomato for 3 minutes into a rough masala.",
-      "Add the idiyappam strands and the grated coconut; toss and chop together with two spatulas for 2–3 minutes, kothu-style, until the strands are coated and steaming.",
+      "Add the idiyappam strands and the grated coconut; toss and chop together with two spatulas for 2-3 minutes, kothu-style, until the strands are coated and steaming.",
       "Push to one side, scramble the beaten eggs in the cleared space for 1 minute, then fold everything together with the chicken for a final minute.",
       "Serve piled in bowls, hot off the pan.",
     ],
@@ -370,10 +370,10 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Clean and devein the prawns; toss with the turmeric and half the salt and rest 10 minutes.",
-      "Crush the grated coconut with the garlic and green chilli to a coarse, dry mixture — the thoran's crumb.",
-      "Heat the coconut oil in a wide pan; crackle the mustard seeds, then fry the onion for 3–4 minutes until soft and golden at the edges.",
+      "Crush the grated coconut with the garlic and green chilli to a coarse, dry mixture, the thoran's crumb.",
+      "Heat the coconut oil in a wide pan; crackle the mustard seeds, then fry the onion for 3-4 minutes until soft and golden at the edges.",
       "Add the prawns in a single layer; sear 2 minutes per side until pink, curled and just cooked through.",
-      "Beat the eggs and pour over; let them set for 30 seconds, then scramble gently through the prawns for 1–2 minutes until softly set in ribbons.",
+      "Beat the eggs and pour over; let them set for 30 seconds, then scramble gently through the prawns for 1-2 minutes until softly set in ribbons.",
       "Scatter the coconut crumb over everything; toss for 1 minute until the thoran is dry, fragrant and the coconut clings to the egg and prawns.",
       "Serve at once with puttu, appam or rice.",
     ],
@@ -402,9 +402,9 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Use firm, unripe jackfruit: cut the flesh into small pieces, discarding the core. Boil the eggs for 9 minutes; cool in cold water, peel and halve.",
-      "Cook the jackfruit in salted water with the turmeric for 15–18 minutes until completely tender and mashable; drain, keeping a little of the cooking water.",
+      "Cook the jackfruit in salted water with the turmeric for 15-18 minutes until completely tender and mashable; drain, keeping a little of the cooking water.",
       "Crush the grated coconut with the garlic and green chilli to a coarse paste.",
-      "Mash the hot jackfruit roughly with a wooden spoon — a puzhukku is chunky, never a purée — and fold in the coconut paste with a splash of the cooking water; simmer 3 minutes and season.",
+      "Mash the hot jackfruit roughly with a wooden spoon, a puzhukku is chunky, never a purée, and fold in the coconut paste with a splash of the cooking water; simmer 3 minutes and season.",
       "Heat the coconut oil in a small pan; crackle the mustard seeds and fry the sliced onion until golden; pour the tempering over the puzhukku.",
       "Serve the puzhukku in bowls with the halved boiled eggs alongside, yolks still deep gold.",
     ],
@@ -432,12 +432,12 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-170931", grams: 2 }, // black pepper
     ],
     method: [
-      "Cook the rice in salted water until just tender (about 12 minutes); spread on a tray to steam dry — silog rice fries best when dry, ideally cooked the day before.",
+      "Cook the rice in salted water until just tender (about 12 minutes); spread on a tray to steam dry, silog rice fries best when dry, ideally cooked the day before.",
       "Pound the chicken breasts to an even 1.5 cm; season with the salt and black pepper and rest 10 minutes.",
-      "Heat half the oil in a wide pan over medium-high heat; sear the chicken 4–5 minutes per side until golden and cooked through (74°C inside). Rest 5 minutes, then slice.",
-      "In the same pan add the remaining oil and fry most of the garlic for 1–2 minutes until pale gold and crisp; scoop out half as a garnish.",
-      "Add the rice to the garlicky oil; toss and fry 4–5 minutes until the grains are glossy, separate and flecked with garlic. Splash with half the vinegar and toss once more.",
-      "Fry the eggs in a clean non-stick pan for 2–3 minutes until the whites are set and lacy at the edges and the yolks still run.",
+      "Heat half the oil in a wide pan over medium-high heat; sear the chicken 4-5 minutes per side until golden and cooked through (74°C inside). Rest 5 minutes, then slice.",
+      "In the same pan add the remaining oil and fry most of the garlic for 1-2 minutes until pale gold and crisp; scoop out half as a garnish.",
+      "Add the rice to the garlicky oil; toss and fry 4-5 minutes until the grains are glossy, separate and flecked with garlic. Splash with half the vinegar and toss once more.",
+      "Fry the eggs in a clean non-stick pan for 2-3 minutes until the whites are set and lacy at the edges and the yolks still run.",
       "Plate the garlic rice with the sliced chicken, a fried egg on top, tomato wedges alongside and the reserved crisp garlic scattered over.",
     ],
     timeMinutes: 30,
@@ -465,9 +465,9 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Season the ground turkey like chorizo: mix in the chili powder, cayenne, garlic, vinegar and salt and rest 15 minutes (overnight is better) so the spices bloom into the meat.",
-      "Heat the oil in a heavy pan over medium-high heat; crumble in the turkey and fry 6–8 minutes, breaking it fine, until browned in spots and cooked through — it should sizzle in its own spiced fat.",
+      "Heat the oil in a heavy pan over medium-high heat; crumble in the turkey and fry 6-8 minutes, breaking it fine, until browned in spots and cooked through, it should sizzle in its own spiced fat.",
       "Add the onion and red pepper; fry 4 minutes until softened and sweet.",
-      "Beat the eggs and pour over the meat; let them set for 30 seconds, then fold gently for 1–2 minutes until softly scrambled through the chorizo — glossy curds, never dry.",
+      "Beat the eggs and pour over the meat; let them set for 30 seconds, then fold gently for 1-2 minutes until softly scrambled through the chorizo, glossy curds, never dry.",
       "Rest off the heat for 1 minute so the eggs finish in the pan's warmth.",
       "Serve straight from the pan, with warm flatbread or rice if you like.",
     ],
@@ -494,7 +494,7 @@ export const PW2_DISHES: readonly Dish[] = [
     method: [
       "Make the crepe batter: whisk the flour with the milk, half the eggs and a pinch of salt into a thin, lump-free batter; rest 20 minutes.",
       "For the filling, press the cottage cheese in a cloth for 10 minutes to drain; mix with the remaining beaten egg, the grated mozzarella and a pinch of salt until it holds together.",
-      "Heat a non-stick pan over medium heat, brush with a little butter, and swirl in a thin ladle of batter; cook 1–2 minutes until the top looks dry and the edges lift, then slide out — blintz crepes cook on one side only. Repeat to make 6–8 crepes.",
+      "Heat a non-stick pan over medium heat, brush with a little butter, and swirl in a thin ladle of batter; cook 1-2 minutes until the top looks dry and the edges lift, then slide out, blintz crepes cook on one side only. Repeat to make 6-8 crepes.",
       "Place 2 tablespoons of filling along the lower third of each crepe (cooked side up); fold in the sides and roll into a neat parcel.",
       "Melt the remaining butter in the pan over medium heat; fry the parcels seam-side down first for 2 minutes, then turn and fry 2 minutes more until golden and the filling is hot and just set.",
       "Serve warm, two or three to a plate.",
@@ -522,11 +522,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Poach the chicken: simmer it gently in 800 ml salted water with the ginger slices for 12–14 minutes until just cooked through; lift out, shred finely, and keep the broth.",
+      "Poach the chicken: simmer it gently in 800 ml salted water with the ginger slices for 12-14 minutes until just cooked through; lift out, shred finely, and keep the broth.",
       "Return the broth to a gentle boil; stir in the corn and finely chopped onion and simmer 3 minutes.",
       "Stir the rice flour into 60 ml cold water to a slurry; drizzle it into the soup, stirring, and simmer 1 minute until the broth turns silky and just coats a spoon.",
-      "Add the shredded chicken back; season with the salt and black pepper and bring back to the barest simmer — a rolling boil shreds the egg clouds.",
-      "Beat the eggs; swirl the soup in one direction and pour the eggs in a thin stream. Wait 10 seconds, then stir once, gently — the eggs should bloom into soft ribbons.",
+      "Add the shredded chicken back; season with the salt and black pepper and bring back to the barest simmer, a rolling boil shreds the egg clouds.",
+      "Beat the eggs; swirl the soup in one direction and pour the eggs in a thin stream. Wait 10 seconds, then stir once, gently, the eggs should bloom into soft ribbons.",
       "Finish with the sesame oil off the heat and serve at once in warm bowls.",
     ],
     timeMinutes: 25,
@@ -550,11 +550,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the mung beans for 4 hours; drain and steam (or simmer in just enough water) for 18–20 minutes until completely soft. Mash half of them with the turmeric and a pinch of salt into a golden paste; keep the rest whole.",
+      "Soak the mung beans for 4 hours; drain and steam (or simmer in just enough water) for 18-20 minutes until completely soft. Mash half of them with the turmeric and a pinch of salt into a golden paste; keep the rest whole.",
       "Cook the rice with the whole mung beans stirred through, in salted water, for about 14 minutes until tender and sticky; rest covered 10 minutes so the grains turn glossy and cling together.",
-      "Meanwhile slice the onion very thin and fry it in the oil over medium heat for 6–8 minutes, stirring often, until deep golden and crisp; drain on paper. Keep the fragrant oil.",
-      "Toast the peanuts in a dry pan for 3–4 minutes until blistered; rub off the skins and crush coarsely.",
-      "Fold the golden mung paste through the hot rice in ribbons — xôi xéo is marbled, not uniform.",
+      "Meanwhile slice the onion very thin and fry it in the oil over medium heat for 6-8 minutes, stirring often, until deep golden and crisp; drain on paper. Keep the fragrant oil.",
+      "Toast the peanuts in a dry pan for 3-4 minutes until blistered; rub off the skins and crush coarsely.",
+      "Fold the golden mung paste through the hot rice in ribbons, xôi xéo is marbled, not uniform.",
       "Serve in bowls with the crisp onions, their oil and the crushed peanuts over the top.",
     ],
     timeMinutes: 40,
@@ -580,11 +580,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-170931", grams: 2 }, // black pepper
     ],
     method: [
-      "Char the whole eggplants over an open flame (or under a fierce grill) for 8–10 minutes, turning, until blackened and completely soft; rest in a covered bowl 10 minutes, then peel, keeping the stems on. Flatten each gently with a fork into a fan.",
-      "Meanwhile fry the ground turkey with the onion, garlic and tomato in half the oil for 6–7 minutes until cooked through and the tomato melts in; season with the salt and black pepper. Keep warm.",
+      "Char the whole eggplants over an open flame (or under a fierce grill) for 8-10 minutes, turning, until blackened and completely soft; rest in a covered bowl 10 minutes, then peel, keeping the stems on. Flatten each gently with a fork into a fan.",
+      "Meanwhile fry the ground turkey with the onion, garlic and tomato in half the oil for 6-7 minutes until cooked through and the tomato melts in; season with the salt and black pepper. Keep warm.",
       "Beat the eggs with a pinch of salt in a wide shallow dish; lay a flattened eggplant in the egg and turn to coat thickly.",
       "Heat the remaining oil in a non-stick pan over medium heat; slide in the eggplant with its egg coat and spoon a quarter of the turkey mixture over the top.",
-      "Cook 2–3 minutes until the underside is golden and set; flip carefully with a wide spatula and cook 2 minutes more, until the egg is cooked through and the filling hot.",
+      "Cook 2-3 minutes until the underside is golden and set; flip carefully with a wide spatula and cook 2 minutes more, until the egg is cooked through and the filling hot.",
       "Repeat for the second eggplant and serve at once with rice.",
     ],
     timeMinutes: 35,
@@ -611,10 +611,10 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Shred the cabbage finely. Whisk the flour with the milk, eggs, ginger and salt into a batter; fold in the cabbage until every strand is coated — the mixture should look like mostly cabbage held together by batter.",
+      "Shred the cabbage finely. Whisk the flour with the milk, eggs, ginger and salt into a batter; fold in the cabbage until every strand is coated, the mixture should look like mostly cabbage held together by batter.",
       "Cut the chicken into thin small slices; season with a pinch of salt.",
       "Heat half the oil in a non-stick pan over medium heat; spread half the cabbage batter into a thick 16 cm pancake and lay half the chicken slices over the top.",
-      "Cover and cook 4–5 minutes until the base is deep golden and the pancake holds together; flip with confidence and cook 4 minutes more, until the chicken is cooked through and the centre is set, not wet.",
+      "Cover and cook 4-5 minutes until the base is deep golden and the pancake holds together; flip with confidence and cook 4 minutes more, until the chicken is cooked through and the centre is set, not wet.",
       "Repeat for the second pancake with the remaining oil and batter.",
       "Stir the chili powder into the Greek yogurt and drizzle over the hot pancakes in a lattice; serve at once, cut in wedges.",
     ],
@@ -640,11 +640,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-170931", grams: 2 }, // black pepper
     ],
     method: [
-      "Bake the rye bread first: mix the rye flour with a pinch of salt and about 55 ml warm water into a stiff dough; shape a small flat loaf and bake at 200°C for 25–30 minutes until firm and dark. Cool and cut 2 thick slices.",
+      "Bake the rye bread first: mix the rye flour with a pinch of salt and about 55 ml warm water into a stiff dough; shape a small flat loaf and bake at 200°C for 25-30 minutes until firm and dark. Cool and cut 2 thick slices.",
       "Slice the turkey breast into 4 thin cutlets; season with the salt and black pepper.",
       "Melt half the butter in a heavy pan over medium-high heat; sear the turkey cutlets 3 minutes per side until golden and cooked through (74°C). Rest 3 minutes.",
       "Toast the rye slices in the turkey pan juices for 1 minute per side.",
-      "Fry the eggs in the remaining butter for 2–3 minutes until the whites are set with crisp edges and the yolks still run.",
+      "Fry the eggs in the remaining butter for 2-3 minutes until the whites are set with crisp edges and the yolks still run.",
       "Build each Strammer Max: rye toast, two turkey cutlets, a fried egg on top; cucumber and tomato alongside, with an extra grind of black pepper over the yolk.",
     ],
     timeMinutes: 40,
@@ -668,11 +668,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Drain the cottage cheese in a cloth for 15 minutes, pressing firmly — dry curds are the whole secret of syrniki that hold their shape. Push through a sieve for a smooth crumb if you like.",
+      "Drain the cottage cheese in a cloth for 15 minutes, pressing firmly, dry curds are the whole secret of syrniki that hold their shape. Push through a sieve for a smooth crumb if you like.",
       "Mix the drained cheese with the egg, milk, salt and most of the flour until a soft, just-holding dough forms; rest 10 minutes.",
       "With floured hands, shape 8 plump patties about 2 cm thick; dust lightly with the remaining flour.",
-      "Heat the oil in a non-stick pan over medium heat; fry the syrniki 3–4 minutes per side until deep golden with a crisp crust.",
-      "Lower the heat, cover and give them 2 more minutes so the centres set through — they should feel springy, not soft, when pressed.",
+      "Heat the oil in a non-stick pan over medium heat; fry the syrniki 3-4 minutes per side until deep golden with a crisp crust.",
+      "Lower the heat, cover and give them 2 more minutes so the centres set through, they should feel springy, not soft, when pressed.",
       "Serve warm with the Greek yogurt spooned over.",
     ],
     timeMinutes: 30,
@@ -697,10 +697,10 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Bake the milk bread first: knead the flour with the milk, half the salt and a pinch of the butter into a soft dough; rest 20 minutes, shape a small loaf and bake at 190°C for 20–22 minutes until pale gold. Cool fully, then cut 4 thick, soft slices.",
+      "Bake the milk bread first: knead the flour with the milk, half the salt and a pinch of the butter into a soft dough; rest 20 minutes, shape a small loaf and bake at 190°C for 20-22 minutes until pale gold. Cool fully, then cut 4 thick, soft slices.",
       "Boil the eggs for 9 minutes; cool in cold water and peel. The yolks should be deep gold and just set.",
       "Separate the yolks and mash them with the Greek yogurt, ground mustard seed, black pepper and remaining salt into a smooth, seasoned cream.",
-      "Chop the whites into small cubes and fold through the yolk cream — tamago sando filling is chunky-creamy, never a purée. Chill 10 minutes.",
+      "Chop the whites into small cubes and fold through the yolk cream, tamago sando filling is chunky-creamy, never a purée. Chill 10 minutes.",
       "Spread the remaining butter thinly on the bread slices; pile the egg salad thickly onto two slices and cap with the others, pressing gently.",
       "Trim the crusts, cut each sandwich diagonally, and serve with the cut faces showing the gold-and-white filling.",
     ],
@@ -725,12 +725,12 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Knead the flour with half the salt and about 75 ml warm water into a smooth dough; rest 30 minutes — gözleme dough must relax to roll paper-thin.",
+      "Knead the flour with half the salt and about 75 ml warm water into a smooth dough; rest 30 minutes, gözleme dough must relax to roll paper-thin.",
       "Wilt the spinach in a dry pan for 2 minutes; squeeze bone-dry in a cloth and chop. Mix with the drained cottage cheese, grated mozzarella, finely chopped onion and remaining salt.",
       "Divide the dough into 4; roll each piece into a thin 22 cm round, almost translucent at the edges.",
       "Spread a quarter of the filling over one half of each round; fold over and seal the edges firmly with a fork.",
-      "Cook on a dry hot tawa or heavy pan for 2–3 minutes per side until blistered and golden in patches, brushing with a little of the oil as they finish.",
-      "Rest 2 minutes — the cheese settles — then cut in wedges and serve hot.",
+      "Cook on a dry hot tawa or heavy pan for 2-3 minutes per side until blistered and golden in patches, brushing with a little of the oil as they finish.",
+      "Rest 2 minutes, the cheese settles, then cut in wedges and serve hot.",
     ],
     timeMinutes: 40,
     budgetTier: 2,
@@ -753,7 +753,7 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Bring 600 ml water with the salt to a boil in a heavy pot; rain in the cornmeal in a thin stream, whisking constantly so no lumps form.",
-      "Lower the heat to the barest simmer; cook 20–25 minutes, stirring with a wooden spoon every few minutes and scraping the base — mămăligă is done when it pulls cleanly from the sides and holds a spoon upright.",
+      "Lower the heat to the barest simmer; cook 20-25 minutes, stirring with a wooden spoon every few minutes and scraping the base, mămăligă is done when it pulls cleanly from the sides and holds a spoon upright.",
       "Stir in the butter and milk until glossy.",
       "Drain the cottage cheese lightly and crumble it in large curds; grate the mozzarella.",
       "Layer in warm bowls: a bed of mămăligă, a generous crumble of cottage cheese, more mămăligă, and the mozzarella over the top.",
@@ -780,11 +780,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Grind the whole buckwheat to a coarse flour in a blender. Whisk with the milk, 150 ml water, a third of the eggs (beaten in) and the salt into a thin batter; rest at least 1 hour — buckwheat batter must hydrate or the galettes tear.",
+      "Grind the whole buckwheat to a coarse flour in a blender. Whisk with the milk, 150 ml water, a third of the eggs (beaten in) and the salt into a thin batter; rest at least 1 hour, buckwheat batter must hydrate or the galettes tear.",
       "Heat a large non-stick pan or crepe pan over medium-high heat and wipe with a little butter.",
-      "Ladle in batter and swirl into a thin 24 cm galette; cook 1–2 minutes until the edges crisp and lace and the surface looks dry.",
+      "Ladle in batter and swirl into a thin 24 cm galette; cook 1-2 minutes until the edges crisp and lace and the surface looks dry.",
       "Scatter a quarter of the grated mozzarella over the centre, add a handful of spinach to wilt in the steam, then crack an egg into the middle.",
-      "Fold the four edges in to frame the yolk in a square; cover and cook 2–3 minutes until the white is just set and the yolk still glistens.",
+      "Fold the four edges in to frame the yolk in a square; cover and cook 2-3 minutes until the white is just set and the yolk still glistens.",
       "Slide onto a warm plate and repeat for the remaining galettes; serve at once.",
     ],
     timeMinutes: 30,
@@ -809,12 +809,12 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Bake the bread first: knead 100 g of the flour with half the salt and about 65 ml warm water into a soft dough; rest 15 minutes, shape a small loaf and bake at 200°C for 22–25 minutes. Cool and cut 4 slices.",
+      "Bake the bread first: knead 100 g of the flour with half the salt and about 65 ml warm water into a soft dough; rest 15 minutes, shape a small loaf and bake at 200°C for 22-25 minutes. Cool and cut 4 slices.",
       "Slice the turkey into 4 thin cutlets; sear in half the butter for 3 minutes per side until golden and cooked through.",
       "Make the béchamel: melt the remaining butter, whisk in the remaining flour for 1 minute, then the milk a splash at a time, simmering 3 minutes into a thick sauce; season with the ground mustard seed and remaining salt, and stir in half the grated mozzarella.",
       "Toast the bread slices lightly; spread each with béchamel, layer turkey and the remaining mozzarella, and cap to make 2 sandwiches.",
-      "Spoon more béchamel over the tops and grill (broil) for 3–4 minutes until bubbling and golden in patches.",
-      "Fry the eggs sunny-side for 2–3 minutes and crown each sandwich with one — the madame's hat. Serve at once with a knife and fork.",
+      "Spoon more béchamel over the tops and grill (broil) for 3-4 minutes until bubbling and golden in patches.",
+      "Fry the eggs sunny-side for 2-3 minutes and crown each sandwich with one, the madame's hat. Serve at once with a knife and fork.",
     ],
     timeMinutes: 45,
     budgetTier: 2,
@@ -839,9 +839,9 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Cut the potatoes into thin rounds or small wedges; soak 10 minutes in cold water and dry thoroughly.",
-      "Heat the olive oil in a wide pan over medium heat; fry the potatoes in a loose layer for 12–15 minutes, turning now and then, until tender inside and golden at the edges — confit-fried, not deep-fried. Season with half the salt and lift onto a warm serving dish.",
-      "In the same pan, fry the ground turkey with the onion and pepper for 6–7 minutes, crumbling fine, until cooked through; dust with the chili powder and remaining salt and scatter over the potatoes.",
-      "Wipe the pan, add a film of the remaining oil if needed, and fry the eggs over medium-low heat for 2–3 minutes until the whites are just set and the yolks still liquid — rotos eggs are never flipped.",
+      "Heat the olive oil in a wide pan over medium heat; fry the potatoes in a loose layer for 12-15 minutes, turning now and then, until tender inside and golden at the edges, confit-fried, not deep-fried. Season with half the salt and lift onto a warm serving dish.",
+      "In the same pan, fry the ground turkey with the onion and pepper for 6-7 minutes, crumbling fine, until cooked through; dust with the chili powder and remaining salt and scatter over the potatoes.",
+      "Wipe the pan, add a film of the remaining oil if needed, and fry the eggs over medium-low heat for 2-3 minutes until the whites are just set and the yolks still liquid, rotos eggs are never flipped.",
       "Slide the eggs over the potatoes and turkey.",
       "At the table, break (romper) the yolks with the edge of a spoon so they sauce the whole dish, and eat at once.",
     ],
@@ -867,11 +867,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Bake the biscuits: rub half the butter into 100 g of the flour with a pinch of salt until sandy; stir in 60 ml of the milk to a shaggy dough, pat out 2 cm thick, cut 4 rounds and bake at 200°C for 12–14 minutes until risen and golden.",
-      "Season the ground turkey with the fennel seed (crushed), chili powder, black pepper and remaining salt — the sausage seasoning.",
-      "Melt the remaining butter in a heavy pan over medium-high heat; crumble in the turkey and fry 6–8 minutes, breaking it into small crumbles, until well browned.",
+      "Bake the biscuits: rub half the butter into 100 g of the flour with a pinch of salt until sandy; stir in 60 ml of the milk to a shaggy dough, pat out 2 cm thick, cut 4 rounds and bake at 200°C for 12-14 minutes until risen and golden.",
+      "Season the ground turkey with the fennel seed (crushed), chili powder, black pepper and remaining salt, the sausage seasoning.",
+      "Melt the remaining butter in a heavy pan over medium-high heat; crumble in the turkey and fry 6-8 minutes, breaking it into small crumbles, until well browned.",
       "Sprinkle the remaining flour over the meat; stir and cook 1 minute so the flour toasts in the fat.",
-      "Pour in the remaining milk a little at a time, stirring constantly; simmer 3–4 minutes into a thick, peppery gravy that coats the back of a spoon. Rest 2 minutes — it thickens as it stands.",
+      "Pour in the remaining milk a little at a time, stirring constantly; simmer 3-4 minutes into a thick, peppery gravy that coats the back of a spoon. Rest 2 minutes, it thickens as it stands.",
       "Split the warm biscuits and ladle the gravy generously over; serve at once.",
     ],
     timeMinutes: 35,
@@ -900,10 +900,10 @@ export const PW2_DISHES: readonly Dish[] = [
     method: [
       "Cook the rice in salted water for about 12 minutes until tender; keep warm.",
       "Season the ground turkey with the salt and black pepper; shape 2 thick patties.",
-      "Heat half the oil in a heavy pan over medium-high heat; sear the patties 4–5 minutes per side until deeply browned and cooked through (74°C). Rest on a warm plate; keep the pan juices.",
+      "Heat half the oil in a heavy pan over medium-high heat; sear the patties 4-5 minutes per side until deeply browned and cooked through (74°C). Rest on a warm plate; keep the pan juices.",
       "In the same pan, fry the onion and mushrooms in the remaining oil for 5 minutes until golden; stir in the garlic and flour and cook 1 minute.",
       "Pour in 250 ml water a splash at a time, stirring, and simmer 3 minutes into a glossy brown gravy; season to taste.",
-      "Fry the eggs sunny-side for 2–3 minutes, whites set, yolks runny.",
+      "Fry the eggs sunny-side for 2-3 minutes, whites set, yolks runny.",
       "Build each plate: a mound of rice, a turkey patty, gravy ladled over everything, and the fried egg on top.",
     ],
     timeMinutes: 30,
@@ -930,10 +930,10 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Make the tortillas: mix the cornmeal with a pinch of salt and about 55 ml warm water into a soft dough; divide into 4, roll thin and cook on a dry hot pan 1 minute per side. Cut into short strips.",
-      "Heat half the oil in a wide pan over medium-high heat; fry the tortilla strips for 2–3 minutes until crisp and golden at the edges. Set aside.",
+      "Heat half the oil in a wide pan over medium-high heat; fry the tortilla strips for 2-3 minutes until crisp and golden at the edges. Set aside.",
       "In the same pan, fry the onion and pepper in the remaining oil for 4 minutes; add the tomato and chili powder and cook 3 minutes until the tomato softens and the pan looks almost dry.",
       "Return the crisp strips; toss for 30 seconds so they take the heat but keep their crunch.",
-      "Beat the eggs with the remaining salt and pour over; fold gently for 1–2 minutes until softly set around the strips — migas eggs stay loose and glossy.",
+      "Beat the eggs with the remaining salt and pour over; fold gently for 1-2 minutes until softly set around the strips, migas eggs stay loose and glossy.",
       "Scatter the grated cheddar over, cover for 30 seconds to melt, and serve straight from the pan.",
     ],
     timeMinutes: 25,
@@ -958,7 +958,7 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Hydrate the cornmeal: sprinkle it with the salt and about 90 ml water, mixing with your fingers until it feels like damp sand; rest 10 minutes so the grains swell.",
-      "Pack the cornmeal loosely into a steamer basket (a cuscuzeira if you have one); steam over boiling water for 10–12 minutes until set, fragrant and springy — it should unmould in one soft dome.",
+      "Pack the cornmeal loosely into a steamer basket (a cuscuzeira if you have one); steam over boiling water for 10-12 minutes until set, fragrant and springy, it should unmould in one soft dome.",
       "Meanwhile melt the butter and fry the tomato for 3 minutes until jammy; scramble the eggs through it softly for 2 minutes, seasoning with a pinch of salt.",
       "Warm the milk to steaming (do not boil).",
       "Unmould the cuscuz onto a warm plate; flake it open with a fork and pour the hot milk over so it turns supple and steamy.",
@@ -984,12 +984,12 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Peel the green plantains (cut off the ends, score the skin lengthways and lift it off under running water) and cut into 4 cm chunks.",
-      "Boil the plantain in salted water for 15–18 minutes until completely tender — a knife should slide through with no resistance.",
+      "Boil the plantain in salted water for 15-18 minutes until completely tender, a knife should slide through with no resistance.",
       "Drain and mash while steaming hot with the salt, working it until smooth and dough-like; the mash stiffens as it cools, so shape it warm.",
       "Mix the grated mozzarella with the drained, crumbled cottage cheese.",
       "With oiled hands, take a ball of plantain mash, flatten it in your palm, fill the centre with the cheese mixture and close it into a smooth ball about the size of a small orange. Repeat to make 4.",
-      "Brush the bolones with the oil and bake at 200°C (or fry in a lightly oiled pan) for 12–15 minutes, turning once, until golden and crisp outside and the cheese inside is molten.",
-      "Rest 2 minutes — the cheese is lava-hot — and serve.",
+      "Brush the bolones with the oil and bake at 200°C (or fry in a lightly oiled pan) for 12-15 minutes, turning once, until golden and crisp outside and the cheese inside is molten.",
+      "Rest 2 minutes, the cheese is lava-hot, and serve.",
     ],
     timeMinutes: 35,
     budgetTier: 2,
@@ -1017,7 +1017,7 @@ export const PW2_DISHES: readonly Dish[] = [
     method: [
       "Cook the rice in the coconut milk topped up with water to the usual level, with the ginger, turmeric and half the salt, for about 14 minutes; rest covered 10 minutes so the grains turn glossy and fragrant.",
       "Cut the tempeh into thin fingers; toss with a pinch of salt.",
-      "Heat the oil in a wide pan over medium-high heat; fry the tempeh 3–4 minutes per side until deep golden and crisp at the edges.",
+      "Heat the oil in a wide pan over medium-high heat; fry the tempeh 3-4 minutes per side until deep golden and crisp at the edges.",
       "Toast the peanuts in a dry pan for 3 minutes until blistered; crush coarsely with the sliced red chilli for a quick sambal crunch.",
       "Fluff the coconut rice and mound it on plates; arrange the tempeh alongside.",
       "Serve with cucumber slices and the peanut-chilli crunch scattered over the rice.",
@@ -1074,9 +1074,9 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Cook the rice in 900 ml salted water for 12–14 minutes until the grains burst and the broth turns starchy and soupy — khao tom is rice IN broth, not rice with broth.",
+      "Cook the rice in 900 ml salted water for 12-14 minutes until the grains burst and the broth turns starchy and soupy, khao tom is rice IN broth, not rice with broth.",
       "Add the ginger and shredded cabbage; simmer 3 minutes.",
-      "Slide in the cleaned prawns; poach 2–3 minutes until they curl pink and are just cooked — carryover heat finishes them, so do not wait for them to toughen.",
+      "Slide in the cleaned prawns; poach 2-3 minutes until they curl pink and are just cooked, carryover heat finishes them, so do not wait for them to toughen.",
       "Beat the eggs; swirl the soup and stream the eggs in, waiting 10 seconds before one gentle stir so they set in soft clouds.",
       "Season with the salt and black pepper; finish with the sesame oil and garlic (fried golden in the oil for 1 minute if you like it crisp).",
       "Serve in deep bowls with coriander leaves over the top.",
@@ -1104,13 +1104,13 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-170931", grams: 4 }, // black pepper
     ],
     method: [
-      "Heat the oven to 180°C. Brown the ground turkey in a dry non-stick pan over medium-high heat for 7–8 minutes, crumbling fine, until cooked through and its liquid has cooked off; season with half the salt and black pepper.",
+      "Heat the oven to 180°C. Brown the ground turkey in a dry non-stick pan over medium-high heat for 7-8 minutes, crumbling fine, until cooked through and its liquid has cooked off; season with half the salt and black pepper.",
       "Add the onion and red pepper to the pan; cook 4 minutes until softened. Stir in the spinach and cook 1 minute until just wilted; take off the heat.",
       "Whisk the egg whites with the remaining salt until just foamy; fold in the drained cottage cheese.",
       "Tip the turkey mixture into a baking dish (about 20 × 25 cm), spread level, and pour the egg-white mixture over, nudging it into the corners.",
       "Scatter the grated mozzarella over the top.",
-      "Bake for 25–30 minutes until puffed, set in the centre (a knife comes out clean) and golden at the edges.",
-      "Rest 10 minutes — it slices cleanly once settled — and cut into 4 generous squares. It keeps 3 days in the fridge and reheats well.",
+      "Bake for 25-30 minutes until puffed, set in the centre (a knife comes out clean) and golden at the edges.",
+      "Rest 10 minutes, it slices cleanly once settled, and cut into 4 generous squares. It keeps 3 days in the fridge and reheats well.",
     ],
     timeMinutes: 45,
     budgetTier: 3,
@@ -1135,8 +1135,8 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Cook the rice in salted water for about 12 minutes until tender; keep warm.",
-      "Make the soboro turkey: cook the ground turkey in a dry pan over medium heat with the finely grated pear (the classic dish's fruit sweetness) and ginger, stirring and crumbling for 6–7 minutes until the liquid cooks off and the crumbles turn glossy and lightly caramelised. Season with the salt.",
-      "Scramble the eggs separately in the sesame oil over low heat, stirring constantly for 2–3 minutes into fine, soft, pale-gold crumbs — soboro eggs are crumbled small, not folded large.",
+      "Make the soboro turkey: cook the ground turkey in a dry pan over medium heat with the finely grated pear (the classic dish's fruit sweetness) and ginger, stirring and crumbling for 6-7 minutes until the liquid cooks off and the crumbles turn glossy and lightly caramelised. Season with the salt.",
+      "Scramble the eggs separately in the sesame oil over low heat, stirring constantly for 2-3 minutes into fine, soft, pale-gold crumbs, soboro eggs are crumbled small, not folded large.",
       "Warm the peas through in the rice for the last 2 minutes of its resting time.",
       "Divide the rice between bowls and level the tops.",
       "Serve with the turkey soboro over one half of the rice and the egg soboro over the other, peas scattered across the seam.",
@@ -1165,10 +1165,10 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Cook the rice in salted water for about 12 minutes until tender; rest 5 minutes and fluff.",
-      "Boil the eggs for 8 minutes; cool, peel and cut into wedges — the yolks should be jammy at the centre.",
+      "Boil the eggs for 8 minutes; cool, peel and cut into wedges, the yolks should be jammy at the centre.",
       "Drain the tuna well and flake it into a bowl; fold in the Greek yogurt, lemon juice, chili powder and a pinch of salt into a creamy, seasoned tuna salad.",
       "Dice the cucumber small and toss with a pinch of salt.",
-      "Toast the sesame seeds in a dry pan for 1–2 minutes until fragrant and just golden.",
+      "Toast the sesame seeds in a dry pan for 1-2 minutes until fragrant and just golden.",
       "Build the bowls: rice first, the yogurt tuna over one side, cucumber over the other, egg wedges on top and sesame scattered over everything.",
     ],
     timeMinutes: 25,
@@ -1195,10 +1195,10 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Bake the rolls: knead the flour with half the salt and about 70 ml warm water into a soft dough; rest 20 minutes, shape 2 stubby baguette rolls and bake at 220°C for 15–18 minutes until crisp-crusted and hollow-sounding. Cool.",
+      "Bake the rolls: knead the flour with half the salt and about 70 ml warm water into a soft dough; rest 20 minutes, shape 2 stubby baguette rolls and bake at 220°C for 15-18 minutes until crisp-crusted and hollow-sounding. Cool.",
       "Quick-pickle the vegetables: toss the carrot (cut in fine matchsticks) and cucumber ribbons with the vinegar and a pinch of salt; rest 20 minutes, then drain.",
-      "Pound the chicken to an even thickness; season with the remaining salt and sear in a dry non-stick pan for 4–5 minutes per side until golden and cooked through. Rest, then slice thickly.",
-      "Fry the eggs for 2–3 minutes until the whites set and the yolks still run.",
+      "Pound the chicken to an even thickness; season with the remaining salt and sear in a dry non-stick pan for 4-5 minutes per side until golden and cooked through. Rest, then slice thickly.",
+      "Fry the eggs for 2-3 minutes until the whites set and the yolks still run.",
       "Split the rolls and spread the cut sides with Greek yogurt; layer in the chicken, a fried egg, the pickled vegetables, green chilli slices and plenty of coriander leaves.",
       "Press gently, cut in half, and eat while the yolk still sauces the filling.",
     ],
@@ -1226,10 +1226,10 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Make the filling: fry the ground turkey with the onion and garlic in half the oil over medium-high heat for 5–6 minutes, crumbling fine, until cooked through.",
+      "Make the filling: fry the ground turkey with the onion and garlic in half the oil over medium-high heat for 5-6 minutes, crumbling fine, until cooked through.",
       "Add the tomato and peas; cook 3 minutes until the tomato melts and the filling is moist but not wet. Season with the salt and black pepper; keep warm.",
       "Beat the eggs with a pinch of salt. Heat a 20 cm non-stick pan over medium heat with a little of the remaining oil, swirling to coat the sides.",
-      "Pour in half the egg and swirl into a thin, even omelette sheet; cook 1–2 minutes until just set on top — no browning.",
+      "Pour in half the egg and swirl into a thin, even omelette sheet; cook 1-2 minutes until just set on top, no browning.",
       "Spoon half the filling into the centre; fold the four edges over into a neat square parcel, seam-side down, and slide onto a plate. Repeat for the second omelette.",
       "Serve seam-side down with coriander leaves over, and cut open at the table so the filling spills out.",
     ],
@@ -1254,11 +1254,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Knead the flour with half the salt and about 75 ml warm water into a soft dough; divide into 4 balls, coat lightly with a little of the ghee and rest 30 minutes — rested dough stretches thin without tearing.",
+      "Knead the flour with half the salt and about 75 ml warm water into a soft dough; divide into 4 balls, coat lightly with a little of the ghee and rest 30 minutes, rested dough stretches thin without tearing.",
       "Beat the eggs with the milk, remaining salt, finely chopped onion and green chilli.",
       "Stretch or roll each dough ball into a thin 20 cm round (roti canai is thrown; a rolling pin is honest too).",
       "Heat a tawa over medium heat with a brush of ghee; lay on a round and pour a quarter of the egg mixture over it, tilting to spread.",
-      "Cook 2 minutes until the egg sets into the bread; fold the edges in to a square, flip, and cook 1–2 minutes more in a little more ghee until golden and puffed in layers.",
+      "Cook 2 minutes until the egg sets into the bread; fold the edges in to a square, flip, and cook 1-2 minutes more in a little more ghee until golden and puffed in layers.",
       "Repeat for the remaining rotis; serve hot, torn and shared.",
     ],
     timeMinutes: 35,
@@ -1286,13 +1286,13 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Wash the spinach, coriander, moringa leaves and mint; dry very well and chop finely — kuku sabzi is more herb than egg, and wet herbs steam instead of frying.",
+      "Wash the spinach, coriander, moringa leaves and mint; dry very well and chop finely, kuku sabzi is more herb than egg, and wet herbs steam instead of frying.",
       "Whisk the eggs with the egg whites, turmeric and salt until evenly combined; fold in all the chopped greens and the finely sliced onion until the mixture is dark green throughout.",
       "Stir in the coarsely chopped walnuts.",
       "Heat the oil in a 22 cm non-stick pan over medium heat until shimmering; pour in the mixture and level the top.",
-      "Cover and cook on low heat for 10–12 minutes until the edges are set and the centre is nearly firm.",
-      "Flip in one piece (slide onto a plate and invert back) and cook 4–5 minutes more, until deep green-gold and set through.",
-      "Rest 5 minutes; cut into wedges. Serve warm or at room temperature — kuku keeps its flavour cold.",
+      "Cover and cook on low heat for 10-12 minutes until the edges are set and the centre is nearly firm.",
+      "Flip in one piece (slide onto a plate and invert back) and cook 4-5 minutes more, until deep green-gold and set through.",
+      "Rest 5 minutes; cut into wedges. Serve warm or at room temperature, kuku keeps its flavour cold.",
     ],
     timeMinutes: 35,
     budgetTier: 3,
@@ -1317,9 +1317,9 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Simmer the rice in 1 litre of salted water for 30–35 minutes, stirring now and then, until the grains burst and the congee turns thick and porridge-like; add water if it tightens too much.",
+      "Simmer the rice in 1 litre of salted water for 30-35 minutes, stirring now and then, until the grains burst and the congee turns thick and porridge-like; add water if it tightens too much.",
       "Stir in the ginger (cut in fine matchsticks) and the finely chopped onion for the last 10 minutes.",
-      "Toast the peanuts in a dry pan for 3–4 minutes until blistered; crush half coarsely and leave half whole.",
+      "Toast the peanuts in a dry pan for 3-4 minutes until blistered; crush half coarsely and leave half whole.",
       "Cut the tofu into 2 cm cubes; slide them into the congee for the last 5 minutes to heat through without breaking.",
       "Wilt the spinach through the hot congee for 1 minute; season with the salt and plenty of black pepper.",
       "Serve in deep bowls with the sesame oil drizzled over and both the crushed and whole peanuts scattered on top.",
@@ -1346,10 +1346,10 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Toast the buckwheat groats in a dry pot for 3–4 minutes until nutty and a shade darker; add 300 ml salted water, cover and simmer 15 minutes. Rest off the heat for 10 minutes, then fluff — grechka grains stay separate and distinct.",
+      "Toast the buckwheat groats in a dry pot for 3-4 minutes until nutty and a shade darker; add 300 ml salted water, cover and simmer 15 minutes. Rest off the heat for 10 minutes, then fluff, grechka grains stay separate and distinct.",
       "Press the tofu between cloths for 10 minutes to dry its surface; cut into 2 cm cubes and toss with a pinch of salt and the black pepper.",
-      "Heat half the oil in a wide pan over high heat; sear the tofu in a single layer for 6–8 minutes, turning, until golden on most faces. Set aside.",
-      "In the same pan, fry the onion and mushrooms in the remaining oil for 6–7 minutes until the mushrooms give up their water and brown; add the garlic for the last minute.",
+      "Heat half the oil in a wide pan over high heat; sear the tofu in a single layer for 6-8 minutes, turning, until golden on most faces. Set aside.",
+      "In the same pan, fry the onion and mushrooms in the remaining oil for 6-7 minutes until the mushrooms give up their water and brown; add the garlic for the last minute.",
       "Fold the tofu and the mushroom mixture through the hot buckwheat; rest covered 3 minutes so the flavours marry.",
       "Serve in bowls, steaming, with extra black pepper.",
     ],
@@ -1378,9 +1378,9 @@ export const PW2_DISHES: readonly Dish[] = [
     method: [
       "Heat the oven to 210°C. Cut the cod into finger-size strips about 2 cm thick; pat completely dry and season with the salt, turmeric and chili powder.",
       "Set up a coating line: the besan in one shallow dish, the beaten egg white in another.",
-      "Roll each fish finger in besan, then in egg white, then in besan again — the double flour coat is what crisps in the oven instead of a crumb.",
+      "Roll each fish finger in besan, then in egg white, then in besan again, the double flour coat is what crisps in the oven instead of a crumb.",
       "Lay the fingers on an oiled rack over a tray, not touching; brush or spray the tops with the oil.",
-      "Bake for 12–14 minutes, turning once halfway, until the crust is deep golden and crisp and the fish flakes at the thickest point.",
+      "Bake for 12-14 minutes, turning once halfway, until the crust is deep golden and crisp and the fish flakes at the thickest point.",
       "Rest 2 minutes (the crust sets) and serve with lemon wedges to squeeze over.",
     ],
     timeMinutes: 25,
@@ -1406,10 +1406,10 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Blitz half the prawns to a sticky paste in a food processor (or pound them) — the paste is the glue. Chop the rest coarsely for texture.",
+      "Blitz half the prawns to a sticky paste in a food processor (or pound them), the paste is the glue. Chop the rest coarsely for texture.",
       "Mix both prawn preparations with the rice flour, egg white, finely chopped green beans, garlic, red chilli, coriander leaves and salt until evenly combined; chill 15 minutes to firm up.",
       "With wet hands, shape 8 small patties about 1.5 cm thick.",
-      "Heat the oil in a non-stick pan over medium heat; fry the cakes 3 minutes per side until deep golden, springy and cooked through — a prawn cake should bounce back when pressed.",
+      "Heat the oil in a non-stick pan over medium heat; fry the cakes 3 minutes per side until deep golden, springy and cooked through, a prawn cake should bounce back when pressed.",
       "Drain on paper for 1 minute.",
       "Serve hot, straight off the pan.",
     ],
@@ -1437,8 +1437,8 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the soybeans overnight; boil in fresh water for 35–40 minutes until completely tender. Drain very well and spread on a tray to steam dry for 10 minutes — a dry mash makes kebabs that hold.",
-      "Mash the beans coarsely (a food processor in pulses, or a masher) — keep some texture, never a purée.",
+      "Soak the soybeans overnight; boil in fresh water for 35-40 minutes until completely tender. Drain very well and spread on a tray to steam dry for 10 minutes, a dry mash makes kebabs that hold.",
+      "Mash the beans coarsely (a food processor in pulses, or a masher), keep some texture, never a purée.",
       "Mix in the besan, finely chopped onion, ginger, green chilli, coriander leaves, cumin, chili powder and salt; rest 10 minutes so the besan drinks the moisture.",
       "Shape 8 patties with oiled hands, about 1.5 cm thick.",
       "Heat the oil in a heavy pan over medium heat; fry the kebabs 4 minutes per side until deep golden with a crisp crust and hot through the centre.",
@@ -1468,8 +1468,8 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the kidney beans overnight; boil in fresh water for 40–45 minutes until completely soft. Drain very well and steam dry on a tray for 10 minutes.",
-      "Toast the besan in a dry pan for 2–3 minutes until it smells nutty — roasted besan binds without tasting raw.",
+      "Soak the kidney beans overnight; boil in fresh water for 40-45 minutes until completely soft. Drain very well and steam dry on a tray for 10 minutes.",
+      "Toast the besan in a dry pan for 2-3 minutes until it smells nutty, roasted besan binds without tasting raw.",
       "Mash the beans coarsely, keeping some whole pieces for texture.",
       "Mix in the roasted besan, finely chopped onion, ginger, garlic, cumin, chili powder, coriander leaves and salt; rest 10 minutes.",
       "Shape 8 patties with oiled hands.",
@@ -1497,11 +1497,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the red lentils for 2 hours; drain very well — masala vada batter is ground almost dry, with just the soaking moisture.",
-      "Grind the lentils coarsely with no added water (a few pulses, scraping down) — the batter should be gritty and hold a shape, never pourable.",
+      "Soak the red lentils for 2 hours; drain very well, masala vada batter is ground almost dry, with just the soaking moisture.",
+      "Grind the lentils coarsely with no added water (a few pulses, scraping down), the batter should be gritty and hold a shape, never pourable.",
       "Fold in the besan, finely chopped onion, crushed fennel seed, green chilli, ginger and salt.",
       "With wet hands, shape 10 small patties about 1 cm thick.",
-      "Shallow-fry in the oil over medium heat for 3–4 minutes per side until deep amber and crisp all over — pan-fried, not deep-fried, and just as crunchy at the edges.",
+      "Shallow-fry in the oil over medium heat for 3-4 minutes per side until deep amber and crisp all over, pan-fried, not deep-fried, and just as crunchy at the edges.",
       "Drain on paper and serve hot.",
     ],
     timeMinutes: 35,
@@ -1527,7 +1527,7 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Boil the edamame in salted water for 3–4 minutes until bright green and just tender; drain and let the surface steam dry.",
+      "Boil the edamame in salted water for 3-4 minutes until bright green and just tender; drain and let the surface steam dry.",
       "Toast the peanuts in a dry pan for 3 minutes until blistered; rub off the skins and crush coarsely.",
       "Toast the cumin seeds in the same dry pan for 1 minute until fragrant; crush and mix with the chili powder and salt for the chaat masala.",
       "Toss the warm edamame with the finely chopped onion and tomato, the chaat masala and a generous squeeze of lemon juice.",
@@ -1557,7 +1557,7 @@ export const PW2_DISHES: readonly Dish[] = [
     method: [
       "Boil the eggs for 10 minutes; cool in cold water so the whites stay unblemished, and peel carefully.",
       "Halve the eggs lengthways and pop the yolks into a bowl.",
-      "Mash the yolks with the Greek yogurt, ground mustard seed, turmeric, salt and black pepper until completely smooth and pipeable — this is the mayonnaise-free devilled filling.",
+      "Mash the yolks with the Greek yogurt, ground mustard seed, turmeric, salt and black pepper until completely smooth and pipeable, this is the mayonnaise-free devilled filling.",
       "Spoon or pipe the filling back into the white halves in generous mounds.",
       "Finish with finely chopped coriander leaves and an extra crack of black pepper.",
       "Chill 15 minutes so the filling firms, and serve cold.",
@@ -1584,9 +1584,9 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Poach the salmon in barely simmering salted water for 7–8 minutes until just cooked; cool and flake, checking for bones.",
+      "Poach the salmon in barely simmering salted water for 7-8 minutes until just cooked; cool and flake, checking for bones.",
       "Mix the flaked salmon with the drained cottage cheese, lemon juice, black pepper and a pinch of salt; fold in the finely shredded spinach.",
-      "Beat the eggs with the remaining salt; melt a little butter in a non-stick pan and make 2 thin egg crepes — a ladle of egg swirled thin, 1 minute, no flipping, sliding out while still supple.",
+      "Beat the eggs with the remaining salt; melt a little butter in a non-stick pan and make 2 thin egg crepes, a ladle of egg swirled thin, 1 minute, no flipping, sliding out while still supple.",
       "Lay the crepes flat; spread the salmon mixture along the lower third of each.",
       "Roll up tightly, tucking the sides in as you go, like a wrap.",
       "Rest seam-side down for 2 minutes, then slice each roll into 4 pieces and serve at room temperature.",
@@ -1615,8 +1615,8 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Press the tofu between cloths for 15 minutes; cut into 3 cm cubes and toss with the turmeric, half the salt and a little of the oil. Thread onto soaked skewers.",
-      "Make the satay sauce: pound or blend the peanuts to a coarse paste; simmer with the coconut milk, tamarind pulp (soaked in 60 ml warm water and strained), garlic, red chilli and remaining salt for 4–5 minutes until thick and glossy, stirring so it does not catch.",
-      "Grill or pan-sear the tofu skewers over medium-high heat for 8–10 minutes, turning every couple of minutes, until charred at the edges and firm.",
+      "Make the satay sauce: pound or blend the peanuts to a coarse paste; simmer with the coconut milk, tamarind pulp (soaked in 60 ml warm water and strained), garlic, red chilli and remaining salt for 4-5 minutes until thick and glossy, stirring so it does not catch.",
+      "Grill or pan-sear the tofu skewers over medium-high heat for 8-10 minutes, turning every couple of minutes, until charred at the edges and firm.",
       "Brush the skewers with a little of the sauce for the last 2 minutes so it lacquers on.",
       "Rest the skewers for 2 minutes so the lacquer sets.",
       "Serve hot with the remaining warm peanut sauce for dipping.",
@@ -1643,8 +1643,8 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the navy beans overnight; boil in fresh water for 35–40 minutes until completely soft. Reserve a cup of the cooking water. Boil the eggs for 9 minutes; cool, peel and halve.",
-      "Blend the hot beans with the garlic, cumin, lemon juice, salt and half the olive oil, adding cooking water a splash at a time, until smooth and scoopable — it thickens as it cools, so keep it a touch loose.",
+      "Soak the navy beans overnight; boil in fresh water for 35-40 minutes until completely soft. Reserve a cup of the cooking water. Boil the eggs for 9 minutes; cool, peel and halve.",
+      "Blend the hot beans with the garlic, cumin, lemon juice, salt and half the olive oil, adding cooking water a splash at a time, until smooth and scoopable, it thickens as it cools, so keep it a touch loose.",
       "Fold in the chopped coriander leaves.",
       "Spoon the warm dip into a shallow bowl; swirl the top and drizzle with the remaining olive oil.",
       "Arrange the halved eggs around the dip.",
@@ -1673,10 +1673,10 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Cut the chicken into 4 cm pieces. Blend the drained cottage cheese with the Greek yogurt, ginger, garlic, green chilli, coriander leaves and salt into a smooth, thick marinade — reshmi means silky, and this marinade is why.",
+      "Cut the chicken into 4 cm pieces. Blend the drained cottage cheese with the Greek yogurt, ginger, garlic, green chilli, coriander leaves and salt into a smooth, thick marinade, reshmi means silky, and this marinade is why.",
       "Coat the chicken thoroughly and marinate at least 1 hour (overnight is best).",
       "Thread the chicken onto skewers, letting the excess marinade cling.",
-      "Grill over high heat (or sear in a smoking-hot pan with the oil) for 8–10 minutes, turning every 2 minutes, until charred at the edges and cooked through (74°C) — the yogurt marinade browns fast, so keep them moving.",
+      "Grill over high heat (or sear in a smoking-hot pan with the oil) for 8-10 minutes, turning every 2 minutes, until charred at the edges and cooked through (74°C), the yogurt marinade browns fast, so keep them moving.",
       "Rest 3 minutes under foil so the juices settle back in.",
       "Serve hot, soft and silky, straight off the skewers.",
     ],
@@ -1704,9 +1704,9 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Knead the flour with half the salt and about 65 ml warm water into a soft dough; rest 20 minutes, then roll 2 thin parathas and cook on a tawa with a little of the oil, 1–2 minutes per side, until puffed and golden. Keep warm.",
+      "Knead the flour with half the salt and about 65 ml warm water into a soft dough; rest 20 minutes, then roll 2 thin parathas and cook on a tawa with a little of the oil, 1-2 minutes per side, until puffed and golden. Keep warm.",
       "Cut the chicken into thin strips; toss with the chili powder, cumin and remaining salt.",
-      "Heat the remaining oil in a wide pan over high heat; sear the chicken 5–6 minutes until charred at the edges and cooked through. Add the onion and pepper for the last 3 minutes so they soften but keep their bite.",
+      "Heat the remaining oil in a wide pan over high heat; sear the chicken 5-6 minutes until charred at the edges and cooked through. Add the onion and pepper for the last 3 minutes so they soften but keep their bite.",
       "Beat the eggs; in a clean pan, make 2 thin omelette sheets, 1 minute each, no browning.",
       "Lay an omelette sheet on each paratha; pile the chicken mixture down the centre and squeeze lemon juice over.",
       "Roll up tightly, wrap the base in paper, and eat hot.",
@@ -1733,8 +1733,8 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Knead the flour with half the salt and about 55 ml warm water into a soft dough; divide into 2 balls, coat with a little oil and rest 30 minutes — martabak skin must stretch without snapping back.",
-      "Cook the filling: fry the ground turkey with half the onion and the curry powder in a dry pan for 5–6 minutes until cooked through and dry; season and cool slightly.",
+      "Knead the flour with half the salt and about 55 ml warm water into a soft dough; divide into 2 balls, coat with a little oil and rest 30 minutes, martabak skin must stretch without snapping back.",
+      "Cook the filling: fry the ground turkey with half the onion and the curry powder in a dry pan for 5-6 minutes until cooked through and dry; season and cool slightly.",
       "Beat the eggs with the remaining onion, green chilli and salt; stir in the warm turkey mixture.",
       "Stretch each dough ball on an oiled surface into a large, thin, almost translucent sheet (hands, not a pin, if you can).",
       "Heat the remaining oil in a wide pan over medium heat; lay in a sheet, spoon half the egg-turkey filling into the centre and fold the edges in to a square parcel.",
@@ -1764,8 +1764,8 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Bake the loaf first: knead the flour with half the salt and about 65 ml warm water into a soft dough; rest 15 minutes, shape a stubby loaf and bake at 200°C for 20–22 minutes. Cool, then split lengthways into 2 long halves.",
-      "Mince the chicken finely; fry it in half the oil with the onion, pepper, chili powder and remaining salt for 5–6 minutes until cooked through and lightly browned. Cool 2 minutes.",
+      "Bake the loaf first: knead the flour with half the salt and about 65 ml warm water into a soft dough; rest 15 minutes, shape a stubby loaf and bake at 200°C for 20-22 minutes. Cool, then split lengthways into 2 long halves.",
+      "Mince the chicken finely; fry it in half the oil with the onion, pepper, chili powder and remaining salt for 5-6 minutes until cooked through and lightly browned. Cool 2 minutes.",
       "Beat the eggs and stir the chicken mixture through them.",
       "Heat the remaining oil in a wide pan over medium heat; pour in the egg-chicken mixture in 2 long ovals roughly the shape of the bread.",
       "While the egg is still wet on top, press the cut side of each bread half firmly onto it; cook 2 minutes until the egg sets onto the bread.",
@@ -1794,12 +1794,12 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Boil the potatoes in their skins for 18–20 minutes until tender; peel while warm and mash dry — no milk, no butter, perkedel mash is plain and dry so the patties hold.",
+      "Boil the potatoes in their skins for 18-20 minutes until tender; peel while warm and mash dry, no milk, no butter, perkedel mash is plain and dry so the patties hold.",
       "Poach the chicken in salted water for 12 minutes; cool and shred or mince very finely.",
       "Mix the mash with the chicken, finely chopped onion, garlic, crushed coriander seed, black pepper, salt and half the beaten egg; rest 10 minutes.",
       "Shape 8 firm patties with oiled hands.",
       "Dip each patty in the remaining beaten egg to coat.",
-      "Fry in the oil over medium heat for 3–4 minutes per side until deep golden and crisp; drain on paper and serve hot.",
+      "Fry in the oil over medium heat for 3-4 minutes per side until deep golden and crisp; drain on paper and serve hot.",
     ],
     timeMinutes: 40,
     budgetTier: 3,
@@ -1826,11 +1826,11 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Boil two-thirds of the eggs for 10 minutes; cool, peel and halve lengthways. Boil the potatoes until tender; peel and mash dry.",
-      "Season the mash with the onion (finely chopped), ginger, green chilli, cumin, turmeric and salt — the Kolkata chop's spiced potato jacket.",
+      "Season the mash with the onion (finely chopped), ginger, green chilli, cumin, turmeric and salt, the Kolkata chop's spiced potato jacket.",
       "Encase each egg half in a smooth shell of the potato mixture, shaping a neat oval chop with no cracks.",
       "Set up a coating line: half the besan dry in one dish; the remaining eggs beaten with the rest of the besan and a splash of water into a thick batter in another.",
       "Roll each chop in the dry besan, then in the batter, then in dry besan again.",
-      "Bake on an oiled rack at 210°C for 16–18 minutes, turning once and brushing with the oil, until the crust is deep golden and crisp — the baked answer to the fried chop.",
+      "Bake on an oiled rack at 210°C for 16-18 minutes, turning once and brushing with the oil, until the crust is deep golden and crisp, the baked answer to the fried chop.",
       "Serve hot, cut open to show the yolk.",
     ],
     timeMinutes: 40,
@@ -1857,11 +1857,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Soak the black beans overnight; boil in fresh water for 35–40 minutes until completely soft. Drain very well. Cook the quinoa in salted water for 14 minutes until the spirals unfurl; drain and steam dry.",
+      "Soak the black beans overnight; boil in fresh water for 35-40 minutes until completely soft. Drain very well. Cook the quinoa in salted water for 14 minutes until the spirals unfurl; drain and steam dry.",
       "Mash half the beans coarsely; mix with the whole beans, quinoa, rice flour, finely chopped onion, garlic, cumin, chili powder, coriander leaves and salt into a firm mixture. Rest 10 minutes.",
       "With oiled hands, shape 12 small patties or balls.",
-      "Heat the oil in a non-stick pan over medium heat; fry the bites 3–4 minutes per side until crisp and deep golden (or bake at 200°C for 18 minutes, turning once).",
-      "Rest 2 minutes — they firm as they cool slightly.",
+      "Heat the oil in a non-stick pan over medium heat; fry the bites 3-4 minutes per side until crisp and deep golden (or bake at 200°C for 18 minutes, turning once).",
+      "Rest 2 minutes, they firm as they cool slightly.",
       "Serve warm, stacked in a bowl.",
     ],
     timeMinutes: 45,
@@ -1890,7 +1890,7 @@ export const PW2_DISHES: readonly Dish[] = [
       "Wilt the spinach in the same pan for 1 minute; squeeze dry and chop.",
       "Lay the turkey slices over the dough in a single layer; scatter the spinach and grated mozzarella evenly over.",
       "Roll up tightly from the long edge into a log; rest seam-side down for 10 minutes, then slice into 8 pinwheels with a sharp knife.",
-      "Stand the pinwheels cut-side up on a tray, brush the tops with the milk, and bake at 190°C for 14–16 minutes until the pastry is golden and the cheese bubbling.",
+      "Stand the pinwheels cut-side up on a tray, brush the tops with the milk, and bake at 190°C for 14-16 minutes until the pastry is golden and the cheese bubbling.",
       "Serve warm, spirals showing.",
     ],
     timeMinutes: 40,
@@ -1916,11 +1916,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Knead the flour with half the salt, a teaspoon of the oil and about 60 ml warm water into a stiff dough; rest 30 minutes — samosa dough is firm, never soft.",
-      "Make the filling: drain the cottage cheese and crumble. Fry the cumin in a dry pan for 30 seconds; add the onion, ginger and green chilli for 3 minutes, then the peas for 2 minutes. Off the heat, fold in the cheese and remaining salt, and cool completely — a warm filling sweats the pastry.",
+      "Knead the flour with half the salt, a teaspoon of the oil and about 60 ml warm water into a stiff dough; rest 30 minutes, samosa dough is firm, never soft.",
+      "Make the filling: drain the cottage cheese and crumble. Fry the cumin in a dry pan for 30 seconds; add the onion, ginger and green chilli for 3 minutes, then the peas for 2 minutes. Off the heat, fold in the cheese and remaining salt, and cool completely, a warm filling sweats the pastry.",
       "Divide the dough into 5 balls; roll each into a thin oval, cut in half, and form each half into a cone, sealing the seam with water.",
       "Fill each cone generously and seal the base firmly, pleating the edge.",
-      "Brush the samosas all over with the remaining oil and bake at 200°C for 20–22 minutes, turning once, until deep golden and crisp — baked, not fried, and still shattering.",
+      "Brush the samosas all over with the remaining oil and bake at 200°C for 20-22 minutes, turning once, until deep golden and crisp, baked, not fried, and still shattering.",
       "Rest 5 minutes and serve hot.",
     ],
     timeMinutes: 45,
@@ -1946,7 +1946,7 @@ export const PW2_DISHES: readonly Dish[] = [
     method: [
       "Clean and devein the prawns, keeping the tails on. Marinate for 15 minutes in the olive oil with the garlic (finely grated), chili powder, salt and half the lemon juice.",
       "Thread the prawns onto soaked skewers, curving them into C-shapes so they cook evenly.",
-      "Heat a grill pan (or grill) until smoking hot; lay the skewers down and cook 2 minutes per side — no longer — until pink, charred at the edges and just opaque in the centre.",
+      "Heat a grill pan (or grill) until smoking hot; lay the skewers down and cook 2 minutes per side, no longer, until pink, charred at the edges and just opaque in the centre.",
       "Rest 1 minute off the heat; the carryover finishes them gently.",
       "Squeeze the remaining lemon over and scatter the coriander leaves.",
       "Serve at once, straight off the skewers.",
@@ -1973,9 +1973,9 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Make the flatbreads: knead the flour with half the salt and about 55 ml warm water into a firm dough; rest 15 minutes, roll 2 thin rounds and cook on a dry hot tawa 1–2 minutes per side until puffed and spotted. Keep warm.",
+      "Make the flatbreads: knead the flour with half the salt and about 55 ml warm water into a firm dough; rest 15 minutes, roll 2 thin rounds and cook on a dry hot tawa 1-2 minutes per side until puffed and spotted. Keep warm.",
       "Boil the eggs for 8 minutes; cool, peel and slice into rounds.",
-      "Drain the sardines; split them open and lift out the backbones if you like (they are edible and calcium-rich — the honest cook keeps them).",
+      "Drain the sardines; split them open and lift out the backbones if you like (they are edible and calcium-rich, the honest cook keeps them).",
       "Toast the flatbreads again briefly in the olive oil until crisp at the edges.",
       "Rub the toasts with the cut tomato, then layer tomato slices, sardines and egg rounds over each.",
       "Finish with finely sliced onion, a squeeze of lemon and the remaining salt; serve at once while the base is still crisp.",
@@ -2001,9 +2001,9 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Make the flatbreads: knead the flour with half the salt and about 55 ml warm water into a firm dough; rest 15 minutes, roll 2 thin rounds and cook on a dry hot tawa 1–2 minutes per side until puffed. Toast again just before serving so they are crisp.",
+      "Make the flatbreads: knead the flour with half the salt and about 55 ml warm water into a firm dough; rest 15 minutes, roll 2 thin rounds and cook on a dry hot tawa 1-2 minutes per side until puffed. Toast again just before serving so they are crisp.",
       "Drain the mackerel well; lift out any large bones and flake the flesh.",
-      "Mash the mackerel with the drained cottage cheese, lemon juice, black pepper and remaining salt, working it with a fork into a coarse, spreadable pâté — rustic, not smooth.",
+      "Mash the mackerel with the drained cottage cheese, lemon juice, black pepper and remaining salt, working it with a fork into a coarse, spreadable pâté, rustic, not smooth.",
       "Fold in the chopped coriander leaves.",
       "Chill the pâté for 15 minutes so the flavours marry and it firms.",
       "Spread thickly over the warm crisp flatbread toasts and serve at once.",
@@ -2034,8 +2034,8 @@ export const PW2_DISHES: readonly Dish[] = [
       "Drain the cottage cheese in a cloth for 10 minutes, pressing out the whey; crumble finely.",
       "Mix the cheese with the oats, egg white, grated carrot, finely chopped onion, green chilli, coriander leaves and salt; rest 10 minutes so the oats drink the moisture and the mixture firms.",
       "Shape 8 patties with oiled hands, about 1.5 cm thick.",
-      "Heat the oil in a non-stick pan over medium heat; fry the patties 3–4 minutes per side until deep golden and crisp, the oats toasting at the edges.",
-      "Rest 2 minutes — they set as they cool slightly.",
+      "Heat the oil in a non-stick pan over medium heat; fry the patties 3-4 minutes per side until deep golden and crisp, the oats toasting at the edges.",
+      "Rest 2 minutes, they set as they cool slightly.",
       "Serve hot, straight off the pan.",
     ],
     timeMinutes: 25,
@@ -2061,11 +2061,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Boil the potatoes until tender; peel and mash completely dry. Drain the tuna very well — squeeze it in a cloth if needed; a wet kebab mixture will not hold.",
+      "Boil the potatoes until tender; peel and mash completely dry. Drain the tuna very well, squeeze it in a cloth if needed; a wet kebab mixture will not hold.",
       "Mix the mash with the tuna, finely chopped onion, garlic, red chilli, coriander leaves, salt and half the egg white; rest 10 minutes.",
       "Shape 8 patties with oiled hands.",
       "Brush the patties with the remaining egg white to seal the surface.",
-      "Fry in the oil over medium heat for 3–4 minutes per side until deep golden and crisp.",
+      "Fry in the oil over medium heat for 3-4 minutes per side until deep golden and crisp.",
       "Drain on paper for 1 minute and serve hot.",
     ],
     timeMinutes: 30,
@@ -2089,11 +2089,11 @@ export const PW2_DISHES: readonly Dish[] = [
     ],
     method: [
       "Soak the soybeans overnight; drain and boil in fresh water for 20 minutes until just tender but still holding their shape.",
-      "Drain and dry the beans thoroughly — spread on a cloth for 30 minutes; surface water is the enemy of a crisp roast.",
+      "Drain and dry the beans thoroughly, spread on a cloth for 30 minutes; surface water is the enemy of a crisp roast.",
       "Toss the beans with the oil and salt.",
-      "Roast at 180°C for 25–30 minutes, shaking the tray every 10 minutes, until the beans are golden, dry and crunchy all the way through — test one: it should crack, not bend.",
+      "Roast at 180°C for 25-30 minutes, shaking the tray every 10 minutes, until the beans are golden, dry and crunchy all the way through, test one: it should crack, not bend.",
       "While hot, toss with the cumin and coriander seed (toasted and crushed) and the chili powder so the spices cling to the oil.",
-      "Cool completely — they crisp further as they cool — and store airtight for up to a week.",
+      "Cool completely, they crisp further as they cool, and store airtight for up to a week.",
     ],
     timeMinutes: 45,
     budgetTier: 1,
@@ -2116,11 +2116,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Cut the mozzarella into 10 thick sticks about 1.5 × 7 cm. Freeze them on a tray for at least 1 hour — frozen cheese is the only way a baked stick keeps its shape while the crust crisps.",
+      "Cut the mozzarella into 10 thick sticks about 1.5 × 7 cm. Freeze them on a tray for at least 1 hour, frozen cheese is the only way a baked stick keeps its shape while the crust crisps.",
       "Season the besan with the salt, chili powder and finely grated garlic. Put the beaten egg white in a second dish.",
       "Coat each frozen stick: besan, egg white, besan again, pressing the flour on firmly. Return to the freezer for 15 minutes while the oven heats to 220°C.",
       "Lay the sticks on an oiled rack over a tray; brush the tops with the oil.",
-      "Bake for 7–9 minutes until the crust is deep golden and the cheese just begins to soften at the seams — pull them the moment they slump.",
+      "Bake for 7-9 minutes until the crust is deep golden and the cheese just begins to soften at the seams, pull them the moment they slump.",
       "Serve immediately, while the centre still pulls into strings.",
     ],
     timeMinutes: 25,
@@ -2145,7 +2145,7 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Drain the cottage cheese well and crumble. Blitz half the corn briefly to a coarse cream and keep the rest whole — the blitzed corn binds, the whole kernels pop.",
+      "Drain the cottage cheese well and crumble. Blitz half the corn briefly to a coarse cream and keep the rest whole, the blitzed corn binds, the whole kernels pop.",
       "Mix both corns with the cheese, besan, finely chopped onion, green chilli, coriander leaves and salt into a thick, spoonable batter; rest 5 minutes.",
       "Heat the oil in a non-stick pan over medium heat until shimmering.",
       "Drop heaped tablespoons of batter into the pan, flattening slightly; fry 3 minutes per side until deep golden and crisp, the corn caramelising at the edges.",
@@ -2176,11 +2176,11 @@ export const PW2_DISHES: readonly Dish[] = [
       { foodId: "usda-173468", grams: 2 }, // salt
     ],
     method: [
-      "Simmer the lentils in salted water for 20–25 minutes until completely soft; drain well, reserving a little cooking water.",
-      "Make the toasts: knead the flour with a pinch of salt and about 45 ml warm water into a firm dough; rest 10 minutes, roll 2 thin rounds, cook on a dry tawa 1–2 minutes per side, then cut into wedges and toast again until crisp.",
-      "Fry the onion in the olive oil for 7–8 minutes until deep golden and sweet; add the garlic and cumin for the last minute.",
+      "Simmer the lentils in salted water for 20-25 minutes until completely soft; drain well, reserving a little cooking water.",
+      "Make the toasts: knead the flour with a pinch of salt and about 45 ml warm water into a firm dough; rest 10 minutes, roll 2 thin rounds, cook on a dry tawa 1-2 minutes per side, then cut into wedges and toast again until crisp.",
+      "Fry the onion in the olive oil for 7-8 minutes until deep golden and sweet; add the garlic and cumin for the last minute.",
       "Toast the walnuts in a dry pan for 3 minutes until fragrant.",
-      "Blend the lentils with the onion mixture and walnuts, adding lemon juice, black pepper, salt and a splash of cooking water, until smooth but still textured — a pâté, not a soup.",
+      "Blend the lentils with the onion mixture and walnuts, adding lemon juice, black pepper, salt and a splash of cooking water, until smooth but still textured, a pâté, not a soup.",
       "Chill at least 30 minutes so it firms and the flavours settle; serve with the crisp toasts.",
     ],
     timeMinutes: 40,
@@ -2211,8 +2211,8 @@ export const PW2_DISHES: readonly Dish[] = [
       "Fry the chopped stems with the garlic in the butter for 4 minutes until golden; wilt in the spinach for 1 minute and take off the heat.",
       "Mix the stem mixture with the drained, crumbled cottage cheese, the chopped egg, black pepper and a pinch of salt.",
       "Fill the caps generously, mounding the mixture, and top with the grated mozzarella.",
-      "Bake at 190°C for 12–14 minutes until the mushrooms are tender, the filling hot and the cheese golden in spots.",
-      "Rest 3 minutes — the caps hold hot liquid — and serve.",
+      "Bake at 190°C for 12-14 minutes until the mushrooms are tender, the filling hot and the cheese golden in spots.",
+      "Rest 3 minutes, the caps hold hot liquid, and serve.",
     ],
     timeMinutes: 30,
     budgetTier: 2,
@@ -2238,7 +2238,7 @@ export const PW2_DISHES: readonly Dish[] = [
     method: [
       "Slice the eggplants lengthways into 8 thin sheets about 5 mm thick; salt them and rest 20 minutes to draw out moisture, then pat dry.",
       "Make a quick tomato sauce: fry the garlic in half the olive oil for 1 minute, add the chopped tomato and simmer 10 minutes into a thick sauce; season with salt and black pepper.",
-      "Grill or sear the eggplant sheets in the remaining oil for 2–3 minutes per side until supple and golden in patches — they must bend without cracking.",
+      "Grill or sear the eggplant sheets in the remaining oil for 2-3 minutes per side until supple and golden in patches, they must bend without cracking.",
       "Mix the drained cottage cheese with the grated mozzarella and a pinch of salt and black pepper.",
       "Spoon the cheese mixture along one end of each sheet and roll up snugly.",
       "Lay the rolls seam-side down in a baking dish over a bed of the tomato sauce, spoon more sauce over, and bake at 190°C for 15 minutes until bubbling and the cheese melts out at the ends.",

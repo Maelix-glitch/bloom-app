@@ -50,7 +50,7 @@ export const PROGRESS_TEMPLATES = [
   tpl({
     id: "progress-showed-up",
     name: "Showed Up",
-    hint: "Say the thing you did — the list backs you up.",
+    hint: "Say the thing you did, the list backs you up.",
     category: "progress",
     tags: ["progress", "win", "habits", "data"],
     tone: "light",

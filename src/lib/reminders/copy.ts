@@ -100,13 +100,13 @@ const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one :
 /* ------------------------------------------------------------------ habit */
 
 const HABIT_OPEN_STREAK = [
-  "{habit} — day {streak} in a row.",
+  "{habit}, day {streak} in a row.",
   "{streak} days of {habit}. Don't break it now.",
   "You're on a {streak}-day run with {habit}.",
   "{habit} again. That's {streak} straight.",
   "Day {streak} of {habit}.",
-  "{greet} — {habit} is {streak} days strong.",
-  "{streak} in a row — steady going.",
+  "{greet}, {habit} is {streak} days strong.",
+  "{streak} in a row, steady going.",
   "The {streak}-day run of {habit} keeps growing.",
   "{habit} shows up for day {streak}.",
 ];
@@ -115,10 +115,10 @@ const HABIT_OPEN_FRESH = [
   "Time for {habit}.",
   "{habit} is waiting.",
   "A minute for {habit}?",
-  "{habit} — whenever you're ready.",
+  "{habit}, whenever you're ready.",
   "Let's get {habit} done.",
   "Your {habit} is still open for today.",
-  "{greet} — a minute for {habit}?",
+  "{greet}, a minute for {habit}?",
   "{greet}. {habit} takes one.",
   "Somewhere today, {habit} fits.",
   "{habit} hasn't happened yet today.",
@@ -128,20 +128,20 @@ const HABIT_OPEN_FRESH = [
 const HABIT_BODY_STREAK = [
   "Tick it and the streak keeps going.",
   "One more and the run holds.",
-  "You've earned the momentum — spend a minute on it.",
+  "You've earned the momentum, spend a minute on it.",
   "Small thing, big streak.",
   "One more day on the record.",
   "Keep it gentle, keep it going.",
 ];
 
 const HABIT_BODY_FRESH = [
-  "Tick it when it's done — no pressure on timing.",
+  "Tick it when it's done, no pressure on timing.",
   "Takes a minute. Future you says thanks.",
   "No streak to protect yet; this is where one starts.",
   "Do it now or later, just don't forget it.",
   "It only counts if it's real, so do it properly.",
   "Tiny actions compound quietly.",
-  "Whenever suits — today's the window.",
+  "Whenever suits, today's the window.",
 ];
 
 function habitCopy(ctx: ReminderContext, seed: string): ReminderCopy {
@@ -177,31 +177,31 @@ const PERIOD_LATE_TITLE = [
 
 const PERIOD_LATE_BODY = [
   "If it's started, logging day one sharpens every prediction after it.",
-  "No cause for alarm — bodies aren't clocks. Log it when you can.",
+  "No cause for alarm, bodies aren't clocks. Log it when you can.",
   "Cycles shift. A quick log keeps the next estimate honest.",
   "If it has started, one tap keeps your record accurate.",
-  "Stress, sleep, seasons — all of it moves cycles. Log it when you're ready.",
+  "Stress, sleep, seasons, all of it moves cycles. Log it when you're ready.",
   "A late line in the record is still a useful line.",
 ];
 
 const PERIOD_SOON_TITLE = [
   "A period is likely in a couple of days",
   "Your next period looks close",
-  "Heads up — a period may start soon",
-  "Around day {day} — a period looks near",
+  "Heads up, a period may start soon",
+  "Around day {day}, a period looks near",
   "Your pattern points to a period in a couple of days",
 ];
 
 const PERIOD_SOON_BODY = [
   "An estimate from your own record, not a certainty.",
   "Based on your logged cycles. It may still shift.",
-  "Predicted from your pattern — treat it as a guide.",
-  "Cycle day {day} today — the usual signs may show up.",
+  "Predicted from your pattern, treat it as a guide.",
+  "Cycle day {day} today, the usual signs may show up.",
   "From your history, not a rulebook. It can move.",
   "Worth keeping an eye on, not a promise.",
-  "Biology, not a certainty: pre-period progesterone falls — a flatter mood here is typical, not a failing.",
+  "Biology, not a certainty: pre-period progesterone falls, a flatter mood here is typical, not a failing.",
   "Cravings and heavier tiredness before a period have a physical side. The date is an estimate; the rest is up to you.",
-  "Cycle science, lightly: the pre-period dip is one of the most reported shifts there is — it can vary, and so can the date.",
+  "Cycle science, lightly: the pre-period dip is one of the most reported shifts there is, it can vary, and so can the date.",
 ];
 
 function periodCopy(ctx: ReminderContext, seed: string): ReminderCopy {
@@ -233,9 +233,9 @@ const OPEN_ENTRY_TITLE = [
 ];
 
 const OPEN_ENTRY_BODY = [
-  "One of your entries is still open. When you have a moment, tap to finish it — or leave it as it is. Nothing is wrong either way.",
+  "One of your entries is still open. When you have a moment, tap to finish it, or leave it as it is. Nothing is wrong either way.",
   "There's an entry in your tracker waiting for its last day. A ten-second tap whenever you're ready.",
-  "An entry you started is still open. Finishing it keeps your record tidy — and it's fine to do it later.",
+  "An entry you started is still open. Finishing it keeps your record tidy, and it's fine to do it later.",
 ];
 
 /* ---------------------------------------------------------------- fertile */
@@ -249,10 +249,10 @@ const FERTILE_TITLE = [
 ];
 
 const FERTILE_BODY = [
-  "Estimated from your logged cycles — an educated guess, not a guarantee.",
+  "Estimated from your logged cycles, an educated guess, not a guarantee.",
   "From your own record. Cycles vary, so treat it as a guide.",
   "Predicted from your pattern; it can move.",
-  "Day {day} of this cycle — estimated, not certain.",
+  "Day {day} of this cycle, estimated, not certain.",
   "Your logs made this estimate possible. It's still an estimate.",
 ];
 
@@ -263,18 +263,18 @@ const EVENING_NOTHING_TITLE = [
   "Today's still a blank page",
   "A quiet day so far",
   "Bloom hasn't heard from you today",
-  "{greet} — nothing logged yet",
+  "{greet}, nothing logged yet",
   "Today hasn't been touched yet",
   "An empty record isn't an empty day",
 ];
 
 const EVENING_NOTHING_BODY = [
-  "One line is enough. Or skip it — the record is yours, not a debt.",
+  "One line is enough. Or skip it, the record is yours, not a debt.",
   "Even a single check-in makes tomorrow's picture clearer.",
   "No judgement if today was a write-off. There's always tomorrow.",
   "Thirty seconds now saves you guessing later.",
   "Log something small, or don't. Bloom keeps either way.",
-  "A tick, a number, a word — any of them counts.",
+  "A tick, a number, a word, any of them counts.",
   "Skipping is fine. The option is the point.",
   "Low-energy days count as days too. One word is plenty.",
 ];
@@ -282,7 +282,7 @@ const EVENING_NOTHING_BODY = [
 const EVENING_SOME_TITLE = [
   "You've logged {n} {things} today",
   "{n} {things} down today",
-  "Nice — {n} {things} already",
+  "Nice, {n} {things} already",
   "{n} {things} in the record today",
   "Today holds {n} {things} so far",
 ];
@@ -291,7 +291,7 @@ const EVENING_SOME_BODY = [
   "Anything else worth adding before the day closes?",
   "Want to round it off with one more?",
   "That's a solid day. Add more only if there's more to say.",
-  "One more line would round it off — or don't.",
+  "One more line would round it off, or don't.",
   "Plenty captured. Top it up only if it feels right.",
 ];
 

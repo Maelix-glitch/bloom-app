@@ -45,7 +45,7 @@ const food = (id: string): Food => {
 };
 
 describe("the milk-and-curd serving tally", () => {
-  it("counts milks and curd/yogurts — including Greek yogurt — and not the cheeses", () => {
+  it("counts milks and curd/yogurts, including Greek yogurt, and not the cheeses", () => {
     const dairy = USDA_REFERENCE_FOODS.filter((f) => f.classification?.group === "dairy");
     const counted = dairy.filter(countsTowardMilkCurdFloor).map((f) => f.id).sort();
     expect(counted).toEqual([...MILK_CURD_FOOD_IDS].sort());
@@ -161,7 +161,7 @@ describe("the milk-and-curd serving tally", () => {
        property pinned here is unchanged. */
     const milkNotes = outcome.plan.notes.filter((n) => n.includes("g of milk and curd"));
     expect(milkNotes).toEqual([
-      "Today's suggestions reach 100 g of milk and curd — the ICMR-NIN guideline aims for at least 300 g across the day.",
+      "Today's suggestions reach 100 g of milk and curd, the ICMR-NIN guideline aims for at least 300 g across the day.",
     ]);
     expect(outcome.plan.notes.some((n) => n.includes("reach 0 g of milk and curd"))).toBe(false);
   });

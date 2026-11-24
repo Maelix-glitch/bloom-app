@@ -40,9 +40,9 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-322559", grams: 100 }, // skim milk
     ],
     method: [
-      "Peel the banana and break it into chunks; the riper it is, the sweeter the shake — no sugar is needed.",
+      "Peel the banana and break it into chunks; the riper it is, the sweeter the shake, no sugar is needed.",
       "Spoon the Greek yogurt into the blender and pour the skim milk over it; liquid first keeps the blades moving.",
-      "Add the banana and blend on high for 45–60 seconds, until completely smooth with no banana flecks.",
+      "Add the banana and blend on high for 45-60 seconds, until completely smooth with no banana flecks.",
       "Check the texture: it should pour in a thick ribbon. Too thick, blend in a splash of water; too thin, a spoonful more yogurt.",
       "Pour into a tall glass and drink at once, while it is cold and frothy.",
     ],
@@ -66,7 +66,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Peel the mango and cut the flesh away from the stone in chunks; a ripe, fragrant mango does all the sweetening.",
       "Put the Greek yogurt and whole milk in the blender first, then the mango chunks.",
-      "Blend on high for a full minute — mango fibres need the extra time to disappear into the shake.",
+      "Blend on high for a full minute, mango fibres need the extra time to disappear into the shake.",
       "Stop and scrape down the sides once, then blend 15 seconds more; the shake should be glossy and uniform.",
       "Rest for 2 minutes so the foam settles, then pour and serve cold.",
     ],
@@ -90,8 +90,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Hull the strawberries and halve any large ones; keep a small one back for the top if you like.",
       "Add the Greek yogurt and skim milk to the blender, then the strawberries.",
-      "Blend on high for 45–60 seconds until the shake is evenly pink and the strawberry seeds are the only texture left.",
-      "Taste: a tart batch of berries may need 2–3 minutes of standing — the yogurt's edge softens as it sits.",
+      "Blend on high for 45-60 seconds until the shake is evenly pink and the strawberry seeds are the only texture left.",
+      "Taste: a tart batch of berries may need 2-3 minutes of standing, the yogurt's edge softens as it sits.",
       "Pour into a glass, top with the reserved strawberry, and serve cold.",
     ],
     timeMinutes: 10,
@@ -116,7 +116,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Hull the strawberries and peel the banana; break the banana into the blender in chunks.",
       "Add the Greek yogurt and skim milk, then the strawberries.",
       "Blend on high for about a minute, until the banana has fully disappeared and the colour is even.",
-      "The banana makes this one thicker — blend in a splash of water if you want it pourable rather than spoonable.",
+      "The banana makes this one thicker, blend in a splash of water if you want it pourable rather than spoonable.",
       "Serve at once in a cold glass.",
     ],
     timeMinutes: 10,
@@ -138,11 +138,11 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-170919", grams: 1 }, // cardamom
     ],
     method: [
-      "Peel the orange and pull it into segments, picking out any pips and thick pith — pith turns a shake bitter.",
+      "Peel the orange and pull it into segments, picking out any pips and thick pith, pith turns a shake bitter.",
       "Crush the cardamom and pick out the black seeds; discard the husks.",
       "Put the Greek yogurt, whole milk and cardamom seeds in the blender, then the orange segments.",
       "Blend on high for 45 seconds, until the orange has broken down completely and the shake smells of cardamom.",
-      "Pour and serve immediately — orange shakes separate if they stand.",
+      "Pour and serve immediately, orange shakes separate if they stand.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -163,7 +163,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-171320", grams: 1 }, // cinnamon
     ],
     method: [
-      "Stir the oats into the Greek yogurt and leave for 10 minutes — softened oats blend silk-smooth instead of gritty.",
+      "Stir the oats into the Greek yogurt and leave for 10 minutes, softened oats blend silk-smooth instead of gritty.",
       "Core the apple and cut it into chunks, skin on; the skin carries the fibre.",
       "Add the yogurt-oat mixture, apple chunks, cinnamon and a splash of water to the blender.",
       "Blend on high for a full minute, until no apple skin flecks remain visible.",
@@ -190,7 +190,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Quarter the pear and cut out the core; leave the skin on. Peel the ginger and slice it thin so it blends out.",
       "Add the Greek yogurt and skim milk to the blender, then the pear and ginger.",
-      "Blend on high for about a minute, until the ginger has vanished into the shake — no fibrous bits should remain.",
+      "Blend on high for about a minute, until the ginger has vanished into the shake, no fibrous bits should remain.",
       "Check the warmth: ginger should hum in the background, not bite. Blend in an extra spoonful of yogurt to tame it.",
       "Serve cold, straight away.",
     ],
@@ -213,9 +213,9 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-322559", grams: 50 }, // skim milk
     ],
     method: [
-      "Cut the watermelon flesh into cubes, picking out the seeds; chill the cubes well — this shake wants to be icy.",
+      "Cut the watermelon flesh into cubes, picking out the seeds; chill the cubes well, this shake wants to be icy.",
       "Put the Greek yogurt and skim milk in the blender, then the watermelon and the spearmint leaves.",
-      "Blend on high for 30–40 seconds only — watermelon breaks down fast and over-blending makes it watery.",
+      "Blend on high for 30-40 seconds only, watermelon breaks down fast and over-blending makes it watery.",
       "Pour at once over a glass; the shake is light and frothy and separates on standing, so drink it now.",
     ],
     timeMinutes: 10,
@@ -238,7 +238,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Pull the jackfruit bulbs apart and remove every seed; ripe bulbs should smell sweet and give slightly when pressed.",
       "Add the Greek yogurt and skim milk to the blender, then the jackfruit.",
-      "Blend on high for a full minute — jackfruit is fibrous and needs the time to turn smooth.",
+      "Blend on high for a full minute, jackfruit is fibrous and needs the time to turn smooth.",
       "Scrape down the sides and blend 15 seconds more; the shake should be pale gold and thick.",
       "Serve cold at once.",
     ],
@@ -261,7 +261,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     ],
     method: [
       "Peel the banana and break it into chunks.",
-      "Put the cottage cheese and whole milk in the blender first and blend for 30 seconds on their own — this first pass is what makes cottage cheese silky instead of grainy.",
+      "Put the cottage cheese and whole milk in the blender first and blend for 30 seconds on their own, this first pass is what makes cottage cheese silky instead of grainy.",
       "Add the banana and blend on high for another 45 seconds, until no curd grains remain when you rub a drop between your fingers.",
       "Pour into a tall glass and serve cold.",
     ],
@@ -285,7 +285,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Peel the mango and cut the flesh from the stone in chunks.",
       "Blend the cottage cheese with the skim milk for 30 seconds first, until smooth.",
-      "Add the mango and blend on high for a full minute — mango fibre and cheese curd both need the time.",
+      "Add the mango and blend on high for a full minute, mango fibre and cheese curd both need the time.",
       "Rest 2 minutes for the foam to settle, then pour and serve cold.",
     ],
     timeMinutes: 10,
@@ -332,7 +332,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Peel the orange into segments, removing pips and thick pith to keep the shake sweet, not bitter.",
       "Blend the cottage cheese with the skim milk for 30 seconds first, until silky.",
       "Add the orange segments and blend on high for 45 seconds, until the orange has fully broken down.",
-      "Serve immediately — citrus shakes separate on standing.",
+      "Serve immediately, citrus shakes separate on standing.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -353,7 +353,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-322892", grams: 100 }, // whole milk
     ],
     method: [
-      "Stir the oats into the whole milk and leave for 10 minutes to soften — or overnight in the fridge for the smoothest result.",
+      "Stir the oats into the whole milk and leave for 10 minutes to soften, or overnight in the fridge for the smoothest result.",
       "Peel the banana and break it into chunks.",
       "Blend the cottage cheese on its own for 20 seconds, then add the oat-milk mixture and the banana.",
       "Blend on high for a full minute, until thick and completely smooth.",
@@ -380,7 +380,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Peel the banana and break it into chunks.",
       "Blend the cottage cheese with the skim milk for 30 seconds first, until no curd grains remain.",
       "Add the Greek yogurt and banana and blend on high for 45 seconds, until thick and uniform.",
-      "Pour into a glass and serve cold — the plainest, most protein-dense shake in this set.",
+      "Pour into a glass and serve cold, the plainest, most protein-dense shake in this set.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -450,8 +450,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Peel the banana and break it into chunks.",
       "Pour the whole milk into the blender, add the Greek yogurt, then the banana.",
-      "Blend on high for 45–60 seconds, until frothy and completely smooth.",
-      "This is the most drinkable shake in the wave — pour it into a bottle for the road, or serve cold in a glass.",
+      "Blend on high for 45-60 seconds, until frothy and completely smooth.",
+      "This is the most drinkable shake in the wave, pour it into a bottle for the road, or serve cold in a glass.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -495,10 +495,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 60 }, // banana
     ],
     method: [
-      "Peel the banana and break it into chunks — it sweetens the turmeric without any added sugar.",
+      "Peel the banana and break it into chunks, it sweetens the turmeric without any added sugar.",
       "Pour the whole milk into the blender and whisk the turmeric into it first, so no dry pockets survive.",
       "Add the Greek yogurt and banana; blend on high for 45 seconds, until deep gold and smooth.",
-      "Serve cold. Turmeric stains — rinse the blender straight away.",
+      "Serve cold. Turmeric stains, rinse the blender straight away.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -565,7 +565,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 60 }, // banana
     ],
     method: [
-      "The night before (or at least 30 minutes ahead), stir the oats into the whole milk and Greek yogurt and refrigerate — soaked oats blend into silk and are gentler to digest.",
+      "The night before (or at least 30 minutes ahead), stir the oats into the whole milk and Greek yogurt and refrigerate, soaked oats blend into silk and are gentler to digest.",
       "Peel the banana and break it into chunks.",
       "Tip the oat mixture into the blender, add the banana, and blend on high for a full minute.",
       "The shake should be thick, almost spoonable. Serve cold, straight from the glass.",
@@ -593,7 +593,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Stir the oats into the Greek yogurt and whole milk and rest for 10 minutes to soften.",
       "Core the apple and cut it into chunks, skin on for the fibre.",
       "Add the oat mixture, apple and cinnamon to the blender; blend on high for a full minute, until no skin flecks remain.",
-      "Pour and serve cold — it thickens a little more as it stands.",
+      "Pour and serve cold, it thickens a little more as it stands.",
     ],
     timeMinutes: 15,
     budgetTier: 2,
@@ -616,7 +616,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Stir the oats into the Greek yogurt and rest for 10 minutes (or overnight) so they soften fully.",
       "Peel the mango and cut the flesh from the stone.",
       "Blend everything on high for a full minute, with a splash of water if the blades labour, until completely smooth.",
-      "Serve cold — a breakfast shake that eats like a meal.",
+      "Serve cold, a breakfast shake that eats like a meal.",
     ],
     timeMinutes: 15,
     budgetTier: 2,
@@ -640,7 +640,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Stir the oats into the Greek yogurt and rest for 10 minutes to soften.",
       "Add the peanuts to the blender with a splash of water and blend for 30 seconds into a rough peanut paste.",
       "Add the oat-yogurt mixture and the peeled, chunked banana; blend on high for a full minute.",
-      "Pour and serve cold — thick, nutty and filling.",
+      "Pour and serve cold, thick, nutty and filling.",
     ],
     timeMinutes: 15,
     budgetTier: 2,
@@ -661,10 +661,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-322892", grams: 60 }, // whole milk
     ],
     method: [
-      "Add the peanuts and whole milk to the blender and blend for a full minute into a smooth peanut milk — this first pass decides whether the shake is silky or gritty.",
+      "Add the peanuts and whole milk to the blender and blend for a full minute into a smooth peanut milk, this first pass decides whether the shake is silky or gritty.",
       "Peel the banana and break it in; add the Greek yogurt.",
       "Blend on high for 45 seconds, until thick and uniform.",
-      "Pour and serve cold. The peanut makes this the most dessert-like shake in the wave — with no added sugar in it.",
+      "Pour and serve cold. The peanut makes this the most dessert-like shake in the wave, with no added sugar in it.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -707,7 +707,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 70 }, // banana
     ],
     method: [
-      "Blend the almonds with a splash of water for a full minute, until they break down into a smooth almond paste — patience here is the difference between silky and gritty.",
+      "Blend the almonds with a splash of water for a full minute, until they break down into a smooth almond paste, patience here is the difference between silky and gritty.",
       "Peel the banana and add it with the Greek yogurt.",
       "Blend on high for 45 seconds, until uniform and thick.",
       "Pour and serve cold.",
@@ -734,7 +734,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Crush the cardamom and pick out the seeds; discard the husks.",
       "Blend the almonds, cardamom seeds and whole milk for a full minute, until the almonds have become a smooth, fragrant milk.",
       "Add the Greek yogurt and blend on high for 30 seconds more.",
-      "Serve cold — a badam-doodh style shake, sweetened by nothing but the almonds and yogurt.",
+      "Serve cold, a badam-doodh style shake, sweetened by nothing but the almonds and yogurt.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -779,7 +779,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Blend the walnuts with a splash of water for 45 seconds, until they form a smooth paste.",
       "Peel the banana and add it with the Greek yogurt.",
-      "Blend on high for 45 seconds, until thick and uniform — a faint walnut texture is fine and pleasant.",
+      "Blend on high for 45 seconds, until thick and uniform, a faint walnut texture is fine and pleasant.",
       "Serve cold.",
     ],
     timeMinutes: 10,
@@ -805,7 +805,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Put the pumpkin seeds, sunflower seeds and sesame seeds in the blender with a splash of water and blend for a full minute, until the seeds have broken down as far as they will go.",
       "Peel the banana and add it with the Greek yogurt.",
       "Blend on high for 45 seconds more, until thick and speckled but smooth-drinking.",
-      "Serve cold — expect gentle seed texture; that is the fibre, and it is meant to be there.",
+      "Serve cold, expect gentle seed texture; that is the fibre, and it is meant to be there.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -848,10 +848,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 80 }, // banana
     ],
     method: [
-      "Blend the sesame seeds with a splash of water for a full minute — sesame is stubborn and needs the time to turn creamy rather than gritty.",
+      "Blend the sesame seeds with a splash of water for a full minute, sesame is stubborn and needs the time to turn creamy rather than gritty.",
       "Peel the banana and add it with the Greek yogurt.",
       "Blend on high for 45 seconds, until thick and uniform.",
-      "Serve cold — a til shake with a deep, nutty flavour.",
+      "Serve cold, a til shake with a deep, nutty flavour.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -894,10 +894,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 70 }, // banana
     ],
     method: [
-      "Boil the eggs for 9 minutes, cool them under cold water, and peel. Warm egg makes a shake taste eggy — let them cool fully, or chill them.",
+      "Boil the eggs for 9 minutes, cool them under cold water, and peel. Warm egg makes a shake taste eggy, let them cool fully, or chill them.",
       "Peel the banana and break it into chunks.",
       "Put the eggs, Greek yogurt and banana in the blender with a splash of water and blend on high for a full minute, until no trace of egg white remains visible.",
-      "Serve cold at once. Blended smooth and chilled, the egg disappears — what is left is a thick, custard-like banana shake.",
+      "Serve cold at once. Blended smooth and chilled, the egg disappears, what is left is a thick, custard-like banana shake.",
     ],
     timeMinutes: 20,
     budgetTier: 2,
@@ -919,7 +919,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Boil the eggs for 9 minutes, cool under cold water, peel, and let them go completely cold.",
       "Peel the mango and cut the flesh from the stone.",
       "Blend the eggs, Greek yogurt and mango on high for a full minute, until completely smooth.",
-      "Serve cold at once — the mango's perfume covers the egg entirely.",
+      "Serve cold at once, the mango's perfume covers the egg entirely.",
     ],
     timeMinutes: 20,
     budgetTier: 2,
@@ -942,7 +942,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Boil the eggs for 9 minutes, cool under cold water, peel, and chill.",
       "Stir the oats into the whole milk and Greek yogurt and rest for 10 minutes to soften.",
       "Add the eggs and blend everything on high for a full minute, until thick and completely smooth.",
-      "Pour and serve cold — a whole breakfast (eggs, oats, yogurt) in one glass.",
+      "Pour and serve cold, a whole breakfast (eggs, oats, yogurt) in one glass.",
     ],
     timeMinutes: 20,
     budgetTier: 2,
@@ -1010,7 +1010,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Blend the pumpkin seeds with a splash of water for 45 seconds into a paste.",
       "Peel the mango and cut the flesh from the stone; drain the tofu and break it in.",
       "Add the mango and blend on high for a full minute, until glossy and smooth.",
-      "Serve cold — the tofu is undetectable; what you taste is mango.",
+      "Serve cold, the tofu is undetectable; what you taste is mango.",
     ],
     timeMinutes: 10,
     budgetTier: 3,
@@ -1057,7 +1057,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Blend the pumpkin seeds with the coconut milk for 45 seconds, until the seeds have broken down.",
       "Drain the tofu and break it in; add the pineapple chunks.",
       "Blend on high for a full minute, until tropical, thick and smooth.",
-      "Serve very cold — this is the piña colada of the wave, built on tofu instead of rum and cream.",
+      "Serve very cold, this is the piña colada of the wave, built on tofu instead of rum and cream.",
     ],
     timeMinutes: 10,
     budgetTier: 3,
@@ -1080,7 +1080,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Blend the peanuts and oats with a splash of water for 45 seconds into a rough, thick base.",
       "Drain the tofu and break it in; peel the banana and add it in chunks.",
-      "Blend on high for a full minute, until completely smooth — add water a splash at a time to reach a pourable thickness.",
+      "Blend on high for a full minute, until completely smooth, add water a splash at a time to reach a pourable thickness.",
       "Serve cold; a filling vegan breakfast smoothie.",
     ],
     timeMinutes: 15,
@@ -1125,7 +1125,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-172430", grams: 10 }, // peanuts
     ],
     method: [
-      "Steam the tempeh for 10 minutes — steaming softens it, mellows its tang and makes it blend smooth. Let it cool completely; warm tempeh makes a warm smoothie.",
+      "Steam the tempeh for 10 minutes, steaming softens it, mellows its tang and makes it blend smooth. Let it cool completely; warm tempeh makes a warm smoothie.",
       "Blend the peanuts with a splash of water for 30 seconds into a paste.",
       "Add the tempeh in chunks and the peeled banana; blend on high for a full minute, until no tempeh grain remains.",
       "Thin with a splash of water if needed and serve cold.",
@@ -1192,10 +1192,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 70 }, // banana
     ],
     method: [
-      "Boil the edamame beans for 3–4 minutes until tender, drain, and let them cool — hot beans make a warm, dull smoothie.",
+      "Boil the edamame beans for 3-4 minutes until tender, drain, and let them cool, hot beans make a warm, dull smoothie.",
       "Drain the tofu and break it into the blender; add the cooled edamame.",
       "Peel the banana and add it in chunks; blend on high for a full minute, until completely smooth.",
-      "Serve cold — pale green, thick and quietly sweet from the banana alone.",
+      "Serve cold, pale green, thick and quietly sweet from the banana alone.",
     ],
     timeMinutes: 15,
     budgetTier: 2,
@@ -1215,10 +1215,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173475", grams: 2 }, // spearmint
     ],
     method: [
-      "Boil the edamame beans for 3–4 minutes, drain and cool completely.",
+      "Boil the edamame beans for 3-4 minutes, drain and cool completely.",
       "Peel the mango and cut the flesh from the stone; drain the tofu and break it in.",
       "Add the edamame, mango and spearmint leaves; blend on high for a full minute, until smooth and flecked green.",
-      "Serve very cold — the mint lifts the whole glass.",
+      "Serve very cold, the mint lifts the whole glass.",
     ],
     timeMinutes: 15,
     budgetTier: 2,
@@ -1238,10 +1238,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 60 }, // banana
     ],
     method: [
-      "Boil the edamame beans for 3–4 minutes, drain and cool.",
+      "Boil the edamame beans for 3-4 minutes, drain and cool.",
       "Blend the peanuts and oats with a splash of water for 45 seconds into a thick base.",
       "Add the edamame and the peeled, chunked banana; blend on high for a full minute, until smooth.",
-      "Serve cold — the most fibre-rich smoothie in the wave.",
+      "Serve cold, the most fibre-rich smoothie in the wave.",
     ],
     timeMinutes: 15,
     budgetTier: 2,
@@ -1261,10 +1261,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
     ],
     method: [
       "Soak the soybeans in plenty of water for at least 8 hours (or overnight); drain and rinse. Rub the beans between your palms to loosen some skins and skim them off.",
-      "Blend the beans with 500 ml fresh water for 2 minutes, until milky and fine. Pour into a pan, bring to a gentle boil, and simmer for 15 minutes, skimming the foam and stirring — raw soy must be properly cooked. The soy milk is done when it smells sweet and nutty, not beany.",
+      "Blend the beans with 500 ml fresh water for 2 minutes, until milky and fine. Pour into a pan, bring to a gentle boil, and simmer for 15 minutes, skimming the foam and stirring, raw soy must be properly cooked. The soy milk is done when it smells sweet and nutty, not beany.",
       "Cool the soy milk completely (this batch is the whole recipe's soy milk; it keeps 2 days in the fridge).",
       "Blend the peanuts with a splash of the soy milk into a paste, add the rest of the soy milk and the peeled, chunked banana, and blend for 45 seconds.",
-      "Serve cold — a from-scratch protein shake with nothing bought in a tub.",
+      "Serve cold, a from-scratch protein shake with nothing bought in a tub.",
     ],
     timeMinutes: 30,
     budgetTier: 2,
@@ -1305,10 +1305,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 60 }, // banana
     ],
     method: [
-      "Whisk the sattu (roasted chickpea flour) into a splash of water to a lump-free slurry — sattu clumps if it meets the blender dry.",
+      "Whisk the sattu (roasted chickpea flour) into a splash of water to a lump-free slurry, sattu clumps if it meets the blender dry.",
       "Peel the banana and break it into chunks.",
       "Add the slurry, Greek yogurt and banana to the blender; blend on high for 45 seconds, until smooth and creamy.",
-      "Serve cold — Bihar's original protein drink, rebuilt on Greek yogurt.",
+      "Serve cold. Bihar's original protein drink, rebuilt on Greek yogurt.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -1354,7 +1354,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Stir the oats into the Greek yogurt and rest for 10 minutes to soften.",
       "Whisk the sattu into a splash of water to a lump-free slurry.",
       "Blend everything on high for a full minute, until thick and smooth.",
-      "Serve cold — two of India's cheapest protein sources in one glass.",
+      "Serve cold, two of India's cheapest protein sources in one glass.",
     ],
     timeMinutes: 15,
     budgetTier: 1,
@@ -1377,7 +1377,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Whisk the sattu into a splash of water to a smooth slurry.",
       "Drain the tofu and break it into the blender; peel the banana and add it in chunks.",
       "Add the slurry and blend on high for a full minute, until the tofu has disappeared and the shake is uniform.",
-      "Thin with a splash of water if needed. Serve cold — a fully plant-based sattu shake.",
+      "Thin with a splash of water if needed. Serve cold, a fully plant-based sattu shake.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -1421,10 +1421,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 70 }, // banana
     ],
     method: [
-      "Rinse the quinoa well under running water — unrinsed quinoa tastes bitter. Cook it in 120 ml water for 15 minutes until the spirals unfurl, then spread it on a plate to cool completely (warm quinoa melts the shake's chill and thins it).",
+      "Rinse the quinoa well under running water, unrinsed quinoa tastes bitter. Cook it in 120 ml water for 15 minutes until the spirals unfurl, then spread it on a plate to cool completely (warm quinoa melts the shake's chill and thins it).",
       "Peel the banana and break it into chunks.",
       "Blend the cooled quinoa with the Greek yogurt and banana on high for a full minute, until no quinoa grain remains intact.",
-      "Serve cold — a shake with a complete-protein grain at its base.",
+      "Serve cold, a shake with a complete-protein grain at its base.",
     ],
     timeMinutes: 25,
     budgetTier: 2,
@@ -1465,10 +1465,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-173944", grams: 90 }, // banana
     ],
     method: [
-      "Blend the spinach with a splash of water first, for 30 seconds, until it is a smooth green liquid with no leaf pieces — this order keeps the shake silky instead of flecked.",
+      "Blend the spinach with a splash of water first, for 30 seconds, until it is a smooth green liquid with no leaf pieces, this order keeps the shake silky instead of flecked.",
       "Peel the banana and add it with the Greek yogurt.",
       "Blend on high for 45 seconds, until bright green and uniform.",
-      "Serve at once — you taste banana and yogurt; the spinach only shows in the colour.",
+      "Serve at once, you taste banana and yogurt; the spinach only shows in the colour.",
     ],
     timeMinutes: 10,
     budgetTier: 2,
@@ -1489,7 +1489,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-167746", grams: 20 }, // lemon
     ],
     method: [
-      "Halve the avocado, remove the stone, and scoop the flesh into the blender. Squeeze the lemon over it straight away — the acid keeps the colour bright green.",
+      "Halve the avocado, remove the stone, and scoop the flesh into the blender. Squeeze the lemon over it straight away, the acid keeps the colour bright green.",
       "Add the Greek yogurt and skim milk.",
       "Blend on high for 45 seconds, until completely smooth and pale green.",
       "Serve immediately; avocado shakes brown and dull if they stand.",
@@ -1513,10 +1513,10 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-171320", grams: 1 }, // cinnamon
     ],
     method: [
-      "Boil or bake the sweet potato until completely soft — a knife should slide through with no resistance. Cool it fully and slip off the skin.",
+      "Boil or bake the sweet potato until completely soft, a knife should slide through with no resistance. Cool it fully and slip off the skin.",
       "Put the sweet potato, Greek yogurt, whole milk and cinnamon in the blender.",
       "Blend on high for a full minute, until the shake is smooth, rust-orange and thick.",
-      "Serve cold — it drinks like a spiced pie filling, with the protein of a meal.",
+      "Serve cold, it drinks like a spiced pie filling, with the protein of a meal.",
     ],
     timeMinutes: 25,
     budgetTier: 2,
@@ -1536,7 +1536,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       { foodId: "usda-169231", grams: 5 }, // ginger
     ],
     method: [
-      "Scrub the carrot and chop it small — small pieces are what let a home blender break carrot down fully. Peel the ginger and slice it thin. Peel the orange into segments, removing pips and pith.",
+      "Scrub the carrot and chop it small, small pieces are what let a home blender break carrot down fully. Peel the ginger and slice it thin. Peel the orange into segments, removing pips and pith.",
       "Blend the carrot, ginger and orange with a splash of water first, for a full minute, until no carrot grit remains.",
       "Add the Greek yogurt and blend on high for 30 seconds more.",
       "Serve at once, cold and bright.",
@@ -1563,7 +1563,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
       "Blend the coconut meat with the coconut milk first, for a full minute, until the coconut has broken down as smooth as it will go.",
       "Peel the banana and add it with the Greek yogurt.",
       "Blend on high for 45 seconds more, until thick and uniform.",
-      "Serve cold — the richest shake in the wave; a small glass goes a long way.",
+      "Serve cold, the richest shake in the wave; a small glass goes a long way.",
     ],
     timeMinutes: 10,
     budgetTier: 3,
@@ -1585,7 +1585,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Peel the banana and break it into chunks.",
       "Pour the whole milk into the blender and blend it with the banana for 30 seconds first.",
-      "Add the whey protein powder last and blend for just 15–20 seconds — powder added at the end, and blended briefly, stays smooth instead of frothing into foam.",
+      "Add the whey protein powder last and blend for just 15-20 seconds, powder added at the end, and blended briefly, stays smooth instead of frothing into foam.",
       "Pour and drink at once. The classic post-training shake, on a verified generic whey isolate.",
     ],
     timeMinutes: 5,
@@ -1608,7 +1608,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Peel the mango and cut the flesh from the stone.",
       "Blend the whole milk and mango for 30 seconds, until the mango has broken down.",
-      "Add the whey protein powder and blend 15–20 seconds more, just until it disappears.",
+      "Add the whey protein powder and blend 15-20 seconds more, just until it disappears.",
       "Serve cold at once.",
     ],
     timeMinutes: 5,
@@ -1632,7 +1632,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Hull the strawberries and halve them.",
       "Blend the Greek yogurt, skim milk and strawberries for 30 seconds, until pink and smooth.",
-      "Add the whey protein powder last; blend 15–20 seconds, until just combined — longer blending whips it to foam.",
+      "Add the whey protein powder last; blend 15-20 seconds, until just combined, longer blending whips it to foam.",
       "Pour and serve cold.",
     ],
     timeMinutes: 5,
@@ -1656,8 +1656,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Stir the oats into the whole milk and rest for 10 minutes to soften (or overnight in the fridge).",
       "Peel the banana; blend the oat-milk mixture with the banana for 45 seconds, until smooth.",
-      "Add the whey protein powder and blend 15–20 seconds more.",
-      "Serve cold — oats, milk, banana and whey: a full breakfast's protein in one glass.",
+      "Add the whey protein powder and blend 15-20 seconds more.",
+      "Serve cold, oats, milk, banana and whey: a full breakfast's protein in one glass.",
     ],
     timeMinutes: 15,
     budgetTier: 3,
@@ -1679,7 +1679,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Blend the peanuts with the whole milk for a full minute, into a smooth peanut milk.",
       "Peel the banana and blend it in for 20 seconds.",
-      "Add the whey protein powder last and blend 15–20 seconds, until just combined.",
+      "Add the whey protein powder last and blend 15-20 seconds, until just combined.",
       "Pour and drink cold.",
     ],
     timeMinutes: 10,
@@ -1703,8 +1703,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Blend the cottage cheese with the skim milk for 30 seconds, until silky.",
       "Peel the banana and blend it in for 20 seconds.",
-      "Add the whey protein powder last; blend 15–20 seconds, until just combined.",
-      "Serve cold — the highest-protein shake in the wave.",
+      "Add the whey protein powder last; blend 15-20 seconds, until just combined.",
+      "Serve cold, the highest-protein shake in the wave.",
     ],
     timeMinutes: 10,
     budgetTier: 3,
@@ -1727,8 +1727,8 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Blend the peanuts and oats with a splash of water for 45 seconds into a thick base; rest 5 minutes so the oats soften.",
       "Peel the banana and blend it in for 20 seconds.",
-      "Add the soy protein powder last and blend 15–20 seconds, until just combined.",
-      "Serve cold — a fully plant-based powder shake.",
+      "Add the soy protein powder last and blend 15-20 seconds, until just combined.",
+      "Serve cold, a fully plant-based powder shake.",
     ],
     timeMinutes: 15,
     budgetTier: 3,
@@ -1751,7 +1751,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Stir the oats into the coconut milk and rest for 5 minutes to soften.",
       "Peel the mango and cut the flesh from the stone; blend it with the oat-coconut mixture for 30 seconds.",
-      "Add the soy protein powder last; blend 15–20 seconds, until just combined.",
+      "Add the soy protein powder last; blend 15-20 seconds, until just combined.",
       "Serve cold.",
     ],
     timeMinutes: 15,
@@ -1775,7 +1775,7 @@ export const SHAKES_DISHES: readonly Dish[] = [
     method: [
       "Blend the almonds and oats with a splash of water for a full minute, until the almonds have broken down smoothly.",
       "Hull the strawberries and blend them in for 20 seconds.",
-      "Add the soy protein powder last; blend 15–20 seconds, until just combined.",
+      "Add the soy protein powder last; blend 15-20 seconds, until just combined.",
       "Pour and serve cold.",
     ],
     timeMinutes: 15,

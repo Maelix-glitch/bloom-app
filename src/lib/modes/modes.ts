@@ -193,7 +193,7 @@ function judgeRule(rule: ModeRule, dish: Dish, nutrients: Nutrients): string | n
     }
     case "max_carbs_per_serving": {
       return nutrients.carbsG > rule.limitG
-        ? `${Math.round(nutrients.carbsG)} g of carbohydrate in a serving — over this mode's ${rule.limitG} g limit`
+        ? `${Math.round(nutrients.carbsG)} g of carbohydrate in a serving, over this mode's ${rule.limitG} g limit`
         : null;
     }
     case "max_sodium_per_serving": {
@@ -201,7 +201,7 @@ function judgeRule(rule: ModeRule, dish: Dish, nutrients: Nutrients): string | n
        * it, so the dish's sodium is unknown, not zero. */
       if (typeof nutrients.sodiumMg !== "number") return null;
       return nutrients.sodiumMg > rule.limitMg
-        ? `${Math.round(nutrients.sodiumMg)} mg of sodium in a serving — over this mode's ${rule.limitMg} mg limit`
+        ? `${Math.round(nutrients.sodiumMg)} mg of sodium in a serving, over this mode's ${rule.limitMg} mg limit`
         : null;
     }
   }
