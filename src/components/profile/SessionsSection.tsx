@@ -9,6 +9,7 @@
 
 import { useEffect, useState } from "react";
 import { IconDevices, IconErase, IconLaptop, IconLogOut } from "@/components/profile/SettingsIcons";
+import { BloomConfirm } from "@/components/ui/bloom-sheet";
 
 import { bloomKeys } from "@/lib/data/erase";
 import { fmtDate } from "@/lib/format";
@@ -28,7 +29,9 @@ export function SessionsSection({
 }) {
   const [session, setSession] = useState<SessionInfo | null>(null);
   const [deviceKeys, setDeviceKeys] = useState<number>(0);
-  const [confirmAll, setConfirmAll] = useState(false);
+  /* Which sign-out the confirmation sheet is armed with (M-234). Both
+     rows open the sheet; the sign-out call itself waits for the confirm. */
+  const [pending, setPending] = useState<null | "local" | "global">(null);
   const [busy, setBusy] = useState<null | "local" | "global">(null);
 
   useEffect(() => {
@@ -67,17 +70,11 @@ export function SessionsSection({
   };
 
   const signOutEverywhere = async () => {
-    if (!confirmAll) {
-      setConfirmAll(true);
-      window.setTimeout(() => setConfirmAll(false), 4000);
-      return;
-    }
     setBusy("global");
     try {
       await supabase.auth.signOut({ scope: "global" });
     } finally {
       setBusy(null);
-      setConfirmAll(false);
       setSession(null);
     }
   };
@@ -122,7 +119,7 @@ export function SessionsSection({
             <button
               type="button"
               className="pf-row"
-              onClick={() => void signOutHere()}
+              onClick={() => setPending("local")}
               disabled={busy !== null}
             >
               <span className="pf-row-icon" aria-hidden>
@@ -139,7 +136,7 @@ export function SessionsSection({
             <button
               type="button"
               className="pf-row"
-              onClick={() => void signOutEverywhere()}
+              onClick={() => setPending("global")}
               disabled={busy !== null}
             >
               <span className="pf-row-icon" aria-hidden>
@@ -151,9 +148,7 @@ export function SessionsSection({
                   Revokes all sessions at once, including this one
                 </span>
               </span>
-              <span className="pf-row-value">
-                {busy === "global" ? "Signing out…" : confirmAll ? "Tap again to confirm" : ""}
-              </span>
+              <span className="pf-row-value">{busy === "global" ? "Signing out…" : ""}</span>
               <span />
             </button>
           </>
@@ -180,6 +175,27 @@ export function SessionsSection({
           <span />
         </button>
       </div>
+
+      {/* One confirmation for both sign-out rows (M-234): the copy names
+          the cost (a fresh sign-in link); the global variant adds that
+          every session ends. Nothing signs out until this confirms. */}
+      <BloomConfirm
+        open={pending !== null}
+        onClose={() => setPending(null)}
+        title="Sign out?"
+        description={
+          pending === "global"
+            ? "You'll need a fresh sign-in link to get back in. This signs you out on every device."
+            : "You'll need a fresh sign-in link to get back in."
+        }
+        confirmLabel="Sign out"
+        cancelLabel="Cancel"
+        busyLabel="Signing out…"
+        onConfirm={async () => {
+          if (pending === "global") await signOutEverywhere();
+          else await signOutHere();
+        }}
+      />
     </section>
   );
 }
