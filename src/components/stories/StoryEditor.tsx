@@ -870,8 +870,8 @@ export function StoryEditor({
           ? "#9DB89A"
           : accent === "sky"
             ? "#9FB6CF"
-            : accent === "violet"
-              ? "#B7A6E8"
+            : accent === "gold" || accent === "violet"
+              ? "#DCC08F"
               : "#F4EFE4";
 
   /** Swap the whole composition. Undoable, and it never touches captions. */
@@ -1155,7 +1155,7 @@ export function StoryEditor({
         role="alertdialog"
         aria-label="Discard story draft"
       >
-        <div className="w-full max-w-[340px] rounded-3xl border border-white/10 bg-[#1c1930] p-6 text-center">
+        <div className="w-full max-w-[340px] rounded-3xl border border-white/10 bg-[#1a1b21] p-6 text-center">
           <p className="display text-[length:var(--text-section)] text-white">Leave the editor?</p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-white/60">
             Your draft is saved on this device — except video, which can't be kept yet.

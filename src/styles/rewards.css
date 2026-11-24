@@ -488,8 +488,8 @@
   z-index: -2;
   opacity: 0.34;
   background-image:
-    linear-gradient(to right, rgb(174 153 241 / 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(174 153 241 / 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgb(220 192 143 / 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(220 192 143 / 0.08) 1px, transparent 1px);
   background-size: 72px 72px;
   mask-image: radial-gradient(75% 80% at 50% 50%, black, transparent 88%);
 }
@@ -523,7 +523,7 @@
   padding: var(--space-2) 11px;
   border: 1px solid color-mix(in oklab, var(--foreground) 13%, transparent);
   border-radius: var(--radius-pill);
-  background: rgb(21 20 38 / 0.65);
+  background: rgb(16 17 22 / 0.65);
   backdrop-filter: blur(12px);
 }
 .claim-signal-dot {
@@ -712,7 +712,7 @@
   border-radius: var(--radius-pill);
   padding: 9px var(--space-3);
   color: var(--muted-foreground);
-  background: rgb(29 28 43 / 0.72);
+  background: rgb(23 24 30 / 0.72);
   font: var(--text-micro) var(--font-mono);
   letter-spacing: var(--tracking-meta);
   text-transform: uppercase;

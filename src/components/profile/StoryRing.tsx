@@ -4,7 +4,7 @@
  * never pasted on: constant stroke, constant inset, stable at every size.
  *
  *   none    — no presence; identity stands alone
- *   unseen  — the Bloom arc (lavender → rose → champagne)
+ *   unseen  — the Bloom arc (champagne → gold → rose)
  *   seen    — the same circle, dimmed to a whisper (shape + tone, not color alone)
  *   prompt  — dashed invitation to add a story
  *

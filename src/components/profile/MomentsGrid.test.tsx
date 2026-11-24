@@ -115,7 +115,7 @@ describe("MomentsGrid — composed stories (M-205, F-28)", () => {
 
 /**
  * M-207 (F-28, the live shape): the owner's actual 9 Nov 2026 note, as
- * the live record holds it — title "" and body "", a solid #221D33
+ * the live record holds it — title "" and body "", a solid #20222A
  * canvas, and exactly two elements: a decorative "underline-hand" shape
  * and one GIF sticker. No words anywhere. M-205's composed-tile test
  * used a text element, so it passed while this shape still read as a
@@ -167,8 +167,8 @@ function liveNoteStory(): Story {
       ink: "#F7F1E3",
       mode: "solid",
       angle: 180,
-      color: "#221D33",
-      paint: { type: "solid", color: "#221D33" },
+      color: "#20222A",
+      paint: { type: "solid", color: "#20222A" },
       photo: null,
       overlay: null,
       texture: "none",

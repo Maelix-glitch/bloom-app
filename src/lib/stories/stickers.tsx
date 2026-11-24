@@ -102,7 +102,7 @@ const ART: Record<string, React.ReactNode> = {
   "bloom.petal-2": (
     <S>
       <g {...P}>
-        <path d="M14 44c2-12 12-22 26-24 2 14-8 24-26 24Z" {...F("#b7a6e8", 0.5)} />
+        <path d="M14 44c2-12 12-22 26-24 2 14-8 24-26 24Z" {...F("#9db89a", 0.5)} />
         <path d="M22 52c0-10 8-18 20-20" />
       </g>
     </S>
@@ -161,7 +161,7 @@ const ART: Record<string, React.ReactNode> = {
       <g {...P}>
         <path d="M32 6l3 14 14 3-14 3-3 14-3-14-14-3 14-3 3-14Z" {...F("#eed9a4", 0.8)} />
         <path d="M50 40l1.6 7 7 1.6-7 1.6-1.6 7-1.6-7-7-1.6 7-1.6 1.6-7Z" {...F("#e0a3b8", 0.8)} />
-        <circle cx="14" cy="46" r="2.4" {...F("#b7a6e8", 0.9)} stroke="none" />
+        <circle cx="14" cy="46" r="2.4" {...F("#9db89a", 0.9)} stroke="none" />
       </g>
     </S>
   ),
@@ -292,7 +292,7 @@ const ART: Record<string, React.ReactNode> = {
   "well.rest": (
     <S>
       <g {...P}>
-        <rect x="12" y="26" width="40" height="22" rx="8" {...F("#b7a6e8", 0.35)} />
+        <rect x="12" y="26" width="40" height="22" rx="8" {...F("#9fb6cf", 0.35)} />
         <path d="M12 34h40" strokeWidth={2.4} />
         <circle cx="24" cy="20" r="4" {...F("#eed9a4", 0.7)} />
         <path
@@ -326,7 +326,7 @@ const ART: Record<string, React.ReactNode> = {
       <g {...P}>
         <path
           d="M32 10c12 10 16 20 14 32-10-2-18-8-22-16-4 8-12 14-22 16-2-12 2-22 14-32 5 4 8 4 16 0Z"
-          {...F("#b7a6e8", 0.45)}
+          {...F("#e0a3b8", 0.45)}
         />
       </g>
     </S>
@@ -433,7 +433,7 @@ const ART: Record<string, React.ReactNode> = {
   "sleep.bedtime": (
     <S>
       <g {...P}>
-        <path d="M10 40v-6a8 8 0 0 1 8-8h28a8 8 0 0 1 8 8v6" {...F("#b7a6e8", 0.35)} />
+        <path d="M10 40v-6a8 8 0 0 1 8-8h28a8 8 0 0 1 8 8v6" {...F("#eed9a4", 0.35)} />
         <path d="M8 44h48" strokeWidth={4} />
         <path
           d="M44 10l1.5 4 4 1.5-4 1.5-1.5 4-1.5-4-4-1.5 4-1.5 1.5-4Z"
@@ -488,7 +488,7 @@ const ART: Record<string, React.ReactNode> = {
         <path d="M30 36l6-2M36 42l4-5M26 30l2-6" strokeWidth={2.4} />
         <circle cx="46" cy="16" r="2.4" {...F("#eed9a4", 0.95)} stroke="none" />
         <circle cx="54" cy="26" r="2" {...F("#9db89a", 0.9)} stroke="none" />
-        <circle cx="40" cy="26" r="1.8" {...F("#b7a6e8", 0.9)} stroke="none" />
+        <circle cx="40" cy="26" r="1.8" {...F("#e0a3b8", 0.9)} stroke="none" />
       </g>
     </S>
   ),
@@ -540,9 +540,9 @@ const ART: Record<string, React.ReactNode> = {
   "day.music-note": (
     <S>
       <g {...P}>
-        <circle cx="22" cy="44" r="6" {...F("#b7a6e8", 0.6)} />
+        <circle cx="22" cy="44" r="6" {...F("#dcc08f", 0.6)} />
         <path d="M28 44V16l22-4v22" />
-        <circle cx="50" cy="34" r="5" {...F("#b7a6e8", 0.6)} />
+        <circle cx="50" cy="34" r="5" {...F("#dcc08f", 0.6)} />
       </g>
     </S>
   ),

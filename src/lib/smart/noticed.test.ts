@@ -33,7 +33,7 @@ function habit(patch: Partial<Habit> = {}): Habit {
     icon: "book",
     iconType: "bloom",
     iconUrl: null,
-    color: "#a78bfa",
+    color: "#dcc08f",
     frequency: "daily",
     points: 10,
     reminderTime: null,

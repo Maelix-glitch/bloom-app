@@ -151,7 +151,7 @@
    consumes these; a component never invents its own charcoal or its own gold.
 
    Distribution is deliberate: ~80% neutral surfaces, ~15% supporting surface
-   variation, ~5% accent. Gold is the primary brand accent, lavender supports
+   variation, ~5% accent. Gold is the primary brand accent, sage supports
    it, semantic colours only ever describe data.
    ========================================================================== */
 :root {
@@ -3539,17 +3539,18 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
 
 /* ------------------------------- themes --------------------------------- */
 
-/* M-225: Velvet Night keeps its name and its deep-night character, but
-   the violet is gone — surfaces sit in the neutral ink family (a trace
-   of chroma at hue 250, no purple cast) and its accent channel writes
-   gold through --accent-secondary, like every skin below. */
+/* M-225 grounded Velvet Night off its old hue-290 violet; M-233 finishes
+   the job: the surfaces now sit in the warm night-ink family itself (a
+   trace of chroma at hue 85, the champagne axis) — no blue-violet lean
+   left anywhere in the theme — and its accent channel writes gold
+   through --accent-secondary, like every skin below. */
 html[data-bloom-theme="th-velvet-night"] {
-  --background: oklch(0.155 0.006 250);
-  --surface: oklch(0.19 0.007 250);
-  --surface-2: oklch(0.225 0.008 250);
-  --surface-3: oklch(0.26 0.009 250);
-  --border: oklch(0.305 0.008 250);
-  --border-strong: oklch(0.38 0.009 250);
+  --background: oklch(0.155 0.006 85);
+  --surface: oklch(0.19 0.007 85);
+  --surface-2: oklch(0.225 0.008 85);
+  --surface-3: oklch(0.26 0.009 85);
+  --border: oklch(0.305 0.008 85);
+  --border-strong: oklch(0.38 0.009 85);
   --accent-secondary: oklch(0.82 0.09 85);
 }
 
@@ -3593,14 +3594,18 @@ html[data-bloom-theme="th-midnight-tide"] {
   --accent-secondary: oklch(0.77 0.075 235);
 }
 
+/* M-233: Ink Serenity's surfaces sat at hue 280 — a violet lean, however
+   faint. They move to the warm ink axis (hue 85) and the accent becomes
+   champagne, so the theme is night ink + gold like Velvet Night, only
+   a step lighter. */
 html[data-bloom-theme="th-ink-serenity"] {
-  --background: oklch(0.175 0.01 280);
-  --surface: oklch(0.21 0.012 280);
-  --surface-2: oklch(0.245 0.014 280);
-  --surface-3: oklch(0.275 0.016 280);
-  --border: oklch(0.32 0.013 280);
-  --border-strong: oklch(0.39 0.015 280);
-  --accent-secondary: oklch(0.79 0.05 230);
+  --background: oklch(0.175 0.01 85);
+  --surface: oklch(0.21 0.012 85);
+  --surface-2: oklch(0.245 0.014 85);
+  --surface-3: oklch(0.275 0.016 85);
+  --border: oklch(0.32 0.013 85);
+  --border-strong: oklch(0.39 0.015 85);
+  --accent-secondary: oklch(0.82 0.07 85);
 }
 
 /* ------------------------------- palettes ------------------------------- */

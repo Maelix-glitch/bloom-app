@@ -24,20 +24,20 @@ export interface PaletteSwatch {
 export const BLOOM_PALETTE: PaletteSwatch[] = [
   { id: "warm-ivory", label: "Warm Ivory", color: "#F7F1E3", on: "#2C2415" },
   { id: "champagne", label: "Champagne", color: "#EED9A4", on: "#2C2415" },
-  { id: "dusty-rose", label: "Dusty Rose", color: "#E0A3B8", on: "#2C2130" },
-  { id: "lavender", label: "Lavender", color: "#B7A6E8", on: "#221D33" },
+  { id: "dusty-rose", label: "Dusty Rose", color: "#E0A3B8", on: "#2B211D" },
+  { id: "pale-sage", label: "Pale Sage", color: "#C3D2B8", on: "#1D2B22" },
   { id: "sage", label: "Sage", color: "#9DB89A", on: "#1D2B22" },
   { id: "mist", label: "Mist", color: "#AEBFD2", on: "#1F2433" },
-  { id: "midnight", label: "Midnight", color: "#221D33", on: "#F4EFE4" },
+  { id: "midnight", label: "Midnight", color: "#20222A", on: "#F4EFE4" },
   { id: "deep-forest", label: "Deep Forest", color: "#1D2B22", on: "#EEF2E4" },
-  { id: "obsidian", label: "Obsidian", color: "#14111D", on: "#F4EFE4" },
+  { id: "obsidian", label: "Obsidian", color: "#121317", on: "#F4EFE4" },
   { id: "soft-blue", label: "Soft Blue", color: "#9FB6CF", on: "#1F2433" },
   { id: "warm-beige", label: "Warm Beige", color: "#D3B795", on: "#2C2415" },
   { id: "terracotta", label: "Terracotta", color: "#C07A5E", on: "#FBF3E6" },
   { id: "muted-peach", label: "Muted Peach", color: "#F0C6A8", on: "#2C2415" },
-  { id: "deep-plum", label: "Deep Plum", color: "#4A2B45", on: "#F2E4EF" },
+  { id: "deep-garnet", label: "Deep Garnet", color: "#4A2B33", on: "#F2E9E4" },
   { id: "cloud", label: "Cloud", color: "#E8ECF4", on: "#1F2433" },
-  { id: "soft-grey", label: "Soft Grey", color: "#C9C7D4", on: "#221D33" },
+  { id: "soft-grey", label: "Soft Grey", color: "#C9C7D4", on: "#20222A" },
   { id: "butter", label: "Butter", color: "#F4E3B2", on: "#2C2415" },
   { id: "clay", label: "Clay", color: "#B98A72", on: "#FBF3E6" },
   { id: "ink-blue", label: "Ink Blue", color: "#2B3348", on: "#E8ECF4" },
@@ -46,11 +46,20 @@ export const BLOOM_PALETTE: PaletteSwatch[] = [
 
 export function paletteById(id: string | null | undefined): PaletteSwatch | null {
   if (!id) return null;
-  return BLOOM_PALETTE.find((p) => p.id === id) ?? null;
+  /* M-233: retired swatch ids resolve to their re-grounded successors so
+     saved stories keep a colour instead of losing the swatch. */
+  const wanted = RETIRED_SWATCH_IDS[id] ?? id;
+  return BLOOM_PALETTE.find((p) => p.id === wanted) ?? null;
 }
 
+/** M-233: swatch ids retired by the violet purge → their successors. */
+const RETIRED_SWATCH_IDS: Record<string, string> = {
+  lavender: "pale-sage",
+  "deep-plum": "deep-garnet",
+};
+
 /** Best ink for an arbitrary color, by relative luminance. */
-export function readableInk(color: string, light = "#F7F1E3", dark = "#191526"): string {
+export function readableInk(color: string, light = "#F7F1E3", dark = "#17181D"): string {
   return luminance(color) > 0.52 ? dark : light;
 }
 
@@ -181,9 +190,9 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     name: "Moonlight",
     ink: "#F4EFE4",
     paint: radial(0.5, 0, 1.3, 0.9, [
-      [0, "#3A3358"],
-      [55, "#221D33"],
-      [100, "#14111D"],
+      [0, "#33363F"],
+      [55, "#20222A"],
+      [100, "#121317"],
     ]),
   },
   {
@@ -212,18 +221,18 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     ink: "#FBF0DD",
     paint: radial(0.5, 1.1, 1.4, 0.9, [
       [0, "#8A5A34"],
-      [45, "#4A3040"],
-      [100, "#221D33"],
+      [45, "#4A3428"],
+      [100, "#20222A"],
     ]),
   },
   {
     id: "quiet-room",
     name: "Quiet room",
-    ink: "#ECE7F7",
+    ink: "#F2EEE3",
     paint: linear(180, [
-      [0, "#33304A"],
-      [60, "#262338"],
-      [100, "#1A1828"],
+      [0, "#303139"],
+      [60, "#24252C"],
+      [100, "#191A1F"],
     ]),
   },
   {
@@ -239,11 +248,11 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
   {
     id: "night-bloom",
     name: "Night bloom",
-    ink: "#F2E4EF",
+    ink: "#F2E9E4",
     paint: radial(0.8, 0.1, 1.1, 0.7, [
-      [0, "#5B3A5E"],
-      [50, "#2C2138"],
-      [100, "#14111D"],
+      [0, "#5E3A42"],
+      [50, "#26242A"],
+      [100, "#121317"],
     ]),
   },
   {
@@ -258,7 +267,7 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
   {
     id: "rose-water",
     name: "Rose water",
-    ink: "#2C2130",
+    ink: "#2B211D",
     paint: linear(160, [
       [0, "#FBEFF1"],
       [55, "#F1D4DD"],
@@ -266,13 +275,13 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     ]),
   },
   {
-    id: "lavender-field",
-    name: "Lavender field",
-    ink: "#221D33",
+    id: "champagne-field",
+    name: "Champagne field",
+    ink: "#2C2415",
     paint: linear(165, [
-      [0, "#EFE9FB"],
-      [50, "#D6C9F2"],
-      [100, "#B7A6E8"],
+      [0, "#F4EFE3"],
+      [50, "#E6D9B8"],
+      [100, "#DCC08F"],
     ]),
   },
   {
@@ -298,7 +307,7 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
   {
     id: "aurora-soft",
     name: "Aurora (soft)",
-    ink: "#191526",
+    ink: "#17181D",
     paint: {
       type: "layers",
       layers: [
@@ -307,8 +316,8 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
           [100, "#EDE3E8"],
         ]),
         radial(0.15, 0.1, 0.75, 0.55, [
-          [0, "rgba(183,166,232,0.55)"],
-          [100, "rgba(183,166,232,0)"],
+          [0, "rgba(220,192,143,0.55)"],
+          [100, "rgba(220,192,143,0)"],
         ]),
         radial(0.9, 0.35, 0.7, 0.5, [
           [0, "rgba(224,163,184,0.5)"],
@@ -329,12 +338,12 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
       type: "layers",
       layers: [
         linear(170, [
-          [0, "#1B1730"],
-          [100, "#100E1C"],
+          [0, "#1A1B20"],
+          [100, "#100F13"],
         ]),
         radial(0.2, 0.15, 0.8, 0.5, [
-          [0, "rgba(120,100,200,0.5)"],
-          [100, "rgba(120,100,200,0)"],
+          [0, "rgba(158,128,84,0.5)"],
+          [100, "rgba(158,128,84,0)"],
         ]),
         radial(0.85, 0.5, 0.7, 0.55, [
           [0, "rgba(90,140,180,0.35)"],
@@ -344,13 +353,13 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     },
   },
   {
-    id: "deep-plum",
-    name: "Deep plum",
-    ink: "#F2E4EF",
+    id: "deep-garnet",
+    name: "Deep garnet",
+    ink: "#F2E9E4",
     paint: linear(168, [
-      [0, "#5B3557"],
-      [60, "#4A2B45"],
-      [100, "#2C1A2B"],
+      [0, "#59353F"],
+      [60, "#4A2B33"],
+      [100, "#2B1A1E"],
     ]),
   },
   {
@@ -398,7 +407,7 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     paint: radial(0.5, 0.95, 1.1, 0.8, [
       [0, "#8A4A32"],
       [50, "#4B2733"],
-      [100, "#201522"],
+      [100, "#211D1E"],
     ]),
   },
   {
@@ -406,8 +415,8 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
     name: "Obsidian",
     ink: "#F4EFE4",
     paint: linear(180, [
-      [0, "#1B1826"],
-      [100, "#0C0A14"],
+      [0, "#1A1B1F"],
+      [100, "#0B0B0E"],
     ]),
   },
   {
@@ -423,8 +432,16 @@ export const GRADIENT_PRESETS: GradientPreset[] = [
 
 export function gradientPresetById(id: string | null | undefined): GradientPreset | null {
   if (!id) return null;
-  return GRADIENT_PRESETS.find((g) => g.id === id) ?? null;
+  /* M-233: retired preset ids resolve to their re-grounded successors. */
+  const wanted = RETIRED_PRESET_IDS[id] ?? id;
+  return GRADIENT_PRESETS.find((g) => g.id === wanted) ?? null;
 }
+
+/** M-233: gradient preset ids retired by the violet purge → successors. */
+const RETIRED_PRESET_IDS: Record<string, string> = {
+  "lavender-field": "champagne-field",
+  "deep-plum": "deep-garnet",
+};
 
 /* ------------------------------ background -------------------------------- */
 
@@ -483,7 +500,7 @@ export function gradientBackground(
     v: 1,
     mode: presetId ? "preset" : "gradient",
     presetId,
-    color: "#221D33",
+    color: "#20222A",
     paint,
     angle,
     photo: null,
@@ -515,7 +532,7 @@ export function presetBackground(id: string): StoryBackgroundState {
 export function photoBackground(
   src: string,
   ink: string,
-  base = "#14111d",
+  base = "#121317",
 ): StoryBackgroundState {
   return {
     v: 1,
@@ -539,9 +556,9 @@ const LEGACY: { id: string; name: string; paint: Paint; ink: string }[] = [
     name: "Moonlight",
     ink: "#f4efe4",
     paint: radial(0.5, 0, 1.3, 0.9, [
-      [0, "#3a3358"],
-      [55, "#221d33"],
-      [100, "#14111d"],
+      [0, "#33363f"],
+      [55, "#20222a"],
+      [100, "#121317"],
     ]),
   },
   {
@@ -590,18 +607,18 @@ const LEGACY: { id: string; name: string; paint: Paint; ink: string }[] = [
     ink: "#fbf0dd",
     paint: radial(0.5, 1.1, 1.4, 0.9, [
       [0, "#8a5a34"],
-      [45, "#4a3040"],
-      [100, "#221d33"],
+      [45, "#4a3428"],
+      [100, "#20222a"],
     ]),
   },
   {
     id: "quiet-room",
     name: "Quiet room",
-    ink: "#ece7f7",
+    ink: "#f2eee3",
     paint: linear(180, [
-      [0, "#33304a"],
-      [60, "#262338"],
-      [100, "#1a1828"],
+      [0, "#303139"],
+      [60, "#24252C"],
+      [100, "#191a1f"],
     ]),
   },
   {
@@ -617,11 +634,11 @@ const LEGACY: { id: string; name: string; paint: Paint; ink: string }[] = [
   {
     id: "night-bloom",
     name: "Night bloom",
-    ink: "#f2e4ef",
+    ink: "#f2e9e4",
     paint: radial(0.8, 0.1, 1.1, 0.7, [
-      [0, "#5b3a5e"],
-      [50, "#2c2138"],
-      [100, "#14111d"],
+      [0, "#5e3a42"],
+      [50, "#26242a"],
+      [100, "#121317"],
     ]),
   },
   {
@@ -694,7 +711,7 @@ export function sanitizeBackground(value: unknown): StoryBackgroundState {
   const raw = value as Record<string, unknown>;
   const mode = raw["mode"];
   const presetId = typeof raw["presetId"] === "string" ? raw["presetId"].slice(0, 48) : null;
-  const color = isColor(raw["color"]) ? raw["color"] : "#221D33";
+  const color = isColor(raw["color"]) ? raw["color"] : "#20222A";
   const angle = Math.min(360, Math.max(0, num(raw["angle"], 180)));
   const ink = isColor(raw["ink"]) ? raw["ink"] : readableInk(color);
   const texture =

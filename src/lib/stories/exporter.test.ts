@@ -123,7 +123,7 @@ describe("exportStory", () => {
   it("renders at 1080×1920", async () => {
     await exportStory({
       elements: [],
-      background: solidBackground("#221D33"),
+      background: solidBackground("#20222A"),
       loadImage: loadStub,
     });
     expect(created).not.toBeNull();
@@ -135,7 +135,7 @@ describe("exportStory", () => {
   it("paints the background before any layer", async () => {
     await exportStory({
       elements: [makeTextElement("Hello", { preset: "editorial", color: "#fff", z: 1 })],
-      background: solidBackground("#221D33"),
+      background: solidBackground("#20222A"),
       loadImage: loadStub,
     });
     const firstFill = log.findIndex((c) => c.name === "fillRect");
@@ -171,7 +171,7 @@ describe("exportStory", () => {
 
     await exportStory({
       elements: [text, { ...photo, src: "data:image/png;base64,AAA" }, shape, data, hidden],
-      background: solidBackground("#221D33"),
+      background: solidBackground("#20222A"),
       data: null,
       loadImage: loadStub,
     });
@@ -190,7 +190,7 @@ describe("exportStory", () => {
 
     await exportStory({
       elements: [late, early],
-      background: solidBackground("#221D33"),
+      background: solidBackground("#20222A"),
       loadImage: loadStub,
     });
 
@@ -207,7 +207,7 @@ describe("exportStory", () => {
 
     const result = await exportStory({
       elements: [{ ...photo, src: "https://example.invalid/broken.png" }, text],
-      background: solidBackground("#221D33"),
+      background: solidBackground("#20222A"),
       loadImage: async () => {
         throw new Error("nope");
       },
@@ -230,7 +230,7 @@ describe("exportStory", () => {
 
     await exportStory({
       elements: [data],
-      background: solidBackground("#221D33"),
+      background: solidBackground("#20222A"),
       data: null,
       loadImage: loadStub,
     });
@@ -251,7 +251,7 @@ describe("exportStory", () => {
 
     await exportStory({
       elements: [data],
-      background: solidBackground("#221D33"),
+      background: solidBackground("#20222A"),
       data: null,
       loadImage: loadStub,
     });

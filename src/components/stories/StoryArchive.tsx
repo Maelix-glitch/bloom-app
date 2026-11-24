@@ -271,7 +271,7 @@ function ArchiveCard({
         {story.audience === "close" ? (
           <span
             className="absolute left-1.5 top-1.5 rounded-full px-1.5 py-0.5 text-[length:var(--text-micro)] font-bold uppercase tracking-[0.06em]"
-            style={{ background: "rgba(20,17,29,0.7)", color: "var(--sage)" }}
+            style={{ background: "rgba(18,19,24,0.7)", color: "var(--sage)" }}
             aria-label="Close friends story"
           >
             Close

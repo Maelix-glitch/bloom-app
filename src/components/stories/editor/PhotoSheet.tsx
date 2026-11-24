@@ -254,7 +254,7 @@ export function PhotoSheet({
                   className="se-filter-swatch"
                   style={{
                     backgroundImage:
-                      "linear-gradient(140deg,#f0e6d2,#c9a3a8 45%,#6d6f86 78%,#2a2740)",
+                      "linear-gradient(140deg,#f0e6d2,#c9a3a8 45%,#6d6f86 78%,#26272e)",
                     filter: filterById(f.id).css,
                   }}
                   aria-hidden

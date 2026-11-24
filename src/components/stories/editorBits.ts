@@ -2,8 +2,8 @@
 
 export const DRAW_COLORS = [
   "#f4efe4",
-  "#221d33",
-  "#b7a6e8",
+  "#20222a",
+  "#c3d2b8",
   "#9db89a",
   "#e0a3b8",
   "#eed9a4",

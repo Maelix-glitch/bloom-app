@@ -431,7 +431,7 @@ export function ProfileEditor({
                   <span className="min-w-0">
                     <span className="bedit-field-label">Username</span>
                     {/* No gap between the @ and the field: with one, the
-                        empty field's placeholder read as "@ quietlavender"
+                        empty field's placeholder read as "@ quietbloom"
                         — a handle with a space in it, which the rules
                         themselves forbid. The @ sits directly against the
                         typed (or suggested) name, as a handle reads. */}
@@ -451,7 +451,7 @@ export function ProfileEditor({
                           setUsername(e.target.value);
                           setSaveError(null);
                         }}
-                        placeholder="quietlavender"
+                        placeholder="quietbloom"
                         maxLength={30}
                         className="bedit-field-input mono mt-0 text-[length:var(--text-callout)]"
                         data-testid="profile-username"

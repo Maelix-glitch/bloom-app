@@ -378,7 +378,7 @@ function paintData(
     const panelY = cy - boxH / 2;
     ctx.beginPath();
     ctx.roundRect(panelX, panelY, boxW, boxH, 18 * k);
-    ctx.fillStyle = "rgba(14,11,22,0.4)";
+    ctx.fillStyle = "rgba(13,13,17,0.4)";
     ctx.fill();
     ctx.lineWidth = 1 * k;
     ctx.strokeStyle = "rgba(244,239,228,0.14)";
@@ -490,7 +490,7 @@ export async function exportStory(options: ExportOptions): Promise<ExportResult>
   if (options.background) {
     await paintBackground(ctx, options.background, width, height, load);
   } else {
-    ctx.fillStyle = "#0c0a14";
+    ctx.fillStyle = "#0b0b0e";
     ctx.fillRect(0, 0, width, height);
   }
 

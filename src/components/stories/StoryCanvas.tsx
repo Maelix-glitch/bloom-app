@@ -268,9 +268,9 @@ function TextPiece({ el, k }: { el: Extract<StoryElement, { kind: "text" }>; k: 
     el.style?.backdropColor ??
     el.backgroundColor ??
     (backdrop === "pill" || backdrop === "highlight"
-      ? "rgba(20,17,29,0.62)"
+      ? "rgba(18,19,24,0.62)"
       : backdrop === "veil"
-        ? "rgba(20,17,29,0.4)"
+        ? "rgba(18,19,24,0.4)"
         : "transparent");
   return (
     <div
@@ -918,7 +918,7 @@ function QuestionPiece({
             type="submit"
             disabled={!interaction || busy || !value.trim()}
             aria-label="Send response"
-            className="grid size-9 shrink-0 place-items-center rounded-full bg-[#f4efe4] text-[13px] font-bold text-[#221d33] transition-transform active:scale-90 disabled:opacity-40"
+            className="grid size-9 shrink-0 place-items-center rounded-full bg-[#f4efe4] text-[13px] font-bold text-[#20222a] transition-transform active:scale-90 disabled:opacity-40"
           >
             ↑
           </button>
@@ -1170,7 +1170,7 @@ function MusicPiece({
       aria-label={playing ? `Pause ${el.title}` : `Play ${el.title}`}
     >
       <span className="sx-music-disc" data-playing={playing || undefined}>
-        <Music2 className="size-3.5 text-[#221d33]" aria-hidden />
+        <Music2 className="size-3.5 text-[#20222a]" aria-hidden />
       </span>
       <span className="min-w-0 text-left leading-tight">
         <span className="block truncate text-[length:var(--text-support)] font-semibold">{el.title}</span>
@@ -1317,7 +1317,7 @@ export function StoryCanvas({
       ref={ref}
       className={`scanvas bstory ${className ?? ""}`}
       style={{
-        ...(hasBaseMedia ? { background: "#0c0a14" } : layers.base),
+        ...(hasBaseMedia ? { background: "#0b0b0e" } : layers.base),
         ...(ink ? ({ ["--story-ink" as string]: ink } as React.CSSProperties) : null),
       }}
       onPointerDown={editing && onSelect ? () => onSelect(null) : undefined}
