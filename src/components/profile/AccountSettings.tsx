@@ -83,6 +83,7 @@ export function AccountSettings({
   const [eraseOpen, setEraseOpen] = useState(false);
   const [restoreOpen, setRestoreOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const [viewer, setViewer] = useState<{ stories: Story[]; startIndex: number } | null>(null);
   const [highlightEditor, setHighlightEditor] = useState<{
     id: string | null;
@@ -201,6 +202,8 @@ export function AccountSettings({
         setRestoreOpen,
         shareSheetOpen,
         setShareSheetOpen,
+        signOutOpen,
+        setSignOutOpen,
         viewer,
         setViewer,
         highlightEditor,
@@ -236,6 +239,8 @@ interface SettingsUi {
   setRestoreOpen: Setter;
   shareSheetOpen: boolean;
   setShareSheetOpen: Setter;
+  signOutOpen: boolean;
+  setSignOutOpen: Setter;
   viewer: { stories: Story[]; startIndex: number } | null;
   setViewer: (v: { stories: Story[]; startIndex: number } | null) => void;
   highlightEditor: { id: string | null; preselect: string | null } | null;
@@ -430,9 +435,7 @@ function AccountSettingsInner({
           onOpenArchive={() => ui.setArchiveOpen(true)}
           onOpenStorySettings={() => ui.setStorySettingsOpen(true)}
           onEdit={() => ui.setEditorOpen(true)}
-          onSignOut={() => {
-            void space.actions.signOut();
-          }}
+          onSignOut={() => ui.setSignOutOpen(true)}
           onSignIn={() => ui.setSignInOpen(true)}
           onExportAll={() => ui.setExportOpen(true)}
           onOpenReminders={() => ui.setRemindersOpen(true)}
@@ -440,6 +443,19 @@ function AccountSettingsInner({
           {...(install.canInstall ? { onInstall: () => void install.install() } : {})}
           remindersValue={remindersValue}
           installValue={installValue}
+        />
+
+        {/* Sign-out is gated (M-234): the row only opens this; the
+            sign-out call fires on the explicit confirm. */}
+        <BloomConfirm
+          open={ui.signOutOpen}
+          onClose={() => ui.setSignOutOpen(false)}
+          title="Sign out?"
+          description="You'll need a fresh sign-in link to get back in."
+          confirmLabel="Sign out"
+          cancelLabel="Cancel"
+          busyLabel="Signing out…"
+          onConfirm={() => space.actions.signOut()}
         />
 
         {/* The other half of "Download everything". */}

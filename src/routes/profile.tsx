@@ -83,6 +83,7 @@ import { StoryArchive } from "@/components/stories/StoryArchive";
 import { HighlightRail } from "@/components/highlights/HighlightRail";
 import { HighlightComposer } from "@/components/highlights/HighlightComposer";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { BloomConfirm } from "@/components/ui/bloom-sheet";
 
 const profileSearchSchema = z.object({
   story: z.string().optional(),
@@ -142,6 +143,7 @@ function ProfilePage() {
   const [composerOpen, setComposerOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [signInOpen, setSignInOpen] = useState(false);
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const [featuredOpen, setFeaturedOpen] = useState(false);
   const [shareSheetOpen, setShareSheetOpen] = useState(false);
   const [userSearchOpen, setUserSearchOpen] = useState(false);
@@ -577,9 +579,7 @@ function ProfilePage() {
                 onPreview={() => setPreviewOpen(true)}
                 onOpenArchive={() => setArchiveOpen(true)}
                 onOpenPrivacy={() => setPrivacyOpen(true)}
-                onSignOut={() => {
-                  void space.actions.signOut();
-                }}
+                onSignOut={() => setSignOutOpen(true)}
               />
 
 
@@ -1013,6 +1013,20 @@ function ProfilePage() {
             privacy={identity.privacy}
             onPreview={() => setPreviewOpen(true)}
             onEditUsername={() => setEditorOpen(true)}
+          />
+          {/* Sign-out is gated (M-234): sign-in is a magic link, so an
+              accidental tap costs a trip to the inbox. The hero's button
+              only opens this; the sign-out call fires on the explicit
+              confirm. */}
+          <BloomConfirm
+            open={signOutOpen}
+            onClose={() => setSignOutOpen(false)}
+            title="Sign out?"
+            description="You'll need a fresh sign-in link to get back in."
+            confirmLabel="Sign out"
+            cancelLabel="Cancel"
+            busyLabel="Signing out…"
+            onConfirm={() => space.actions.signOut()}
           />
           {userId ? (
             <StoryComposer
