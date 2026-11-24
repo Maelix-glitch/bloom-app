@@ -24,7 +24,7 @@ export function RankPill({ points, linkTo = true }: { points: number | null; lin
   );
   if (!linkTo) return content;
   return (
-    <Link to="/rewards" className="pg-rank-pill-link" aria-label={`${state.rank.name} — your journey`}>
+    <Link to="/rewards" className="pg-rank-pill-link" aria-label={`${state.rank.name}, your journey`}>
       {content}
     </Link>
   );

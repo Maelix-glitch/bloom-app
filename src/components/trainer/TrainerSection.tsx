@@ -54,7 +54,7 @@ export function TrainerSection() {
         </div>
       </div>
 
-      <p className="trn-intro">Bring your professional into Bloom — on your terms.</p>
+      <p className="trn-intro">Bring your professional into Bloom, on your terms.</p>
 
       {/* Share summary */}
       <div className="trn-row">
@@ -91,7 +91,7 @@ export function TrainerSection() {
               ))}
             </dl>
             <p className="mt-3 text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-              Built here, shown only on your Profile — Bloom does not send it anywhere. You show it
+              Built here, shown only on your Profile. Bloom does not send it anywhere. You show it
               to your trainer or clinician yourself.
             </p>
           </div>
@@ -101,11 +101,11 @@ export function TrainerSection() {
       {/* Trainer-proposed targets */}
       {pending ? (
         <div className="trn-row">
-          <p className="pf-eyebrow">Proposed targets — waiting for you</p>
+          <p className="pf-eyebrow">Proposed targets, waiting for you</p>
           <p className="mt-1 text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
             {pending.proposedBy} proposed ~{pending.kcal.toLocaleString("en-IN")} kcal and ~
             {pending.proteinG} g protein a day, on {formatDate(pending.proposedAt)}.
-            {pending.note ? ` Their note: “${pending.note}”` : ""} Nothing has changed — these apply
+            {pending.note ? ` Their note: “${pending.note}”` : ""} Nothing has changed, these apply
             only if you confirm them.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
@@ -125,8 +125,7 @@ export function TrainerSection() {
         <div className="trn-row">
           <p className="pf-eyebrow">Trainer-proposed targets</p>
           <p className="mt-1 text-[length:var(--text-callout)] text-[color:var(--text-secondary)]">
-            ~{confirmed.kcal.toLocaleString("en-IN")} kcal and ~{confirmed.proteinG} g protein a day
-            — proposed by {confirmed.proposedBy}, confirmed by you on{" "}
+            ~{confirmed.kcal.toLocaleString("en-IN")} kcal and ~{confirmed.proteinG} g protein a day, proposed by {confirmed.proposedBy}, confirmed by you on{" "}
             {formatDate(confirmed.confirmedAt)}.
           </p>
         </div>

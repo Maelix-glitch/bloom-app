@@ -475,7 +475,7 @@ export function toHistoryTurns(
       let content = m.text ?? m.paragraphs.join("\n\n");
       if (fact !== null) {
         content += fact
-          ? `\n\n[Photo shared with this message — Bloom identified: ${fact}]`
+          ? `\n\n[Photo shared with this message. Bloom identified: ${fact}]`
           : `\n\n[A photo was shared with this message.]`;
       }
       return {
@@ -498,7 +498,7 @@ export function toHistoryTurns(
           content:
             last.turn.content +
             (earlier.fact
-              ? `\n\n[Earlier in this thread the person shared a photo — Bloom identified: ${earlier.fact}]`
+              ? `\n\n[Earlier in this thread the person shared a photo. Bloom identified: ${earlier.fact}]`
               : `\n\n[Earlier in this thread the person shared a photo.]`),
         },
       };
@@ -510,9 +510,9 @@ export function toHistoryTurns(
 /** The Money System's two refusal lines — states, not failures, so
  *  they get their own honest copy instead of the connection line. */
 export const CREDITS_EXHAUSTED_MESSAGE =
-  "You've used this month's AI credits — the Coach pauses here. Premium refills the allowance every month, and everything else in Bloom keeps working.";
+  "You've used this month's AI credits, the Coach pauses here. Premium refills the allowance every month, and everything else in Bloom keeps working.";
 export const PHOTO_PREMIUM_MESSAGE =
-  "Reading a photo of your plate is a Premium feature — tell me about the meal in words and we'll work it out together.";
+  "Reading a photo of your plate is a Premium feature, tell me about the meal in words and we'll work it out together.";
 
 export function coachErrorMessage(error: unknown, fallback?: string): string {
   /*
@@ -522,7 +522,7 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
    * setup instructions, no "offline" framing, nothing fabricated.
    */
   const down =
-    "It didn't go through — your words are safe. Try again and we'll pick it right back up.";
+    "It didn't go through, your words are safe. Try again and we'll pick it right back up.";
   if (error instanceof CoachUnavailable) {
     if (error.reason === "insufficient_credits") return CREDITS_EXHAUSTED_MESSAGE;
     if (error.reason === "premium_required") return PHOTO_PREMIUM_MESSAGE;
@@ -536,7 +536,7 @@ export function coachErrorMessage(error: unknown, fallback?: string): string {
         : "";
   if (/fetch|network|failed to fetch/i.test(raw)) return down;
   if (/relation|does not exist|schema cache|404/i.test(raw))
-    return "Your conversation isn't syncing to your account right now — it stays safe on this device.";
+    return "Your conversation isn't syncing to your account right now, it stays safe on this device.";
   return fallback ?? down;
 }
 
@@ -1034,7 +1034,7 @@ export function useCoachSystem() {
 
       if (result.paragraphs.length === 0) {
         return {
-          paragraphs: ["Sorry — I lost my train of thought there. Ask me again?"],
+          paragraphs: ["Sorry. I lost my train of thought there. Ask me again?"],
           sources: [],
           blocks: [],
           source: result.source,

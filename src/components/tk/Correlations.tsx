@@ -62,7 +62,7 @@ export function Correlations({ items }: { items: Correlation[] }) {
       })}
       <li>
         <p className="text-[length:var(--text-meta)] leading-relaxed ci-muted">
-          These describe your own logged days. They are observations, not causes — and they are not
+          These describe your own logged days. They are observations, not causes, and they are not
           advice.
         </p>
       </li>

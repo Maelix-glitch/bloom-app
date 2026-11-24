@@ -68,7 +68,7 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
         {report ? (
           <div className="mt-5 space-y-4">
             <p className="text-[length:var(--text-support)] leading-relaxed text-foreground">
-              Restored with <span className="text-foreground">{mode}</span> — what landed:
+              Restored with <span className="text-foreground">{mode}</span>, what landed:
             </p>
             <ul className="space-y-1.5">
               {report.sections.map((s) => (
@@ -121,7 +121,7 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
             {parsed?.ok ? (
               <>
                 <p className="text-[length:var(--text-caption)] text-muted-foreground">
-                  Backup from {new Date(parsed.bundle.exportedAt).toLocaleString()} —{" "}
+                  Backup from {new Date(parsed.bundle.exportedAt).toLocaleString()} -{" "}
                   {parsed.bundle.counts.habits} habits, {parsed.bundle.counts.habitLogs} ticks,{" "}
                   {parsed.bundle.counts.trackerDays} tracker days,{" "}
                   {parsed.bundle.counts.moodEntries} mood check-ins, {parsed.bundle.counts.periods}{" "}
@@ -131,8 +131,8 @@ export function RestoreSheet({ open, onClose }: { open: boolean; onClose: () => 
                 <div className="grid gap-2">
                   {(
                     [
-                      ["merge", "Merge — keep what's on this device when both copies have a row"],
-                      ["replace", "Replace — this device becomes the backup"],
+                      ["merge", "Merge, keep what's on this device when both copies have a row"],
+                      ["replace", "Replace, this device becomes the backup"],
                     ] as [RestoreMode, string][]
                   ).map(([m, label]) => (
                     <button

@@ -173,7 +173,7 @@ export function useCoachChat({
         onAccepted,
       } = params;
       if (inFlightRef.current) {
-        if (thinking) setNotice("Bloom is still finishing the last reply — one moment.");
+        if (thinking) setNotice("Bloom is still finishing the last reply, one moment.");
         return "rejected";
       }
       if (thinking) return "rejected";
@@ -291,7 +291,7 @@ export function useCoachChat({
           paragraphs = [...paragraphs, outcome.outcome];
         }
         if (paragraphs.length === 0) {
-          paragraphs = ["Sorry — I lost my train of thought there. Ask me again?"];
+          paragraphs = ["Sorry. I lost my train of thought there. Ask me again?"];
         }
 
         const coachMessage: CoachMessage = {

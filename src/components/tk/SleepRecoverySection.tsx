@@ -49,7 +49,7 @@ export function SleepRecoverySection({
         ))}
       </ul>
       <p className="at-fine">
-        Read only from the nights you logged — duration and the quality rating you gave them.
+        Read only from the nights you logged, duration and the quality rating you gave them.
         Bloom doesn't record heart rate or sleep stages, so nothing like that is estimated here.
       </p>
     </section>

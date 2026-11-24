@@ -116,7 +116,7 @@ export function TrainerReferralSection() {
           <h3 className="trn-row-title">My clients</h3>
           {clients.length === 0 ? (
             <p className="trn-row-copy">
-              Nobody has joined with your code yet — when a client enters it, they&rsquo;ll appear
+              Nobody has joined with your code yet, when a client enters it, they&rsquo;ll appear
               here.
             </p>
           ) : (

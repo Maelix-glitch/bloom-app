@@ -64,7 +64,7 @@ export function ProfileShareSheet({
       toast("Profile link copied.");
       window.setTimeout(() => setCopied(false), 1800);
     } catch {
-      toast("Couldn't copy automatically — here's your link", {
+      toast("Couldn't copy automatically, here's your link", {
         description: url,
         duration: 6000,
       });
@@ -81,7 +81,7 @@ export function ProfileShareSheet({
     try {
       await navigator.share({
         title: `${displayName} on Bloom`,
-        text: bio ? bio.slice(0, 120) : `A space in Bloom — @${username}`,
+        text: bio ? bio.slice(0, 120) : `A space in Bloom, @${username}`,
         url,
       });
     } catch (error) {
@@ -129,7 +129,7 @@ export function ProfileShareSheet({
             {needsUsername
               ? "A @username becomes the address of your Bloom. Choose one to make your profile shareable."
               : isPublic
-                ? "Anyone with your link sees what you've chosen to share — name, bio, public moments."
+                ? "Anyone with your link sees what you've chosen to share, name, bio, public moments."
                 : "Your profile is private right now. Visitors will see a quiet note until you make it public."}
           </p>
         </SheetItem>
@@ -226,7 +226,7 @@ export function ProfileShareSheet({
                 Choose your @username
               </button>
               <p className="text-center text-[length:var(--text-meta)] text-faint-strong">
-                You can change it later — old links stop working.
+                You can change it later, old links stop working.
               </p>
             </div>
           ) : (

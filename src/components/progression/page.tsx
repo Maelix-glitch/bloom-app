@@ -98,7 +98,7 @@ export function JourneyPage() {
           if (result.unlocked.length > 0) {
             setNote(
               result.unlocked.length === 1
-                ? `Achievement earned — ${result.unlocked[0]?.title}`
+                ? `Achievement earned, ${result.unlocked[0]?.title}`
                 : `${result.unlocked.length} achievements earned`,
             );
           }
@@ -109,7 +109,7 @@ export function JourneyPage() {
         }
       } catch (err) {
         console.error("Goal claim UI failed:", err);
-        setNote("That didn't go through — nothing was lost. Try again.");
+        setNote("That didn't go through, nothing was lost. Try again.");
       } finally {
         setClaimingId(null);
       }
@@ -175,8 +175,7 @@ export function JourneyPage() {
         {progress.serverUnavailable ? (
           <div className="pg-banner pg-banner-quiet" role="status">
             <CircleAlert width={13} height={13} aria-hidden />
-            Your account balance couldn&rsquo;t load right now. Everything below is still here —
-            from your own records.
+            Your account balance couldn&rsquo;t load right now. Everything below is still here, from your own records.
             <button type="button" className="pg-link" onClick={() => progress.refreshPoints()}>
               <RefreshCw width={12} height={12} aria-hidden /> Try again
             </button>
@@ -275,7 +274,7 @@ export function JourneyPage() {
                 </h2>
               </div>
               <p className="pg-section-aside">
-                Each rank is struck as a crest. The frame itself is earned — it grows more elaborate
+                Each rank is struck as a crest. The frame itself is earned, it grows more elaborate
                 the further you walk.
               </p>
             </div>
@@ -312,7 +311,7 @@ export function JourneyPage() {
               <p className="pg-section-aside">
                 {progress.loading || progress.achievementsPending
                   ? "Each one tied to a real condition."
-                  : `${progress.achievements.filter((a) => a.unlocked).length} of ${progress.achievements.length} earned — each one tied to a real condition.`}
+                  : `${progress.achievements.filter((a) => a.unlocked).length} of ${progress.achievements.length} earned, each one tied to a real condition.`}
               </p>
             </div>
             {progress.achievementsPending ? (
@@ -342,7 +341,7 @@ export function JourneyPage() {
                   How you earn
                 </h2>
               </div>
-              <p className="pg-section-aside">Habit ticks pay 5–500. Goals pay 100–10,000.</p>
+              <p className="pg-section-aside">Habit ticks pay 5-500. Goals pay 100-10,000.</p>
             </div>
             {progress.error ? (
               <p className="pg-empty" style={{ marginBottom: "1rem" }}>
@@ -371,7 +370,7 @@ export function JourneyPage() {
               </div>
               <p className="pg-section-aside">
                 {progress.loading
-                  ? "— points earned"
+                  ? " points earned"
                   : `${formatPoints(progress.points)} points earned · ${progress.rank.rank.name}`}
               </p>
             </div>

@@ -70,7 +70,7 @@ export function SignedOutProfile({
         )}
       >
         Sign in and Bloom will show you your moments, your milestones, and the things you've chosen
-        to keep — exactly as you left them.
+        to keep, exactly as you left them.
       </p>
 
       <div className="mt-8 w-full max-w-[380px]">

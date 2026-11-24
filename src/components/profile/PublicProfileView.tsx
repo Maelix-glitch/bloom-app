@@ -90,7 +90,7 @@ export function PublicProfileView({
         <p className="display mt-4 text-[length:var(--text-title)]">This space is private.</p>
         <p className="mx-auto mt-2 max-w-[42ch] text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
           {identity.username
-            ? `${identity.displayName} keeps their Bloom to themselves right now — and that's okay.`
+            ? `${identity.displayName} keeps their Bloom to themselves right now, and that's okay.`
             : "This profile hasn't been shared yet."}
         </p>
         {safetyButton ? <div className="mt-5 flex justify-center">{safetyButton}</div> : null}
@@ -214,7 +214,7 @@ export function PublicProfileView({
       />
       <StoryViewer
         target={highlightView ? { stories: highlightView.stories, startIndex: 0 } : null}
-        viewerName={`${highlightView?.name ?? ""} — highlight`}
+        viewerName={`${highlightView?.name ?? ""}, highlight`}
         viewerAvatarPath={identity.avatarPath}
         accent={highlightView?.accent ?? identity.accent}
         authorId={authorId}

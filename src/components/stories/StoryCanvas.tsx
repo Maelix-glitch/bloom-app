@@ -895,7 +895,7 @@ function QuestionPiece({
       <h4>{el.prompt}</h4>
       {sent ? (
         <p className="rounded-full bg-[rgba(244,239,228,0.1)] px-3 py-2 text-[length:var(--text-support)]">
-          Sent — thank you.
+          Sent, thank you.
         </p>
       ) : (
         <form

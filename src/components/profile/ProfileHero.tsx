@@ -296,7 +296,7 @@ export function ProfileHero({
               onClick={hasStory ? onOpenStory : onEdit}
               aria-label={
                 hasStory
-                  ? `View your story — ${story.count} moment${story.count === 1 ? "" : "s"}`
+                  ? `View your story, ${story.count} moment${story.count === 1 ? "" : "s"}`
                   : "Change profile photo"
               }
               className={cn("pf-avatar-btn", hasStory && "cursor-pointer")}

@@ -91,7 +91,7 @@ export function HistoryTable({
         >
           <p className="text-[length:var(--text-caption)] leading-relaxed ci-soft">
             Remove all {plural(days.length, "day")} from your record
-            {" — "}every tracker, every date? You'll get a few seconds to undo.
+            {" - "}every tracker, every date? You'll get a few seconds to undo.
           </p>
           <span className="flex items-center gap-2">
             <Button
@@ -144,7 +144,7 @@ export function HistoryTable({
                     return (
                       <td key={def.id}>
                         {value === null ? (
-                          <span className="ci-muted">—</span>
+                          <span className="ci-muted">-</span>
                         ) : (
                           <Metric
                             value={def.format(Math.round(value))}
@@ -178,7 +178,7 @@ export function HistoryTable({
                           type="button"
                           className="tk2-row-action"
                           disabled={disabled}
-                          aria-label={`Delete ${formatDateShort(day.date)} — you can undo for a few seconds`}
+                          aria-label={`Delete ${formatDateShort(day.date)}, you can undo for a few seconds`}
                           title="Delete this day (undo available)"
                           onClick={() => onDelete(day.date)}
                         >

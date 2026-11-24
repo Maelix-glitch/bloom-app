@@ -50,7 +50,7 @@ export function PointActivity({
             </span>
           </span>
           <span className="pg-history-points">
-            {entry.points > 0 ? `+${formatPoints(entry.points)}` : "—"}
+            {entry.points > 0 ? `+${formatPoints(entry.points)}` : "-"}
           </span>
         </div>
       ))}
@@ -114,7 +114,7 @@ export function MilestoneArchive({
             Nothing has happened <span className="display-em">yet</span>
           </>
         }
-        description="This is where your record reads at a glance — every rank you reach, every milestone you finish. There is no hurry."
+        description="This is where your record reads at a glance, every rank you reach, every milestone you finish. There is no hurry."
         className="py-8"
       />
     );
@@ -161,7 +161,7 @@ export function MilestoneArchive({
 export function AtelierLinkContent() {
   return (
     <>
-      Your Bloom Atelier — looks opened by your ranks
+      Your Bloom Atelier, looks opened by your ranks
       <ArrowUpRight width={13} height={13} aria-hidden />
     </>
   );

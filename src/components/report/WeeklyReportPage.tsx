@@ -133,7 +133,7 @@ export function WeeklyReportPage() {
   );
 
   const fmtHours = (min: number | null): string =>
-    min === null ? "—" : `${Math.round((min / 60) * 10) / 10}h`;
+    min === null ? "-" : `${Math.round((min / 60) * 10) / 10}h`;
 
   /* "Against your usual" — the week read against their own pre-week
      baseline. Only fields with real history on both sides appear. */
@@ -159,7 +159,7 @@ export function WeeklyReportPage() {
         `movement ${delta === 0 ? "level" : `${delta > 0 ? "+" : "−"}${Math.abs(delta)}m`}`,
       );
     }
-    return parts.length > 0 ? `Against your usual — ${parts.join(" · ")}` : null;
+    return parts.length > 0 ? `Against your usual, ${parts.join(" · ")}` : null;
   }, [
     report.usual,
     report.trackers.sleepAvg,
@@ -189,8 +189,8 @@ export function WeeklyReportPage() {
   const weekAheadLine = useMemo(() => {
     const starts = formatDate(shiftDay(report.weekEnd, 1));
     return intro.tenureWeeks !== null
-      ? `Week ${intro.tenureWeeks + 1} of your Bloom record starts ${starts} — it will read back whatever you log.`
-      : `A new week starts ${starts} — it will read back whatever you log.`;
+      ? `Week ${intro.tenureWeeks + 1} of your Bloom record starts ${starts}, it will read back whatever you log.`
+      : `A new week starts ${starts}, it will read back whatever you log.`;
   }, [report.weekEnd, intro.tenureWeeks]);
 
   /* M-214: the Weekly Report is advanced analytics — Premium Plus.
@@ -204,7 +204,7 @@ export function WeeklyReportPage() {
     return (
       <PlusGate
         title="Your Weekly Report is part of Premium Plus"
-        body="Seven days of your record, read back with its patterns — mood, habits, body and cycle in one calm page. Reports and advanced analytics live in Premium Plus, with Vitalis and the Metabolic Twin."
+        body="Seven days of your record, read back with its patterns, mood, habits, body and cycle in one calm page. Reports and advanced analytics live in Premium Plus, with Vitalis and the Metabolic Twin."
       />
     );
   }
@@ -225,13 +225,13 @@ export function WeeklyReportPage() {
           </p>
           <h1 className="mt-2 font-display text-[clamp(28px,5vw,44px)] italic leading-tight">
             {intro.name
-              ? `Your week, ${intro.name} — read back to you.`
+              ? `Your week, ${intro.name}, read back to you.`
               : "Your week, read back to you."}
           </h1>
           {intro.tenureWeeks !== null ? (
             <p className="mt-2 text-[length:var(--text-caption)] text-muted-foreground">
               Week {intro.tenureWeeks.toLocaleString()} of your Bloom record
-              {report.insight ? " — one thing stands out below." : "."}
+              {report.insight ? ", one thing stands out below." : "."}
             </p>
           ) : null}
         </header>
@@ -251,7 +251,7 @@ export function WeeklyReportPage() {
                 A quiet week <span className="display-em">so far</span>.
               </>
             }
-            description="The report writes itself from whatever you log — a mood, a tick, a night of sleep. Start small and come back on Sunday."
+            description="The report writes itself from whatever you log, a mood, a tick, a night of sleep. Start small and come back on Sunday."
             action={
               <Button asChild>
                 <Link to="/mood">Log a first mood</Link>
@@ -269,7 +269,7 @@ export function WeeklyReportPage() {
                 />
                 <Stat
                   icon={<Sparkles className="size-4" />}
-                  value={report.mood.avgMood !== null ? `${report.mood.avgMood}` : "—"}
+                  value={report.mood.avgMood !== null ? `${report.mood.avgMood}` : "-"}
                   caption="average mood / 10"
                 />
               </div>
@@ -316,7 +316,7 @@ export function WeeklyReportPage() {
                 />
                 <Stat
                   icon={<Flame className="size-4 opacity-60" />}
-                  value={report.habits.bestStreak ? `${report.habits.bestStreak.days}d` : "—"}
+                  value={report.habits.bestStreak ? `${report.habits.bestStreak.days}d` : "-"}
                   caption={
                     report.habits.bestStreak
                       ? `live streak · ${report.habits.bestStreak.name}`
@@ -354,7 +354,7 @@ export function WeeklyReportPage() {
                   icon={<GlassWater className="size-4" />}
                   value={
                     report.trackers.waterAvg === null
-                      ? "—"
+                      ? "-"
                       : `${Math.round(report.trackers.waterAvg / 100) / 10}L`
                   }
                   caption="avg water"
@@ -363,7 +363,7 @@ export function WeeklyReportPage() {
                   icon={<PersonStanding className="size-4" />}
                   value={
                     report.trackers.movementAvg === null
-                      ? "—"
+                      ? "-"
                       : `${Math.round(report.trackers.movementAvg)}m`
                   }
                   caption="avg movement"
@@ -418,7 +418,7 @@ export function WeeklyReportPage() {
         )}
 
         <p className="mt-10 max-w-md text-[length:var(--text-meta)] leading-relaxed text-muted-foreground">
-          Computed on this device from what you logged. Estimates, not medical advice — and never a
+          Computed on this device from what you logged. Estimates, not medical advice, and never a
           judgement.
         </p>
 

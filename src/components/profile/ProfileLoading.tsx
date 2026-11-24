@@ -222,7 +222,7 @@ export function ProfileUnavailable({
         {problem?.kind === "schema"
           ? "The project this copy points at is missing part of its profile table."
           : problem?.kind === "permission"
-            ? "Your account can read Bloom, but not this row — an admin can fix that."
+            ? "Your account can read Bloom, but not this row, an admin can fix that."
             : "Nothing is lost; this is a connection, not your data."}
       </p>
       <button type="button" className="pf-out-btn" onClick={onRetry} disabled={syncing}>

@@ -277,7 +277,7 @@ export function TrackerModal({
               setDraft(usualDraft);
               window.setTimeout(() => inputRef.current?.focus(), 30);
             }}
-            title={`Your usual ${def.name.toLowerCase()} — from your last ${usualSamples} logs. Tap to fill, then adjust.`}
+            title={`Your usual ${def.name.toLowerCase()}, from your last ${usualSamples} logs. Tap to fill, then adjust.`}
           >
             <span>Your usual · {def.format(usualValue)}</span>
             <span className="font-normal opacity-60">from {usualSamples} logs · tap to use</span>
@@ -334,7 +334,7 @@ export function TrackerModal({
 
         {usualValue !== null && usualEmpty && tracker === "energy" ? (
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Usually a {usualValue} — from your last {usualSamples} logs.
+            Usually a {usualValue}, from your last {usualSamples} logs.
           </p>
         ) : null}
 

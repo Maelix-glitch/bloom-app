@@ -377,7 +377,7 @@ export function StoryEditor({
   const addElement = useCallback(
     (el: StoryElement) => {
       if (elements.length >= ELEMENT_LIMITS.maxElements) {
-        toast("That's the layer limit — remove one to add another.");
+        toast("That's the layer limit, remove one to add another.");
         return;
       }
       const placed = { ...el, x: 0.5, y: 0.42, z: nextZ(elements) };
@@ -469,7 +469,7 @@ export function StoryEditor({
   const openText = useCallback(
     (existing: Extract<StoryElement, { kind: "text" }> | null) => {
       if (!existing && elements.length >= ELEMENT_LIMITS.maxElements) {
-        toast("That's the layer limit — remove one to add another.");
+        toast("That's the layer limit, remove one to add another.");
         return;
       }
       setTextEditing({
@@ -1118,7 +1118,7 @@ export function StoryEditor({
                 ? audience === "close"
                   ? "Only your close friends can see this. It expires in 24 hours."
                   : "Visible wherever your profile is shared. It expires in 24 hours."
-                : "Only you — it rests in your private archive after 24 hours."}
+                : "Only you, it rests in your private archive after 24 hours."}
             </p>
           </div>
           <button
@@ -1158,7 +1158,7 @@ export function StoryEditor({
         <div className="w-full max-w-[340px] rounded-3xl border border-white/10 bg-[#1a1b21] p-6 text-center">
           <p className="display text-[length:var(--text-section)] text-white">Leave the editor?</p>
           <p className="mt-1.5 text-[13px] leading-relaxed text-white/60">
-            Your draft is saved on this device — except video, which can't be kept yet.
+            Your draft is saved on this device, except video, which can't be kept yet.
           </p>
           <div className="mt-5 flex flex-col gap-2">
             <button

@@ -38,7 +38,7 @@ const msg = (over: Partial<CoachMessage>): CoachMessage => ({
 });
 
 const PHOTO_NOTE =
-  "That looks like a paneer thali — paneer curry, yellow dal, rice, two rotis and raita.";
+  "That looks like a paneer thali, paneer curry, yellow dal, rice, two rotis and raita.";
 
 const photoMessage = (over: Partial<CoachMessage> = {}): CoachMessage =>
   msg({
@@ -48,7 +48,7 @@ const photoMessage = (over: Partial<CoachMessage> = {}): CoachMessage =>
     ...over,
   });
 
-describe("photoNoteFromReply — the note is the reply's own identification", () => {
+describe("photoNoteFromReply, the note is the reply's own identification", () => {
   it("takes the first paragraph, collapsed to one line", () => {
     expect(
       photoNoteFromReply([
@@ -64,13 +64,13 @@ describe("photoNoteFromReply — the note is the reply's own identification", ()
     expect(note!.length).toBeLessThanOrEqual(300);
   });
 
-  it("is undefined when the reply said nothing — never invented", () => {
+  it("is undefined when the reply said nothing, never invented", () => {
     expect(photoNoteFromReply([])).toBeUndefined();
     expect(photoNoteFromReply(["", "   "])).toBeUndefined();
   });
 });
 
-describe("toHistoryTurns — a photo stays in the thread's working memory", () => {
+describe("toHistoryTurns, a photo stays in the thread's working memory", () => {
   it("a follow-up turn's history carries the photo and its identification", () => {
     const turns = toHistoryTurns([
       photoMessage(),
@@ -85,13 +85,13 @@ describe("toHistoryTurns — a photo stays in the thread's working memory", () =
     expect(turns[0]!.role).toBe("user");
     expect(turns[0]!.content).toContain("what is this dish");
     expect(turns[0]!.content).toContain(
-      `[Photo shared with this message — Bloom identified: ${PHOTO_NOTE}]`,
+      `[Photo shared with this message. Bloom identified: ${PHOTO_NOTE}]`,
     );
     /* The follow-up is the last turn, unchanged. */
     expect(turns[2]!.content).toBe("what is the dish?");
   });
 
-  it("a photo whose reply failed still announces itself — no identification invented", () => {
+  it("a photo whose reply failed still announces itself, no identification invented", () => {
     const turns = toHistoryTurns([
       photoMessage({ photoNote: undefined }),
       msg({ paragraphs: ["and the calories?"] }),
@@ -116,7 +116,7 @@ describe("toHistoryTurns — a photo stays in the thread's working memory", () =
     const last = turns[turns.length - 1]!;
     expect(last.content).toContain("so what was that dish, again?");
     expect(last.content).toContain(
-      `[Earlier in this thread the person shared a photo — Bloom identified: ${PHOTO_NOTE}]`,
+      `[Earlier in this thread the person shared a photo. Bloom identified: ${PHOTO_NOTE}]`,
     );
     /* And no in-window turn pretends the photo is attached to it. */
     expect(
@@ -124,7 +124,7 @@ describe("toHistoryTurns — a photo stays in the thread's working memory", () =
     ).toBe(true);
   });
 
-  it("a text-only thread is mapped exactly as before — no markers appear", () => {
+  it("a text-only thread is mapped exactly as before, no markers appear", () => {
     const turns = toHistoryTurns([
       msg({ paragraphs: ["hello"] }),
       msg({ role: "coach", paragraphs: ["Hi. What's on your mind?"] }),

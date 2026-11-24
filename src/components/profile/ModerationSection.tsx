@@ -95,7 +95,7 @@ export function ModerationSection() {
         </span>
         <span className="pf-row-text">
           <span className="pf-row-label">Reports to review</span>
-          <span className="pf-row-hint">Content people have reported — only you see this</span>
+          <span className="pf-row-hint">Content people have reported, only you see this</span>
         </span>
         <span className="pf-row-value">
           {reports === null ? "…" : openCount > 0 ? `${openCount} open` : "None open"}

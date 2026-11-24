@@ -99,7 +99,7 @@ export function PrivacySheet({
                 title="Let people find my profile"
                 body={
                   hasUsername
-                    ? "Anyone with your link can see your public face — name, bio, shared moments."
+                    ? "Anyone with your link can see your public face, name, bio, shared moments."
                     : "Turn this on after claiming a @username; that's what your link will use."
                 }
               />

@@ -326,7 +326,7 @@ export function useHabits(): HabitsStore {
           keptLocalLogs = mirrorLogs.filter((l) => keptIds.has(l.habitId));
           if (moved.failed > 0 && mounted) {
             setError(
-              `${moved.failed} ${moved.failed === 1 ? "habit" : "habits"} from this device couldn't be moved to your account yet — they're still here and will be retried.`,
+              `${moved.failed} ${moved.failed === 1 ? "habit" : "habits"} from this device couldn't be moved to your account yet, they're still here and will be retried.`,
             );
           }
         }
@@ -582,7 +582,7 @@ export function useHabits(): HabitsStore {
           habitsRef.current.filter((h) => !h.archived).length,
         )
       ) {
-        setError("Free includes up to 5 habits — Premium removes the limit.");
+        setError("Free includes up to 5 habits. Premium removes the limit.");
         requestPaywall("habits_limit");
         return;
       }

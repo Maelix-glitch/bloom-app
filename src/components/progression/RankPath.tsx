@@ -64,7 +64,7 @@ export function RankPath({ points, rankTier }: { points: number; rankTier: numbe
         })}
       </ol>
       <p className="pg-path-more">
-        Past {ranks[ranks.length - 1]?.name ?? "the named ranks"} the path keeps going — a new
+        Past {ranks[ranks.length - 1]?.name ?? "the named ranks"} the path keeps going, a new
         season every {formatPoints(CYCLE_STEP)} points.
       </p>
     </div>

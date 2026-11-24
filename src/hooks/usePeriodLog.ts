@@ -366,7 +366,7 @@ export function usePeriodLog(): PeriodLogStore {
       if (stateDirty) dirtyState.current = true;
       setSync({
         state: "error",
-        message: "Couldn't reach your account — this day is safe on this device.",
+        message: "Couldn't reach your account, this day is safe on this device.",
         signedIn: true,
       });
     } finally {
@@ -379,7 +379,7 @@ export function usePeriodLog(): PeriodLogStore {
       if (!hasCloud()) {
         setSync({
           state: "off",
-          message: "No database connected in this build — records stay on this device.",
+          message: "No database connected in this build, records stay on this device.",
           signedIn: false,
         });
         return;
@@ -393,7 +393,7 @@ export function usePeriodLog(): PeriodLogStore {
         () =>
           setSync({
             state: "error",
-            message: "Couldn't reach your account — showing what's saved on this device.",
+            message: "Couldn't reach your account, showing what's saved on this device.",
             signedIn: profileId.current !== null,
           }),
       );
@@ -403,7 +403,7 @@ export function usePeriodLog(): PeriodLogStore {
         if (!pid) {
           setSync({
             state: "signed-out",
-            message: "Not signed in — saved on this device only.",
+            message: "Not signed in, saved on this device only.",
             signedIn: false,
           });
           return;
@@ -476,7 +476,7 @@ export function usePeriodLog(): PeriodLogStore {
       } catch {
         setSync({
           state: "error",
-          message: "Couldn't reach your account — showing what's saved on this device.",
+          message: "Couldn't reach your account, showing what's saved on this device.",
           signedIn: profileId.current !== null,
         });
       } finally {
@@ -819,7 +819,7 @@ export function usePeriodLog(): PeriodLogStore {
           rememberAnswer(checkIn.id, "dismiss");
           return {
             type: "saved",
-            message: `Last day recorded as ${formatDate(resolution.end)} — everything below was recalculated.`,
+            message: `Last day recorded as ${formatDate(resolution.end)}, everything below was recalculated.`,
           };
         }
         case "set-start": {
@@ -831,13 +831,13 @@ export function usePeriodLog(): PeriodLogStore {
           rememberAnswer(checkIn.id, "dismiss");
           return {
             type: "saved",
-            message: `First day moved to ${formatDate(resolution.start)} — everything below was recalculated.`,
+            message: `First day moved to ${formatDate(resolution.start)}, everything below was recalculated.`,
           };
         }
         case "remove-period": {
           rememberAnswer(checkIn.id, "dismiss");
           remove(resolution.periodId);
-          return { type: "saved", message: "Entry removed — you can undo this for a few seconds." };
+          return { type: "saved", message: "Entry removed, you can undo this for a few seconds." };
         }
         case "add-period": {
           const result = add({
@@ -852,7 +852,7 @@ export function usePeriodLog(): PeriodLogStore {
           }
           return {
             type: "saved",
-            message: `Period logged from ${formatDate(resolution.start)} — predictions updated.`,
+            message: `Period logged from ${formatDate(resolution.start)}, predictions updated.`,
           };
         }
         case "focus-form":
@@ -866,7 +866,7 @@ export function usePeriodLog(): PeriodLogStore {
           rememberAnswer(checkIn.id, "dismiss");
           return {
             type: "saved",
-            message: `Understood — cycles up to ${resolution.days} days now count as yours. Average and predictions recalculated.`,
+            message: `Understood, cycles up to ${resolution.days} days now count as yours. Average and predictions recalculated.`,
           };
         case "pause-tracking":
           setMode("paused");
@@ -874,7 +874,7 @@ export function usePeriodLog(): PeriodLogStore {
           return {
             type: "saved",
             message:
-              "Understood — predictions are paused and nothing will be called late. Your history stays; turn tracking back on from the Cycle page whenever you like.",
+              "Understood, predictions are paused and nothing will be called late. Your history stays; turn tracking back on from the Cycle page whenever you like.",
           };
         case "dismiss":
           rememberAnswer(checkIn.id, "dismiss");

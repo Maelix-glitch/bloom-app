@@ -172,18 +172,18 @@ export function Welcome({ onFinish, onAdmin, initial, onExit }: WelcomeProps) {
     const result = await linkTrainerCode(value);
     switch (result.kind) {
       case "linked":
-        setTrainerFlag("Linked — your trainer will see you've joined.");
+        setTrainerFlag("Linked, your trainer will see you've joined.");
         break;
       case "already-linked":
         setTrainerFlag("You're already linked to a trainer, so this code wasn't added.");
         break;
       case "own-code":
-        setTrainerFlag("That's your own trainer code — it's for your clients to enter.");
+        setTrainerFlag("That's your own trainer code, it's for your clients to enter.");
         break;
       case "unknown-code":
       case "malformed":
         setTrainerFlag(
-          "That code doesn't match a trainer — check it with them, or carry on without it.",
+          "That code doesn't match a trainer, check it with them, or carry on without it.",
         );
         break;
       case "unavailable":
@@ -376,7 +376,7 @@ export function Welcome({ onFinish, onAdmin, initial, onExit }: WelcomeProps) {
                   </h1>
                   <p className="wl-sub">
                     Bloom tracks a menstrual cycle for the people who have one. This answer decides
-                    whether that part of the app is there at all — asked once, and changeable later
+                    whether that part of the app is there at all, asked once, and changeable later
                     from Settings.
                   </p>
                   <div className="wl-choices">
@@ -426,7 +426,7 @@ export function Welcome({ onFinish, onAdmin, initial, onExit }: WelcomeProps) {
                     What brought <em>you here?</em>
                   </h1>
                   <p className="wl-sub">
-                    Pick any that fit — Bloom switches on the right trackers to start. You can add
+                    Pick any that fit. Bloom switches on the right trackers to start. You can add
                     or drop them at any time.
                   </p>
                   <div className="wl-choices wl-choices--grid">
