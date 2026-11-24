@@ -135,7 +135,7 @@ export function cyclePatterns(input: PatternInput): PatternNotice[] {
       notices.push({
         id: "heavy-flow",
         title: "Heavier flow, repeating",
-        body: "Several of your recent periods show heavy flow on three or more days, or clots on several days. Bloom can't see how often you change a pad or tampon — but if you're ever soaking through one every hour for more than two hours, or you feel faint or breathless while bleeding heavily, that's same-day care, not a wait-and-see. A repeating heavy pattern is worth discussing with a doctor.",
+        body: "Several of your recent periods show heavy flow on three or more days, or clots on several days. Bloom can't see how often you change a pad or tampon, but if you're ever soaking through one every hour for more than two hours, or you feel faint or breathless while bleeding heavily, that's same-day care, not a wait-and-see. A repeating heavy pattern is worth discussing with a doctor.",
       });
     }
   }
@@ -187,7 +187,7 @@ export function cyclePatterns(input: PatternInput): PatternNotice[] {
     notices.push({
       id: "short-cycles",
       title: "Shorter cycles, repeating",
-      body: "Two of your last three cycles were under 21 days. Cycles that keep coming this often are worth discussing with a doctor — especially if the bleeding feels heavier than it used to.",
+      body: "Two of your last three cycles were under 21 days. Cycles that keep coming this often are worth discussing with a doctor, especially if the bleeding feels heavier than it used to.",
     });
   }
 
@@ -210,7 +210,7 @@ export function cyclePatterns(input: PatternInput): PatternNotice[] {
     notices.push({
       id: "irregular-swing",
       title: "Your cycle length swings",
-      body: "Your recent cycles vary by more than 9 days from shortest to longest. That much swing is common in the teens and in the years before menopause — and if it continues, it's something a doctor can help make sense of.",
+      body: "Your recent cycles vary by more than 9 days from shortest to longest. That much swing is common in the teens and in the years before menopause, and if it continues, it's something a doctor can help make sense of.",
     });
   }
 
@@ -237,7 +237,7 @@ export function cyclePatterns(input: PatternInput): PatternNotice[] {
         notices.push({
           id: "pcos-conversation",
           title: "A pattern worth a conversation",
-          body: "Your cycles have been irregular, and acne shows up in your log across several cycles. Doctors often look at signs like these together — conditions such as PCOS are common, and only a clinician can assess them. If it continues, it's worth raising at a check-up.",
+          body: "Your cycles have been irregular, and acne shows up in your log across several cycles. Doctors often look at signs like these together, conditions such as PCOS are common, and only a clinician can assess them. If it continues, it's worth raising at a check-up.",
         });
       }
     }

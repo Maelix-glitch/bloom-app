@@ -564,7 +564,7 @@ export function draftToColumns(draft: HabitDraft) {
  * are never judged by this — it gates creation and edits only.
  */
 export function validateHabitName(name: string): string | null {
-  return name.trim().length < 2 ? "Give the habit a name — two letters or more." : null;
+  return name.trim().length < 2 ? "Give the habit a name, two letters or more." : null;
 }
 
 /** One key for "the same habit" — case and extra spaces do not make a new one. */
@@ -620,7 +620,7 @@ export function isMissingColumn(error: unknown): boolean {
 /** Thrown when a pause is asked of a table that doesn't have the pause columns yet. */
 export class PauseColumnsMissing extends Error {
   constructor() {
-    super("This project hasn't run 20260907_habit_pause.sql yet — the pause stays on this device.");
+    super("This project hasn't run 20260907_habit_pause.sql yet, the pause stays on this device.");
     this.name = "PauseColumnsMissing";
   }
 }

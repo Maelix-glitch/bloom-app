@@ -111,5 +111,5 @@ export function changeSentence(finding: ChangeFinding): string {
 
 /** Kept for callers that want a date-anchored reminder of the window. */
 export function windowLabel(from: string, to: string): string {
-  return `${longDay(from)} – ${longDay(to)}`;
+  return `${longDay(from)} - ${longDay(to)}`;
 }

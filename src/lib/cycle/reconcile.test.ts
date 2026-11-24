@@ -44,7 +44,7 @@ describe("reconcile · ended early", () => {
     const out = reconcile({ logs, days, today: TODAY });
     const q = find(out, "ended-early");
     expect(q).toBeDefined();
-    expect(q!.title).toBe("Bleeding stopped on day 3 — did your period end early?");
+    expect(q!.title).toBe("Bleeding stopped on day 3, did your period end early?");
     const yes = q!.actions.find((a) => a.id === "yes")!;
     expect(yes.resolution).toEqual({ type: "set-end", periodId: "d", end: ago(1) });
     expect(q!.actions.map((a) => a.label)).toContain("No, it's continuing");
@@ -93,7 +93,7 @@ describe("reconcile · continued", () => {
     const days = [day(TODAY, "light")];
     const q = find(reconcile({ logs, days, today: TODAY }), "continued");
     expect(q).toBeDefined();
-    expect(q!.title).toBe("You logged bleeding the day after your period ended — did it continue?");
+    expect(q!.title).toBe("You logged bleeding the day after your period ended, did it continue?");
     expect(q!.actions.find((a) => a.id === "yes")!.resolution).toEqual({
       type: "set-end",
       periodId: "d",
@@ -150,7 +150,7 @@ describe("reconcile · same period vs new period", () => {
     expect(find(out, "same-period")).toBeUndefined();
   });
 
-  it("ignores spotting entirely — it is not a period day", () => {
+  it("ignores spotting entirely, it is not a period day", () => {
     const logs = history(20, ago(16));
     const days: DayLog[] = [{ date: ago(2), flow: "spotting" }];
     expect(kinds(reconcile({ logs, days, today: TODAY }))).toEqual([]);
@@ -179,7 +179,7 @@ describe("reconcile · still open · late · missed", () => {
     const logs = history(32, ago(28)); // average 29 → due 3 days ago
     const q = find(reconcile({ logs, days: [], today: TODAY }), "late");
     expect(q).toBeDefined();
-    expect(q!.title).toBe("Your period was due 3 days ago — has it started?");
+    expect(q!.title).toBe("Your period was due 3 days ago, has it started?");
     expect(q!.actions[0]!.resolution).toEqual({
       type: "focus-form",
       date: TODAY,
@@ -373,7 +373,7 @@ describe("reconcile · superseded open periods · paused tracking", () => {
   });
 });
 
-describe("classifyBleedDay — what pre-ticks 'first day of a period'", () => {
+describe("classifyBleedDay, what pre-ticks 'first day of a period'", () => {
   const logs = history(10, ago(6));
   const analysis = analyzeCycle(logs, TODAY);
 
@@ -471,7 +471,7 @@ describe("reconcile · the start itself is wrong (engine-probe fixes C6/C7)", ()
     expect(find(reconcile({ logs, days, today: TODAY }), "start-day")).toBeUndefined();
   });
 
-  it("flags a start dated in the future and asks for the real day — and asks nothing else", () => {
+  it("flags a start dated in the future and asks for the real day, and asks nothing else", () => {
     const logs: PeriodLog[] = [
       { id: "a", start: ago(60), end: ago(56), flow: "medium" },
       { id: "b", start: ago(31), end: ago(27), flow: "medium" },

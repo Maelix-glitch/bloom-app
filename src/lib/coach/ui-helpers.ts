@@ -409,7 +409,7 @@ export function signalStarters(record: CoachRecord): Starter[] {
   if (sleep && sleep.avg7 !== null) {
     const recent = lastLogged(sleep).slice(-3);
     if (recent.length === 3 && recent.every((v) => v < sleep.avg7! - 30)) {
-      out.push({ lens: "ask", text: "Sleep's been lighter than usual lately — why?" });
+      out.push({ lens: "ask", text: "Sleep's been lighter than usual lately, why?" });
     }
   }
 
@@ -418,7 +418,7 @@ export function signalStarters(record: CoachRecord): Starter[] {
   if (energy) {
     const recent = lastLogged(energy).slice(-2);
     if (recent.length === 2 && recent.every((v) => v <= 2)) {
-      out.push({ lens: "reflect", text: "Energy's been low two days straight — talk it through" });
+      out.push({ lens: "reflect", text: "Energy's been low two days straight, talk it through" });
     }
   }
 
@@ -436,7 +436,7 @@ export function signalStarters(record: CoachRecord): Starter[] {
   if (quiet) {
     out.push({
       lens: "ask",
-      text: `It's been a bit since ${quiet.name.toLowerCase()} — catch me up`,
+      text: `It's been a bit since ${quiet.name.toLowerCase()}, catch me up`,
     });
   }
 

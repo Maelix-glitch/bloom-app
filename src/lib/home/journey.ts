@@ -105,7 +105,7 @@ export function journeyStateOf(signals: JourneySignals): JourneyState {
     {
       id: "habit",
       title: "Tick your first habit",
-      line: "One small routine, done once, starts your record — and earns your first milestone.",
+      line: "One small routine, done once, starts your record, and earns your first milestone.",
       actionLabel: "Tick a habit",
       done: signals.habitTicks > 0,
       points: pointsFor("first-bloom"),
@@ -113,7 +113,7 @@ export function journeyStateOf(signals: JourneySignals): JourneyState {
     {
       id: "vitalis",
       title: "Meet Vitalis",
-      line: "The orb at the corner of your screen is Vitalis — Bloom's nutrition mind. Say hello, and ask it anything about your food.",
+      line: "The orb at the corner of your screen is Vitalis. Bloom's nutrition mind. Say hello, and ask it anything about your food.",
       actionLabel: "Meet Vitalis",
       done: signals.vitalisMet,
       points: null,
@@ -123,8 +123,8 @@ export function journeyStateOf(signals: JourneySignals): JourneyState {
       title: "See today's dish",
       line: signals.todayDish
         ? goalLine
-          ? `Today's dish is ${signals.todayDish} — composed around ${goalLine}.`
-          : `Today's dish is ${signals.todayDish} — see what Bloom composed for you.`
+          ? `Today's dish is ${signals.todayDish}, composed around ${goalLine}.`
+          : `Today's dish is ${signals.todayDish}, see what Bloom composed for you.`
         : goalLine
           ? `Bloom composes a plan around ${goalLine}. See what today's dish looks like.`
           : "See the dish Bloom composes for a day like yours.",
@@ -150,7 +150,7 @@ export function journeyStateOf(signals: JourneySignals): JourneyState {
     },
     {
       id: "assessment",
-      title: "Unlock your full plan",
+      title: "Get your full plan",
       line: inProgress
         ? "You're part-way through. Finish the last sections and Bloom composes your full plan from your answers."
         : goalLine

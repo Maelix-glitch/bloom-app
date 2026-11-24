@@ -230,7 +230,7 @@ export function describeExport(counts: ExportCounts): string {
   add(counts.stories, "moment");
   add(counts.coachMessages, "coach message");
   add(counts.pointEntries, "point entry", "point entries");
-  if (parts.length === 0) return "Nothing logged yet — the file has your profile only.";
+  if (parts.length === 0) return "Nothing logged yet, the file has your profile only.";
   return parts.join(" · ");
 }
 

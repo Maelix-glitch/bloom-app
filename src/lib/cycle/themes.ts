@@ -21,7 +21,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
     name: "Nocturne",
     tagline: "Ink ground, champagne and rose",
     description:
-      "The default. A near-black neutral ink ground, hairline-bordered cards, a rose bleed phase and champagne ovulation. Calm, editorial, and easy on the eyes at night — which is when most people check.",
+      "The default. A near-black neutral ink ground, hairline-bordered cards, a rose bleed phase and champagne ovulation. Calm, editorial, and easy on the eyes at night, which is when most people check.",
     palette: [
       { label: "Ground", hex: "#0a0b0e" },
       { label: "Surface", hex: "#111318" },
@@ -32,7 +32,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
       { label: "Luteal", hex: "#8fc7a2" },
     ],
     traits: ["Hairline 1px cards", "14px radius", "Fraunces + Inter", "Quiet radial glow"],
-    best: "The main direction — calm, legible, distinctive without being loud.",
+    best: "The main direction, calm, legible, distinctive without being loud.",
   },
   {
     id: "orchid",
@@ -68,7 +68,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
       { label: "Luteal", hex: "#2f8ca0" },
     ],
     traits: ["Flat, shadowless", "10px radius", "Stronger rules", "Cool neutral ink"],
-    best: "When data density matters — the busiest cycles still read cleanly.",
+    best: "When data density matters, the busiest cycles still read cleanly.",
   },
   {
     id: "fern",
@@ -86,7 +86,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
       { label: "Luteal", hex: "#5f8f9d" },
     ],
     traits: ["Border-free depth", "18px radius", "Softest contrast", "Green-leaning teal"],
-    best: "A gentler, more organic read — good if Nocturne feels too cool.",
+    best: "A gentler, more organic read, good if Nocturne feels too cool.",
   },
   {
     id: "aurora",
@@ -104,7 +104,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
       { label: "Luteal", hex: "#2f9fbb" },
     ],
     traits: ["Glass + blur", "18px radius", "Drifting aurora", "Brightest accents"],
-    best: "When you want the page to feel alive — the signature look.",
+    best: "When you want the page to feel alive, the signature look.",
   },
   {
     id: "ember",
@@ -129,7 +129,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
     name: "Ink",
     tagline: "Near-black, bone white, nothing extra",
     description:
-      "The stripped-back one: 6px corners, no shadows, no atmosphere, white as the accent. Type and data only — the closest thing to a printed page.",
+      "The stripped-back one: 6px corners, no shadows, no atmosphere, white as the accent. Type and data only, the closest thing to a printed page.",
     palette: [
       { label: "Ground", hex: "#0a0a0b" },
       { label: "Surface", hex: "#111113" },
@@ -140,7 +140,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
       { label: "Luteal", hex: "#4fa3ae" },
     ],
     traits: ["No shadows", "6px radius", "White accent", "Flat black"],
-    best: "When content density wins — the most legible of the eight.",
+    best: "When content density wins, the most legible of the eight.",
   },
   {
     id: "daybreak",
@@ -158,7 +158,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
       { label: "Luteal", hex: "#16636f" },
     ],
     traits: ["Light scheme", "12px radius", "Paper + ink", "Muted accent wash"],
-    best: "An alternate, not the brief — pick it if the app is mostly used in daylight.",
+    best: "An alternate, not the brief, pick it if the app is mostly used in daylight.",
   },
 ];
 

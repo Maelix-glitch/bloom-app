@@ -22,7 +22,7 @@ const existing: PeriodLog[] = [
   { id: "c", start: ago(6), end: null, flow: "heavy" },
 ];
 
-describe("validateLogDraft — the hard walls", () => {
+describe("validateLogDraft, the hard walls", () => {
   it("refuses a future start", () => {
     expect(validateLogDraft({ start: addDays(TODAY, 1) }, existing, TODAY).start).toMatch(/future/);
   });
@@ -79,7 +79,7 @@ describe("validateLogDraft — the hard walls", () => {
   });
 });
 
-describe("assessLogDraft — soft margins that still save", () => {
+describe("assessLogDraft, soft margins that still save", () => {
   it("warns (does not block) when a start lands too close to the previous one", () => {
     const a = assessLogDraft({ start: ago(2) }, existing, TODAY);
     expect(a.errors).toEqual({});
@@ -122,7 +122,7 @@ describe("assessLogDraft — soft margins that still save", () => {
   });
 });
 
-describe("analyzeCycle — what the check-ins rely on", () => {
+describe("analyzeCycle, what the check-ins rely on", () => {
   it("a genuinely long last bleed does not redefine the usual period length", () => {
     /* A 20-day episode is recorded truth, but the averaged history (<= 15
        day bound) stays the "usual length" — one episode must not stretch
@@ -231,7 +231,7 @@ describe("analyzeCycle — what the check-ins rely on", () => {
   });
 });
 
-describe("fertileEstimateGate — when a calendar estimate would be a guess", () => {
+describe("fertileEstimateGate, when a calendar estimate would be a guess", () => {
   it("never judges on fewer than three measured cycles", () => {
     expect(fertileEstimateGate([]).suppressed).toBe(false);
     expect(fertileEstimateGate([21, 40]).suppressed).toBe(false);
@@ -243,7 +243,7 @@ describe("fertileEstimateGate — when a calendar estimate would be a guess", ()
     expect(g.reason).toMatch(/24 to 35 days/);
   });
 
-  it("suppresses when most recent cycles sit outside 21–35 days", () => {
+  it("suppresses when most recent cycles sit outside 21-35 days", () => {
     expect(fertileEstimateGate([38, 39, 38]).suppressed).toBe(true);
     expect(fertileEstimateGate([19, 20, 28]).suppressed).toBe(true);
   });
@@ -272,7 +272,7 @@ describe("fertileEstimateGate — when a calendar estimate would be a guess", ()
   });
 });
 
-describe("analyzeCycle — long cycles are a rhythm, not a mistake", () => {
+describe("analyzeCycle, long cycles are a rhythm, not a mistake", () => {
   const longHistory: PeriodLog[] = [
     { id: "a", start: ago(155) },
     { id: "b", start: ago(103) }, // 52
@@ -338,7 +338,7 @@ describe("analyzeCycle — long cycles are a rhythm, not a mistake", () => {
   });
 });
 
-describe("describeNextPeriod — one sentence every surface can quote", () => {
+describe("describeNextPeriod, one sentence every surface can quote", () => {
   const steady = (n: number, len: number, lastStartAgo: number): PeriodLog[] =>
     Array.from({ length: n }, (_, i) => {
       const s = addDays(TODAY, -lastStartAgo - (n - 1 - i) * len);
@@ -356,7 +356,7 @@ describe("describeNextPeriod — one sentence every surface can quote", () => {
     /* four periods → three cycles; too few for "high", steady enough for "medium" */
     const a = analyzeCycle(steady(4, 28, 10), TODAY);
     expect(a.confidence).toBe("medium");
-    expect(describeNextPeriod(a)).toMatch(/^Next period likely .*–.* · around .*, in 18 days$/);
+    expect(describeNextPeriod(a)).toMatch(/^Next period likely .*-.* · around .*, in 18 days$/);
   });
 
   it("calls a low-confidence estimate rough and shows the window", () => {
@@ -371,9 +371,9 @@ describe("describeNextPeriod — one sentence every surface can quote", () => {
     const a = analyzeCycle(logs, TODAY);
     expect(a.confidence).toBe("low");
     expect(describeNextPeriod(a)).toMatch(
-      /^Next period roughly .*–.* · a rough estimate, in about \d+ days$/,
+      /^Next period roughly .*-.* · a rough estimate, in about \d+ days$/,
     );
-    expect(describeNextPeriodShort(a)).toMatch(/^~.*–.*$/);
+    expect(describeNextPeriodShort(a)).toMatch(/^~.*-.*$/);
   });
 
   it("never dresses the 28-day fallback up as a prediction", () => {
@@ -392,7 +392,7 @@ describe("describeNextPeriod — one sentence every surface can quote", () => {
 
   it("points at a future-dated entry instead of predicting from it", () => {
     const a = analyzeCycle([{ id: "z", start: addDays(TODAY, 3), flow: null }], TODAY);
-    expect(describeNextPeriod(a)).toMatch(/starts .* — a date in the future$/);
+    expect(describeNextPeriod(a)).toMatch(/starts .*, a date in the future$/);
     expect(describeNextPeriodShort(a)).toMatch(/^starts /);
   });
 
@@ -402,7 +402,7 @@ describe("describeNextPeriod — one sentence every surface can quote", () => {
   });
 });
 
-describe("analyzeCycle — exclude-a-cycle (Wave B8)", () => {
+describe("analyzeCycle, exclude-a-cycle (Wave B8)", () => {
   const fourSteady = (excludedId?: string): PeriodLog[] =>
     [112, 84, 56, 28].map((n, i) => ({
       id: `p${i}`,

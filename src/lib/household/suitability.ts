@@ -195,7 +195,7 @@ export function judgeDishForHousehold(
       const t = normaliseTerm(term);
       const hit = ingredients.find((f) => f.name.toLowerCase().includes(t));
       if (hit) {
-        warnings.push(`Contains ${hit.name} — ${member.name} dislikes "${term}".`);
+        warnings.push(`Contains ${hit.name} - ${member.name} dislikes "${term}".`);
       }
     }
   }
@@ -247,7 +247,7 @@ export function caregiverLines(
   lines.push(
     member.pattern
       ? `${member.name} eats ${DIETARY_LABEL[member.pattern]}.`
-      : `${member.name} has no dietary pattern stated — no pattern filter is applied.`,
+      : `${member.name} has no dietary pattern stated, no pattern filter is applied.`,
   );
   if (member.allergies.length > 0) {
     const checkable: string[] = [];
@@ -258,12 +258,12 @@ export function caregiverLines(
     }
     if (checkable.length > 0) {
       lines.push(
-        `Allergic to: ${checkable.join(", ")} — every dish below is checked against these.`,
+        `Allergic to: ${checkable.join(", ")}, every dish below is checked against these.`,
       );
     }
     if (manual.length > 0) {
       lines.push(
-        `Allergic to: ${manual.join(", ")} — Bloom could not match ${
+        `Allergic to: ${manual.join(", ")}, Bloom could not match ${
           manual.length === 1 ? "this" : "these"
         } to an ingredient name, so check ${
           manual.length === 1 ? "it" : "them"

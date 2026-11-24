@@ -199,7 +199,7 @@ export function readings(input: {
     {
       id: "habits",
       label: "Habits",
-      value: habits.dueToday === 0 ? "—" : `${habits.completedToday} / ${habits.dueToday}`,
+      value: habits.dueToday === 0 ? "-" : `${habits.completedToday} / ${habits.dueToday}`,
       pct: habits.dueToday === 0 ? 0 : clamp01(habits.completedToday / habits.dueToday),
       empty: habits.dueToday === 0,
       to: "/",
@@ -207,7 +207,7 @@ export function readings(input: {
     {
       id: "mood",
       label: "Mood",
-      value: mood ? `${Math.round(mood.mood)} / 10` : "—",
+      value: mood ? `${Math.round(mood.mood)} / 10` : "-",
       pct: mood ? clamp01(mood.mood / 10) : 0,
       empty: !mood,
       to: "/mood",
@@ -216,7 +216,7 @@ export function readings(input: {
       ? {
           id: "sleep",
           label: "Sleep",
-          value: sleep.today === null ? "—" : fmt("sleep", sleep.today),
+          value: sleep.today === null ? "-" : fmt("sleep", sleep.today),
           pct: sleep.progress,
           empty: sleep.today === null,
           to: "/trackers",
@@ -228,7 +228,7 @@ export function readings(input: {
           label: "Study",
           value:
             study.today === null
-              ? "—"
+              ? "-"
               : `${fmt("study", study.today)} / ${fmt("study", study.goal)}`,
           pct: study.progress,
           empty: study.today === null,
@@ -240,7 +240,7 @@ export function readings(input: {
       : {
           id: "cycle",
           label: "Cycle",
-          value: cycleMode === "paused" ? "Paused" : cycleDay === null ? "—" : `Day ${cycleDay}`,
+          value: cycleMode === "paused" ? "Paused" : cycleDay === null ? "-" : `Day ${cycleDay}`,
           pct: cycleDay === null ? 0 : clamp01(cycleDay / cycleLen),
           empty: cycleDay === null,
           to: "/cycle",
@@ -254,7 +254,7 @@ export function readings(input: {
           ? `${energy.today} / 5`
           : mood
             ? `${Math.round(mood.energy)} / 10`
-            : "—",
+            : "-",
       pct:
         tracks("energy") && energy.today !== null
           ? clamp01(energy.today / 5)
@@ -293,14 +293,14 @@ export function scoreOf(input: {
 
   let note: string;
   if (present.length === 0)
-    note = "Nothing logged yet today — one tick or one check-in starts the ring.";
+    note = "Nothing logged yet today, one tick or one check-in starts the ring.";
   else if (habitPct === null && habits.dueToday === 0)
     note = "Add a habit and today's ring will have something to fill.";
   else if (moodPct === null) note = "Log today's mood to complete the picture.";
   else if (overall >= 80)
-    note = "A strong day — habits, trackers and mood are all pulling together.";
+    note = "A strong day, habits, trackers and mood are all pulling together.";
   else if (overall >= 60) note = "Steady rhythm. One more small thing completes more of the day.";
-  else note = "Early in the day — each thing you log adds to the picture.";
+  else note = "Early in the day, each thing you log adds to the picture.";
 
   const caption =
     present.length === 3
@@ -439,9 +439,9 @@ export function connections(input: {
           days: cycleDays,
           note:
             cycleMode === "paused"
-              ? "Cycle predictions are paused — history kept, nothing due, nothing late."
+              ? "Cycle predictions are paused, history kept, nothing due, nothing late."
               : cycle.upcomingStart
-                ? `Your latest period entry is dated in the future — fix it on the Cycle page.`
+                ? `Your latest period entry is dated in the future, fix it on the Cycle page.`
                 : cycle.cycleDay === null
                   ? "Log a period start and Bloom places you in your cycle."
                   : `Day ${cycle.cycleDay} · ${cycle.phaseLabel.toLowerCase()} phase${
@@ -454,7 +454,7 @@ export function connections(input: {
       days: energy.daysLogged,
       note:
         energy.daysLogged === 0
-          ? "Rate your energy 1–5 on Trackers."
+          ? "Rate your energy 1-5 on Trackers."
           : trackers.advanced.headline || `${energy.daysLogged} energy readings.`,
     },
     {
@@ -695,7 +695,7 @@ export function focusOf(input: {
   if (easing) {
     out.push({
       id: "cycle-ease",
-      title: "Ease is on — one habit is enough today",
+      title: "Ease is on, one habit is enough today",
       sub: "Pre-period days · change it on the Cycle page",
       kind: "cycle",
       done: false,

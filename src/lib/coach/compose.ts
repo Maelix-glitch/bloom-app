@@ -58,7 +58,7 @@ export interface ComposeInput {
 const LOG_NUDGE = [
   "If you log a few days, I can tell you whether that's what's happening for you specifically.",
   "Track it for a week and I can stop speaking generally and start speaking about you.",
-  "None of that is from your record — there's nothing in it yet. A few days of logging changes that.",
+  "None of that is from your record, there's nothing in it yet. A few days of logging changes that.",
 ];
 
 const pickFrom = (pool: string[] | undefined, seed: string): string | null =>
@@ -252,7 +252,7 @@ export function compose(input: ComposeInput): string[] {
  * rather than two paragraphs, and always offers a direction.
  */
 const OPEN_HANDED = [
-  "I don't have anything specific stored on that, but I'm happy to think it through with you — tell me a bit more about what's going on.",
+  "I don't have anything specific stored on that, but I'm happy to think it through with you, tell me a bit more about what's going on.",
   "That's outside what I track, though not outside what we can talk about. What's the part that's bothering you most?",
   "I can't look that one up, but say more and I'll help you reason about it.",
 ];

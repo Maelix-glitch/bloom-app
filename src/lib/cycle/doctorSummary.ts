@@ -75,15 +75,15 @@ export function buildDoctorSummary(input: {
           : "Not enough data",
     },
     {
-      label: "Shortest – longest counted cycle",
+      label: "Shortest, longest counted cycle",
       value:
         stats.shortest !== null && stats.longest !== null
-          ? `${stats.shortest} – ${stats.longest} days`
-          : "—",
+          ? `${stats.shortest} - ${stats.longest} days`
+          : "-",
     },
     {
       label: "Typical period length",
-      value: stats.averageBleed !== null ? `${Math.round(stats.averageBleed)} days` : "—",
+      value: stats.averageBleed !== null ? `${Math.round(stats.averageBleed)} days` : "-",
     },
   ];
   if (stats.excludedCycles > 0) {

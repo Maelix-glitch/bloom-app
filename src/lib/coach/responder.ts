@@ -122,7 +122,7 @@ export interface CoachQuestion {
 }
 
 const fmt = (value: number | null, digits = 1): string => {
-  if (value === null || !Number.isFinite(value)) return "—";
+  if (value === null || !Number.isFinite(value)) return "-";
   const rounded = Math.round(value * 10 ** digits) / 10 ** digits;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(digits);
 };
@@ -180,13 +180,13 @@ export function detectTopic(text: string, mode: CoachMode): Topic {
 
 const NOT_LOGGED: Record<string, string> = {
   sleep:
-    "You haven't logged a night yet. On the Trackers page, put in last night's bedtime and wake time — that's one field each, and tomorrow I can tell you something real about your week.",
+    "You haven't logged a night yet. On the Trackers page, put in last night's bedtime and wake time, that's one field each, and tomorrow I can tell you something real about your week.",
   water:
-    "No water logged yet. The Trackers page has +250ml and +500ml taps — use them as you drink and I'll read the day back to you.",
+    "No water logged yet. The Trackers page has +250ml and +500ml taps, use them as you drink and I'll read the day back to you.",
   study:
     "No study sessions logged yet. Add one with its minutes and a subject on the Trackers page and the heatmap starts drawing itself.",
   movement:
-    "Nothing logged for movement yet. Even ten minutes counts — log it on the Trackers page and it becomes data instead of a feeling.",
+    "Nothing logged for movement yet. Even ten minutes counts, log it on the Trackers page and it becomes data instead of a feeling.",
   energy:
     "No energy readings yet. It's one tap from 1 to 5 on the Trackers page, and it's the number that makes the other five make sense.",
   screen:
@@ -263,14 +263,14 @@ function trackerAnswer(topic: Topic, record: CoachRecord): CoachResponse | null 
   } else if (logged >= 3) {
     paragraphs.push(
       meetsTarget
-        ? `That's inside your target on average — steady rather than dramatic, which is usually what holds.`
-        : `That sits ${isCeiling ? "over" : "under"} your target on average. Not a verdict — just where the numbers are.`,
+        ? `That's inside your target on average, steady rather than dramatic, which is usually what holds.`
+        : `That sits ${isCeiling ? "over" : "under"} your target on average. Not a verdict, just where the numbers are.`,
     );
   }
 
   if (stat.today === null) {
     paragraphs.push(
-      `Today hasn't been logged yet — the ${stat.name.toLowerCase()} row is still empty on the Trackers page.`,
+      `Today hasn't been logged yet, the ${stat.name.toLowerCase()} row is still empty on the Trackers page.`,
     );
   } else {
     paragraphs.push(
@@ -333,7 +333,7 @@ function periodAnswer(record: CoachRecord): CoachResponse {
     );
     paragraphs.push(generalModelLine(record.today));
     paragraphs.push(
-      "When you want it personal: log the day bleeding starts on the Cycle page — one date — and the phase, the predicted window and how much to trust it all appear from your own record.",
+      "When you want it personal: log the day bleeding starts on the Cycle page, one date, and the phase, the predicted window and how much to trust it all appear from your own record.",
     );
     return { paragraphs, sources, blocks };
   }
@@ -350,8 +350,8 @@ function periodAnswer(record: CoachRecord): CoachResponse {
        the first line — a terse budget must never hide the honesty. */
     const assumed = (cycle.confidence ?? "") === "assumed";
     paragraphs.push(
-      `You're on day ${cycle.cycleDay} — ${cycle.phaseLabel.toLowerCase()}${
-        assumed ? " (from the general pattern — your logs will replace it)" : ""
+      `You're on day ${cycle.cycleDay} - ${cycle.phaseLabel.toLowerCase()}${
+        assumed ? " (from the general pattern, your logs will replace it)" : ""
       }. ${
         cycle.nextPeriod
           ? `${cycle.nextPeriod}.`
@@ -379,7 +379,7 @@ function periodAnswer(record: CoachRecord): CoachResponse {
 
   if (cycle.confidence && cycle.confidenceReason) {
     paragraphs.push(
-      `How much to trust that: ${cycle.confidence.toLowerCase()} confidence — ${cycle.confidenceReason}`,
+      `How much to trust that: ${cycle.confidence.toLowerCase()} confidence, ${cycle.confidenceReason}`,
     );
     sources.push("Cycle record", "Prediction confidence");
   }
@@ -415,16 +415,16 @@ function moodAnswer(topic: Topic, context: CoachContext, mode: CoachMode): Coach
     paragraphs.push(
       `Stress reads ${fmt(mood.recent.stress)} of 10 on average over the last week ${
         (mood.change.stress ?? 0) < -0.5
-          ? "— down from the week before."
+          ? ", down from the week before."
           : (mood.change.stress ?? 0) > 0.5
-            ? "— up against the week before. Spikes sit on specific days; they aren't your whole week."
+            ? ", up against the week before. Spikes sit on specific days; they aren't your whole week."
             : ", holding roughly steady."
       }`,
     );
     if (mood.anomalies.length > 0) {
       const worst = mood.anomalies[mood.anomalies.length - 1]!;
       paragraphs.push(
-        `The sharpest single day was ${worst.date} — ${
+        `The sharpest single day was ${worst.date} - ${
           worst.kind === "low" ? "a real low, not something you imagined" : "an unusual high"
         }. One hard day doesn't rewrite the trend.`,
       );
@@ -432,7 +432,7 @@ function moodAnswer(topic: Topic, context: CoachContext, mode: CoachMode): Coach
     sources.push("Last 7 days", "Previous 7 days", "Mood record");
   } else {
     paragraphs.push(
-      `Mood sits at ${fmt(mood.recent.mood)} of 10 across ${plural(mood.entries, "check-in")} — ${
+      `Mood sits at ${fmt(mood.recent.mood)} of 10 across ${plural(mood.entries, "check-in")} - ${
         dir === "improving"
           ? `up ${fmt(Math.abs(delta ?? 0))} on the week before`
           : dir === "declining"
@@ -444,7 +444,7 @@ function moodAnswer(topic: Topic, context: CoachContext, mode: CoachMode): Coach
       paragraphs.push(`One thing stands out: ${mood.patterns[0]!.statement.toLowerCase()}`);
     } else if (mood.entries >= 5) {
       paragraphs.push(
-        "Nothing repeats clearly yet — that's a reading too, not a failure. Patterns need a few ordinary weeks, not perfect streaks.",
+        "Nothing repeats clearly yet, that's a reading too, not a failure. Patterns need a few ordinary weeks, not perfect streaks.",
       );
     }
     sources.push("Last 7 days", "Mood record");
@@ -484,13 +484,13 @@ function planAnswer(record: CoachRecord, context: CoachContext): CoachResponse {
 
   if (bestBand) {
     paragraphs.push(
-      `Your energy logs say ${bestBand.label.toLowerCase()} is your strongest band this week — put the thing that needs a brain there and keep the rest gentle.`,
+      `Your energy logs say ${bestBand.label.toLowerCase()} is your strongest band this week, put the thing that needs a brain there and keep the rest gentle.`,
     );
     steps.push({ label: "The one task that needs real focus", time: bestBand.label.toLowerCase() });
     sources.push("Time-of-day bands");
   } else if (study && study.daysLogged >= 3) {
     paragraphs.push(
-      `You've studied on ${plural(study.daysLogged, "day")}, averaging ${study.format(Math.round(study.avg7 ?? 0))} — put the hardest hour where your logged energy is highest and leave the rest light.`,
+      `You've studied on ${plural(study.daysLogged, "day")}, averaging ${study.format(Math.round(study.avg7 ?? 0))}, put the hardest hour where your logged energy is highest and leave the rest light.`,
     );
     steps.push({ label: "One focused block on the thing that matters", time: "your best band" });
     sources.push("Trackers · Study");
@@ -539,7 +539,7 @@ function planAnswer(record: CoachRecord, context: CoachContext): CoachResponse {
     detail:
       study && study.daysLogged >= 3
         ? "Built from your logged days, not a template."
-        : "Partly from thin data — the more you log, the less generic this gets.",
+        : "Partly from thin data, the more you log, the less generic this gets.",
     steps,
   });
 
@@ -561,10 +561,10 @@ function generalAnswer(record: CoachRecord, context: CoachContext): CoachRespons
     (!record.cycle || record.cycle.daysLogged === 0)
   ) {
     paragraphs.push(
-      "I read from your own logs — sleep, water, study, movement, energy, screen, cycle and mood — and I'd rather say nothing than guess at something I can't see.",
+      "I read from your own logs, sleep, water, study, movement, energy, screen, cycle and mood, and I'd rather say nothing than guess at something I can't see.",
     );
     paragraphs.push(
-      "Right now that record is empty. Log one day on the Trackers page, or the start date of your period on the Cycle page, and ask me again — then the answer is yours rather than a template.",
+      "Right now that record is empty. Log one day on the Trackers page, or the start date of your period on the Cycle page, and ask me again, then the answer is yours rather than a template.",
     );
     return { paragraphs, sources, blocks };
   }
@@ -587,12 +587,12 @@ function generalAnswer(record: CoachRecord, context: CoachContext): CoachRespons
   if (cycle && cycle.daysLogged > 0) {
     if (cycle.paused) {
       paragraphs.push(
-        "Your cycle tracking is paused, so nothing counts as late right now — history is kept, and predictions resume when you switch tracking back on.",
+        "Your cycle tracking is paused, so nothing counts as late right now, history is kept, and predictions resume when you switch tracking back on.",
       );
     } else if (cycle.daysUntilNext !== null && cycle.daysUntilNext < 0) {
       paragraphs.push(
         cycle.nextPeriod ??
-          `Your period is about ${plural(Math.abs(cycle.daysUntilNext), "day")} past its estimated window — normal in itself; cycles shift.`,
+          `Your period is about ${plural(Math.abs(cycle.daysUntilNext), "day")} past its estimated window, normal in itself; cycles shift.`,
       );
       sources.push("Cycle record");
     } else if (cycle.cycleDay !== null) {
@@ -608,7 +608,7 @@ function generalAnswer(record: CoachRecord, context: CoachContext): CoachRespons
   }
 
   paragraphs.push(
-    "Ask me about any one of those — sleep, water, study, movement, energy, screen, your cycle, or how the week reads — and I'll go into it properly.",
+    "Ask me about any one of those, sleep, water, study, movement, energy, screen, your cycle, or how the week reads, and I'll go into it properly.",
   );
 
   const strongest = [...available].sort((a, b) => b.daysLogged - a.daysLogged)[0];
@@ -662,8 +662,8 @@ export function answer(
     if (available === 0 && name !== null && timeWord !== null) {
       return {
         paragraphs: [
-          `${timeWord}, ${name}. I'm Bloom's coach — I read whatever you log and help it make sense.`,
-          "There's nothing on the record yet, which is fine: day one is for looking around, not for perfect entries. Log one number when it's natural — last night's sleep, a glass of water — and ask me anything in the meantime.",
+          `${timeWord}, ${name}. I'm Bloom's coach. I read whatever you log and help it make sense.`,
+          "There's nothing on the record yet, which is fine: day one is for looking around, not for perfect entries. Log one number when it's natural, last night's sleep, a glass of water, and ask me anything in the meantime.",
         ],
         sources: [],
         blocks: [],
@@ -676,7 +676,7 @@ export function answer(
         paragraphs: [
           `${who}I've got ${plural(available, "tracker")} with entries on them${
             record.cycle && record.cycle.daysLogged > 0 ? " plus your cycle record" : ""
-          }. Ask me about any of it — or say "plan tonight".`,
+          }. Ask me about any of it, or say "plan tonight".`,
         ],
         sources: [],
         blocks: [],
@@ -685,7 +685,7 @@ export function answer(
 
     return {
       paragraphs: [
-        "I've got nothing logged to read from yet, so I'll be blunt rather than comforting: log one day on the Trackers page and I'll have something real to say. Until then, ask me anything general — sleep, stress, the app itself — and I'll answer from knowledge, not from your record.",
+        "I've got nothing logged to read from yet, so I'll be blunt rather than comforting: log one day on the Trackers page and I'll have something real to say. Until then, ask me anything general, sleep, stress, the app itself, and I'll answer from knowledge, not from your record.",
       ],
       sources: [],
       blocks: [],
@@ -713,7 +713,7 @@ export function answer(
       paragraphs: [
         `Your routine is ${plural(h.activeCount, "habit")} tracked; recent logs show ${plural(h.recentCompleted, "completion")} this window${
           h.previousCompleted > 0 ? `, ${h.previousCompleted} in the one before` : ""
-        }. ${h.recentCompleted >= h.previousCompleted ? "Holding or quietly improving." : "A little lighter than before — worth a glance at what changed."}`,
+        }. ${h.recentCompleted >= h.previousCompleted ? "Holding or quietly improving." : "A little lighter than before, worth a glance at what changed."}`,
       ],
       sources: ["Tracker data"],
       blocks: [],

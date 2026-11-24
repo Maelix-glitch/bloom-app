@@ -59,10 +59,10 @@ export const ACTIVITY_FACTOR: Record<ActivityLevel, number> = {
 
 export const ACTIVITY_LABEL: Record<ActivityLevel, string> = {
   sedentary: "Mostly sitting",
-  light: "Light — 1–2 days a week",
-  moderate: "Moderate — 3–4 days a week",
-  active: "Active — 5–6 days a week",
-  "very-active": "Very active — daily training",
+  light: "Light, 1-2 days a week",
+  moderate: "Moderate, 3-4 days a week",
+  active: "Active, 5-6 days a week",
+  "very-active": "Very active, daily training",
 };
 
 export const GOAL_LABEL: Record<BodyGoal, string> = {

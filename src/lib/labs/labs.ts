@@ -42,7 +42,7 @@ export const LAB_RESULTS_CAP = 200;
 
 /** The standing honesty line, shown wherever results are shown. */
 export const LABS_DISCLAIMER =
-  "Bloom does not interpret your results. It only shows each value against the range printed on your own report — talk to your doctor about what your results mean.";
+  "Bloom does not interpret your results. It only shows each value against the range printed on your own report, talk to your doctor about what your results mean.";
 
 export interface LabResult {
   id: string;

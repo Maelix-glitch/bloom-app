@@ -76,22 +76,22 @@ const HELLO_DAYPART: Record<string, string[]> = {
   night: [
     "Good night. What's on your mind?",
     "The quiet hours. Where shall we start?",
-    "Late one — what are we looking at?",
+    "Late one, what are we looking at?",
   ],
   morning: [
     "Morning. What's on your mind?",
     "Morning. Where shall we start?",
-    "A new day — what are we looking at?",
+    "A new day, what are we looking at?",
   ],
   afternoon: [
     "Afternoon. What's on your mind?",
     "Afternoon. Where shall we start?",
-    "Midway through the day — what's up?",
+    "Midway through the day, what's up?",
   ],
   evening: [
     "Evening. What's on your mind?",
     "Evening. Where shall we start?",
-    "Day's end — what are we looking at?",
+    "Day's end, what are we looking at?",
   ],
 };
 
@@ -101,7 +101,7 @@ const HELLO_NAMED: Record<string, string[]> = {
   morning: [
     "Morning, {name}. What's on your mind?",
     "Morning, {name}. Where shall we start?",
-    "Hi {name} — what are we looking at today?",
+    "Hi {name}, what are we looking at today?",
   ],
   afternoon: [
     "Afternoon, {name}. What's on your mind?",
@@ -119,9 +119,9 @@ const YOURE_WELCOME = [
 ];
 
 const WHO_I_AM = [
-  "I'm Bloom's coach. I read what you've logged and try to say something useful about it — no diagnosis, no guessing at numbers you haven't given me.",
+  "I'm Bloom's coach. I read what you've logged and try to say something useful about it, no diagnosis, no guessing at numbers you haven't given me.",
   "Bloom's coach. I work from your own record: trackers, check-ins, cycle, habits. If the data isn't there, I'll say so rather than make something up.",
-  "I'm the coach built into Bloom. Ask me about your week, your patterns, or whatever's on your mind — I'll stick to what your record actually shows.",
+  "I'm the coach built into Bloom. Ask me about your week, your patterns, or whatever's on your mind. I'll stick to what your record actually shows.",
 ];
 
 /**
@@ -171,7 +171,7 @@ const CARE_OPENERS: Partial<Record<Topic, string[]>> = {
  * in the record that genuinely bears on the question.
  */
 const UNTRACKED_NOTE: Partial<Record<Topic, string>> = {
-  food: "Bloom doesn't track meals, so I can't tell you what you ate — but energy and sleep usually show the shape of it.",
+  food: "Bloom doesn't track meals, so I can't tell you what you ate, but energy and sleep usually show the shape of it.",
   caffeine:
     "Caffeine isn't one of Bloom's trackers, though your sleep log is the place it tends to show up.",
   alcohol:
@@ -180,9 +180,9 @@ const UNTRACKED_NOTE: Partial<Record<Topic, string>> = {
   money:
     "That's outside what Bloom tracks, so I'll speak generally rather than pretending to read it in your data.",
   relationships:
-    "Bloom doesn't track people, only how your days go — so take what I say as general, not as something I've measured.",
+    "Bloom doesn't track people, only how your days go, so take what I say as general, not as something I've measured.",
   grief: "There's nothing in a tracker that measures this, and I won't pretend otherwise.",
-  loneliness: "Bloom can't see your social life, only your logs — so this is me talking generally.",
+  loneliness: "Bloom can't see your social life, only your logs, so this is me talking generally.",
   illness:
     "I'm not a clinician and Bloom isn't a medical record. For anything that worries you, a doctor beats an app.",
   pain: "Bloom doesn't track pain outside the cycle log, and persistent pain is a doctor's question, not an app's.",
@@ -192,20 +192,20 @@ const UNTRACKED_NOTE: Partial<Record<Topic, string>> = {
 /** Something concrete to offer, matched to the subject. */
 const OFFERS: Partial<Record<Topic, string[]>> = {
   motivation: [
-    "The trick that actually works is shrinking the task until starting is boring — two minutes, not two hours.",
+    "The trick that actually works is shrinking the task until starting is boring, two minutes, not two hours.",
     "Pick the smallest version of it that still counts, and do that. Momentum is easier to steer than to start.",
   ],
   time: [
     "If everything is a priority, nothing is. What would you drop if you had to drop one thing this week?",
-    "Look at where the hours actually went before deciding you need more of them — your screen log is a blunt but honest place to start.",
+    "Look at where the hours actually went before deciding you need more of them, your screen log is a blunt but honest place to start.",
   ],
   goals: [
     "A goal you can check off tonight beats one you can only check off in June.",
-    "Name the next action, not the outcome — 'open the document' rather than 'write the essay'.",
+    "Name the next action, not the outcome, 'open the document' rather than 'write the essay'.",
   ],
   work: [
     "One boundary, defended once, does more than a plan you don't keep.",
-    "If the workload is the problem, no amount of personal optimisation fixes it — that's worth saying out loud.",
+    "If the workload is the problem, no amount of personal optimisation fixes it, that's worth saying out loud.",
   ],
   confidence: [
     "Evidence beats reassurance: your record is full of days you showed up. That's not nothing.",
@@ -216,7 +216,7 @@ const OFFERS: Partial<Record<Topic, string[]>> = {
     "If energy is the complaint, the timing of meals usually matters more than their contents.",
   ],
   caffeine: [
-    "The usual rule of thumb is nothing after early afternoon — caffeine's half-life is long enough to still be working at bedtime.",
+    "The usual rule of thumb is nothing after early afternoon, caffeine's half-life is long enough to still be working at bedtime.",
     "If you're tired *and* wired, caffeine is normally propping up a sleep debt rather than fixing it.",
   ],
 };

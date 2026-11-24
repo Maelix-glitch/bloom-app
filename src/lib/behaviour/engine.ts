@@ -199,12 +199,12 @@ function habitCandidate(inp: NudgeInputs): Nudge | null {
       usualMinutes = usual.minutes;
       detail =
         streak >= 2
-          ? `You've ticked it ${streak} days in a row, usually by ${formatClock(usual.minutes)} — today it's still open.`
-          : `On your recent days you've usually ticked it by ${formatClock(usual.minutes)} — today it's still open.`;
+          ? `You've ticked it ${streak} days in a row, usually by ${formatClock(usual.minutes)}, today it's still open.`
+          : `On your recent days you've usually ticked it by ${formatClock(usual.minutes)}, today it's still open.`;
     } else if (!usual) {
       const recent = habitRecentDays(habit, inp.habitLogs, inp.today);
       if (recent >= MIN_PATTERN_DAYS) {
-        detail = `You've ticked it on ${recent} of the last 7 days — today it's still open.`;
+        detail = `You've ticked it on ${recent} of the last 7 days, today it's still open.`;
       }
     }
     if (!detail) continue;
@@ -272,7 +272,7 @@ function mealCandidate(inp: NudgeInputs): Nudge | null {
         kind: "meal",
         key: `meal:${meal}`,
         title: `${meal[0]!.toUpperCase()}${meal.slice(1)} isn't logged yet`,
-        detail: `You've logged ${meal} ${streak} days in a row, usually by ${formatClock(usual)} — today's is still open.`,
+        detail: `You've logged ${meal} ${streak} days in a row, usually by ${formatClock(usual)}, today's is still open.`,
         action: { kind: "open-nutrition" },
         actionLabel: "Log food",
       },
@@ -318,7 +318,7 @@ function moodCandidate(inp: NudgeInputs): Nudge | null {
     key: "mood:check-in",
     title: "No mood check-in yet today",
     detail: emotionalHigh
-      ? `You've checked in on ${days.size} of the last 7 days, usually by ${formatClock(usual)}. You told Bloom eating often follows your feelings — checking in keeps days like that visible.`
+      ? `You've checked in on ${days.size} of the last 7 days, usually by ${formatClock(usual)}. You told Bloom eating often follows your feelings, checking in keeps days like that visible.`
       : `You've checked in on ${days.size} of the last 7 days, usually by ${formatClock(usual)}.`,
     action: { kind: "open-mood" },
     actionLabel: "Check in",
@@ -344,8 +344,8 @@ function planCandidate(inp: NudgeInputs): Nudge | null {
     key: "plan:today",
     title: "No plan for today yet",
     detail: inp.plan
-      ? `Your last plan was for ${prettyDay(inp.plan.day)}. On ${firstByDay.size} of the last 7 days you'd started logging by ${formatClock(usual)} — a plan makes the day easier to follow.`
-      : `On ${firstByDay.size} of the last 7 days you'd started logging by ${formatClock(usual)} — a plan makes the day easier to follow.`,
+      ? `Your last plan was for ${prettyDay(inp.plan.day)}. On ${firstByDay.size} of the last 7 days you'd started logging by ${formatClock(usual)}, a plan makes the day easier to follow.`
+      : `On ${firstByDay.size} of the last 7 days you'd started logging by ${formatClock(usual)}, a plan makes the day easier to follow.`,
     action: { kind: "open-nutrition" },
     actionLabel: "Make today's plan",
   };

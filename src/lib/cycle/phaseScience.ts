@@ -40,22 +40,22 @@ export function phaseKeyOf(label: string | null | undefined): PhaseKey | null {
  */
 const PHASE_SCIENCE: Record<PhaseKey, string[]> = {
   menstrual: [
-    "During menstruation, prostaglandins make the uterus contract — the same chemistry behind cramps also tends to lower energy and deepen sleep need for a few days.",
+    "During menstruation, prostaglandins make the uterus contract, the same chemistry behind cramps also tends to lower energy and deepen sleep need for a few days.",
     "Iron loss across a period is one of the quieter reasons for mid-cycle tiredness; many people run measurably lower on haemoglobin by the end of a heavy one.",
-    "For most cycles, the first days are when rest is genuinely doing medical work, not laziness — recovery and blood loss overlap here.",
+    "For most cycles, the first days are when rest is genuinely doing medical work, not laziness, recovery and blood loss overlap here.",
   ],
   follicular: [
-    "After a period, oestrogen rises through the follicular phase — for many people this is the stretch where energy, focus and mood lift most reliably.",
+    "After a period, oestrogen rises through the follicular phase, for many people this is the stretch where energy, focus and mood lift most reliably.",
     "Rising oestrogen tends to improve sleep continuity and exercise recovery, which is why ambitious plans usually land easier here than in the luteal half.",
   ],
   ovulation: [
     "Around ovulation, oestrogen peaks and then drops; some people feel a clear energy and confidence bump, others mostly notice the dip on the far side of it.",
-    "This is the fertile window in a calendar estimate — useful for awareness, and deliberately imprecise: cycles ovulate on average 14 days before the *next* period, not 14 days after the last one.",
+    "This is the fertile window in a calendar estimate, useful for awareness, and deliberately imprecise: cycles ovulate on average 14 days before the *next* period, not 14 days after the last one.",
   ],
   luteal: [
-    "The luteal phase — after ovulation — runs on progesterone, which raises core temperature, can fragment sleep slightly, and for many people pulls mood and energy down towards the period. It's the most studied and most predictable part of the cycle.",
-    "Late-luteal dips in mood are common enough that research treats them as typical biology first and a concern only when they're severe or disruptive — that line, not the dip itself, is what PMS and PMDD descriptions actually draw.",
-    "Cravings and appetite rising before a period have a physiological side — energy use is measurably higher in the luteal phase — so it isn't a willpower failure when snack discipline loosens here.",
+    "The luteal phase, after ovulation, runs on progesterone, which raises core temperature, can fragment sleep slightly, and for many people pulls mood and energy down towards the period. It's the most studied and most predictable part of the cycle.",
+    "Late-luteal dips in mood are common enough that research treats them as typical biology first and a concern only when they're severe or disruptive, that line, not the dip itself, is what PMS and PMDD descriptions actually draw.",
+    "Cravings and appetite rising before a period have a physiological side, energy use is measurably higher in the luteal phase, so it isn't a willpower failure when snack discipline loosens here.",
   ],
 };
 
@@ -76,7 +76,7 @@ export function phaseScienceLine(
   const pool = PHASE_SCIENCE[key];
   const line = pool[hash(String(seed)) % pool.length]!;
   if ((confidence ?? "") === "assumed") {
-    return `${line} (That phase is from the general pattern, not your logs yet — worth treating loosely.)`;
+    return `${line} (That phase is from the general pattern, not your logs yet, worth treating loosely.)`;
   }
   return line;
 }
@@ -113,9 +113,9 @@ export function phaseBrief(): PhaseBriefLine[] {
  * This is the "0 entries" answer — not a nag to log, but real knowledge.
  */
 export const GENERAL_MODEL_LINES = [
-  "The textbook 28-day cycle is an average, not a rule — anything from about 21 to 35 days counts as a regular cycle, and day-to-day life, stress and sleep all move it.",
+  "The textbook 28-day cycle is an average, not a rule, anything from about 21 to 35 days counts as a regular cycle, and day-to-day life, stress and sleep all move it.",
   "Cycles are counted from the first day of one period to the first day of the next; the luteal half is the most stable part, which is why predictions lean on it.",
-  "Two logged period starts are what turn every general number on the cycle page into a personal one — until then the app deliberately shows population patterns, labelled as such.",
+  "Two logged period starts are what turn every general number on the cycle page into a personal one, until then the app deliberately shows population patterns, labelled as such.",
 ];
 
 /** Small stable string hash — same role as voice/messages.hashSeed, kept local

@@ -67,7 +67,7 @@ export type DataSufficiency =
   | "strong_personal_history";
 
 export const CONFIDENCE_LABEL: Record<Confidence, string> = {
-  assumed: "Based on a general pattern — no personal history yet",
+  assumed: "Based on a general pattern, no personal history yet",
   early: "Based on your first cycle",
   fair: "Building from a few cycles",
   strong: "Based on your own history",

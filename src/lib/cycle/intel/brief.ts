@@ -64,7 +64,7 @@ export function buildInsights(input: {
         title: "Your cycle lengths genuinely vary, and the forecast reflects that",
         body: `Across ${baseline.plausible.length} intervals your lengths ranged from ${baseline.min} to ${baseline.max} days. Bloom widens the window rather than pretending one date is exact.`,
         evidence: [
-          { label: "Range", value: `${baseline.min}–${baseline.max} days` },
+          { label: "Range", value: `${baseline.min}-${baseline.max} days` },
           { label: "Variation", value: `${(baseline.cvPercent ?? 0).toFixed(1)}%` },
           { label: "Intervals", value: `${baseline.plausible.length}` },
         ],
@@ -97,7 +97,7 @@ export function buildInsights(input: {
       body:
         baseline.starts.length === 0
           ? "Log the first day of a period. Bloom will not show a forecast until it has a measured interval to work from."
-          : "A single start records where a cycle began, but a cycle length needs two. Until then there is no personal estimate — only your logged history.",
+          : "A single start records where a cycle began, but a cycle length needs two. Until then there is no personal estimate, only your logged history.",
       evidence: [
         { label: "Starts recorded", value: `${baseline.starts.length}` },
         { label: "Intervals", value: `${baseline.plausible.length}` },
@@ -146,7 +146,7 @@ export function buildBrief(input: {
         ? `Cycle day ${phase.day} · ${phase.label.toLowerCase()}.`
         : "Current position unavailable.";
 
-  const next = `Next period estimated ${rangeLabel(forecast.next.from, forecast.next.to)} — ${confidence.label.toLowerCase()} confidence, based on ${forecast.intervalsUsed} recorded ${plural(forecast.intervalsUsed, "interval", "intervals")}.`;
+  const next = `Next period estimated ${rangeLabel(forecast.next.from, forecast.next.to)} - ${confidence.label.toLowerCase()} confidence, based on ${forecast.intervalsUsed} recorded ${plural(forecast.intervalsUsed, "interval", "intervals")}.`;
   const best = insights[0];
 
   return {
@@ -172,7 +172,7 @@ export function explainForecast(input: {
     lines.push("It does not substitute a 28-day population average for your own pattern.");
   } else {
     lines.push(
-      `Based on ${forecast.intervalsUsed} completed ${plural(forecast.intervalsUsed, "interval", "intervals")}: median ${baseline.median !== null ? Math.round(baseline.median) : "—"} days, range ${baseline.min}–${baseline.max}.`,
+      `Based on ${forecast.intervalsUsed} completed ${plural(forecast.intervalsUsed, "interval", "intervals")}: median ${baseline.median !== null ? Math.round(baseline.median) : "-"} days, range ${baseline.min}-${baseline.max}.`,
     );
     lines.push(
       `The window is ±${forecast.halfWidth} ${plural(forecast.halfWidth, "day", "days")}, widened by your own spread and, once available, by how far past estimates actually landed.`,

@@ -52,8 +52,8 @@ describe("groceryMessageFor", () => {
   });
 
   it("then bands by percentage", () => {
-    expect(groceryMessageFor(2, 8)).toBe("Getting started — one aisle at a time.");
-    expect(groceryMessageFor(11, 49)).toBe("Getting started — one aisle at a time.");
+    expect(groceryMessageFor(2, 8)).toBe("Getting started, one aisle at a time.");
+    expect(groceryMessageFor(11, 49)).toBe("Getting started, one aisle at a time.");
     expect(groceryMessageFor(12, 50)).toBe("You’re making good progress.");
     expect(groceryMessageFor(18, 75)).toBe("Just a few more things.");
     expect(groceryMessageFor(23, 100)).toBe("Everything’s in the basket. You’re all set!");

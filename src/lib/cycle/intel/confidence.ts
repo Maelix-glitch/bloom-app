@@ -107,7 +107,7 @@ export function assessConfidence(input: {
 
   const reason =
     level === "none"
-      ? "There is not enough personal history for a reliable estimate yet. Log a period start, then the next one — the second start is what creates your first measured interval."
+      ? "There is not enough personal history for a reliable estimate yet. Log a period start, then the next one, the second start is what creates your first measured interval."
       : level === "low"
         ? `A rough estimate only: ${variability.detail}. Treat the window as the answer, not the date.`
         : level === "moderate"

@@ -60,8 +60,8 @@ export function resolveVoiceIntent(intent: VoiceIntent, deps: VoiceActionDeps): 
     case "unknown":
       return noAction(
         intent.transcript
-          ? `I heard "${intent.transcript}" — that's not one I know yet. Try "mark gym done" or "drank 500 ml water".`
-          : "I didn't catch that — try again, or type it instead.",
+          ? `I heard "${intent.transcript}", that's not one I know yet. Try "mark gym done" or "drank 500 ml water".`
+          : "I didn't catch that, try again, or type it instead.",
       );
     case "navigate": {
       const target = intent.target;
@@ -77,10 +77,10 @@ export function resolveVoiceIntent(intent: VoiceIntent, deps: VoiceActionDeps): 
     case "tick-habit": {
       const match = matchByName(deps.habits, intent.heardName);
       if (match.status === "none")
-        return noAction(`No habit called "${intent.heardName}" on your list — nothing was marked.`);
+        return noAction(`No habit called "${intent.heardName}" on your list, nothing was marked.`);
       if (match.status === "ambiguous")
         return noAction(
-          `A few habits match "${intent.heardName}" (${match.candidates.map((c) => c.name).join(", ")}) — say the full name.`,
+          `A few habits match "${intent.heardName}" (${match.candidates.map((c) => c.name).join(", ")}), say the full name.`,
         );
       const habit = match.item;
       return {
@@ -96,9 +96,9 @@ export function resolveVoiceIntent(intent: VoiceIntent, deps: VoiceActionDeps): 
       const ml = waterMlOf(intent);
       if (ml === null)
         return noAction(
-          "I heard water, but no amount — say how much, like \"drank 500 ml water\" or \"two glasses of water\". Nothing was logged.",
+          "I heard water, but no amount, say how much, like \"drank 500 ml water\" or \"two glasses of water\". Nothing was logged.",
         );
-      if (ml <= 0 || ml > 8000) return noAction(`"${ml} ml" is outside what the water tracker takes — nothing was logged.`);
+      if (ml <= 0 || ml > 8000) return noAction(`"${ml} ml" is outside what the water tracker takes, nothing was logged.`);
       return {
         type: "action",
         label: `Log ${ml} ml of water?`,
@@ -119,16 +119,16 @@ export function resolveVoiceIntent(intent: VoiceIntent, deps: VoiceActionDeps): 
     case "log-food": {
       const match = matchByName(deps.foods, intent.heardName);
       if (match.status === "none")
-        return noAction(`No food called "${intent.heardName}" in your foods — nothing was logged.`);
+        return noAction(`No food called "${intent.heardName}" in your foods, nothing was logged.`);
       if (match.status === "ambiguous")
         return noAction(
-          `A few foods match "${intent.heardName}" (${match.candidates.map((c) => c.name).join(", ")}) — say the full name.`,
+          `A few foods match "${intent.heardName}" (${match.candidates.map((c) => c.name).join(", ")}), say the full name.`,
         );
       const food = match.item;
       const serving = food.servings[0];
       if (!serving)
         return noAction(
-          `"${food.name}" has no serving size stored, so voice can't portion it — log it from Nutrition this time.`,
+          `"${food.name}" has no serving size stored, so voice can't portion it, log it from Nutrition this time.`,
         );
       const count = intent.count ?? 1;
       const meal = intent.meal ?? deps.defaultMeal;
