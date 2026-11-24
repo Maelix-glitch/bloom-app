@@ -15,6 +15,7 @@ import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 import profileCss from "../styles/profile.css?url";
+import progressionCss from "../styles/progression.css?url";
 import storiesCss from "../styles/stories.css?url";
 import storiesFontsCss from "../styles/fonts-stories.css?url";
 
@@ -34,6 +35,11 @@ export const Route = createFileRoute("/settings")({
   head: () => ({
     links: [
       { rel: "stylesheet", href: profileCss },
+      /* The Appearance group hosts the themes gallery (M-241), whose
+         styles are the progression sheet's .thg-* block; the file is
+         fully namespaced (.pg-* and .thg-*), so it cannot restyle the
+         settings page itself. */
+      { rel: "stylesheet", href: progressionCss },
       /* The account sections open Stories surfaces (archive, viewer,
          story settings), so the Stories styles ride along as they did
          on /profile. */

@@ -17,7 +17,7 @@
   /* the meta contrast step (P2-2, R3) — same step as the global token */
   --faint-strong: #aba69c;
   --muted-foreground: #bcb7ad;
-  --sky: #879dbb;
+  --sky: #8fc7a2; /* M-240: value-locks to the new sage --info */
   --sage: #8fc7a2;
   --rose: #e3919f;
   --font-display: "Fraunces", ui-serif, Georgia, serif;

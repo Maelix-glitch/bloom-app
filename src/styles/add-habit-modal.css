@@ -29,12 +29,12 @@
   --ahm-border-hover: var(--border-strong);
   --ahm-text: var(--foreground);
   --ahm-text-muted: var(--muted-foreground);
-  /* No house equal — the modal's deepest quiet text. Lightened by the
-     2026-11-18 contrast audit: the old value measured 2.4–3.1:1 on the
-     modal's surfaces (WCAG AA needs 4.5:1); this one measures 4.77:1 on
-     --surface-3 and 5.71:1 on --surface, same blue-grey family. Pinned
-     by src/lib/contrast.guard.test.ts. */
-  --ahm-text-faint: #8a8da7;
+  /* No house equal: the modal's deepest quiet text. Lightened by the
+     2026-11-18 contrast audit (WCAG AA needs 4.5:1); M-240 re-grounded
+     it from blue-grey to a warm neutral and re-measured it at 5.27:1 on
+     --surface-3 and 6.31:1 on --surface. Pinned by
+     src/lib/contrast.guard.test.ts. */
+  --ahm-text-faint: #9a968e;
 
   --ahm-amber: var(--gold);
   --ahm-amber-dim: color-mix(in oklab, var(--gold) 14%, transparent);
@@ -42,8 +42,8 @@
   --ahm-sage-dim: rgba(127, 168, 143, 0.14);
   --ahm-rose: #c98ba0;
   --ahm-rose-dim: rgba(201, 139, 160, 0.14);
-  --ahm-sky: #7fa0c9;
-  --ahm-sky-dim: rgba(127, 160, 201, 0.14);
+  --ahm-sky: #8fc7a2; /* M-240: sage (was steel blue) */
+  --ahm-sky-dim: rgba(143, 199, 162, 0.14);
   --ahm-gold: #e8cf9a;
   --ahm-gold-dim: rgba(232, 207, 154, 0.14);
   --ahm-danger: var(--destructive);

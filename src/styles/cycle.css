@@ -61,29 +61,29 @@
 }
 
 /* ------------------------------- 3. Deep tide ----------------------------- */
-/* Charcoal-slate blue, crisp and technical. Raspberry / aqua / saffron. */
+/* Neutral ink, crisp and technical (M-240: was charcoal-slate blue). Raspberry / aqua / saffron. */
 .ci[data-theme="tide"] {
-  --ci-bg: #0d1620;
-  --ci-bg-deep: #080f16;
-  --ci-surface: #131f2a;
-  --ci-surface-2: #182734;
-  --ci-line: #1e2e3b;
-  --ci-line-strong: #2b4153;
+  --ci-bg: #0a0b0e;
+  --ci-bg-deep: #07080a;
+  --ci-surface: #111318;
+  --ci-surface-2: #171a21;
+  --ci-line: #1d2026;
+  --ci-line-strong: #2c3038;
   --ci-text: #edf1f5;
   --ci-text-soft: #c3ced7;
-  --ci-text-mute: #8b9baa;
+  --ci-text-mute: #93918b;
   --ci-menstrual: #c4557a;
   --ci-follicular: #3fb6c6;
   --ci-luteal: #2f8ca0;
   --ci-ovulation: #edbb5f;
-  --ci-late: #93a9c4;
+  --ci-late: #d9be8c;
   --ci-accent: #3fb6c6;
   --ci-accent-soft: rgba(63, 182, 198, 0.14);
   --ci-focus: #74d6e4;
   --ci-ok: #3fb6c6;
   --ci-warn: #edbb5f;
   --ci-danger: #e5765c;
-  --ci-input-bg: #0f1b26;
+  --ci-input-bg: #0d0e12;
   --ci-veil:
     radial-gradient(120% 80% at 10% -10%, rgba(63, 182, 198, 0.13), transparent 60%),
     radial-gradient(90% 70% at 100% 0%, rgba(196, 85, 122, 0.1), transparent 55%);
@@ -111,7 +111,7 @@
   --ci-follicular: #7fb8a6;
   --ci-luteal: #5f8f9d;
   --ci-ovulation: #dfb35c;
-  --ci-late: #9aa8b6;
+  --ci-late: #d9be8c;
   --ci-accent: #c9a86a;
   --ci-accent-soft: rgba(201, 168, 106, 0.15);
   --ci-focus: #e0c48c;
@@ -746,14 +746,14 @@ textarea.ci-input {
 }
 
 /* =========================================================================
-   6. Aurora — deep teal-indigo, glass panels, drifting light
+   6. Aurora — deep ink, glass panels, drifting light (M-240: grounds re-grounded from teal-indigo)
    ========================================================================= */
 
 .ci[data-theme="aurora"] {
-  --ci-bg: #09131a;
-  --ci-bg-deep: #050d12;
-  --ci-surface: rgba(16, 34, 42, 0.72);
-  --ci-surface-2: rgba(22, 46, 56, 0.6);
+  --ci-bg: #090b0d;
+  --ci-bg-deep: #050708;
+  --ci-surface: rgba(17, 19, 24, 0.72);
+  --ci-surface-2: rgba(23, 26, 33, 0.6);
   --ci-line: rgba(120, 200, 210, 0.14);
   --ci-line-strong: rgba(120, 200, 210, 0.26);
   --ci-text: #e8f6f4;
@@ -763,14 +763,14 @@ textarea.ci-input {
   --ci-follicular: #45e0c0;
   --ci-luteal: #2f9fbb;
   --ci-ovulation: #ffd166;
-  --ci-late: #9db6d8;
+  --ci-late: #d9be8c;
   --ci-accent: #45e0c0;
   --ci-accent-soft: rgba(69, 224, 192, 0.14);
   --ci-focus: #7ff2dd;
   --ci-ok: #45e0c0;
   --ci-warn: #ffd166;
   --ci-danger: #f2805f;
-  --ci-input-bg: rgba(8, 22, 28, 0.7);
+  --ci-input-bg: rgba(10, 11, 14, 0.7);
   --ci-veil: none;
   --ci-atmos-1: #1fb8a6;
   --ci-atmos-2: #dcc08f;
@@ -1426,7 +1426,7 @@ textarea.ci-input {
   --ci-follicular: var(--sky);
   --ci-luteal: var(--sage);
   --ci-ovulation: var(--gold);
-  --ci-late: #8f98ad;
+  --ci-late: #d9be8c;
   --ci-accent: var(--gold);
   --ci-accent-soft: color-mix(in oklab, var(--gold) 14%, transparent);
   --ci-focus: var(--gold-soft);
