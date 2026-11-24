@@ -492,7 +492,7 @@ export function StoryViewer({
           className="sv-frame relative flex h-full w-full max-w-[460px] flex-col overflow-hidden outline-none sm:h-[min(92dvh,860px)] sm:rounded-2xl sm:border sm:border-white/10"
           style={{
             background:
-              "radial-gradient(140% 90% at 50% 0%, oklch(0.24 0.024 280), oklch(0.155 0.018 279) 70%)",
+              "radial-gradient(140% 90% at 50% 0%, oklch(0.24 0.012 85), oklch(0.155 0.01 85) 70%)",
             boxShadow: "0 60px 140px -60px rgba(0,0,0,0.9)",
           }}
         >

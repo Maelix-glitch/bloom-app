@@ -144,7 +144,7 @@ export const FRAMES: FrameDef[] = [
   { id: "polaroid", name: "Polaroid", pad: 0.055, padBottom: 0.16, color: "#FBF8F1", shadow: true },
   { id: "mat", name: "Mat", pad: 0.06, color: "#FBF8F1", shadow: true },
   { id: "tape", name: "Tape", pad: 0, color: "rgba(244,239,228,0.42)", shadow: true },
-  { id: "film", name: "Film strip", pad: 0.09, color: "#14121C", shadow: true },
+  { id: "film", name: "Film strip", pad: 0.09, color: "#131316", shadow: true },
   { id: "window", name: "Window", pad: 0.05, color: "#F6F1E6", shadow: true },
   { id: "magazine", name: "Magazine", pad: 0.035, padBottom: 0.1, color: "#FFFFFF", shadow: true },
   { id: "torn-paper", name: "Torn paper", pad: 0.045, color: "#F7F2E6", shadow: true },

@@ -525,7 +525,7 @@ const COLLECTIONS: CollectionDef[] = [
     tone: "#dcc08f",
     componentIds: ["th-velvet-night", "pl-lavender-mist", "wp-night-sky", "fr-crescent", "fx-starlight"],
     includes:
-      "One complete look: the Velvet Night theme, Lavender Mist palette, Night Sky wallpaper, Crescent profile frame and Starlight unlock effect.",
+      "One complete look: the Velvet Night theme, Champagne Mist palette, Night Sky wallpaper, Crescent profile frame and Starlight unlock effect.",
     surfaces: ["Every Bloom surface", "Today", "Rewards", "Profile", "Rail"],
   },
   {
@@ -573,7 +573,7 @@ const COLLECTIONS: CollectionDef[] = [
     tone: "#c9b586",
     componentIds: ["th-midnight-tide", "pl-lavender-mist", "wp-moonlit-garden", "fr-soft-bloom", "fx-petals"],
     includes:
-      "One complete look: the Midnight Tide theme, Lavender Mist palette, Moonlit Garden wallpaper, Soft Bloom profile frame and Petals unlock effect.",
+      "One complete look: the Midnight Tide theme, Champagne Mist palette, Moonlit Garden wallpaper, Soft Bloom profile frame and Petals unlock effect.",
     surfaces: ["Every Bloom surface", "Today", "Rewards", "Profile", "Rail"],
   },
   {

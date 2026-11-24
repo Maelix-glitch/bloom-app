@@ -152,7 +152,7 @@ export function TextTool({
             background:
               value.background === "none" || value.background === "outline"
                 ? "transparent"
-                : "rgba(20,17,29,0.62)",
+                : "rgba(18,19,24,0.62)",
             borderColor: value.background === "outline" ? value.color : undefined,
           }}
         />
@@ -220,7 +220,7 @@ export function TextTool({
           <label
             className="se-swatch relative grid shrink-0 place-items-center overflow-hidden !outline-dashed"
             style={{
-              background: "conic-gradient(#e0a3b8, #eed9a4, #9db89a, #9fb6cf, #b7a6e8, #e0a3b8)",
+              background: "conic-gradient(#e0a3b8, #eed9a4, #9db89a, #9fb6cf, #dcc08f, #e0a3b8)",
             }}
             title="Custom colour"
           >

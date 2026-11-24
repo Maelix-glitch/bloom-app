@@ -19,15 +19,15 @@ export interface StorySwatch {
 }
 
 export const STORY_PALETTE: StorySwatch[] = [
-  { id: "ivory", label: "Ivory", color: "#f4efe4", onColor: "#221d33" },
-  { id: "midnight", label: "Midnight", color: "#221d33", onColor: "#f4efe4" },
-  { id: "lavender", label: "Lavender", color: "#b7a6e8", onColor: "#221d33" },
-  { id: "sage", label: "Sage", color: "#9db89a", onColor: "#221d33" },
+  { id: "ivory", label: "Ivory", color: "#f4efe4", onColor: "#20222a" },
+  { id: "midnight", label: "Midnight", color: "#20222a", onColor: "#f4efe4" },
+  { id: "pale-sage", label: "Pale sage", color: "#c3d2b8", onColor: "#1d2b22" },
+  { id: "sage", label: "Sage", color: "#9db89a", onColor: "#20222a" },
   { id: "rose", label: "Rose", color: "#e0a3b8", onColor: "#2c2130" },
   { id: "champagne", label: "Champagne", color: "#eed9a4", onColor: "#2c2415" },
   { id: "mist", label: "Mist blue", color: "#9fb6cf", onColor: "#1f2433" },
   { id: "sand", label: "Warm sand", color: "#d3b795", onColor: "#2c2415" },
-  { id: "ink", label: "Ink", color: "#14111d", onColor: "#f4efe4" },
+  { id: "ink", label: "Ink", color: "#121317", onColor: "#f4efe4" },
   { id: "clay", label: "Clay", color: "#c07a5e", onColor: "#fbf3e6" },
 ];
 
@@ -56,7 +56,7 @@ export const STORY_BACKGROUNDS: StoryBackground[] = [
   {
     id: "moonlight",
     name: "Moonlight",
-    css: "radial-gradient(130% 90% at 50% 0%, #3a3358 0%, #221d33 55%, #14111d 100%)",
+    css: "radial-gradient(130% 90% at 50% 0%, #33363f 0%, #20222a 55%, #121317 100%)",
     ink: "#f4efe4",
   },
   {
@@ -86,14 +86,14 @@ export const STORY_BACKGROUNDS: StoryBackground[] = [
   {
     id: "golden-hour",
     name: "Golden hour",
-    css: "radial-gradient(140% 90% at 50% 110%, #8a5a34 0%, #4a3040 45%, #221d33 100%)",
+    css: "radial-gradient(140% 90% at 50% 110%, #8a5a34 0%, #4a3428 45%, #20222a 100%)",
     ink: "#fbf0dd",
   },
   {
     id: "quiet-room",
     name: "Quiet room",
-    css: "linear-gradient(180deg, #33304a 0%, #262338 60%, #1a1828 100%)",
-    ink: "#ece7f7",
+    css: "linear-gradient(180deg, #303139 0%, #24252C 60%, #191a1f 100%)",
+    ink: "#f2eee3",
   },
   {
     id: "mist",
@@ -104,8 +104,8 @@ export const STORY_BACKGROUNDS: StoryBackground[] = [
   {
     id: "night-bloom",
     name: "Night bloom",
-    css: "radial-gradient(110% 70% at 80% 10%, #5b3a5e 0%, #2c2138 50%, #14111d 100%)",
-    ink: "#f2e4ef",
+    css: "radial-gradient(110% 70% at 80% 10%, #5e3a42 0%, #26242a 50%, #121317 100%)",
+    ink: "#f2e9e4",
   },
   {
     id: "paper",
@@ -316,21 +316,21 @@ export const STORY_FILTERS: StoryFilter[] = [
     name: "Matte",
     hint: "Low contrast, filmic blacks",
     css: "brightness(1.04) contrast(0.86) saturate(0.88)",
-    wash: ["rgba(232,230,240,0.12)", "screen", 1],
+    wash: ["rgba(238,234,226,0.12)", "screen", 1],
   },
   {
     id: "film",
     name: "Film",
     hint: "Quiet grain",
     css: "brightness(0.98) contrast(1.08) saturate(0.86)",
-    wash: ["rgba(30,24,40,0.18)", "multiply", 1],
+    wash: ["rgba(26,25,30,0.18)", "multiply", 1],
   },
   {
     id: "fade",
     name: "Fade",
     hint: "Washed and distant",
     css: "brightness(1.1) contrast(0.82) saturate(0.78)",
-    wash: ["rgba(240,238,244,0.18)", "screen", 1],
+    wash: ["rgba(242,240,234,0.18)", "screen", 1],
   },
   {
     id: "vintage",
@@ -356,7 +356,7 @@ export const STORY_FILTERS: StoryFilter[] = [
     name: "Dream",
     hint: "Soft glow, low clarity",
     css: "brightness(1.08) contrast(0.9) saturate(1.04) blur(0.3px)",
-    wash: ["rgba(224,196,232,0.14)", "screen", 1],
+    wash: ["rgba(232,196,205,0.14)", "screen", 1],
   },
   {
     id: "golden",
@@ -369,14 +369,14 @@ export const STORY_FILTERS: StoryFilter[] = [
     name: "Bloom",
     hint: "Bloom's own tint",
     css: "brightness(1.03) contrast(1.0) saturate(1.06) hue-rotate(10deg)",
-    wash: ["rgba(183,166,232,0.14)", "overlay", 1],
+    wash: ["rgba(220,192,143,0.14)", "overlay", 1],
   },
   {
     id: "midnight",
     name: "Midnight",
     hint: "Cool evening",
     css: "brightness(0.94) contrast(1.06) saturate(0.92) hue-rotate(-8deg)",
-    wash: ["linear-gradient(180deg, rgba(70,80,160,0.16), rgba(20,16,40,0.22))", "overlay", 1],
+    wash: ["linear-gradient(180deg, rgba(70,80,160,0.16), rgba(17,17,22,0.22))", "overlay", 1],
   },
   {
     id: "mist",
@@ -386,16 +386,19 @@ export const STORY_FILTERS: StoryFilter[] = [
     wash: ["rgba(220,225,235,0.14)", "screen", 1],
   },
   {
-    id: "lavender",
-    name: "Lavender",
-    hint: "Violet wash",
+    id: "dusk",
+    name: "Dusk",
+    hint: "Golden wash",
     css: "brightness(1.02) contrast(1.0) saturate(1.05) hue-rotate(12deg)",
-    wash: ["rgba(150,130,220,0.14)", "overlay", 1],
+    wash: ["rgba(198,168,110,0.14)", "overlay", 1],
   },
 ];
 
 export function filterById(id: string | null | undefined): StoryFilter {
-  return STORY_FILTERS.find((f) => f.id === id) ?? STORY_FILTERS[0]!;
+  /* M-233: the retired "lavender" filter is the "dusk" filter now — stored
+     stories that name it keep their look instead of falling back. */
+  const wanted = id === "lavender" ? "dusk" : id;
+  return STORY_FILTERS.find((f) => f.id === wanted) ?? STORY_FILTERS[0]!;
 }
 
 /** Compose adjustments into a single CSS filter string. */
@@ -463,7 +466,7 @@ export const GIFT_META: Record<StoryGiftKind, GiftMeta> = {
     tint: "#e8b4c4",
   },
   star: { id: "star", name: "Star", hint: "For a bright one", glyph: "⭐", tint: "#eed9a4" },
-  heart: { id: "heart", name: "Heart", hint: "Held close", glyph: "💜", tint: "#b7a6e8" },
+  heart: { id: "heart", name: "Heart", hint: "Held close", glyph: "💛", tint: "#dcc08f" },
   candle: { id: "candle", name: "Candle", hint: "A quiet light", glyph: "🕯️", tint: "#e8c98a" },
   moon: { id: "moon", name: "Moon", hint: "Rest well", glyph: "🌙", tint: "#9fb6cf" },
   ribbon: { id: "ribbon", name: "Ribbon", hint: "Tied with care", glyph: "🎀", tint: "#e0a3b8" },

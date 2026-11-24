@@ -108,8 +108,8 @@ export function paintEdges(paint: Paint): { from: string; to: string } {
     case "radial": {
       const sorted = [...paint.stops].sort((a, b) => a[0] - b[0]);
       return {
-        from: sorted[0]?.[1] ?? "#221D33",
-        to: sorted[sorted.length - 1]?.[1] ?? "#14111D",
+        from: sorted[0]?.[1] ?? "#20222A",
+        to: sorted[sorted.length - 1]?.[1] ?? "#121317",
       };
     }
     case "layers": {
@@ -118,8 +118,8 @@ export function paintEdges(paint: Paint): { from: string; to: string } {
       const first = washes[0] ? paintEdges(washes[0]).from : null;
       const last = washes.length > 0 ? paintEdges(washes[washes.length - 1]!).from : null;
       return {
-        from: first ?? (base && base.type === "solid" ? base.color : "#221D33"),
-        to: last ?? (base && base.type === "solid" ? base.color : "#14111D"),
+        from: first ?? (base && base.type === "solid" ? base.color : "#20222A"),
+        to: last ?? (base && base.type === "solid" ? base.color : "#121317"),
       };
     }
   }
@@ -131,7 +131,7 @@ export function paintStyle(paint: Paint): { background: string; backgroundImage?
     const images = paint.layers.filter((l) => l.type !== "solid").map(paintCss);
     const base = paint.layers.find((l) => l.type === "solid");
     return {
-      background: base && base.type === "solid" ? base.color : "#0c0a14",
+      background: base && base.type === "solid" ? base.color : "#0b0b0e",
       ...(images.length > 0 ? { backgroundImage: images.join(", ") } : {}),
     };
   }

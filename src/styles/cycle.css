@@ -23,30 +23,32 @@
 }
 
 
-/* ------------------------------ 2. Orchid ink ----------------------------- */
-/* Charcoal-plum ground, orchid bleed, jade and brass. Glassier raised panels. */
+/* ------------------------------ 2. Garnet ink ----------------------------- */
+/* Warm charcoal ground, garnet bleed, jade and brass. Glassier raised panels.
+   (Theme id stays "orchid" — it is the stored selection key; M-233
+   re-grounded every plum/violet value in this block to the brand family.) */
 .ci[data-theme="orchid"] {
-  --ci-bg: #12101a;
-  --ci-bg-deep: #0c0a13;
-  --ci-surface: #1a1626;
-  --ci-surface-2: #211c30;
-  --ci-line: #2a2338;
-  --ci-line-strong: #3a3150;
-  --ci-text: #f4edf4;
-  --ci-text-soft: #d0c5d8;
-  --ci-text-mute: #968ba6;
+  --ci-bg: #131110;
+  --ci-bg-deep: #0c0a09;
+  --ci-surface: #1d1917;
+  --ci-surface-2: #262019;
+  --ci-line: #2e2620;
+  --ci-line-strong: #453a2e;
+  --ci-text: #f4efe9;
+  --ci-text-soft: #d8cec2;
+  --ci-text-mute: #a29890;
   --ci-menstrual: #d2608f;
   --ci-follicular: #52b69b;
   --ci-luteal: #3e8c90;
   --ci-ovulation: #e3b55e;
-  --ci-late: #b39ad6;
+  --ci-late: #d9be8c;
   --ci-accent: #d2608f;
   --ci-accent-soft: rgba(210, 96, 143, 0.16);
-  --ci-focus: #d79ae0;
+  --ci-focus: #df9ab5;
   --ci-ok: #52b69b;
   --ci-warn: #e3b55e;
   --ci-danger: #e2795f;
-  --ci-input-bg: #15111f;
+  --ci-input-bg: #171310;
   --ci-veil:
     radial-gradient(120% 80% at 8% -10%, rgba(210, 96, 143, 0.16), transparent 60%),
     radial-gradient(90% 70% at 100% 0%, rgba(82, 182, 155, 0.1), transparent 55%);
@@ -771,7 +773,7 @@ textarea.ci-input {
   --ci-input-bg: rgba(8, 22, 28, 0.7);
   --ci-veil: none;
   --ci-atmos-1: #1fb8a6;
-  --ci-atmos-2: #7d4bd8;
+  --ci-atmos-2: #dcc08f;
   --ci-atmos-3: #e2578c;
   --ci-atmos-opacity: 0.3;
   --ci-glass: 1;

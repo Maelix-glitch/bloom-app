@@ -4,31 +4,41 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * No-violet guard (M-225, "Slop removal").
+ * No-violet guard (M-225, extended by M-233 — "total purge, no exemptions").
  *
- * The owner's ruling (2026-11-23): every violet/lavender tone is retired
- * from Bloom's UI chrome. The only colours chrome may use are the brand
- * family — ink, gold, gold-soft, sage, rose, cream (plus the desaturated
- * slate semantic --info/--sky). This guard scans the actual source files
- * (comments stripped — prose history is not paint) for:
+ * The owner's ruling (2026-11-23, reaffirmed 2026-11-24): every
+ * violet/lavender tone is retired from Bloom — not just app chrome. The
+ * only colours any surface may use are the brand family — ink, gold,
+ * gold-soft, sage, rose, cream (plus the desaturated slate semantic
+ * --info/--sky). M-225 exempted the Stories creative tooling and the
+ * non-default Cycle gallery themes as "user art"; the owner overruled
+ * both exemptions on 2026-11-24 ("the purple or the velvet night color
+ * is still there — change it all over"), so this guard now scans the
+ * WHOLE src tree, test files included, for:
  *
- *   1. hex colours in the violet band (HSL hue 240–300) at real saturation;
- *   2. oklch colours in the violet band at real chroma;
- *   3. the retired tokens themselves (--violet, --dim-violet, --coach-lav)
- *      being defined or consumed anywhere in chrome source.
+ *   1. hex colours in the violet band (HSL hue 240–320) at real saturation;
+ *   2. rgb()/rgba() colours in the same band at real saturation;
+ *   3. oklch colours in the violet band at real chroma;
+ *   4. hsl()/hsla() colours in the same band at real saturation;
+ *   5. the retired tokens themselves (--violet, --dim-violet, --coach-lav)
+ *      being defined or consumed anywhere in non-test source.
  *
- * ALLOWLIST (each with its justification — user content and opt-in theme
- * art are not app chrome):
- *   - src/components/stories/** and src/lib/stories/** — the Stories
- *     creative tooling: canvas backgrounds, paint/text/sticker palettes
- *     are colours the USER picks for their own story art.
- *   - The non-default Cycle gallery themes in src/styles/cycle.css
- *     ([data-theme="orchid"|"tide"|"fern"|"aurora"|"daybreak"|"ember"|"ink"])
- *     and their metadata in src/lib/cycle/themes.ts — opt-in theme art the
- *     user picks in the style gallery. The DEFAULT theme (nocturne) is
- *     pinned separately below: it must stay on house tokens.
- *   - Test files — fixtures may carry legacy stored values (e.g. a stored
- *     accent of "violet") precisely to prove the migration paths.
+ * Stories/Cycle content survives the purge as re-grounded brand-family
+ * equivalents: same swatches, presets, filters and themes, same slot
+ * counts — and stored ids resolve through the retired-id aliases in
+ * src/lib/stories/canvas/backgrounds.ts and src/lib/stories/catalogs.ts.
+ * Stored VALUES migrate the way M-225 taught: a stored accent of
+ * "violet" reads as gold (src/lib/profile/types.ts, src/lib/home/today.ts,
+ * the StoryEditor accent chain) — those string literals are data keys,
+ * not paint, and are not scanned here.
+ *
+ * FIXTURE ALLOWLIST (values only — each file must name the retired
+ * colours precisely to pin their absence; nothing here renders):
+ *   - src/lib/ui.guard.test.ts — carries banned-value fixtures it
+ *     asserts are absent from the stylesheets.
+ *   - src/lib/profile/presetAvatars.test.ts — negative pin: asserts no
+ *     curated avatar tint IS the retired violet #a58bff.
+ *   - this file — it names the retired tokens and bands to ban them.
  *
  * Near-black neutrals (lightness < 0.06) are exempt from the hex rule:
  * at that depth a hue reading is channel noise, and Bloom's ink grounds
@@ -39,13 +49,17 @@ import { describe, expect, it } from "vitest";
 
 const SRC = join(process.cwd(), "src");
 
-const ALLOWLISTED_PREFIXES = ["components/stories/", "lib/stories/"];
+const FIXTURE_FILES = new Set([
+  "lib/noViolet.guard.test.ts",
+  "lib/ui.guard.test.ts",
+  "lib/profile/presetAvatars.test.ts",
+]);
 
 function walk(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
     const p = join(dir, entry.name);
     if (entry.isDirectory()) walk(p, out);
-    else if (/\.(css|ts|tsx)$/.test(entry.name) && !/\.test\.(ts|tsx)$/.test(entry.name)) out.push(p);
+    else if (/\.(css|ts|tsx)$/.test(entry.name)) out.push(p);
   }
   return out;
 }
@@ -56,13 +70,11 @@ function stripComments(s: string): string {
   return s.replace(/\/\*[\s\S]*?\*\//g, "");
 }
 
-/** HSL of a #rgb/#rrggbb hex. Returns [hueDeg, saturation, lightness]. */
-function hsl(hex: string): [number, number, number] {
-  let h = hex.slice(1);
-  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
-  const r = parseInt(h.slice(0, 2), 16) / 255;
-  const g = parseInt(h.slice(2, 4), 16) / 255;
-  const b = parseInt(h.slice(4, 6), 16) / 255;
+/** HSL of an rgb triple (0–255). Returns [hueDeg, saturation, lightness]. */
+function hslOf(r: number, g: number, b: number): [number, number, number] {
+  r /= 255;
+  g /= 255;
+  b /= 255;
   const max = Math.max(r, g, b);
   const min = Math.min(r, g, b);
   const l = (max + min) / 2;
@@ -76,11 +88,37 @@ function hsl(hex: string): [number, number, number] {
   return [hue, s, l];
 }
 
+function hsl(hex: string): [number, number, number] {
+  let h = hex.slice(1);
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  return hslOf(parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16));
+}
+
+const inVioletBand = (hue: number, sat: number, light: number) =>
+  hue >= 240 && hue <= 320 && sat >= 0.2 && light >= 0.06;
+
 function violetHexes(text: string): string[] {
   const hits: string[] = [];
   for (const m of text.matchAll(/#(?:[0-9a-fA-F]{6}|[0-9a-fA-F]{3})\b/g)) {
     const [hue, sat, light] = hsl(m[0]);
-    if (hue >= 240 && hue <= 300 && sat >= 0.2 && light >= 0.06) hits.push(m[0]);
+    if (inVioletBand(hue, sat, light)) hits.push(m[0]);
+  }
+  return hits;
+}
+
+function violetRgbs(text: string): string[] {
+  const hits: string[] = [];
+  for (const m of text.matchAll(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/g)) {
+    const [hue, sat, light] = hslOf(Number(m[1]), Number(m[2]), Number(m[3]));
+    if (inVioletBand(hue, sat, light)) hits.push(m[0]);
+  }
+  return hits;
+}
+
+function violetHsls(text: string): string[] {
+  const hits: string[] = [];
+  for (const m of text.matchAll(/hsla?\(\s*([\d.]+)[,\s]+([\d.]+)%[,\s]+([\d.]+)%/g)) {
+    if (inVioletBand(Number(m[1]), Number(m[2]) / 100, Number(m[3]) / 100)) hits.push(m[0]);
   }
   return hits;
 }
@@ -92,35 +130,39 @@ function violetOklch(text: string): string[] {
     const hue = parseFloat(m[3]);
     // True violet band at any real chroma; the blue-violet edge (240–255)
     // only counts at high chroma so slate semantics stay legal.
-    if (hue > 255 && hue <= 300 && chroma >= 0.02) hits.push(m[0]);
+    if (hue > 255 && hue <= 320 && chroma >= 0.02) hits.push(m[0]);
     else if (hue >= 240 && hue <= 255 && chroma >= 0.09) hits.push(m[0]);
   }
   return hits;
 }
 
-const files = walk(SRC).filter((p) => {
-  const rel = p.slice(SRC.length + 1);
-  return !ALLOWLISTED_PREFIXES.some((prefix) => rel.startsWith(prefix));
-});
+const violetValues = (text: string) => [
+  ...violetHexes(text),
+  ...violetRgbs(text),
+  ...violetHsls(text),
+  ...violetOklch(text),
+];
 
-describe("M-225 · no violet in UI chrome", () => {
-  it("no violet-band hex or oklch values in chrome source", () => {
+const allFiles = walk(SRC);
+const valueFiles = allFiles.filter((p) => !FIXTURE_FILES.has(p.slice(SRC.length + 1)));
+const sourceFiles = allFiles.filter((p) => !/\.test\.(ts|tsx)$/.test(p));
+
+describe("M-233 · no violet anywhere in Bloom", () => {
+  it("no violet-band colour values in any source or test file", () => {
     const offenders: string[] = [];
-    for (const file of files) {
+    for (const file of valueFiles) {
       const rel = file.slice(SRC.length + 1);
-      // The non-default Cycle gallery themes are opt-in theme art (see header).
-      if (rel === "styles/cycle.css" || rel === "lib/cycle/themes.ts") continue;
       const text = stripComments(readFileSync(file, "utf8"));
-      for (const hit of [...violetHexes(text), ...violetOklch(text)]) {
+      for (const hit of violetValues(text)) {
         offenders.push(`${rel}: ${hit}`);
       }
     }
     expect(offenders).toEqual([]);
   });
 
-  it("the retired tokens are neither defined nor consumed in chrome source", () => {
+  it("the retired tokens are neither defined nor consumed in source", () => {
     const offenders: string[] = [];
-    for (const file of files) {
+    for (const file of sourceFiles) {
       const rel = file.slice(SRC.length + 1);
       const text = stripComments(readFileSync(file, "utf8"));
       for (const token of ["--violet", "--dim-violet", "--coach-lav", "--grad-violet", "--glow-violet"]) {
@@ -130,24 +172,34 @@ describe("M-225 · no violet in UI chrome", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("the default Cycle theme (nocturne) carries no violet literals", () => {
+  it("every Cycle gallery theme block is violet-free, the default included", () => {
     const css = stripComments(readFileSync(join(SRC, "styles/cycle.css"), "utf8"));
-    const blocks = css.match(/\.ci\[data-theme="nocturne"\]\s*\{[^}]*\}/g) ?? [];
+    const blocks = css.match(/\.ci\[data-theme="[a-z-]+"\]\s*\{[^}]*\}/g) ?? [];
     expect(blocks.length).toBeGreaterThan(0);
     for (const block of blocks) {
-      expect(violetHexes(block)).toEqual([]);
-      expect(violetOklch(block)).toEqual([]);
+      expect(violetValues(block)).toEqual([]);
       expect(block).not.toContain("--violet");
     }
   });
 
-  it("Velvet Night re-grounds on neutral ink, not hue-290 violet", () => {
+  it("Velvet Night grounds on warm night ink — no violet-band hue at any chroma", () => {
     const css = stripComments(readFileSync(join(SRC, "styles.css"), "utf8"));
     const block = css.match(/html\[data-bloom-theme="th-velvet-night"\]\s*\{[^}]*\}/)?.[0] ?? "";
     expect(block).not.toBe("");
-    expect(violetOklch(block)).toEqual([]);
-    expect(violetHexes(block)).toEqual([]);
+    expect(violetValues(block)).toEqual([]);
     expect(block).not.toContain("--violet");
+    // The owner named this theme: even a trace hue in the violet band fails.
+    for (const m of block.matchAll(/oklch\(\s*[\d.]+\s+[\d.]+\s+([\d.]+)/g)) {
+      const hue = parseFloat(m[1]);
+      expect(hue < 240 || hue > 320).toBe(true);
+    }
+  });
+
+  it("Ink Serenity no longer leans violet (was hue 280 throughout)", () => {
+    const css = stripComments(readFileSync(join(SRC, "styles.css"), "utf8"));
+    const block = css.match(/html\[data-bloom-theme="th-ink-serenity"\]\s*\{[^}]*\}/)?.[0] ?? "";
+    expect(block).not.toBe("");
+    expect(violetValues(block)).toEqual([]);
   });
 
   it("the grocery group icons are glyphs, never raw emoji", () => {

@@ -36,14 +36,14 @@ export const CYCLE_THEMES: CycleTheme[] = [
   },
   {
     id: "orchid",
-    name: "Orchid ink",
-    tagline: "Plum-black ground, orchid and jade",
+    name: "Garnet ink",
+    tagline: "Warm charcoal ground, garnet and jade",
     description:
-      "Warmer and more saturated than Nocturne. Charcoal-plum surfaces with a faint inner highlight, rounder 20px corners, and an orchid bleed phase against jade and brass.",
+      "Warmer and more saturated than Nocturne. Warm charcoal surfaces with a faint inner highlight, rounder 20px corners, and a garnet bleed phase against jade and brass.",
     palette: [
-      { label: "Ground", hex: "#12101a" },
-      { label: "Surface", hex: "#1a1626" },
-      { label: "Ink", hex: "#f4edf4" },
+      { label: "Ground", hex: "#131110" },
+      { label: "Surface", hex: "#1d1917" },
+      { label: "Ink", hex: "#f4efe9" },
       { label: "Menstrual", hex: "#d2608f" },
       { label: "Follicular", hex: "#52b69b" },
       { label: "Ovulation", hex: "#e3b55e" },

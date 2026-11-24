@@ -54,7 +54,7 @@ export function FilterTool({
         <span
           className="block size-full"
           style={{
-            background: "linear-gradient(160deg, #b7a6e8, #e0a3b8 55%, #eed9a4)",
+            background: "linear-gradient(160deg, #dcc08f, #e0a3b8 55%, #eed9a4)",
             filter: filterCss,
           }}
         />

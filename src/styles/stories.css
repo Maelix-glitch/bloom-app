@@ -22,7 +22,7 @@
   --story-ink-dim: rgba(244, 239, 228, 0.6);
   --story-ink-faint: rgba(244, 239, 228, 0.38);
   --story-veil: rgba(10, 11, 14, 0.5);
-  --story-chip: rgba(22, 19, 33, 0.65);
+  --story-chip: rgba(20, 20, 25, 0.65);
   --story-chip-line: rgba(244, 239, 228, 0.12);
   --story-radius: 20px;
   --story-ease: var(--ease-out-expo);
@@ -1627,7 +1627,7 @@
 .sdata-card {
   padding: var(--space-3) 16px;
   border-radius: 18px;
-  background: rgba(14, 11, 22, 0.4);
+  background: rgba(13, 13, 17, 0.4);
   border: 1px solid rgba(244, 239, 228, 0.14);
   backdrop-filter: blur(10px);
   align-items: flex-start;
@@ -1662,7 +1662,7 @@
 .sdata-bars {
   padding: 10px 14px;
   border-radius: 14px;
-  background: rgba(14, 11, 22, 0.32);
+  background: rgba(13, 13, 17, 0.32);
   border: 1px solid rgba(244, 239, 228, 0.1);
 }
 
@@ -1718,7 +1718,7 @@
 .sdata-list {
   padding: var(--space-3) 16px;
   border-radius: var(--radius-lg);
-  background: rgba(14, 11, 22, 0.38);
+  background: rgba(13, 13, 17, 0.38);
   border: 1px solid rgba(244, 239, 228, 0.12);
 }
 
@@ -1758,7 +1758,7 @@
   position: absolute;
   inset: 3px;
   border-radius: 50%;
-  background: rgba(14, 11, 22, 0.7);
+  background: rgba(13, 13, 17, 0.7);
 }
 
 .sdata-phase {

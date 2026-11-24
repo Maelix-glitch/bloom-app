@@ -390,9 +390,9 @@ export const DEFAULT_TEXT_STYLE: TextStyle = {
   leading: null,
   transform: null,
   backdrop: "none",
-  backdropColor: "rgba(20,17,29,0.62)",
+  backdropColor: "rgba(18,19,24,0.62)",
   outline: 0,
-  outlineColor: "#14111D",
+  outlineColor: "#121317",
   shadow: true,
   maxWidth: 340,
 };
