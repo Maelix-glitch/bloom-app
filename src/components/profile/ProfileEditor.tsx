@@ -195,7 +195,7 @@ export function ProfileEditor({
    * and "taken" handling never actually mattered.
    */
   const usernameProblem =
-    username.trim() === "" ? "Pick a @username — it's how people find you." : validateUsername(username);
+    username.trim() === "" ? "Pick a @username, it's how people find you." : validateUsername(username);
 
   const handleSave = useCallback(async () => {
     const nameInvalid = validateDisplayName(displayName);
@@ -206,7 +206,7 @@ export function ProfileEditor({
 
     const trimmed = username.trim().toLowerCase();
     if (trimmed === "") {
-      setSaveError("Pick a @username — it's how people find you.");
+      setSaveError("Pick a @username, it's how people find you.");
       return;
     }
     const usernameInvalid = validateUsername(trimmed);
@@ -347,7 +347,7 @@ export function ProfileEditor({
                 <h2 className="bsheet-h1 mt-2">Your profile</h2>
               </SheetItem>
               <SheetItem>
-                <p className="bsheet-sub mt-1.5">Name, photo and handle — what the rest of Bloom uses.</p>
+                <p className="bsheet-sub mt-1.5">Name, photo and handle, what the rest of Bloom uses.</p>
               </SheetItem>
 
               <SheetItem>
@@ -476,7 +476,7 @@ export function ProfileEditor({
                 </label>
                 {usernameProblem ? <FieldNote message={usernameProblem} error /> : null}
                 {usernameState === "unknown" ? (
-                  <FieldNote message="Couldn't check availability right now — we'll confirm on save." />
+                  <FieldNote message="Couldn't check availability right now, we'll confirm on save." />
                 ) : null}
                 {suggestions.length > 0 ? (
                   <div className="flex flex-wrap items-center gap-1.5" data-testid="username-suggestions">

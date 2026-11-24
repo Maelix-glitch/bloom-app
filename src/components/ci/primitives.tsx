@@ -136,7 +136,7 @@ export function Stat({
 /* -------------------------------- confidence -------------------------------- */
 
 const CONFIDENCE_LABEL: Record<Confidence, string> = {
-  none: "No confidence — generic estimate",
+  none: "No confidence, generic estimate",
   low: "Low confidence",
   medium: "Medium confidence",
   high: "High confidence",
@@ -167,7 +167,7 @@ export function ConfidenceBadge({
 export function Disclaimer({ className }: { className?: string | undefined }) {
   return (
     <p className={cn("text-[length:var(--text-caption)] leading-relaxed ci-muted", className)}>
-      Every date on this page is an estimate generated from the dates you logged — nothing more. It
+      Every date on this page is an estimate generated from the dates you logged, nothing more. It
       is not medical advice, it cannot diagnose anything, and the fertile window shown here is not
       contraception.
     </p>

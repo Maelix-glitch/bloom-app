@@ -26,7 +26,7 @@ export function RankChip({ points }: { points: number | null }) {
       <span style={{ display: "inline-flex", color: state.rank.tone }} aria-hidden>
         <Emblem id={state.rank.emblem} size={15} strokeWidth={1.7} />
       </span>
-      <span className="sr-only">{state.rank.name} —</span>
+      <span className="sr-only">{state.rank.name} -</span>
       {remaining > 0
         ? `${formatPoints(remaining)} points to ${state.next.name}`
         : `${state.rank.name} · ${formatPoints(points)} points`}

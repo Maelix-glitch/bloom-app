@@ -89,7 +89,7 @@ export function todayKey(now: Date = new Date()): string {
 }
 
 export function formatDate(key: string, locale?: string): string {
-  if (!isValidDateKey(key)) return "—";
+  if (!isValidDateKey(key)) return "-";
   const dt = new Date(parseDateKey(key));
   return dt.toLocaleDateString(locale ?? undefined, {
     day: "numeric",
@@ -100,7 +100,7 @@ export function formatDate(key: string, locale?: string): string {
 }
 
 export function formatDateShort(key: string, locale?: string): string {
-  if (!isValidDateKey(key)) return "—";
+  if (!isValidDateKey(key)) return "-";
   const dt = new Date(parseDateKey(key));
   return dt.toLocaleDateString(locale ?? undefined, {
     day: "numeric",
@@ -457,7 +457,7 @@ export function fertileEstimateGate(lengths: readonly number[]): {
   if (max - min > 9 || stdDev(lengths) > 7) {
     return {
       suppressed: true,
-      reason: `Your recent cycles range from ${min} to ${max} days. When cycles vary this much, a calendar fertile estimate would be a guess dressed up as a date, so Bloom isn't showing one — the phases and period predictions still use your record as usual.`,
+      reason: `Your recent cycles range from ${min} to ${max} days. When cycles vary this much, a calendar fertile estimate would be a guess dressed up as a date, so Bloom isn't showing one, the phases and period predictions still use your record as usual.`,
     };
   }
   const recent = lengths.slice(-3);
@@ -466,7 +466,7 @@ export function fertileEstimateGate(lengths: readonly number[]): {
     return {
       suppressed: true,
       reason:
-        "Most of your recent cycles sit outside the usual 21–35 day range, where calendar fertile estimates stop being reliable, so Bloom isn't showing one. Your period predictions still come from your own record.",
+        "Most of your recent cycles sit outside the usual 21-35 day range, where calendar fertile estimates stop being reliable, so Bloom isn't showing one. Your period predictions still come from your own record.",
     };
   }
   return { suppressed: false, reason: null };
@@ -504,15 +504,15 @@ export const PHASE_TIPS: Record<Phase, Tip[]> = {
   menstrual: [
     {
       title: "Replace what you lose",
-      body: "Bleeding draws on iron. Lentils, leafy greens, tofu, eggs or red meat — paired with something rich in vitamin C (citrus, peppers, tomatoes) to help your body absorb it.",
+      body: "Bleeding draws on iron. Lentils, leafy greens, tofu, eggs or red meat, paired with something rich in vitamin C (citrus, peppers, tomatoes) to help your body absorb it.",
     },
     {
       title: "Gentle movement beats total rest",
-      body: "A walk, easy yoga or light mobility work often settles cramps better than lying still. Heat is a real tool too: a hot water bottle or warm bath for 10–15 minutes.",
+      body: "A walk, easy yoga or light mobility work often settles cramps better than lying still. Heat is a real tool too: a hot water bottle or warm bath for 10-15 minutes.",
     },
     {
       title: "Lowering the bar is allowed",
-      body: "You don't need to hit your usual numbers this week. Treating these days as recovery — not as failure — tends to serve the rest of the month better.",
+      body: "You don't need to hit your usual numbers this week. Treating these days as recovery, not as failure, tends to serve the rest of the month better.",
     },
     {
       title: "Note what actually helped",
@@ -544,13 +544,13 @@ export const PHASE_TIPS: Record<Phase, Tip[]> = {
     },
     {
       title: "Most fertile window",
-      body: "This is the stretch of the cycle when pregnancy is most likely — relevant whether you're trying to conceive or trying to avoid it. A calendar estimate is not contraception.",
+      body: "This is the stretch of the cycle when pregnancy is most likely, relevant whether you're trying to conceive or trying to avoid it. A calendar estimate is not contraception.",
     },
   ],
   luteal: [
     {
       title: "A dip is chemistry, not character",
-      body: "Progesterone rises and then falls across the back half of the cycle. Lower mood, lower patience and tiredness are common here — hormonal, not a willpower problem.",
+      body: "Progesterone rises and then falls across the back half of the cycle. Lower mood, lower patience and tiredness are common here, hormonal, not a willpower problem.",
     },
     {
       title: "Magnesium-rich foods",
@@ -558,7 +558,7 @@ export const PHASE_TIPS: Record<Phase, Tip[]> = {
     },
     {
       title: "Consistency over intensity",
-      body: "Steady, moderate movement — walking, strength work at a slightly lower load — usually beats either grinding through or stopping entirely.",
+      body: "Steady, moderate movement, walking, strength work at a slightly lower load, usually beats either grinding through or stopping entirely.",
     },
     {
       title: "Cravings aren't a failure",
@@ -580,7 +580,7 @@ export const PHASE_TIPS: Record<Phase, Tip[]> = {
     },
     {
       title: "Keep logging either way",
-      body: "When it does arrive, log the first day — that single entry makes the next prediction better than any amount of waiting.",
+      body: "When it does arrive, log the first day, that single entry makes the next prediction better than any amount of waiting.",
     },
   ],
 };
@@ -608,7 +608,7 @@ export const PHASE_GUIDE: Record<
   ovulation: {
     window: "Around the estimated day",
     summary:
-      "One egg is released. It's a short window — and the stretch of the cycle where pregnancy is most likely, whichever way that matters to you.",
+      "One egg is released. It's a short window, and the stretch of the cycle where pregnancy is most likely, whichever way that matters to you.",
     signals: ["mucus changes", "a small temperature shift", "brief energy lift"],
   },
   luteal: {
@@ -663,11 +663,11 @@ export function analyzeCycle(
       reason =
         "Next to a cycle you've excluded from your averages, so this stretch isn't counted either. The record itself is unchanged.";
     } else if (days < o.minPlausible) {
-      reason = `${days} ${plural(days, "day", "days")} apart — too short for a cycle. Usually a duplicate or a mistyped date rather than a real cycle.`;
+      reason = `${days} ${plural(days, "day", "days")} apart, too short for a cycle. Usually a duplicate or a mistyped date rather than a real cycle.`;
     } else if (days > maxPlausible) {
       reason = longCyclesAccepted
-        ? `${days} days apart — longer even than your own long cycles (up to ${maxPlausible} days). Probably a period that went unlogged.`
-        : `${days} days apart — longer than a plausible cycle. Almost always a period that went unlogged, not one long cycle.`;
+        ? `${days} days apart, longer even than your own long cycles (up to ${maxPlausible} days). Probably a period that went unlogged.`
+        : `${days} days apart, longer than a plausible cycle. Almost always a period that went unlogged, not one long cycle.`;
     }
     gaps.push({
       index: i,
@@ -698,12 +698,12 @@ export function analyzeCycle(
     confidenceReason = "Nothing logged yet, so there is nothing to be confident about.";
   } else if (isGeneric) {
     confidence = "none";
-    confidenceReason = `Not personalised — the ${o.fallbackLength}-day figure below is a population average, not your pattern.`;
+    confidenceReason = `Not personalised, the ${o.fallbackLength}-day figure below is a population average, not your pattern.`;
   } else if (cycleLengths.length < 3 || variability > o.moderateVariability) {
     confidence = "low";
     confidenceReason =
       cycleLengths.length < 3
-        ? `Only ${cycleLengths.length} usable ${plural(cycleLengths.length, "cycle", "cycles")} so far — treat the dates as a rough guide.`
+        ? `Only ${cycleLengths.length} usable ${plural(cycleLengths.length, "cycle", "cycles")} so far, treat the dates as a rough guide.`
         : `Your cycle lengths vary by about ±${variability.toFixed(1)} days, which makes precise dates unlikely.`;
   } else if (cycleLengths.length >= 4 && variability <= o.lowVariability) {
     confidence = "high";
@@ -944,14 +944,14 @@ export function analyzeCycle(
       kind: "generic",
       tone: "info",
       title: "This is a placeholder, not your pattern",
-      body: `With ${sorted.length === 1 ? "one period logged" : "no usable cycle length yet"}, the ${o.fallbackLength}-day figure below is the population average — a starting point, not something derived from your body. Log one more period and it becomes yours.`,
+      body: `With ${sorted.length === 1 ? "one period logged" : "no usable cycle length yet"}, the ${o.fallbackLength}-day figure below is the population average, a starting point, not something derived from your body. Log one more period and it becomes yours.`,
     });
   } else if (cycleLengths.length < 3) {
     flags.push({
       id: "building",
       kind: "building",
       tone: "calm",
-      title: `${cycleLengths.length} usable ${plural(cycleLengths.length, "cycle", "cycles")} in — still a rough guide`,
+      title: `${cycleLengths.length} usable ${plural(cycleLengths.length, "cycle", "cycles")} in, still a rough guide`,
       body: "Predictions get noticeably steadier after three or four logged cycles. Until then the dates below are a direction, not a promise.",
     });
   }
@@ -963,8 +963,8 @@ export function analyzeCycle(
       id: "long-cycles",
       kind: "long-cycles",
       tone: "calm",
-      title: "Your cycles run long — and that's what Bloom now expects",
-      body: `Your record shows cycles of up to ${maxPlausible} days that agree with each other, so they count as your rhythm rather than as missed periods. Predictions, phases and the fertile window are built from that. Cycles this long are common and have many ordinary causes; if they're new for you, that's worth a conversation with a clinician — not because a chart flagged it.`,
+      title: "Your cycles run long, and that's what Bloom now expects",
+      body: `Your record shows cycles of up to ${maxPlausible} days that agree with each other, so they count as your rhythm rather than as missed periods. Predictions, phases and the fertile window are built from that. Cycles this long are common and have many ordinary causes; if they're new for you, that's worth a conversation with a clinician, not because a chart flagged it.`,
     });
   }
 
@@ -977,7 +977,7 @@ export function analyzeCycle(
       tone: "attention",
       title: `A ${g.days}-day gap in your record`,
       body: g.suggestedMissedDate
-        ? `Between ${formatDate(g.fromStart)} and ${formatDate(g.toStart)} there are ${g.days} days. That's almost always a period that went unlogged rather than one long cycle, so this gap is left out of your average. If you bled around ${formatDate(g.suggestedMissedDate)}, add it — the average corrects itself the moment you do.${
+        ? `Between ${formatDate(g.fromStart)} and ${formatDate(g.toStart)} there are ${g.days} days. That's almost always a period that went unlogged rather than one long cycle, so this gap is left out of your average. If you bled around ${formatDate(g.suggestedMissedDate)}, add it, the average corrects itself the moment you do.${
             g.days > o.maxPlausible * 2
               ? " A gap this long probably hides more than one period, so keep adding any you remember; each one sharpens the picture."
               : ""
@@ -1001,7 +1001,7 @@ export function analyzeCycle(
           : `Your period is ${lateBy} ${plural(lateBy, "day", "days")} later than predicted`,
       body: `${
         confidence === "low"
-          ? "That estimate was only a direction — built from a short or uneven record — so a week either side is normal. "
+          ? "That estimate was only a direction, built from a short or uneven record, so a week either side is normal. "
           : ""
       }Late periods are very common and usually have ordinary explanations: stress, travel or shifted sleep, being ill, a big change in weight or exercise, or some medications. Nothing here can diagnose anything. If being this late is unusual for you, or it becomes a pattern, that's worth raising with a doctor or nurse.${
         overdue
@@ -1019,7 +1019,7 @@ export function analyzeCycle(
       kind: "late",
       tone: "attention",
       title: `Day ${cycleDay} since your last logged start`,
-      body: `That is ${overdueDays} ${plural(overdueDays, "day", "days")} longer than the ${cycleLength}-day estimate, and Bloom still has no completed cycle to measure you against. It won't start a new cycle on its own — a cycle begins when you log the first day of a period. If one has started, add that day and everything here recalculates. If cycles are often this long or this is new for you, a doctor or nurse is the right person to ask; this page cannot tell you why.`,
+      body: `That is ${overdueDays} ${plural(overdueDays, "day", "days")} longer than the ${cycleLength}-day estimate, and Bloom still has no completed cycle to measure you against. It won't start a new cycle on its own, a cycle begins when you log the first day of a period. If one has started, add that day and everything here recalculates. If cycles are often this long or this is new for you, a doctor or nurse is the right person to ask; this page cannot tell you why.`,
       action: { label: "Log a period start", start: today },
     });
   }
@@ -1031,7 +1031,7 @@ export function analyzeCycle(
       kind: "variability",
       tone: "attention",
       title: "Your cycle lengths move around a fair bit",
-      body: `Across ${cycleLengths.length} cycles your lengths range roughly ±${variability.toFixed(1)} days from the average. Irregular cycles are common and have many ordinary causes — stress, sleep, weight change, coming off hormonal contraception, perimenopause, PCOS or thyroid conditions among them. Worth a conversation with a clinician if the pattern is persistent or a change from your own norm, not because a chart flagged it.`,
+      body: `Across ${cycleLengths.length} cycles your lengths range roughly ±${variability.toFixed(1)} days from the average. Irregular cycles are common and have many ordinary causes, stress, sleep, weight change, coming off hormonal contraception, perimenopause, PCOS or thyroid conditions among them. Worth a conversation with a clinician if the pattern is persistent or a change from your own norm, not because a chart flagged it.`,
     });
   }
 
@@ -1047,8 +1047,8 @@ export function analyzeCycle(
           : `Your cycles have been getting shorter`,
       body:
         trend.direction === "lengthening"
-          ? `Comparing the earlier half of your record with the recent half, your cycles are running about ${trend.days} ${plural(trend.days, "day", "days")} longer. Worth noticing, not worrying about — patterns drift over time and this recalculates from whatever you log.`
-          : `Comparing the earlier half of your record with the recent half, your cycles are running about ${trend.days} ${plural(trend.days, "day", "days")} shorter. Worth noticing, not worrying about — patterns drift over time and this recalculates from whatever you log.`,
+          ? `Comparing the earlier half of your record with the recent half, your cycles are running about ${trend.days} ${plural(trend.days, "day", "days")} longer. Worth noticing, not worrying about, patterns drift over time and this recalculates from whatever you log.`
+          : `Comparing the earlier half of your record with the recent half, your cycles are running about ${trend.days} ${plural(trend.days, "day", "days")} shorter. Worth noticing, not worrying about, patterns drift over time and this recalculates from whatever you log.`,
     });
   }
 
@@ -1131,7 +1131,7 @@ export function validateLogDraft(
   const start = draft.start?.trim() ?? "";
   if (start === "") {
     errors.start =
-      "Add the first day of your period — it's the one date every prediction hangs on.";
+      "Add the first day of your period, it's the one date every prediction hangs on.";
   } else if (!isValidDateKey(start)) {
     errors.start =
       "That date isn't one the calendar recognises. Use the date picker, or type YYYY-MM-DD.";
@@ -1139,7 +1139,7 @@ export function validateLogDraft(
     errors.start =
       "That date is in the future. Log a period that has already started, or use today.";
   } else if (diffDays(start, today) > MAX_YEARS_BACK * 365) {
-    errors.start = `That's more than ${MAX_YEARS_BACK} years back. Check the year — a typo here skews every average.`;
+    errors.start = `That's more than ${MAX_YEARS_BACK} years back. Check the year, a typo here skews every average.`;
   } else if (others.some((e) => e.start === start)) {
     errors.start = `You already have a period starting ${formatDate(start)}. Edit that entry instead of adding a second one.`;
   } else {
@@ -1150,7 +1150,7 @@ export function validateLogDraft(
     if (overlap) {
       const span =
         overlap.end && isValidDateKey(overlap.end) && overlap.end !== overlap.start
-          ? `${formatDateShort(overlap.start)} – ${formatDateShort(overlap.end)}`
+          ? `${formatDateShort(overlap.start)} - ${formatDateShort(overlap.end)}`
           : formatDateShort(overlap.start);
       errors.start = `That date falls inside the period you already logged for ${span}. Pick the day bleeding actually began, or edit that entry.`;
     }
@@ -1161,7 +1161,7 @@ export function validateLogDraft(
     if (!isValidDateKey(end)) {
       errors.end = "Use the date picker or type YYYY-MM-DD.";
     } else if (start !== "" && isValidDateKey(start) && diffDays(start, end) < 0) {
-      errors.end = `The end date is before the start date (${formatDateShort(start)}). Swap them, or clear the end date — it's optional.`;
+      errors.end = `The end date is before the start date (${formatDateShort(start)}). Swap them, or clear the end date, it's optional.`;
     } else if (diffDays(today, end) > 0) {
       errors.end = "The end date is in the future. Leave it blank until the bleeding stops.";
     } else if (start !== "" && isValidDateKey(start) && diffDays(start, end) + 1 > MAX_BLEED_DAYS) {
@@ -1255,13 +1255,13 @@ export function assessLogDraft(
       warnings.push({
         key: "start",
         message:
-          "That's more than two years back. Allowed — just check the year, because a typo here skews every average.",
+          "That's more than two years back. Allowed, just check the year, because a typo here skews every average.",
       });
     }
     if (gapBefore !== null && gapBefore < minPlausible) {
       warnings.push({
         key: "gap",
-        message: `Only ${gapBefore} ${plural(gapBefore, "day", "days")} after the period that started ${formatDate(before!.start)}. That's too close to count as a new cycle, so this gap will be left out of your average — if it's the same period continuing, extend that entry instead.`,
+        message: `Only ${gapBefore} ${plural(gapBefore, "day", "days")} after the period that started ${formatDate(before!.start)}. That's too close to count as a new cycle, so this gap will be left out of your average, if it's the same period continuing, extend that entry instead.`,
       });
     } else if (
       gapBefore !== null &&
@@ -1270,13 +1270,13 @@ export function assessLogDraft(
     ) {
       warnings.push({
         key: "gap",
-        message: `${gapBefore} days after your last start — noticeably earlier than your usual ${Math.round(options.averageLength)}. If this was spotting rather than a period, untick "first day of a period".`,
+        message: `${gapBefore} days after your last start, noticeably earlier than your usual ${Math.round(options.averageLength)}. If this was spotting rather than a period, untick "first day of a period".`,
       });
     }
     if (gapAfter !== null && gapAfter < minPlausible) {
       warnings.push({
         key: "gap",
-        message: `Only ${gapAfter} ${plural(gapAfter, "day", "days")} before the period that started ${formatDate(after!.start)}. One of the two is probably the same period — the gap will be left out of your average.`,
+        message: `Only ${gapAfter} ${plural(gapAfter, "day", "days")} before the period that started ${formatDate(after!.start)}. One of the two is probably the same period, the gap will be left out of your average.`,
       });
     }
   }
@@ -1286,7 +1286,7 @@ export function assessLogDraft(
     if (length > LONG_BLEED_DAYS) {
       warnings.push({
         key: "end",
-        message: `${length} days of bleeding is longer than most periods. It's recorded as you logged it — if bleeds this long are new for you, that's worth mentioning to a doctor or nurse.`,
+        message: `${length} days of bleeding is longer than most periods. It's recorded as you logged it, if bleeds this long are new for you, that's worth mentioning to a doctor or nurse.`,
       });
     }
   }
@@ -1319,7 +1319,7 @@ export function newLogId(): string {
  */
 export function describeNextPeriod(a: CycleAnalysis): string | null {
   if (a.upcomingStart) {
-    return `Your latest entry starts ${formatDateShort(a.upcomingStart)} — a date in the future`;
+    return `Your latest entry starts ${formatDateShort(a.upcomingStart)}, a date in the future`;
   }
   if (!a.nextStart || a.daysUntilNext === null) return null;
   const date = formatDateShort(a.nextStart);
@@ -1327,10 +1327,10 @@ export function describeNextPeriod(a: CycleAnalysis): string | null {
     return `${a.lateBy} ${plural(a.lateBy, "day", "days")} later than predicted (${date})`;
   }
   if (a.overdue) {
-    return `${a.overdueDays} ${plural(a.overdueDays, "day", "days")} past your usual ${a.expectedCycleLength}-day cycle — log the first day of a new period to restart the count`;
+    return `${a.overdueDays} ${plural(a.overdueDays, "day", "days")} past your usual ${a.expectedCycleLength}-day cycle, log the first day of a new period to restart the count`;
   }
   const w = a.nextWindow;
-  const span = w ? `${formatDateShort(w.from)}–${formatDateShort(w.to)}` : date;
+  const span = w ? `${formatDateShort(w.from)}-${formatDateShort(w.to)}` : date;
   const d = a.daysUntilNext;
   const soon = d === 0 ? "due today" : d > 0 ? `in ${d} ${plural(d, "day", "days")}` : null;
   const passed = d < 0 ? `${-d} ${plural(-d, "day", "days")} past the estimate` : null;
@@ -1345,7 +1345,7 @@ export function describeNextPeriod(a: CycleAnalysis): string | null {
       }`.trim();
     case "none":
     default:
-      return `Next period pencilled in for ${date} — a generic ${Math.round(a.averageLength)}-day guide, not your pattern yet`;
+      return `Next period pencilled in for ${date}, a generic ${Math.round(a.averageLength)}-day guide, not your pattern yet`;
   }
 }
 
@@ -1359,14 +1359,14 @@ export function describeNextPeriodShort(a: CycleAnalysis): string | null {
   if (a.confidence === "none") return "28-day guide only";
   if (a.confidence === "low") {
     const w = a.nextWindow;
-    return w ? `~${formatDateShort(w.from)}–${formatDateShort(w.to)}` : `~${d}d`;
+    return w ? `~${formatDateShort(w.from)}-${formatDateShort(w.to)}` : `~${d}d`;
   }
   if (d === 0) return "due today";
   return d > 0 ? `next in ${d}d` : `${-d}d past estimate`;
 }
 
 export function describeCountdown(daysUntilNext: number | null): string {
-  if (daysUntilNext === null) return "—";
+  if (daysUntilNext === null) return "-";
   if (daysUntilNext === 0) return "due today";
   if (daysUntilNext > 0) return `in ${daysUntilNext} ${plural(daysUntilNext, "day", "days")}`;
   const late = Math.abs(daysUntilNext);

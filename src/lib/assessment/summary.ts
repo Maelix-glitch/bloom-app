@@ -174,7 +174,7 @@ export function summaryOf(
     stat(
       identityStats,
       identityLines,
-      "BMI — calculated from your height and weight",
+      "BMI, calculated from your height and weight",
       bmi.toFixed(1),
       `BMI ${bmi.toFixed(1)}, calculated from the height and weight you gave.`,
     );
@@ -339,7 +339,7 @@ export function summaryOf(
   for (const attempt of a.pastAttempts) {
     behaviourLines.push(
       attempt.failureReasons.length > 0
-        ? `You've tried ${attempt.approach} before — it came unstuck over ${attempt.failureReasons.map((r) => FAILURE_REASON_LABEL[r].toLowerCase()).join(", ")}.`
+        ? `You've tried ${attempt.approach} before, it came unstuck over ${attempt.failureReasons.map((r) => FAILURE_REASON_LABEL[r].toLowerCase()).join(", ")}.`
         : `You've tried ${attempt.approach} before.`,
     );
   }

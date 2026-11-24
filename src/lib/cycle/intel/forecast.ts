@@ -32,7 +32,7 @@ const EMPTY: ForecastResult = {
   halfWidth: 0,
   bleedingWindow: null,
   intervalsUsed: 0,
-  method: "No completed cycle interval yet — nothing to estimate from.",
+  method: "No completed cycle interval yet, nothing to estimate from.",
 };
 
 export function forecastCycle(

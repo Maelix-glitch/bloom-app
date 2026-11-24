@@ -38,18 +38,18 @@ import { phaseBrief, phaseKeyOf, phaseScienceLine } from "@/lib/cycle/phaseScien
     canonical phase key so the label's exact wording can never orphan a pool. */
 const PHASE_HINTS: Record<string, string[]> = {
   menstrual: [
-    "A softer week is a strategy, not a retreat — put the gentlest plan on the hardest days.",
-    "Keep one small comfort prepped — heat pad, easy dinner — and let the plan bend around it.",
+    "A softer week is a strategy, not a retreat, put the gentlest plan on the hardest days.",
+    "Keep one small comfort prepped, heat pad, easy dinner, and let the plan bend around it.",
   ],
   follicular: [
-    "Energy tends to climb from here — a good stretch to point at the thing you've been postponing.",
+    "Energy tends to climb from here, a good stretch to point at the thing you've been postponing.",
     "If there's a habit to start, this is the window where starting is cheapest.",
   ],
   ovulation: [
-    "Some people feel their strongest days here — worth spending on what matters most to you.",
+    "Some people feel their strongest days here, worth spending on what matters most to you.",
   ],
   luteal: [
-    "Lower the bar, not the plan — pre-period weeks reward smaller, finished things.",
+    "Lower the bar, not the plan, pre-period weeks reward smaller, finished things.",
     "If the afternoons dip, front-load the day; the record says this week forgives it.",
   ],
 };
@@ -131,7 +131,7 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
           <div className="min-w-0">
             <p className="text-sm font-medium">Ease this week</p>
             <p className="mt-0.5 text-xs leading-snug text-muted-foreground">
-              Pre-period days ahead — Today will suggest one habit instead of two.
+              Pre-period days ahead. Today will suggest one habit instead of two.
             </p>
           </div>
           <Switch
@@ -141,7 +141,7 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
               setSettings(updated);
               saveCycleSettings(updated);
             }}
-            aria-label="Ease this week — one habit is enough on pre-period days"
+            aria-label="Ease this week, one habit is enough on pre-period days"
           />
         </div>
       ) : null}
@@ -187,7 +187,7 @@ export function PhaseCard({ analysis, today }: { analysis: CycleAnalysis; today:
                     }`}
                   >
                     {row.label}
-                    {phaseKeyOf(analysis.phaseLabel) === row.key ? " — today" : ""}
+                    {phaseKeyOf(analysis.phaseLabel) === row.key ? ", today" : ""}
                   </dt>
                   <dd className="mt-0.5 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
                     {row.line}

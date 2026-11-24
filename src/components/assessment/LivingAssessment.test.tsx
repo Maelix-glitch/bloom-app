@@ -96,17 +96,17 @@ function seed(): void {
   resetPrefCache();
 }
 
-describe("LivingAssessmentSection — the Profile card", () => {
+describe("LivingAssessmentSection, the Profile card", () => {
   it("shows grounded since-lines and the worth-updating prompt on a 4 kg drift", () => {
     seed();
     render(<AssessmentProfileCard />);
     expect(screen.getByText("Since your assessment")).toBeTruthy();
-    expect(screen.getByText(/Weigh-in on .*96 kg — 4 kg below the 100 kg/)).toBeTruthy();
+    expect(screen.getByText(/Weigh-in on .*96 kg, 4 kg below the 100 kg/)).toBeTruthy();
     expect(screen.getByText(/Food logged on 2 days since your assessment/)).toBeTruthy();
     expect(screen.getByText("Worth updating")).toBeTruthy();
   });
 
-  it("the delta form has no pattern or budget control — Assessment-only fields", () => {
+  it("the delta form has no pattern or budget control. Assessment-only fields", () => {
     seed();
     render(<AssessmentProfileCard />);
     fireEvent.click(screen.getByRole("button", { name: "Update weight, activity, sleep or kitchen" }));
@@ -135,7 +135,7 @@ describe("LivingAssessmentSection — the Profile card", () => {
     expect(screen.getByText(/Updated on .*weight 95\.5 kg/)).toBeTruthy();
   });
 
-  it("the kitchen facts can move by delta — and no reflective control exists (§10.5)", () => {
+  it("the kitchen facts can move by delta, and no reflective control exists (§10.5)", () => {
     seed();
     render(<AssessmentProfileCard />);
     fireEvent.click(screen.getByRole("button", { name: "Update weight, activity, sleep or kitchen" }));
@@ -166,6 +166,6 @@ describe("LivingAssessmentSection — the Profile card", () => {
       equipment: ["stove"],
     });
     /* And the update reads back as a since-line naming the kitchen. */
-    expect(screen.getByText(/Updated on .*cooking — basic cooking/)).toBeTruthy();
+    expect(screen.getByText(/Updated on .*cooking, basic cooking/)).toBeTruthy();
   });
 });

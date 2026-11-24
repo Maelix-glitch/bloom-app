@@ -68,5 +68,5 @@ export function isRawBasisFood(food: Food): boolean {
  * could mislead and nowhere else.
  */
 export function rawBasisFraming(food: Food): string | null {
-  return isRawBasisFood(food) ? "dry — weighed before cooking" : null;
+  return isRawBasisFood(food) ? "dry, weighed before cooking" : null;
 }

@@ -43,7 +43,7 @@ export function AiConsentSheet({
         </h2>
         <p className="mt-2.5 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
           {copy.description} When you use Coach or Vitalis, your message and the parts of your
-          record the reply depends on are sent to Bloom&rsquo;s AI providers — and if a reply is
+          record the reply depends on are sent to Bloom&rsquo;s AI providers, and if a reply is
           spoken aloud, its text goes to ElevenLabs, which provides the voice.
         </p>
         <p className="mt-2.5 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">

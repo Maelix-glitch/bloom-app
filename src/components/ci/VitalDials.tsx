@@ -88,7 +88,7 @@ function Gauge({
           fontSize={18}
           fill="var(--ci-text)"
         >
-          {value === null ? "—" : value.toFixed(decimals)}
+          {value === null ? "-" : value.toFixed(decimals)}
         </text>
         <text
           x={42}

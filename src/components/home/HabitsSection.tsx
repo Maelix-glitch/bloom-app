@@ -333,7 +333,7 @@ export function HabitsSection({
                     data-testid={`home-habit-yesterday-${h.id}`}
                     title="Forgot to tick it before bed? Add yesterday's tick and keep the streak."
                   >
-                    <History className="size-3" /> Did it yesterday? Tick it — keeps your streak
+                    <History className="size-3" /> Did it yesterday? Tick it, keeps your streak
                   </button>
                 ) : null}
               </li>
@@ -389,7 +389,7 @@ export function HabitsSection({
                   <span className="min-w-0 flex-1">
                     <span className="block truncate">{h.name}</span>
                     <span className="block text-[length:var(--text-meta)] text-muted-foreground">
-                      Paused until {h.pausedUntil ? formatDateShort(h.pausedUntil) : "—"} · streak
+                      Paused until {h.pausedUntil ? formatDateShort(h.pausedUntil) : "-"} · streak
                       kept
                     </span>
                   </span>
@@ -621,7 +621,7 @@ function HabitMenu({
         {actions.onArchive || actions.onDelete ? <DropdownMenuSeparator /> : null}
         {actions.onArchive ? (
           <DropdownMenuItem onSelect={() => actions.onArchive?.(habit.id)}>
-            <Archive className="size-4" /> Archive — keep its history
+            <Archive className="size-4" /> Archive, keep its history
           </DropdownMenuItem>
         ) : null}
         {actions.onDelete ? (

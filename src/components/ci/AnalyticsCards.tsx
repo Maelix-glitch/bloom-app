@@ -40,8 +40,8 @@ export function StatsStrip({ analysis }: { analysis: CycleAnalysis }) {
       label: "Range",
       value:
         stats.shortest !== null && stats.longest !== null
-          ? `${stats.shortest}–${stats.longest}d`
-          : "—",
+          ? `${stats.shortest}-${stats.longest}d`
+          : "-",
       sub: stats.shortest !== null ? "shortest to longest" : "needs two cycles",
     },
     {
@@ -54,7 +54,7 @@ export function StatsStrip({ analysis }: { analysis: CycleAnalysis }) {
     },
     {
       label: "Bleed length",
-      value: stats.averageBleed !== null ? `${stats.averageBleed}d` : "—",
+      value: stats.averageBleed !== null ? `${stats.averageBleed}d` : "-",
       sub:
         stats.averageBleed !== null
           ? `logged on ${stats.entriesWithEnd} of ${analysis.entryCount}`
@@ -62,7 +62,7 @@ export function StatsStrip({ analysis }: { analysis: CycleAnalysis }) {
     },
     {
       label: "Days tracked",
-      value: stats.daysTracked !== null ? String(stats.daysTracked) : "—",
+      value: stats.daysTracked !== null ? String(stats.daysTracked) : "-",
       sub: stats.firstEntry ? `since ${formatDate(stats.firstEntry)}` : "nothing logged yet",
     },
   ];
@@ -134,7 +134,7 @@ export function FlowBreakdown({ analysis }: { analysis: CycleAnalysis }) {
       </div>
       <p className="mt-3.5 text-[12px] leading-relaxed ci-muted">
         {mostCommonFlow && mostCommonFlow !== "unspecified"
-          ? `Most of your logged periods are ${FLOW_LABEL[mostCommonFlow].toLowerCase()} flow — ${flowCounts[mostCommonFlow]} of ${total}.`
+          ? `Most of your logged periods are ${FLOW_LABEL[mostCommonFlow].toLowerCase()} flow, ${flowCounts[mostCommonFlow]} of ${total}.`
           : "No single flow leads your record yet."}
         {analysis.stats.entriesWithNotes > 0
           ? ` ${analysis.stats.entriesWithNotes} ${analysis.stats.entriesWithNotes === 1 ? "entry has" : "entries have"} notes.`
@@ -146,7 +146,7 @@ export function FlowBreakdown({ analysis }: { analysis: CycleAnalysis }) {
         Every row shares one denominator: the {total} logged{" "}
         {total === 1 ? "period" : "periods"} in this record. A period with no flow recorded
         counts as “Not specified”{unspecified > 0 ? ` (${unspecified} of ${total})` : ""}, so the
-        rows add up to 100% — none of them is a share of the days you logged.
+        rows add up to 100%, none of them is a share of the days you logged.
       </p>
     </div>
   );
@@ -204,7 +204,7 @@ export function PhaseCards({
             </div>
 
             <p className="ci-num mt-2 text-[length:var(--text-caption)] ci-muted">
-              day {w.fromDay}–{w.toDay} · {days}d · {formatDate(w.from)} – {formatDate(w.to)}
+              day {w.fromDay}-{w.toDay} · {days}d · {formatDate(w.from)} - {formatDate(w.to)}
             </p>
             {!compact ? (
               <>
@@ -279,9 +279,9 @@ export function ForecastStrip({
                 estimate, and it disappears entirely (with the reason
                 below) when the record is too variable to support one. */}
             <p className="ci-num text-[length:var(--text-caption)] ci-muted">
-              predicted {formatDate(c.startFrom)} – {formatDate(c.startTo)}
+              predicted {formatDate(c.startFrom)} - {formatDate(c.startTo)}
               {c.fertileStart && c.fertileEnd
-                ? ` · fertile window estimated ${formatDate(c.fertileStart)} – ${formatDate(c.fertileEnd)}`
+                ? ` · fertile window estimated ${formatDate(c.fertileStart)} - ${formatDate(c.fertileEnd)}`
                 : ""}
             </p>
           </div>
@@ -301,7 +301,7 @@ export function ForecastStrip({
                   background: `var(--ci-${p.phase})`,
                   opacity: p.phase === "menstrual" ? 0.95 : 0.5,
                 }}
-                title={`${PHASE_LABEL[p.phase]} · day ${p.fromDay}–${p.toDay}`}
+                title={`${PHASE_LABEL[p.phase]} · day ${p.fromDay}-${p.toDay}`}
               />
             ))}
           </div>
@@ -311,7 +311,7 @@ export function ForecastStrip({
             ) : (
               <p className="mt-1.5 text-[length:var(--text-caption)] ci-muted">
                 Berry is the predicted bleed, gold is the estimated fertile window. Fertile dates
-                are estimated from your logged dates only — they move as your record grows.
+                are estimated from your logged dates only, they move as your record grows.
               </p>
             )
           ) : null}

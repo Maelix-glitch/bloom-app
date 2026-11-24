@@ -51,8 +51,8 @@ export function CycleModeCard({
     return (
       <p className="mt-3 text-[length:var(--text-caption)] ci-muted" data-testid="cycle-mode">
         {predictionsOff
-          ? "Expecting periods — predictions hidden by you. "
-          : "Expecting periods — predictions on. "}
+          ? "Expecting periods, predictions hidden by you. "
+          : "Expecting periods, predictions on. "}
         <button
           type="button"
           className="underline underline-offset-2 hover:text-[var(--ci-text)]"
@@ -101,10 +101,10 @@ export function CycleModeCard({
           </p>
           <p className="mt-1 max-w-[58ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
             {mode === "tracking"
-              ? "Pregnancy, postpartum, contraception with no bleed, menopause, or just a break — tell Bloom and it stops predicting and never calls anything late. Your history stays."
+              ? "Pregnancy, postpartum, contraception with no bleed, menopause, or just a break, tell Bloom and it stops predicting and never calls anything late. Your history stays."
               : mode === "paused"
                 ? "Nothing is predicted and nothing is late. Your history and the daily log are still here; turn tracking back on whenever periods return."
-                : "The cycle is out of Today, the sidebar and the coach. Your history is kept — switch it back on any time."}
+                : "The cycle is out of Today, the sidebar and the coach. Your history is kept, switch it back on any time."}
           </p>
         </div>
         {mode !== "tracking" ? (
@@ -158,7 +158,7 @@ export function CycleModeCard({
                   <option key={r} value={r} />
                 ))}
               </datalist>
-              <span className="ci-hint mt-1.5 block">Never required — a note to yourself.</span>
+              <span className="ci-hint mt-1.5 block">Never required, a note to yourself.</span>
             </label>
           </div>
           <div className="flex flex-wrap items-center gap-2 lg:pt-[26px]">
@@ -188,8 +188,8 @@ export function CycleModeCard({
             <p className="text-[13px] font-medium">Predictions</p>
             <p className="mt-1 text-[length:var(--text-support)] leading-relaxed ci-soft">
               {predictionsOff
-                ? "Hidden — no dates, phases or fertile estimates anywhere, and no cycle reminders. Logging works exactly as before, and your record keeps learning."
-                : "Shown — next period, phases and fertile estimates, all from your record. You can hide them without pausing if you'd rather just log."}
+                ? "Hidden, no dates, phases or fertile estimates anywhere, and no cycle reminders. Logging works exactly as before, and your record keeps learning."
+                : "Shown, next period, phases and fertile estimates, all from your record. You can hide them without pausing if you'd rather just log."}
             </p>
           </div>
           <Button

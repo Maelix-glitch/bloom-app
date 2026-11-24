@@ -92,9 +92,9 @@ export const STEP_INTRO: Record<QuestionStep, string> = {
   nutrition: "Your usual pattern, not a perfect week.",
   preferences: "Anything Bloom should keep off your plate, and what you enjoy.",
   behaviour:
-    "How eating actually goes for you — cravings, hard moments, and what has or has not worked before. Bloom uses this to shape support, never to judge you.",
+    "How eating actually goes for you, cravings, hard moments, and what has or has not worked before. Bloom uses this to shape support, never to judge you.",
   sleep: "Sleep is where recovery happens. Answer for a typical week.",
-  activity: "Your usual week, including work and walking — not just exercise sessions.",
+  activity: "Your usual week, including work and walking, not just exercise sessions.",
 };
 
 export const GOAL_OPTIONS: readonly { value: VitalisGoal; label: string; hint: string }[] = [
@@ -140,10 +140,10 @@ export const ACTIVITY_OPTIONS: readonly { value: ActivityLevel; label: string; h
   {
     value: "light",
     label: "Light",
-    hint: "On your feet some of the day, or active 1–2 days a week",
+    hint: "On your feet some of the day, or active 1-2 days a week",
   },
-  { value: "moderate", label: "Moderate", hint: "Active 3–4 days a week" },
-  { value: "active", label: "Active", hint: "Active 5–6 days a week, or a physical job" },
+  { value: "moderate", label: "Moderate", hint: "Active 3-4 days a week" },
+  { value: "active", label: "Active", hint: "Active 5-6 days a week, or a physical job" },
   { value: "very_active", label: "Very active", hint: "Training daily, or heavy physical work" },
 ];
 
@@ -210,8 +210,8 @@ export const BUDGET_OPTIONS: readonly {
 ];
 
 export const BUDGET_LABEL: Record<1 | 2 | 3, string> = {
-  1: `Keep it light — about ₹${BUDGET_TIER_1_MAX_PER_SERVING} a serving`,
-  2: `Moderate — about ₹${BUDGET_TIER_2_MAX_PER_SERVING} a serving`,
+  1: `Keep it light, about ₹${BUDGET_TIER_1_MAX_PER_SERVING} a serving`,
+  2: `Moderate, about ₹${BUDGET_TIER_2_MAX_PER_SERVING} a serving`,
   3: "No limit",
 };
 
@@ -311,7 +311,7 @@ export const RESTEDNESS_LABEL: Record<number, string> = {
 
 export const COOKING_OPTIONS: readonly { value: CookingAbility; label: string; hint: string }[] = [
   { value: "none", label: "I don't cook", hint: "Meals are made for me, or bought ready" },
-  { value: "basic", label: "Basic cooking", hint: "Simple things — eggs, rice, a curry base" },
+  { value: "basic", label: "Basic cooking", hint: "Simple things, eggs, rice, a curry base" },
   { value: "confident", label: "Confident cooking", hint: "Most recipes are fine" },
 ];
 

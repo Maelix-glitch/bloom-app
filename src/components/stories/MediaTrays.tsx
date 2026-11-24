@@ -119,7 +119,7 @@ export function MusicTray({
   };
 
   return (
-    <StorySheet title="Music" subtitle="Set the mood — gently." onClose={onClose}>
+    <StorySheet title="Music" subtitle="Set the mood, gently." onClose={onClose}>
       <audio ref={audioRef} preload="none" onEnded={() => setPreviewId(null)} />
       <div className="flex flex-col gap-3 pb-2">
         {musicProvider.configured ? (

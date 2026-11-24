@@ -72,7 +72,7 @@ export function ReportSheet({
         reason,
       });
       if (ok) {
-        toast("Report sent. Thank you — we'll take a look.");
+        toast("Report sent. Thank you, we'll take a look.");
         onClose();
       } else {
         toast.error("That report couldn't be sent. Please try again in a moment.");
@@ -98,7 +98,7 @@ export function ReportSheet({
         </h2>
         <p className="mt-2.5 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
           What&rsquo;s wrong with {targetName}&rsquo;s {KIND_NOUN[targetKind]}? Reports are
-          private — the other person is not told, and reporting doesn&rsquo;t block them.
+          private, the other person is not told, and reporting doesn&rsquo;t block them.
         </p>
 
         <div className="mt-5 flex flex-col gap-2" role="radiogroup" aria-label="Reason">
@@ -209,7 +209,7 @@ export function SafetyMenuSheet({
             {targetName}
           </h2>
           <p className="mt-2.5 max-w-[46ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            Two separate things — reporting tells Bloom to take a look; blocking hides the two of
+            Two separate things, reporting tells Bloom to take a look; blocking hides the two of
             you from each other.
           </p>
           <div className="mt-6 flex flex-col gap-2.5">
@@ -252,7 +252,7 @@ export function SafetyMenuSheet({
         open={open && view === "block"}
         onClose={() => setView("menu")}
         title={`Block ${targetName}?`}
-        description="Blocking hides both directions: their stories and profile disappear for you, and yours disappear for them — including search. You can undo this any time in Settings → Privacy → Blocked people."
+        description="Blocking hides both directions: their stories and profile disappear for you, and yours disappear for them, including search. You can undo this any time in Settings → Privacy → Blocked people."
         confirmLabel="Block"
         cancelLabel="Cancel"
         tone="default"

@@ -170,7 +170,7 @@ export function DishesSection({ day }: { day: string }) {
         />
         <Input
           aria-label="Search dishes"
-          placeholder="Search dishes — try “dal” or “दाल”"
+          placeholder="Search dishes, try “dal” or “दाल”"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           className="pl-10"
@@ -225,9 +225,9 @@ export function DishesSection({ day }: { day: string }) {
              dishBrowse.test.ts), so it says so instead of implying a
              selection happened. */
           pattern === "non_vegetarian" ? (
-            <> · your pattern is {DIETARY_LABEL[profile.dietary.pattern]} — it excludes nothing</>
+            <> · your pattern is {DIETARY_LABEL[profile.dietary.pattern]}, it excludes nothing</>
           ) : (
-            <> · showing what suits you — {DIETARY_LABEL[profile.dietary.pattern]} pattern</>
+            <> · showing what suits you, {DIETARY_LABEL[profile.dietary.pattern]} pattern</>
           )
         ) : null}
         {budgetTier === 1 ? <> · your everyday ₹ budget preferred first</> : null}
@@ -246,7 +246,7 @@ export function DishesSection({ day }: { day: string }) {
       {rows.length === 0 ? (
         <div className="mt-4 text-center">
           <p className="text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            No dishes match — try clearing a filter.
+            No dishes match, try clearing a filter.
           </p>
           {anyFilter ? (
             <button type="button" className="nut-btn nut-btn-ghost nut-btn-sm mt-3" onClick={clearFilters}>
@@ -263,7 +263,7 @@ export function DishesSection({ day }: { day: string }) {
                   type="button"
                   className="nut-dish-card"
                   onClick={() => setSelected(dish)}
-                  aria-label={`${dish.name.en} — view recipe`}
+                  aria-label={`${dish.name.en}, view recipe`}
                 >
                   <DishPhoto dishId={dish.id} name={dish.name.en} lightbox={false} />
                   <span className="min-w-0 flex-1">
@@ -304,7 +304,7 @@ export function DishesSection({ day }: { day: string }) {
                 className="nut-btn nut-btn-ghost nut-btn-sm"
                 onClick={() => setShownCount((n) => n + DISH_PAGE_SIZE)}
               >
-                Show more — {fmtCount(rows.length - shownCount)} more{" "}
+                Show more, {fmtCount(rows.length - shownCount)} more{" "}
                 {rows.length - shownCount === 1 ? "dish" : "dishes"}
               </button>
             </div>

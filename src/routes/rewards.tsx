@@ -8,7 +8,7 @@ import progressionCss from "../styles/progression.css?url";
  */
 export const Route = createFileRoute("/rewards")({
   head: () => ({
-    meta: [{ title: "Bloom — Your Journey" }],
+    meta: [{ title: "Bloom - Your Journey" }],
     links: [{ rel: "stylesheet", href: progressionCss }],
   }),
   component: RewardsLayout,

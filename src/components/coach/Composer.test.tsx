@@ -140,7 +140,7 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
-describe("Composer submit contract — the accepted signal", () => {
+describe("Composer submit contract, the accepted signal", () => {
   it("clears the draft and chip the moment the send is accepted, while the reply is still in flight", async () => {
     const flight = deferred<ComposerSubmitOutcome>();
     const seen: { text?: string; attachment?: ComposerAttachment | null } = {};
@@ -204,7 +204,7 @@ describe("Composer submit contract — the accepted signal", () => {
 
     await waitFor(() =>
       expect(onNotice).toHaveBeenCalledWith(
-        "That reply didn't make it — tap Try again on your message above.",
+        "That reply didn't make it, tap Try again on your message above.",
       ),
     );
     expect(textbox().value).toBe("");

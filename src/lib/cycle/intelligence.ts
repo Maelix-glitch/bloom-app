@@ -30,7 +30,7 @@ export function buildRecommendations(model: CycleModel, context: CycleContext): 
       id: `prep-${nextPeriod.date ?? nextPeriod.rangeEnd}`,
       category: "prepare",
       title: "Set up a softer evening",
-      body: "Prep the things that help you before it arrives — heat pad, comfy clothes, an early night. Skip it if you'd rather not plan around it.",
+      body: "Prep the things that help you before it arrives, heat pad, comfy clothes, an early night. Skip it if you'd rather not plan around it.",
       reason: `period estimated ${daysAwayLabel(nextPeriod.daysAway)}${nextPeriod.plusMinusDays ? ` (±${nextPeriod.plusMinusDays}d)` : ""}`,
       weight: 1,
     });
@@ -45,7 +45,7 @@ export function buildRecommendations(model: CycleModel, context: CycleContext): 
       id: `care-day-${model.currentDay}`,
       category: "care",
       title: "Be lenient with this week",
-      body: "Low energy in the first days is common — many people schedule less, not more. It's a preference, not a rule.",
+      body: "Low energy in the first days is common, many people schedule less, not more. It's a preference, not a rule.",
       reason: "you're inside a logged period day",
       weight: 2,
     });
@@ -71,7 +71,7 @@ export function buildRecommendations(model: CycleModel, context: CycleContext): 
       id: "plan-luteal-load",
       category: "plan",
       title: "Move one heavy thing earlier",
-      body: "Your recent energy logs dipped while in the luteal stretch — if there's a task you can pull forward, now is cheap.",
+      body: "Your recent energy logs dipped while in the luteal stretch, if there's a task you can pull forward, now is cheap.",
       reason: `${lowEnergy} of your last 7 energy logs were low`,
       weight: 2,
     });
@@ -118,8 +118,8 @@ export function buildPersonalInsight(model: CycleModel, context: CycleContext): 
       if (Math.abs(delta) >= 2) {
         return {
           id: `drift-${model.today}`,
-          text: `Your last cycle ran ${last} days — ${Math.abs(Math.round(delta))} day${Math.abs(Math.round(delta)) === 1 ? "" : "s"} ${delta > 0 ? "longer" : "shorter"} than your ${model.average.toFixed(1)}-day average.`,
-          why: `one cycle shifting is common — trend language needs ${n} cycles`,
+          text: `Your last cycle ran ${last} days, ${Math.abs(Math.round(delta))} day${Math.abs(Math.round(delta)) === 1 ? "" : "s"} ${delta > 0 ? "longer" : "shorter"} than your ${model.average.toFixed(1)}-day average.`,
+          why: `one cycle shifting is common, trend language needs ${n} cycles`,
         };
       }
     }
@@ -129,14 +129,14 @@ export function buildPersonalInsight(model: CycleModel, context: CycleContext): 
         id: `steady-${model.today}`,
         text:
           spread <= 0
-            ? `Your last ${n} cycles ran at almost exactly ${model.average?.toFixed(0)} days — estimates are at their best with history this steady.`
-            : `Your cycles vary by only about ±${spread} ${spread === 1 ? "day" : "days"} — estimates are at their best with history this steady.`,
+            ? `Your last ${n} cycles ran at almost exactly ${model.average?.toFixed(0)} days, estimates are at their best with history this steady.`
+            : `Your cycles vary by only about ±${spread} ${spread === 1 ? "day" : "days"}, estimates are at their best with history this steady.`,
         why: `computed from your last ${Math.min(6, n)} completed cycles`,
       };
     }
     return {
       id: `gathering-${model.today}`,
-      text: `You've logged ${n} completed cycles — long enough that every estimate on this page is yours, not a general pattern.`,
+      text: `You've logged ${n} completed cycles, long enough that every estimate on this page is yours, not a general pattern.`,
       why: "personal baseline replaces the default once two cycles exist",
     };
   }
@@ -219,7 +219,7 @@ export function buildObservations(model: CycleModel, entries: CycleEntry[]): Obs
     const lo = [...filled].sort((a, b) => (a.avg ?? 0) - (b.avg ?? 0))[0]!;
     out.push({
       id: "energy-phase",
-      text: `Energy averaged ${hi.avg?.toFixed(1)}/5 in your ${hi.phase} days vs ${lo.avg?.toFixed(1)}/5 in your ${lo.phase} days — across ${energy.n} logged days.`,
+      text: `Energy averaged ${hi.avg?.toFixed(1)}/5 in your ${hi.phase} days vs ${lo.avg?.toFixed(1)}/5 in your ${lo.phase} days, across ${energy.n} logged days.`,
       seen: Math.min(energy.n, 9),
       total: 9,
     });
@@ -229,7 +229,7 @@ export function buildObservations(model: CycleModel, entries: CycleEntry[]): Obs
   if (sleep.shortAvg !== null && sleep.longAvg !== null) {
     out.push({
       id: "sleep-length",
-      text: `On your shorter cycles you logged ~${sleep.shortAvg.toFixed(1)} h of sleep, ~${sleep.longAvg.toFixed(1)} h on longer ones — compared across ${sleep.pairs} cycles.`,
+      text: `On your shorter cycles you logged ~${sleep.shortAvg.toFixed(1)} h of sleep, ~${sleep.longAvg.toFixed(1)} h on longer ones, compared across ${sleep.pairs} cycles.`,
       seen: sleep.pairs,
       total: model.completed.length,
     });
@@ -238,7 +238,7 @@ export function buildObservations(model: CycleModel, entries: CycleEntry[]): Obs
   if (model.completed.length >= 3 && model.stdDev !== null) {
     out.push({
       id: "variability",
-      text: `Your recent cycles varied by ±${model.stdDev.toFixed(1)} days — that spread is why estimates arrive as ranges.`,
+      text: `Your recent cycles varied by ±${model.stdDev.toFixed(1)} days, that spread is why estimates arrive as ranges.`,
       seen: model.completed.length,
       total: model.completed.length,
     });

@@ -11,7 +11,7 @@ function CorrelationsImpl({ correlations }: { correlations: Correlation[] }) {
       <SectionHead
         eyebrow="Relationships"
         title="What moves with your mood"
-        sub="Pearson correlation across paired daily observations. Strength is gated by sample size — never presented as causation."
+        sub="Pearson correlation across paired daily observations. Strength is gated by sample size, never presented as causation."
       />
 
       {usable.length === 0 ? (

@@ -364,7 +364,7 @@ function computeDeltas(input: OverviewInput, dayKeys: Set<string>): OverviewDelt
       direction: dir,
       sentence:
         dir === "flat"
-          ? `Mood averaged ${fmt1(mood.recentAvg)} over the last 7 days — much the same as the ${fmt1(mood.priorAvg)} of the 7 days before.`
+          ? `Mood averaged ${fmt1(mood.recentAvg)} over the last 7 days, much the same as the ${fmt1(mood.priorAvg)} of the 7 days before.`
           : `Mood averaged ${fmt1(mood.recentAvg)} over the last 7 days, ${directionWord[dir]} ${fmt1(mood.priorAvg)} in the 7 days before.`,
       weight: Math.abs(diff) / 10,
     });
@@ -373,7 +373,7 @@ function computeDeltas(input: OverviewInput, dayKeys: Set<string>): OverviewDelt
       id: "mood",
       label: "Mood",
       direction: "new",
-      sentence: `Mood averaged ${fmt1(mood.recentAvg)} across ${mood.recentCount} check-ins in the last 7 days — no earlier week to compare yet.`,
+      sentence: `Mood averaged ${fmt1(mood.recentAvg)} across ${mood.recentCount} check-ins in the last 7 days, no earlier week to compare yet.`,
       weight: 0.1,
     });
   }
@@ -392,7 +392,7 @@ function computeDeltas(input: OverviewInput, dayKeys: Set<string>): OverviewDelt
         direction: dir,
         sentence:
           dir === "flat"
-            ? `${def.name} averaged ${def.format(Math.round(recentAvg))} a day over the last 7 days — much the same as the 7 days before.`
+            ? `${def.name} averaged ${def.format(Math.round(recentAvg))} a day over the last 7 days, much the same as the 7 days before.`
             : `${def.name} averaged ${def.format(Math.round(recentAvg))} a day over the last 7 days, ${directionWord[dir]} ${def.format(Math.round(priorAvg))} in the 7 days before.`,
         weight: Math.abs(diff) / Math.max(1, Math.abs(priorAvg)),
       });
@@ -401,7 +401,7 @@ function computeDeltas(input: OverviewInput, dayKeys: Set<string>): OverviewDelt
         id: `tracker-${id}`,
         label: def.name,
         direction: "new",
-        sentence: `${def.name} averaged ${def.format(Math.round(recentAvg))} a day over the last 7 days — no earlier week to compare yet.`,
+        sentence: `${def.name} averaged ${def.format(Math.round(recentAvg))} a day over the last 7 days, no earlier week to compare yet.`,
         weight: 0.1,
       });
     }
@@ -419,7 +419,7 @@ function computeDeltas(input: OverviewInput, dayKeys: Set<string>): OverviewDelt
       direction: dir,
       sentence:
         dir === "flat"
-          ? `You ticked habits ${recentTicks} times in the last 7 days — the same as the 7 days before.`
+          ? `You ticked habits ${recentTicks} times in the last 7 days, the same as the 7 days before.`
           : `You ticked habits ${recentTicks} ${recentTicks === 1 ? "time" : "times"} in the last 7 days, ${directionWord[dir]} ${priorTicks} in the 7 days before.`,
       weight: Math.abs(recentTicks - priorTicks) / Math.max(1, priorTicks),
     });
@@ -437,7 +437,7 @@ function computeDeltas(input: OverviewInput, dayKeys: Set<string>): OverviewDelt
       id: "days-logged",
       label: "Days logged",
       direction: "new",
-      sentence: `Your record began this week — ${recentDays} ${recentDays === 1 ? "day" : "days"} logged so far.`,
+      sentence: `Your record began this week, ${recentDays} ${recentDays === 1 ? "day" : "days"} logged so far.`,
       weight: 0.05,
     });
   } else if (recentDays > 0 || priorDays > 0) {
@@ -448,7 +448,7 @@ function computeDeltas(input: OverviewInput, dayKeys: Set<string>): OverviewDelt
       direction: dir,
       sentence:
         dir === "flat"
-          ? `You logged on ${recentDays} of the last 7 days — the same as the 7 days before.`
+          ? `You logged on ${recentDays} of the last 7 days, the same as the 7 days before.`
           : `You logged on ${recentDays} of the last 7 days, ${directionWord[dir]} ${priorDays} of the 7 days before.`,
       weight: Math.abs(recentDays - priorDays) / 7,
     });
@@ -520,11 +520,11 @@ export function synthesizeOverview(input: OverviewInput): OverviewSynthesis {
   if (recordDays === 0) {
     headline = "Your Bloom record is just beginning.";
   } else if (allHabitsDone && moodTodayEntry) {
-    headline = "A settled day — everything you track is written down.";
+    headline = "A settled day, everything you track is written down.";
   } else if (moodDown) {
-    headline = "A slower stretch — recent days have felt heavier than the ones before.";
+    headline = "A slower stretch, recent days have felt heavier than the ones before.";
   } else if (!todayWritten) {
-    headline = "A blank page so far today — the record underneath it is safe.";
+    headline = "A blank page so far today, the record underneath it is safe.";
   } else {
     headline = "The day is partly written.";
   }
@@ -574,7 +574,7 @@ export function synthesizeOverview(input: OverviewInput): OverviewSynthesis {
       deltas.length > 0
         ? null
         : recordDays === 0
-          ? "Nothing to compare yet — changes appear here once a week has something on both sides of it."
+          ? "Nothing to compare yet, changes appear here once a week has something on both sides of it."
           : "Not enough logged days yet to compare weeks honestly. Keep logging, and this fills in.",
   };
 
@@ -649,7 +649,7 @@ export function choosePriority(
         id: "first-steps",
         title: "Your record starts with one small log",
         reason:
-          "Nothing is logged yet. One entry today starts the record — everything on this page grows from what you write down.",
+          "Nothing is logged yet. One entry today starts the record, everything on this page grows from what you write down.",
       },
       action: firstDue
         ? { kind: "habit", label: `Tick ${firstDue.name}`, habitId: firstDue.id }
@@ -666,7 +666,7 @@ export function choosePriority(
         id: "assessment-finish",
         title: "Finish your assessment",
         reason:
-          "You started it, and your answers so far are saved. The remaining sections take a few minutes — and once it's complete, what this page suggests can be shaped around you.",
+          "You started it, and your answers so far are saved. The remaining sections take a few minutes, and once it's complete, what this page suggests can be shaped around you.",
       },
       action: { kind: "assessment", label: "Continue assessment" },
     };
@@ -693,7 +693,7 @@ export function choosePriority(
       priority: {
         id: "silent-tracker",
         title: `${def.name} has gone quiet`,
-        reason: `You last logged ${def.name.toLowerCase()} ${signals.silent.daysSilent} days ago, after ${signals.silent.daysLogged} logged ${signals.silent.daysLogged === 1 ? "day" : "days"}. One entry restarts the thread — there's nothing to catch up on.`,
+        reason: `You last logged ${def.name.toLowerCase()} ${signals.silent.daysSilent} days ago, after ${signals.silent.daysLogged} logged ${signals.silent.daysLogged === 1 ? "day" : "days"}. One entry restarts the thread, there's nothing to catch up on.`,
       },
       action: { kind: "metrics", label: `Log ${def.name.toLowerCase()}` },
     };
@@ -743,7 +743,7 @@ export function choosePriority(
         title: topHabit.name,
         reason:
           topHabit.priority === "high"
-            ? "It's due today, still open — and it's the one you marked as high priority."
+            ? "It's due today, still open, and it's the one you marked as high priority."
             : "It's due today and still open. One tick and today is fully written.",
       },
       action: { kind: "habit", label: "Tick it off", habitId: topHabit.id },
@@ -771,7 +771,7 @@ export function choosePriority(
       title: "Nothing needs chasing today",
       reason:
         summary && goal
-          ? `Everything due is done and today's check-ins are in. This page is quietly steering by your assessment goal — ${GOAL_LABEL[goal].toLowerCase()} — and will speak up when something changes.`
+          ? `Everything due is done and today's check-ins are in. This page is quietly steering by your assessment goal, ${GOAL_LABEL[goal].toLowerCase()}, and will speak up when something changes.`
           : "Everything due is done and today's check-ins are in. This page will speak up when something changes.",
     },
     action: { kind: "link", label: "See your weekly report", to: "/report" },

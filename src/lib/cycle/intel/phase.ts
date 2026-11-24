@@ -35,7 +35,7 @@ export function phaseEstimate(input: {
       expectedLength: null,
       certainty: "unknown",
       window: null,
-      note: "Log the first day of a period to begin — nothing is estimated until then.",
+      note: "Log the first day of a period to begin, nothing is estimated until then.",
       overdueDays: 0,
     };
   }

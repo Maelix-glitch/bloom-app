@@ -24,7 +24,7 @@ import { Reveal } from "@/components/mood/primitives";
 export const Route = createFileRoute("/mood/intelligence")({
   head: () => ({
     meta: [
-      { title: "Bloom — Mood Intelligence" },
+      { title: "Bloom - Mood Intelligence" },
       {
         name: "description",
         content:

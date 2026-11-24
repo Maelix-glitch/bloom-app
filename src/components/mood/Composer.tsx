@@ -327,7 +327,7 @@ export function Composer({
       closeTimer.current = window.setTimeout(onClose, 620);
     } catch {
       setSaving(false);
-      setError("That didn't save just now. Your moment is still here — try again in a second.");
+      setError("That didn't save just now. Your moment is still here, try again in a second.");
     }
   };
 
@@ -371,7 +371,7 @@ export function Composer({
           </h2>
           <p className="bmood-sub">
             {face
-              ? `Feeling ${MOOD_LABELS[face].toLowerCase()} — ${moodLabel(draft.mood).toLowerCase()}.`
+              ? `Feeling ${MOOD_LABELS[face].toLowerCase()} - ${moodLabel(draft.mood).toLowerCase()}.`
               : "Tap the face that fits."}
           </p>
         </header>
@@ -780,7 +780,7 @@ function ReadingSlider({
         {typeof usual === "number" ? (
           <span
             className="bmood-slider-usual"
-            title={`Your usual ${label.toLowerCase()} — ${usual}/10`}
+            title={`Your usual ${label.toLowerCase()} - ${usual}/10`}
             style={{ left: `${((usual - 1) / 9) * 100}%` }}
             aria-hidden
           />
@@ -821,7 +821,7 @@ function NumField({
           step={step}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          placeholder="—"
+          placeholder="-"
         />
         <span className="bmood-unit">{unit}</span>
       </span>

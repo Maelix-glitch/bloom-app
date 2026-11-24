@@ -64,11 +64,11 @@ export function EmptyWelcome({
         ) : null}
         <p className="coach-welcome-copy">
           Ask, reflect, plan, or simply talk. I&rsquo;ll read what you&rsquo;ve actually logged when
-          it helps — and say so plainly when there&rsquo;s nothing to go on.
+          it helps, and say so plainly when there&rsquo;s nothing to go on.
         </p>
         {phaseLine ? <p className="coach-welcome-phase">{phaseLine}</p> : null}
         {lastMemory ? (
-          <p className="coach-welcome-memory">Last time you mentioned — {lastMemory}</p>
+          <p className="coach-welcome-memory">Last time you mentioned, {lastMemory}</p>
         ) : null}
         <div className="coach-welcome-starters" aria-label="Ways to begin">
           {starters.map((starter, index) => (
@@ -88,7 +88,7 @@ export function EmptyWelcome({
           ))}
         </div>
         <p className="coach-welcome-note">
-          Bloom works from the context you keep — raw tracker history never appears here.
+          Bloom works from the context you keep, raw tracker history never appears here.
         </p>
       </motion.div>
     </div>

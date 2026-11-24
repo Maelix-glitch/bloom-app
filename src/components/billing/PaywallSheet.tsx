@@ -132,7 +132,7 @@ function inclusionsFor(tier: PlanTier): string[] {
   return [
     `Up to ${PLANS.free.habitLimit} habits`,
     ...PAYWALL_COMPARISON.filter((row) => comparisonHas(row, "free")).map((row) => row.label),
-    `Coach chat — ${COACH_ACCESS.free}`,
+    `Coach chat, ${COACH_ACCESS.free}`,
     `${PLANS.free.monthlyCredits} AI credits a month`,
   ];
 }
@@ -281,32 +281,32 @@ export function PaywallSheet({
         const sub = await createSubscription(tier, period);
         if (sub.state === "payments_not_configured") {
           setNotice(
-            "Payments open soon — Bloom's payment account isn't connected yet, so checkout can't start today. Nothing has been charged. The moment it connects, this button goes straight to a secure checkout.",
+            "Payments open soon. Bloom's payment account isn't connected yet, so checkout can't start today. Nothing has been charged. The moment it connects, this button goes straight to a secure checkout.",
           );
           return;
         }
         if (sub.state !== "ready") {
-          setNotice("Checkout couldn't start just now — nothing has been charged. Try again in a moment.");
+          setNotice("Checkout couldn't start just now, nothing has been charged. Try again in a moment.");
           return;
         }
         const pay = await payWithRazorpaySubscription({
           keyId: sub.keyId,
           subscriptionId: sub.subscriptionId,
-          description: `${PLANS[tier].name} — ${period === "monthly" ? "monthly" : "yearly"}`,
+          description: `${PLANS[tier].name} - ${period === "monthly" ? "monthly" : "yearly"}`,
         });
         if (pay.kind === "dismissed") {
-          setNotice("Checkout closed — nothing has been charged.");
+          setNotice("Checkout closed, nothing has been charged.");
           return;
         }
         if (pay.kind === "unavailable") {
           setNotice(
-            "The secure payment window couldn't load — check your connection and try again. Nothing has been charged.",
+            "The secure payment window couldn't load, check your connection and try again. Nothing has been charged.",
           );
           return;
         }
         if (pay.kind === "failed") {
           setNotice(
-            `Payment didn't go through — ${pay.message} No plan was started; if your bank shows a debit for it, Razorpay refunds it automatically.`,
+            `Payment didn't go through, ${pay.message} No plan was started; if your bank shows a debit for it, Razorpay refunds it automatically.`,
           );
           return;
         }
@@ -315,7 +315,7 @@ export function PaywallSheet({
            and once more shortly after, as the Orders flow does. */
         invalidateEntitlement();
         setNotice(
-          "Payment received — your plan is switching on now. It renews automatically each period until you cancel; cancel auto-renew anytime from your Profile. It can take a few seconds to show here.",
+          "Payment received, your plan is switching on now. It renews automatically each period until you cancel; cancel auto-renew anytime from your Profile. It can take a few seconds to show here.",
         );
         window.setTimeout(() => invalidateEntitlement(), 4000);
         return;
@@ -323,12 +323,12 @@ export function PaywallSheet({
       const order = await createOrder(tier, period);
       if (order.state === "payments_not_configured") {
         setNotice(
-          "Payments open soon — Bloom's payment account isn't connected yet, so checkout can't start today. Nothing has been charged. The moment it connects, this button goes straight to a secure checkout.",
+          "Payments open soon. Bloom's payment account isn't connected yet, so checkout can't start today. Nothing has been charged. The moment it connects, this button goes straight to a secure checkout.",
         );
         return;
       }
       if (order.state !== "ready") {
-        setNotice("Checkout couldn't start just now — nothing has been charged. Try again in a moment.");
+        setNotice("Checkout couldn't start just now, nothing has been charged. Try again in a moment.");
         return;
       }
       const pay = await payWithRazorpay({
@@ -336,21 +336,21 @@ export function PaywallSheet({
         orderId: order.orderId,
         amount: order.amount,
         currency: order.currency,
-        description: `${PLANS[tier].name} — ${period === "monthly" ? "monthly" : "yearly"}`,
+        description: `${PLANS[tier].name} - ${period === "monthly" ? "monthly" : "yearly"}`,
       });
       if (pay.kind === "dismissed") {
-        setNotice("Checkout closed — nothing has been charged.");
+        setNotice("Checkout closed, nothing has been charged.");
         return;
       }
       if (pay.kind === "unavailable") {
         setNotice(
-          "The secure payment window couldn't load — check your connection and try again. Nothing has been charged.",
+          "The secure payment window couldn't load, check your connection and try again. Nothing has been charged.",
         );
         return;
       }
       if (pay.kind === "failed") {
         setNotice(
-          `Payment didn't go through — ${pay.message} No plan was started; if your bank shows a debit for it, Razorpay refunds it automatically.`,
+          `Payment didn't go through, ${pay.message} No plan was started; if your bank shows a debit for it, Razorpay refunds it automatically.`,
         );
         return;
       }
@@ -360,11 +360,11 @@ export function PaywallSheet({
          reflects the new plan as soon as it lands. */
       invalidateEntitlement();
       if (confirmed) {
-        setNotice("Payment received — your plan is switching on now. It can take a few seconds to show here.");
+        setNotice("Payment received, your plan is switching on now. It can take a few seconds to show here.");
         window.setTimeout(() => invalidateEntitlement(), 4000);
       } else {
         setNotice(
-          "Your payment is being confirmed — if it went through, your plan switches on automatically within a few minutes, and you won't be charged twice for the same period.",
+          "Your payment is being confirmed, if it went through, your plan switches on automatically within a few minutes, and you won't be charged twice for the same period.",
         );
       }
     } finally {
@@ -421,14 +421,14 @@ export function PaywallSheet({
             </h3>
             <p className="bill-a-sub">
               Choose how much of Bloom you want. Every plan keeps your data, your history and
-              your streak — upgrading only opens more of the garden.
+              your streak, upgrading only opens more of the garden.
             </p>
 
             {/* What was reached, stated plainly — the context's own
                 headline, kept from the card era: the sheet is specific
                 first, commercial second. */}
             <p className="bill-context">
-              <strong>{headline.title}</strong> — {headline.body}
+              <strong>{headline.title}</strong> - {headline.body}
             </p>
 
             {entitlement ? (
@@ -440,7 +440,7 @@ export function PaywallSheet({
                     keeps its claim — Free is on no other mark. */}
                 {entitlement.tier === "free" ? (
                   <>
-                    You're on <strong>{PLANS[entitlement.tier].name}</strong> —{" "}
+                    You're on <strong>{PLANS[entitlement.tier].name}</strong> -{" "}
                     {entitlement.creditBalance} of {entitlement.monthlyAllowance} AI credits left
                     this month.
                   </>
@@ -611,18 +611,18 @@ export function PaywallSheet({
           column), then the payment honesty lines, whole. */}
       <div className="bsheet-foot bill-foot-zone">
         <p className="bill-foot">
-          Free keeps working either way — trackers, habits, mood and your records are never held
+          Free keeps working either way, trackers, habits, mood and your records are never held
           hostage. AI credits refill monthly; when they run out, the AI pauses and everything
           else carries on.
         </p>
         <p className="bill-foot">{CREDIT_WEIGHTS_LINE}</p>
         <p className="bill-foot">
-          Payments are handled securely by Razorpay — UPI, cards and netbanking.
+          Payments are handled securely by Razorpay. UPI, cards and netbanking.
         </p>
         <p className="bill-foot">
           {CHECKOUT_RAIL === "subscription"
-            ? "The first payment confirms your plan, and it renews automatically each period until you cancel. Cancel auto-renew anytime from your Profile — you keep Premium until the period ends, and nothing is charged after that."
-            : "The first payment confirms your plan. Renewals are charged manually in this version — nothing is taken automatically, and you keep Premium until the period ends."}
+            ? "The first payment confirms your plan, and it renews automatically each period until you cancel. Cancel auto-renew anytime from your Profile, you keep Premium until the period ends, and nothing is charged after that."
+            : "The first payment confirms your plan. Renewals are charged manually in this version, nothing is taken automatically, and you keep Premium until the period ends."}
         </p>
       </div>
     </BloomSheet>

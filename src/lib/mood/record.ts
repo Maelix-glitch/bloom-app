@@ -57,7 +57,7 @@ export type MoodRecordState = {
 const NO_CONFIG =
   "Bloom isn't connected to a database in this environment, so your Mood record stays on this device.";
 const SIGNED_OUT =
-  "You're not signed in — entries you log stay on this device and move to your account when you sign in.";
+  "You're not signed in, entries you log stay on this device and move to your account when you sign in.";
 
 const byTime = (a: MoodEntry, b: MoodEntry) => a.timestamp.localeCompare(b.timestamp);
 
@@ -112,8 +112,8 @@ function syncLine(profileId: string | null): MoodSync {
       state: "signed-out",
       message:
         pending > 0
-          ? `Saved on this device — ${pending === 1 ? "1 entry moves" : `${pending} entries move`} to your account when you sign in.`
-          : "Saved on this device — sign in to keep it on your account.",
+          ? `Saved on this device, ${pending === 1 ? "1 entry moves" : `${pending} entries move`} to your account when you sign in.`
+          : "Saved on this device, sign in to keep it on your account.",
       signedIn: false,
       pending,
     };
@@ -121,7 +121,7 @@ function syncLine(profileId: string | null): MoodSync {
   if (pending > 0) {
     return {
       state: "error",
-      message: `Saved here — ${pending === 1 ? "1 entry" : `${pending} entries`} not yet on your account. Bloom will retry.`,
+      message: `Saved here, ${pending === 1 ? "1 entry" : `${pending} entries`} not yet on your account. Bloom will retry.`,
       signedIn: true,
       pending,
     };
@@ -156,7 +156,7 @@ function load(id: string, { silent }: { silent: boolean }) {
       });
       publish({
         state: "error",
-        message: "Couldn't reach your account — showing what this device has.",
+        message: "Couldn't reach your account, showing what this device has.",
         signedIn: true,
       });
     })

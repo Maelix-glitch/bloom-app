@@ -71,7 +71,7 @@ export function LegalPage({
 
         <footer className="mt-14 border-t border-border pt-6">
           <p className="text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
-            Bloom Vitalis runs this app, and this copy of the page ships with the app itself — so
+            Bloom Vitalis runs this app, and this copy of the page ships with the app itself, so
             what you read here is what the code does. Questions about anything on it:{" "}
             <a
               href="mailto:maelix67@gmail.com"

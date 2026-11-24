@@ -46,7 +46,7 @@ export const Route = createFileRoute("/$handle")({
       /* D4: the Stories-scoped preset fonts (Cormorant Garamond, Oswald). */
       { rel: "stylesheet", href: storiesFontsCss },
     ],
-    meta: [{ title: `Bloom — @${params.handle.replace(/^@/, "")}` }],
+    meta: [{ title: `Bloom - @${params.handle.replace(/^@/, "")}` }],
   }),
   loader: ({ params }) => {
     const handle = params.handle.replace(/^@/, "").toLowerCase();
@@ -167,7 +167,7 @@ function PublicProfilePage() {
             <Lock className="mx-auto size-5 text-faint" strokeWidth={1.5} aria-hidden />
             <h1 className="display mt-5 text-[24px]">This space is private.</h1>
             <p className="mt-2.5 text-[length:var(--text-support)] leading-relaxed text-muted-foreground">
-              @{handle} keeps their Bloom to themselves right now — and that's okay.
+              @{handle} keeps their Bloom to themselves right now, and that's okay.
             </p>
             <Link
               to="/"

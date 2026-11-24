@@ -342,7 +342,7 @@ export function LogPanel({
         setPeriodErrors({
           flow:
             bleed === "spotting"
-              ? "Spotting on its own doesn't start a period. Pick light, medium or heavy for the first real day — or untick the box to log it as spotting."
+              ? "Spotting on its own doesn't start a period. Pick light, medium or heavy for the first real day, or untick the box to log it as spotting."
               : "Pick a bleed level for the day it started.",
         });
         return;
@@ -362,7 +362,7 @@ export function LogPanel({
       const warned = assessLogDraft(draft, logs, today, editing?.id ?? null, {
         averageLength: analysis.isGeneric ? undefined : analysis.averageLengthRaw,
       }).warnings;
-      if (warned.length > 0) periodNote = "Saved — with a note below.";
+      if (warned.length > 0) periodNote = "Saved, with a note below.";
       setPeriodWarnings(warned);
     } else if (closePeriod && nearPeriod && onSetPeriodEnd) {
       const lastDay = date > nearPeriod.start ? addDays(date, -1) : nearPeriod.start;
@@ -371,14 +371,14 @@ export function LogPanel({
         setPeriodErrors(result.errors);
         return;
       }
-      periodNote = `Period closed — last day ${formatDateShort(lastDay)}. Predictions updated.`;
+      periodNote = `Period closed, last day ${formatDateShort(lastDay)}. Predictions updated.`;
     } else if (extendPeriod && nearPeriod && onSetPeriodEnd) {
       const result = onSetPeriodEnd(nearPeriod.id, date);
       if (!result.ok) {
         setPeriodErrors(result.errors);
         return;
       }
-      periodNote = `Period extended — now runs to ${formatDateShort(date)}.`;
+      periodNote = `Period extended, now runs to ${formatDateShort(date)}.`;
     }
 
     if (dayHasContent) {
@@ -399,7 +399,7 @@ export function LogPanel({
           : periodOk && dayHasContent
             ? "Period and day logged."
             : periodOk
-              ? "Period logged — predictions updated."
+              ? "Period logged, predictions updated."
               : periodNote
                 ? periodNote
                 : existing
@@ -574,13 +574,13 @@ export function LogPanel({
                       : ` would usually have ended (about ${usual} days)`
                   }.`
                 : context?.kind === "soon-after"
-                  ? `Day ${context.daysSinceStart + 1} since the period that started ${formatDateShort(nearPeriod.start)} — no last day logged yet.`
+                  ? `Day ${context.daysSinceStart + 1} since the period that started ${formatDateShort(nearPeriod.start)}, no last day logged yet.`
                   : null}
           </p>
         ) : null}
         {!editing && context?.kind === "soon-after" && isPeriodBleed(bleed) ? (
           <p className="mt-2.5 text-[length:var(--text-caption)] leading-relaxed ci-muted" data-testid="log-context">
-            {context.daysSinceStart} days after your last period started — too soon to count as a
+            {context.daysSinceStart} days after your last period started, too soon to count as a
             new cycle, so if you log it as one the gap is left out of your average.
           </p>
         ) : null}
@@ -600,15 +600,15 @@ export function LogPanel({
               <span>
                 {context?.kind === "inside" && context.dayOfPeriod - 1 < usual
                   ? "The period ended early"
-                  : "The period has ended"}{" "}
-                — record{" "}
+                  : "The period has ended"}{", "}
+                record{" "}
                 <strong className="font-medium">
                   {formatDateShort(date > nearPeriod.start ? addDays(date, -1) : nearPeriod.start)}
                 </strong>{" "}
                 as its last day
                 <span className="ci-muted">
-                  {" "}
-                  — untick if it's just a quiet day and the bleeding is continuing
+                  {", "}
+                  untick if it's just a quiet day and the bleeding is continuing
                 </span>
               </span>
             </label>
@@ -626,9 +626,9 @@ export function LogPanel({
                 data-testid="log-extend-period"
               />
               <span>
-                <strong className="font-medium">Same period, still going</strong> — move its last
+                <strong className="font-medium">Same period, still going</strong>, move its last
                 day to {formatDateShort(date)}
-                <span className="ci-muted"> — untick if this is spotting between periods</span>
+                <span className="ci-muted">, untick if this is spotting between periods</span>
               </span>
             </label>
           </div>
@@ -668,8 +668,8 @@ export function LogPanel({
               <span>
                 This is the <strong className="font-medium">first day of a period</strong>
                 <span className="ci-muted">
-                  {" "}
-                  — used for predictions
+                  {", "}
+                  used for predictions
                   {!editing && context?.kind === "inside" && context.dayOfPeriod > 1
                     ? `. Not ticked, because this looks like day ${context.dayOfPeriod} of a period you already logged`
                     : !editing && context?.kind === "adjacent"
@@ -706,7 +706,7 @@ export function LogPanel({
                 <div className="ci-field">
                   <span className="ci-label">Flow for the record</span>
                   <p className="mt-1 text-[length:var(--text-support)] ci-soft">
-                    {bleed ? FLOW_LABEL[bleed as FlowLevel] : "—"}
+                    {bleed ? FLOW_LABEL[bleed as FlowLevel] : "-"}
                   </p>
                 </div>
               </div>
@@ -720,7 +720,7 @@ export function LogPanel({
             ) : null}
             {existingPeriod && !editing ? (
               <p className="mt-2 text-[length:var(--text-caption)] ci-muted">
-                A period already starts on this date — saving will update it.
+                A period already starts on this date, saving will update it.
               </p>
             ) : null}
             {(liveAssessment?.warnings ?? []).map((w) => (
@@ -885,7 +885,7 @@ export function LogPanel({
                 </button>
               </div>
               <p className="ci-hint mt-1.5">
-                Only if you noticed them — it helps Bloom spot a heavy-flow pattern over time.
+                Only if you noticed them, it helps Bloom spot a heavy-flow pattern over time.
               </p>
             </fieldset>
 
@@ -909,7 +909,7 @@ export function LogPanel({
               </fieldset>
 
               <fieldset className="ci-field" disabled={disabled}>
-                <legend className="ci-label mb-1.5">Energy (1–5)</legend>
+                <legend className="ci-label mb-1.5">Energy (1-5)</legend>
                 <div className="ci-seg ci-seg--grid" style={{ "--ci-seg-cols": 5 } as CSSProperties}>
                   {[1, 2, 3, 4, 5].map((n) => (
                     <button
@@ -935,7 +935,7 @@ export function LogPanel({
             {/* pain · sleep */}
             <div className="mt-4 grid gap-4 sm:grid-cols-2">
               <fieldset className="ci-field" disabled={disabled}>
-                <legend className="ci-label mb-1.5">Pain (0–5)</legend>
+                <legend className="ci-label mb-1.5">Pain (0-5)</legend>
                 <div className="ci-seg ci-seg--grid" style={{ "--ci-seg-cols": 6 } as CSSProperties}>
                   {[0, 1, 2, 3, 4, 5].map((n) => (
                     <button

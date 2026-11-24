@@ -55,8 +55,8 @@ export function DoctorSummaryPage() {
         <p className="ci-eyebrow">Bloom · Cycle summary</p>
         <h1 className="ci-display mt-1 text-[26px]">For your doctor</h1>
         <p className="mt-1.5 text-[13px] ci-soft">
-          {summary.fromLabel} – {summary.toLabel} · Prepared {formatDate(today)} from the record
-          kept in Bloom. Everything below is logged history — no predictions are printed as facts.
+          {summary.fromLabel} - {summary.toLabel} · Prepared {formatDate(today)} from the record
+          kept in Bloom. Everything below is logged history, no predictions are printed as facts.
         </p>
       </header>
 
@@ -64,7 +64,7 @@ export function DoctorSummaryPage() {
         <p className="mt-8 text-[13px] ci-muted">Reading your record…</p>
       ) : logs.length === 0 ? (
         <p className="mt-8 text-[13px] ci-soft">
-          Nothing to summarise yet — once periods are logged, this page prints the last twelve
+          Nothing to summarise yet, once periods are logged, this page prints the last twelve
           months to take to an appointment.
         </p>
       ) : (
@@ -107,10 +107,10 @@ export function DoctorSummaryPage() {
                   <tr key={r.start}>
                     <td>{r.startLabel}</td>
                     <td>{r.endLabel ?? "not recorded"}</td>
-                    <td>{r.bleedDays !== null ? `${r.bleedDays}d` : "—"}</td>
-                    <td>{r.cycleDays !== null ? `${r.cycleDays}d` : "—"}</td>
+                    <td>{r.bleedDays !== null ? `${r.bleedDays}d` : "-"}</td>
+                    <td>{r.cycleDays !== null ? `${r.cycleDays}d` : "-"}</td>
                     <td>
-                      {r.flow ?? "—"}
+                      {r.flow ?? "-"}
                       {r.excluded ? " · excluded from averages" : ""}
                       {r.notes ? ` · ${r.notes}` : ""}
                     </td>

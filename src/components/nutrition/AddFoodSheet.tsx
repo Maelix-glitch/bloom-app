@@ -197,7 +197,7 @@ export function LogDialog({
     const entry = nutrition.logFood(selection.food, amount, meal, day, selection.source);
     if (!entry) {
       setLogError(
-        "Bloom couldn't log that — the portion may be out of range. Try a smaller amount.",
+        "Bloom couldn't log that, the portion may be out of range. Try a smaller amount.",
       );
       return;
     }
@@ -330,7 +330,7 @@ export function LogDialog({
 
               <div className="mt-5 flex flex-wrap items-end gap-x-5 gap-y-3">
                 <p className="font-display text-[56px] leading-none text-foreground tabular-nums">
-                  {preview ? Math.round(preview.kcal) : "—"}
+                  {preview ? Math.round(preview.kcal) : "-"}
                   <span className="ml-1.5 text-[length:var(--text-section)] text-muted-foreground">
                     kcal
                   </span>
@@ -648,7 +648,7 @@ function SearchStep({
         />
         <Input
           aria-label="Search foods"
-          placeholder="Search foods — try “rice” or “egg”"
+          placeholder="Search foods, try “rice” or “egg”"
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           className="pl-10"
@@ -814,20 +814,20 @@ function CustomFoodStep({
   const macroError = (raw: string, label: string): string | undefined => {
     const value = parseForgivingNumber(raw);
     if (value === null)
-      return `${label}: enter the number from the label — 0 is fine if that's what it says.`;
+      return `${label}: enter the number from the label, 0 is fine if that's what it says.`;
     if (value > 100) return `${label}: per 100 g, this can't be over 100 g.`;
     return undefined;
   };
 
   const submit = () => {
     const next: FieldErrors = {};
-    if (!name.trim()) next.name = "Give the food a name — the packet's name works.";
+    if (!name.trim()) next.name = "Give the food a name, the packet's name works.";
     const kcalValue = parseForgivingNumber(kcal);
     if (kcalValue === null) {
       next.kcal = "Energy: enter the number from the label, per 100 g.";
     } else if (kcalValue > 2000) {
       next.kcal =
-        "Energy: that's more than any food has per 100 g — check the label isn't per pack or per serving.";
+        "Energy: that's more than any food has per 100 g, check the label isn't per pack or per serving.";
     }
     const proteinError = macroError(proteinG, "Protein");
     if (proteinError) next.proteinG = proteinError;
@@ -868,7 +868,7 @@ function CustomFoodStep({
       });
       if (!food) {
         setErrors({
-          form: "One of those values is outside the range Bloom can store — check the per-100 g numbers against the packet.",
+          form: "One of those values is outside the range Bloom can store, check the per-100 g numbers against the packet.",
         });
         return;
       }
@@ -876,7 +876,7 @@ function CustomFoodStep({
     } catch (err) {
       if (err instanceof FoodListFullError) {
         setErrors({
-          form: `Your food list is full — Bloom keeps up to ${MAX_FOODS} of your own foods, so this one couldn't be saved.`,
+          form: `Your food list is full. Bloom keeps up to ${MAX_FOODS} of your own foods, so this one couldn't be saved.`,
         });
         return;
       }
@@ -921,7 +921,7 @@ function CustomFoodStep({
       <p className="mt-3 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
         Copy the values from the packet label, per 100 g. Bloom saves them as your own food,
         badged “Your value” wherever they're used. Anything you leave blank is stored as “not
-        reported” — never as zero.
+        reported”, never as zero.
       </p>
       <div className="mt-5">
         <label className="nut-field-label" htmlFor="nut-custom-name">

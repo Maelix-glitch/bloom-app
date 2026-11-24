@@ -263,11 +263,11 @@ describe("forecast windows and the fertile-estimate gate", () => {
     expect(state.analysis.forecast).toHaveLength(3);
   });
 
-  it("withholds fertile dates when cycles sit mostly outside 21–35 days", () => {
+  it("withholds fertile dates when cycles sit mostly outside 21-35 days", () => {
     const starts = startsFrom("2026-01-01", [38, 39, 38, 39]);
     const state = build(addDays(starts[starts.length - 1]!, 9), starts.map((s) => log(s)));
     expect(state.analysis.fertileSuppressed).toBe(true);
-    expect(state.analysis.fertileNote).toMatch(/21–35/);
+    expect(state.analysis.fertileNote).toMatch(/21-35/);
     expect(state.analysis.fertileStart).toBeNull();
   });
 });
@@ -294,7 +294,7 @@ describe("paused tracking", () => {
   });
 });
 
-describe("architecture — one calculation path", () => {
+describe("architecture, one calculation path", () => {
   const ROOT = process.cwd();
   const views = [
     "src/components/ci/CycleIntelligence.tsx",
@@ -369,7 +369,7 @@ describe("flow mix denominators", () => {
   });
 });
 
-describe("exclude-a-cycle (Wave B8) — the canonical projection", () => {
+describe("exclude-a-cycle (Wave B8), the canonical projection", () => {
   it("skips the intervals and bleed of an excluded period, and says so", () => {
     const starts = startsFrom("2026-01-05", [28, 28, 28]);
     const logs: PeriodLog[] = starts.map((start, i) => ({

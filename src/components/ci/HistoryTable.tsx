@@ -52,7 +52,7 @@ export function HistoryTable({
       <SectionHead
         eyebrow="Your record"
         title="Every entry you've logged"
-        note="Lengths marked as not counted stay out of the average — too short or too long to be a real cycle, or a cycle you excluded yourself (illness, travel, stress). Fix the gap, or include the cycle again, and the average corrects itself."
+        note="Lengths marked as not counted stay out of the average, too short or too long to be a real cycle, or a cycle you excluded yourself (illness, travel, stress). Fix the gap, or include the cycle again, and the average corrects itself."
         aside={
           onExport || onImport ? (
             <span className="flex flex-wrap items-center gap-1.5">
@@ -86,7 +86,7 @@ export function HistoryTable({
 
       {ordered.length === 0 ? (
         <p className="mt-5 rounded-[var(--ci-radius-md)] border border-dashed px-4 py-8 text-center text-[13px] ci-muted ci-hair">
-          Nothing logged yet. Add your first period above and this table fills in — the second entry
+          Nothing logged yet. Add your first period above and this table fills in, the second entry
           is where predictions begin.
         </p>
       ) : (
@@ -117,7 +117,7 @@ export function HistoryTable({
                         </span>
                         {entry.end ? (
                           <span className="mt-0.5 block text-[length:var(--text-caption)] ci-muted">
-                            {formatDateShort(entry.start)} – {formatDateShort(entry.end)}
+                            {formatDateShort(entry.start)} - {formatDateShort(entry.end)}
                           </span>
                         ) : (
                           <span className="mt-0.5 block text-[length:var(--text-caption)] ci-muted">
@@ -144,14 +144,14 @@ export function HistoryTable({
                             title={gap.reason ?? undefined}
                           >
                             <TriangleAlert size={13} aria-hidden />
-                            {gap.days}d — not counted
+                            {gap.days}d, not counted
                           </span>
                         ) : (
                           <span className="ci-num">{gap?.days}d</span>
                         )}
                       </td>
                       <td className="capitalize">
-                        {entry.flow ?? <span className="ci-muted">—</span>}
+                        {entry.flow ?? <span className="ci-muted">-</span>}
                       </td>
                       <td className="max-w-[220px]">
                         {entry.notes ? (
@@ -159,7 +159,7 @@ export function HistoryTable({
                             {entry.notes}
                           </span>
                         ) : (
-                          <span className="ci-muted">—</span>
+                          <span className="ci-muted">-</span>
                         )}
                       </td>
                       <td>
@@ -262,7 +262,7 @@ export function HistoryTable({
                           style={{ color: "var(--ci-ovulation)" }}
                         >
                           <TriangleAlert size={12} aria-hidden />
-                          {gap.days}d — not counted
+                          {gap.days}d, not counted
                         </p>
                       )
                     ) : (
@@ -272,7 +272,7 @@ export function HistoryTable({
                   <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[12px] ci-muted">
                     {entry.end ? (
                       <span>
-                        {formatDateShort(entry.start)} – {formatDateShort(entry.end)}
+                        {formatDateShort(entry.start)} - {formatDateShort(entry.end)}
                       </span>
                     ) : (
                       <span>no last day logged</span>

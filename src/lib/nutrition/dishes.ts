@@ -448,7 +448,7 @@ export function validateDish(
     if (seenLines.has(line.foodId)) problems.push(`duplicate line for ${line.foodId}`);
     seenLines.add(line.foodId);
     if (!food.classification) {
-      problems.push(`line food ${line.foodId} is unclassified — patterns and budget cannot be derived`);
+      problems.push(`line food ${line.foodId} is unclassified, patterns and budget cannot be derived`);
     }
   }
   if (dish.enriched && !dish.enrichment) problems.push("enriched dish does not state its boost");

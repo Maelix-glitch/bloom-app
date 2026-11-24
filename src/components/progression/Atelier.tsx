@@ -94,11 +94,11 @@ export function AtelierPage() {
               Your Bloom Atelier
             </p>
             <h1 className="pg-title" style={{ fontSize: "clamp(30px, 4.4vw, 44px)" }}>
-              {progress.loading ? "—" : progress.rank.rank.name}
+              {progress.loading ? "-" : progress.rank.rank.name}
             </h1>
             {progress.loading ? null : (
               <p className="pg-hero-note">
-                Looks open with ranks — you are rank {tier}, and every look you already owned stays
+                Looks open with ranks, you are rank {tier}, and every look you already owned stays
                 yours. This is the quiet second layer of Bloom, not the point of it.
               </p>
             )}
@@ -106,7 +106,7 @@ export function AtelierPage() {
           <div style={{ display: "flex", gap: "0.6rem", flexWrap: "wrap" }}>
             <span className="pg-to-next" style={{ padding: "0.6rem 1rem" }}>
               <Emblem id={progress.rank.rank.emblem} size={16} strokeWidth={1.6} />
-              {progress.loading ? "—" : formatPoints(progress.points)} points
+              {progress.loading ? "-" : formatPoints(progress.points)} points
             </span>
             <Button
               type="button"
@@ -221,7 +221,7 @@ export function AtelierPage() {
                     ) : (
                       <span className="pg-lock-note">
                         <Lock width={11} height={11} aria-hidden /> Opens at rank{" "}
-                        {RANK_GATE[comp.kind]} — {formatPoints(RANK_GATE[comp.kind] * 500)} points
+                        {RANK_GATE[comp.kind]} - {formatPoints(RANK_GATE[comp.kind] * 500)} points
                         onward
                       </span>
                     )}

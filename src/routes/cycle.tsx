@@ -9,11 +9,11 @@ import { CycleNotYours } from "@/components/ci/CycleNotYours";
 export const Route = createFileRoute("/cycle")({
   head: () => ({
     meta: [
-      { title: "Bloom — Cycle Intelligence" },
+      { title: "Bloom - Cycle Intelligence" },
       {
         name: "description",
         content:
-          "Log the day a period starts. Bloom turns it into predictions, confidence levels, plain-language insights and phase-based tips — computed only from your own record.",
+          "Log the day a period starts. Bloom turns it into predictions, confidence levels, plain-language insights and phase-based tips, computed only from your own record.",
       },
     ],
     links: [{ rel: "stylesheet", href: cycleIntelligenceCss }],

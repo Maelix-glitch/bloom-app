@@ -98,7 +98,7 @@ function CoachPanelView({
       } catch {
         /* private mode */
       }
-      setNotice("Sign in on the Coach page to send a private message — your draft is kept.");
+      setNotice("Sign in on the Coach page to send a private message, your draft is kept.");
       return;
     }
     setThinking(true);
@@ -136,7 +136,7 @@ function CoachPanelView({
         coach.saveMessage(coachMessage),
       ]);
       if (saved.some((ok) => !ok))
-        setNotice("Answered — but the thread couldn't be saved to your account just now.");
+        setNotice("Answered, but the thread couldn't be saved to your account just now.");
     } catch (e) {
       console.warn("[bloom:home] coach ask:", e);
       setNotice("Bloom couldn't answer that just now.");

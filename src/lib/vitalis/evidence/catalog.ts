@@ -122,7 +122,7 @@ export const CATALOG: EvidenceRegistry = {
       version: 2,
       supersededBy: null,
       notes:
-        "Composition dataset. The shipped reference set (src/lib/nutrition/data/usdaReferenceData.ts) has since been checked entry by entry: every food carries its FoodData Central id and data type, Foundation and SR Legacy only — Branded and FNDDS are not shipped. Claim usda-fdc-composition-source cites this source for the dataset's provenance and licence only, not for the accuracy of any individual value.",
+        "Composition dataset. The shipped reference set (src/lib/nutrition/data/usdaReferenceData.ts) has since been checked entry by entry: every food carries its FoodData Central id and data type, Foundation and SR Legacy only. Branded and FNDDS are not shipped. Claim usda-fdc-composition-source cites this source for the dataset's provenance and licence only, not for the accuracy of any individual value.",
     },
     {
       id: "uk-cofid-2021",
@@ -147,7 +147,7 @@ export const CATALOG: EvidenceRegistry = {
       version: 1,
       supersededBy: null,
       notes:
-        "UK national food-composition database (the McCance and Widdowson tables, maintained for the UK government). Registered for ONE shipped food (M-229, 2026-11-23): paneer, CoFID food code 12-495 ('Cheese, Paneer'), in src/lib/nutrition/data/cofidReferenceData.ts — the row's own data reference is 'LGC, Nutrient analysis of cheese, 1999' (9 samples, sampled in spring and autumn). USDA FoodData Central carries no paneer entry, and the Indian IFCT paneer row stays unusable until ICMR-NIN grants written permission, so CoFID is the licence-clean source for this food. Caveat recorded honestly: CoFID's paneer is a UK retail product, harder-pressed than typical Indian market paneer (46.8 g water per 100 g against roughly 54-57 g), so its protein, fat and energy run higher per 100 g; the values are CoFID's own and are labelled as such, never as USDA or IFCT values.",
+        "UK national food-composition database (the McCance and Widdowson tables, maintained for the UK government). Registered for ONE shipped food (M-229, 2026-11-23): paneer, CoFID food code 12-495 ('Cheese, Paneer'), in src/lib/nutrition/data/cofidReferenceData.ts, the row's own data reference is 'LGC, Nutrient analysis of cheese, 1999' (9 samples, sampled in spring and autumn). USDA FoodData Central carries no paneer entry, and the Indian IFCT paneer row stays unusable until ICMR-NIN grants written permission, so CoFID is the licence-clean source for this food. Caveat recorded honestly: CoFID's paneer is a UK retail product, harder-pressed than typical Indian market paneer (46.8 g water per 100 g against roughly 54-57 g), so its protein, fat and energy run higher per 100 g; the values are CoFID's own and are labelled as such, never as USDA or IFCT values.",
     },
     {
       id: "au-afcd-release-3",
@@ -173,7 +173,7 @@ export const CATALOG: EvidenceRegistry = {
       version: 1,
       supersededBy: null,
       notes:
-        "Australian national food-composition database. Registered for SIX shipped foods (M-230, 2026-11-24), all with AFCD Derivation 'Analysed' — the majority of each row's data from Australian laboratory analysis of representative samples — in src/lib/nutrition/data/afcdReferenceData.ts: lupin splits (F005249), broad beans dried (F000416), split peas dried (F006543), amaranth grain (F000061), chia seeds (F008209) and flaxseed/linseed (F008210). AFCD publishes energy in kilojoules only; Bloom's kcal figure is the pinned kJ value divided by 4.184 and rounded, and the generator pins the kJ so the derivation is checkable. Fields AFCD's own sampling notes attribute to another database are NOT shipped: vitamin C is omitted for lupin splits (borrowed from Kohajkova et al. 2011) and for broad beans (borrowed from USDA SR28) rather than letting a borrowed value wear an AFCD label. Limitation of Data Statement (FSANZ): there are limitations associated with food composition databases — the data represent an average of the nutrient content of a particular sample of foods, determined at a particular time, and composition can vary substantially between batches and brands with season, processing, ingredient source and methods of calculation.",
+        "Australian national food-composition database. Registered for SIX shipped foods (M-230, 2026-11-24), all with AFCD Derivation 'Analysed', the majority of each row's data from Australian laboratory analysis of representative samples, in src/lib/nutrition/data/afcdReferenceData.ts: lupin splits (F005249), broad beans dried (F000416), split peas dried (F006543), amaranth grain (F000061), chia seeds (F008209) and flaxseed/linseed (F008210). AFCD publishes energy in kilojoules only; Bloom's kcal figure is the pinned kJ value divided by 4.184 and rounded, and the generator pins the kJ so the derivation is checkable. Fields AFCD's own sampling notes attribute to another database are NOT shipped: vitamin C is omitted for lupin splits (borrowed from Kohajkova et al. 2011) and for broad beans (borrowed from USDA SR28) rather than letting a borrowed value wear an AFCD label. Limitation of Data Statement (FSANZ): there are limitations associated with food composition databases, the data represent an average of the nutrient content of a particular sample of foods, determined at a particular time, and composition can vary substantially between batches and brands with season, processing, ingredient source and methods of calculation.",
     },
     {
       id: "ca-cnf-2026",
@@ -198,7 +198,7 @@ export const CATALOG: EvidenceRegistry = {
       version: 1,
       supersededBy: null,
       notes:
-        "Canadian national food-composition database. Registered for THREE shipped foods (M-230, 2026-11-24) in src/lib/nutrition/data/cnfReferenceData.ts: quark (food code 6995), kefir plain low fat (6999) and unsweetened fortified soy beverage (6330). Every shipped row carries CNF Food Source Code 37 — Health Canada's own CNF Sampling and Analysis Program (SNAP-CAN). CNF rows whose food source is code 0 ('based on data from USDA: no changes') were deliberately NOT shipped from this wave: natto, lupins, amaranth, spirulina and broad beans exist in the CNF only as USDA data under a Canadian label, and lifting them would mislabel USDA values as Canadian — the same honesty rule that keeps IFCT values out until ICMR-NIN grants written permission.",
+        "Canadian national food-composition database. Registered for THREE shipped foods (M-230, 2026-11-24) in src/lib/nutrition/data/cnfReferenceData.ts: quark (food code 6995), kefir plain low fat (6999) and unsweetened fortified soy beverage (6330). Every shipped row carries CNF Food Source Code 37. Health Canada's own CNF Sampling and Analysis Program (SNAP-CAN). CNF rows whose food source is code 0 ('based on data from USDA: no changes') were deliberately NOT shipped from this wave: natto, lupins, amaranth, spirulina and broad beans exist in the CNF only as USDA data under a Canadian label, and lifting them would mislabel USDA values as Canadian, the same honesty rule that keeps IFCT values out until ICMR-NIN grants written permission.",
     },
     {
       id: "fao-who-unu-2004-energy",
@@ -421,7 +421,7 @@ export const CATALOG: EvidenceRegistry = {
       confidence: 0,
       population: "Anyone using Bloom's body-target calculator",
       uncertainty: [
-        "The M-219 engine evidence audit (2026-11-22) set this cap against the published ranges it verified — CDC's 1–2 lb per week and the AHA/ACC/TOS 500–750 kcal/day prescription the old 1 kg/week cap exceeded. Those sources are not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.",
+        "The M-219 engine evidence audit (2026-11-22) set this cap against the published ranges it verified. CDC's 1-2 lb per week and the AHA/ACC/TOS 500-750 kcal/day prescription the old 1 kg/week cap exceeded. Those sources are not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.",
         "How the ceiling should differ by body size remains unresolved.",
       ],
       limitations: [
@@ -449,7 +449,7 @@ export const CATALOG: EvidenceRegistry = {
     {
       id: "usda-fdc-composition-source",
       statement:
-        "Bloom's reference food values come from USDA FoodData Central — the Foundation and SR Legacy datasets, each food carrying its FoodData Central id and data type — published under CC0 1.0 (public domain).",
+        "Bloom's reference food values come from USDA FoodData Central, the Foundation and SR Legacy datasets, each food carrying its FoodData Central id and data type, published under CC0 1.0 (public domain).",
       topic: "food_composition",
       grade: "moderate",
       confidence: 0.9,
@@ -468,7 +468,7 @@ export const CATALOG: EvidenceRegistry = {
           sourceId: "usda-fooddata-central",
           direction: "supports",
           locator:
-            "FoodData Central (fdc.nal.usda.gov) — USDA publishes the data under CC0 1.0 and asks that FoodData Central be named as the source",
+            "FoodData Central (fdc.nal.usda.gov). USDA publishes the data under CC0 1.0 and asks that FoodData Central be named as the source",
         },
       ],
       reviewStatus: "approved",
@@ -529,7 +529,7 @@ export const CATALOG: EvidenceRegistry = {
     {
       id: "protein-recomp-2-2",
       statement:
-        "For body recomposition — fat loss and muscle gain at the same weight — Bloom sets the protein target at 2.2 g per kg of body weight, the highest of its four goal bands.",
+        "For body recomposition, fat loss and muscle gain at the same weight. Bloom sets the protein target at 2.2 g per kg of body weight, the highest of its four goal bands.",
       topic: "protein",
       grade: "insufficient",
       confidence: 0,
@@ -538,7 +538,7 @@ export const CATALOG: EvidenceRegistry = {
         "The figure's citations are recorded in the code comment (src/lib/health/body.ts) as Morton et al.'s 2018 meta-analysis of protein and lean mass (BJSM) and the ISSN position stand's range for maximising lean mass; they have not yet been verified against those publications, so no source is linked.",
       ],
       limitations: [
-        "The code describes 2.2 g/kg as the upper confidence bound in the cited meta-analysis — the top of a range, chosen deliberately for the most protein-demanding goal, not a typical requirement.",
+        "The code describes 2.2 g/kg as the upper confidence bound in the cited meta-analysis, the top of a range, chosen deliberately for the most protein-demanding goal, not a typical requirement.",
       ],
       contraindications: [
         "The safety classifier blocks this band from reaching anyone for whom a high-protein target needs a clinician (chronic kidney disease, pregnancy, eating-disorder history).",
@@ -553,7 +553,7 @@ export const CATALOG: EvidenceRegistry = {
     {
       id: "protein-bands-by-goal",
       statement:
-        "Bloom's other protein bands are 1.8 g per kg for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance. Above a BMI of 23 the bands multiply a reference weight — the healthy-ceiling weight for the person's height (22.9 × height²) — instead of current body weight; at or below it they apply to current body weight. (Corrected at version 2, M-219: the statement previously said the bands apply to current body weight throughout, which stopped being true when the dosing basis changed.)",
+        "Bloom's other protein bands are 1.8 g per kg for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance. Above a BMI of 23 the bands multiply a reference weight, the healthy-ceiling weight for the person's height (22.9 × height²), instead of current body weight; at or below it they apply to current body weight. (Corrected at version 2, M-219: the statement previously said the bands apply to current body weight throughout, which stopped being true when the dosing basis changed.)",
       topic: "protein",
       grade: "insufficient",
       confidence: 0,
@@ -577,7 +577,7 @@ export const CATALOG: EvidenceRegistry = {
     {
       id: "energy-per-kg-7700",
       statement:
-        "Bloom's energy-balance maths treats a kilogram of body-mass change as about 7,700 kcal — in the goal delta (rate × 7,700 ÷ 7) and in the expenditure estimate that learns from a person's own weigh-ins and logged days.",
+        "Bloom's energy-balance maths treats a kilogram of body-mass change as about 7,700 kcal, in the goal delta (rate × 7,700 ÷ 7) and in the expenditure estimate that learns from a person's own weigh-ins and logged days.",
       topic: "energy_balance",
       grade: "insufficient",
       confidence: 0,
@@ -587,7 +587,7 @@ export const CATALOG: EvidenceRegistry = {
         "The real energy density of weight change varies with body composition and over time; the figure is a modelling assumption, not a measured constant.",
       ],
       limitations: [
-        "Estimates built on it — maintenance calories, goal timelines — inherit the approximation and are labelled estimates wherever they are shown.",
+        "Estimates built on it, maintenance calories, goal timelines, inherit the approximation and are labelled estimates wherever they are shown.",
       ],
       contraindications: [
         "A projected weight or date is arithmetic on an approximation, never a promise.",
@@ -638,7 +638,7 @@ export const CATALOG: EvidenceRegistry = {
         "OPEN OWNER DECISION: this registry permission-gates ICMR-NIN publications for reproduction in a product (see icmr-nin-dgi-2024 and icmr-nin-ifct-2017). Whether stating RDA numeric values as reference intakes falls under the written permission Bloom is seeking is unresolved. The values stay in the product while the owner decides; this entry records the question and does not settle it.",
       ],
       contraindications: [
-        "A day under a reference is a statement about the logged foods that report the nutrient — never a deficiency diagnosis, and no surface may word it as one.",
+        "A day under a reference is a statement about the logged foods that report the nutrient, never a deficiency diagnosis, and no surface may word it as one.",
       ],
       sources: [],
       reviewStatus: "draft",
@@ -650,7 +650,7 @@ export const CATALOG: EvidenceRegistry = {
     {
       id: "plan-composition-derivations",
       statement:
-        "The plan composer's portion caps and day floors (for example 90 g dry grain and 60 g dry pulses per meal, and 120 g egg portions) are engine derivations recorded in the code from ICMR-NIN's My Plate framework, British Nutrition Foundation portion sizes and ISSN protein-distribution guidance — not reproduced guideline text.",
+        "The plan composer's portion caps and day floors (for example 90 g dry grain and 60 g dry pulses per meal, and 120 g egg portions) are engine derivations recorded in the code from ICMR-NIN's My Plate framework, British Nutrition Foundation portion sizes and ISSN protein-distribution guidance, not reproduced guideline text.",
       topic: "dietary_pattern",
       grade: "insufficient",
       confidence: 0,
@@ -701,7 +701,7 @@ export const CATALOG: EvidenceRegistry = {
     {
       id: "water-efsa-drinking-share",
       statement:
-        "Bloom's daily water target is a drinking-water figure: a base of 1,900 ml for men, 1,500 ml for women and 1,700 ml when sex is unstated, plus an activity allowance of 0 to 700 ml, clamped between 1,200 and 3,000 ml. The base is set at roughly three quarters of EFSA's total-water adequate intake (2.5 L a day for men, 2.0 L for women) — the share ordinarily drunk rather than taken in food.",
+        "Bloom's daily water target is a drinking-water figure: a base of 1,900 ml for men, 1,500 ml for women and 1,700 ml when sex is unstated, plus an activity allowance of 0 to 700 ml, clamped between 1,200 and 3,000 ml. The base is set at roughly three quarters of EFSA's total-water adequate intake (2.5 L a day for men, 2.0 L for women), the share ordinarily drunk rather than taken in food.",
       topic: "hydration",
       grade: "insufficient",
       confidence: 0,
@@ -831,7 +831,7 @@ export const CATALOG: EvidenceRegistry = {
         "The 70% threshold and the 4-of-7-days minimum are engine constants (MICRO_GAP_RATIO and MICRO_MIN_DAYS in src/lib/nutrition/planAdaptation.ts) with no source stated in the code; recorded as TO VERIFY.",
       ],
       limitations: [
-        "Averages rest only on days whose logged foods report the nutrient, and sodium — a ceiling, not a goal — is never counted as a gap.",
+        "Averages rest only on days whose logged foods report the nutrient, and sodium, a ceiling, not a goal, is never counted as a gap.",
       ],
       contraindications: [
         "A gap is never a deficiency diagnosis, and no surface may word it as one or recommend a supplement from it.",
@@ -880,67 +880,67 @@ export const CATALOG: EvidenceRegistry = {
       recommendationId: "vitalis.safety.rate-cap",
       claimIds: ["rate-cap-0-75kg-per-week"],
       rationale:
-        "The Phase 1 classifier clamps requested pace to this constant. Phase 2 records the rule and the fact that its evidence is missing, rather than inventing support for a number that was chosen as a safety margin. Implemented in src/lib/vitalis/domain/safety.ts — MIN_RATE_KG_PER_WEEK / MAX_RATE_KG_PER_WEEK.",
+        "The Phase 1 classifier clamps requested pace to this constant. Phase 2 records the rule and the fact that its evidence is missing, rather than inventing support for a number that was chosen as a safety margin. Implemented in src/lib/vitalis/domain/safety.ts. MIN_RATE_KG_PER_WEEK / MAX_RATE_KG_PER_WEEK.",
     },
     {
       recommendationId: "vitalis.nutrition.composition-source",
       claimIds: ["usda-fdc-composition-source"],
       rationale:
-        "Implemented in src/lib/nutrition/usdaReference.ts: its licence gate resolves the usda provenance kind to this registry's usda-fooddata-central source and fails closed for any source that is not product-allowed — which is what keeps IFCT and INDB values out of the product until written permission exists.",
+        "Implemented in src/lib/nutrition/usdaReference.ts: its licence gate resolves the usda provenance kind to this registry's usda-fooddata-central source and fails closed for any source that is not product-allowed, which is what keeps IFCT and INDB values out of the product until written permission exists.",
     },
     {
       recommendationId: "vitalis.body.bmr-equation",
       claimIds: ["mifflin-st-jeor-bmr"],
       rationale:
-        "Implemented in src/lib/health/body.ts — bmrOf (Mifflin–St Jeor; sex constants +5 / −161 / −78). The Vitalis calculation path consumes the same figures via src/lib/vitalis/calc/body.ts (targetsFor).",
+        "Implemented in src/lib/health/body.ts, bmrOf (Mifflin–St Jeor; sex constants +5 / −161 / −78). The Vitalis calculation path consumes the same figures via src/lib/vitalis/calc/body.ts (targetsFor).",
     },
     {
       recommendationId: "vitalis.body.activity-factors",
       claimIds: ["activity-factor-table"],
       rationale:
-        "Implemented in src/lib/health/body.ts — ACTIVITY_FACTOR, applied in bodyTargetsOf as TDEE = BMR × factor.",
+        "Implemented in src/lib/health/body.ts. ACTIVITY_FACTOR, applied in bodyTargetsOf as TDEE = BMR × factor.",
     },
     {
       recommendationId: "vitalis.body.protein-recomp",
       claimIds: ["protein-recomp-2-2"],
       rationale:
-        "Implemented in src/lib/health/body.ts — bodyTargetsOf sets proteinPerKg to 2.2 when the goal is recomp; the comment there carries the citations this claim records as unverified.",
+        "Implemented in src/lib/health/body.ts, bodyTargetsOf sets proteinPerKg to 2.2 when the goal is recomp; the comment there carries the citations this claim records as unverified.",
     },
     {
       recommendationId: "vitalis.body.protein-bands",
       claimIds: ["protein-bands-by-goal"],
       rationale:
-        "Implemented in src/lib/health/body.ts — bodyTargetsOf proteinPerKg: 1.8 (lose), 1.6 (gain), 1.4 (maintain).",
+        "Implemented in src/lib/health/body.ts, bodyTargetsOf proteinPerKg: 1.8 (lose), 1.6 (gain), 1.4 (maintain).",
     },
     {
       recommendationId: "vitalis.body.energy-per-kg",
       claimIds: ["energy-per-kg-7700"],
       rationale:
-        "Implemented in src/lib/nutrition/expenditure.ts — ENERGY_KCAL_PER_KG = 7700; the same figure appears as the 7700 literal in src/lib/health/body.ts, where bodyTargetsOf turns a weekly rate into a daily delta.",
+        "Implemented in src/lib/nutrition/expenditure.ts. ENERGY_KCAL_PER_KG = 7700; the same figure appears as the 7700 literal in src/lib/health/body.ts, where bodyTargetsOf turns a weekly rate into a daily delta.",
     },
     {
       recommendationId: "vitalis.body.calorie-floor",
       claimIds: ["calorie-floors"],
       rationale:
-        "Implemented in src/lib/health/body.ts — calorieFloor(sex) returns 1500 / 1200 / 1350; bodyTargetsOf clamps the target to at least the floor and records floorApplied so the surface can say the floor did the work.",
+        "Implemented in src/lib/health/body.ts, calorieFloor(sex) returns 1500 / 1200 / 1350; bodyTargetsOf clamps the target to at least the floor and records floorApplied so the surface can say the floor did the work.",
     },
     {
       recommendationId: "vitalis.nutrition.spectrum-references",
       claimIds: ["spectrum-rda-2020-references"],
       rationale:
-        "Implemented in src/lib/nutrition/dayView.ts — spectrumReferences(sex) returns the seven reference rows the panel and the gap detection judge against.",
+        "Implemented in src/lib/nutrition/dayView.ts, spectrumReferences(sex) returns the seven reference rows the panel and the gap detection judge against.",
     },
     {
       recommendationId: "vitalis.plan.composition-caps",
       claimIds: ["plan-composition-derivations"],
       rationale:
-        "Implemented in src/lib/nutrition/plan.ts — the portion-cap constants (CAP_GRAIN_DRY_G, CAP_DRY_PULSES_G, CAP_EGGS_G and their family) and the day-floor checks of the layered composer.",
+        "Implemented in src/lib/nutrition/plan.ts, the portion-cap constants (CAP_GRAIN_DRY_G, CAP_DRY_PULSES_G, CAP_EGGS_G and their family) and the day-floor checks of the layered composer.",
     },
     {
       recommendationId: "vitalis.body.hydration-target",
       claimIds: ["water-efsa-drinking-share"],
       rationale:
-        "Implemented in src/lib/health/body.ts — bodyTargetsOf computes waterMl as weightKg × 35 plus the activity bonus, clamped to [1500, 4500] and rounded to 50 ml.",
+        "Implemented in src/lib/health/body.ts, bodyTargetsOf computes waterMl as weightKg × 35 plus the activity bonus, clamped to [1500, 4500] and rounded to 50 ml.",
     },
     {
       recommendationId: "vitalis.guidance.healthy-diet-principles",
@@ -958,25 +958,25 @@ export const CATALOG: EvidenceRegistry = {
       recommendationId: "vitalis.plan.budget-tiers",
       claimIds: ["budget-tier-cost-bands"],
       rationale:
-        "Implemented in src/lib/nutrition/dishes.ts — BUDGET_TIER_1_MAX_PER_SERVING = 20 and BUDGET_TIER_2_MAX_PER_SERVING = 45 (₹ per serving) over the stated ₹-per-gram group bands.",
+        "Implemented in src/lib/nutrition/dishes.ts. BUDGET_TIER_1_MAX_PER_SERVING = 20 and BUDGET_TIER_2_MAX_PER_SERVING = 45 (₹ per serving) over the stated ₹-per-gram group bands.",
     },
     {
       recommendationId: "vitalis.plan.dish-regions",
       claimIds: ["dish-region-markers"],
       rationale:
-        "Implemented in src/lib/nutrition/regions.ts — the curated north/south marker tables; the plan composer applies the result as a ranking bonus, never a filter.",
+        "Implemented in src/lib/nutrition/regions.ts, the curated north/south marker tables; the plan composer applies the result as a ranking bonus, never a filter.",
     },
     {
       recommendationId: "vitalis.plan.micro-gap-bias",
       claimIds: ["micro-gap-threshold"],
       rationale:
-        "Implemented in src/lib/nutrition/planAdaptation.ts — microGapsFor applies MICRO_GAP_RATIO = 0.7 with MICRO_MIN_DAYS = 4 reporting days inside MICRO_WINDOW_DAYS = 7, and the composer favours dishes rich in a gap nutrient (MICRO_RICH_SHARE).",
+        "Implemented in src/lib/nutrition/planAdaptation.ts, microGapsFor applies MICRO_GAP_RATIO = 0.7 with MICRO_MIN_DAYS = 4 reporting days inside MICRO_WINDOW_DAYS = 7, and the composer favours dishes rich in a gap nutrient (MICRO_RICH_SHARE).",
     },
     {
       recommendationId: "vitalis.plan.log-adaptation",
       claimIds: ["adaptation-ratios"],
       rationale:
-        "Implemented in src/lib/nutrition/planAdaptation.ts — planAdaptationFor applies PROTEIN_SHORTFALL_RATIO = 0.85 and ENERGY_OVERSHOOT_RATIO = 1.1 over the last two to three logged days; targets are read, never written.",
+        "Implemented in src/lib/nutrition/planAdaptation.ts, planAdaptationFor applies PROTEIN_SHORTFALL_RATIO = 0.85 and ENERGY_OVERSHOOT_RATIO = 1.1 over the last two to three logged days; targets are read, never written.",
     },
   ],
 

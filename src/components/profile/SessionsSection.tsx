@@ -168,7 +168,7 @@ export function SessionsSection({
           <span className="pf-row-text">
             <span className="pf-row-label">Erase this device</span>
             <span className="pf-row-hint">
-              Removes every local record from this browser{isSignedIn ? " — account untouched" : ""}
+              Removes every local record from this browser{isSignedIn ? ", account untouched" : ""}
             </span>
           </span>
           <span className="pf-row-value pf-row-value--danger">Erase…</span>

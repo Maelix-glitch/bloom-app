@@ -117,10 +117,10 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
       label: "Your value",
       kcal: weekShares.ownKcal,
       color: "var(--gold)",
-      blurb: "Values you copied from packet labels yourself. Bloom stores them as stated — it does not verify them.",
+      blurb: "Values you copied from packet labels yourself. Bloom stores them as stated, it does not verify them.",
     },
     {
-      label: "Estimate — based on your photo",
+      label: "Estimate, based on your photo",
       kcal: weekShares.estimateKcal,
       color: "var(--rose)",
       blurb: "Coach's estimate from a meal photo, confirmed by you before logging. An approximation, never a measurement.",
@@ -227,19 +227,19 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
                     <td>{fmtGrams(totals.carbsG)}</td>
                     <td>{fmtGrams(totals.fatG)}</td>
                     <td>
-                      {totals.fibreG !== undefined ? fmtGrams(totals.fibreG) : "—"}
+                      {totals.fibreG !== undefined ? fmtGrams(totals.fibreG) : "-"}
                       {incomplete.has("fibreG") ? "*" : ""}
                     </td>
                     <td>
                       {totals.sodiumMg !== undefined
                         ? Math.round(totals.sodiumMg).toLocaleString("en-IN")
-                        : "—"}
+                        : "-"}
                       {incomplete.has("sodiumMg") ? "*" : ""}
                     </td>
                     <td>
                       {shares.verifiedShare !== null
                         ? `${Math.round(shares.verifiedShare * 100)}%`
-                        : "—"}
+                        : "-"}
                     </td>
                   </tr>
                 );
@@ -248,16 +248,16 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
             <tfoot>
               <tr>
                 <td>Average of {loggedDays.length} logged days</td>
-                <td>{week.avgKcal ?? "—"}</td>
-                <td>{week.avgProteinG !== null ? fmtGrams(week.avgProteinG) : "—"}</td>
-                <td>{week.avgCarbsG !== null ? fmtGrams(week.avgCarbsG) : "—"}</td>
-                <td>{week.avgFatG !== null ? fmtGrams(week.avgFatG) : "—"}</td>
-                <td>—</td>
-                <td>—</td>
+                <td>{week.avgKcal ?? "-"}</td>
+                <td>{week.avgProteinG !== null ? fmtGrams(week.avgProteinG) : "-"}</td>
+                <td>{week.avgCarbsG !== null ? fmtGrams(week.avgCarbsG) : "-"}</td>
+                <td>{week.avgFatG !== null ? fmtGrams(week.avgFatG) : "-"}</td>
+                <td>-</td>
+                <td>-</td>
                 <td>
                   {weekShares.verifiedShare !== null
                     ? `${Math.round(weekShares.verifiedShare * 100)}%`
-                    : "—"}
+                    : "-"}
                 </td>
               </tr>
             </tfoot>
@@ -266,7 +266,7 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
         {anyFibreIncomplete ? (
           <p className="nut-note">
             * Some logged foods don't report fibre. Those days' fibre totals are floors over
-            the foods that did — not whole-day claims.
+            the foods that did, not whole-day claims.
           </p>
         ) : null}
       </section>
@@ -286,7 +286,7 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
               <p className="mt-2 font-display text-[30px] text-foreground tabular-nums">
                 {weekShares.totalKcal > 0
                   ? `${Math.round((card.kcal / weekShares.totalKcal) * 100)}%`
-                  : "—"}
+                  : "-"}
               </p>
               <p className="mt-1 text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
                 {card.blurb}
@@ -295,7 +295,7 @@ export function NutritionReportPage({ endDay }: { endDay: string }) {
           ))}
         </div>
         <p className="nut-note">
-          Self-reported intake is inherently imprecise — portions are weighed or estimated by
+          Self-reported intake is inherently imprecise, portions are weighed or estimated by
           the person eating, and photo estimates carry a natural margin. This report is
           informational and does not constitute medical advice.
         </p>

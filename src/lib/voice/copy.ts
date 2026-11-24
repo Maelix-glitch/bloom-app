@@ -37,7 +37,7 @@ export const SAVED = [
 ];
 
 export const SAVED_WARM = [
-  "Saved — that's today accounted for.",
+  "Saved, that's today accounted for.",
   "Logged. The numbers below just moved.",
   "Noted. Everything recalculated.",
   "That's in, and it counts.",
@@ -51,7 +51,7 @@ export const DELETED = ["Removed.", "Deleted.", "Gone.", "Taken out.", "Cleared.
 /* -------------------------------- empty ----------------------------------- */
 
 export const EMPTY_DAY = [
-  "Nothing logged today — yet.",
+  "Nothing logged today, yet.",
   "Today is still blank.",
   "A clean page for today.",
   "Nothing down for today so far.",
@@ -63,7 +63,7 @@ export const FIRST_ENTRY = [
   "One entry is enough to begin.",
   "The first one is the hardest.",
   "Everything below is built from this.",
-  "Start here — the rest follows.",
+  "Start here, the rest follows.",
 ];
 
 /* ------------------------------- encourage -------------------------------- */
@@ -77,7 +77,7 @@ export const STREAK_KEPT = [
 ];
 
 export const STREAK_BROKEN = [
-  "The run ended — starting again is the whole skill.",
+  "The run ended, starting again is the whole skill.",
   "A missed day is data, not failure.",
   "Streaks break. The record stays.",
   "One gap doesn't undo the rest.",
@@ -87,17 +87,17 @@ export const STREAK_BROKEN = [
 /* --------------------------------- errors --------------------------------- */
 
 export const OFFLINE = [
-  "You're offline — this is saved here and will sync when you're back.",
+  "You're offline, this is saved here and will sync when you're back.",
   "No connection. Kept on this device for now.",
   "Offline. Nothing is lost; it uploads when you reconnect.",
-  "Saved locally — the account catches up later.",
+  "Saved locally, the account catches up later.",
 ];
 
 export const RETRY = [
   "That didn't go through. Try again?",
   "Couldn't save that just now.",
   "Something got in the way. One more go?",
-  "No luck that time — try again.",
+  "No luck that time, try again.",
 ];
 
 /* -------------------------------- loading --------------------------------- */

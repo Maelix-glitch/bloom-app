@@ -79,7 +79,7 @@ export function TipsCard({
 
       {!compact ? (
         <p className="mt-4 border-t pt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted ci-hair">
-          General wellness suggestions that tend to suit this phase — not medical advice, and not a
+          General wellness suggestions that tend to suit this phase, not medical advice, and not a
           diagnosis. Your own experience outranks any phase label on this page.
         </p>
       ) : null}

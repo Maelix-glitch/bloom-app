@@ -1,4 +1,4 @@
--- Bloom Vitalis — evidence catalogue seed.
+-- Bloom Vitalis, evidence catalogue seed.
 --
 -- GENERATED FILE. Do not edit by hand.
 --
@@ -8,7 +8,7 @@
 --   verify           npm run seed:evidence:check
 --
 -- format version   2
--- catalogue hash   sha256:6c880595da3a491c1e9125de9ec187b4252ab76b18280fdc00b2e6f51e908774
+-- catalogue hash   sha256:80767778703075cb94327edc1895dc706764b062be8800dddce1e175d847c519
 -- rows             9 sources, 22 claims, 4 citations, 18 recommendations, 27 revisions
 --
 -- What this file does, and does not do:
@@ -24,7 +24,7 @@
 --   • Never moves a row backwards: a newer database version is not reverted,
 --     a recorded supersession is not cleared, an approved claim is not
 --     returned to draft, and a row whose content already matches is not
---     touched — so applying this file to a current database is a no-op.
+--     touched, so applying this file to a current database is a no-op.
 --   • Appends revision history, and never rewrites or removes it.
 --   • Touches no health, authentication or other Bloom table.
 --
@@ -340,7 +340,7 @@ $$;
 insert into public.evidence_sources as target (
   id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
 ) values (
-  'au-afcd-release-3', 'Australian Food Composition Database (AFCD), Release 3', 'dataset', 'Food Standards Australia New Zealand (FSANZ)', array['Food Standards Australia New Zealand']::text[], 2025, 'https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd/about-afcd', 'fsanz-data-user-licence', 'https://www.foodstandards.gov.au/science-data/monitoringnutrients/afcd/datauserlicenceagreement', 'The AFCD is published under FSANZ''s Data User Licence Agreement (modelled on CC BY-SA 3.0 AU): the data may be reproduced, adapted and distributed, including commercially, provided FSANZ is attributed, the licence is linked, the Limitation of Data Statement travels with the data, and the data are identified as Australian data that may not be appropriate for use in other countries. Bloom attributes Food Standards Australia New Zealand / the Australian Food Composition Database wherever these values are shown, and carries the statement: this data is based on Australian data, and Australian data may not be appropriate for use in other countries.', true, false, false, '2026-11-23'::date, null, '2026-11-23'::date, 12, 'approved', 1, null, 'Australian national food-composition database. Registered for SIX shipped foods (M-230, 2026-11-24), all with AFCD Derivation ''Analysed'' — the majority of each row''s data from Australian laboratory analysis of representative samples — in src/lib/nutrition/data/afcdReferenceData.ts: lupin splits (F005249), broad beans dried (F000416), split peas dried (F006543), amaranth grain (F000061), chia seeds (F008209) and flaxseed/linseed (F008210). AFCD publishes energy in kilojoules only; Bloom''s kcal figure is the pinned kJ value divided by 4.184 and rounded, and the generator pins the kJ so the derivation is checkable. Fields AFCD''s own sampling notes attribute to another database are NOT shipped: vitamin C is omitted for lupin splits (borrowed from Kohajkova et al. 2011) and for broad beans (borrowed from USDA SR28) rather than letting a borrowed value wear an AFCD label. Limitation of Data Statement (FSANZ): there are limitations associated with food composition databases — the data represent an average of the nutrient content of a particular sample of foods, determined at a particular time, and composition can vary substantially between batches and brands with season, processing, ingredient source and methods of calculation.'
+  'au-afcd-release-3', 'Australian Food Composition Database (AFCD), Release 3', 'dataset', 'Food Standards Australia New Zealand (FSANZ)', array['Food Standards Australia New Zealand']::text[], 2025, 'https://www.foodstandards.gov.au/science-data/food-nutrient-databases/afcd/about-afcd', 'fsanz-data-user-licence', 'https://www.foodstandards.gov.au/science-data/monitoringnutrients/afcd/datauserlicenceagreement', 'The AFCD is published under FSANZ''s Data User Licence Agreement (modelled on CC BY-SA 3.0 AU): the data may be reproduced, adapted and distributed, including commercially, provided FSANZ is attributed, the licence is linked, the Limitation of Data Statement travels with the data, and the data are identified as Australian data that may not be appropriate for use in other countries. Bloom attributes Food Standards Australia New Zealand / the Australian Food Composition Database wherever these values are shown, and carries the statement: this data is based on Australian data, and Australian data may not be appropriate for use in other countries.', true, false, false, '2026-11-23'::date, null, '2026-11-23'::date, 12, 'approved', 1, null, 'Australian national food-composition database. Registered for SIX shipped foods (M-230, 2026-11-24), all with AFCD Derivation ''Analysed'', the majority of each row''s data from Australian laboratory analysis of representative samples, in src/lib/nutrition/data/afcdReferenceData.ts: lupin splits (F005249), broad beans dried (F000416), split peas dried (F006543), amaranth grain (F000061), chia seeds (F008209) and flaxseed/linseed (F008210). AFCD publishes energy in kilojoules only; Bloom''s kcal figure is the pinned kJ value divided by 4.184 and rounded, and the generator pins the kJ so the derivation is checkable. Fields AFCD''s own sampling notes attribute to another database are NOT shipped: vitamin C is omitted for lupin splits (borrowed from Kohajkova et al. 2011) and for broad beans (borrowed from USDA SR28) rather than letting a borrowed value wear an AFCD label. Limitation of Data Statement (FSANZ): there are limitations associated with food composition databases, the data represent an average of the nutrient content of a particular sample of foods, determined at a particular time, and composition can vary substantially between batches and brands with season, processing, ingredient source and methods of calculation.'
 ) on conflict (id) do update set
     title = excluded.title,
     kind = excluded.kind,
@@ -371,7 +371,7 @@ insert into public.evidence_sources as target (
 insert into public.evidence_sources as target (
   id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
 ) values (
-  'ca-cnf-2026', 'Canadian Nutrient File (CNF)', 'dataset', 'Health Canada', array['Health Canada']::text[], 2026, 'https://open.canada.ca/data/en/dataset/1b6139bd-ed7e-4043-bc28-ff00e10f3109', 'ogl-canada-2.0', 'https://open.canada.ca/en/open-government-licence-canada', 'The Canadian Nutrient File is published by Health Canada through the Government of Canada''s open data portal under the Open Government Licence – Canada v2.0: the data may be copied, modified, published, translated, adapted and distributed for commercial or non-commercial purposes, with attribution to the source and no suggestion of official endorsement. Bloom attributes Health Canada''s Canadian Nutrient File wherever these values are shown.', true, false, false, '2026-11-23'::date, null, '2026-11-23'::date, 12, 'approved', 1, null, 'Canadian national food-composition database. Registered for THREE shipped foods (M-230, 2026-11-24) in src/lib/nutrition/data/cnfReferenceData.ts: quark (food code 6995), kefir plain low fat (6999) and unsweetened fortified soy beverage (6330). Every shipped row carries CNF Food Source Code 37 — Health Canada''s own CNF Sampling and Analysis Program (SNAP-CAN). CNF rows whose food source is code 0 (''based on data from USDA: no changes'') were deliberately NOT shipped from this wave: natto, lupins, amaranth, spirulina and broad beans exist in the CNF only as USDA data under a Canadian label, and lifting them would mislabel USDA values as Canadian — the same honesty rule that keeps IFCT values out until ICMR-NIN grants written permission.'
+  'ca-cnf-2026', 'Canadian Nutrient File (CNF)', 'dataset', 'Health Canada', array['Health Canada']::text[], 2026, 'https://open.canada.ca/data/en/dataset/1b6139bd-ed7e-4043-bc28-ff00e10f3109', 'ogl-canada-2.0', 'https://open.canada.ca/en/open-government-licence-canada', 'The Canadian Nutrient File is published by Health Canada through the Government of Canada''s open data portal under the Open Government Licence – Canada v2.0: the data may be copied, modified, published, translated, adapted and distributed for commercial or non-commercial purposes, with attribution to the source and no suggestion of official endorsement. Bloom attributes Health Canada''s Canadian Nutrient File wherever these values are shown.', true, false, false, '2026-11-23'::date, null, '2026-11-23'::date, 12, 'approved', 1, null, 'Canadian national food-composition database. Registered for THREE shipped foods (M-230, 2026-11-24) in src/lib/nutrition/data/cnfReferenceData.ts: quark (food code 6995), kefir plain low fat (6999) and unsweetened fortified soy beverage (6330). Every shipped row carries CNF Food Source Code 37. Health Canada''s own CNF Sampling and Analysis Program (SNAP-CAN). CNF rows whose food source is code 0 (''based on data from USDA: no changes'') were deliberately NOT shipped from this wave: natto, lupins, amaranth, spirulina and broad beans exist in the CNF only as USDA data under a Canadian label, and lifting them would mislabel USDA values as Canadian, the same honesty rule that keeps IFCT values out until ICMR-NIN grants written permission.'
 ) on conflict (id) do update set
     title = excluded.title,
     kind = excluded.kind,
@@ -557,7 +557,7 @@ insert into public.evidence_sources as target (
 insert into public.evidence_sources as target (
   id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
 ) values (
-  'uk-cofid-2021', 'McCance and Widdowson''s Composition of Foods Integrated Dataset (CoFID)', 'dataset', 'Public Health England', array['Public Health England']::text[], 2021, 'https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid', 'ogl-3.0', 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/', 'The CoFID workbook is published under the Open Government Licence v3.0: it may be copied, published, distributed and adapted, including commercially, free of charge, provided the source is acknowledged. Bloom acknowledges Public Health England / McCance and Widdowson''s CoFID wherever these values are shown.', true, false, false, '2026-11-23'::date, '2021-03-19'::date, '2026-11-23'::date, 12, 'approved', 1, null, 'UK national food-composition database (the McCance and Widdowson tables, maintained for the UK government). Registered for ONE shipped food (M-229, 2026-11-23): paneer, CoFID food code 12-495 (''Cheese, Paneer''), in src/lib/nutrition/data/cofidReferenceData.ts — the row''s own data reference is ''LGC, Nutrient analysis of cheese, 1999'' (9 samples, sampled in spring and autumn). USDA FoodData Central carries no paneer entry, and the Indian IFCT paneer row stays unusable until ICMR-NIN grants written permission, so CoFID is the licence-clean source for this food. Caveat recorded honestly: CoFID''s paneer is a UK retail product, harder-pressed than typical Indian market paneer (46.8 g water per 100 g against roughly 54-57 g), so its protein, fat and energy run higher per 100 g; the values are CoFID''s own and are labelled as such, never as USDA or IFCT values.'
+  'uk-cofid-2021', 'McCance and Widdowson''s Composition of Foods Integrated Dataset (CoFID)', 'dataset', 'Public Health England', array['Public Health England']::text[], 2021, 'https://www.gov.uk/government/publications/composition-of-foods-integrated-dataset-cofid', 'ogl-3.0', 'https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/', 'The CoFID workbook is published under the Open Government Licence v3.0: it may be copied, published, distributed and adapted, including commercially, free of charge, provided the source is acknowledged. Bloom acknowledges Public Health England / McCance and Widdowson''s CoFID wherever these values are shown.', true, false, false, '2026-11-23'::date, '2021-03-19'::date, '2026-11-23'::date, 12, 'approved', 1, null, 'UK national food-composition database (the McCance and Widdowson tables, maintained for the UK government). Registered for ONE shipped food (M-229, 2026-11-23): paneer, CoFID food code 12-495 (''Cheese, Paneer''), in src/lib/nutrition/data/cofidReferenceData.ts, the row''s own data reference is ''LGC, Nutrient analysis of cheese, 1999'' (9 samples, sampled in spring and autumn). USDA FoodData Central carries no paneer entry, and the Indian IFCT paneer row stays unusable until ICMR-NIN grants written permission, so CoFID is the licence-clean source for this food. Caveat recorded honestly: CoFID''s paneer is a UK retail product, harder-pressed than typical Indian market paneer (46.8 g water per 100 g against roughly 54-57 g), so its protein, fat and energy run higher per 100 g; the values are CoFID''s own and are labelled as such, never as USDA or IFCT values.'
 ) on conflict (id) do update set
     title = excluded.title,
     kind = excluded.kind,
@@ -588,7 +588,7 @@ insert into public.evidence_sources as target (
 insert into public.evidence_sources as target (
   id, title, kind, publisher, authors, publication_year, url, license_id, license_url, license_note, product_use_allowed, permission_required, peer_reviewed, retrieved_on, published_on, reviewed_on, review_interval_months, review_status, version, superseded_by, notes
 ) values (
-  'usda-fooddata-central', 'FoodData Central', 'dataset', 'U.S. Department of Agriculture, Agricultural Research Service, Beltsville Human Nutrition Research Center', array['U.S. Department of Agriculture, Agricultural Research Service']::text[], 2019, 'https://fdc.nal.usda.gov/', 'cc0-1.0', 'https://creativecommons.org/publicdomain/zero/1.0/', 'USDA states that FoodData Central data are in the public domain, published under CC0 1.0. No permission is needed; USDA requests that FoodData Central be named as the source.', true, false, false, '2026-11-05'::date, null, '2026-11-05'::date, 12, 'approved', 2, null, 'Composition dataset. The shipped reference set (src/lib/nutrition/data/usdaReferenceData.ts) has since been checked entry by entry: every food carries its FoodData Central id and data type, Foundation and SR Legacy only — Branded and FNDDS are not shipped. Claim usda-fdc-composition-source cites this source for the dataset''s provenance and licence only, not for the accuracy of any individual value.'
+  'usda-fooddata-central', 'FoodData Central', 'dataset', 'U.S. Department of Agriculture, Agricultural Research Service, Beltsville Human Nutrition Research Center', array['U.S. Department of Agriculture, Agricultural Research Service']::text[], 2019, 'https://fdc.nal.usda.gov/', 'cc0-1.0', 'https://creativecommons.org/publicdomain/zero/1.0/', 'USDA states that FoodData Central data are in the public domain, published under CC0 1.0. No permission is needed; USDA requests that FoodData Central be named as the source.', true, false, false, '2026-11-05'::date, null, '2026-11-05'::date, 12, 'approved', 2, null, 'Composition dataset. The shipped reference set (src/lib/nutrition/data/usdaReferenceData.ts) has since been checked entry by entry: every food carries its FoodData Central id and data type, Foundation and SR Legacy only. Branded and FNDDS are not shipped. Claim usda-fdc-composition-source cites this source for the dataset''s provenance and licence only, not for the accuracy of any individual value.'
 ) on conflict (id) do update set
     title = excluded.title,
     kind = excluded.kind,
@@ -759,7 +759,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'energy-per-kg-7700', 'Bloom''s energy-balance maths treats a kilogram of body-mass change as about 7,700 kcal — in the goal delta (rate × 7,700 ÷ 7) and in the expenditure estimate that learns from a person''s own weigh-ins and logged days.', 'energy_balance', 'insufficient', 0, 'Adults using Bloom''s goal timelines, targets or expenditure estimate', '["The constant is a stated approximation in the code (src/lib/nutrition/expenditure.ts, ENERGY_KCAL_PER_KG); its formal citation is TO VERIFY.","The real energy density of weight change varies with body composition and over time; the figure is a modelling assumption, not a measured constant."]'::jsonb, '["Estimates built on it — maintenance calories, goal timelines — inherit the approximation and are labelled estimates wherever they are shown."]'::jsonb, '["A projected weight or date is arithmetic on an approximation, never a promise."]'::jsonb, 'draft', 1, null, 12, null
+  'energy-per-kg-7700', 'Bloom''s energy-balance maths treats a kilogram of body-mass change as about 7,700 kcal, in the goal delta (rate × 7,700 ÷ 7) and in the expenditure estimate that learns from a person''s own weigh-ins and logged days.', 'energy_balance', 'insufficient', 0, 'Adults using Bloom''s goal timelines, targets or expenditure estimate', '["The constant is a stated approximation in the code (src/lib/nutrition/expenditure.ts, ENERGY_KCAL_PER_KG); its formal citation is TO VERIFY.","The real energy density of weight change varies with body composition and over time; the figure is a modelling assumption, not a measured constant."]'::jsonb, '["Estimates built on it, maintenance calories, goal timelines, inherit the approximation and are labelled estimates wherever they are shown."]'::jsonb, '["A projected weight or date is arithmetic on an approximation, never a promise."]'::jsonb, 'draft', 1, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -828,7 +828,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'micro-gap-threshold', 'A nutrient counts as a gap when at least 4 of the last 7 logged days report it and those days average under 70% of its Spectrum reference; the plan then favours dishes whose computed panels are rich in that nutrient.', 'dietary_pattern', 'insufficient', 0, 'Adults whose food log the plan learns from', '["The 70% threshold and the 4-of-7-days minimum are engine constants (MICRO_GAP_RATIO and MICRO_MIN_DAYS in src/lib/nutrition/planAdaptation.ts) with no source stated in the code; recorded as TO VERIFY."]'::jsonb, '["Averages rest only on days whose logged foods report the nutrient, and sodium — a ceiling, not a goal — is never counted as a gap."]'::jsonb, '["A gap is never a deficiency diagnosis, and no surface may word it as one or recommend a supplement from it."]'::jsonb, 'draft', 1, null, 12, null
+  'micro-gap-threshold', 'A nutrient counts as a gap when at least 4 of the last 7 logged days report it and those days average under 70% of its Spectrum reference; the plan then favours dishes whose computed panels are rich in that nutrient.', 'dietary_pattern', 'insufficient', 0, 'Adults whose food log the plan learns from', '["The 70% threshold and the 4-of-7-days minimum are engine constants (MICRO_GAP_RATIO and MICRO_MIN_DAYS in src/lib/nutrition/planAdaptation.ts) with no source stated in the code; recorded as TO VERIFY."]'::jsonb, '["Averages rest only on days whose logged foods report the nutrient, and sodium, a ceiling, not a goal, is never counted as a gap."]'::jsonb, '["A gap is never a deficiency diagnosis, and no surface may word it as one or recommend a supplement from it."]'::jsonb, 'draft', 1, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -897,7 +897,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'plan-composition-derivations', 'The plan composer''s portion caps and day floors (for example 90 g dry grain and 60 g dry pulses per meal, and 120 g egg portions) are engine derivations recorded in the code from ICMR-NIN''s My Plate framework, British Nutrition Foundation portion sizes and ISSN protein-distribution guidance — not reproduced guideline text.', 'dietary_pattern', 'insufficient', 0, 'Adults receiving a generated meal plan', '["The derivations are stated in src/lib/nutrition/plan.ts and in the composition research notes behind it; the BNF and ISSN citations are TO VERIFY against the publications, so no source is linked."]'::jsonb, '["ICMR-NIN''s Dietary Guidelines are licence-blocked in this registry (icmr-nin-dgi-2024): the composer uses figures it derived and must not present them as ICMR-NIN''s published guidance."]'::jsonb, '["Caps are composition guardrails for plan realism, not intake recommendations to present to a person as health advice."]'::jsonb, 'draft', 1, null, 12, null
+  'plan-composition-derivations', 'The plan composer''s portion caps and day floors (for example 90 g dry grain and 60 g dry pulses per meal, and 120 g egg portions) are engine derivations recorded in the code from ICMR-NIN''s My Plate framework, British Nutrition Foundation portion sizes and ISSN protein-distribution guidance, not reproduced guideline text.', 'dietary_pattern', 'insufficient', 0, 'Adults receiving a generated meal plan', '["The derivations are stated in src/lib/nutrition/plan.ts and in the composition research notes behind it; the BNF and ISSN citations are TO VERIFY against the publications, so no source is linked."]'::jsonb, '["ICMR-NIN''s Dietary Guidelines are licence-blocked in this registry (icmr-nin-dgi-2024): the composer uses figures it derived and must not present them as ICMR-NIN''s published guidance."]'::jsonb, '["Caps are composition guardrails for plan realism, not intake recommendations to present to a person as health advice."]'::jsonb, 'draft', 1, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -920,7 +920,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'protein-bands-by-goal', 'Bloom''s other protein bands are 1.8 g per kg for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance. Above a BMI of 23 the bands multiply a reference weight — the healthy-ceiling weight for the person''s height (22.9 × height²) — instead of current body weight; at or below it they apply to current body weight. (Corrected at version 2, M-219: the statement previously said the bands apply to current body weight throughout, which stopped being true when the dosing basis changed.)', 'protein', 'insufficient', 0, 'Adults using Bloom''s body targets who pass Bloom''s safety screening', '["No source is stated in the code for these three bands (src/lib/health/body.ts, bodyTargetsOf); recorded as TO VERIFY."]'::jsonb, '["Per-kilogram bands scale linearly with body weight, which overstates needs at high body weights; since M-219 the engine doses on the healthy-ceiling reference weight above a BMI of 23, but that reference is a BMI ceiling, not a measured lean-mass figure."]'::jsonb, '["Planning targets for the classifier''s cleared set, not therapeutic protein prescriptions."]'::jsonb, 'draft', 2, null, 12, null
+  'protein-bands-by-goal', 'Bloom''s other protein bands are 1.8 g per kg for weight loss, 1.6 g per kg for weight gain and 1.4 g per kg for maintenance. Above a BMI of 23 the bands multiply a reference weight, the healthy-ceiling weight for the person''s height (22.9 × height²), instead of current body weight; at or below it they apply to current body weight. (Corrected at version 2, M-219: the statement previously said the bands apply to current body weight throughout, which stopped being true when the dosing basis changed.)', 'protein', 'insufficient', 0, 'Adults using Bloom''s body targets who pass Bloom''s safety screening', '["No source is stated in the code for these three bands (src/lib/health/body.ts, bodyTargetsOf); recorded as TO VERIFY."]'::jsonb, '["Per-kilogram bands scale linearly with body weight, which overstates needs at high body weights; since M-219 the engine doses on the healthy-ceiling reference weight above a BMI of 23, but that reference is a BMI ceiling, not a measured lean-mass figure."]'::jsonb, '["Planning targets for the classifier''s cleared set, not therapeutic protein prescriptions."]'::jsonb, 'draft', 2, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -943,7 +943,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'protein-recomp-2-2', 'For body recomposition — fat loss and muscle gain at the same weight — Bloom sets the protein target at 2.2 g per kg of body weight, the highest of its four goal bands.', 'protein', 'insufficient', 0, 'Adults with a recomposition goal who pass Bloom''s safety screening', '["The figure''s citations are recorded in the code comment (src/lib/health/body.ts) as Morton et al.''s 2018 meta-analysis of protein and lean mass (BJSM) and the ISSN position stand''s range for maximising lean mass; they have not yet been verified against those publications, so no source is linked."]'::jsonb, '["The code describes 2.2 g/kg as the upper confidence bound in the cited meta-analysis — the top of a range, chosen deliberately for the most protein-demanding goal, not a typical requirement."]'::jsonb, '["The safety classifier blocks this band from reaching anyone for whom a high-protein target needs a clinician (chronic kidney disease, pregnancy, eating-disorder history)."]'::jsonb, 'draft', 1, null, 12, null
+  'protein-recomp-2-2', 'For body recomposition, fat loss and muscle gain at the same weight. Bloom sets the protein target at 2.2 g per kg of body weight, the highest of its four goal bands.', 'protein', 'insufficient', 0, 'Adults with a recomposition goal who pass Bloom''s safety screening', '["The figure''s citations are recorded in the code comment (src/lib/health/body.ts) as Morton et al.''s 2018 meta-analysis of protein and lean mass (BJSM) and the ISSN position stand''s range for maximising lean mass; they have not yet been verified against those publications, so no source is linked."]'::jsonb, '["The code describes 2.2 g/kg as the upper confidence bound in the cited meta-analysis, the top of a range, chosen deliberately for the most protein-demanding goal, not a typical requirement."]'::jsonb, '["The safety classifier blocks this band from reaching anyone for whom a high-protein target needs a clinician (chronic kidney disease, pregnancy, eating-disorder history)."]'::jsonb, 'draft', 1, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -966,7 +966,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'rate-cap-0-75kg-per-week', 'Bloom caps planned weight change at 0.75 kg per week.', 'weight_change_rate', 'insufficient', 0, 'Anyone using Bloom''s body-target calculator', '["The M-219 engine evidence audit (2026-11-22) set this cap against the published ranges it verified — CDC''s 1–2 lb per week and the AHA/ACC/TOS 500–750 kcal/day prescription the old 1 kg/week cap exceeded. Those sources are not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.","How the ceiling should differ by body size remains unresolved."]'::jsonb, '["Deliberately recorded with no citation rather than attaching a plausible-looking reference to a number nobody checked.","Until a source is verified, this claim must not be presented to a person as evidence-based."]'::jsonb, '["A cap does not make an aggressive target safe for someone with a history of disordered eating; the safety classifier handles that separately."]'::jsonb, 'draft', 1, null, 12, null
+  'rate-cap-0-75kg-per-week', 'Bloom caps planned weight change at 0.75 kg per week.', 'weight_change_rate', 'insufficient', 0, 'Anyone using Bloom''s body-target calculator', '["The M-219 engine evidence audit (2026-11-22) set this cap against the published ranges it verified. CDC''s 1-2 lb per week and the AHA/ACC/TOS 500-750 kcal/day prescription the old 1 kg/week cap exceeded. Those sources are not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.","How the ceiling should differ by body size remains unresolved."]'::jsonb, '["Deliberately recorded with no citation rather than attaching a plausible-looking reference to a number nobody checked.","Until a source is verified, this claim must not be presented to a person as evidence-based."]'::jsonb, '["A cap does not make an aggressive target safe for someone with a history of disordered eating; the safety classifier handles that separately."]'::jsonb, 'draft', 1, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -1012,7 +1012,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'spectrum-rda-2020-references', 'The Nutrition tab''s micronutrient panel judges a day against reference intakes the code names as ICMR-NIN Recommended Dietary Allowances 2020: fibre 30 g, potassium 3,500 mg, magnesium 440 mg (370 mg for women), calcium 1,000 mg, iron 19 mg (29 mg for women), vitamin C 80 mg (65 mg for women), and sodium as a 2,000 mg ceiling rather than a goal. (Corrected at version 2, M-219: the magnesium figures previously recorded here were the ICMR-NIN estimated average requirements, not the RDA, and vitamin C was recorded as a single value where the RDA is sex-specific.)', 'dietary_pattern', 'insufficient', 0, 'Adults reading the Nutrition tab''s daily micronutrient panel', '["The values are stated in the code (src/lib/nutrition/dayView.ts, spectrumReferences) with the ICMR-NIN RDA 2020 attribution, but the registry has not verified them against the publication, so no source is linked."]'::jsonb, '["OPEN OWNER DECISION: this registry permission-gates ICMR-NIN publications for reproduction in a product (see icmr-nin-dgi-2024 and icmr-nin-ifct-2017). Whether stating RDA numeric values as reference intakes falls under the written permission Bloom is seeking is unresolved. The values stay in the product while the owner decides; this entry records the question and does not settle it."]'::jsonb, '["A day under a reference is a statement about the logged foods that report the nutrient — never a deficiency diagnosis, and no surface may word it as one."]'::jsonb, 'draft', 2, null, 12, null
+  'spectrum-rda-2020-references', 'The Nutrition tab''s micronutrient panel judges a day against reference intakes the code names as ICMR-NIN Recommended Dietary Allowances 2020: fibre 30 g, potassium 3,500 mg, magnesium 440 mg (370 mg for women), calcium 1,000 mg, iron 19 mg (29 mg for women), vitamin C 80 mg (65 mg for women), and sodium as a 2,000 mg ceiling rather than a goal. (Corrected at version 2, M-219: the magnesium figures previously recorded here were the ICMR-NIN estimated average requirements, not the RDA, and vitamin C was recorded as a single value where the RDA is sex-specific.)', 'dietary_pattern', 'insufficient', 0, 'Adults reading the Nutrition tab''s daily micronutrient panel', '["The values are stated in the code (src/lib/nutrition/dayView.ts, spectrumReferences) with the ICMR-NIN RDA 2020 attribution, but the registry has not verified them against the publication, so no source is linked."]'::jsonb, '["OPEN OWNER DECISION: this registry permission-gates ICMR-NIN publications for reproduction in a product (see icmr-nin-dgi-2024 and icmr-nin-ifct-2017). Whether stating RDA numeric values as reference intakes falls under the written permission Bloom is seeking is unresolved. The values stay in the product while the owner decides; this entry records the question and does not settle it."]'::jsonb, '["A day under a reference is a statement about the logged foods that report the nutrient, never a deficiency diagnosis, and no surface may word it as one."]'::jsonb, 'draft', 2, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -1035,7 +1035,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'usda-fdc-composition-source', 'Bloom''s reference food values come from USDA FoodData Central — the Foundation and SR Legacy datasets, each food carrying its FoodData Central id and data type — published under CC0 1.0 (public domain).', 'food_composition', 'moderate', 0.9, 'Anyone using Bloom''s food search, dish library or meal plans', '["FoodData Central is a living dataset and values can change between releases, which is why every shipped food records the release its values came from."]'::jsonb, '["This entry covers the dataset''s provenance and licence only. It does not certify any individual food value; each value''s standing rests on the dataset and on the per-food provenance the app shows."]'::jsonb, '["USDA values describe foods as analysed in the United States; a local variety or preparation can differ, so values are reference data, never a measurement of the food on a person''s plate."]'::jsonb, 'draft', 1, null, 12, null
+  'usda-fdc-composition-source', 'Bloom''s reference food values come from USDA FoodData Central, the Foundation and SR Legacy datasets, each food carrying its FoodData Central id and data type, published under CC0 1.0 (public domain).', 'food_composition', 'moderate', 0.9, 'Anyone using Bloom''s food search, dish library or meal plans', '["FoodData Central is a living dataset and values can change between releases, which is why every shipped food records the release its values came from."]'::jsonb, '["This entry covers the dataset''s provenance and licence only. It does not certify any individual food value; each value''s standing rests on the dataset and on the per-food provenance the app shows."]'::jsonb, '["USDA values describe foods as analysed in the United States; a local variety or preparation can differ, so values are reference data, never a measurement of the food on a person''s plate."]'::jsonb, 'draft', 1, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -1058,7 +1058,7 @@ insert into public.evidence_claims as target (
 insert into public.evidence_claims as target (
   id, statement, topic, grade, confidence, population, uncertainty, limitations, contraindications, review_status, version, reviewed_on, review_interval_months, superseded_by
 ) values (
-  'water-efsa-drinking-share', 'Bloom''s daily water target is a drinking-water figure: a base of 1,900 ml for men, 1,500 ml for women and 1,700 ml when sex is unstated, plus an activity allowance of 0 to 700 ml, clamped between 1,200 and 3,000 ml. The base is set at roughly three quarters of EFSA''s total-water adequate intake (2.5 L a day for men, 2.0 L for women) — the share ordinarily drunk rather than taken in food.', 'hydration', 'insufficient', 0, 'Adults using Bloom''s hydration tracker', '["The EFSA adequate-intake basis was verified by the M-219 engine evidence audit (2026-11-22) against EFSA''s 2010 opinion; the source is not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.","The roughly-three-quarters drinking share is an estimate of how total water ordinarily splits between drink and food moisture, not an EFSA figure."]'::jsonb, '["EFSA''s adequate intake assumes a temperate climate; heat, illness and medication can move real needs well past any fixed figure."]'::jsonb, '["People whose condition or medication restricts fluid must follow their clinician, not this target."]'::jsonb, 'draft', 1, null, 12, null
+  'water-efsa-drinking-share', 'Bloom''s daily water target is a drinking-water figure: a base of 1,900 ml for men, 1,500 ml for women and 1,700 ml when sex is unstated, plus an activity allowance of 0 to 700 ml, clamped between 1,200 and 3,000 ml. The base is set at roughly three quarters of EFSA''s total-water adequate intake (2.5 L a day for men, 2.0 L for women), the share ordinarily drunk rather than taken in food.', 'hydration', 'insufficient', 0, 'Adults using Bloom''s hydration tracker', '["The EFSA adequate-intake basis was verified by the M-219 engine evidence audit (2026-11-22) against EFSA''s 2010 opinion; the source is not yet registered in this catalogue, so the claim stays a draft: TO VERIFY, TO REGISTER.","The roughly-three-quarters drinking share is an estimate of how total water ordinarily splits between drink and food moisture, not an EFSA figure."]'::jsonb, '["EFSA''s adequate intake assumes a temperate climate; heat, illness and medication can move real needs well past any fixed figure."]'::jsonb, '["People whose condition or medication restricts fluid must follow their clinician, not this target."]'::jsonb, 'draft', 1, null, 12, null
 ) on conflict (id) do update set
     statement = excluded.statement,
     topic = excluded.topic,
@@ -1150,7 +1150,7 @@ on conflict (claim_id, source_id) do update set
         is distinct from (excluded.direction, excluded.locator);
 
 insert into public.evidence_claim_sources as target (claim_id, source_id, direction, locator)
-values ('usda-fdc-composition-source', 'usda-fooddata-central', 'supports', 'FoodData Central (fdc.nal.usda.gov) — USDA publishes the data under CC0 1.0 and asks that FoodData Central be named as the source')
+values ('usda-fdc-composition-source', 'usda-fooddata-central', 'supports', 'FoodData Central (fdc.nal.usda.gov). USDA publishes the data under CC0 1.0 and asks that FoodData Central be named as the source')
 on conflict (claim_id, source_id) do update set
     direction = excluded.direction,
     locator = excluded.locator
@@ -1166,77 +1166,77 @@ on conflict (id) do update set
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.safety.rate-cap', 'The Phase 1 classifier clamps requested pace to this constant. Phase 2 records the rule and the fact that its evidence is missing, rather than inventing support for a number that was chosen as a safety margin. Implemented in src/lib/vitalis/domain/safety.ts — MIN_RATE_KG_PER_WEEK / MAX_RATE_KG_PER_WEEK.')
+values ('vitalis.safety.rate-cap', 'The Phase 1 classifier clamps requested pace to this constant. Phase 2 records the rule and the fact that its evidence is missing, rather than inventing support for a number that was chosen as a safety margin. Implemented in src/lib/vitalis/domain/safety.ts. MIN_RATE_KG_PER_WEEK / MAX_RATE_KG_PER_WEEK.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.nutrition.composition-source', 'Implemented in src/lib/nutrition/usdaReference.ts: its licence gate resolves the usda provenance kind to this registry''s usda-fooddata-central source and fails closed for any source that is not product-allowed — which is what keeps IFCT and INDB values out of the product until written permission exists.')
+values ('vitalis.nutrition.composition-source', 'Implemented in src/lib/nutrition/usdaReference.ts: its licence gate resolves the usda provenance kind to this registry''s usda-fooddata-central source and fails closed for any source that is not product-allowed, which is what keeps IFCT and INDB values out of the product until written permission exists.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.body.bmr-equation', 'Implemented in src/lib/health/body.ts — bmrOf (Mifflin–St Jeor; sex constants +5 / −161 / −78). The Vitalis calculation path consumes the same figures via src/lib/vitalis/calc/body.ts (targetsFor).')
+values ('vitalis.body.bmr-equation', 'Implemented in src/lib/health/body.ts, bmrOf (Mifflin–St Jeor; sex constants +5 / −161 / −78). The Vitalis calculation path consumes the same figures via src/lib/vitalis/calc/body.ts (targetsFor).')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.body.activity-factors', 'Implemented in src/lib/health/body.ts — ACTIVITY_FACTOR, applied in bodyTargetsOf as TDEE = BMR × factor.')
+values ('vitalis.body.activity-factors', 'Implemented in src/lib/health/body.ts. ACTIVITY_FACTOR, applied in bodyTargetsOf as TDEE = BMR × factor.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.body.protein-recomp', 'Implemented in src/lib/health/body.ts — bodyTargetsOf sets proteinPerKg to 2.2 when the goal is recomp; the comment there carries the citations this claim records as unverified.')
+values ('vitalis.body.protein-recomp', 'Implemented in src/lib/health/body.ts, bodyTargetsOf sets proteinPerKg to 2.2 when the goal is recomp; the comment there carries the citations this claim records as unverified.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.body.protein-bands', 'Implemented in src/lib/health/body.ts — bodyTargetsOf proteinPerKg: 1.8 (lose), 1.6 (gain), 1.4 (maintain).')
+values ('vitalis.body.protein-bands', 'Implemented in src/lib/health/body.ts, bodyTargetsOf proteinPerKg: 1.8 (lose), 1.6 (gain), 1.4 (maintain).')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.body.energy-per-kg', 'Implemented in src/lib/nutrition/expenditure.ts — ENERGY_KCAL_PER_KG = 7700; the same figure appears as the 7700 literal in src/lib/health/body.ts, where bodyTargetsOf turns a weekly rate into a daily delta.')
+values ('vitalis.body.energy-per-kg', 'Implemented in src/lib/nutrition/expenditure.ts. ENERGY_KCAL_PER_KG = 7700; the same figure appears as the 7700 literal in src/lib/health/body.ts, where bodyTargetsOf turns a weekly rate into a daily delta.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.body.calorie-floor', 'Implemented in src/lib/health/body.ts — calorieFloor(sex) returns 1500 / 1200 / 1350; bodyTargetsOf clamps the target to at least the floor and records floorApplied so the surface can say the floor did the work.')
+values ('vitalis.body.calorie-floor', 'Implemented in src/lib/health/body.ts, calorieFloor(sex) returns 1500 / 1200 / 1350; bodyTargetsOf clamps the target to at least the floor and records floorApplied so the surface can say the floor did the work.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.nutrition.spectrum-references', 'Implemented in src/lib/nutrition/dayView.ts — spectrumReferences(sex) returns the seven reference rows the panel and the gap detection judge against.')
+values ('vitalis.nutrition.spectrum-references', 'Implemented in src/lib/nutrition/dayView.ts, spectrumReferences(sex) returns the seven reference rows the panel and the gap detection judge against.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.plan.composition-caps', 'Implemented in src/lib/nutrition/plan.ts — the portion-cap constants (CAP_GRAIN_DRY_G, CAP_DRY_PULSES_G, CAP_EGGS_G and their family) and the day-floor checks of the layered composer.')
+values ('vitalis.plan.composition-caps', 'Implemented in src/lib/nutrition/plan.ts, the portion-cap constants (CAP_GRAIN_DRY_G, CAP_DRY_PULSES_G, CAP_EGGS_G and their family) and the day-floor checks of the layered composer.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.body.hydration-target', 'Implemented in src/lib/health/body.ts — bodyTargetsOf computes waterMl as weightKg × 35 plus the activity bonus, clamped to [1500, 4500] and rounded to 50 ml.')
+values ('vitalis.body.hydration-target', 'Implemented in src/lib/health/body.ts, bodyTargetsOf computes waterMl as weightKg × 35 plus the activity bonus, clamped to [1500, 4500] and rounded to 50 ml.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
@@ -1257,28 +1257,28 @@ on conflict (id) do update set
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.plan.budget-tiers', 'Implemented in src/lib/nutrition/dishes.ts — BUDGET_TIER_1_MAX_PER_SERVING = 20 and BUDGET_TIER_2_MAX_PER_SERVING = 45 (₹ per serving) over the stated ₹-per-gram group bands.')
+values ('vitalis.plan.budget-tiers', 'Implemented in src/lib/nutrition/dishes.ts. BUDGET_TIER_1_MAX_PER_SERVING = 20 and BUDGET_TIER_2_MAX_PER_SERVING = 45 (₹ per serving) over the stated ₹-per-gram group bands.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.plan.dish-regions', 'Implemented in src/lib/nutrition/regions.ts — the curated north/south marker tables; the plan composer applies the result as a ranking bonus, never a filter.')
+values ('vitalis.plan.dish-regions', 'Implemented in src/lib/nutrition/regions.ts, the curated north/south marker tables; the plan composer applies the result as a ranking bonus, never a filter.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.plan.micro-gap-bias', 'Implemented in src/lib/nutrition/planAdaptation.ts — microGapsFor applies MICRO_GAP_RATIO = 0.7 with MICRO_MIN_DAYS = 4 reporting days inside MICRO_WINDOW_DAYS = 7, and the composer favours dishes rich in a gap nutrient (MICRO_RICH_SHARE).')
+values ('vitalis.plan.micro-gap-bias', 'Implemented in src/lib/nutrition/planAdaptation.ts, microGapsFor applies MICRO_GAP_RATIO = 0.7 with MICRO_MIN_DAYS = 4 reporting days inside MICRO_WINDOW_DAYS = 7, and the composer favours dishes rich in a gap nutrient (MICRO_RICH_SHARE).')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()
   where target.rationale is distinct from excluded.rationale;
 
 insert into public.evidence_recommendations as target (id, rationale)
-values ('vitalis.plan.log-adaptation', 'Implemented in src/lib/nutrition/planAdaptation.ts — planAdaptationFor applies PROTEIN_SHORTFALL_RATIO = 0.85 and ENERGY_OVERSHOOT_RATIO = 1.1 over the last two to three logged days; targets are read, never written.')
+values ('vitalis.plan.log-adaptation', 'Implemented in src/lib/nutrition/planAdaptation.ts, planAdaptationFor applies PROTEIN_SHORTFALL_RATIO = 0.85 and ENERGY_OVERSHOOT_RATIO = 1.1 over the last two to three logged days; targets are read, never written.')
 on conflict (id) do update set
     rationale = excluded.rationale,
     updated_at = now()

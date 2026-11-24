@@ -737,7 +737,7 @@ export function useProfileSpace() {
       scope: "profile:magic-link",
     });
     return result.ok
-      ? { ok: true, message: "Check your inbox — a sign-in link is on its way." }
+      ? { ok: true, message: "Check your inbox, a sign-in link is on its way." }
       : result;
   }, []);
 

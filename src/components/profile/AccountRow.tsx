@@ -242,7 +242,7 @@ function PersonalizationSection() {
       />
       <ConfirmRow
         open={confirming}
-        message="Turning off cycle tracking removes Cycle from your Bloom — the nav entry, the Today ring and your coach's cycle context. Nothing you have logged is deleted, and you can turn it back on here."
+        message="Turning off cycle tracking removes Cycle from your Bloom, the nav entry, the Today ring and your coach's cycle context. Nothing you have logged is deleted, and you can turn it back on here."
         onCancel={() => setConfirming(false)}
         onConfirm={() => {
           setConfirming(false);
@@ -284,7 +284,7 @@ function PersonalizationSection() {
         hint={
           state.sex
             ? "Asked once at setup. Changing it never deletes anything logged."
-            : "Not asked yet — the switch above is what Bloom is going by."
+            : "Not asked yet, the switch above is what Bloom is going by."
         }
         value={sexValue}
       />
@@ -476,7 +476,7 @@ export function AccountRow({
                   month: "short",
                   year: "numeric",
                 })
-              : "—"
+              : "-"
           }
         />
         {isSignedIn ? (

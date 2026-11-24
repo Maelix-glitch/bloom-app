@@ -39,7 +39,7 @@ const WORDS = ["Two", "Three", "Four", "Five"];
 
 export function sublineFor({ ready, firstDay, openCount }: SublineInput): string {
   if (!ready) return RECORD_READING;
-  if (firstDay) return "Day one — look around, log one thing when it's natural.";
+  if (firstDay) return "Day one, look around, log one thing when it's natural.";
   if (openCount <= 0) return "Everything you track is logged. Enjoy the quiet.";
   if (openCount === 1) return "One thing left to shape your day.";
   const count = openCount <= WORDS.length + 1 ? WORDS[openCount - 2] : String(openCount);

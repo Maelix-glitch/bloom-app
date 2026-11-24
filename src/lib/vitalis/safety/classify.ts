@@ -146,7 +146,7 @@ export function classifySafety(input: SafetyInput): SafetyAssessment {
     add(
       "underweight_target",
       "professional_review_required",
-      `Your target weight works out to a BMI of ${input.targetBmi.toFixed(1)}, below the healthy range. Bloom won't plan weight loss toward an underweight goal — please set a target inside the healthy range, or talk it through with a clinician.`,
+      `Your target weight works out to a BMI of ${input.targetBmi.toFixed(1)}, below the healthy range. Bloom won't plan weight loss toward an underweight goal, please set a target inside the healthy range, or talk it through with a clinician.`,
       true,
     );
   }

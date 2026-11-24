@@ -109,8 +109,8 @@ function gapsFor(intel: IntelligenceResult, logs: readonly PeriodLog[]): CycleGa
         : touchesExcluded
           ? "Next to a cycle you've excluded from your averages, so this stretch isn't counted either. The record itself is unchanged."
           : days > PLAUSIBLE_MAX
-            ? `Longer than ${PLAUSIBLE_MAX} days — kept in your history, left out of the median.`
-            : "Shorter than 15 days — kept in your history, left out of the median.",
+            ? `Longer than ${PLAUSIBLE_MAX} days, kept in your history, left out of the median.`
+            : "Shorter than 15 days, kept in your history, left out of the median.",
       suggestedMissedDate: null,
     };
   });
@@ -170,7 +170,7 @@ function flagsFor(intel: IntelligenceResult): InsightFlag[] {
       body:
         intel.baseline.starts.length === 0
           ? "Log the first day of a period. A forecast needs two starts before it can measure a cycle length."
-          : "One start is recorded. The next one creates your first measured interval — until then there is no personal estimate.",
+          : "One start is recorded. The next one creates your first measured interval, until then there is no personal estimate.",
     });
   }
 
@@ -190,7 +190,7 @@ function flagsFor(intel: IntelligenceResult): InsightFlag[] {
       kind: "late",
       tone: "attention",
       title: `${intel.phase.overdueDays} ${intel.phase.overdueDays === 1 ? "day" : "days"} past your usual cycle`,
-      body: "This is measured against your own median, not a population average. Nothing is restarted for you — log a new start when it begins.",
+      body: "This is measured against your own median, not a population average. Nothing is restarted for you, log a new start when it begins.",
     });
   }
 

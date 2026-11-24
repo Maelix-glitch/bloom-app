@@ -49,7 +49,7 @@ export function groceryMessageFor(boughtCount: number, pct: number): string {
   if (pct >= 100) return "Everything’s in the basket. You’re all set!";
   if (pct >= 75) return "Just a few more things.";
   if (pct >= 50) return "You’re making good progress.";
-  return "Getting started — one aisle at a time.";
+  return "Getting started, one aisle at a time.";
 }
 
 /**

@@ -35,15 +35,15 @@ export function PointsChip({
     : wallet.source === "account"
       ? "Your account balance"
       : wallet.degraded
-        ? "Your account balance couldn't load — showing this device for now"
-        : "Earned on this device — sign in to sync";
+        ? "Your account balance couldn't load, showing this device for now"
+        : "Earned on this device, sign in to sync";
   return (
     <Link
       to="/rewards"
       aria-label={
         wallet.loading
-          ? "Loading your Bloom Points — open your Journey"
-          : `${formatPoints(wallet.balance)} Bloom Points — open your Journey`
+          ? "Loading your Bloom Points, open your Journey"
+          : `${formatPoints(wallet.balance)} Bloom Points, open your Journey`
       }
       title={title}
       className={cn(

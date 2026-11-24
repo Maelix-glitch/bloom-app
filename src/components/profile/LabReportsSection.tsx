@@ -85,7 +85,7 @@ export function LabReportsSection() {
     };
     if (!parseLabResult(candidate) || !addLabResult(candidate)) {
       setError(
-        "Check the result: it needs a test name, a number, a unit and the report's date — and the range's low must not be above its high.",
+        "Check the result: it needs a test name, a number, a unit and the report's date, and the range's low must not be above its high.",
       );
       return;
     }
@@ -192,7 +192,7 @@ export function LabReportsSection() {
                     <div
                       className="meter flex-1"
                       role="progressbar"
-                      aria-label={`${group.testName} — position in the range on your report`}
+                      aria-label={`${group.testName}, position in the range on your report`}
                       aria-valuemin={range.low}
                       aria-valuemax={range.high}
                       aria-valuenow={Math.min(range.high, Math.max(range.low, latest.value))}
@@ -200,15 +200,15 @@ export function LabReportsSection() {
                       style={{ "--v": `${range.pct}%` } as CSSProperties}
                     />
                     <span className="text-[length:var(--text-caption)] tabular-nums text-faint">
-                      {fmtValue(range.low)}–{fmtValue(range.high)} {latest.unit}
+                      {fmtValue(range.low)}-{fmtValue(range.high)} {latest.unit}
                     </span>
                   </div>
                 ) : null}
                 {latest.refLow !== undefined || latest.refHigh !== undefined ? (
                   <div className="mt-1.5 text-[length:var(--text-caption)] text-faint">
                     Range on your report:{" "}
-                    {latest.refLow !== undefined ? fmtValue(latest.refLow) : "—"} to{" "}
-                    {latest.refHigh !== undefined ? fmtValue(latest.refHigh) : "—"} {latest.unit}
+                    {latest.refLow !== undefined ? fmtValue(latest.refLow) : "-"} to{" "}
+                    {latest.refHigh !== undefined ? fmtValue(latest.refHigh) : "-"} {latest.unit}
                   </div>
                 ) : null}
                 {group.points.length > 1 ? (
@@ -345,7 +345,7 @@ export function LabReportsSection() {
           <div className="grid grid-cols-2 gap-3">
             <div className="grid gap-1.5">
               <label className={inputLabel} htmlFor="lab-ref-low">
-                Range on the report — low (optional)
+                Range on the report, low (optional)
               </label>
               <Input
                 id="lab-ref-low"
@@ -357,7 +357,7 @@ export function LabReportsSection() {
             </div>
             <div className="grid gap-1.5">
               <label className={inputLabel} htmlFor="lab-ref-high">
-                Range on the report — high (optional)
+                Range on the report, high (optional)
               </label>
               <Input
                 id="lab-ref-high"

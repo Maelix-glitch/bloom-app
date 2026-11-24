@@ -158,7 +158,7 @@ export type DayFieldErrors = Partial<
 export function validateDayLog(draft: DayLog, today: string): DayFieldErrors {
   const errors: DayFieldErrors = {};
   if (!isValidDateKey(draft.date)) {
-    errors.date = "Pick a real date — the log hangs off it.";
+    errors.date = "Pick a real date, the log hangs off it.";
   } else if (diffDays(today, draft.date) > 0) {
     errors.date = "That date hasn't happened yet. Log today or an earlier day.";
   }
@@ -491,7 +491,7 @@ function buildHeadline(
 
   if (analysis.confidence === "high") {
     bits.push(
-      `Your cycles are steady — ${analysis.cycleLengths.length} of them inside ±3 days of ${analysis.averageLength.toFixed(1)}.`,
+      `Your cycles are steady, ${analysis.cycleLengths.length} of them inside ±3 days of ${analysis.averageLength.toFixed(1)}.`,
     );
   } else if (analysis.irregular) {
     bits.push(
@@ -537,7 +537,7 @@ function buildNotes(
   if (top && top.count >= 3) {
     notes.push(
       top.topPhase
-        ? `${cap(top.key)} is your most logged symptom — ${top.count} days, mostly in the ${top.topPhase} phase.`
+        ? `${cap(top.key)} is your most logged symptom, ${top.count} days, mostly in the ${top.topPhase} phase.`
         : `${cap(top.key)} is your most logged symptom so far, across ${top.count} days.`,
     );
   }

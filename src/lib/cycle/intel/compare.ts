@@ -76,7 +76,7 @@ export function compareRecentCycles(
     cycles.length < 2
       ? "Comparison needs at least two recorded cycles."
       : complete === 0
-        ? "Lengths are known for completed cycles, but no bleeding end has been recorded — that column stays empty rather than guessed."
+        ? "Lengths are known for completed cycles, but no bleeding end has been recorded, that column stays empty rather than guessed."
         : `${cycles.length} most recent cycles, ${complete} with a recorded bleed end. Differences here are descriptive; they do not show that one cycle is healthier than another.`;
 
   return { cycles, compared: cycles.length, note };

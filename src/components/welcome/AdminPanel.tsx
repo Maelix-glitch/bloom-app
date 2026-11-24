@@ -214,7 +214,7 @@ export function AdminPanel({
           </button>
           <p className="adm-note">
             This door only appears for an account listed in Bloom's admin table. It skips setup and
-            opens surfaces directly — the reward admin and point audit still check your access on
+            opens surfaces directly, the reward admin and point audit still check your access on
             the server.
           </p>
         </footer>

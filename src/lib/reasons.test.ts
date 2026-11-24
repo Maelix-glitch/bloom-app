@@ -63,7 +63,7 @@ const FIXTURES: PlanReason[] = [
   { kind: "meal-missing-layers", layers: ["a protein dish", "vegetables"] },
 ];
 
-describe("reasons — the copy contract (brief v4 Part 6)", () => {
+describe("reasons, the copy contract (brief v4 Part 6)", () => {
   it("every kind renders a title, a source, and a detail ≤ 140 chars ending with a full stop", () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
     for (const reason of FIXTURES) {
@@ -114,7 +114,7 @@ describe("reasons — the copy contract (brief v4 Part 6)", () => {
  * data, and the deficit words ("to go", "left", "failed") never
  * appear.
  */
-describe("reasons — adjustmentCopy (brief v7)", () => {
+describe("reasons, adjustmentCopy (brief v7)", () => {
   const BANNED = /\bto go\b|\bleft\b|\bfailed\b/i;
 
   it("protein-lean under 7 days carries the Early read badge as data", () => {
@@ -173,11 +173,11 @@ describe("reasons — adjustmentCopy (brief v7)", () => {
     });
     expect(raised!.title).toBe("Prep time stretched");
     expect(raised!.detail).toBe(
-      "Your answers aim for about 10 minutes a main; today's dishes take up to about 25 minutes — the closest fit.",
+      "Your answers aim for about 10 minutes a main; today's dishes take up to about 25 minutes, the closest fit.",
     );
     const quickest = adjustmentCopy({ kind: "kitchen-cap-quickest", capMinutes: 10 });
     expect(quickest!.detail).toBe(
-      "Your answers aim for about 10 minutes, and every main dish takes longer — today uses the quickest there are.",
+      "Your answers aim for about 10 minutes, and every main dish takes longer, today uses the quickest there are.",
     );
     const energy = adjustmentCopy({
       kind: "log-energy-overshoot",

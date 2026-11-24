@@ -52,7 +52,7 @@ export function ConnectionNotice() {
       <button
         type="button"
         className="conn-notice-chip"
-        aria-label="Saving to this device only — show details"
+        aria-label="Saving to this device only, show details"
         title="Saving to this device only"
         onClick={() => setCollapsed(false)}
       >

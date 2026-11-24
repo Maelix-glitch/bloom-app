@@ -204,7 +204,7 @@ function QuestionBuilder({ onAdd }: { onAdd: (el: StoryElement) => void }) {
         />
       </Row>
       <p className="text-[12px] text-faint">
-        Answers arrive privately — only you see who wrote what.
+        Answers arrive privately, only you see who wrote what.
       </p>
       <AddButton disabled={!prompt.trim()} onClick={() => onAdd(makeQuestionElement(prompt))}>
         Add question
@@ -310,7 +310,7 @@ function MentionBuilder({ onAdd }: { onAdd: (el: StoryElement) => void }) {
       </Row>
       {!valid && handle.trim() ? (
         <p className="text-[12px] text-rose">
-          Usernames are 3–30 letters, numbers, or underscores.
+          Usernames are 3-30 letters, numbers, or underscores.
         </p>
       ) : null}
       <AddButton disabled={!valid} onClick={() => onAdd(makeMentionElement(clean))}>

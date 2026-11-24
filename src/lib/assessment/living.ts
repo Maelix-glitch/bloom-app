@@ -282,31 +282,31 @@ function latestWeighInAfter(weighIns: readonly WeighIn[], day: string): WeighIn 
 function describeChanges(changes: AssessmentDeltaChanges): string[] {
   const parts: string[] = [];
   if (changes.weightKg !== undefined) parts.push(`weight ${fmtKg(changes.weightKg)} kg`);
-  if (changes.activity !== undefined) parts.push(`activity — ${ACTIVITY_LABEL[changes.activity]}`);
+  if (changes.activity !== undefined) parts.push(`activity, ${ACTIVITY_LABEL[changes.activity]}`);
   if (changes.sleepHoursTypical !== undefined) {
-    parts.push(`sleep — about ${fmtKg(changes.sleepHoursTypical)} hours`);
+    parts.push(`sleep, about ${fmtKg(changes.sleepHoursTypical)} hours`);
   }
   if (changes.sleepQuality !== undefined) {
-    parts.push(`sleep quality — ${SLEEP_QUALITY_LABEL[changes.sleepQuality].toLowerCase()}`);
+    parts.push(`sleep quality, ${SLEEP_QUALITY_LABEL[changes.sleepQuality].toLowerCase()}`);
   }
   if (changes.morningRestedness !== undefined) {
     parts.push(
-      `waking rested — ${RESTEDNESS_LABEL[changes.morningRestedness]?.toLowerCase() ?? changes.morningRestedness}`,
+      `waking rested, ${RESTEDNESS_LABEL[changes.morningRestedness]?.toLowerCase() ?? changes.morningRestedness}`,
     );
   }
   if (changes.cookingAbility !== undefined) {
-    parts.push(`cooking — ${COOKING_LABEL[changes.cookingAbility].toLowerCase()}`);
+    parts.push(`cooking, ${COOKING_LABEL[changes.cookingAbility].toLowerCase()}`);
   }
   if (changes.equipment !== undefined) {
     parts.push(
-      `equipment — ${changes.equipment.map((item) => EQUIPMENT_LABEL[item].toLowerCase()).join(", ")}`,
+      `equipment, ${changes.equipment.map((item) => EQUIPMENT_LABEL[item].toLowerCase()).join(", ")}`,
     );
   }
   if (changes.prepTimeMaxMinutes !== undefined) {
-    parts.push(`prep time — ${PREP_TIME_LABEL[changes.prepTimeMaxMinutes].toLowerCase()}`);
+    parts.push(`prep time, ${PREP_TIME_LABEL[changes.prepTimeMaxMinutes].toLowerCase()}`);
   }
   if (changes.eatingSetting !== undefined) {
-    parts.push(`eating — ${EATING_SETTING_LABEL[changes.eatingSetting].toLowerCase()}`);
+    parts.push(`eating, ${EATING_SETTING_LABEL[changes.eatingSetting].toLowerCase()}`);
   }
   return parts;
 }
@@ -339,7 +339,7 @@ export function sinceLines(
     lines.push({
       id: `weighin-${latest.date}`,
       date: latest.date,
-      text: `Weigh-in on ${fmtDay(latest.date)}: ${fmtKg(latest.kg)} kg — ${relation}.`,
+      text: `Weigh-in on ${fmtDay(latest.date)}: ${fmtKg(latest.kg)} kg, ${relation}.`,
     });
   }
 
@@ -355,7 +355,7 @@ export function sinceLines(
     lines.push({
       id: `foodlog-${latestLogged}`,
       date: latestLogged,
-      text: `Food logged on ${loggedDays.size} ${loggedDays.size === 1 ? "day" : "days"} since your assessment — most recently ${fmtDay(latestLogged)}.`,
+      text: `Food logged on ${loggedDays.size} ${loggedDays.size === 1 ? "day" : "days"} since your assessment, most recently ${fmtDay(latestLogged)}.`,
     });
   }
 
@@ -410,7 +410,7 @@ export function assessmentStaleness(
     const drift = Math.round(Math.abs(latest.kg - baseWeight) * 10) / 10;
     if (drift > STALE_WEIGHT_DRIFT_KG) {
       reasons.push(
-        `Your weigh-in on ${fmtDay(latest.date)} was ${fmtKg(latest.kg)} kg — ${fmtKg(drift)} kg from the ${fmtKg(baseWeight)} kg in your assessment.`,
+        `Your weigh-in on ${fmtDay(latest.date)} was ${fmtKg(latest.kg)} kg, ${fmtKg(drift)} kg from the ${fmtKg(baseWeight)} kg in your assessment.`,
       );
     }
   }

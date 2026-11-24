@@ -48,7 +48,7 @@ function completedState(weightKg: number | null = 100): AssessmentState {
 const entry = (day: string): LogEntry => ({ day }) as unknown as LogEntry;
 const weighIn = (date: string, kg: number): WeighIn => ({ date, kg });
 
-describe("parseDeltaChanges — the hard rule", () => {
+describe("parseDeltaChanges, the hard rule", () => {
   it("keeps only the permitted fields, with the Assessment's own ranges", () => {
     expect(
       parseDeltaChanges({
@@ -77,7 +77,7 @@ describe("parseDeltaChanges — the hard rule", () => {
     ).toEqual({ weightKg: 98 });
   });
 
-  it("drops a forged cuisine preference — it is Assessment-only, like pattern and budget", () => {
+  it("drops a forged cuisine preference, it is Assessment-only, like pattern and budget", () => {
     expect(parseDeltaChanges({ cuisinePreference: "south_indian" })).toBeNull();
     expect(
       parseDeltaChanges({ weightKg: 98, cuisinePreference: "north_indian" }),
@@ -107,7 +107,7 @@ describe("parseDeltaChanges — the hard rule", () => {
     expect(parseDeltaChanges("weight")).toBeNull();
   });
 
-  it("accepts the factual kitchen fields — kitchens change (§10.5)", () => {
+  it("accepts the factual kitchen fields, kitchens change (§10.5)", () => {
     expect(
       parseDeltaChanges({
         cookingAbility: "basic",
@@ -131,7 +131,7 @@ describe("parseDeltaChanges — the hard rule", () => {
     expect(parseDeltaChanges({ eatingSetting: "office" })).toBeNull();
   });
 
-  it("drops forged reflective behavioural fields — they are Assessment-only (§10.5)", () => {
+  it("drops forged reflective behavioural fields, they are Assessment-only (§10.5)", () => {
     const forged = {
       hungerPattern: "evenings",
       cravings: ["chocolate"],
@@ -183,7 +183,7 @@ describe("the delta value", () => {
     expect(parseAssessmentDeltaValue({ updates: [] })).toBeNull();
   });
 
-  it("appendDelta with nothing permitted changes nothing — same reference", () => {
+  it("appendDelta with nothing permitted changes nothing, same reference", () => {
     const value = parseAssessmentDeltaValue({ version: 1, updates: [] })!;
     expect(appendDelta(value, {}, COMPLETED)).toBe(value);
     expect(appendDelta(value, { dietaryPattern: "vegan" } as never, COMPLETED)).toBe(value);
@@ -199,7 +199,7 @@ describe("the delta value", () => {
   });
 });
 
-describe("the merge — base + deltas", () => {
+describe("the merge, base + deltas", () => {
   it("applies updates in order, latest wins, and never mutates the base", () => {
     const state = completedState(100);
     const baseBefore = { ...state.answers };
@@ -251,7 +251,7 @@ describe("the merge — base + deltas", () => {
   });
 });
 
-describe("sinceLines — grounded or absent", () => {
+describe("sinceLines, grounded or absent", () => {
   it("an incomplete assessment has no since-lines", () => {
     const state = beginAssessment(emptyAssessmentState(T0), T0);
     expect(sinceLines(state, [weighIn("2026-11-01", 90)], [entry("2026-11-01")], EMPTY_DELTA_VALUE)).toEqual([]);
@@ -276,7 +276,7 @@ describe("sinceLines — grounded or absent", () => {
     expect(lines).toEqual([]);
   });
 
-  it("no assessment weight — no weight line (nothing to compare against)", () => {
+  it("no assessment weight, no weight line (nothing to compare against)", () => {
     expect(sinceLines(completedState(null), [weighIn("2026-11-12", 97.5)], [], EMPTY_DELTA_VALUE)).toEqual([]);
   });
 
@@ -301,8 +301,8 @@ describe("sinceLines — grounded or absent", () => {
     const lines = sinceLines(completedState(), [], [], value);
     expect(lines).toHaveLength(1);
     expect(lines[0]!.text).toContain("Updated on");
-    expect(lines[0]!.text).toContain("activity — Active");
-    expect(lines[0]!.text).toContain("sleep — about 7 hours");
+    expect(lines[0]!.text).toContain("activity, Active");
+    expect(lines[0]!.text).toContain("sleep, about 7 hours");
   });
 
   it("a kitchen update is described in the same dated line", () => {
@@ -318,14 +318,14 @@ describe("sinceLines — grounded or absent", () => {
     );
     const lines = sinceLines(completedState(), [], [], value);
     expect(lines).toHaveLength(1);
-    expect(lines[0]!.text).toContain("cooking — basic cooking");
-    expect(lines[0]!.text).toContain("equipment — stove, fridge");
-    expect(lines[0]!.text).toContain("prep time — about 20 minutes");
-    expect(lines[0]!.text).toContain("eating — at home");
+    expect(lines[0]!.text).toContain("cooking, basic cooking");
+    expect(lines[0]!.text).toContain("equipment, stove, fridge");
+    expect(lines[0]!.text).toContain("prep time, about 20 minutes");
+    expect(lines[0]!.text).toContain("eating, at home");
   });
 });
 
-describe("assessmentStaleness — thresholds pinned", () => {
+describe("assessmentStaleness, thresholds pinned", () => {
   it("a drift of exactly the threshold is NOT stale; beyond it is", () => {
     const at = assessmentStaleness(
       completedState(100),
@@ -342,7 +342,7 @@ describe("assessmentStaleness — thresholds pinned", () => {
     expect(beyond.reasons[0]).toContain("96.9 kg");
   });
 
-  it("age alone never fires — old with no newer records is not stale", () => {
+  it("age alone never fires, old with no newer records is not stale", () => {
     const now = new Date(Date.parse(COMPLETED) + (STALE_AGE_DAYS + 30) * 86_400_000).toISOString();
     expect(assessmentStaleness(completedState(100), [], now).stale).toBe(false);
     expect(

@@ -65,7 +65,7 @@ export const STRONG_START: ProgrammeDefinition = {
   name: "Strong Start",
   blurb:
     "Four weeks of getting the basics recorded: food in the log, habits ticked, " +
-    "one weigh-in a week. A structure for your next 4 weeks — the record itself is the point.",
+    "one weigh-in a week. A structure for your next 4 weeks, the record itself is the point.",
   outcome: "The record itself is the point.",
   weeks: [
     {
@@ -107,15 +107,15 @@ export const BUILD_AND_FUEL: ProgrammeDefinition = {
     { focus: "Set the base", targets: [t("plan_days", 3), t("food_log_days", 4), t("habit_tick_days", 4), t("weigh_in_count", 1)] },
     { focus: "Follow the plan", targets: [t("plan_days", 4), t("food_log_days", 5), t("habit_tick_days", 4), t("weigh_in_count", 1)] },
     { focus: "Fuel every training day", targets: [t("plan_days", 4), t("food_log_days", 5), t("habit_tick_days", 5), t("weigh_in_count", 1)] },
-    { focus: "Consolidation week — hold the line", targets: [t("plan_days", 4), t("food_log_days", 5), t("habit_tick_days", 5), t("weigh_in_count", 1)] },
+    { focus: "Consolidation week, hold the line", targets: [t("plan_days", 4), t("food_log_days", 5), t("habit_tick_days", 5), t("weigh_in_count", 1)] },
     { focus: "Add a day", targets: [t("plan_days", 5), t("food_log_days", 6), t("habit_tick_days", 5), t("weigh_in_count", 1)] },
-    { focus: "Halfway — keep the streak honest", targets: [t("plan_days", 5), t("food_log_days", 6), t("habit_tick_days", 6), t("weigh_in_count", 1)] },
+    { focus: "Halfway, keep the streak honest", targets: [t("plan_days", 5), t("food_log_days", 6), t("habit_tick_days", 6), t("weigh_in_count", 1)] },
     { focus: "Progressive load", targets: [t("plan_days", 5), t("food_log_days", 6), t("habit_tick_days", 6), t("weigh_in_count", 1)] },
-    { focus: "Consolidation week — hold the line", targets: [t("plan_days", 5), t("food_log_days", 6), t("habit_tick_days", 6), t("weigh_in_count", 1)] },
+    { focus: "Consolidation week, hold the line", targets: [t("plan_days", 5), t("food_log_days", 6), t("habit_tick_days", 6), t("weigh_in_count", 1)] },
     { focus: "Nearly every day on plan", targets: [t("plan_days", 6), t("food_log_days", 7), t("habit_tick_days", 6), t("weigh_in_count", 1)] },
     { focus: "Hold the standard", targets: [t("plan_days", 6), t("food_log_days", 7), t("habit_tick_days", 6), t("weigh_in_count", 1)] },
     { focus: "The full week, on purpose", targets: [t("plan_days", 6), t("food_log_days", 7), t("habit_tick_days", 7), t("weigh_in_count", 1)] },
-    { focus: "Final week — your most complete week", targets: [t("plan_days", 6), t("food_log_days", 7), t("habit_tick_days", 7), t("weigh_in_count", 1)] },
+    { focus: "Final week, your most complete week", targets: [t("plan_days", 6), t("food_log_days", 7), t("habit_tick_days", 7), t("weigh_in_count", 1)] },
   ],
 };
 

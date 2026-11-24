@@ -5,11 +5,11 @@ import { LegalPage } from "@/components/legal/LegalPage";
 export const Route = createFileRoute("/terms")({
   head: () => ({
     meta: [
-      { title: "Bloom — Terms" },
+      { title: "Bloom - Terms" },
       {
         name: "description",
         content:
-          "The honest terms of using Bloom: plans, prices, renewal, AI credits — and a health companion that is not a doctor.",
+          "The honest terms of using Bloom: plans, prices, renewal, AI credits, and a health companion that is not a doctor.",
       },
     ],
   }),
@@ -21,26 +21,26 @@ function TermsRoute() {
     <LegalPage
       title="Terms, without the thicket."
       updated="19 November 2026"
-      intro="Bloom is a personal health companion — nutrition, habits, activity, sleep and cycle tracking, with two AI companions, Coach and Vitalis. These terms are the whole arrangement: you keep your data, we keep our promises, and the app never pretends to be something it isn't."
+      intro="Bloom is a personal health companion, nutrition, habits, activity, sleep and cycle tracking, with two AI companions, Coach and Vitalis. These terms are the whole arrangement: you keep your data, we keep our promises, and the app never pretends to be something it isn't."
       sections={[
         {
-          heading: "What Bloom is — and is not",
+          heading: "What Bloom is, and is not",
           paras: [
             "Bloom keeps a private record of your days and works out patterns and plans from it: meal plans from your assessment, cycle forecasts, weekly reports, insights.",
-            "Bloom is not a doctor and is not a medical device. It does not diagnose anything, and its estimates — a photo's nutrition, a forecast date, a calorie target — are labelled estimates that can be wrong. For anything that matters medically, talk to a professional.",
+            "Bloom is not a doctor and is not a medical device. It does not diagnose anything, and its estimates, a photo's nutrition, a forecast date, a calorie target, are labelled estimates that can be wrong. For anything that matters medically, talk to a professional.",
           ],
         },
         {
           heading: "Who can use Bloom",
           paras: [
-            "Bloom is for adults: you must be 18 or over to use it. You are responsible for your account and for keeping your sign-in link private — anyone holding the link can open your account, so treat it like a key.",
+            "Bloom is for adults: you must be 18 or over to use it. You are responsible for your account and for keeping your sign-in link private, anyone holding the link can open your account, so treat it like a key.",
             "Bloom is currently invite-only, and an invitation is personal: please don't share sign-in links, and don't try to reach a record that isn't yours.",
           ],
         },
         {
           heading: "Your data stays yours",
           paras: [
-            "You own everything you write into Bloom. You can export it at any time and erase it at any time — the Privacy page describes the controls. Using Bloom gives us no rights over your record beyond running the service for you.",
+            "You own everything you write into Bloom. You can export it at any time and erase it at any time, the Privacy page describes the controls. Using Bloom gives us no rights over your record beyond running the service for you.",
           ],
         },
         {
@@ -52,7 +52,7 @@ function TermsRoute() {
         {
           heading: "Renewal and cancellation",
           paras: [
-            "Paid plans renew automatically at the end of each period — month or year — until you cancel. You can cancel at any time: cancellation stops the next renewal, and your plan stays active until the current period ends. After that, your account returns to Free.",
+            "Paid plans renew automatically at the end of each period, month or year, until you cancel. You can cancel at any time: cancellation stops the next renewal, and your plan stays active until the current period ends. After that, your account returns to Free.",
             "Payments are processed by Razorpay; Bloom never sees or stores your card or UPI details. Refunds follow the Refund policy page.",
           ],
         },
@@ -72,7 +72,7 @@ function TermsRoute() {
         {
           heading: "No warranty, plainly",
           paras: [
-            "Bloom is provided as-is. Estimates may be inaccurate and sync may fail — which is exactly why the export exists. To the maximum extent the law allows, Bloom is not liable for decisions made on the strength of an estimate. Nothing in these terms takes away rights the law gives you.",
+            "Bloom is provided as-is. Estimates may be inaccurate and sync may fail, which is exactly why the export exists. To the maximum extent the law allows, Bloom is not liable for decisions made on the strength of an estimate. Nothing in these terms takes away rights the law gives you.",
           ],
         },
         {
@@ -84,13 +84,13 @@ function TermsRoute() {
         {
           heading: "Ownership",
           paras: [
-            "The Bloom name, design and software belong to Bloom Vitalis. Your record belongs to you — see above.",
+            "The Bloom name, design and software belong to Bloom Vitalis. Your record belongs to you, see above.",
           ],
         },
         {
           heading: "Law and changes",
           paras: [
-            "These terms are governed by the laws of India. When they change, the date above moves and the change is summarised here. Continued use after a change is acceptance of the new terms; the first arrangement — your data stays yours — never changes.",
+            "These terms are governed by the laws of India. When they change, the date above moves and the change is summarised here. Continued use after a change is acceptance of the new terms; the first arrangement, your data stays yours, never changes.",
           ],
         },
       ]}

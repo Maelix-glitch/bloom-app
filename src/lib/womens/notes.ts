@@ -18,15 +18,15 @@ import type { Phase } from "@/lib/cycle/predict";
 
 export const PHASE_NOTES: Record<Phase, string> = {
   menstrual:
-    "Many people find the bleeding days are when energy tends to sit lowest, and rest can feel more necessary than usual. General information only — your own logged patterns matter more than general notes.",
+    "Many people find the bleeding days are when energy tends to sit lowest, and rest can feel more necessary than usual. General information only, your own logged patterns matter more than general notes.",
   follicular:
-    "Many people notice energy gradually returning in the days after a period ends, and appetite can feel steadier in this stretch. General information only — your own logged patterns matter more than general notes.",
+    "Many people notice energy gradually returning in the days after a period ends, and appetite can feel steadier in this stretch. General information only, your own logged patterns matter more than general notes.",
   ovulation:
-    "Around the middle of a cycle, some people notice small changes such as different discharge or a brief lift in energy; others notice nothing at all, and both are common. General information only — your own logged patterns matter more than general notes.",
+    "Around the middle of a cycle, some people notice small changes such as different discharge or a brief lift in energy; others notice nothing at all, and both are common. General information only, your own logged patterns matter more than general notes.",
   luteal:
-    "Many people notice appetite changes in the late luteal phase, and mood, sleep or cravings can shift in the days before a period. General information only — your own logged patterns matter more than general notes.",
+    "Many people notice appetite changes in the late luteal phase, and mood, sleep or cravings can shift in the days before a period. General information only, your own logged patterns matter more than general notes.",
   late:
-    "A period arriving later than an estimate is common, and cycle lengths can vary from month to month for many ordinary reasons. General information only — your own logged patterns matter more than general notes.",
+    "A period arriving later than an estimate is common, and cycle lengths can vary from month to month for many ordinary reasons. General information only, your own logged patterns matter more than general notes.",
 };
 
 /** The note for a phase, or null when there is no phase to attach it to. */

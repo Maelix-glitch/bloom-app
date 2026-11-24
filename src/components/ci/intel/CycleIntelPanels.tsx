@@ -153,12 +153,12 @@ export function CycleOverviewPanel({
         <div>
           <dt className="ci-eyebrow">Your baseline</dt>
           <dd className="ci-overview__value">
-            {baseline.median !== null ? `${Math.round(baseline.median)} days` : "—"}
+            {baseline.median !== null ? `${Math.round(baseline.median)} days` : "-"}
           </dd>
           <dd className="ci-overview__sub">
             {baseline.median === null
               ? "no completed cycle yet"
-              : `${baseline.min}–${baseline.max} day range`}
+              : `${baseline.min}-${baseline.max} day range`}
           </dd>
         </div>
       </dl>
@@ -178,14 +178,14 @@ export function CycleOverviewPanel({
         <ul className="ci-bullets mt-2.5">
           {confidence.factors.map((factor) => (
             <li key={factor.id}>
-              {factor.label} — {factor.detail}
+              {factor.label} - {factor.detail}
             </li>
           ))}
         </ul>
         <p className="mt-3 border-t pt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted ci-hair">
           The band is read off an internal heuristic index of{" "}
           <span className="ci-num">{confidence.score}</span> out of 100. The index ranks how much
-          evidence stands behind the estimate for your record — it is not a probability, not a
+          evidence stands behind the estimate for your record, it is not a probability, not a
           confidence interval and not an accuracy percentage, so 70 never means “70% likely”. The
           band is what this page reports; the number stays in this note.
         </p>
@@ -233,7 +233,7 @@ export function PersonalPatternPanel({ intel }: { intel: IntelligenceResult }) {
   const cells: { label: string; value: string; sub: string }[] = [
     {
       label: "Typical cycle",
-      value: baseline.median !== null ? `${Math.round(baseline.median)}d` : "—",
+      value: baseline.median !== null ? `${Math.round(baseline.median)}d` : "-",
       sub:
         baseline.median !== null
           ? `median of ${baseline.plausible.length} ${plural(baseline.plausible.length, "interval", "intervals")}`
@@ -241,12 +241,12 @@ export function PersonalPatternPanel({ intel }: { intel: IntelligenceResult }) {
     },
     {
       label: "Recorded range",
-      value: baseline.min !== null ? `${baseline.min}–${baseline.max}d` : "—",
+      value: baseline.min !== null ? `${baseline.min}-${baseline.max}d` : "-",
       sub: baseline.min !== null ? "shortest to longest" : "not measurable yet",
     },
     {
       label: "Bleed length",
-      value: baseline.bleedingMedian !== null ? `${Math.round(baseline.bleedingMedian)}d` : "—",
+      value: baseline.bleedingMedian !== null ? `${Math.round(baseline.bleedingMedian)}d` : "-",
       sub:
         baseline.bleedingMedian !== null
           ? `from ${baseline.bleedingCount} closed ${plural(baseline.bleedingCount, "period", "periods")}`
@@ -254,12 +254,12 @@ export function PersonalPatternPanel({ intel }: { intel: IntelligenceResult }) {
     },
     {
       label: "Variation",
-      value: baseline.cvPercent !== null ? `±${baseline.cvPercent.toFixed(1)}%` : "—",
+      value: baseline.cvPercent !== null ? `±${baseline.cvPercent.toFixed(1)}%` : "-",
       sub: forecast.available ? `window ±${forecast.halfWidth}d` : "needs two intervals",
     },
     {
       label: "Most logged symptom",
-      value: symptoms.topSymptom ?? "—",
+      value: symptoms.topSymptom ?? "-",
       sub:
         symptoms.topSymptom !== null
           ? `${symptoms.patterns[0]?.cyclesSeen ?? 0} of ${symptoms.patterns[0]?.totalCycles ?? 0} cycles`
@@ -344,7 +344,7 @@ export function WhatChangedPanel({ intel }: { intel: IntelligenceResult }) {
       </h2>
       {changes.length === 0 ? (
         <p className="mt-3 text-[length:var(--text-support)] leading-relaxed ci-muted">
-          No change stands out against your history. That is the finding, not a gap in the page — a
+          No change stands out against your history. That is the finding, not a gap in the page, a
           shift needs several cycles to be visible.
         </p>
       ) : (
@@ -367,7 +367,7 @@ export function WhatChangedPanel({ intel }: { intel: IntelligenceResult }) {
       )}
       <p className="mt-4 border-t pt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted ci-hair">
         These are comparisons with your own logged history, not diagnoses. Persistent or worrying
-        changes are worth discussing with a qualified clinician — Bloom cannot tell you what they
+        changes are worth discussing with a qualified clinician. Bloom cannot tell you what they
         mean.
       </p>
     </Card>
@@ -387,7 +387,7 @@ export function CycleComparisonPanel({ intel }: { intel: IntelligenceResult }) {
         Your last {rows.length} recorded cycles, side by side
       </h2>
       <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
-        Differences only — a longer cycle is not a better or worse one.
+        Differences only, a longer cycle is not a better or worse one.
       </p>
       <div className="ci-compare">
         <table>
@@ -406,10 +406,10 @@ export function CycleComparisonPanel({ intel }: { intel: IntelligenceResult }) {
               <tr key={row.start}>
                 <th scope="row">{longDay(row.start)}</th>
                 <td>{row.lengthDays !== null ? `${row.lengthDays}d` : "open"}</td>
-                <td>{row.bleedingDays !== null ? `${row.bleedingDays}d` : "—"}</td>
-                <td>{row.topFlow ?? "—"}</td>
+                <td>{row.bleedingDays !== null ? `${row.bleedingDays}d` : "-"}</td>
+                <td>{row.topFlow ?? "-"}</td>
                 <td>{row.symptomDays}</td>
-                <td>{row.topSymptom ?? "—"}</td>
+                <td>{row.topSymptom ?? "-"}</td>
               </tr>
             ))}
           </tbody>
@@ -443,7 +443,7 @@ export function ModelNote({ intel }: { intel: IntelligenceResult }) {
             : "no backtest yet"}
         </span>
         <span className="ci-model__chip">
-          confidence band: {confidence.label} — heuristic, not a probability
+          confidence band: {confidence.label}, heuristic, not a probability
         </span>
       </div>
     </div>

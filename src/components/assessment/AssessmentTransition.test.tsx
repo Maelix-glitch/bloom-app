@@ -138,7 +138,7 @@ function seed(state: AssessmentState): void {
 const settledSection = (container: HTMLElement) =>
   container.querySelector('section[aria-labelledby="home-starting-point-title"]');
 
-describe("AssessmentPromptCard — the unfinished states are untouched", () => {
+describe("AssessmentPromptCard, the unfinished states are untouched", () => {
   it("not started: the invitation card, exactly as before", () => {
     const { container } = render(<AssessmentPromptCard />);
     expect(screen.getByRole("heading", { name: "A short assessment, when you are ready" })).toBeTruthy();
@@ -157,7 +157,7 @@ describe("AssessmentPromptCard — the unfinished states are untouched", () => {
   });
 });
 
-describe("AssessmentPromptCard — already complete at mount", () => {
+describe("AssessmentPromptCard, already complete at mount", () => {
   it("shows the settled starting-point card directly: goal, targets, plan status, no show", () => {
     seed(completedState());
     const { container } = render(<AssessmentPromptCard />);
@@ -174,7 +174,7 @@ describe("AssessmentPromptCard — already complete at mount", () => {
     expect(section!.textContent).toContain("a guide, not a prescription");
     /* No plan stored yet — the plan hook's own verdict. */
     expect(section!.textContent).toContain(
-      "No plan yet — Bloom can compose one from these numbers in Nutrition.",
+      "No plan yet. Bloom can compose one from these numbers in Nutrition.",
     );
     /* No celebration on a fresh load. */
     expect(container.querySelectorAll(".assess-orb")).toHaveLength(0);
@@ -197,7 +197,7 @@ describe("AssessmentPromptCard — already complete at mount", () => {
   });
 });
 
-describe("AssessmentPromptCard — the completion moment", () => {
+describe("AssessmentPromptCard, the completion moment", () => {
   it("finishing from Today's flow: the summary survives, then orbs break and the card flies in and settles", () => {
     vi.useFakeTimers();
     seed(activityState());
@@ -234,7 +234,7 @@ describe("AssessmentPromptCard — the completion moment", () => {
     expect(settled!.textContent).toContain("Your goal: lose weight.");
   });
 
-  it("reduced motion: finishing swaps straight to the settled card — no orbs, no flight", () => {
+  it("reduced motion: finishing swaps straight to the settled card, no orbs, no flight", () => {
     reducedMotion = true;
     seed(activityState());
     const { container } = render(<AssessmentPromptCard />);

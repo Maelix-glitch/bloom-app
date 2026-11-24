@@ -108,7 +108,7 @@ export function ExportSheet({
       <SheetBody className="pb-5">
         <SheetHead
           title="Download everything"
-          blurb="One JSON file with your whole record — not just the profile. It is built here, on this device; nothing is uploaded to make it."
+          blurb="One JSON file with your whole record, not just the profile. It is built here, on this device; nothing is uploaded to make it."
         />
         <SheetItem className="px-5 pt-4 sm:px-6">
           <div className="rounded-2xl border border-border bg-surface/50 px-4 py-3">
@@ -191,8 +191,7 @@ export function RemindersSheet({
         {unsupported ? (
           <SheetItem className="px-5 pt-4 sm:px-6">
             <p className="rounded-2xl border border-border bg-surface/50 px-4 py-3 text-[length:var(--text-support)] text-muted-foreground">
-              This browser can't show notifications. On iPhone, add Bloom to your home screen first
-              — installed apps can.
+              This browser can't show notifications. On iPhone, add Bloom to your home screen first, installed apps can.
             </p>
           </SheetItem>
         ) : null}
@@ -310,7 +309,7 @@ export function RemindersSheet({
               <p className="mt-1 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
                 {install.ios
                   ? "On iPhone: tap Share, then Add to Home Screen. Reminders can only fire from the installed app."
-                  : "Add Bloom to your home screen — it opens without browser chrome and reminders keep working."}
+                  : "Add Bloom to your home screen, it opens without browser chrome and reminders keep working."}
               </p>
               {install.canInstall ? (
                 <button
@@ -385,7 +384,7 @@ export function EraseSheet({
             ))}
           </div>
           <p className="mt-3 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
-            If you might want any of it later, download it first — the export sits one row above
+            If you might want any of it later, download it first, the export sits one row above
             this one.
           </p>
         </SheetItem>

@@ -196,7 +196,7 @@ export function TargetSheet({ store }: { store: TrackerStore }) {
         <p className="tk2-active-head">
           What you track
           <span>
-            Switch off anything you don't measure — it leaves the flower, the quick log and today's
+            Switch off anything you don't measure, it leaves the flower, the quick log and today's
             score. Nothing is deleted.
           </span>
         </p>
@@ -444,7 +444,7 @@ export function Achievements({ analysis }: { analysis: TrackerAnalysis }) {
         : {
             label: n === 6 ? "All six in one day" : `All ${words[n] ?? n} in one day`,
             detail:
-              met > 0 ? `${met} of ${n} today` : "Not yet — every target met on one day earns this.",
+              met > 0 ? `${met} of ${n} today` : "Not yet, every target met on one day earns this.",
             ...(met > 0 ? { hint: "Meet every target on one day to earn this." } : {}),
             earned: false,
           };
@@ -466,7 +466,7 @@ export function Achievements({ analysis }: { analysis: TrackerAnalysis }) {
             }
           : {
               label: "Three days running",
-              detail: "Not yet — meet a target three days in a row to start.",
+              detail: "Not yet, meet a target three days in a row to start.",
               earned: false,
             };
 
@@ -487,7 +487,7 @@ export function Achievements({ analysis }: { analysis: TrackerAnalysis }) {
             }
           : {
               label: "A week on the map",
-              detail: "Not yet — log seven days in total to earn this.",
+              detail: "Not yet, log seven days in total to earn this.",
               earned: false,
             };
 
@@ -508,7 +508,7 @@ export function Achievements({ analysis }: { analysis: TrackerAnalysis }) {
             }
           : {
               label: "Longest run yet",
-              detail: "Not yet — a run starts with one logged day.",
+              detail: "Not yet, a run starts with one logged day.",
               earned: false,
             };
 

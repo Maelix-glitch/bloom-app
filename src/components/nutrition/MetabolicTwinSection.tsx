@@ -149,7 +149,7 @@ function GatheringTile({
     <article className="tile" data-state="gathering">
       <TileHead title={title} badge={badge} />
       <div className="tile__figure">
-        <strong>—</strong>
+        <strong>-</strong>
       </div>
       {progress && progress.length > 0 ? (
         <ReqMeters progress={progress} metric={progressMetric} />
@@ -309,7 +309,7 @@ export function MetabolicTwinSection() {
           {days < EARLY_READ_MIN_DAYS ? <EarlyReadBadge days={days} /> : null}
         </h3>
         <p>
-          From your last {days} logged {days === 1 ? "day" : "days"} — the food-log coverage tile
+          From your last {days} logged {days === 1 ? "day" : "days"}, the food-log coverage tile
           holds the averages.
         </p>
         <a href="#nut-plan" className="nut-inline-link">
@@ -376,7 +376,7 @@ export function MetabolicTwinSection() {
         <h3>Your usual portion differs</h3>
         <p>
           You usually log {signal.typicalGrams} g of {signal.name}; the plan serves{" "}
-          {signal.plannedGrams} g (from {signal.logs} logs). Portions stay as planned — the choice
+          {signal.plannedGrams} g (from {signal.logs} logs). Portions stay as planned, the choice
           is yours.
         </p>
       </StripRow>,
@@ -639,8 +639,8 @@ export function MetabolicTwinSection() {
           subline="A living model of your metabolism, computed fresh from your record."
         />
         <p className="mt-4 text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
-          The Twin reads your food log, weigh-ins and habits together — maintenance energy,
-          weight trend, nutrient gaps — and it is where your plan's adaptations are proposed.
+          The Twin reads your food log, weigh-ins and habits together, maintenance energy,
+          weight trend, nutrient gaps, and it is where your plan's adaptations are proposed.
           It is part of Premium Plus, with Vitalis and the rest of the intelligence layer.
         </p>
         <button

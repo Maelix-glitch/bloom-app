@@ -156,7 +156,7 @@ export function computeActivity(input: JourneyInput): ActivityEntry[] {
     items.push({
       id: `story-${story.id}`,
       tone: "story",
-      text: story.title ? `Shared a story — ${story.title}` : "Shared a story",
+      text: story.title ? `Shared a story, ${story.title}` : "Shared a story",
       at: story.createdAt,
     });
   }

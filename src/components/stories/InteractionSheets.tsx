@@ -221,7 +221,7 @@ export function ReplySheet({
           <p className="max-w-[30ch] text-[length:var(--text-support)] text-faint">
             {isOwner
               ? "When someone answers your story, it lands here."
-              : "Say something kind — it goes straight to them."}
+              : "Say something kind, it goes straight to them."}
           </p>
         </div>
       ) : (
@@ -480,7 +480,7 @@ function ViewersList({ viewers }: { viewers: StoryViewerEntry[] }) {
         </span>
         <p className="display text-[15px] text-muted-foreground">No views yet.</p>
         <p className="max-w-[26ch] text-[length:var(--text-support)] text-faint">
-          Moments take their time — this quiet page fills as people stop by.
+          Moments take their time, this quiet page fills as people stop by.
         </p>
       </div>
     );

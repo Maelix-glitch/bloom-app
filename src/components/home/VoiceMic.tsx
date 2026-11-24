@@ -69,8 +69,8 @@ export function VoiceMic({
         stopRef.current = null;
         setMicError(
           error === "not-allowed" || error === "service-not-allowed"
-            ? "The mic was blocked — allow microphone access for this site, then try again."
-            : "Voice didn't work just then — try again, or type it instead.",
+            ? "The mic was blocked, allow microphone access for this site, then try again."
+            : "Voice didn't work just then, try again, or type it instead.",
         );
       },
       onEnd: () => {
@@ -82,7 +82,7 @@ export function VoiceMic({
       stopRef.current = stop;
       setListening(true);
     } else {
-      setMicError("Voice isn't available in this browser — typing works as always.");
+      setMicError("Voice isn't available in this browser, typing works as always.");
     }
   };
 

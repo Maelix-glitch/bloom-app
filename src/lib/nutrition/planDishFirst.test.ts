@@ -168,7 +168,7 @@ function ownerCornerProfile(): HealthProfile {
 describe("method 13 · the owner's corner (D3/F9)", () => {
   const plan = gen(ownerCornerProfile(), "2026-11-19", 1350, 171);
 
-  it("every meal is dish-composed — no raw composite anywhere", () => {
+  it("every meal is dish-composed, no raw composite anywhere", () => {
     /* Method 14 (M-160): a gravy lunch/dinner anchor now carries
        ONE base beside it, so a meal is one dish (anchor) or two
        (anchor + base) — never a layered raw composite, which is
@@ -249,7 +249,7 @@ describe("method 13 · the snack slot serves dishes (D2)", () => {
     expect(["shake", "snack", "breakfast"]).toContain(dish.category);
   });
 
-  it("shakes are served across a week — at breakfast or snack", () => {
+  it("shakes are served across a week, at breakfast or snack", () => {
     /* M-219: pinned on a profile whose protein share makes shakes
        earn their place — a 60 kg lose profile at the 1,200 kcal
        floor with a 105 g guide (~33% protein). At the plain
@@ -294,7 +294,7 @@ describe("method 13 · the snack slot serves dishes (D2)", () => {
 /* --------------------------- F1 · budget preference ------------------------ */
 
 describe("method 13 · the budget is a preference (F1)", () => {
-  it("a budget that starves the pool widens — and the plan says so", () => {
+  it("a budget that starves the pool widens, and the plan says so", () => {
     /* Vegan at tier 1 is the tightest budget cell in the library:
        measured, its in-budget pool falls below the dishPoolFor
        floor, so the pool widens to the full pattern pool and the
@@ -331,7 +331,7 @@ describe("method 13 · the budget is a preference (F1)", () => {
 describe("method 13 · raw-basis framing (D5)", () => {
   it("a raw-basis food carries the dry framing; an as-eaten food does not", () => {
     const raw = USDA_REFERENCE_FOODS.find((f) => f.preparation?.state === "raw")!;
-    expect(rawBasisFraming(raw)).toBe("dry — weighed before cooking");
+    expect(rawBasisFraming(raw)).toBe("dry, weighed before cooking");
     const asEaten = USDA_REFERENCE_FOODS.find((f) => f.preparation?.state === "as_purchased")!;
     expect(rawBasisFraming(asEaten)).toBeNull();
   });

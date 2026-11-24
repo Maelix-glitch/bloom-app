@@ -365,7 +365,7 @@ export function useTrackers(): TrackerStore {
       for (const date of removals) deletedDates.current.add(date);
       setSync({
         state: "error",
-        message: "Saved here — not on your account yet",
+        message: "Saved here, not on your account yet",
         signedIn: true,
       });
     } finally {
@@ -392,7 +392,7 @@ export function useTrackers(): TrackerStore {
         () =>
           setSync({
             state: "error",
-            message: "Saved here — not on your account yet",
+            message: "Saved here, not on your account yet",
             signedIn: profileId.current !== null,
           }),
       );
@@ -402,7 +402,7 @@ export function useTrackers(): TrackerStore {
         if (!pid) {
           setSync({
             state: "signed-out",
-            message: "Saved on this device — not signed in",
+            message: "Saved on this device, not signed in",
             signedIn: false,
           });
           return;
@@ -416,7 +416,7 @@ export function useTrackers(): TrackerStore {
       } catch {
         setSync({
           state: "error",
-          message: "Saved here — not on your account yet",
+          message: "Saved here, not on your account yet",
           signedIn: profileId.current !== null,
         });
       } finally {

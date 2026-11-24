@@ -13,7 +13,7 @@ const reportSearchSchema = z.object({
 export const Route = createFileRoute("/nutrition/report")({
   validateSearch: (search: Record<string, unknown>) => reportSearchSchema.parse(search),
   head: () => ({
-    meta: [{ title: "Bloom — Nutrition report" }],
+    meta: [{ title: "Bloom - Nutrition report" }],
   }),
   component: NutritionReportRoute,
 });

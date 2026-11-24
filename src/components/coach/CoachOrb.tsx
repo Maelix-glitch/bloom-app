@@ -543,8 +543,8 @@ export function CoachOrb() {
             time: new Date().toISOString(),
             paragraphs: [
               plusRefusal
-                ? "Vitalis is part of Premium Plus, so I can't open here on your current plan. Premium Plus carries the whole intelligence layer — me, the adaptive plans and the Metabolic Twin."
-                : "You've used this month's AI credits, so I pause here. Premium Plus refills the allowance every month — your record, plans and trackers keep working either way.",
+                ? "Vitalis is part of Premium Plus, so I can't open here on your current plan. Premium Plus carries the whole intelligence layer, me, the adaptive plans and the Metabolic Twin."
+                : "You've used this month's AI credits, so I pause here. Premium Plus refills the allowance every month, your record, plans and trackers keep working either way.",
             ],
             status: "error",
             paywall: true,
@@ -558,7 +558,7 @@ export function CoachOrb() {
           id: newTurnId("vitalis-error"),
           role: "vitalis",
           time: new Date().toISOString(),
-          paragraphs: ["Check the connection and try again — your words are kept."],
+          paragraphs: ["Check the connection and try again, your words are kept."],
           status: "error",
         };
         applyTurns([...turnsRef.current, turn]);
@@ -658,20 +658,20 @@ export function CoachOrb() {
         case "log_dish": {
           const dish = DISH_LIBRARY.find((d) => d.id === proposal.dishId);
           if (!dish) {
-            line = "That dish is no longer in the library — nothing was logged.";
+            line = "That dish is no longer in the library, nothing was logged.";
             break;
           }
           const entry = logDish(dish, proposal.meal, nutrition.today);
           ok = entry !== null;
           line = ok
-            ? `Logged — ${dish.name.en} is in today's food log.`
+            ? `Logged, ${dish.name.en} is in today's food log.`
             : "That could not be logged just now.";
           break;
         }
         case "log_food": {
           const food = nutrition.foodById(proposal.foodId);
           if (!food) {
-            line = "That food is no longer available — nothing was logged.";
+            line = "That food is no longer available, nothing was logged.";
             break;
           }
           const isCustom = nutrition.foods.some((f) => f.id === food.id);
@@ -684,7 +684,7 @@ export function CoachOrb() {
           );
           ok = entry !== null;
           line = ok
-            ? `Logged — ${food.name} is in today's food log.`
+            ? `Logged, ${food.name} is in today's food log.`
             : "That could not be logged just now.";
           break;
         }
@@ -692,8 +692,8 @@ export function CoachOrb() {
           const outcome = plan.generate();
           ok = outcome.ok;
           line = outcome.ok
-            ? "Done — today's plan is composed and waiting in the Nutrition tab."
-            : "Bloom could not compose a plan just now — the Nutrition tab shows what is missing.";
+            ? "Done, today's plan is composed and waiting in the Nutrition tab."
+            : "Bloom could not compose a plan just now, the Nutrition tab shows what is missing.";
           break;
         }
         case "swap_dish": {
@@ -701,8 +701,8 @@ export function CoachOrb() {
           const to = DISH_LIBRARY.find((d) => d.id === proposal.toDishId);
           ok = plan.swapPlanDish(proposal.meal, proposal.fromDishId, proposal.toDishId);
           line = ok
-            ? `Swapped — ${to?.name.en ?? "the new dish"} replaces ${from?.name.en ?? "the old dish"} in your ${proposal.meal} plan.`
-            : "That swap could not be applied — your plan is unchanged.";
+            ? `Swapped, ${to?.name.en ?? "the new dish"} replaces ${from?.name.en ?? "the old dish"} in your ${proposal.meal} plan.`
+            : "That swap could not be applied, your plan is unchanged.";
           break;
         }
         case "propose_assessment_change": {
@@ -713,9 +713,9 @@ export function CoachOrb() {
           if (next) {
             setPref(ASSESSMENT_KEY, next);
             ok = true;
-            line = "Applied — your assessment is updated.";
+            line = "Applied, your assessment is updated.";
           } else {
-            line = "That change could not be applied — nothing was altered.";
+            line = "That change could not be applied, nothing was altered.";
           }
           break;
         }
@@ -811,7 +811,7 @@ export function CoachOrb() {
             <DialogPrimitive.Title className="sr-only">Vitalis</DialogPrimitive.Title>
             <DialogPrimitive.Description className="sr-only">
               Chat with Vitalis, Bloom&rsquo;s nutrition intelligence. A fresh conversation each
-              time — nothing here is the Coach thread.
+              time, nothing here is the Coach thread.
             </DialogPrimitive.Description>
 
             <div className="coach-orb-head">
@@ -858,7 +858,7 @@ export function CoachOrb() {
                   <CoachGlyph size={30} />
                   <p className="coach-orb-welcome-greeting">I&rsquo;m Vitalis.</p>
                   <p className="coach-orb-welcome-line">
-                    I look after the food side of Bloom — your assessment, your plan and what you
+                    I look after the food side of Bloom, your assessment, your plan and what you
                     eat. I answer only from your real numbers, and I&rsquo;ll read my replies
                     aloud unless you mute me.
                   </p>
@@ -966,7 +966,7 @@ export function CoachOrb() {
                                 </button>
                               </div>
                             ) : view.status === "dismissed" ? (
-                              <p className="coach-orb-action-result">Dismissed — nothing changed.</p>
+                              <p className="coach-orb-action-result">Dismissed, nothing changed.</p>
                             ) : (
                               <p className="coach-orb-action-result">
                                 {view.status === "done" ? (
@@ -985,7 +985,7 @@ export function CoachOrb() {
                       <div className="coach-orb-stages-head">
                         <CoachGlyph size={15} active />
                         <span>
-                          Vitalis is checking this one properly — the careful path takes a little
+                          Vitalis is checking this one properly, the careful path takes a little
                           longer.
                         </span>
                       </div>
@@ -1031,7 +1031,7 @@ export function CoachOrb() {
                 data-testid="vitalis-consent-note"
                 className="mx-4 mb-2 rounded-[var(--radius-control)] border border-border bg-surface-2 px-3.5 py-2.5 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground"
               >
-                Nothing was sent — Vitalis needs your permission to use AI first. You can turn it
+                Nothing was sent. Vitalis needs your permission to use AI first. You can turn it
                 on any time in Profile → Privacy → Your consent.
               </p>
             ) : null}
@@ -1064,7 +1064,7 @@ export function CoachOrb() {
                 }}
                 placeholder={
                   locked
-                    ? "Vitalis is paused — sign in again to continue"
+                    ? "Vitalis is paused, sign in again to continue"
                     : "Ask Vitalis about your food or plan…"
                 }
                 disabled={locked}

@@ -94,12 +94,12 @@ const clock = (hhmm: string): string => formatClock(clockToMinutes(hhmm));
  *  one, stated against the bedtime alone when it does not. */
 function lastMealLine(care: DayCaretaker): string {
   if (care.lastMeal?.time && care.lastMealInsideWindow === true) {
-    return `${care.lastMeal.label} at ${clock(care.lastMeal.time)} sits inside the last two hours before bed — on a day you can, bring the last meal earlier.`;
+    return `${care.lastMeal.label} at ${clock(care.lastMeal.time)} sits inside the last two hours before bed, on a day you can, bring the last meal earlier.`;
   }
   if (care.lastMeal?.time && care.lastMealInsideWindow === false) {
-    return `A heavy meal in the last two hours — ${care.lastMeal.label} at ${clock(care.lastMeal.time)} already sits outside them.`;
+    return `A heavy meal in the last two hours, ${care.lastMeal.label} at ${clock(care.lastMeal.time)} already sits outside them.`;
   }
-  return `A heavy meal in the last two hours before bed — with bed at ${clock(care.bedTime)}, the last meal wants to end by ${clock(care.lastMealEndsBy)}.`;
+  return `A heavy meal in the last two hours before bed, with bed at ${clock(care.bedTime)}, the last meal wants to end by ${clock(care.lastMealEndsBy)}.`;
 }
 
 /* --------------------- the medallions' drawn glyphs --------------------- */
@@ -355,7 +355,7 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
     <section className="nut-card nut-rise section nut-care" aria-label="Your whole day">
       <SectionHead title="Your whole day" />
       <p className="nut-note">
-        Sleep, movement and the evening — set from the same numbers as your plan.
+        Sleep, movement and the evening, set from the same numbers as your plan.
       </p>
 
       {/* The day as one arc — the composition the facts hang on.
@@ -519,13 +519,13 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
         <div className="nut-care-cols">
           <div className="nut-care-zone is-do">
             <p className="nut-care-col-title">
-              Tonight <span>— do</span>
+              Tonight<span>: do</span>
             </p>
             <ul className="nut-care-list2">
               <li>
                 <IconCheck className="nut-care-list-icon is-do" />
                 <span>
-                  From {clock(care.windDownTime)} — screens dim, then off. Your screen target for
+                  From {clock(care.windDownTime)}, screens dim, then off. Your screen target for
                   the day is {durationText(care.screenMinutes)}.
                 </span>
               </li>
@@ -538,7 +538,7 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
           <div className="nut-care-cols-divider" aria-hidden="true" />
           <div className="nut-care-zone is-avoid">
             <p className="nut-care-col-title">
-              Tonight <span>— avoid</span>
+              Tonight<span>: avoid</span>
             </p>
             <ul className="nut-care-list2">
               <li>
@@ -559,7 +559,7 @@ export function DayCaretakerSection({ plan }: { plan: DailyPlan }) {
       </div>
 
       <p className="nut-note">
-        General care for the day&rsquo;s rhythm, from your own numbers — not medical advice.
+        General care for the day&rsquo;s rhythm, from your own numbers, not medical advice.
       </p>
     </section>
   );

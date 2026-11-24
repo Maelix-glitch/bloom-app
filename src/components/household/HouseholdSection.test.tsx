@@ -83,7 +83,7 @@ describe("HouseholdSection", () => {
     expect(
       screen.getByText(`All ${DISH_LIBRARY.length.toLocaleString("en-IN")} dishes`),
     ).toBeTruthy();
-    expect(screen.getByText(/suit you — your pattern from your Assessment/)).toBeTruthy();
+    expect(screen.getByText(/suit you, your pattern from your Assessment/)).toBeTruthy();
     expect(screen.queryByText(/suit everyone at your table/)).toBeNull();
   });
 });

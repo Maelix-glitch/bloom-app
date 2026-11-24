@@ -232,8 +232,8 @@ export function FirstBloomJourney({
         titleId="first-bloom-title"
         subline={
           assessment.state.answers.goal
-            ? `Seven small steps toward ${GOAL_LABEL[assessment.state.answers.goal].toLowerCase()} — each one opens a part of Bloom.`
-            : "Seven small steps — each one opens a part of Bloom."
+            ? `Seven small steps toward ${GOAL_LABEL[assessment.state.answers.goal].toLowerCase()}, each one opens a part of Bloom.`
+            : "Seven small steps, each one opens a part of Bloom."
         }
         right={
           <p className="shrink-0 text-[length:var(--text-caption)] tabular-nums text-muted-foreground">
@@ -276,7 +276,7 @@ export function FirstBloomJourney({
               {step.done ? <Check className="size-3" strokeWidth={3} /> : null}
             </span>
             <span className="sr-only">
-              Step {i + 1} of {journey.steps.length}: {step.title} —{" "}
+              Step {i + 1} of {journey.steps.length}: {step.title} -{" "}
               {step.done ? "done" : i === journey.current ? "current step" : "ahead"}
             </span>
           </li>
@@ -332,7 +332,7 @@ export function FirstBloomJourney({
 
       <div className="mt-4 flex items-center justify-between gap-3">
         <p className="text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
-          Bloom is open — every tab works. This path just shows you around.
+          Bloom is open, every tab works. This path just shows you around.
         </p>
         <Button
           type="button"

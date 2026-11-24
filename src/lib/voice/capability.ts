@@ -17,7 +17,7 @@ export const VOICE_LANG = "en-IN" as const;
 /** What a surface shows when the microphone path does not exist here.
     Honest and short: no dead button, typing keeps working. */
 export const VOICE_UNSUPPORTED_MESSAGE =
-  "Voice isn't available in this browser — typing works as always.";
+  "Voice isn't available in this browser, typing works as always.";
 
 export type VoiceCapability =
   | { supported: true; lang: typeof VOICE_LANG }

@@ -24,7 +24,7 @@ interface CoachPanelStats {
 }
 
 const fmt = (value: number | null | undefined, digits = 1): string => {
-  if (value === null || value === undefined || !Number.isFinite(value)) return "—";
+  if (value === null || value === undefined || !Number.isFinite(value)) return "-";
   const rounded = Math.round(value * 10 ** digits) / 10 ** digits;
   return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(digits);
 };
@@ -78,7 +78,7 @@ function ContextView({
     const collides = rows.some((row) => row.label.toLowerCase() === tracker.name.toLowerCase());
     rows.push({
       label: collides ? `${tracker.name} tracker` : tracker.name,
-      value: tracker.avg7 !== null ? tracker.format(Math.round(tracker.avg7)) : "—",
+      value: tracker.avg7 !== null ? tracker.format(Math.round(tracker.avg7)) : "-",
       detail: `${tracker.daysLogged} ${tracker.daysLogged === 1 ? "day" : "days"} logged`,
     });
   }
@@ -103,7 +103,7 @@ function ContextView({
   return (
     <div className="coach-panel-body">
       <p className="coach-panel-lede">
-        Bloom works from a <strong>derived</strong> view of your record — averages and patterns,
+        Bloom works from a <strong>derived</strong> view of your record, averages and patterns,
         never your raw entries.
       </p>
       {rows.length > 0 ? (
@@ -133,7 +133,7 @@ function ContextView({
         <span>
           {profileConnected
             ? "Only approved context shapes a reply. Your record stays yours."
-            : "Nothing here is shared — everything stays on this device."}
+            : "Nothing here is shared, everything stays on this device."}
         </span>
       </div>
       {!profileConnected ? (
@@ -161,7 +161,7 @@ function MemoryView({
   return (
     <div className="coach-panel-body">
       <p className="coach-panel-lede">
-        What Bloom keeps from your conversations — pin the important ones, forget the rest here.
+        What Bloom keeps from your conversations, pin the important ones, forget the rest here.
       </p>
       <div className="coach-memory-filters" role="group" aria-label="Filter saved context">
         {(["all", "pattern", "preference", "goal", "context"] as const).map((key) => (
@@ -222,7 +222,7 @@ function MemoryView({
       )}
       <div className="coach-panel-note">
         <ShieldCheck className="coach-panel-note-icon" aria-hidden="true" />
-        <span>Review, pin or forget anything — it&rsquo;s always your call.</span>
+        <span>Review, pin or forget anything, it&rsquo;s always your call.</span>
       </div>
     </div>
   );

@@ -329,7 +329,7 @@ export function TemplateBrowser({
         <div>
           <h2 className="display text-[18px] leading-tight">Start somewhere</h2>
           <p className="text-[length:var(--text-caption)] text-muted-foreground">
-            {STORY_TEMPLATE_LIBRARY.length} designs — every one a starting point.
+            {STORY_TEMPLATE_LIBRARY.length} designs, every one a starting point.
           </p>
         </div>
       </header>
@@ -491,7 +491,7 @@ export function TemplatePreview({
           </ul>
 
           <p className="stpl-preview-note">
-            A starting point. Every layer — photos, type, colour, background — stays yours to
+            A starting point. Every layer, photos, type, colour, background, stays yours to
             change.
           </p>
 

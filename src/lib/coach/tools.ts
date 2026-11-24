@@ -125,7 +125,7 @@ const ACTION: Record<string, Runner> = {
 
     const timesPerWeek = frequency === "weekly" ? (num(args["timesPerWeek"]) ?? null) : null;
     if (frequency === "weekly" && (timesPerWeek === null || timesPerWeek < 1 || timesPerWeek > 7)) {
-      return { ok: false, outcome: "Tell me how many times per week — 1 to 7." };
+      return { ok: false, outcome: "Tell me how many times per week, 1 to 7." };
     }
 
     const days =
@@ -143,7 +143,7 @@ const ACTION: Record<string, Runner> = {
     if (reminderTime && !TIME_RE.test(reminderTime)) {
       return {
         ok: false,
-        outcome: "That reminder time doesn't look right — use a 24-hour time like 19:30.",
+        outcome: "That reminder time doesn't look right, use a 24-hour time like 19:30.",
       };
     }
 
@@ -160,7 +160,7 @@ const ACTION: Record<string, Runner> = {
     if (existing) {
       return {
         ok: true,
-        outcome: `“${existing.name}” is already one of your habits — I left it as it is.`,
+        outcome: `“${existing.name}” is already one of your habits. I left it as it is.`,
       };
     }
 
@@ -179,7 +179,7 @@ const ACTION: Record<string, Runner> = {
       return {
         ok: false,
         outcome:
-          "You're at the Free plan's limit of 5 habits, so I can't add another yet — archive one, or Premium makes habits unlimited. I've opened the Premium details for you.",
+          "You're at the Free plan's limit of 5 habits, so I can't add another yet, archive one, or Premium makes habits unlimited. I've opened the Premium details for you.",
       };
     }
 
@@ -231,7 +231,7 @@ const ACTION: Record<string, Runner> = {
         : "";
     return {
       ok: true,
-      outcome: `Done — “${name}” is now one of your habits (${cadence}${when}${noteBit})${deviceBit}. You'll find it on the Habits page.`,
+      outcome: `Done, “${name}” is now one of your habits (${cadence}${when}${noteBit})${deviceBit}. You'll find it on the Habits page.`,
     };
   },
 
@@ -275,7 +275,7 @@ const ACTION: Record<string, Runner> = {
     if (typeof window !== "undefined") window.dispatchEvent(new Event(HABITS_CHANGED));
     return {
       ok: true,
-      outcome: `Done — “${habit.name}” is ticked off${date === todayLocal() ? " for today" : ` for ${date}`}.`,
+      outcome: `Done, “${habit.name}” is ticked off${date === todayLocal() ? " for today" : ` for ${date}`}.`,
     };
   },
 
@@ -283,7 +283,7 @@ const ACTION: Record<string, Runner> = {
   list_habits: async (_args, profileId) => {
     const active = (await visibleHabits(profileId)).filter((h) => !h.archived);
     if (active.length === 0) {
-      return { ok: true, outcome: "You don't have any habits yet — ask me to create one." };
+      return { ok: true, outcome: "You don't have any habits yet, ask me to create one." };
     }
     const names = active.map((h) => h.name);
     const shown = names.slice(0, 12).join("; ");
@@ -320,7 +320,7 @@ const ACTION: Record<string, Runner> = {
     if (value < def.min || value > def.max) {
       return {
         ok: false,
-        outcome: `${def.name} is logged between ${def.min} and ${def.max}${def.kind === "rating" ? "" : " minutes"} — ${value} doesn't fit.`,
+        outcome: `${def.name} is logged between ${def.min} and ${def.max}${def.kind === "rating" ? "" : " minutes"} - ${value} doesn't fit.`,
       };
     }
     if (!dateIsLoggable(date, todayLocal())) {
@@ -383,7 +383,7 @@ export async function executeCoachTool(
   if (!runner) {
     return {
       ok: false,
-      outcome: "I don't have that action on this device yet — the rest of my reply stands.",
+      outcome: "I don't have that action on this device yet, the rest of my reply stands.",
     };
   }
   if (typeof window === "undefined") {
@@ -395,7 +395,7 @@ export async function executeCoachTool(
     const detail = error instanceof Error ? error.message : String(error);
     return {
       ok: false,
-      outcome: `I couldn't do that just now (${detail}). Nothing was changed — try once more, or do it from the page itself.`,
+      outcome: `I couldn't do that just now (${detail}). Nothing was changed, try once more, or do it from the page itself.`,
     };
   }
 }

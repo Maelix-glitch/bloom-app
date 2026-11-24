@@ -231,8 +231,8 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
   if (input.assessment.status !== "complete") {
     person.push(
       input.assessment.status === "in_progress"
-        ? "Their Assessment is started but NOT completed — treat every answer below as provisional, and do not treat missing answers as facts about them."
-        : "They have NOT completed their Assessment yet. You do not know their goal, eating pattern or safety answers — ask rather than assume, and never fill a gap with a typical value.",
+        ? "Their Assessment is started but NOT completed, treat every answer below as provisional, and do not treat missing answers as facts about them."
+        : "They have NOT completed their Assessment yet. You do not know their goal, eating pattern or safety answers, ask rather than assume, and never fill a gap with a typical value.",
     );
   } else if (input.assessment.completedAt) {
     person.push(
@@ -249,11 +249,11 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
   if (a.activity) person.push(`Activity: ${ACTIVITY_WORDS[a.activity] ?? a.activity}.`);
   if (a.dietaryPattern) person.push(`Eating pattern: ${PATTERN_WORDS[a.dietaryPattern] ?? a.dietaryPattern}. This is a hard rule for anything you suggest.`);
   if (a.mealsPerDay !== null) person.push(`They eat ${a.mealsPerDay} meals a day.`);
-  if (a.allergies.length > 0) person.push(`Allergies: ${a.allergies.join(", ")} — never suggest these.`);
+  if (a.allergies.length > 0) person.push(`Allergies: ${a.allergies.join(", ")}, never suggest these.`);
   if (a.intolerances.length > 0) person.push(`Intolerances: ${a.intolerances.join(", ")}.`);
-  if (a.dislikedFoods.length > 0) person.push(`Foods they dislike: ${a.dislikedFoods.join(", ")} — do not suggest these.`);
+  if (a.dislikedFoods.length > 0) person.push(`Foods they dislike: ${a.dislikedFoods.join(", ")}, do not suggest these.`);
   if (a.cuisines.length > 0) person.push(`Cuisines they enjoy: ${a.cuisines.join(", ")}.`);
-  if (a.foodBudget !== null) person.push(`Meal budget preference: tier ${a.foodBudget} of 3 (1 is everyday, 3 is rich) — the plan and dishes already respect it.`);
+  if (a.foodBudget !== null) person.push(`Meal budget preference: tier ${a.foodBudget} of 3 (1 is everyday, 3 is rich), the plan and dishes already respect it.`);
   if (a.sleepHoursTypical !== null) person.push(`They say they typically sleep about ${a.sleepHoursTypical} hours (an Assessment answer, not a measurement).`);
   /* The behavioural answers (spec §10) — the person's own words about
    * how eating goes for them, stated factually so explanations can
@@ -282,7 +282,7 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
   /* Safety answers — stated factually, for care, never for diagnosis. */
   if (a.pregnantOrBreastfeeding === true) person.push("They told Bloom they are pregnant or breastfeeding. Be extra careful: no deficit framing, and anything beyond gentle general food guidance goes to their clinician.");
   if (a.eatingDisorderHistory === true) person.push("They told Bloom they have a history of disordered eating. Be especially gentle: never frame food as failure, never push targets or deficits, and let them lead.");
-  if (a.unexplainedWeightChange === true) person.push("They reported an unexplained weight change in their Assessment. If it comes up, one calm sentence that it is worth mentioning to a clinician — never speculate about causes.");
+  if (a.unexplainedWeightChange === true) person.push("They reported an unexplained weight change in their Assessment. If it comes up, one calm sentence that it is worth mentioning to a clinician, never speculate about causes.");
   if (a.conditions.length > 0) {
     person.push(
       `Conditions they reported: ${a.conditions.map((c) => conditionLabel(c as HighRiskCondition)).join(", ")}. You may be considerate of these in food suggestions; you may not diagnose, interpret or advise on the conditions themselves.`,
@@ -290,29 +290,29 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
   }
   if (a.takesMedication === true) {
     person.push(
-      `They take medication${a.medications.length > 0 ? `: ${a.medications.join(", ")}` : ""}. Never advise on medication — that is their clinician's call.`,
+      `They take medication${a.medications.length > 0 ? `: ${a.medications.join(", ")}` : ""}. Never advise on medication, that is their clinician's call.`,
     );
   }
   if (a.symptoms.length > 0) {
     person.push(
-      `Symptoms they flagged in the Assessment: ${a.symptoms.map((s) => symptomLabel(s as UrgentSymptom)).join(", ")}. If they raise these, advise seeing a clinician — do not interpret them.`,
+      `Symptoms they flagged in the Assessment: ${a.symptoms.map((s) => symptomLabel(s as UrgentSymptom)).join(", ")}. If they raise these, advise seeing a clinician, do not interpret them.`,
     );
   }
-  section("THE PERSON — FROM THEIR ASSESSMENT", person);
+  section("THE PERSON: FROM THEIR ASSESSMENT", person);
 
   /* ----------------------------- targets ------------------------------ */
   if (input.targets) {
-    section("TARGETS — COMPUTED BY BLOOM'S ENGINE, QUOTE EXACTLY", [
+    section("TARGETS: COMPUTED BY BLOOM'S ENGINE, QUOTE EXACTLY", [
       `Energy target: ${kcal(input.targets.kcal)} a day. Protein target: ${grams(input.targets.proteinG)} a day.`,
       "These are the only calorie and protein goals you may state for this person.",
     ]);
   } else if (input.targetsBlocked) {
     section("TARGETS", [
-      "Bloom's safety gate has NOT cleared nutrition targets for this person. There are no calorie or protein goals to quote — do not state any, estimate any, or work around the gate. If they ask why, say Bloom is being careful with their safety answers and the Assessment is where that gets reviewed.",
+      "Bloom's safety gate has NOT cleared nutrition targets for this person. There are no calorie or protein goals to quote, do not state any, estimate any, or work around the gate. If they ask why, say Bloom is being careful with their safety answers and the Assessment is where that gets reviewed.",
     ]);
   } else {
     section("TARGETS", [
-      "No targets have been computed yet — there is not enough body information. Do not state calorie or protein goals for this person; if a question needs them, say they come once the Assessment holds enough to compute them honestly.",
+      "No targets have been computed yet, there is not enough body information. Do not state calorie or protein goals for this person; if a question needs them, say they come once the Assessment holds enough to compute them honestly.",
     ]);
   }
 
@@ -320,7 +320,7 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
   if (input.plan) {
     const plan = input.plan;
     const lines = [
-      `Plan for ${plan.day}${plan.stale ? " — made earlier and possibly out of date; if it no longer fits, say so rather than defending it" : ""}. Goal: ${plan.goalLabel}. Its targets: ${kcal(plan.targets.kcal)}, ${grams(plan.targets.proteinG)} protein.`,
+      `Plan for ${plan.day}${plan.stale ? ", made earlier and possibly out of date; if it no longer fits, say so rather than defending it" : ""}. Goal: ${plan.goalLabel}. Its targets: ${kcal(plan.targets.kcal)}, ${grams(plan.targets.proteinG)} protein.`,
     ];
     for (const meal of plan.meals) {
       const items = meal.items.length > 0 ? meal.items.join("; ") : (meal.note ?? "nothing composed");
@@ -332,7 +332,7 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
     section("THEIR CURRENT PLAN", lines);
   } else {
     section("THEIR CURRENT PLAN", [
-      "No plan has been generated yet. If they want one, the Nutrition tab builds it deterministically from the Assessment — you can explain what it would use, but you cannot create it yourself in this conversation.",
+      "No plan has been generated yet. If they want one, the Nutrition tab builds it deterministically from the Assessment, you can explain what it would use, but you cannot create it yourself in this conversation.",
     ]);
   }
 
@@ -340,7 +340,7 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
   const today = input.todayLog;
   if (today.entries.length > 0) {
     const lines = today.entries.map(
-      (e) => `${e.meal}: ${e.name} — ${kcal(e.kcal)}, ${grams(e.proteinG)} protein.`,
+      (e) => `${e.meal}: ${e.name} - ${kcal(e.kcal)}, ${grams(e.proteinG)} protein.`,
     );
     let totals = `Day so far: ${macroLine(today.totals)}.`;
     if (input.targets) {
@@ -351,7 +351,7 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
     lines.push(totals);
     section(`LOGGED TODAY (${today.day})`, lines);
   } else {
-    section(`LOGGED TODAY (${today.day})`, ["Nothing logged yet today. Do not describe today as eaten or missed — it simply has no entries yet."]);
+    section(`LOGGED TODAY (${today.day})`, ["Nothing logged yet today. Do not describe today as eaten or missed, it simply has no entries yet."]);
   }
 
   /* ---------------------------- recent days ---------------------------- */
@@ -359,11 +359,11 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
     section(
       "RECENT DAYS",
       input.recentDays.map(
-        (d) => `${d.day}: ${d.entriesCount} ${d.entriesCount === 1 ? "entry" : "entries"} — ${macroLine(d.totals)}.`,
+        (d) => `${d.day}: ${d.entriesCount} ${d.entriesCount === 1 ? "entry" : "entries"} - ${macroLine(d.totals)}.`,
       ),
     );
   } else {
-    section("RECENT DAYS", ["No food logged on earlier days yet — there is no eating history to reason from. Say so rather than implying a pattern."]);
+    section("RECENT DAYS", ["No food logged on earlier days yet, there is no eating history to reason from. Say so rather than implying a pattern."]);
   }
 
   /* ----------------------------- own foods ----------------------------- */
@@ -372,7 +372,7 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
       "THEIR OWN FOODS (values per 100 g, as they entered them)",
       input.customFoods.map(
         (f) =>
-          `${f.name} — ${kcal(f.kcal)}, ${grams(f.proteinG)} protein per 100 g.${f.id ? ` [food id: ${f.id}]` : ""}`,
+          `${f.name} - ${kcal(f.kcal)}, ${grams(f.proteinG)} protein per 100 g.${f.id ? ` [food id: ${f.id}]` : ""}`,
       ),
     );
   }
@@ -383,7 +383,7 @@ export function buildVitalisContext(input: VitalisContextInput): VitalisContext 
       "DISHES IN BLOOM'S LIBRARY THAT SUIT THEM (per serving, computed from verified ingredients)",
       input.dishes.map(
         (d) =>
-          `${d.name} (${d.category}) — ${kcal(d.kcal)}, ${grams(d.proteinG)} protein.${d.id ? ` [dish id: ${d.id}]` : ""}`,
+          `${d.name} (${d.category}), ${kcal(d.kcal)}, ${grams(d.proteinG)} protein.${d.id ? ` [dish id: ${d.id}]` : ""}`,
       ),
     );
   }

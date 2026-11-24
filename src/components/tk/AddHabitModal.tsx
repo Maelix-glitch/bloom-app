@@ -586,7 +586,7 @@ function AddHabitDialog({
               <textarea
                 id="noteInput"
                 maxLength={160}
-                placeholder="A short reason — shown when you tap the habit."
+                placeholder="A short reason, shown when you tap the habit."
                 value={s.note}
                 onChange={(e) => set({ note: e.target.value })}
               />
@@ -717,7 +717,7 @@ function AddHabitDialog({
                         </div>
                         <div className="dropzone-text">Drop an image or click to upload</div>
                         <div className="dropzone-sub">
-                          PNG, JPG or WEBP up to 2MB — square works best
+                          PNG, JPG or WEBP up to 2MB, square works best
                         </div>
                       </>
                     )}
@@ -822,7 +822,7 @@ function AddHabitDialog({
                         set({ timesPerWeek: Math.max(1, Math.min(7, s.timesPerWeek - 1)) })
                       }
                     >
-                      –
+                      -
                     </button>
                     <span className="step-value" id="timesValue">
                       {s.timesPerWeek}
@@ -919,7 +919,7 @@ function AddHabitDialog({
                   aria-label="Fewer points"
                   onClick={() => set({ points: Math.max(5, Math.min(500, s.points - 5)) })}
                 >
-                  –
+                  -
                 </button>
                 <span className="step-value" id="pointsValue">
                   {s.points}
@@ -991,7 +991,7 @@ function AddHabitDialog({
                   className="usual-reminder-chip"
                   onClick={() => set({ reminder: { enabled: true, time: suggestReminder.time } })}
                 >
-                  You usually finish this around {suggestReminder.around} — remind you{" "}
+                  You usually finish this around {suggestReminder.around}, remind you{" "}
                   {formatClock(
                     Number(suggestReminder.time.slice(0, 2)) * 60 +
                       Number(suggestReminder.time.slice(3, 5)),
@@ -1091,8 +1091,8 @@ function AddHabitDialog({
           </h3>
           <p id="successSub">
             {prefill
-              ? "Your changes are saved — its history stays exactly as it was."
-              : "It’s on your board — first check-in starts today."}
+              ? "Your changes are saved, its history stays exactly as it was."
+              : "It’s on your board, first check-in starts today."}
           </p>
         </div>
       </div>

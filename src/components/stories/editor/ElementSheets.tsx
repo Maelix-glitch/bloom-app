@@ -236,7 +236,7 @@ export function LayersSheet({
   return (
     <StorySheet
       title="Layers"
-      subtitle={`${elements.length} on the canvas — top of the list is in front.`}
+      subtitle={`${elements.length} on the canvas, top of the list is in front.`}
       onClose={onClose}
       label="Layer stack"
     >

@@ -197,7 +197,7 @@ export function NutritionHero({
   const ledger: { label: string; kcal: number; color: string }[] = [
     { label: "USDA FoodData Central", kcal: shares.usdaKcal, color: "var(--sage)" },
     { label: "Your value", kcal: shares.ownKcal, color: "var(--gold)" },
-    { label: "Estimate — based on your photo", kcal: shares.estimateKcal, color: "var(--rose)" },
+    { label: "Estimate, based on your photo", kcal: shares.estimateKcal, color: "var(--rose)" },
   ].filter((row) => row.kcal > 0);
 
   return (
@@ -429,13 +429,13 @@ export function NutritionHero({
         <p className="nut-note flex items-center gap-2">
           <EstimateChip />
           <span>
-            Targets are estimates (Mifflin–St Jeor) — a guide for the day, not a prescription.
+            Targets are estimates (Mifflin–St Jeor), a guide for the day, not a prescription.
           </span>
         </p>
       ) : targetState.kind === "blocked" ? (
         <p className="nut-note">
           Your safety answers mean Bloom doesn't set calorie targets for you. These totals
-          are simply your record — logging still works exactly the same.
+          are simply your record, logging still works exactly the same.
         </p>
       ) : (
         <p className="nut-note">

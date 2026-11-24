@@ -54,7 +54,7 @@ import { localDay } from "@/lib/localDay";
 import { offlineNotice } from "@/lib/offline/syncState";
 import { useConnectivity } from "@/lib/offline/useConnectivity";
 
-const TITLE = "Bloom — Today";
+const TITLE = "Bloom - Today";
 const DESCRIPTION =
   "Bloom is a calm daily companion: track mood, sleep, habits, study, cycle and energy, and see how they connect in one living map.";
 
@@ -285,7 +285,7 @@ function TodayPage() {
       : trackers.sync.state === "off"
         ? "Saved on this device"
         : trackers.sync.state === "signed-out"
-          ? "Saved on this device — sign in to sync"
+          ? "Saved on this device, sign in to sync"
           : trackers.sync.message || null;
 
   /* The mobile story card's action door (M-174): the synthesis's

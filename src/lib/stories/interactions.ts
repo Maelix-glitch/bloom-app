@@ -383,7 +383,7 @@ export async function sendReply(
 ): Promise<StoryReplyRecord> {
   const clean = body.trim().slice(0, 500);
   if (!clean) throw new Error("Write a little something first.");
-  if (!allow("reply")) throw new Error("Slow down a touch — try again in a moment.");
+  if (!allow("reply")) throw new Error("Slow down a touch, try again in a moment.");
   const record: StoryReplyRecord = {
     id: uid(),
     storyId,
@@ -490,7 +490,7 @@ export async function sendGift(
   gift: StoryGiftKind,
   userName?: string | null,
 ): Promise<StoryGiftRecord> {
-  if (!allow("gift")) throw new Error("Slow down a touch — try again in a moment.");
+  if (!allow("gift")) throw new Error("Slow down a touch, try again in a moment.");
   const record: StoryGiftRecord = {
     id: uid(),
     storyId,
@@ -605,7 +605,7 @@ export async function castVote(
   userId: string | null,
   valueText?: string,
 ): Promise<StoryPollTally> {
-  if (!allow("vote")) throw new Error("Slow down a touch — try again in a moment.");
+  if (!allow("vote")) throw new Error("Slow down a touch, try again in a moment.");
   return dedupe(`vote:${storyId}:${elementId}:${userId ?? "local"}`, async () => {
     const local = readLocal();
     const storyVotes = local.votes[storyId] ?? {};

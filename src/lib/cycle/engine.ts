@@ -506,8 +506,8 @@ export function buildCycleModel(
       plusMinusDays: halfWidth,
       daysAway,
       detail: usesDefault
-        ? `Estimated from a general ${assumed}-day pattern — log two cycles and it becomes yours`
-        : `Estimated around day ${expectedDay ?? "—"} of this cycle, from your last ${recent.length} cycles`,
+        ? `Estimated from a general ${assumed}-day pattern, log two cycles and it becomes yours`
+        : `Estimated around day ${expectedDay ?? "-"} of this cycle, from your last ${recent.length} cycles`,
       predicted: true,
       provenance: usesDefault
         ? PROV.baseline(`Estimated from the general ${assumed}-day baseline.`)
@@ -562,14 +562,14 @@ export function buildCycleModel(
       daysAway: ovuAway,
       detail:
         confirmedBy === "lh"
-          ? `Your positive LH test on ${fmtShort(latestLH!)} moved this off the calendar — a surge is typically followed by ovulation in ~24–36h`
+          ? `Your positive LH test on ${fmtShort(latestLH!)} moved this off the calendar, a surge is typically followed by ovulation in ~24-36h`
           : confirmedBy === "bbt"
             ? `Your temperature rise on ${fmtShort(bbtShiftDate!)} suggests ovulation already happened, about a day earlier`
             : personalizedLuteal !== null
               ? `Calendar estimate, refined using your own ${personalizedLuteal}-day luteal phase from confirmed cycles`
               : usesDefault
-                ? "Calendar estimate only (typical 14-day luteal phase) — no personal data behind it yet"
-                : "Calendar estimate — an LH test or temperature shift sharpens it",
+                ? "Calendar estimate only (typical 14-day luteal phase), no personal data behind it yet"
+                : "Calendar estimate, an LH test or temperature shift sharpens it",
       // Ovulation itself is never directly observed, even when a biomarker
       // narrows it a lot — keep this true so the UI never claims "logged".
       predicted: true,
@@ -615,10 +615,10 @@ export function buildCycleModel(
       plusMinusDays: halfWidth,
       daysAway: diffDays(today, fertileStart),
       detail: extendedByMucus
-        ? `Extended earlier to include egg-white cervical mucus logged on ${fmtShort(earliestEggWhite!)} — planning awareness only, not contraception`
+        ? `Extended earlier to include egg-white cervical mucus logged on ${fmtShort(earliestEggWhite!)}, planning awareness only, not contraception`
         : confirmedBy !== "calendar"
-          ? "Adjusted to match your confirmed ovulation — planning awareness only, not contraception"
-          : "Planning awareness only — an estimate, not contraception and not a fertility guarantee",
+          ? "Adjusted to match your confirmed ovulation, planning awareness only, not contraception"
+          : "Planning awareness only, an estimate, not contraception and not a fertility guarantee",
       predicted: true,
       provenance: usesDefault
         ? PROV.baseline("General fertile-window estimate; not contraception or a guarantee.")
@@ -640,7 +640,7 @@ export function buildCycleModel(
           rangeEnd: pmsEnd,
           plusMinusDays: null,
           daysAway: diffDays(today, pmsStart),
-          detail: "Late-luteal stretch — some people notice mood or energy shifts here; many don't",
+          detail: "Late-luteal stretch, some people notice mood or energy shifts here; many don't",
           predicted: true,
           provenance: PROV.predicted(
             "Estimated late-luteal window from your cycle-length history.",
@@ -660,7 +660,7 @@ export function buildCycleModel(
       rangeEnd: null,
       plusMinusDays: null,
       daysAway: diffDays(today, latest),
-      detail: "Logged by you — the surge usually precedes ovulation by ~24–36 h",
+      detail: "Logged by you, the surge usually precedes ovulation by ~24-36 h",
       predicted: false,
       provenance: PROV.userObserved("LH test logged by you."),
       generatedFromVersion: calculationVersion,

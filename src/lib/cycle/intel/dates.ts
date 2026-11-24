@@ -78,7 +78,7 @@ export function longDay(key: string): string {
 /** Inclusive range label, collapsing a one-day window. */
 export function rangeLabel(from: string, to: string): string {
   if (from === to) return shortDay(from);
-  return `${shortDay(from)} – ${shortDay(to)}`;
+  return `${shortDay(from)} - ${shortDay(to)}`;
 }
 
 /** Sorted, de-duplicated list of date keys. */

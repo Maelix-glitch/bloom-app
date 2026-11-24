@@ -47,7 +47,7 @@ describe("TrainerSection", () => {
     render(<TrainerSection />);
 
     /* One intro line, said once. */
-    expect(screen.getByText("Bring your professional into Bloom — on your terms.")).toBeTruthy();
+    expect(screen.getByText("Bring your professional into Bloom, on your terms.")).toBeTruthy();
 
     /* A titled row per remaining feature. */
     expect(screen.getByRole("heading", { name: "Share summary" })).toBeTruthy();
@@ -60,7 +60,7 @@ describe("TrainerSection", () => {
     expect(screen.queryByText(/only exists while you allow it/)).toBeNull();
   });
 
-  it("shows no referral code to anyone — the code is the trainers-only server section now", () => {
+  it("shows no referral code to anyone, the code is the trainers-only server section now", () => {
     render(<TrainerSection />);
 
     expect(screen.queryByRole("heading", { name: "Referral code" })).toBeNull();

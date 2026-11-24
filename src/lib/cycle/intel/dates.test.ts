@@ -24,7 +24,7 @@ describe("date-only arithmetic", () => {
     expect(diffDays("2026-11-01", "2026-11-01")).toBe(0);
     expect(shortDay("2026-11-01")).toBe("1 Nov");
     expect(longDay("2026-11-01")).toBe("1 Nov 2026");
-    expect(rangeLabel("2026-11-18", "2026-11-21")).toBe("18 Nov – 21 Nov");
+    expect(rangeLabel("2026-11-18", "2026-11-21")).toBe("18 Nov - 21 Nov");
     expect(rangeLabel("2026-11-18", "2026-11-18")).toBe("18 Nov");
   });
 

@@ -101,7 +101,7 @@ export function StoryArchive({
               </span>
               <p className="display text-[length:var(--text-section)] text-muted-foreground">Nothing resting here yet.</p>
               <p className="max-w-[32ch] text-[length:var(--text-support)] leading-relaxed text-faint">
-                Stories you share settle here quietly after 24 hours — your personal history, kept
+                Stories you share settle here quietly after 24 hours, your personal history, kept
                 safe.
               </p>
             </div>

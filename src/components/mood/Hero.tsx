@@ -38,7 +38,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
             </span>
           </h1>
           <p className="mt-4 max-w-[62ch] text-[length:var(--text-callout)] text-muted-foreground">
-            A command centre for how you actually feel — trends, rhythms, correlations and anomalies
+            A command centre for how you actually feel, trends, rhythms, correlations and anomalies
             derived only from what you have logged. Nothing invented, nothing assumed.
           </p>
         </div>
@@ -115,7 +115,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
           />
           <Metric
             label="Stability index"
-            raw={a.volatility.stability === null ? "—" : `${a.volatility.stability}`}
+            raw={a.volatility.stability === null ? "-" : `${a.volatility.stability}`}
             suffix="%"
             accent="sage"
             sub={
@@ -133,7 +133,7 @@ export function Hero({ system, onCompose }: { system: MoodSystem; onCompose: () 
           />
           <Metric
             label="Current state"
-            raw={a.days.length ? moodLabel(a.avg) : "—"}
+            raw={a.days.length ? moodLabel(a.avg) : "-"}
             accent="sky"
             sub={
               <span className="mono text-[length:var(--text-meta)] text-faint-strong">

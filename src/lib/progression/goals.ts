@@ -39,7 +39,7 @@ const DAILY: GoalDef[] = [
   {
     id: "daily-move",
     title: "Log movement today",
-    detail: "A walk, a stretch, a swim — anything you count as moving.",
+    detail: "A walk, a stretch, a swim, anything you count as moving.",
     domain: "movement",
     source: "movement",
     spec: { on: "trackerDays", tracker: "movement", window: 1 },
@@ -94,7 +94,7 @@ const WEEKLY: GoalDef[] = [
   {
     id: "week-consistency",
     title: "Keep 5 days of habit consistency this week",
-    detail: "Five days of any habit at all — the same ones, or different ones.",
+    detail: "Five days of any habit at all, the same ones, or different ones.",
     domain: "habits",
     source: "consistency",
     spec: { on: "habitDays", window: 7 },
@@ -120,7 +120,7 @@ const WEEKLY: GoalDef[] = [
   {
     id: "week-mood",
     title: "Log your mood on 5 days this week",
-    detail: "Consistent reflection — not being happy. Every feeling is welcome here.",
+    detail: "Consistent reflection, not being happy. Every feeling is welcome here.",
     domain: "mindfulness",
     source: "mindfulness",
     spec: { on: "moodDays", window: 7 },
@@ -156,7 +156,7 @@ const WEEKLY: GoalDef[] = [
   {
     id: "week-balance",
     title: "Check in with Bloom on 5 days",
-    detail: "A habit, a tracker or a mood entry — any one of them counts as showing up.",
+    detail: "A habit, a tracker or a mood entry, any one of them counts as showing up.",
     domain: "self-care",
     source: "recovery",
     spec: { on: "balanceDays", window: 7 },
@@ -210,7 +210,7 @@ const MONTHLY: GoalDef[] = [
   {
     id: "month-movement",
     title: "Move on 12 days this month",
-    detail: "Twelve days with movement logged — spread however your life allows.",
+    detail: "Twelve days with movement logged, spread however your life allows.",
     domain: "fitness",
     source: "fitness",
     spec: { on: "trackerDays", tracker: "movement", window: 30 },
@@ -278,7 +278,7 @@ const MILESTONES: GoalDef[] = [
   {
     id: "days-30",
     title: "Keep 30 days of habit consistency",
-    detail: "Thirty days in total — consecutive or not. Both count the same here.",
+    detail: "Thirty days in total, consecutive or not. Both count the same here.",
     domain: "consistency",
     source: "consistency",
     spec: { on: "habitDays", window: 400 },
@@ -339,7 +339,7 @@ const MILESTONES: GoalDef[] = [
   {
     id: "sleep-30",
     title: "Log 30 nights of sleep",
-    detail: "Thirty nights recorded — the quiet foundation of everything else.",
+    detail: "Thirty nights recorded, the quiet foundation of everything else.",
     domain: "sleep",
     source: "sleep",
     spec: { on: "trackerDays", tracker: "sleep", window: 400 },
@@ -387,7 +387,7 @@ const MILESTONES: GoalDef[] = [
   {
     id: "run-60",
     title: "Keep 60 days in a row",
-    detail: "Sixty days of consistency — through every kind of week.",
+    detail: "Sixty days of consistency, through every kind of week.",
     domain: "consistency",
     source: "consistency",
     spec: { on: "habitRun" },

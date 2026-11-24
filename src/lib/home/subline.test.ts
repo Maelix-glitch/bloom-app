@@ -45,7 +45,7 @@ describe("home subtitle", () => {
 
   it("gives day one its own line, once the record has loaded", () => {
     expect(sublineFor({ ready: true, firstDay: true, openCount: 4 })).toBe(
-      "Day one — look around, log one thing when it's natural.",
+      "Day one, look around, log one thing when it's natural.",
     );
     // While loading, day one still shows the reading state — never a flash.
     expect(sublineFor({ ready: false, firstDay: true, openCount: 4 })).toBe(RECORD_READING);

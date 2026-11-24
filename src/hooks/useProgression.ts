@@ -658,7 +658,7 @@ export function useProgression(): ProgressionStore {
           rankUp: null,
           unlocked: [],
           message: left > 0
-            ? `Not completed yet — ${left} to go. You can pick this back up any time.`
+            ? `Not completed yet, ${left} to go. You can pick this back up any time.`
             : "Not completed yet.",
         };
       }
@@ -684,7 +684,7 @@ export function useProgression(): ProgressionStore {
             rankUp: null,
             unlocked: [],
             message:
-              "Bloom couldn't reach your account to add those points, so this claim wasn't saved. Nothing was lost — try again in a moment.",
+              "Bloom couldn't reach your account to add those points, so this claim wasn't saved. Nothing was lost, try again in a moment.",
           };
         }
 
@@ -784,7 +784,7 @@ export function useProgression(): ProgressionStore {
         // This should never happen because all inner calls are safe, but if it does,
         // we must not leave the UI stuck and must not throw to the caller.
         console.warn("Claim failed, falling back to safe state:", cause);
-        setError("Goals couldn't be saved right now. Nothing was lost — try again.");
+        setError("Goals couldn't be saved right now. Nothing was lost, try again.");
         return { awarded: false, points: 0, rankUp: null, unlocked: [], message: "Nothing was charged. Try again." };
       } finally {
         busyRef.current = false;

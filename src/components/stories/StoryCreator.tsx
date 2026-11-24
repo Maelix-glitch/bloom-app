@@ -212,7 +212,7 @@ export function StoryCreator({
       accent: meta.accent,
       captionTitle: `Mood · ${dayLabel(entry.timestamp)}`,
       captionBody:
-        entry.note?.trim() || `${Math.round(entry.mood)}/10 — feeling ${meta.label.toLowerCase()}.`,
+        entry.note?.trim() || `${Math.round(entry.mood)}/10, feeling ${meta.label.toLowerCase()}.`,
     });
   }, []);
 
@@ -323,7 +323,7 @@ export function StoryCreator({
     };
     if (draft.source.base === "photo") {
       if (!draft.source.photoFile) {
-        toast.error("That draft's photo is gone — starting fresh.");
+        toast.error("That draft's photo is gone, starting fresh.");
         setHasLocalDraft(false);
         return;
       }
@@ -343,7 +343,7 @@ export function StoryCreator({
         setHasLocalDraft(false);
         return;
       } catch {
-        toast.error("That draft's photo is gone — starting fresh.");
+        toast.error("That draft's photo is gone, starting fresh.");
         setHasLocalDraft(false);
         return;
       }
@@ -369,7 +369,7 @@ export function StoryCreator({
         setHasLocalDraft(false);
         return;
       } catch {
-        toast.error("That draft's video is gone — starting fresh.");
+        toast.error("That draft's video is gone, starting fresh.");
         setHasLocalDraft(false);
         return;
       }
@@ -691,7 +691,7 @@ export function StoryCreator({
               rewards.length === 0 &&
               milestones.length === 0 ? (
                 <p className="rounded-2xl border border-dashed border-border px-4 py-5 text-center text-[length:var(--text-support)] text-muted-foreground">
-                  As you log moods and earn rewards, they'll wait for you here — ready to become
+                  As you log moods and earn rewards, they'll wait for you here, ready to become
                   stories, only when you choose.
                 </p>
               ) : null}

@@ -96,7 +96,7 @@ export function claimIssues(
     issues.push(`${claim.id}: confidence must be between 0 and 1`);
   }
   if (claim.population.trim().length < 3) {
-    issues.push(`${claim.id}: population is required — evidence always comes from someone`);
+    issues.push(`${claim.id}: population is required, evidence always comes from someone`);
   }
   if (claim.grade !== "strong" && claim.uncertainty.length === 0) {
     issues.push(`${claim.id}: uncertainty must be stated unless the grade is strong`);

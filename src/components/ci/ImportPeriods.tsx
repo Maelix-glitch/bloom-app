@@ -106,7 +106,7 @@ export function ImportPeriods({
           <h2 className="display text-[length:var(--text-title)] leading-tight">Bring your history in</h2>
           <p className="mt-1.5 text-[13px] leading-relaxed text-muted-foreground">
             Paste the start days from your old app, or drop its CSV here. Bloom shows you what it
-            understood before anything is saved — three or four cycles are enough to stop the
+            understood before anything is saved, three or four cycles are enough to stop the
             predictions being generic.
           </p>
         </SheetItem>
@@ -199,7 +199,7 @@ export function ImportPeriods({
                     >
                       <span className="mono text-[length:var(--text-support)]">
                         {formatDate(row.start)}
-                        {row.end ? ` – ${formatDate(row.end)}` : ""}
+                        {row.end ? ` - ${formatDate(row.end)}` : ""}
                       </span>
                       <span
                         className={cn(
@@ -222,12 +222,12 @@ export function ImportPeriods({
                   <p className="flex items-center gap-2 text-[length:var(--text-support)]">
                     <AlertTriangle className="size-3.5" aria-hidden />
                     {plan.problems.length} {plan.problems.length === 1 ? "line" : "lines"} couldn't
-                    be read — nothing here is guessed at.
+                    be read, nothing here is guessed at.
                   </p>
                   <ul className="mt-2 space-y-1">
                     {plan.problems.slice(0, 8).map((p) => (
                       <li key={p.line} className="text-[12px] text-muted-foreground">
-                        <span className="mono">line {p.line}</span> · {p.raw.slice(0, 40)} —{" "}
+                        <span className="mono">line {p.line}</span> · {p.raw.slice(0, 40)} -{" "}
                         {p.reason}
                       </li>
                     ))}

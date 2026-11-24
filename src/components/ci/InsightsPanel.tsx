@@ -56,7 +56,7 @@ export function InsightsPanel({
         title="What stands out in your record"
         note={
           flags.length > 0
-            ? "Each note below is triggered by something specific in your data — and disappears when it stops being true."
+            ? "Each note below is triggered by something specific in your data, and disappears when it stops being true."
             : undefined
         }
       />

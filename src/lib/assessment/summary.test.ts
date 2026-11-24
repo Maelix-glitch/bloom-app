@@ -142,7 +142,7 @@ describe("summaryOf", () => {
     expect(summary?.bmi).toBeNull();
   });
 
-  it("reads back a stated waist in the identity section — and only then", () => {
+  it("reads back a stated waist in the identity section, and only then", () => {
     let s = beginAssessment(emptyAssessmentState(T0), T0);
     s = saveStep(s, { waistCm: 88 }, "summary", T1);
     s = completeAssessment(s, T2);
@@ -175,7 +175,7 @@ describe("summaryOf", () => {
     expect(nutrition?.lines).toContain("Time to cook a main meal: about 20 minutes.");
   });
 
-  it("reads back the behavioural answers in their own section — and they never gate a plan", () => {
+  it("reads back the behavioural answers in their own section, and they never gate a plan", () => {
     let s = beginAssessment(emptyAssessmentState(T0), T0);
     s = saveStep(
       s,
@@ -200,7 +200,7 @@ describe("summaryOf", () => {
     expect(behaviour?.lines).toContain("Cravings: sweet.");
     expect(behaviour?.lines).toContain("Eating follows your feelings: often.");
     expect(behaviour?.lines).toContain(
-      "You've tried a low-carb diet before — it came unstuck over hunger, social pressure.",
+      "You've tried a low-carb diet before, it came unstuck over hunger, social pressure.",
     );
     expect(behaviour?.lines).toContain("Motivation right now: in the middle.");
     expect(behaviour?.lines).toContain("Confidence you can keep this up: low.");
@@ -212,12 +212,12 @@ describe("summaryOf", () => {
     expect(full?.sections.find((sec) => sec.section === "behaviour")?.lines).toEqual([]);
   });
 
-  it("reads back a stated meal budget in the nutrition section — and only then", () => {
+  it("reads back a stated meal budget in the nutrition section, and only then", () => {
     let s = beginAssessment(emptyAssessmentState(T0), T0);
     s = saveStep(s, { dietaryPattern: "vegan", foodBudget: 2 }, "summary", T1);
     s = completeAssessment(s, T2);
     const nutrition = summaryOf(s)?.sections.find((sec) => sec.section === "nutrition");
-    expect(nutrition?.lines).toContain("Meal budget: moderate — about ₹45 a serving.");
+    expect(nutrition?.lines).toContain("Meal budget: moderate, about ₹45 a serving.");
 
     /* No budget stated → no budget line; the section does not guess. */
     const unanswered = summaryOf(completedFull());

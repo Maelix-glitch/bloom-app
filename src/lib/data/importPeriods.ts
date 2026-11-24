@@ -164,7 +164,7 @@ export function parsePeriodImport(
       problems.push({
         line,
         raw: trimmed,
-        reason: "No start date here — expected something like 2026-08-03.",
+        reason: "No start date here, expected something like 2026-08-03.",
       });
       return;
     }
@@ -195,7 +195,7 @@ export function parsePeriodImport(
         problems.push({
           line,
           raw: trimmed,
-          reason: "More than 15 days of bleeding — check the dates.",
+          reason: "More than 15 days of bleeding, check the dates.",
         });
         return;
       } else if (diffDays(today, end) > 0) {
@@ -246,7 +246,7 @@ export function previewImport(
       out.push({
         ...row,
         status: "duplicate",
-        note: "Already in your record — it will be kept as it is.",
+        note: "Already in your record, it will be kept as it is.",
       });
       continue;
     }
@@ -255,7 +255,7 @@ export function previewImport(
       out.push({
         ...row,
         status: "overlaps",
-        note: `Falls inside the period starting ${formatDate(clash.start)} — skipped.`,
+        note: `Falls inside the period starting ${formatDate(clash.start)}, skipped.`,
       });
       continue;
     }
@@ -291,7 +291,7 @@ export function describePreview(
 ): string {
   const { add, duplicate, overlaps } = preview.counts;
   if (add === 0 && problems.length === 0 && preview.counts.total === 0) {
-    return "Nothing to read yet — paste dates, or choose a file.";
+    return "Nothing to read yet, paste dates, or choose a file.";
   }
   const bits = [`${add} to add`];
   if (duplicate > 0) bits.push(`${duplicate} already here`);

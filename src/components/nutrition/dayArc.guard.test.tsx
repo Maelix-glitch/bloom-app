@@ -232,7 +232,7 @@ function nodeByKey(whole: HTMLElement, key: string): HTMLElement {
 const leftPct = (el: HTMLElement): number => parseFloat(el.style.left);
 const topPct = (el: HTMLElement): number => parseFloat(el.style.top);
 
-describe("day arc guard — your whole day as the Day Arc (M-198)", () => {
+describe("day arc guard, your whole day as the Day Arc (M-198)", () => {
   it("(a) six nodes, captioned from the caretaker data, placed by the lib geometry", () => {
     const stored = seedTimedPlan();
     const { container } = render(<NutritionPlanSection />);
@@ -310,7 +310,7 @@ describe("day arc guard — your whole day as the Day Arc (M-198)", () => {
     expect(nodeByKey(whole, "walk").textContent).toContain("Walk · 45 min");
   });
 
-  it("(c) the now marker is the real time — evening between its neighbours, night in the valley", () => {
+  it("(c) the now marker is the real time, evening between its neighbours, night in the valley", () => {
     seedTimedPlan();
     /* Hold the local clock by its hands only (hours/minutes) —
        the rest of the render pipeline keeps its real timers. */
@@ -430,7 +430,7 @@ describe("day arc guard — your whole day as the Day Arc (M-198)", () => {
     expect(leftPct(walk)).toBeLessThan(leftPct(nodeByKey(whole, "caffeine")));
   });
 
-  it("(g) the now label's placement is the geometry's rule — lifted at 22:13, home when clear (M-199)", () => {
+  it("(g) the now label's placement is the geometry's rule, lifted at 22:13, home when clear (M-199)", () => {
     seedTimedPlan();
     const hours = vi.spyOn(Date.prototype, "getHours").mockReturnValue(22);
     const minutes = vi.spyOn(Date.prototype, "getMinutes").mockReturnValue(13);
@@ -473,13 +473,13 @@ describe("day arc guard — your whole day as the Day Arc (M-198)", () => {
     minutes.mockRestore();
   });
 
-  it("(e) the words did not move — figures sentence and Tonight zones verbatim", () => {
+  it("(e) the words did not move, figures sentence and Tonight zones verbatim", () => {
     seedTimedPlan();
     const { container } = render(<NutritionPlanSection />);
     const text = sectionByLabel(container, "Your whole day").textContent ?? "";
     expect(text).toContain("In bed by 10:30 PM · Up at 6:30 AM · 8 hours.");
-    expect(text).toContain("Tonight — do");
-    expect(text).toContain("Tonight — avoid");
+    expect(text).toContain("Tonight: do");
+    expect(text).toContain("Tonight: avoid");
     expect(text).toContain("The room dark and cool; the morning’s clothes and bag laid out ready.");
     expect(text).toContain("Your movement target is 30 minutes in the day.");
   });

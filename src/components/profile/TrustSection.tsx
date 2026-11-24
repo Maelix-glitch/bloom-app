@@ -32,11 +32,11 @@ import {
 } from "@/lib/vitalis/evidence/registry";
 
 const EVIDENCE_STATE_LINE: Record<RecommendationEvidenceState, string> = {
-  ready: "Checked against its source — and licensed for use in Bloom.",
+  ready: "Checked against its source, and licensed for use in Bloom.",
   blocked:
     "Checked against its source, but Bloom is not licensed to use that source in the app yet.",
   unverified:
-    "Recorded honestly — no source has been verified for this yet, so Bloom does not present it as evidence-based.",
+    "Recorded honestly, no source has been verified for this yet, so Bloom does not present it as evidence-based.",
 };
 
 export function TrustSection() {
@@ -57,7 +57,7 @@ export function TrustSection() {
         <span className="pf-row-text">
           <span className="pf-row-label">Trust &amp; security</span>
           <span className="pf-row-hint">
-            How Bloom protects your data and your money — and how each line is checked
+            How Bloom protects your data and your money, and how each line is checked
           </span>
         </span>
         <span className="pf-row-value">Verified</span>
@@ -83,7 +83,7 @@ export function TrustSection() {
           </ul>
           <p className="mt-3.5 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
             Every line above is checked by Bloom&rsquo;s own guard tests against the code that makes
-            it true — a protection that stops being true takes its line with it.
+            it true, a protection that stops being true takes its line with it.
           </p>
           <div className="mt-5" data-testid="pf-evidence-detail">
             <p className="text-[length:var(--text-caption)] font-medium leading-snug text-foreground">
@@ -91,7 +91,7 @@ export function TrustSection() {
             </p>
             <p className="mt-0.5 text-[length:var(--text-caption)] leading-snug text-muted-foreground">
               Every rule your targets and plan are built with, and where it stands. A rule is
-              recorded even when its source is not verified yet — and labelled that way, not dressed
+              recorded even when its source is not verified yet, and labelled that way, not dressed
               up.
             </p>
             <div className="mt-3 flex flex-col gap-3.5">

@@ -191,10 +191,10 @@ export function calculateCorrelations(days: DayAggregate[]): Correlation[] {
 
 /** Weekday × time-of-day mood grid. */
 export const TIME_BANDS = [
-  { key: "morning", label: "Morning", range: "05–12" },
-  { key: "afternoon", label: "Afternoon", range: "12–17" },
-  { key: "evening", label: "Evening", range: "17–22" },
-  { key: "night", label: "Night", range: "22–05" },
+  { key: "morning", label: "Morning", range: "05-12" },
+  { key: "afternoon", label: "Afternoon", range: "12-17" },
+  { key: "evening", label: "Evening", range: "17-22" },
+  { key: "night", label: "Night", range: "22-05" },
 ] as const;
 
 export function bandOf(hour: number) {

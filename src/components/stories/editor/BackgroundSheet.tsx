@@ -354,7 +354,7 @@ export function BackgroundSheet({
             </>
           ) : (
             <p className="se-hint">
-              Pick a photo and it sits behind everything — safe zones, text and photo slots stay
+              Pick a photo and it sits behind everything, safe zones, text and photo slots stay
               put. Blur or darken it if the text needs to breathe.
             </p>
           )}

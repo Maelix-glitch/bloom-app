@@ -48,7 +48,7 @@ export const EVERYDAY_TEMPLATES = [
     id: "everyday-day-in-numbers",
     premium: true,
     name: "The Day in Numbers",
-    hint: "Your habits, counted — the day at a glance.",
+    hint: "Your habits, counted, the day at a glance.",
     category: "everyday",
     tags: ["data", "habits", "daily", "editorial"],
     tone: "dark",

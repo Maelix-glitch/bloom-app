@@ -93,7 +93,7 @@ function ActiveProgramme({ progress, onQuit }: { progress: ProgrammeProgress; on
       <h3 className="text-[length:var(--text-section)] font-semibold text-foreground">
         {progress.definition.name}
         {progress.currentWeek !== null
-          ? ` — Week ${progress.currentWeek} of ${progress.definition.weeks.length}`
+          ? `, Week ${progress.currentWeek} of ${progress.definition.weeks.length}`
           : ""}
       </h3>
       {current ? (
@@ -111,7 +111,7 @@ function ActiveProgramme({ progress, onQuit }: { progress: ProgrammeProgress; on
                   {targetKindLabel(tp.target.kind)}
                 </span>
                 <span className="text-[length:var(--text-support)] text-muted-foreground">
-                  {tp.actual} of {tp.target.count} — {WEEK_STATE_LABEL[tp.state]}
+                  {tp.actual} of {tp.target.count} - {WEEK_STATE_LABEL[tp.state]}
                 </span>
               </li>
             ))}
@@ -135,7 +135,7 @@ function ActiveProgramme({ progress, onQuit }: { progress: ProgrammeProgress; on
         {progress.summary.weeksNoRecord > 0
           ? `, ${progress.summary.weeksNoRecord} with no record`
           : ""}
-        . Progress is counted from your own log — nothing here is estimated.
+        . Progress is counted from your own log, nothing here is estimated.
       </p>
 
       <div className="mt-3">

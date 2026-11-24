@@ -527,8 +527,7 @@ export function ConnectionConstellationView({
             <Waves className="size-4" />
           </span>
           <p className="empty-row-text">
-            <strong>Nothing to read yet.</strong> Log mood and one more area on the same days —
-            after 8 paired days, Bloom can check how they connect.{" "}
+            <strong>Nothing to read yet.</strong> Log mood and one more area on the same days, after 8 paired days, Bloom can check how they connect.{" "}
             <Link to="/mood" className="orbit-empty-action">
               Log mood today
             </Link>
@@ -609,7 +608,7 @@ export function ConnectionConstellationEmpty() {
       </div>
 
       <p className="mx-auto max-w-[52ch] text-center text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-        Connections appear once two signals share enough logged days — a few mornings of mood, sleep
+        Connections appear once two signals share enough logged days, a few mornings of mood, sleep
         or habits, and the first arc draws itself from your own record.
       </p>
       <p className="orbit-foot">{FOOT}</p>

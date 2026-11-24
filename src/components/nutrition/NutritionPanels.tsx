@@ -60,7 +60,7 @@ export function WeekPanel({
       <div className="mt-5 grid grid-cols-3 gap-3 border-t border-border-subtle pt-4">
         <div>
           <p className="font-display text-[24px] text-foreground tabular-nums">
-            {week.avgKcal !== null ? week.avgKcal : "—"}
+            {week.avgKcal !== null ? week.avgKcal : "-"}
           </p>
           <p className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground">
             avg kcal
@@ -68,7 +68,7 @@ export function WeekPanel({
         </div>
         <div>
           <p className="font-display text-[24px] text-foreground tabular-nums">
-            {week.avgProteinG !== null ? fmtGrams(week.avgProteinG) : "—"}
+            {week.avgProteinG !== null ? fmtGrams(week.avgProteinG) : "-"}
           </p>
           <p className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground">
             avg protein g
@@ -76,7 +76,7 @@ export function WeekPanel({
         </div>
         <div>
           <p className="font-display text-[24px] text-foreground tabular-nums">
-            {week.proteinHitDays !== null ? `${week.proteinHitDays}/${week.loggedDays}` : "—"}
+            {week.proteinHitDays !== null ? `${week.proteinHitDays}/${week.loggedDays}` : "-"}
           </p>
           <p className="mt-0.5 text-[length:var(--text-caption)] text-muted-foreground">
             protein days
@@ -170,7 +170,7 @@ export function Spectrum({
       {anyIncomplete ? (
         <p className="nut-note">
           * Some logged foods don't report this nutrient. Bloom treats that as "unknown", so
-          the total is a floor — not a claim.
+          the total is a floor, not a claim.
         </p>
       ) : null}
     </section>
@@ -191,7 +191,7 @@ export function PatternLab({ patterns }: { patterns: MoodPattern[] }) {
         </div>
       </div>
       <p className="mt-2 max-w-[62ch] text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
-        These are patterns in your data — not proof of cause — and each shows how many days
+        These are patterns in your data, not proof of cause, and each shows how many days
         stand behind it.
       </p>
       {patterns.length === 0 ? (
@@ -201,7 +201,7 @@ export function PatternLab({ patterns }: { patterns: MoodPattern[] }) {
           </span>
           <p className="empty-row-text">
             <strong>No patterns yet.</strong> Patterns appear once you have at least two
-            days on each side of a comparison — keep logging food and checking in on Mood.
+            days on each side of a comparison, keep logging food and checking in on Mood.
           </p>
           <Link to="/mood" className="nut-btn nut-btn-ghost nut-btn-sm empty-row-action">
             Open Mood

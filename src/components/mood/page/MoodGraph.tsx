@@ -129,7 +129,7 @@ export function MoodGraph({
               Your mood web
             </h2>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              How everything you log pulls on your mood — measured from your own days, never
+              How everything you log pulls on your mood, measured from your own days, never
               guessed.
             </p>
           </div>
@@ -320,7 +320,7 @@ function Canvas({
         data-state={nodeState("mood")}
         role="button"
         tabIndex={0}
-        aria-label={`Mood — ${hub.reading}`}
+        aria-label={`Mood, ${hub.reading}`}
         onMouseEnter={() => onHover("mood")}
         onFocus={() => onHover("mood")}
         onBlur={() => onHover(null)}
@@ -403,7 +403,7 @@ function Satellite({
       data-state={state}
       role="button"
       tabIndex={0}
-      aria-label={`${n.label} — ${n.reading}`}
+      aria-label={`${n.label} - ${n.reading}`}
       onMouseEnter={() => onHover(n.id)}
       onFocus={() => onHover(n.id)}
       onBlur={() => onHover(null)}
@@ -441,7 +441,7 @@ function HowToRead() {
       </li>
       <li className="flex gap-2.5">
         <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full border border-foreground/40" />
-        Dotted rings are emotions — how often you name them and the mood they arrive with.
+        Dotted rings are emotions, how often you name them and the mood they arrive with.
       </li>
     </ul>
   );
@@ -514,7 +514,7 @@ function Reading({
             </p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
               Energy and stress come with every check-in. Add sleep, exercise or screen time in the
-              composer and the map shows what actually moves your mood — with the strength measured
+              composer and the map shows what actually moves your mood, with the strength measured
               on your own days.
             </p>
           </>
@@ -524,7 +524,7 @@ function Reading({
               {headline(graph.headline.statement)}
             </p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Your strongest measured link right now — r {graph.headline.r > 0 ? "+" : ""}
+              Your strongest measured link right now, r {graph.headline.r > 0 ? "+" : ""}
               {graph.headline.r.toFixed(2)} over {graph.headline.n} days, {graph.headline.evidence}{" "}
               evidence.{" "}
               <span className="hidden sm:inline">Hover any node to read it; click to pin.</span>
@@ -537,7 +537,7 @@ function Reading({
               {graph.days} day{graph.days === 1 ? "" : "s"} in the web so far.
             </p>
             <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-              Relationships need at least 8 paired days before they count. Keep logging — and add
+              Relationships need at least 8 paired days before they count. Keep logging, and add
               sleep, exercise or screen time in the composer to give the map more to connect.
             </p>
           </>

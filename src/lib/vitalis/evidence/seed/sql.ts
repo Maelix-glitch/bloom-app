@@ -626,7 +626,7 @@ function header(registry: EvidenceRegistry, hashLabel: string): string {
   const citationCount = registry.claims.reduce((total, claim) => total + claim.sources.length, 0);
 
   return [
-    "-- Bloom Vitalis — evidence catalogue seed.",
+    "-- Bloom Vitalis, evidence catalogue seed.",
     "--",
     "-- GENERATED FILE. Do not edit by hand.",
     "--",
@@ -652,7 +652,7 @@ function header(registry: EvidenceRegistry, hashLabel: string): string {
     "--   • Never moves a row backwards: a newer database version is not reverted,",
     "--     a recorded supersession is not cleared, an approved claim is not",
     "--     returned to draft, and a row whose content already matches is not",
-    "--     touched — so applying this file to a current database is a no-op.",
+    "--     touched, so applying this file to a current database is a no-op.",
     "--   • Appends revision history, and never rewrites or removes it.",
     "--   • Touches no health, authentication or other Bloom table.",
     "--",

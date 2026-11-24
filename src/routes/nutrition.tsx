@@ -9,11 +9,11 @@ import nutritionCss from "../styles/nutrition.css?url";
 export const Route = createFileRoute("/nutrition")({
   head: () => ({
     meta: [
-      { title: "Bloom — Nutrition" },
+      { title: "Bloom - Nutrition" },
       {
         name: "description",
         content:
-          "What you eat, logged against your day — USDA reference values, your own packet labels and clearly marked estimates, every number carrying its source.",
+          "What you eat, logged against your day. USDA reference values, your own packet labels and clearly marked estimates, every number carrying its source.",
       },
     ],
     links: [{ rel: "stylesheet", href: nutritionCss }],

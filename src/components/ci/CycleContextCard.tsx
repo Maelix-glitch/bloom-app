@@ -56,7 +56,7 @@ export function CycleContextCard({ context }: { context: CyclePhaseContext }) {
       <p className="mt-3 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">{context.note}</p>
 
       <p className="mt-3 text-[length:var(--text-caption)] leading-relaxed ci-muted">
-        {context.basis} Estimates from your own logged cycle — general information, not medical
+        {context.basis} Estimates from your own logged cycle, general information, not medical
         advice.
       </p>
     </Card>

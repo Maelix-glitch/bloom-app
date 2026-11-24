@@ -219,8 +219,8 @@ function figureText(section: HTMLElement, name: string): string {
   return el!.textContent ?? "";
 }
 
-describe("whole-day guard — the plan as caretaker (M-162)", () => {
-  it("(a) the section stands after the day card, before the balance — defaults' arithmetic, the plan's own largest meal", () => {
+describe("whole-day guard, the plan as caretaker (M-162)", () => {
+  it("(a) the section stands after the day card, before the balance, defaults' arithmetic, the plan's own largest meal", () => {
     seedAndStore((plan) =>
       fixtureTimeline(plan, {
         breakfast: "07:15",
@@ -265,7 +265,7 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     expect(legendItems[0]?.textContent).toContain("6:30 AM");
     expect(legendItems[legendItems.length - 1]?.textContent).toContain("In bed");
     expect(legendItems[legendItems.length - 1]?.textContent).toContain("10:30 PM");
-    expect(text).toContain("From 9:30 PM — screens dim, then off.");
+    expect(text).toContain("From 9:30 PM, screens dim, then off.");
     expect(text).toContain("Your screen target for the day is 3 hours.");
     expect(text).toContain("Caffeine after 2:30 PM.");
     expect(text).toContain("not medical advice");
@@ -300,10 +300,10 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     expect(figureText(whole, "movement-target")).toContain("45 minutes");
     expect(text).toContain("Your screen target for the day is 4 hours.");
     expect(text).toContain("Caffeine after 3:00 PM.");
-    expect(text).toContain("From 10:00 PM — screens dim, then off.");
+    expect(text).toContain("From 10:00 PM, screens dim, then off.");
   });
 
-  it("(c) the last-meal line tells the truth both ways — and refuses a time it does not have", () => {
+  it("(c) the last-meal line tells the truth both ways, and refuses a time it does not have", () => {
     /* Outside: dinner 19:45 on the default frame (bed 22:30). */
     seedAndStore((plan) =>
       fixtureTimeline(plan, {
@@ -315,7 +315,7 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     );
     const first = render(<NutritionPlanSection />);
     expect(sectionByLabel(first.container, "Your whole day").textContent).toContain(
-      "A heavy meal in the last two hours — Dinner at 7:45 PM already sits outside them.",
+      "A heavy meal in the last two hours, Dinner at 7:45 PM already sits outside them.",
     );
     cleanup();
 
@@ -329,7 +329,7 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     );
     const second = render(<NutritionPlanSection />);
     expect(sectionByLabel(second.container, "Your whole day").textContent).toContain(
-      "Evening snack at 9:15 PM sits inside the last two hours before bed — on a day you can, bring the last meal earlier.",
+      "Evening snack at 9:15 PM sits inside the last two hours before bed, on a day you can, bring the last meal earlier.",
     );
     cleanup();
 
@@ -338,11 +338,11 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     seedAndStore();
     const third = render(<NutritionPlanSection />);
     expect(sectionByLabel(third.container, "Your whole day").textContent).toContain(
-      "A heavy meal in the last two hours before bed — with bed at 10:30 PM, the last meal wants to end by 8:30 PM.",
+      "A heavy meal in the last two hours before bed, with bed at 10:30 PM, the last meal wants to end by 8:30 PM.",
     );
   });
 
-  it("(d) the wake row writes the preference — the plan is untouched, nothing goes stale", () => {
+  it("(d) the wake row writes the preference, the plan is untouched, nothing goes stale", () => {
     seedAndStore();
     const storedBefore = readPlan();
     const { container } = render(<NutritionPlanSection />);
@@ -364,7 +364,7 @@ describe("whole-day guard — the plan as caretaker (M-162)", () => {
     expect(container.textContent).not.toContain("the plan below still uses the older numbers");
   });
 
-  it("(e) the sources are the only sources — pure lib, two doors, no banned words", () => {
+  it("(e) the sources are the only sources, pure lib, two doors, no banned words", () => {
     const SRC = join(process.cwd(), "src");
     const read = (rel: string) => readFileSync(join(SRC, rel), "utf8");
     const component = read("components/nutrition/DayCaretakerSection.tsx");

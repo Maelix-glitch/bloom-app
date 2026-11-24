@@ -265,7 +265,7 @@ function pickInsight(input: WeeklyReportInput, ctx: InsightCtx): string | null {
   if (restedAvg !== null && shortAvg !== null && rested.length >= 2 && short.length >= 2) {
     const gap = round1(restedAvg - shortAvg);
     if (gap >= 0.7) {
-      return `Mood averaged ${restedAvg.toFixed(1)} after ${Math.round(goalHours)}h+ of sleep, ${shortAvg.toFixed(1)} after shorter nights — sleep keeps moving your week.`;
+      return `Mood averaged ${restedAvg.toFixed(1)} after ${Math.round(goalHours)}h+ of sleep, ${shortAvg.toFixed(1)} after shorter nights, sleep keeps moving your week.`;
     }
   }
 
@@ -288,7 +288,7 @@ function pickInsight(input: WeeklyReportInput, ctx: InsightCtx): string | null {
   if (ctx.mood.avgMood !== null && ctx.mood.prevAvgMood !== null) {
     const delta = round1(ctx.mood.avgMood - ctx.mood.prevAvgMood);
     if (delta >= 0.7) {
-      return `Mood is up ${delta.toFixed(1)} on last week's average — the trend is yours to keep.`;
+      return `Mood is up ${delta.toFixed(1)} on last week's average, the trend is yours to keep.`;
     }
     if (delta <= -0.7) {
       return `Mood is ${Math.abs(delta).toFixed(1)} below last week's average. Worth a kinder schedule, not a judgement.`;

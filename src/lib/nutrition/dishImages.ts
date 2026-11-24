@@ -57,5 +57,5 @@ export function dishPhotoFor(dishId: string): DishPhoto | null {
 export function dishPhotoCredit(dishId: string): string | null {
   const photo = dishPhotoFor(dishId);
   if (!photo) return null;
-  return `${photo.dishName} — photo by ${photo.author}, ${photo.license}, via Wikimedia Commons`;
+  return `${photo.dishName}, photo by ${photo.author}, ${photo.license}, via Wikimedia Commons`;
 }

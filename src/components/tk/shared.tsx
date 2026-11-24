@@ -19,7 +19,7 @@ import { useTrackers, type SaveDayResult, type TrackerStore } from "@/hooks/useT
 import { emptyDay, trackerDef, type DayEntry, type TrackerId } from "@/lib/trackers/core";
 
 export const DISCLAIMER =
-  "Everything here is read back from days you logged yourself. It's a description of your own record — not medical advice, and it can't diagnose anything.";
+  "Everything here is read back from days you logged yourself. It's a description of your own record, not medical advice, and it can't diagnose anything.";
 
 /** One tap writes to today. Returns an error message, or null when it saved. */
 export function applyQuickAdd(

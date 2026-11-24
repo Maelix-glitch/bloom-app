@@ -118,8 +118,8 @@ export function RhythmChart({
               <g key={`${gap.fromStart}-${gap.toStart}`}>
                 <title>
                   {gap.plausible
-                    ? `${gap.days} days — ${formatDateShort(gap.fromStart)} to ${formatDateShort(gap.toStart)}`
-                    : `${gap.days} days — not counted (${gap.reason ?? "outside the plausible range"})`}
+                    ? `${gap.days} days, ${formatDateShort(gap.fromStart)} to ${formatDateShort(gap.toStart)}`
+                    : `${gap.days} days, not counted (${gap.reason ?? "outside the plausible range"})`}
                 </title>
                 <rect
                   x={cx - barW / 2}
@@ -198,7 +198,7 @@ export function RhythmChart({
           <p className="text-[length:var(--text-support)] ci-muted">
             {analysis.entryCount === 0
               ? "Your cycle lengths chart out here once you've logged a period."
-              : "Two entries make a cycle — that's where this chart starts."}
+              : "Two entries make a cycle, that's where this chart starts."}
           </p>
         </div>
       )}

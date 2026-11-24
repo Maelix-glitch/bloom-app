@@ -12,7 +12,7 @@ import { dayGreeting, readPersonalVoice } from "@/lib/voice/personal";
 export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
-      { title: "Bloom — Dashboard" },
+      { title: "Bloom - Dashboard" },
       {
         name: "description",
         content:
@@ -163,7 +163,7 @@ function DashboardRoute() {
                     <div className="grid grid-cols-3 gap-2 text-center">
                       <div className="rounded-lg bg-muted/40 px-2 py-2">
                         <div className="text-sm font-semibold tabular-nums text-foreground">
-                          {stat.today === null ? "—" : def.format(Math.round(stat.today))}
+                          {stat.today === null ? "-" : def.format(Math.round(stat.today))}
                         </div>
                         <div className="mt-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
                           Today
@@ -171,7 +171,7 @@ function DashboardRoute() {
                       </div>
                       <div className="rounded-lg bg-muted/40 px-2 py-2">
                         <div className="text-sm font-semibold tabular-nums text-foreground">
-                          {stat.avg7 === null ? "—" : def.format(Math.round(stat.avg7))}
+                          {stat.avg7 === null ? "-" : def.format(Math.round(stat.avg7))}
                         </div>
                         <div className="mt-0.5 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-muted-foreground">
                           7-day avg

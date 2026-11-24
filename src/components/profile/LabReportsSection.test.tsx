@@ -99,10 +99,10 @@ describe("LabReportsSection", () => {
     fireEvent.change(screen.getByLabelText(/Test name/), { target: { value: "HbA1c" } });
     fireEvent.change(screen.getByLabelText("Value"), { target: { value: "7.2" } });
     fireEvent.change(screen.getByLabelText(/Unit/), { target: { value: "%" } });
-    fireEvent.change(screen.getByLabelText(/Range on the report — low/), {
+    fireEvent.change(screen.getByLabelText(/Range on the report, low/), {
       target: { value: "4" },
     });
-    fireEvent.change(screen.getByLabelText(/Range on the report — high/), {
+    fireEvent.change(screen.getByLabelText(/Range on the report, high/), {
       target: { value: "6" },
     });
     fireEvent.click(screen.getByRole("button", { name: "Save result" }));

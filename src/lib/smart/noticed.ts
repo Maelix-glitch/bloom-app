@@ -210,7 +210,7 @@ export function noticedOf(input: {
       id: "noticed-streak",
       signal: "habits",
       title: `Day ${streak.streak} of your ${streak.habit.name} run is still open.`,
-      sub: `${streak.streak} days unbroken — today's version can be the smallest one that counts.`,
+      sub: `${streak.streak} days unbroken, today's version can be the smallest one that counts.`,
     });
   }
 
@@ -232,8 +232,8 @@ export function noticedOf(input: {
               ? "energy"
               : "habits",
       title: positive
-        ? `${def.name} is trending up — ${def.format(Math.round(trend.thisWeek))} ${noun} this week, ${fmtDelta} ${trend.up ? "more" : "less"} than the week before.`
-        : `${def.name} is easing — ${def.format(Math.round(trend.thisWeek))} ${noun} this week, against ${def.format(Math.round(trend.thisWeek - trend.delta))} the week before.`,
+        ? `${def.name} is trending up, ${def.format(Math.round(trend.thisWeek))} ${noun} this week, ${fmtDelta} ${trend.up ? "more" : "less"} than the week before.`
+        : `${def.name} is easing, ${def.format(Math.round(trend.thisWeek))} ${noun} this week, against ${def.format(Math.round(trend.thisWeek - trend.delta))} the week before.`,
       sub: `From ${trend.nThis} logged days against ${trend.nPrev} the week before.`,
     });
   }
@@ -257,15 +257,15 @@ export function noticedOf(input: {
 function weekShapeTitle(id: TrackerId, weekendsLower: boolean, fmt: string): string {
   if (id === "water") {
     return weekendsLower
-      ? `Weekends run lighter on water — about ${fmt} less than weekdays.`
-      : `Weekends carry more water than weekdays — about ${fmt} more.`;
+      ? `Weekends run lighter on water, about ${fmt} less than weekdays.`
+      : `Weekends carry more water than weekdays, about ${fmt} more.`;
   }
   if (id === "sleep") {
     return weekendsLower
       ? `Weekend nights run about ${fmt} shorter than weekdays.`
-      : `Weekend nights run about ${fmt} longer — a real catch-up pattern.`;
+      : `Weekend nights run about ${fmt} longer, a real catch-up pattern.`;
   }
   return weekendsLower
     ? `Weekends run about ${fmt} lighter on screen time.`
-    : `Screen time climbs on weekends — about ${fmt} more than weekdays.`;
+    : `Screen time climbs on weekends, about ${fmt} more than weekdays.`;
 }

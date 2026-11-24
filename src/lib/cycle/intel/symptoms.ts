@@ -173,7 +173,7 @@ export function analyseSymptoms(record: CycleRecord, baseline: Baseline): Sympto
   const note = !sufficient
     ? `Recorded symptoms need at least ${MIN_CYCLES_FOR_PATTERN} cycles with daily logs before Bloom will describe a pattern. You have ${loggedCycles.size}.`
     : patterns.length === 0
-      ? "No symptom has recurred often enough across cycles to call it a pattern yet — that is a limit of the sample, not a finding."
+      ? "No symptom has recurred often enough across cycles to call it a pattern yet, that is a limit of the sample, not a finding."
       : "";
 
   return {

@@ -431,7 +431,7 @@ export async function createStory(userId: string, input: CreateStoryInput): Prom
     input.video ? `${input.video.durationMs}` : "",
   ].join("|");
   if (!duplicatePublishGuard(fingerprint)) {
-    throw new StoryServiceError("That story is already on its way — no double post.");
+    throw new StoryServiceError("That story is already on its way, no double post.");
   }
 
   let mediaPath: string | null = null;

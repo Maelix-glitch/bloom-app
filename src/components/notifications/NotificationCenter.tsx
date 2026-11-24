@@ -275,7 +275,7 @@ export function NotificationCenter({ open, onClose }: { open: boolean; onClose: 
                   icon={Check}
                   tint="sage"
                   title="Nothing due"
-                  sub="Reminders appear here — and nudge you — at their time."
+                  sub="Reminders appear here, and nudge you, at their time."
                 />
               ) : (
                 <ul className="ncenter-group">

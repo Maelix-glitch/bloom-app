@@ -209,7 +209,7 @@ function expectedView() {
 
 const BANNED = /\bleft\b|\bto go\b|\bburn\b|\bearn\b|\bcheat\b|\bfailed\b|\bjunk\b|\bclean\b/i;
 
-describe("plan balance guard — brief v7 N4", () => {
+describe("plan balance guard, brief v7 N4", () => {
   it("(a)+(b)+(c) balance is the viz: one array feeds count, flower and chips; zero prose", () => {
     seedAndStore(FIXTURE_REASONS);
     logFruitToday();
@@ -323,10 +323,10 @@ describe("plan balance guard — brief v7 N4", () => {
     const empty = section.querySelectorAll(".empty-row");
     expect(empty.length).toBe(1);
     expect(empty[0]!.textContent).toContain(
-      "No adjustments today — the plan follows your Assessment as set.",
+      "No adjustments today, the plan follows your Assessment as set.",
     );
     expect(
-      screen.queryByText("No adjustments today — the plan follows your Assessment as set."),
+      screen.queryByText("No adjustments today, the plan follows your Assessment as set."),
     ).toBeTruthy();
   });
 

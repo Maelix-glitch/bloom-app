@@ -21,7 +21,7 @@ describe("syncPillModel", () => {
     expect(syncPillModel("saved", "Saved to your account")?.live).toBe(true);
   });
 
-  it("pending is a still gold dot — no pulse theatre while saving", () => {
+  it("pending is a still gold dot, no pulse theatre while saving", () => {
     expect(syncPillModel("pending", "Saving…")).toEqual({
       label: "Saving…",
       shortLabel: "Saving…",
@@ -31,8 +31,8 @@ describe("syncPillModel", () => {
   });
 
   it("error is a still rose dot with the store's own words", () => {
-    expect(syncPillModel("error", "Saved here — not on your account yet")).toEqual({
-      label: "Saved here — not on your account yet",
+    expect(syncPillModel("error", "Saved here, not on your account yet")).toEqual({
+      label: "Saved here, not on your account yet",
       shortLabel: "Not synced yet",
       dot: "rose",
       live: false,
@@ -46,8 +46,8 @@ describe("syncPillModel", () => {
       dot: "muted",
       live: false,
     });
-    expect(syncPillModel("signed-out", "Saved on this device — sign in to sync")).toEqual({
-      label: "Saved on this device — sign in to sync",
+    expect(syncPillModel("signed-out", "Saved on this device, sign in to sync")).toEqual({
+      label: "Saved on this device, sign in to sync",
       shortLabel: "Not signed in",
       dot: "muted",
       live: false,
@@ -62,9 +62,9 @@ describe("syncPillModel", () => {
 
   /* Offline-First Bharat: the browser's offline word downgrades the
      pill — connectivity only ever takes a claim away, never grants one. */
-  it("offline, a synced pill falls to the device truth — still muted, no pulse", () => {
+  it("offline, a synced pill falls to the device truth, still muted, no pulse", () => {
     expect(syncPillModel("saved", "Synced with your account.", false)).toEqual({
-      label: "On this device — will sync when you're back",
+      label: "On this device, will sync when you're back",
       shortLabel: "Offline",
       dot: "muted",
       live: false,
@@ -73,7 +73,7 @@ describe("syncPillModel", () => {
 
   it("offline, a saving pill is held on the device, not saving", () => {
     expect(syncPillModel("pending", "Saving…", false)).toEqual({
-      label: "On this device — will sync when you're back",
+      label: "On this device, will sync when you're back",
       shortLabel: "Offline",
       dot: "muted",
       live: false,
@@ -81,15 +81,15 @@ describe("syncPillModel", () => {
   });
 
   it("offline leaves the already-honest states in their own words", () => {
-    expect(syncPillModel("error", "Saved here — not on your account yet", false)?.dot).toBe("rose");
+    expect(syncPillModel("error", "Saved here, not on your account yet", false)?.dot).toBe("rose");
     expect(syncPillModel("off", "Saved on this device", false)?.label).toBe("Saved on this device");
     expect(
-      syncPillModel("signed-out", "Saved on this device — sign in to sync", false)?.label,
-    ).toBe("Saved on this device — sign in to sync");
+      syncPillModel("signed-out", "Saved on this device, sign in to sync", false)?.label,
+    ).toBe("Saved on this device, sign in to sync");
     expect(syncPillModel("loading", "Checking your account…", false)).toBeNull();
   });
 
-  it("the two-argument form is unchanged — online is the default", () => {
+  it("the two-argument form is unchanged, online is the default", () => {
     expect(syncPillModel("saved", "Synced with your account.")).toEqual(
       syncPillModel("saved", "Synced with your account.", true),
     );

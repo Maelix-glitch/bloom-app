@@ -294,7 +294,7 @@ export function MomentsGrid({
           +
         </span>
         <span className="min-w-0 flex-1 text-[length:var(--text-support)] text-muted-foreground">
-          <span className="font-medium text-foreground">No moments yet — that's okay.</span> Tap to
+          <span className="font-medium text-foreground">No moments yet, that's okay.</span> Tap to
           keep the first one.
         </span>
         <span className="mono shrink-0 text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong transition-colors group-hover:text-foreground">

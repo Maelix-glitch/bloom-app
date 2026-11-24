@@ -23,7 +23,7 @@ const NOTES = [
   "Finished an important project.",
   "Long day, but the hard part is behind me.",
   "Morning run reset everything.",
-  "Too many meetings — no deep work.",
+  "Too many meetings, no deep work.",
   "Slept badly and felt it all day.",
   "Quiet evening, read for an hour.",
   "Shipped the thing I had been avoiding.",

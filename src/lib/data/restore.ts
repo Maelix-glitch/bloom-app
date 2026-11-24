@@ -302,7 +302,7 @@ export function applyRestore(
   return {
     mode,
     sections,
-    skipped: ["Profile", "Stories", "Highlights — account content; signing in restores it"],
+    skipped: ["Profile", "Stories", "Highlights, account content; signing in restores it"],
   };
 }
 

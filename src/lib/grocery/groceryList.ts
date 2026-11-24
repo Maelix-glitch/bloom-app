@@ -237,7 +237,7 @@ export function buildGroceryList(input: GroceryListInput): GroceryListResult {
     return {
       status: "no_plan",
       reason:
-        "There is no plan yet — the shopping list is built from your plan, so there is nothing to list until a plan exists.",
+        "There is no plan yet, the shopping list is built from your plan, so there is nothing to list until a plan exists.",
     };
   }
 

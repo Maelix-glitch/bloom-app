@@ -54,7 +54,7 @@ export function GettingStartedCard() {
         state.status === "in_progress"
           ? "Continue your assessment"
           : "Take your assessment",
-      line: "Your body, your goal, your safety answers — everything Bloom computes starts here.",
+      line: "Your body, your goal, your safety answers, everything Bloom computes starts here.",
       done: assessmentDone,
       action: (
         <Button type="button" size="sm" variant="secondary" asChild>
@@ -66,7 +66,7 @@ export function GettingStartedCard() {
       id: "habit",
       icon: ListPlus,
       title: "Add your first habit",
-      line: "One small routine you tick each day — it earns points and builds your record.",
+      line: "One small routine you tick each day, it earns points and builds your record.",
       done: habits.habits.length > 0,
       action: (
         <Button type="button" size="sm" variant="secondary" asChild>
@@ -78,7 +78,7 @@ export function GettingStartedCard() {
       id: "food",
       icon: UtensilsCrossed,
       title: "Log your first food",
-      line: "One meal is enough — every value arrives labelled with its source.",
+      line: "One meal is enough, every value arrives labelled with its source.",
       done: nutrition.entries.length > 0,
       action: (
         <Button type="button" size="sm" variant="secondary" asChild>

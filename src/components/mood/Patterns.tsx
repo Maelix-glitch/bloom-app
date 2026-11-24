@@ -86,7 +86,7 @@ function AnomaliesImpl({ anomalies }: { anomalies: Anomaly[] }) {
       />
       {anomalies.length === 0 ? (
         <Insufficient>
-          No significant deviations detected — or not enough history to judge yet.
+          No significant deviations detected, or not enough history to judge yet.
         </Insufficient>
       ) : (
         <div className="flex flex-col divide-y divide-border">

@@ -136,7 +136,7 @@ export function CycleIntelligence({
       const result = editing ? store.update(editing.id, draft) : store.add(draft);
       if (result.ok) {
         setNotice(
-          editing ? "Entry updated — every number below was recalculated." : "Period logged.",
+          editing ? "Entry updated, every number below was recalculated." : "Period logged.",
         );
         if (editing) setEditing(null);
       }
@@ -228,7 +228,7 @@ export function CycleIntelligence({
             Your cycle, read from your record.
           </h1>
           <p className="mt-3 text-[length:var(--text-callout)] leading-relaxed ci-soft sm:text-[14px]">
-            Dates, phases and patterns computed from what you log — with the evidence, the sample
+            Dates, phases and patterns computed from what you log, with the evidence, the sample
             size and the uncertainty shown next to every estimate.
           </p>
           <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-[length:var(--text-caption)] ci-soft">
@@ -238,7 +238,7 @@ export function CycleIntelligence({
             {preview ? (
               <>
                 <span aria-hidden>·</span>
-                <span style={{ color: "var(--ci-ovulation)" }}>preview — editing disabled</span>
+                <span style={{ color: "var(--ci-ovulation)" }}>preview, editing disabled</span>
               </>
             ) : null}
           </div>
@@ -313,7 +313,7 @@ export function CycleIntelligence({
                           </p>
                           <p className="mt-1 text-[length:var(--text-support)] leading-relaxed ci-soft">
                             The previous version of this page logged individual days. We can group
-                            those bleeding days into whole periods and bring them across — no
+                            those bleeding days into whole periods and bring them across, no
                             retyping, and nothing leaves your device.
                           </p>
                         </div>
@@ -358,12 +358,12 @@ export function CycleIntelligence({
                       <Card data-testid="cycle-predictions-off-note">
                         <p className="ci-eyebrow">Predictions off</p>
                         <h2 className="ci-display mt-2 text-[length:var(--text-section)] leading-tight sm:text-[22px]">
-                          Estimates hidden — logging as usual.
+                          Estimates hidden, logging as usual.
                         </h2>
                         <p className="mt-2 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
                           Your {analysis.entryCount} logged{" "}
                           {analysis.entryCount === 1 ? "period is" : "periods are"} kept below, and
-                          the daily log still works — log bleeding or symptoms any day. Bloom is
+                          the daily log still works, log bleeding or symptoms any day. Bloom is
                           still learning from your record; it just isn't showing you dates, phases
                           or fertile estimates. Turn predictions back on above whenever you want
                           them.
@@ -378,7 +378,7 @@ export function CycleIntelligence({
                         <p className="mt-2 max-w-[62ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
                           Your {analysis.entryCount} logged{" "}
                           {analysis.entryCount === 1 ? "period is" : "periods are"} kept below, and
-                          the daily log still works — log bleeding or symptoms any day. When periods
+                          the daily log still works, log bleeding or symptoms any day. When periods
                           come back, say so above and the phases, dates and fertile window return
                           from your own record.
                         </p>
@@ -446,7 +446,7 @@ export function CycleIntelligence({
                           <div>
                             <PhaseWave analysis={analysis} />
                             <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed ci-muted">
-                              An estimate, not a fact — both assume your next period lands on the
+                              An estimate, not a fact, both assume your next period lands on the
                               predicted date. Log a new start and they redraw immediately.
                             </p>
                           </div>
@@ -513,7 +513,7 @@ export function CycleIntelligence({
                         Bloom understands your pattern.
                       </h2>
                       <p className="mt-1.5 text-[length:var(--text-support)] leading-relaxed ci-soft">
-                        Only what your own records support — each line carries the count behind it.
+                        Only what your own records support, each line carries the count behind it.
                       </p>
                       <div className="mt-4">
                         <InsightList insights={intel.insights} />
@@ -538,7 +538,7 @@ export function CycleIntelligence({
                           </h2>
                           <p className="mt-1.5 max-w-[52ch] text-[length:var(--text-support)] leading-relaxed ci-soft">
                             Counted from the days you logged. A symptom only appears once you have
-                            recorded it — nothing here is suggested from a general list.
+                            recorded it, nothing here is suggested from a general list.
                           </p>
                           {intel.symptoms.patterns.length > 0 ? (
                             <ul className="mt-3.5 space-y-2.5">
@@ -567,7 +567,7 @@ export function CycleIntelligence({
                             </ul>
                           ) : (
                             <p className="mt-3 text-[12px] leading-relaxed ci-muted">
-                              No recurring symptom yet — one needs to turn up on several days before
+                              No recurring symptom yet, one needs to turn up on several days before
                               it means anything.
                             </p>
                           )}
@@ -595,7 +595,7 @@ export function CycleIntelligence({
                           <p className="text-[length:var(--text-support)] font-medium">Your rhythm over time</p>
                           <p className="mt-1 max-w-[52ch] text-[length:var(--text-caption)] leading-relaxed ci-muted">
                             Each bar is one cycle. Dashed bars are outside the typical length used
-                            for the median — kept on the chart, not deleted.
+                            for the median, kept on the chart, not deleted.
                           </p>
                           <div className="mt-3">
                             <RhythmChart analysis={analysis} />
@@ -648,7 +648,7 @@ export function CycleIntelligence({
                                       />
                                     </span>
                                     <span className="ci-phasebars__value">
-                                      {phase.average !== null ? phase.average.toFixed(1) : "—"}
+                                      {phase.average !== null ? phase.average.toFixed(1) : "-"}
                                     </span>
                                   </div>
                                 ))}
@@ -734,8 +734,8 @@ export function CycleIntelligence({
                       Taking this to a doctor?{" "}
                       <a href="/cycle-report" className="ci-link">
                         Open the one-page summary of your last twelve months
-                      </a>{" "}
-                      — dates, lengths, symptoms and the patterns Bloom noticed, ready to print.
+                      </a>{", "}
+                      dates, lengths, symptoms and the patterns Bloom noticed, ready to print.
                       Free, always.
                     </p>
                     <ModelNote intel={intel} />

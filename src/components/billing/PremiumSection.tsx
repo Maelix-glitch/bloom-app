@@ -71,9 +71,9 @@ function descriptionLine(entitlement: Entitlement): string {
       /* "You're on Free" is not repeated — Row 1 already names it. */
       return "The everyday Bloom, with a monthly taste of the AI.";
     case "premium":
-      return "The full intelligence — Coach, Vitalis, adaptive plans, Nutrition.";
+      return "The full intelligence. Coach, Vitalis, adaptive plans, Nutrition.";
     case "premium_plus":
-      return "Deep AI allowance — daily Vitalis conversations and photo-led logging.";
+      return "Deep AI allowance, daily Vitalis conversations and photo-led logging.";
   }
 }
 
@@ -116,18 +116,18 @@ export function PremiumSection() {
         const date = formatDate(result.periodEnd);
         setCancelNote(
           date
-            ? `Auto-renew is off — your plan stays active until ${date}, and nothing is charged after that.`
-            : "Auto-renew is off — your plan stays active until the current period ends, and nothing is charged after that.",
+            ? `Auto-renew is off, your plan stays active until ${date}, and nothing is charged after that.`
+            : "Auto-renew is off, your plan stays active until the current period ends, and nothing is charged after that.",
         );
         invalidateEntitlement();
       } else if (result.state === "no_active_subscription") {
         setCancelNote(
-          "No auto-renewing subscription was found on your account — your plan doesn't renew automatically, so there's nothing to cancel.",
+          "No auto-renewing subscription was found on your account, your plan doesn't renew automatically, so there's nothing to cancel.",
         );
       } else if (result.state === "payments_not_configured") {
-        setCancelNote("Auto-renew can't be changed right now — Bloom's payment account isn't connected yet.");
+        setCancelNote("Auto-renew can't be changed right now. Bloom's payment account isn't connected yet.");
       } else {
-        setCancelNote("That didn't go through just now — try again in a moment.");
+        setCancelNote("That didn't go through just now, try again in a moment.");
       }
     } finally {
       setCancelBusy(false);

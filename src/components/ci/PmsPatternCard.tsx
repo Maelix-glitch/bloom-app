@@ -14,7 +14,7 @@ export function PmsPatternCard({ logs, days }: { logs: PeriodLog[]; days: DayLog
   if (view.cyclesTotal < 2) {
     return (
       <p className="text-[length:var(--text-support)] leading-relaxed ci-soft">
-        This view compares the five days before each period across cycles — it needs at least two
+        This view compares the five days before each period across cycles, it needs at least two
         periods after your first before a repeat can show.
       </p>
     );
@@ -34,7 +34,7 @@ export function PmsPatternCard({ logs, days }: { logs: PeriodLog[]; days: DayLog
     <div data-testid="pms-patterns">
       <p className="text-[length:var(--text-support)] leading-relaxed ci-soft">
         The five days before each period, across your last {view.cyclesTotal}{" "}
-        {view.cyclesTotal === 1 ? "cycle" : "cycles"} — what keeps showing up there:
+        {view.cyclesTotal === 1 ? "cycle" : "cycles"}, what keeps showing up there:
       </p>
       <ul className="mt-2.5 space-y-2">
         {view.symptoms.map((p) => (

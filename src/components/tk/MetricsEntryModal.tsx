@@ -74,8 +74,8 @@ function metric(key: MetricKey, unit: string, placeholder: string, scale = 1): M
   const max = Math.round((def.max / scale) * 100) / 100;
   const message =
     def.kind === "rating"
-      ? `Must be between ${min}–${max}.`
-      : `Please enter a value between ${min}–${max}.`;
+      ? `Must be between ${min}-${max}.`
+      : `Please enter a value between ${min}-${max}.`;
   return {
     key,
     label: def.name,
@@ -295,9 +295,9 @@ export function MetricsEntryModal({
         : hasErrors
           ? "Please fix the highlighted fields."
           : allFilled
-            ? "Everything's filled — ready to save."
+            ? "Everything's filled, ready to save."
             : !isEmpty
-              ? `${filledCount} of ${metrics.length} filled — save what you have, or keep going.`
+              ? `${filledCount} of ${metrics.length} filled, save what you have, or keep going.`
               : "Today's measurements";
 
   return (
@@ -435,7 +435,7 @@ export function MetricsEntryModal({
                       type="button"
                       onClick={() => setValue(def.key, strip(value / def.scale))}
                       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[length:var(--text-meta)] font-medium transition-colors ${METRIC_COLOR[def.key].border} ${METRIC_COLOR[def.key].text}`}
-                      title={`Fills ${def.label} with what you usually log — ${value} ${def.unit}`}
+                      title={`Fills ${def.label} with what you usually log, ${value} ${def.unit}`}
                     >
                       <Sparkles className="h-3 w-3" aria-hidden />
                       {def.label} · {strip(value / def.scale)} {def.unit}
@@ -502,7 +502,7 @@ export function MetricsEntryModal({
                     <BloomIcon name={m.key} size={14} />
                   </span>
                   <span className="text-sm font-semibold text-foreground">
-                    {filled(m.key) ? values[m.key] : "—"}
+                    {filled(m.key) ? values[m.key] : "-"}
                   </span>
                   <span className="text-[length:var(--text-micro)] text-muted-foreground">
                     {m.unit}

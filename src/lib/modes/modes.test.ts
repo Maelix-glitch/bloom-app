@@ -22,12 +22,12 @@ const nutrientsOf = (dish: Dish): Nutrients => dishNutrients(dish).nutrients;
 
 const BASE: Nutrients = { kcal: 400, proteinG: 20, carbsG: 40, fatG: 12 };
 
-describe("mode definitions — only what the data can honestly support", () => {
+describe("mode definitions, only what the data can honestly support", () => {
   it("ships exactly the three modes, as data", () => {
     expect(MODE_DEFINITIONS.map((m) => m.id)).toEqual(["blood_sugar", "blood_pressure", "thyroid"]);
   });
 
-  it("thyroid is information-only with zero rules — Bloom's data has no iodine or selenium", () => {
+  it("thyroid is information-only with zero rules. Bloom's data has no iodine or selenium", () => {
     const thyroid = modeDefinition("thyroid");
     expect(thyroid.informationOnly).toBe(true);
     expect(thyroid.rules).toEqual([]);
@@ -53,7 +53,7 @@ describe("mode definitions — only what the data can honestly support", () => {
   });
 });
 
-describe("blood-sugar aware — ingredient identity and computed carbs, never sugar grams", () => {
+describe("blood-sugar aware, ingredient identity and computed carbs, never sugar grams", () => {
   it("excludes a real dish with a honey line, and names honey as the reason", () => {
     const dish = findDish("dish-intl-honey-garlic-salmon")!;
     const exclusions = modeExclusionsFor(dish, nutrientsOf(dish), ["blood_sugar"]);
@@ -71,7 +71,7 @@ describe("blood-sugar aware — ingredient identity and computed carbs, never su
       {
         modeId: "blood_sugar",
         ruleId: "carbs-per-serving",
-        reason: `92 g of carbohydrate in a serving — over this mode's ${BLOOD_SUGAR_CARB_LIMIT_G} g limit`,
+        reason: `92 g of carbohydrate in a serving, over this mode's ${BLOOD_SUGAR_CARB_LIMIT_G} g limit`,
       },
     ]);
   });
@@ -82,7 +82,7 @@ describe("blood-sugar aware — ingredient identity and computed carbs, never su
   });
 });
 
-describe("blood-pressure aware — computed sodium, absence never judged", () => {
+describe("blood-pressure aware, computed sodium, absence never judged", () => {
   it("excludes a dish over the sodium limit, naming the computed value", () => {
     const dish = findDish("dish-aloo-gobi")!;
     const exclusions = modeExclusionsFor(dish, { ...BASE, sodiumMg: 940 }, ["blood_pressure"]);
@@ -90,12 +90,12 @@ describe("blood-pressure aware — computed sodium, absence never judged", () =>
       {
         modeId: "blood_pressure",
         ruleId: "sodium-per-serving",
-        reason: `940 mg of sodium in a serving — over this mode's ${BLOOD_PRESSURE_SODIUM_LIMIT_MG} mg limit`,
+        reason: `940 mg of sodium in a serving, over this mode's ${BLOOD_PRESSURE_SODIUM_LIMIT_MG} mg limit`,
       },
     ]);
   });
 
-  it("never judges a dish whose sodium is absent — absent is not zero", () => {
+  it("never judges a dish whose sodium is absent, absent is not zero", () => {
     const dish = findDish("dish-aloo-gobi")!;
     const noSodium: Nutrients = { ...BASE };
     expect("sodiumMg" in noSodium).toBe(false);
@@ -108,7 +108,7 @@ describe("blood-pressure aware — computed sodium, absence never judged", () =>
   });
 });
 
-describe("composition — a dish must pass pattern AND budget AND modes", () => {
+describe("composition, a dish must pass pattern AND budget AND modes", () => {
   const plainEggRice: Dish = {
     id: "dish-test-plain-egg-rice",
     name: { en: "Plain Egg Rice (test)", hindi: "अंडा चावल" },
@@ -168,7 +168,7 @@ describe("composition — a dish must pass pattern AND budget AND modes", () => 
   });
 });
 
-describe("storage parsing — strict, unknown ids dropped", () => {
+describe("storage parsing, strict, unknown ids dropped", () => {
   it("round-trips a valid value and dedupes", () => {
     expect(parseModesValue({ version: 1, active: ["blood_sugar", "blood_sugar", "thyroid"] })).toEqual({
       version: 1,

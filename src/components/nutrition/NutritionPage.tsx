@@ -258,7 +258,7 @@ export function NutritionPage() {
           What you eat, <em className="nut-gold-text">honestly labelled</em>
         </h1>
         <p className="mt-2.5 max-w-[58ch] text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
-          Every value carries its source — USDA reference data, your own packet labels, or a
+          Every value carries its source. USDA reference data, your own packet labels, or a
           clearly marked estimate. Nothing is presented as more certain than it is.
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
@@ -339,7 +339,7 @@ export function NutritionPage() {
         <section className="nut-card nut-rise mt-4" aria-label="Nothing logged yet">
           <EmptyState
             title="Nothing logged yet"
-            description="When you log a food, this page fills in — your totals, your week and the patterns behind them, every value labelled with its source."
+            description="When you log a food, this page fills in, your totals, your week and the patterns behind them, every value labelled with its source."
             action={
               <Button
                 type="button"
@@ -374,7 +374,7 @@ export function NutritionPage() {
                 <Sparkles className="size-4" />
               </span>
               <p className="empty-row-text">
-                <strong>Nothing logged yet</strong> — when you log a food, it appears here with
+                <strong>Nothing logged yet</strong>, when you log a food, it appears here with
                 its source attached, and your totals above start to move.
               </p>
               <button
@@ -484,7 +484,7 @@ export function NutritionPage() {
         </Button>
         <p className="nut-note">
           Food photographs are real photographs from Wikimedia Commons, used under free
-          licences — each one credited to its photographer.
+          licences, each one credited to its photographer.
         </p>
       </footer>
 

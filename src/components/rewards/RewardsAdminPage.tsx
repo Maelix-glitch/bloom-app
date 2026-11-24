@@ -484,11 +484,11 @@ export function RewardsAdminPage() {
             <span className="reward-admin-count">{recipients.length} selected</span>
           </div>
           <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
-            A reward goes only to the recipients you choose here — it can&rsquo;t be claimed by
+            A reward goes only to the recipients you choose here, it can&rsquo;t be claimed by
             anyone else.
           </p>
           <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
-            Publishing is locked to a single recipient, set in the product itself — it can't be
+            Publishing is locked to a single recipient, set in the product itself, it can't be
             changed from this page.
           </p>
           <div className="reward-admin-user-list">

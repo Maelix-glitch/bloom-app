@@ -281,12 +281,12 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                           <span>
                             target <Metric value={def.format(stat.goal)} /> · avg{" "}
                             {stat.avg7 === null ? (
-                              "—"
+                              "-"
                             ) : (
                               <Metric value={def.format(Math.round(stat.avg7))} />
                             )}
                             {shape.logged === 1 ? (
-                              <> · one day logged — a line needs two</>
+                              <> · one day logged, a line needs two</>
                             ) : shape.logged > 1 ? (
                               <> · {shape.logged} days logged</>
                             ) : null}
@@ -402,7 +402,7 @@ export function TrackersPage({ theme = "nocturne" }: { theme?: string }) {
                     })}
                   </ul>
                   <p className="at-fine">
-                    Each path is scaled to its own range — they cross, they don't compete. A break
+                    Each path is scaled to its own range, they cross, they don't compete. A break
                     in a line is a day you didn't log, left empty on purpose; a dot on its own is a
                     single logged day, with nothing on either side of it yet.
                   </p>

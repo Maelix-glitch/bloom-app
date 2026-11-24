@@ -14,7 +14,7 @@ function friendly(error: unknown): string {
   console.error("[bloom:cycle]", error);
   const msg = error instanceof Error ? error.message : "";
   if (/fetch|network|Failed to fetch/i.test(msg))
-    return "You're offline — your last saved state is still here.";
+    return "You're offline, your last saved state is still here.";
   return "Couldn't reach your cycle records just now.";
 }
 

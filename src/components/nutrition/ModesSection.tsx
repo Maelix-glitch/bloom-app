@@ -107,7 +107,7 @@ export function ModesSection() {
       <p className="note mt-4">
         <Info className="size-4" aria-hidden />
         <span>
-          Modes are preferences you switch on — not a diagnosis, not medical advice, and no
+          Modes are preferences you switch on, not a diagnosis, not medical advice, and no
           substitute for your doctor.
         </span>
       </p>
@@ -139,7 +139,7 @@ export function ModesSection() {
                   <Switch
                     checked={false}
                     disabled
-                    aria-label={`${def.name} mode — not available yet`}
+                    aria-label={`${def.name} mode, not available yet`}
                   />
                 ) : (
                   <Switch
@@ -165,7 +165,7 @@ export function ModesSection() {
 
               <footer className="tile__foot">
                 {def.informationOnly ? (
-                  <span>Needs iodine or selenium data — hides nothing.</span>
+                  <span>Needs iodine or selenium data, hides nothing.</span>
                 ) : hiddenCount !== undefined ? (
                   <span>
                     Would hide <strong>{fmtCount(hiddenCount)}</strong> of{" "}

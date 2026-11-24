@@ -5,7 +5,7 @@ import { WeeklyReportPage } from "@/components/report/WeeklyReportPage";
 export const Route = createFileRoute("/report")({
   head: () => ({
     meta: [
-      { title: "Bloom — Weekly report" },
+      { title: "Bloom - Weekly report" },
       {
         name: "description",
         content:

@@ -79,7 +79,7 @@ export function AchievementGallery({
                 ) : null}
                 {!state.unlocked ? (
                   <span className="pg-ach-date">
-                    {state.progress} / {def.target} — still ahead
+                    {state.progress} / {def.target}, still ahead
                   </span>
                 ) : null}
                 {state.unlocked && !state.achievedAt ? (

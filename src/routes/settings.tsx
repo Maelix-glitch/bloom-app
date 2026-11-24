@@ -41,7 +41,7 @@ export const Route = createFileRoute("/settings")({
       { rel: "stylesheet", href: storiesFontsCss },
     ],
     meta: [
-      { title: "Bloom — Settings" },
+      { title: "Bloom - Settings" },
       {
         name: "description",
         content:

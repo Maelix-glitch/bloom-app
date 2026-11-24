@@ -75,7 +75,7 @@ export function NutritionTimeline({
           .filter((c): c is string => c !== null);
         const range =
           clocks.length > 1 && clocks[0] !== clocks[clocks.length - 1]
-            ? `${clocks[0]} – ${clocks[clocks.length - 1]}`
+            ? `${clocks[0]} - ${clocks[clocks.length - 1]}`
             : clocks.length === 1
               ? clocks[0]
               : null;

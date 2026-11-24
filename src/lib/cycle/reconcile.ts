@@ -325,7 +325,7 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
       tone: "attention",
       periodId: last.id,
       date: last.start,
-      title: `A period is logged as starting ${formatDateShort(last.start)} — that's in the future`,
+      title: `A period is logged as starting ${formatDateShort(last.start)}, that's in the future`,
       body: `Bloom can't place today in a cycle that hasn't started. This usually comes from an import or a device whose clock was wrong. Move the start to the right day, or remove the entry.`,
       actions: [
         ...(lastBleedBeforeToday
@@ -458,8 +458,8 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
             periodId: last.id,
             date: proposedEnd,
             title: early
-              ? `Bleeding stopped on day ${stoppedOnDay} — did your period end early?`
-              : `Bleeding stopped on day ${stoppedOnDay} — has your period ended?`,
+              ? `Bleeding stopped on day ${stoppedOnDay}, did your period end early?`
+              : `Bleeding stopped on day ${stoppedOnDay}, has your period ended?`,
             body: `You logged no bleeding on ${formatDate(firstNone)}. ${
               end
                 ? `You had the last day down as ${formatDateShort(end)}.`
@@ -468,7 +468,7 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
             actions: [
               {
                 id: "yes",
-                label: `Yes — it ended ${formatDateShort(proposedEnd)}`,
+                label: `Yes, it ended ${formatDateShort(proposedEnd)}`,
                 primary: true,
                 resolution: { type: "set-end", periodId: last.id, end: proposedEnd },
               },
@@ -505,20 +505,20 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
             date: found,
             title:
               gapDays === 1
-                ? "You logged bleeding the day after your period ended — did it continue?"
-                : `Bleeding again ${gapDays} days after your period ended — was it the same one?`,
+                ? "You logged bleeding the day after your period ended, did it continue?"
+                : `Bleeding again ${gapDays} days after your period ended, was it the same one?`,
             body: `The period that started ${formatDate(last.start)} is recorded as ending ${formatDate(end)}, but ${formatDate(found)} has bleeding logged. If it carried on, the last day moves to ${formatDate(newEnd)}.`,
             actions: [
               {
                 id: "yes",
-                label: `Yes — it ran to ${formatDateShort(newEnd)}`,
+                label: `Yes, it ran to ${formatDateShort(newEnd)}`,
                 primary: true,
                 resolution: { type: "set-end", periodId: last.id, end: newEnd },
               },
-              { id: "spotting", label: "No — that was spotting", resolution: { type: "dismiss" } },
+              { id: "spotting", label: "No, that was spotting", resolution: { type: "dismiss" } },
               {
                 id: "new",
-                label: "No — a new period started",
+                label: "No, a new period started",
                 resolution: { type: "focus-form", date: found, startPeriod: true },
               },
               { id: "later", label: "Not now", resolution: { type: "snooze" } },
@@ -551,7 +551,7 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
         tone: "calm",
         periodId: last.id,
         date: guess,
-        title: `Day ${dayOfPeriod} since your period started — has it finished?`,
+        title: `Day ${dayOfPeriod} since your period started, has it finished?`,
         body: `You haven't logged a last day yet. Your periods usually run about ${usual} ${plural(usual, "day", "days")}${
           lastBleed
             ? `, and the last bleeding you logged was ${formatDate(lastBleed)}${
@@ -562,7 +562,7 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
         actions: [
           {
             id: "yes",
-            label: `Yes — it ended ${formatDateShort(guess)}`,
+            label: `Yes, it ended ${formatDateShort(guess)}`,
             primary: true,
             resolution: { type: "set-end", periodId: last.id, end: guess },
           },
@@ -587,7 +587,7 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
         periodId: last.id,
         date: lastBleed,
         title: `${run.length} days of bleeding logged so far`,
-        body: "That's longer than most periods. Bloom records it exactly as you logged it — it can't tell you why. If bleeds this long are new for you, or it's heavy throughout, that's worth raising with a doctor or nurse.",
+        body: "That's longer than most periods. Bloom records it exactly as you logged it, it can't tell you why. If bleeds this long are new for you, or it's heavy throughout, that's worth raising with a doctor or nurse.",
         actions: [{ id: "ok", label: "Understood", resolution: { type: "dismiss" } }],
       });
     }
@@ -700,12 +700,12 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
             tone: "info",
             periodId: before.id,
             date: first,
-            title: `Bleeding on ${formatDateShort(first)} — the same period, or a new one?`,
-            body: `It's ${sinceStart} ${plural(sinceStart ?? 0, "day", "days")} after the period that started ${formatDate(before.start)}. Bleeding this close together is usually one period with a quiet day in it, not two — so it isn't counted as a new cycle unless you say so.`,
+            title: `Bleeding on ${formatDateShort(first)}, the same period, or a new one?`,
+            body: `It's ${sinceStart} ${plural(sinceStart ?? 0, "day", "days")} after the period that started ${formatDate(before.start)}. Bleeding this close together is usually one period with a quiet day in it, not two, so it isn't counted as a new cycle unless you say so.`,
             actions: [
               {
                 id: "same",
-                label: `Same period — ends ${formatDateShort(lastDay)}`,
+                label: `Same period, ends ${formatDateShort(lastDay)}`,
                 primary: true,
                 resolution: { type: "set-end", periodId: before.id, end: lastDay },
               },
@@ -740,12 +740,12 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
           tone: "attention",
           periodId: null,
           date: first,
-          title: `Bleeding logged from ${formatDateShort(first)} — was that a period starting?`,
+          title: `Bleeding logged from ${formatDateShort(first)}, was that a period starting?`,
           body: `${run.length === 1 ? "That day has" : `${run.length} days in a row have`} bleeding in your daily log, but no period starts there. Predictions only use period starts, so until this is logged as one your cycle count won't move.`,
           actions: [
             {
               id: "yes",
-              label: `Yes — period started ${formatDateShort(first)}`,
+              label: `Yes, period started ${formatDateShort(first)}`,
               primary: true,
               resolution: {
                 type: "add-period",
@@ -754,7 +754,7 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
                 flow,
               },
             },
-            { id: "spotting", label: "No — spotting", resolution: { type: "dismiss" } },
+            { id: "spotting", label: "No, spotting", resolution: { type: "dismiss" } },
             { id: "later", label: "Not now", resolution: { type: "snooze" } },
           ],
         });
@@ -788,19 +788,19 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
         date: suggested,
         title:
           analysis.confidence === "low"
-            ? `Your period was roughly expected ${lateBy} ${plural(lateBy, "day", "days")} ago — has it started?`
-            : `Your period was due ${lateBy} ${plural(lateBy, "day", "days")} ago — has it started?`,
+            ? `Your period was roughly expected ${lateBy} ${plural(lateBy, "day", "days")} ago, has it started?`
+            : `Your period was due ${lateBy} ${plural(lateBy, "day", "days")} ago, has it started?`,
         body: `${
           analysis.confidence === "low"
             ? `Estimated around ${formatDate(analysis.nextStart)} from a short or uneven record, so a week either side is normal.`
             : `Predicted for ${formatDate(analysis.nextStart)} from your own average.`
-        } Late periods are very common — stress, travel, illness, sleep, weight or exercise changes, some medications. If it has started, log the first day and everything recalculates; if not, Bloom simply keeps counting.`,
+        } Late periods are very common, stress, travel, illness, sleep, weight or exercise changes, some medications. If it has started, log the first day and everything recalculates; if not, Bloom simply keeps counting.`,
         actions: [
           {
             id: "yes",
             label: suggested
-              ? `Yes — it started ${formatDateShort(suggested)}`
-              : "Yes — log the first day",
+              ? `Yes, it started ${formatDateShort(suggested)}`
+              : "Yes, log the first day",
             primary: true,
             resolution: { type: "focus-form", date: suggested ?? today, startPeriod: true },
           },
@@ -828,8 +828,8 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
       tone: "calm",
       periodId: longGap.toId,
       date: longGap.suggestedMissedDate,
-      title: `${longGap.days} days between two starts — was a period missed?`,
-      body: `Between ${formatDate(longGap.fromStart)} and ${formatDate(longGap.toStart)} is longer than a plausible cycle, so it's left out of your average rather than skewing it. If you remember roughly when you bled, add it — even an approximate date helps.`,
+      title: `${longGap.days} days between two starts, was a period missed?`,
+      body: `Between ${formatDate(longGap.fromStart)} and ${formatDate(longGap.toStart)} is longer than a plausible cycle, so it's left out of your average rather than skewing it. If you remember roughly when you bled, add it, even an approximate date helps.`,
       actions: [
         {
           id: "add",
@@ -847,10 +847,10 @@ export function reconcile(input: ReconcileInput): CheckIn[] {
         longGap.days <= CYCLE_DEFAULTS.hardMaxPlausible
           ? {
               id: "none",
-              label: "No — it really was that long",
+              label: "No, it really was that long",
               resolution: { type: "accept-long-cycles", days: longGap.days },
             }
-          : { id: "none", label: "No — nothing to add", resolution: { type: "dismiss" } },
+          : { id: "none", label: "No, nothing to add", resolution: { type: "dismiss" } },
         { id: "later", label: "Not now", resolution: { type: "snooze" } },
       ],
     });

@@ -60,7 +60,7 @@ export const PLANS: Record<PlanTier, PlanDetail> = {
   free: {
     tier: "free",
     name: "Free",
-    tagline: "The everyday Bloom — trackers, habits, mood and a taste of the Coach.",
+    tagline: "The everyday Bloom, trackers, habits, mood and a taste of the Coach.",
     monthlyCredits: 20,
     habitLimit: 5,
     prices: {
@@ -71,7 +71,7 @@ export const PLANS: Record<PlanTier, PlanDetail> = {
   premium: {
     tier: "premium",
     name: "Premium",
-    tagline: "The essentials, unlimited — the Coach, your plan, Nutrition and your full record.",
+    tagline: "The essentials, unlimited, the Coach, your plan, Nutrition and your full record.",
     monthlyCredits: 300,
     habitLimit: null,
     prices: {
@@ -82,7 +82,7 @@ export const PLANS: Record<PlanTier, PlanDetail> = {
   premium_plus: {
     tier: "premium_plus",
     name: "Premium Plus",
-    tagline: "The intelligence layer — Vitalis, adaptive plans and the Metabolic Twin, with room to use them daily.",
+    tagline: "The intelligence layer. Vitalis, adaptive plans and the Metabolic Twin, with room to use them daily.",
     monthlyCredits: 800,
     habitLimit: null,
     prices: {
@@ -150,7 +150,7 @@ export const TIER_FEATURES: Record<PlanTier, ReadonlySet<PremiumFeature>> = {
 export const PAYWALL_BULLETS: Record<Exclude<PlanTier, "free">, string[]> = {
   premium: [
     "Unlimited habits",
-    "Full Coach — 300 AI credits a month",
+    "Full Coach, 300 AI credits a month",
     "Food-photo analysis",
     "Assessment + your nutrition plan and grocery list",
     "Trackers, Mood and your full daily record",
@@ -158,7 +158,7 @@ export const PAYWALL_BULLETS: Record<Exclude<PlanTier, "free">, string[]> = {
   ],
   premium_plus: [
     "Everything in Premium",
-    "Vitalis — your nutrition AI, with daily voice conversations",
+    "Vitalis, your nutrition AI, with daily voice conversations",
     "800 AI credits a month (Premium has 300)",
     "Adaptive plans that learn from your days",
     "Metabolic Twin and Overview intelligence",
@@ -229,7 +229,7 @@ export function comparisonHas(row: PaywallComparisonRow, tier: PlanTier): boolea
  *  words the credit surfaces show. One home so the Membership card
  *  and the paywall can never quote different weights. */
 export const CREDIT_WEIGHTS_LINE =
-  "What uses credits — a Coach message 1 · a food photo 5 · a Vitalis message 2 · a Vitalis plan session 10 · voice 1 per 500 characters spoken.";
+  "What uses credits: a Coach message 1 · a food photo 5 · a Vitalis message 2 · a Vitalis plan session 10 · voice 1 per 500 characters spoken.";
 
 /** Free Coach is real but bounded — by the credit allowance and by the
  *  absence of photo analysis. Paid tiers are the full Coach. */
