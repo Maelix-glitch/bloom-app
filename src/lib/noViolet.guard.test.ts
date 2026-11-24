@@ -32,6 +32,15 @@ import { describe, expect, it } from "vitest";
  * the StoryEditor accent chain) — those string literals are data keys,
  * not paint, and are not scanned here.
  *
+ * M-236 adds the surface pin: the band scan above tolerates low-chroma
+ * slate (hue 240–255 under its thresholds), which is exactly where
+ * Midnight Tide's card surfaces lived (hue 255, chroma ~0.03) — visible
+ * as a blue-slate tint on every card, per the owner's 2026-11-24
+ * screenshots. So a dedicated test below pins every appearance theme
+ * block in styles.css: no background, surface or border token may
+ * sit in hue 230–320 at chroma above 0.01, for any theme, present or
+ * future.
+ *
  * FIXTURE ALLOWLIST (values only — each file must name the retired
  * colours precisely to pin their absence; nothing here renders):
  *   - src/lib/ui.guard.test.ts — carries banned-value fixtures it
@@ -200,6 +209,54 @@ describe("M-233 · no violet anywhere in Bloom", () => {
     const block = css.match(/html\[data-bloom-theme="th-ink-serenity"\]\s*\{[^}]*\}/)?.[0] ?? "";
     expect(block).not.toBe("");
     expect(violetValues(block)).toEqual([]);
+  });
+
+  it("no appearance theme tints its card surfaces blue-violet (M-236 surface pin)", () => {
+    const css = stripComments(readFileSync(join(SRC, "styles.css"), "utf8"));
+    const blocks = css.match(/html\[data-bloom-theme="[a-z-]+"\]\s*\{[^}]*\}/g) ?? [];
+    // The six known themes must all be found, so this pin can never pass
+    // vacuously on a broken match.
+    expect(blocks.length).toBeGreaterThanOrEqual(6);
+    expect(blocks.some((b) => b.includes("th-midnight-tide"))).toBe(true);
+    const surfaceTokens = [
+      "--background",
+      "--surface",
+      "--surface-2",
+      "--surface-3",
+      "--border",
+      "--border-strong",
+    ];
+    const offenders: string[] = [];
+    for (const block of blocks) {
+      const theme = block.match(/data-bloom-theme="([a-z-]+)"/)?.[1] ?? "?";
+      for (const token of surfaceTokens) {
+        const decl = block.match(
+          new RegExp(`${token}:\\s*oklch\\(\\s*([\\d.]+)\\s+([\\d.]+)\\s+([\\d.]+)`),
+        );
+        if (!decl) continue;
+        const chroma = parseFloat(decl[2]);
+        const hue = parseFloat(decl[3]);
+        if (hue >= 230 && hue <= 320 && chroma > 0.01) {
+          offenders.push(`${theme} ${token}: oklch(${decl[1]} ${decl[2]} ${decl[3]})`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("Midnight Tide grounds on warm ink, its depth steps unchanged (M-236)", () => {
+    const css = stripComments(readFileSync(join(SRC, "styles.css"), "utf8"));
+    const block = css.match(/html\[data-bloom-theme="th-midnight-tide"\]\s*\{[^}]*\}/)?.[0] ?? "";
+    expect(block).not.toBe("");
+    // Same lightness ladder as the retired hue-255 block, hue 85 throughout.
+    for (const step of ["0.15", "0.19", "0.225", "0.26", "0.3", "0.375"]) {
+      expect(block).toContain(`oklch(${step} `);
+    }
+    for (const m of block.matchAll(/oklch\(\s*[\d.]+\s+([\d.]+)\s+([\d.]+)/g)) {
+      expect(parseFloat(m[2])).toBe(85);
+      expect(parseFloat(m[1])).toBeLessThanOrEqual(0.09);
+    }
+    expect(block).toContain("--accent-secondary: oklch(0.82 0.09 85)");
   });
 
   it("the grocery group icons are glyphs, never raw emoji", () => {
