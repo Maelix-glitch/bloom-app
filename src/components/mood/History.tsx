@@ -102,7 +102,7 @@ function HistoryImpl({
       {filtered.length === 0 ? (
         <Insufficient>
           {entries.length === 0
-            ? "No entries yet — log your first check-in to begin the record."
+            ? "No entries yet, log your first check-in to begin the record."
             : "Nothing matches this search or filter."}
         </Insufficient>
       ) : (
@@ -124,7 +124,7 @@ function HistoryImpl({
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate text-[length:var(--text-support)] text-foreground">
-                    {e.note || e.tags.map((t) => `#${t}`).join(" ") || "—"}
+                    {e.note || e.tags.map((t) => `#${t}`).join(" ") || "-"}
                   </span>
                   {e.emotions.length ? (
                     <span className="mono mt-0.5 block text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
@@ -192,7 +192,7 @@ function HistoryImpl({
           })}
           {filtered.length > 60 ? (
             <p className="mono pt-4 text-center text-[length:var(--text-micro)] uppercase tracking-[var(--tracking-meta)] text-faint-strong">
-              Showing 60 of {filtered.length} — refine the search to narrow further
+              Showing 60 of {filtered.length}, refine the search to narrow further
             </p>
           ) : null}
         </div>

@@ -77,7 +77,7 @@ export function DishDetailSheet({
 
   const log = () => {
     if (!onLog(dish, meal, day)) {
-      setLogError("Bloom couldn't log that dish — its values fall outside the range the log can store.");
+      setLogError("Bloom couldn't log that dish, its values fall outside the range the log can store.");
       return;
     }
     setLogError(null);
@@ -109,8 +109,7 @@ export function DishDetailSheet({
           <div className="mt-3 flex flex-wrap items-center gap-2">
             <ProvenanceBadge kind="recipe" label={labelled.label} />
             <span className="text-[length:var(--text-caption)] text-muted-foreground">
-              Per-serving values are computed from this recipe's USDA ingredient data —
-              nothing is copied from a printed table.
+              Per-serving values are computed from this recipe's USDA ingredient data, nothing is copied from a printed table.
             </span>
           </div>
 

@@ -161,7 +161,7 @@ describe("NutritionPlanSection", () => {
     )) {
       if (toggle.getAttribute("aria-expanded") === "false") fireEvent.click(toggle);
     }
-    const dishRows = screen.getAllByRole("button", { name: /— show ingredients$/ });
+    const dishRows = screen.getAllByRole("button", { name: /, show ingredients$/ });
     expect(dishRows.length).toBeGreaterThan(0);
     fireEvent.click(dishRows[0]!);
     expect(screen.getAllByTestId("provenance-badge").length).toBeGreaterThan(0);
@@ -310,7 +310,7 @@ describe("NutritionPlanSection", () => {
     expect(balance.querySelectorAll("p").length).toBe(0);
     expect(
       screen.queryByText(
-        /fruit — the ICMR-NIN guideline aims for at least 100 g across the day/,
+        /fruit, the ICMR-NIN guideline aims for at least 100 g across the day/,
       ),
     ).toBeNull();
     /* Pin updated for brief v7 N2: the header's targets sentence is
@@ -392,7 +392,7 @@ describe("NutritionPlanSection", () => {
   });
 });
 
-describe("NutritionPlanSection — food photographs (P3-R)", () => {
+describe("NutritionPlanSection, food photographs (P3-R)", () => {
   it("shows the real photograph on exactly the photographed suggestions", async () => {
     seedAssessment(COMPLETE);
     /* Method 13 (2026-11-19): a plan composed WITH the dish
@@ -462,8 +462,8 @@ describe("NutritionPlanSection — food photographs (P3-R)", () => {
   });
 });
 
-describe("NutritionPlanSection — N-UI plan panel", () => {
-  it("goal chips write the goal the engine reads — the plan goes stale, never silently rebuilt", async () => {
+describe("NutritionPlanSection. N-UI plan panel", () => {
+  it("goal chips write the goal the engine reads, the plan goes stale, never silently rebuilt", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
     await createPlanAndAwait();

@@ -153,8 +153,8 @@ export function NutritionTodayCard() {
           ) : null}
           <p className="mt-1 max-w-[52ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
             {hasData
-              ? `${summaryLine(count, totals.kcal, totals.proteinG)}. Every value carries its source — USDA data, your labels, or a marked estimate.`
-              : "Log meals and see them against your daily target. Every value is labelled with where it came from — nothing is presented as more certain than it is."}
+              ? `${summaryLine(count, totals.kcal, totals.proteinG)}. Every value carries its source. USDA data, your labels, or a marked estimate.`
+              : "Log meals and see them against your daily target. Every value is labelled with where it came from, nothing is presented as more certain than it is."}
           </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <Button type="button" size="sm" asChild>
@@ -223,7 +223,7 @@ export function NutritionProfileCard() {
           status sentence simply stands in its own column now. */}
       <div className="pf-nutrition-cols mt-4 grid gap-5 sm:grid-cols-[minmax(0,1fr)_minmax(0,16rem)] sm:gap-8">
         <p className="max-w-[56ch] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-          What you eat, logged against the day — USDA reference values, your own packet labels,
+          What you eat, logged against the day. USDA reference values, your own packet labels,
           and Coach estimates, each labelled as what it is.
         </p>
         <div>

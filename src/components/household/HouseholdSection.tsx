@@ -55,7 +55,7 @@ export function HouseholdSection() {
       dislikes: splitTerms(dislikes),
     });
     if (!ok) {
-      setFormNote("Your household list is full — remove someone before adding another.");
+      setFormNote("Your household list is full, remove someone before adding another.");
       return;
     }
     setName("");
@@ -76,7 +76,7 @@ export function HouseholdSection() {
 
       <div className="hh-stack" style={{ marginTop: "var(--space-4)" }}>
         <p className="hh-body">
-          One kitchen cooks for everyone at your table. You are member #1 — your pattern and
+          One kitchen cooks for everyone at your table. You are member #1, your pattern and
           allergies come from your Assessment and are never re-asked here. To change yours,
           update your preferences in the Assessment. This list is only for the other people
           you cook for.
@@ -191,8 +191,8 @@ export function HouseholdSection() {
           </p>
           <p className="hh-body">
             {aloneAtTable
-              ? "suit you — your pattern from your Assessment, and no ingredient you are allergic to."
-              : "suit everyone at your table — every member's pattern, and no ingredient anyone here is allergic to."}
+              ? "suit you, your pattern from your Assessment, and no ingredient you are allergic to."
+              : "suit everyone at your table, every member's pattern, and no ingredient anyone here is allergic to."}
           </p>
         </div>
 
@@ -206,7 +206,7 @@ export function HouseholdSection() {
               . Bloom could not match{" "}
               {suitability.unmatched.length === 1 ? "it" : "them"} to an ingredient name, so
               the count above covers only the checks that could actually run. Check{" "}
-              {suitability.unmatched.length === 1 ? "that one" : "those"} manually — an
+              {suitability.unmatched.length === 1 ? "that one" : "those"} manually, an
               unmatched allergy is never treated as safe.
             </p>
           </div>
@@ -229,7 +229,7 @@ export function HouseholdSection() {
           </>
         ) : (
           <p className="hh-body">
-            No dish in the library suits the whole table right now — try cooking in parts, or
+            No dish in the library suits the whole table right now, try cooking in parts, or
             check whether a pattern above is stricter than the person really eats.
           </p>
         )}

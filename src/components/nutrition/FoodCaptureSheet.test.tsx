@@ -86,7 +86,7 @@ describe("FoodCaptureSheet", () => {
     expect((screen.getByLabelText("Protein (g)") as HTMLInputElement).value).toBe("42");
     expect((screen.getByLabelText("Carbs (g)") as HTMLInputElement).value).toBe("75");
     expect((screen.getByLabelText("Fat (g)") as HTMLInputElement).value).toBe("24");
-    expect(screen.getByText(/Estimate — based on your photo/)).toBeTruthy();
+    expect(screen.getByText(/Estimate, based on your photo/)).toBeTruthy();
 
     /* Confirm-first: a ready estimate is not a logged one. */
     expect(readFoodLog()).toEqual([]);

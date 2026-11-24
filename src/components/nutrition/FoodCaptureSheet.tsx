@@ -46,12 +46,12 @@ import { MEAL_LABEL } from "./input";
  *  get no retry (the machine marks them non-retryable), so their copy
  *  points at the real blocker instead. */
 const FAILURE_COPY: Record<CaptureFailureReason, string> = {
-  unreadable_photo: "Bloom couldn't read that photo file. Try a different one — nothing was logged.",
+  unreadable_photo: "Bloom couldn't read that photo file. Try a different one, nothing was logged.",
   no_estimate:
     "Coach looked at the photo but couldn't give a usable estimate for it, so nothing was logged. A clearer photo of the dish can help.",
   unconfigured: "Coach isn't connected right now, so the photo couldn't be analysed. Nothing was logged.",
-  timeout: "The analysis took too long and was given up on. Nothing was logged — you can try again.",
-  error: "Coach couldn't analyse that photo just now. Nothing was logged — you can try again.",
+  timeout: "The analysis took too long and was given up on. Nothing was logged, you can try again.",
+  error: "Coach couldn't analyse that photo just now. Nothing was logged, you can try again.",
   aborted: "The analysis was stopped. Nothing was logged.",
   insufficient_credits:
     "You're out of AI credits, so photo estimates are paused for now. Nothing was logged.",
@@ -60,7 +60,7 @@ const FAILURE_COPY: Record<CaptureFailureReason, string> = {
 };
 
 const SAVE_ERROR_COPY =
-  "Bloom couldn't log that — the numbers may be beyond what one meal can carry. Try a smaller portion.";
+  "Bloom couldn't log that, the numbers may be beyond what one meal can carry. Try a smaller portion.";
 
 export function FoodCaptureSheet({
   open,
@@ -206,7 +206,7 @@ export function FoodCaptureSheet({
 
         <div className="nut-dialog-scroll px-5 pb-6 pt-2 sm:px-7">
           <p className="text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
-            <span className="font-medium text-foreground">{COACH_ESTIMATE_LABEL}</span> — Coach
+            <span className="font-medium text-foreground">{COACH_ESTIMATE_LABEL}</span>, Coach
             reads the photo and estimates the portion. You check the numbers and confirm before
             anything is logged; it stays labelled an estimate in your log.
           </p>
@@ -227,7 +227,7 @@ export function FoodCaptureSheet({
                 Logged as an estimate
               </p>
               <p className="mx-auto mt-1.5 max-w-[46ch] text-[length:var(--text-callout)] leading-[var(--leading-body)] text-muted-foreground">
-                It is in this day's log with its estimate label attached — you can edit or remove
+                It is in this day's log with its estimate label attached, you can edit or remove
                 it there like any entry.
               </p>
               <Button type="button" className="mt-5" onClick={onClose}>
@@ -268,7 +268,7 @@ export function FoodCaptureSheet({
                   className="mt-6 text-[length:var(--text-callout)] text-muted-foreground"
                   aria-live="polite"
                 >
-                  Coach is reading your photo — naming the dish first, then estimating the
+                  Coach is reading your photo, naming the dish first, then estimating the
                   portion…
                 </p>
               ) : null}
@@ -349,7 +349,7 @@ export function FoodCaptureSheet({
                   >
                     {totals
                       ? `≈ ${totals.kcal} kcal · ${totals.proteinG} g protein · ${totals.carbsG} g carbs · ${totals.fatG} g fat`
-                      : "Numbers need to be plain values — kcal above zero, each macro zero or more."}
+                      : "Numbers need to be plain values, kcal above zero, each macro zero or more."}
                   </p>
 
                   <div className="mt-4">

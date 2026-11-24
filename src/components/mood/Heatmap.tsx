@@ -93,7 +93,7 @@ function HeatmapImpl({ cells }: { cells: HeatCell[] }) {
                         </span>
                       ) : (
                         <span className="mono absolute inset-0 flex items-center justify-center text-[length:var(--text-micro)] text-faint-strong">
-                          —
+                          -
                         </span>
                       )}
                     </button>

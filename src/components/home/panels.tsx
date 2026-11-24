@@ -301,7 +301,7 @@ export function FlowPanel({
         >
           <p className="text-[length:var(--text-meta)] leading-snug text-muted-foreground">
             When your day happens. Anything past its time reads as "missed", so set these to your
-            own rhythm — a night shift can start at 21:00.
+            own rhythm, a night shift can start at 21:00.
           </p>
           <div className="mt-2 grid grid-cols-2 gap-2">
             {FLOW_TIME_LABELS.map(({ key, label }) => (
@@ -401,7 +401,7 @@ export function InsightsPanel({
         <p className="mt-4 text-sm leading-snug text-muted-foreground">
           {loading
             ? "Reading your record…"
-            : "Patterns surface once a few days of logs overlap — runs, drifts, the shape of your week. Nothing here is ever a guess."}
+            : "Patterns surface once a few days of logs overlap, runs, drifts, the shape of your week. Nothing here is ever a guess."}
         </p>
       ) : (
         <ul className="mt-4 space-y-3">

@@ -188,7 +188,7 @@ export function Metric({
       <p className="eyebrow">{label}</p>
       <p className="numeric flex items-baseline gap-1 text-[30px] leading-none">
         <span className={accentText[accent]}>
-          {raw ?? (typeof value === "number" ? <CountUp value={value} decimals={decimals} /> : "—")}
+          {raw ?? (typeof value === "number" ? <CountUp value={value} decimals={decimals} /> : "-")}
         </span>
         {suffix ? (
           <span className="mono text-[length:var(--text-meta)] text-faint-strong">{suffix}</span>

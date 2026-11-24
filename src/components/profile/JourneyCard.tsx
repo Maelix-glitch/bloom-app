@@ -191,7 +191,7 @@ export function JourneyCard({
         </div>
       ) : (
         <p className="text-[length:var(--text-caption)] text-faint">
-          Nothing yet — the first mood, story or reward shows up here.
+          Nothing yet, the first mood, story or reward shows up here.
         </p>
       )}
     </div>

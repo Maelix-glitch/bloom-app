@@ -507,7 +507,7 @@ export function NutritionPlanSection() {
             ))}
           </ul>
           <p className="nut-note">
-            Built from your record and the dish library — no AI, no invented numbers.
+            Built from your record and the dish library, no AI, no invented numbers.
           </p>
         </div>
       </section>
@@ -531,8 +531,8 @@ export function NutritionPlanSection() {
             ))}
             {refusal.requiresProfessionalReview ? (
               <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
-                The right next step is a conversation with a qualified professional — your doctor or
-                a registered dietitian — who can set targets with your full picture in view.
+                The right next step is a conversation with a qualified professional, your doctor or
+                a registered dietitian, who can set targets with your full picture in view.
               </p>
             ) : null}
             <p className="nut-note">
@@ -540,7 +540,7 @@ export function NutritionPlanSection() {
               <Link to="/profile" className="nut-inline-link">
                 Profile
               </Link>
-              . Logging your food still works exactly the same — only the plan is paused.{" "}
+              . Logging your food still works exactly the same, only the plan is paused.{" "}
               {SAFETY_DISCLAIMER}
             </p>
           </div>
@@ -582,8 +582,7 @@ export function NutritionPlanSection() {
         <div className="mt-2">
           <SectionHead kicker="Your plan" title="A plan for your goal, built from your numbers" />
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
-            Bloom computes your daily targets deterministically — no AI, no invented numbers —
-            splits them across your meals, and builds each meal around a real dish from the dish
+            Bloom computes your daily targets deterministically, no AI, no invented numbers, splits them across your meals, and builds each meal around a real dish from the dish
             library, its numbers computed from its ingredients and labelled with their source.
           </p>
           <SegmentedGoalControl current={chipGoal} onSelect={setGoal} />
@@ -618,7 +617,7 @@ export function NutritionPlanSection() {
           <p className="mt-2 max-w-[56ch] text-[length:var(--text-body)] leading-[var(--leading-body)] text-muted-foreground">
             It aimed at {fmtKcalApprox(plan.targets.kcal)} and{" "}
             {fmtGrams(plan.targets.proteinG)} g of protein for{" "}
-            {GOAL_LABEL[plan.goal].toLowerCase()}. Plans are built for a single day — create today's
+            {GOAL_LABEL[plan.goal].toLowerCase()}. Plans are built for a single day, create today's
             to follow it now.
           </p>
           <div className="mt-4">
@@ -873,7 +872,7 @@ export function NutritionPlanSection() {
           type="button"
           className="nut-dish-row"
           aria-expanded={expanded}
-          aria-label={`${display.en} — show ingredients`}
+          aria-label={`${display.en}, show ingredients`}
           onClick={() => setExpandedDish(expanded ? null : key)}
         >
           <DishPhoto dishId={planDish.dishId} name={display.en} />
@@ -1227,7 +1226,7 @@ export function NutritionPlanSection() {
     const entry = logDish(dish, meal.meal, plan.day);
     if (!entry) {
       setLogError(
-        `“${dish.name.en}” couldn't be logged — its values fall outside the range the log can store.`,
+        `“${dish.name.en}” couldn't be logged, its values fall outside the range the log can store.`,
       );
       return false;
     }
@@ -1314,15 +1313,14 @@ export function NutritionPlanSection() {
         <div className="nut-plan-stale" role="status">
           {staleness.changed.includes("the plan method improved") ? (
             <p className="text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
-              The plan method improved since this plan was made — regenerate to get the new
+              The plan method improved since this plan was made, regenerate to get the new
               composition.
             </p>
           ) : null}
           {staleness.changed.filter((c) => c !== "the plan method improved").length > 0 ? (
             <p className="text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
               Since this plan was made,{" "}
-              {joinNames(staleness.changed.filter((c) => c !== "the plan method improved"))} changed
-              — the plan below still uses the older numbers. Regenerate to bring it up to date.
+              {joinNames(staleness.changed.filter((c) => c !== "the plan method improved"))} changed, the plan below still uses the older numbers. Regenerate to bring it up to date.
             </p>
           ) : null}
         </div>
@@ -1379,7 +1377,7 @@ export function NutritionPlanSection() {
           <p className="nut-note">
             {plan.timeline.anchor === "sleep_log"
               ? "Times follow your usual wake and bed times, from your sleep log."
-              : "In the day's order — once your sleep log holds a few nights, the plan can put your usual times to it."}
+              : "In the day's order, once your sleep log holds a few nights, the plan can put your usual times to it."}
           </p>
         ) : null}
       </div>
@@ -1404,14 +1402,14 @@ export function NutritionPlanSection() {
         <div className="nut-proposal" role="status">
           <p className="nut-group-label">Your real maintenance, from your record</p>
           <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
-            Over {estimate.spanDays} days ({shortDay(estimate.fromDate)} –{" "}
+            Over {estimate.spanDays} days ({shortDay(estimate.fromDate)} -{" "}
             {shortDay(estimate.toDate)}) you logged {estimate.loggedDays} days averaging{" "}
             {fmtInt(estimate.avgIntakeKcal)} kcal, and your weight{" "}
             {weightPhrase}. That puts your maintenance near{" "}
             <span className="font-semibold">
               {fmtInt(estimate.maintenanceKcal)} kcal
             </span>{" "}
-            a day — {fmtInt(Math.abs(proposalDelta))} kcal{" "}
+            a day, {fmtInt(Math.abs(proposalDelta))} kcal{" "}
             {proposalDelta > 0 ? "above" : "below"} the {fmtInt(engineTdeeKcal)}{" "}
             kcal formula estimate behind your plan.
           </p>
@@ -1419,18 +1417,18 @@ export function NutritionPlanSection() {
             <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
               Confirming shifts your daily target by {proposalDelta > 0 ? "+" : "−"}
               {fmtInt(Math.abs(proposalDelta))} kcal, to{" "}
-              {fmtInt(proposedTargetKcal)} kcal — your goal pace stays the same, and
+              {fmtInt(proposedTargetKcal)} kcal, your goal pace stays the same, and
               the plan above keeps its current numbers until you compose again.
             </p>
           ) : (
             <p className="mt-2 text-[length:var(--text-body)] leading-[var(--leading-body)] text-foreground">
               That gap is too large to apply with one tap. It is worth checking your body numbers in
-              Trackers first — if they are right, a fresh plan can be built from them.
+              Trackers first, if they are right, a fresh plan can be built from them.
             </p>
           )}
           <p className="nut-note">
             An estimate from your logged days and weigh-ins, with weight change counted at 7,700
-            kcal per kg — not a measurement. Nothing changes unless you confirm.
+            kcal per kg, not a measurement. Nothing changes unless you confirm.
           </p>
           <div className="mt-3 flex flex-wrap gap-2">
             {proposalApplicable ? (
@@ -1472,16 +1470,16 @@ export function NutritionPlanSection() {
             protected honesty copy, words unchanged; it stood as a
             loose paragraph in the header until the shell split. */}
         <p className="nut-note">
-          Targets are estimates from your body numbers (Mifflin–St Jeor) — a guide for the day, not a
+          Targets are estimates from your body numbers (Mifflin–St Jeor), a guide for the day, not a
           prescription.
           {plan.targetsSource === "body_profile"
-            ? " This plan is built from your Trackers body numbers — the same targets that page shows."
+            ? " This plan is built from your Trackers body numbers, the same targets that page shows."
             : ""}
         </p>
         <p className="nut-note">
-          Plans are built from real dishes in Bloom's library — each dish's numbers are computed
-          from its ingredients' USDA data — topped up with simple foods only where the dishes leave
-          the day short. They are a starting point — log what you actually eat and your totals
+          Plans are built from real dishes in Bloom's library, each dish's numbers are computed
+          from its ingredients' USDA data, topped up with simple foods only where the dishes leave
+          the day short. They are a starting point, log what you actually eat and your totals
           follow that.
         </p>
         {/* P14 (M-161): the one part of the plan's structure the
@@ -1589,7 +1587,7 @@ export function NutritionPlanSection() {
             <Check className="size-4" />
           </span>
           <p className="empty-row-text">
-            No adjustments today — the plan follows your Assessment as set.
+            No adjustments today, the plan follows your Assessment as set.
           </p>
         </div>
       )}

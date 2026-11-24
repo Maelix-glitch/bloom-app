@@ -424,7 +424,7 @@ function Hero({
                 .
               </>
             ) : (
-              "Nothing logged yet today — ten seconds now puts today on the record."
+              "Nothing logged yet today, ten seconds now puts today on the record."
             )}
           </p>
         </div>
@@ -669,7 +669,7 @@ function MoodJourney({
             <p className="mt-4 max-w-md text-sm leading-relaxed text-foreground/80 sm:text-base">
               {points.length >= 2
                 ? changePct !== null && Math.abs(changePct) >= 1
-                  ? `Your average mood is ${avg.toFixed(1)} out of 10 — ${changePct > 0 ? "up" : "down"} ${Math.abs(changePct).toFixed(0)}% on the period before.${bestLabel ? ` ${bestLabel} was your brightest day.` : ""}`
+                  ? `Your average mood is ${avg.toFixed(1)} out of 10, ${changePct > 0 ? "up" : "down"} ${Math.abs(changePct).toFixed(0)}% on the period before.${bestLabel ? ` ${bestLabel} was your brightest day.` : ""}`
                   : `Your average mood is ${avg.toFixed(1)} out of 10 across the ${rangeLabel.toLowerCase()}.${bestLabel ? ` ${bestLabel} was your brightest day.` : ""}`
                 : "Once a few days are logged, this is where the first pattern shows up."}
             </p>
@@ -803,7 +803,7 @@ function QuickInsights({
             text={
               entries === 0
                 ? "Insights are computed only from your own check-ins. The first ones appear after a couple of days."
-                : "A couple more days and the first patterns will be here — nothing is guessed."
+                : "A couple more days and the first patterns will be here, nothing is guessed."
             }
           />
         </div>

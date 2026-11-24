@@ -73,7 +73,7 @@ const chickenCurry = findDish("dish-chicken-curry")!;
 const avial = findDish("dish-avial")!;
 
 function cardOf(dish: Dish) {
-  return screen.getByRole("button", { name: `${dish.name.en} — view recipe` });
+  return screen.getByRole("button", { name: `${dish.name.en}, view recipe` });
 }
 
 /* The shelf renders in pages now (component slice §M — the whole
@@ -82,7 +82,7 @@ function cardOf(dish: Dish) {
    would, instead of assuming every card is already in the DOM. */
 function revealCard(dish: Dish) {
   for (let i = 0; i < 40; i += 1) {
-    const found = screen.queryByRole("button", { name: `${dish.name.en} — view recipe` });
+    const found = screen.queryByRole("button", { name: `${dish.name.en}, view recipe` });
     if (found) return found;
     const more = screen.queryByRole("button", { name: /Show more/ });
     if (!more) break;
@@ -91,7 +91,7 @@ function revealCard(dish: Dish) {
   return cardOf(dish);
 }
 
-describe("DishesSection — browsing", () => {
+describe("DishesSection, browsing", () => {
   it("renders the library with bilingual names and computed per-serving numbers", () => {
     render(<DishesSection day={todayLocal()} />);
     expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
@@ -110,9 +110,9 @@ describe("DishesSection — browsing", () => {
   it("filters by category chip", () => {
     render(<DishesSection day={todayLocal()} />);
     fireEvent.click(screen.getByRole("button", { name: "Chutneys" }));
-    expect(screen.queryByRole("button", { name: `${dal.name.en} — view recipe` })).toBeNull();
+    expect(screen.queryByRole("button", { name: `${dal.name.en}, view recipe` })).toBeNull();
     expect(
-      screen.getByRole("button", { name: /Mint-Coriander Chutney — view recipe/ }),
+      screen.getByRole("button", { name: /Mint-Coriander Chutney, view recipe/ }),
     ).toBeTruthy();
   });
 
@@ -140,15 +140,15 @@ describe("DishesSection — browsing", () => {
     expect(screen.getByText(/Kerala dishes only/)).toBeTruthy();
     expect(revealCard(avial)).toBeTruthy();
     /* An Indian dish and an international dish both fall away. */
-    expect(screen.queryByRole("button", { name: `${dal.name.en} — view recipe` })).toBeNull();
+    expect(screen.queryByRole("button", { name: `${dal.name.en}, view recipe` })).toBeNull();
     expect(
       screen.queryByRole("button", {
-        name: "Herb-Grilled Chicken with Broccoli — view recipe",
+        name: "Herb-Grilled Chicken with Broccoli, view recipe",
       }),
     ).toBeNull();
   });
 
-  it("the cuisine filter composes with search — an impossible pairing is honestly empty", () => {
+  it("the cuisine filter composes with search, an impossible pairing is honestly empty", () => {
     render(<DishesSection day={todayLocal()} />);
     fireEvent.click(screen.getByRole("button", { name: "International · 702" }));
     fireEvent.change(screen.getByLabelText("Search dishes"), {
@@ -157,7 +157,7 @@ describe("DishesSection — browsing", () => {
     /* Masoor dal is Indian — under International there is nothing to
        show, and the section says so instead of padding the list. */
     expect(screen.getByText(/0 dishes/)).toBeTruthy();
-    expect(screen.getByText(/No dishes match — try clearing a filter/)).toBeTruthy();
+    expect(screen.getByText(/No dishes match, try clearing a filter/)).toBeTruthy();
     /* Clearing restores the whole library, cuisine included. */
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
     expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
@@ -173,11 +173,11 @@ describe("DishesSection — browsing", () => {
        Kerala dishes, 56 suit a vegan pattern. */
     fireEvent.click(screen.getByRole("button", { name: "Kerala · 63" }));
     expect(screen.getByText(/63 dishes/)).toBeTruthy();
-    expect(screen.getByText(/showing what suits you — Vegan pattern/)).toBeTruthy();
+    expect(screen.getByText(/showing what suits you, Vegan pattern/)).toBeTruthy();
     expect(screen.getByText(/Kerala dishes only/)).toBeTruthy();
     /* Avial carries curd — the pattern keeps it off the shelf even
        inside its own cuisine. */
-    expect(screen.queryByRole("button", { name: "Avial — view recipe" })).toBeNull();
+    expect(screen.queryByRole("button", { name: "Avial, view recipe" })).toBeNull();
     /* And still no pattern or budget controls appear alongside. */
     expect(screen.queryByRole("group", { name: "Pattern" })).toBeNull();
     expect(screen.queryByRole("group", { name: "Budget" })).toBeNull();
@@ -190,7 +190,7 @@ describe("DishesSection — browsing", () => {
        the dish-suitability vocabulary "non-vegetarian" — and since the
        pattern filters nothing out (pinned in dishBrowse.test.ts), the
        line says so instead of claiming a selection happened. */
-    expect(screen.getByText(/your pattern is Omnivore — it excludes nothing/)).toBeTruthy();
+    expect(screen.getByText(/your pattern is Omnivore, it excludes nothing/)).toBeTruthy();
     expect(screen.queryByText(/non-vegetarian/i)).toBeNull();
     expect(screen.queryByText(/showing what suits you/)).toBeNull();
     expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
@@ -204,7 +204,7 @@ describe("DishesSection — browsing", () => {
     expect(cardOf(dal)).toBeTruthy();
     /* A dish whose names carry no मसूर falls away. */
     expect(
-      screen.queryByRole("button", { name: "Jeera Rice — view recipe" }),
+      screen.queryByRole("button", { name: "Jeera Rice, view recipe" }),
     ).toBeNull();
   });
 
@@ -213,17 +213,17 @@ describe("DishesSection — browsing", () => {
     fireEvent.change(screen.getByLabelText("Search dishes"), {
       target: { value: "zzqqx-nothing" },
     });
-    expect(screen.getByText(/No dishes match — try clearing a filter/)).toBeTruthy();
+    expect(screen.getByText(/No dishes match, try clearing a filter/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
     expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
   });
 
-  it("the shelf follows the person's own pattern — silently, with no pattern or budget controls", () => {
+  it("the shelf follows the person's own pattern, silently, with no pattern or budget controls", () => {
     seedAnswers({ dietaryPattern: "vegan" });
     render(<DishesSection day={todayLocal()} />);
-    expect(screen.getByText(/showing what suits you — Vegan pattern/)).toBeTruthy();
+    expect(screen.getByText(/showing what suits you, Vegan pattern/)).toBeTruthy();
     /* The ghee tadka is not vegan — it is not on the shelf. */
-    expect(screen.queryByRole("button", { name: `${dal.name.en} — view recipe` })).toBeNull();
+    expect(screen.queryByRole("button", { name: `${dal.name.en} view recipe` })).toBeNull();
     /* Pattern and budget are assessment answers, not filters: this
        section renders no controls for either, for anyone. */
     expect(screen.queryByRole("group", { name: "Pattern" })).toBeNull();
@@ -262,10 +262,10 @@ describe("DishesSection — browsing", () => {
     expect(screen.queryByText(/kept to an .* budget/)).toBeNull();
   });
 
-  it("pages the shelf — one page of cards mounts, Show more extends it (§M)", () => {
+  it("pages the shelf, one page of cards mounts, Show more extends it (§M)", () => {
     render(<DishesSection day={todayLocal()} />);
     const cards = () =>
-      screen.getAllByRole("button", { name: /— view recipe$/ });
+      screen.getAllByRole("button", { name: /, view recipe$/ });
     /* The status line still counts the whole library… */
     expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
     /* …but only the first page of cards is in the DOM. */
@@ -275,7 +275,7 @@ describe("DishesSection — browsing", () => {
     expect(cards().length).toBe(96);
   });
 
-  it("a dish card carries its provenance chip — the detail sheet's own bundle (§M)", () => {
+  it("a dish card carries its provenance chip, the detail sheet's own bundle (§M)", () => {
     render(<DishesSection day={todayLocal()} />);
     const card = revealCard(dal);
     expect(within(card).getByTestId("provenance-badge").textContent).toBe(
@@ -291,17 +291,17 @@ describe("DishesSection — browsing", () => {
        south-region dishes, so a south-preference shelf's first page
        is entirely dishes of that region (the lib pins the full
        ordering property; this pins that the section applies it). */
-    const cards = screen.getAllByRole("button", { name: /— view recipe$/ });
+    const cards = screen.getAllByRole("button", { name: /, view recipe$/ });
     expect(cards.length).toBe(48);
     for (const card of cards) {
-      const name = card.getAttribute("aria-label")!.replace(/ — view recipe$/, "");
+      const name = card.getAttribute("aria-label")!.replace(/, view recipe$/, "");
       const dish = DISH_LIBRARY.find((d) => d.name.en === name)!;
       expect(dishRegion(dish)).toBe("south_indian");
     }
   });
 });
 
-describe("DishesSection — the detail sheet and logging", () => {
+describe("DishesSection, the detail sheet and logging", () => {
   it("shows the recipe under its provenance, and logs one serving as a dish entry", () => {
     const today = todayLocal();
     render(<DishesSection day={today} />);

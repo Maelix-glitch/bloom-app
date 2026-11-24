@@ -139,14 +139,14 @@ function GroceryRow({
           </span>
           {item.pantryGrams > 0 ? (
             <span className="block text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
-              {formatGramAmount(item.pantryGrams)} already in your pantry —{" "}
+              {formatGramAmount(item.pantryGrams)} already in your pantry -{" "}
               {item.toBuyGrams > 0
                 ? `buy ${formatGramAmount(item.toBuyGrams)}`
                 : "nothing more to buy"}
             </span>
           ) : item.pantryUnrecorded ? (
             <span className="block text-[length:var(--text-caption)] leading-[var(--leading-body)] text-muted-foreground">
-              In your pantry — amount not recorded, so nothing was deducted. Check before you
+              In your pantry, amount not recorded, so nothing was deducted. Check before you
               shop.
             </span>
           ) : null}
@@ -166,23 +166,23 @@ type ShopTab = "all" | "tobuy" | "basket";
  *  by aisle, with the pantry position stated per line. */
 function groceryListText(result: OkGroceryResult): string {
   const lines: string[] = [
-    `Shopping list — from your plan for ${result.days.map((d) => fmtDate(d)).join(", ")}`,
+    `Shopping list, from your plan for ${result.days.map((d) => fmtDate(d)).join(", ")}`,
   ];
   for (const group of result.groups) {
     lines.push("", group.label);
     for (const item of group.items) {
       if (item.pantryGrams > 0 && item.toBuyGrams === 0) {
-        lines.push(`- ${item.name} — in your pantry, nothing to buy`);
+        lines.push(`- ${item.name}, in your pantry, nothing to buy`);
       } else if (item.pantryGrams > 0) {
         lines.push(
-          `- ${item.name} — buy ${formatGramAmount(item.toBuyGrams)} (${formatGramAmount(item.pantryGrams)} already in your pantry)`,
+          `- ${item.name}, buy ${formatGramAmount(item.toBuyGrams)} (${formatGramAmount(item.pantryGrams)} already in your pantry)`,
         );
       } else if (item.pantryUnrecorded) {
         lines.push(
-          `- ${item.name} — ${formatGramAmount(item.neededGrams)} (also in your pantry — amount not recorded, check before you shop)`,
+          `- ${item.name} - ${formatGramAmount(item.neededGrams)} (also in your pantry, amount not recorded, check before you shop)`,
         );
       } else {
-        lines.push(`- ${item.name} — ${formatGramAmount(item.neededGrams)}`);
+        lines.push(`- ${item.name} - ${formatGramAmount(item.neededGrams)}`);
       }
     }
   }
@@ -522,7 +522,7 @@ export function GrocerySection() {
       ) : (
         <>
           <p className="shop-intro mt-2 max-w-[var(--measure)] text-[length:var(--text-support)] leading-[var(--leading-body)] text-muted-foreground">
-            From your plan for {result.days.map((d) => fmtDate(d)).join(", ")} — the ingredients of every dish in
+            From your plan for {result.days.map((d) => fmtDate(d)).join(", ")}, the ingredients of every dish in
             it, added up per food. Amounts are grams, the units the plan itself uses.
           </p>
 
@@ -633,7 +633,7 @@ export function GrocerySection() {
                     {item.name} ·{" "}
                     {item.pantryOnHandGrams > 0
                       ? `${formatGramAmount(item.pantryOnHandGrams)} at home`
-                      : "at home — amount not recorded"}
+                      : "at home, amount not recorded"}
                   </li>
                 ))}
               </ul>
@@ -729,7 +729,7 @@ export function GrocerySection() {
               <ul className="mt-2 list-disc pl-5 text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
                 {result.unlisted.map((entry, index) => (
                   <li key={`${entry.name}-${index}`}>
-                    {entry.name} ({entry.where}) — {entry.reason}
+                    {entry.name} ({entry.where}), {entry.reason}
                   </li>
                 ))}
               </ul>
@@ -756,7 +756,7 @@ export function GrocerySection() {
             </span>
             <p className="empty-row-text">
               <strong>Nothing recorded yet.</strong> Add what you already have at home and
-              the list above will deduct it — with the deduction shown, never hidden.
+              the list above will deduct it, with the deduction shown, never hidden.
             </p>
           </div>
         ) : (
@@ -766,7 +766,7 @@ export function GrocerySection() {
                 {/* Value-first (Slice 5): the quantity is the figure,
                     the name its label — never name-over-amount. */}
                 <span className="w-24 shrink-0 text-[length:var(--text-callout)] font-semibold tabular-nums text-foreground">
-                  {item.quantityGrams !== null ? formatGramAmount(item.quantityGrams) : "—"}
+                  {item.quantityGrams !== null ? formatGramAmount(item.quantityGrams) : "-"}
                 </span>
                 <div className="min-w-0 flex-1">
                   <span className="block text-[length:var(--text-support)] leading-[var(--leading-body)] text-foreground">
@@ -832,7 +832,7 @@ export function GrocerySection() {
         <div className="note mt-4">
           <Info className="size-4" aria-hidden />
           <span>
-            The amount is optional — without it, the item is marked as at home but nothing
+            The amount is optional, without it, the item is marked as at home but nothing
             is deducted, because a deduction needs a real number.
           </span>
         </div>

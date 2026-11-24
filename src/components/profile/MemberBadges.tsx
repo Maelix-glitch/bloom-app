@@ -40,7 +40,7 @@ export function MemberBadges({
           key={badge.kind}
           className={cn("mb-badge", `mb-badge--${badge.kind}`)}
           data-badge={badge.kind}
-          title={`${badge.label} — granted by Bloom`}
+          title={`${badge.label}, granted by Bloom`}
         >
           {badge.label}
         </span>

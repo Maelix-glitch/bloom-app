@@ -101,7 +101,7 @@ function EmotionsImpl({
                       e.trend === null ? "text-faint" : e.trend >= 0 ? "text-sage" : "text-rose",
                     )}
                   >
-                    {e.trend === null ? "—" : `${e.trend > 0 ? "+" : ""}${e.trend.toFixed(1)}`}
+                    {e.trend === null ? "-" : `${e.trend > 0 ? "+" : ""}${e.trend.toFixed(1)}`}
                   </span>
                 </span>
               </button>

@@ -83,7 +83,7 @@ function DistributionImpl({
               <p className="eyebrow mb-3">Stability index</p>
               <div className="flex items-end gap-3">
                 <p className="numeric text-[34px] leading-none text-sage">
-                  {volatility.stability === null ? "—" : volatility.stability}
+                  {volatility.stability === null ? "-" : volatility.stability}
                 </p>
                 <span className="mono pb-1 text-[length:var(--text-meta)] text-faint-strong">/ 100</span>
               </div>

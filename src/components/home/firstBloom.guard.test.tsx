@@ -129,7 +129,7 @@ afterEach(() => {
   resetWorld();
 });
 
-describe("FirstBloomJourney — the current step from the real record", () => {
+describe("FirstBloomJourney, the current step from the real record", () => {
   it("a fresh record opens on the water step, with the catalogue's points", () => {
     const d = doors();
     render(<FirstBloomJourney ready {...d} />);
@@ -138,7 +138,7 @@ describe("FirstBloomJourney — the current step from the real record", () => {
     expect(screen.getByRole("button", { name: "Log water" })).toBeTruthy();
     expect(screen.getByText("+100 points")).toBeTruthy();
     /* What's ahead is listed quietly; the path shows all 7 stations. */
-    expect(screen.getByText("Unlock your full plan")).toBeTruthy();
+    expect(screen.getByText("Get your full plan")).toBeTruthy();
     expect(screen.getByLabelText("Your First Bloom progress").children).toHaveLength(7);
     fireEvent.click(screen.getByRole("button", { name: "Log water" }));
     expect(d.onLogMetrics).toHaveBeenCalledTimes(1);
@@ -203,7 +203,7 @@ describe("FirstBloomJourney — the current step from the real record", () => {
     expect(screen.queryByTestId("first-bloom-journey")).toBeNull();
   });
 
-  it("the assessment is the final step — framed as the unlock, tied to the stated goal", () => {
+  it("the assessment is the final step, framed as the unlock, tied to the stated goal", () => {
     world.current.waterDays = 1;
     world.current.habitLogs = 1;
     world.current.sleepDays = 1;
@@ -214,13 +214,13 @@ describe("FirstBloomJourney — the current step from the real record", () => {
     act(() => {
       window.dispatchEvent(new Event("bloom:vitalis-opened"));
     });
-    expect(screen.getByRole("heading", { name: "Unlock your full plan" })).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "Get your full plan" })).toBeTruthy();
     expect(screen.getByText(/Seven small steps toward lose weight/)).toBeTruthy();
     const link = screen.getByRole("link", { name: "Begin the assessment" });
     expect(link.getAttribute("href")).toBe("/profile#pf-assessment");
   });
 
-  it("explore freely folds the path for the session — and it comes back", () => {
+  it("explore freely folds the path for the session, and it comes back", () => {
     render(<FirstBloomJourney ready {...doors()} />);
     fireEvent.click(screen.getByRole("button", { name: "Explore freely" }));
     expect(screen.queryByTestId("first-bloom-journey")).toBeNull();
@@ -231,7 +231,7 @@ describe("FirstBloomJourney — the current step from the real record", () => {
   });
 });
 
-describe("TodayStoryCard — the synthesis, phone-first", () => {
+describe("TodayStoryCard, the synthesis, phone-first", () => {
   const synthesis = (recordDays: number) =>
     ({
       state: {
@@ -254,7 +254,7 @@ describe("TodayStoryCard — the synthesis, phone-first", () => {
     expect(onAction).toHaveBeenCalledWith({ kind: "mood", label: "Log today's mood" });
   });
 
-  it("waits while the record is empty — the journey is the lead then", () => {
+  it("waits while the record is empty, the journey is the lead then", () => {
     const { container } = render(
       <TodayStoryCard overview={synthesis(0)} ready onAction={vi.fn()} />,
     );
@@ -262,7 +262,7 @@ describe("TodayStoryCard — the synthesis, phone-first", () => {
   });
 });
 
-describe("LevelStrip — the hero's rank element", () => {
+describe("LevelStrip, the hero's rank element", () => {
   it("reads the same wallet and ladder as the Level card", () => {
     render(<LevelStrip />);
     const strip = screen.getByTestId("home-level-strip");
@@ -278,7 +278,7 @@ describe("LevelStrip — the hero's rank element", () => {
   });
 });
 
-describe("source pins — mobile scoping and the untouched desktop", () => {
+describe("source pins, mobile scoping and the untouched desktop", () => {
   const SRC = join(process.cwd(), "src");
   const read = (rel: string) => readFileSync(join(SRC, rel), "utf8");
 

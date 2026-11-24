@@ -108,7 +108,7 @@ async function createPlanAndAwait(): Promise<void> {
   await screen.findByRole("button", { name: /Suggest different meals/ }, { timeout: 4000 });
 }
 
-describe("NutritionPlanSection — dish-first meals (P5)", () => {
+describe("NutritionPlanSection, dish-first meals (P5)", () => {
   it("a main meal is its dishes: tapping the anchor unfolds its ingredients, and Log this dish writes the dish entry", async () => {
     seedAssessment(COMPLETE);
     render(<NutritionPlanSection />);
@@ -138,7 +138,7 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
     /* The anchor dish is a row naming the dish and its computed
        numbers; its ingredients are not shown until it is tapped. */
     const row = within(lunch).getByRole("button", {
-      name: `${anchor.name} — show ingredients`,
+      name: `${anchor.name}, show ingredients`,
     });
     expect(within(lunch).queryByText("Ingredients · per serving")).toBeNull();
 
@@ -228,7 +228,7 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
     if (lunchToggle && lunchToggle.getAttribute("aria-expanded") === "false") {
       fireEvent.click(lunchToggle);
     }
-    expect(within(lunch).queryByRole("button", { name: /— show ingredients$/ })).toBeNull();
+    expect(within(lunch).queryByRole("button", { name: /, show ingredients$/ })).toBeNull();
     /* Brief v7 N3: the idea is a quiet text link inside the row's
        expansion now — clicking it IS the old "Log this dish". */
     fireEvent.click(within(lunch).getByRole("button", { name: /Dish idea/ }));
@@ -258,7 +258,7 @@ describe("NutritionPlanSection — dish-first meals (P5)", () => {
       }
       expect(within(snack).queryByText(/Dish idea/)).toBeNull();
       expect(
-        within(snack).queryByRole("button", { name: /— show ingredients$/ }),
+        within(snack).queryByRole("button", { name: /, show ingredients$/ }),
       ).toBeTruthy();
     }
   });

@@ -67,7 +67,7 @@ function statusLine(records: readonly ConsentRecord[], purpose: ConsentPurpose):
   /* Effective state is not_asked but a grant sits behind it: the wording
      changed after the decision, so the old grant no longer counts. */
   if (latest.state === "granted") {
-    return `Given${when}, under an earlier version of these permissions — it no longer counts, and Bloom will ask again`;
+    return `Given${when}, under an earlier version of these permissions, it no longer counts, and Bloom will ask again`;
   }
   return "Not given";
 }
@@ -129,7 +129,7 @@ export function ConsentSection() {
           {records.length === 0 ? (
             <p className="text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
               You haven&rsquo;t been asked for any health-data permissions yet. Bloom asks at the
-              start of your Assessment, before any answers are saved — you can begin it from the
+              start of your Assessment, before any answers are saved, you can begin it from the
               Assessment card on this page.
             </p>
           ) : (
@@ -150,8 +150,8 @@ export function ConsentSection() {
                 ))}
               </ul>
               <p className="mt-3.5 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
-                To change a health-data answer, retake your Assessment. Erasing everything — in
-                Sharing &amp; data, below — removes this record along with the rest of your data.
+                To change a health-data answer, retake your Assessment. Erasing everything, in
+                Sharing &amp; data, below, removes this record along with the rest of your data.
               </p>
             </>
           )}
@@ -196,7 +196,7 @@ export function ConsentSection() {
               )}
             </div>
             <p className="mt-2 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground">
-              You can change this here any time — it takes effect right away.
+              You can change this here any time, it takes effect right away.
             </p>
           </div>
         </div>

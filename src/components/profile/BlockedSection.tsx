@@ -81,7 +81,7 @@ export function BlockedSection() {
         <span className="pf-row-text">
           <span className="pf-row-label">Blocked people</span>
           <span className="pf-row-hint">
-            People you&rsquo;ve blocked can&rsquo;t see your stories or profile — and you
+            People you&rsquo;ve blocked can&rsquo;t see your stories or profile, and you
             can&rsquo;t see theirs
           </span>
         </span>

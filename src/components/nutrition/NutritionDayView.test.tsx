@@ -108,7 +108,7 @@ describe("DateNav", () => {
   });
 });
 
-describe("Timeline — inline gram edit", () => {
+describe("Timeline, inline gram edit", () => {
   it("rewrites a gram-based entry through the hardened update", () => {
     const egg = findUsdaReference("usda-171287")!;
     log(egg, 100, todayLocal());
@@ -124,7 +124,7 @@ describe("Timeline — inline gram edit", () => {
   });
 });
 
-describe("Timeline — swaps", () => {
+describe("Timeline, swaps", () => {
   it("offers calorie-matched same-group swaps and applies one in place", () => {
     const egg = findUsdaReference("usda-171287")!;
     const before = log(egg, 100, todayLocal());
@@ -145,7 +145,7 @@ describe("Timeline — swaps", () => {
   });
 });
 
-describe("Timeline — photo lightbox", () => {
+describe("Timeline, photo lightbox", () => {
   it("opens the entry's photograph full-size with its credit, and Escape closes it", () => {
     const egg = findUsdaReference("usda-171287")!;
     const credit = foodPhotoFor("usda-171287")!;
@@ -188,7 +188,7 @@ describe("Spectrum", () => {
     expect(within(card).getByText(/3,876 \/ 2,000 mg/)).toBeTruthy();
     expect(within(card).getByText("limit")).toBeTruthy();
     expect(within(card).getAllByText("*").length).toBeGreaterThan(0);
-    expect(within(card).getByText(/a floor — not a claim/)).toBeTruthy();
+    expect(within(card).getByText(/a floor, not a claim/)).toBeTruthy();
     expect(within(card).getByText(/ICMR-NIN Recommended Dietary Allowances 2020/)).toBeTruthy();
   });
 });
@@ -231,7 +231,7 @@ describe("WeekPanel + PatternLab", () => {
     expect(screen.getByLabelText("Search dishes")).toBeTruthy();
   });
 
-  it("a future day in the strip is reachable — Bloom logs future days too", () => {
+  it("a future day in the strip is reachable. Bloom logs future days too", () => {
     render(<NutritionPage />);
     const tomorrow = shiftDay(todayLocal(), 1);
     const label = new Intl.DateTimeFormat("en-GB", { weekday: "long" }).format(

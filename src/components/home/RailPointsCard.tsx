@@ -52,8 +52,8 @@ export function RailPointsCard() {
     : wallet.source === "account"
       ? "Your account balance"
       : wallet.degraded
-        ? "Your account balance couldn't load — showing this device for now"
-        : "Earned on this device — sign in to sync";
+        ? "Your account balance couldn't load, showing this device for now"
+        : "Earned on this device, sign in to sync";
   return (
     <Link
       to="/rewards"
@@ -61,8 +61,8 @@ export function RailPointsCard() {
       title={title}
       aria-label={
         wallet.loading
-          ? "Loading your Bloom Points — open your Journey"
-          : `${formatPoints(wallet.balance)} Bloom Points, ${model.pct}% of the way to ${model.nextName} — open your Journey`
+          ? "Loading your Bloom Points, open your Journey"
+          : `${formatPoints(wallet.balance)} Bloom Points, ${model.pct}% of the way to ${model.nextName}, open your Journey`
       }
       className="rail-points-card block p-[var(--space-4)] transition-colors hover:border-primary/40"
     >

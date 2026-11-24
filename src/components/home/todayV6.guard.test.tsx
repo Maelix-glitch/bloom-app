@@ -160,7 +160,7 @@ describe("today v6 guard: rituals (M-120)", () => {
   });
 
   it("validates habit names at the lib boundary with one plain message", () => {
-    const message = "Give the habit a name — two letters or more.";
+    const message = "Give the habit a name, two letters or more.";
     expect(validateHabitName("")).toBe(message);
     expect(validateHabitName("   ")).toBe(message);
     expect(validateHabitName(" x ")).toBe(message);
