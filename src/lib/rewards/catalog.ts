@@ -7,7 +7,7 @@
  * rewrite is needed, because all selection code is derived from this data.
  *
  * Economy notes: a typical habit tick earns 10–40 Bloom Points and most people
- * tick 2–6 habits a day, so a "premium" theme at 850 points represents roughly
+ * tick 2–6 habits a day, so a premium piece at 850 points represents roughly
  * two weeks of steady, gentle consistency — and major collections (1,200+)
  * are the aspirational lane. Prices therefore start small (150) and only the
  * most substantial configurations cross 1,000.
@@ -20,6 +20,7 @@ import type {
   ComponentKind,
   RewardRarity,
 } from "./types";
+import { THEME_ART } from "./themeArt";
 
 /** Artwork lives under /public/rewards/art — one coherent campaign. */
 export const REWARD_ART = {
@@ -55,7 +56,10 @@ function component(
 
 /* ------------------------------- themes ---------------------------------- */
 /* A theme is a full, dark, contrast-safe restyle of Bloom's shared surface   */
-/* tokens — it genuinely applies to every page that uses them.               */
+/* tokens — it genuinely applies to every page that uses them. The twelve   */
+/* themes are free for every user (owner decision, 2026-11-24, M-238): the  */
+/* price below is 0 and equipping needs no ownership. Premium themes will   */
+/* arrive later as their own, separate set.                                 */
 
 const THEMES: ComponentDef[] = [
   component(
@@ -65,7 +69,7 @@ const THEMES: ComponentDef[] = [
     "A deep night-ink evening for Bloom.",
     "customization",
     "premium",
-    850,
+    0,
     "#26262b",
     "Bloom settles into deep night ink: calmer neutral surfaces, champagne-gold highlights and a quieter midnight feel on every page.",
     REWARD_ART["deep-rest"],
@@ -78,7 +82,7 @@ const THEMES: ComponentDef[] = [
     "Warm golden light across Bloom.",
     "customization",
     "premium",
-    850,
+    0,
     "#e3c187",
     "A warm amber cast with honeyed highlights. Bloom feels like late afternoon sun through linen curtains.",
     REWARD_ART["golden-hour"],
@@ -91,7 +95,7 @@ const THEMES: ComponentDef[] = [
     "Quiet sage woodland tones.",
     "customization",
     "premium",
-    850,
+    0,
     "#9ec3a1",
     "Soft sage greens cool the surfaces while keeping the depth, a restful, botanical Bloom.",
     REWARD_ART["serenity-strength"],
@@ -104,7 +108,7 @@ const THEMES: ComponentDef[] = [
     "Dusty rose warmth for quiet evenings.",
     "customization",
     "premium",
-    850,
+    0,
     "#e2a5b8",
     "Muted rose and clay tones with warm charcoal shadows, tender, calm and intimate.",
     REWARD_ART["soft-reset"],
@@ -114,12 +118,12 @@ const THEMES: ComponentDef[] = [
     "th-midnight-tide",
     "theme",
     "Midnight Tide",
-    "Deep blue water at night.",
+    "Rain on glass, wet stone under cloud.",
     "customization",
     "premium",
-    850,
-    "#9fc3de",
-    "Ink-blue surfaces with a cool moonlit highlight, deep, clear and steady.",
+    0,
+    "#b9beb4",
+    "Wet stone surfaces, flat and near neutral, with a stone pearl highlight. The water lives in this theme's rain artwork, not in the card tint.",
     REWARD_ART["hydration-mist"],
     ["Every Bloom surface"],
   ),
@@ -127,13 +131,91 @@ const THEMES: ComponentDef[] = [
     "th-ink-serenity",
     "theme",
     "Ink Serenity",
-    "Minimal charcoal with a breath of sky.",
+    "First light on handmade paper.",
     "customization",
     "premium",
-    850,
-    "#a8c6de",
-    "Near-neutral charcoal keeps everything quiet while a soft sky accent lifts focus where it matters.",
+    0,
+    "#ddd6c4",
+    "The palest Bloom: a lifted, near-neutral ground like morning paper, with a pearl accent and the softest borders in the line-up, so panels read as sheets laid on a desk.",
     REWARD_ART["quiet-focus"],
+    ["Every Bloom surface"],
+  ),
+  component(
+    "th-clay-court",
+    "theme",
+    "Clay Court",
+    "Terracotta and sun-baked clay.",
+    "customization",
+    "premium",
+    0,
+    "#d9a066",
+    "Matte clay surfaces in the colours of terracotta pots and roof tiles, with a fired clay accent. The building materials of a southern courtyard, worn warm.",
+    THEME_ART["th-clay-court"]!.overview,
+    ["Every Bloom surface"],
+  ),
+  component(
+    "th-brass-lamp",
+    "theme",
+    "Brass Lamp",
+    "A brass oil lamp lit in a dark room.",
+    "customization",
+    "premium",
+    0,
+    "#d9ab4e",
+    "The deepest warm ground in the line-up, with rimmed, metal-edged borders and a brass accent. Founded on the nilavilakku, the tall oil lamp lit at dawn and dusk.",
+    THEME_ART["th-brass-lamp"]!.overview,
+    ["Every Bloom surface"],
+  ),
+  component(
+    "th-rain-leaf",
+    "theme",
+    "Rain Leaf",
+    "A banana leaf in heavy monsoon rain.",
+    "customization",
+    "premium",
+    0,
+    "#8fd694",
+    "Wet green surfaces, glossy and submerged, with the most saturated leaf accent in the line-up. Moss Rest in the rain: dimmer light, deeper colour.",
+    THEME_ART["th-rain-leaf"]!.overview,
+    ["Every Bloom surface"],
+  ),
+  component(
+    "th-cedar-shelf",
+    "theme",
+    "Cedar Shelf",
+    "Old books on a cedarwood shelf.",
+    "customization",
+    "premium",
+    0,
+    "#dec491",
+    "Varnished wood tones with the most regular border rhythm in the line-up, like shelf uprights, and a page-edge gold accent. Bloom's library.",
+    THEME_ART["th-cedar-shelf"]!.overview,
+    ["Every Bloom surface"],
+  ),
+  component(
+    "th-rosewood",
+    "theme",
+    "Rosewood",
+    "Polished rosewood and a red hibiscus.",
+    "customization",
+    "premium",
+    0,
+    "#d96a63",
+    "Dusk Rose finished as lacquer: a darker ground, glossier edges and a deeper petal accent, the red of polished wood rather than the flower.",
+    THEME_ART["th-rosewood"]!.overview,
+    ["Every Bloom surface"],
+  ),
+  component(
+    "th-ember",
+    "theme",
+    "Ember",
+    "The last embers of a fire.",
+    "customization",
+    "premium",
+    0,
+    "#e07b39",
+    "True neutral black surfaces that refuse all tint, with every drop of warmth held in one ember-orange accent and the firelight artwork. The darkest Bloom.",
+    THEME_ART["th-ember"]!.overview,
     ["Every Bloom surface"],
   ),
 ];
@@ -197,13 +279,13 @@ const PALETTES: ComponentDef[] = [
   component(
     "pl-mist-blue",
     "palette",
-    "Mist Blue",
-    "A clear sky accent.",
+    "Pearl Mist",
+    "A soft pearl accent.",
     "customization",
     "everyday",
     150,
-    "#a8c6de",
-    "A calm, clear blue, like morning sky through mist.",
+    "#d9cbae",
+    "A quiet pearl, warm and near neutral, like morning light on still water. (This palette was Mist Blue; M-237 re-grounded it, and existing owners keep it under its new name.)",
     null,
     ["Every Bloom surface"],
   ),
@@ -260,7 +342,7 @@ const WALLPAPERS: ComponentDef[] = [
     "movement",
     "standard",
     300,
-    "#a8c6de",
+    "#cfc4ab",
     "Pearl mist over a morning path, breathing room for the day ahead.",
     REWARD_ART["move-breathe"],
     ["Today", "Rewards"],
@@ -273,7 +355,7 @@ const WALLPAPERS: ComponentDef[] = [
     "mindfulness",
     "standard",
     300,
-    "#9fc3de",
+    "#c9bda6",
     "Rain-streaked glass and lamplight, an invitation to slow down and stay in.",
     REWARD_ART["recovery-season"],
     ["Today", "Rewards"],
@@ -557,7 +639,7 @@ const COLLECTIONS: CollectionDef[] = [
     tone: "#a8c6de",
     componentIds: ["th-ink-serenity", "pl-mist-blue", "wp-rain-glass", "fr-gold-line", "fx-rain-spark"],
     includes:
-      "One complete look: the Ink Serenity theme, Mist Blue palette, Rain Glass wallpaper, Gold Line profile frame and Rain Spark unlock effect.",
+      "One complete look: the Ink Serenity theme, Pearl Mist palette, Rain Glass wallpaper, Gold Line profile frame and Rain Spark unlock effect.",
     surfaces: ["Every Bloom surface", "Today", "Rewards", "Profile", "Rail"],
   },
   {
@@ -621,7 +703,7 @@ const COLLECTIONS: CollectionDef[] = [
     tone: "#a8c6de",
     componentIds: ["th-midnight-tide", "pl-mist-blue", "wp-still-water", "fr-crescent", "fx-rain-spark"],
     includes:
-      "One complete look: the Midnight Tide theme, Mist Blue palette, Still Water wallpaper, Crescent profile frame and Rain Spark unlock effect.",
+      "One complete look: the Midnight Tide theme, Pearl Mist palette, Still Water wallpaper, Crescent profile frame and Rain Spark unlock effect.",
     surfaces: ["Every Bloom surface", "Today", "Rewards", "Profile", "Rail"],
   },
   {

@@ -3545,75 +3545,142 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
    left anywhere in the theme — and its accent channel writes gold
    through --accent-secondary, like every skin below. */
 html[data-bloom-theme="th-velvet-night"] {
-  --background: oklch(0.155 0.006 85);
+  --background: oklch(0.155 0.007 85);
   --surface: oklch(0.19 0.007 85);
-  --surface-2: oklch(0.225 0.008 85);
-  --surface-3: oklch(0.26 0.009 85);
+  --surface-2: oklch(0.225 0.007 85);
+  --surface-3: oklch(0.26 0.007 85);
   --border: oklch(0.305 0.008 85);
-  --border-strong: oklch(0.38 0.009 85);
+  --border-strong: oklch(0.38 0.008 85);
   --accent-secondary: oklch(0.82 0.09 85);
 }
 
 html[data-bloom-theme="th-honey-hour"] {
-  --background: oklch(0.165 0.02 55);
-  --surface: oklch(0.205 0.024 55);
+  --background: oklch(0.17 0.025 55);
+  --surface: oklch(0.205 0.026 55);
   --surface-2: oklch(0.24 0.027 55);
-  --surface-3: oklch(0.275 0.03 55);
-  --border: oklch(0.315 0.024 55);
-  --border-strong: oklch(0.39 0.026 55);
-  --accent-secondary: oklch(0.85 0.1 85);
+  --surface-3: oklch(0.275 0.027 55);
+  --border: oklch(0.315 0.028 55);
+  --border-strong: oklch(0.39 0.028 55);
+  --accent-secondary: oklch(0.83 0.11 75);
 }
 
 html[data-bloom-theme="th-moss-rest"] {
-  --background: oklch(0.16 0.018 165);
-  --surface: oklch(0.2 0.021 165);
+  --background: oklch(0.165 0.022 165);
+  --surface: oklch(0.2 0.023 165);
   --surface-2: oklch(0.235 0.024 165);
-  --surface-3: oklch(0.27 0.027 165);
-  --border: oklch(0.31 0.022 165);
-  --border-strong: oklch(0.385 0.024 165);
-  --accent-secondary: oklch(0.78 0.08 152);
+  --surface-3: oklch(0.27 0.024 165);
+  --border: oklch(0.31 0.025 165);
+  --border-strong: oklch(0.385 0.025 165);
+  --accent-secondary: oklch(0.78 0.07 155);
 }
 
 html[data-bloom-theme="th-dusk-rose"] {
-  --background: oklch(0.165 0.022 20);
-  --surface: oklch(0.205 0.026 20);
-  --surface-2: oklch(0.24 0.03 20);
-  --surface-3: oklch(0.275 0.032 20);
-  --border: oklch(0.31 0.026 20);
-  --border-strong: oklch(0.385 0.03 20);
-  --accent-secondary: oklch(0.8 0.075 10);
+  --background: oklch(0.165 0.027 20);
+  --surface: oklch(0.2 0.028 20);
+  --surface-2: oklch(0.235 0.029 20);
+  --surface-3: oklch(0.27 0.029 20);
+  --border: oklch(0.305 0.028 20);
+  --border-strong: oklch(0.38 0.028 20);
+  --accent-secondary: oklch(0.78 0.09 10);
 }
 
-/* M-236: Midnight Tide's surfaces sat at hue 255 — every card in the
-   app rendered blue-slate, the tint the owner kept calling purple
-   (2026-11-24 screenshots of Nutrition + Settings). M-233 left this
-   theme standing as "a blue theme"; the owner overruled that for
-   surfaces. Same remedy as Velvet Night / Ink Serenity: lightness
-   steps unchanged, chroma drops to a trace on the warm ink axis
-   (hue 85), and the accent becomes champagne gold. The theme's name,
-   id and stored selections are untouched — it just renders neutral. */
+/* M-237 supersedes M-236's interim landing for this theme. M-236 took
+   Midnight Tide off its illegal hue-255 blue onto warm ink (hue 85) as
+   an emergency re-ground; the approved M-237 line-up gives Tide its
+   founded end state instead: wet stone, hue 160 at a trace of chroma
+   (0.005–0.006, so the surfaces read as stone, not as a colour), with
+   compressed surface steps (cards sit flat, like wet slabs) and a
+   cut-edge border-strong. The accent is stone pearl on the same axis.
+   The water lives in the theme's rain artwork now, not in the tint.
+   Name, id and stored selections are untouched. */
 html[data-bloom-theme="th-midnight-tide"] {
-  --background: oklch(0.15 0.006 85);
-  --surface: oklch(0.19 0.007 85);
-  --surface-2: oklch(0.225 0.008 85);
-  --surface-3: oklch(0.26 0.008 85);
-  --border: oklch(0.3 0.008 85);
-  --border-strong: oklch(0.375 0.008 85);
-  --accent-secondary: oklch(0.82 0.09 85);
+  --background: oklch(0.165 0.005 160);
+  --surface: oklch(0.195 0.005 160);
+  --surface-2: oklch(0.22 0.005 160);
+  --surface-3: oklch(0.245 0.005 160);
+  --border: oklch(0.34 0.006 160);
+  --border-strong: oklch(0.4 0.006 160);
+  --accent-secondary: oklch(0.86 0.012 160);
 }
 
-/* M-233: Ink Serenity's surfaces sat at hue 280 — a violet lean, however
-   faint. They move to the warm ink axis (hue 85) and the accent becomes
-   champagne, so the theme is night ink + gold like Velvet Night, only
-   a step lighter. */
+/* M-237 re-founds Ink Serenity (M-233 had already taken it off hue 280
+   onto warm ink). It is now the line-up's pale theme: first light on
+   handmade paper. The whole scale is lifted well clear of Velvet Night
+   (background 0.225 against 0.155), borders are the softest in the
+   line-up, and the accent is pearl, a near-neutral champagne. */
 html[data-bloom-theme="th-ink-serenity"] {
-  --background: oklch(0.175 0.01 85);
-  --surface: oklch(0.21 0.012 85);
-  --surface-2: oklch(0.245 0.014 85);
-  --surface-3: oklch(0.275 0.016 85);
-  --border: oklch(0.32 0.013 85);
-  --border-strong: oklch(0.39 0.015 85);
-  --accent-secondary: oklch(0.82 0.07 85);
+  --background: oklch(0.225 0.006 85);
+  --surface: oklch(0.26 0.006 85);
+  --surface-2: oklch(0.295 0.006 85);
+  --surface-3: oklch(0.33 0.006 85);
+  --border: oklch(0.35 0.007 85);
+  --border-strong: oklch(0.425 0.007 85);
+  --accent-secondary: oklch(0.87 0.02 85);
+}
+
+/* --------------------- M-237: the six new themes ---------------------- */
+/* Each founded on a material, per the approved line-up: clay, brass,
+   monsoon leaf, cedar wood, rosewood, ember. Surfaces never enter the
+   banned hue band (230–320); the noViolet guard pins that per block. */
+
+html[data-bloom-theme="th-clay-court"] {
+  --background: oklch(0.17 0.028 38);
+  --surface: oklch(0.205 0.029 38);
+  --surface-2: oklch(0.24 0.03 38);
+  --surface-3: oklch(0.275 0.03 38);
+  --border: oklch(0.32 0.03 38);
+  --border-strong: oklch(0.395 0.03 38);
+  --accent-secondary: oklch(0.8 0.06 50);
+}
+
+html[data-bloom-theme="th-brass-lamp"] {
+  --background: oklch(0.14 0.008 85);
+  --surface: oklch(0.175 0.008 85);
+  --surface-2: oklch(0.21 0.008 85);
+  --surface-3: oklch(0.245 0.008 85);
+  --border: oklch(0.33 0.01 85);
+  --border-strong: oklch(0.405 0.01 85);
+  --accent-secondary: oklch(0.79 0.11 78);
+}
+
+html[data-bloom-theme="th-rain-leaf"] {
+  --background: oklch(0.165 0.038 145);
+  --surface: oklch(0.2 0.039 145);
+  --surface-2: oklch(0.235 0.04 145);
+  --surface-3: oklch(0.27 0.04 145);
+  --border: oklch(0.315 0.04 145);
+  --border-strong: oklch(0.39 0.04 145);
+  --accent-secondary: oklch(0.82 0.11 145);
+}
+
+html[data-bloom-theme="th-cedar-shelf"] {
+  --background: oklch(0.175 0.024 45);
+  --surface: oklch(0.21 0.025 45);
+  --surface-2: oklch(0.245 0.026 45);
+  --surface-3: oklch(0.28 0.026 45);
+  --border: oklch(0.325 0.026 45);
+  --border-strong: oklch(0.4 0.026 45);
+  --accent-secondary: oklch(0.83 0.07 85);
+}
+
+html[data-bloom-theme="th-rosewood"] {
+  --background: oklch(0.16 0.04 15);
+  --surface: oklch(0.195 0.041 15);
+  --surface-2: oklch(0.23 0.042 15);
+  --surface-3: oklch(0.265 0.042 15);
+  --border: oklch(0.325 0.04 15);
+  --border-strong: oklch(0.4 0.04 15);
+  --accent-secondary: oklch(0.72 0.13 12);
+}
+
+html[data-bloom-theme="th-ember"] {
+  --background: oklch(0.125 0.001 40);
+  --surface: oklch(0.155 0.001 40);
+  --surface-2: oklch(0.185 0.001 40);
+  --surface-3: oklch(0.22 0.001 40);
+  --border: oklch(0.25 0.001 40);
+  --border-strong: oklch(0.325 0.001 40);
+  --accent-secondary: oklch(0.68 0.16 45);
 }
 
 /* ------------------------------- palettes ------------------------------- */
@@ -3630,8 +3697,11 @@ html[data-bloom-palette="pl-sage-glow"] {
 html[data-bloom-palette="pl-rose-dawn"] {
   --accent-secondary: oklch(0.8 0.075 10);
 }
+/* M-237: pl-mist-blue re-grounded as Pearl Mist. The id is kept (stored
+   selections stay valid); the accent leaves the banned hue-230 band for
+   the pearl family, oklch(0.85 0.025 85). */
 html[data-bloom-palette="pl-mist-blue"] {
-  --accent-secondary: oklch(0.79 0.05 230);
+  --accent-secondary: oklch(0.85 0.025 85);
 }
 
 /* ------------------------------ wallpapers ------------------------------ */
@@ -3650,11 +3720,13 @@ html[data-bloom-wallpaper="wp-hushed-dawn"] {
 }
 html[data-bloom-wallpaper="wp-coastal-mist"] {
   --bloom-wallpaper-image: url("/rewards/art/move-breathe.jpg");
-  --bloom-wallpaper-tint: oklch(0.75 0.06 230 / 0.32);
+  /* M-237: tint re-grounded from hue 230 to the pearl family. */
+  --bloom-wallpaper-tint: oklch(0.78 0.025 85 / 0.32);
 }
 html[data-bloom-wallpaper="wp-rain-glass"] {
   --bloom-wallpaper-image: url("/rewards/art/recovery-season.jpg");
-  --bloom-wallpaper-tint: oklch(0.72 0.06 255 / 0.34);
+  /* M-237: tint re-grounded from hue 255 to warm neutral. */
+  --bloom-wallpaper-tint: oklch(0.76 0.02 85 / 0.34);
 }
 html[data-bloom-wallpaper="wp-candle-glow"] {
   --bloom-wallpaper-image: url("/rewards/art/soft-reset.jpg");

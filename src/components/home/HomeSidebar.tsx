@@ -6,6 +6,7 @@ import { routeShowsAppNav } from "@/lib/appNav";
 
 import botanical from "@/assets/home/sidebar-botanical.jpg";
 import { useRailIdentity } from "@/hooks/useRailIdentity";
+import { useThemeArt } from "@/hooks/useThemeArt";
 import { useCycleVisible } from "@/hooks/useCycleVisible";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { PLANS } from "@/lib/billing/plans";
@@ -78,6 +79,9 @@ function useNavItems() {
 
 export function HomeSidebar() {
   const navItems = useNavItems();
+  /* M-237: an equipped theme brings its own sidebar artwork; Bloom's
+     fern photograph stays the fallback when no theme is equipped. */
+  const themeArt = useThemeArt();
   const { pathname } = useLocation();
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
   return (
@@ -160,7 +164,7 @@ export function HomeSidebar() {
           className="app-sidebar-botanical pointer-events-none absolute inset-0"
         >
           <img
-            src={botanical}
+            src={themeArt?.sidebar ?? botanical}
             alt=""
             loading="lazy"
             width={600}
