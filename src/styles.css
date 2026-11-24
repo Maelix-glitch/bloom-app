@@ -3584,14 +3584,22 @@ html[data-bloom-theme="th-dusk-rose"] {
   --accent-secondary: oklch(0.8 0.075 10);
 }
 
+/* M-236: Midnight Tide's surfaces sat at hue 255 — every card in the
+   app rendered blue-slate, the tint the owner kept calling purple
+   (2026-11-24 screenshots of Nutrition + Settings). M-233 left this
+   theme standing as "a blue theme"; the owner overruled that for
+   surfaces. Same remedy as Velvet Night / Ink Serenity: lightness
+   steps unchanged, chroma drops to a trace on the warm ink axis
+   (hue 85), and the accent becomes champagne gold. The theme's name,
+   id and stored selections are untouched — it just renders neutral. */
 html[data-bloom-theme="th-midnight-tide"] {
-  --background: oklch(0.15 0.025 255);
-  --surface: oklch(0.19 0.029 255);
-  --surface-2: oklch(0.225 0.032 255);
-  --surface-3: oklch(0.26 0.034 255);
-  --border: oklch(0.3 0.028 255);
-  --border-strong: oklch(0.375 0.03 255);
-  --accent-secondary: oklch(0.77 0.075 235);
+  --background: oklch(0.15 0.006 85);
+  --surface: oklch(0.19 0.007 85);
+  --surface-2: oklch(0.225 0.008 85);
+  --surface-3: oklch(0.26 0.008 85);
+  --border: oklch(0.3 0.008 85);
+  --border-strong: oklch(0.375 0.008 85);
+  --accent-secondary: oklch(0.82 0.09 85);
 }
 
 /* M-233: Ink Serenity's surfaces sat at hue 280 — a violet lean, however
