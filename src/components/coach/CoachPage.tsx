@@ -12,6 +12,7 @@ import {
   type CoachMode,
 } from "@/hooks/useCoachSystem";
 import { useCoachChat } from "@/hooks/useCoachChat";
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
 import { followUpPrompts, starterPrompts, type Starter } from "@/lib/coach/ui-helpers";
 import { todayKey } from "@/lib/cycle/predict";
 import { phaseScienceLine } from "@/lib/cycle/phaseScience";
@@ -26,6 +27,7 @@ import { CoachContextPanel, type CoachPanelTab } from "./ContextPanel";
 import { CoachSheet } from "./CoachSheet";
 import { QuickPalette } from "./QuickPalette";
 import { CoachCamera } from "./CoachCamera";
+import { AiConsentSheet } from "./AiConsentSheet";
 
 const DRAFT_MAP_KEY = "bloom.coach.drafts.v2";
 const RAIL_KEY = "bloom.coach.rail";
@@ -88,10 +90,28 @@ function CoachPageView({ coach }: { coach: CoachSystem }) {
   const [personalVoice] = useState(() => readPersonalVoice());
   const [railExpanded, setRailExpanded] = useState(true);
 
+  /* AI consent (M-232): the just-in-time ai_assistance ask for this
+     surface. The pipeline consults it before every send; when it
+     refuses, the reason lands in the thread's notice line — the setter
+     comes from the chat hook itself, so it is handed over by ref. */
+  const aiGate = useAiConsentGate("coach");
+  const noticeRef = useRef<(message: string | null) => void>(() => {});
+  const gateEnsure = aiGate.ensure;
+  const ensureAiConsent = useCallback(async (): Promise<boolean> => {
+    const allowed = await gateEnsure();
+    if (!allowed) {
+      noticeRef.current(
+        "Nothing was sent — AI replies need your permission first. You can turn them on any time in Profile → Privacy → Your consent.",
+      );
+    }
+    return allowed;
+  }, [gateEnsure]);
+
   /* The request pipeline — shared with the orb, so both surfaces send
      through the same path into the same store (see useCoachChat). The
      page keeps only its chrome state: drafts, rail, panels, camera. */
-  const chat = useCoachChat({ coach, entries, record });
+  const chat = useCoachChat({ coach, entries, record, ensureAiConsent });
+  noticeRef.current = chat.setNotice;
   const { thinking, responseSlow, freshId, notice, signInRequired, previews } = chat;
   const setFreshId = chat.setFreshId;
   const setNotice = chat.setNotice;
@@ -628,6 +648,8 @@ function CoachPageView({ coach }: { coach: CoachSystem }) {
           onChooseFile={choosePhotoInstead}
         />
       ) : null}
+
+      <AiConsentSheet open={aiGate.askOpen} onAllow={aiGate.allow} onNotNow={aiGate.notNow} />
     </div>
   );
 }

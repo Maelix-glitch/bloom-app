@@ -117,6 +117,9 @@ vi.mock("@/lib/vitalis-ai/voice", async () => {
 });
 
 import { CoachOrbGate } from "./CoachOrb";
+import { setPref } from "@/lib/prefs";
+import { ASSESSMENT_KEY, emptyAssessmentState, recordConsents } from "@/lib/assessment/state";
+import { consentDecision } from "@/lib/vitalis/domain/consent";
 
 const rootRoute = createRootRoute({
   component: () => (
@@ -188,10 +191,26 @@ function seedCoachThread() {
 
 let reducedMotion = false;
 
+/**
+ * These suites model a person who already talks to Vitalis — since
+ * M-232 that includes having granted the ai_assistance permission (the
+ * gate's own behaviour is pinned in useAiConsentGate.test.ts). Seed the
+ * grant the way the Assessment flow stores it.
+ */
+function seedAiConsent() {
+  const at = "2026-03-04T09:15:00.000Z";
+  setPref(
+    ASSESSMENT_KEY,
+    recordConsents(emptyAssessmentState(at), [consentDecision("ai_assistance", true, at)], at),
+  );
+  resetPrefCache();
+}
+
 beforeEach(() => {
   reducedMotion = false;
   window.localStorage.clear();
   window.sessionStorage.clear();
+  seedAiConsent();
   hoisted.askVitalis.mockReset();
   hoisted.askVitalis.mockResolvedValue({
     paragraphs: ["Canned Vitalis reply."],
@@ -476,7 +495,9 @@ describe("CoachOrb — deliberation, actions and the lock", () => {
         equipment: [],
         prepTimeMaxMinutes: null,
       },
-      consents: [],
+      /* M-232: the seeded person has granted ai_assistance, like the
+         rest of this file's fixtures — Vitalis sends are gated on it. */
+      consents: [consentDecision("ai_assistance", true, "2026-11-17T00:00:00.000Z")],
       startedAt: "2026-11-17T00:00:00.000Z",
       completedAt: "2026-11-17T00:05:00.000Z",
       updatedAt: "2026-11-17T00:05:00.000Z",

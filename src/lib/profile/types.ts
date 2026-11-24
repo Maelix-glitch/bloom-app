@@ -144,6 +144,10 @@ export interface HighlightItem {
 }
 
 export interface ProfileIdentity {
+  /** The account's user id, when the surface knows it (M-232) — public
+      profiles carry it from the RPC payload so Report / Block can aim
+      at the person. Optional: own-profile builders may omit it. */
+  userId?: string | null;
   displayName: string;
   username: string | null;
   bio: string | null;

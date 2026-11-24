@@ -88,6 +88,8 @@ import {
   type SpeechRecognitionLike,
 } from "@/lib/voice/speech";
 
+import { useAiConsentGate } from "@/hooks/useAiConsentGate";
+import { AiConsentSheet } from "./AiConsentSheet";
 import { CoachGlyph } from "./bloom-mark";
 
 import "@/styles/coach.css";
@@ -187,6 +189,11 @@ export function CoachOrb() {
   const [responseSlow, setResponseSlow] = useState(false);
   const [freshId, setFreshId] = useState<string | null>(null);
   const [errorTurnId, setErrorTurnId] = useState<string | null>(null);
+  /* AI consent (M-232): the just-in-time ai_assistance ask for the
+     Vitalis surface, and the quiet line shown when a send is refused
+     because the permission is off. */
+  const aiGate = useAiConsentGate("vitalis");
+  const [consentNote, setConsentNote] = useState(false);
   const [muted, setMuted] = useState(false);
   const [listening, setListening] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
@@ -254,6 +261,7 @@ export function CoachOrb() {
      a fresh conversation, by design. */
   const close = useCallback(() => {
     setOpen(false);
+    setConsentNote(false);
     speaker.stop();
     stopDictation();
     abortRef.current?.abort();
@@ -571,21 +579,40 @@ export function CoachOrb() {
     [applyTurns, buildContext, speaker],
   );
 
+  /* Every Vitalis send passes the AI consent gate first (M-232): the
+     check runs before askVitalis is ever invoked, so a refusal costs
+     no credit and sends nothing — the draft stays in the composer. The
+     gate asks at most once on this surface; after that, a refused send
+     just shows the quiet note above the composer. */
+  const gateEnsure = aiGate.ensure;
+  const gatedRunSend = useCallback(
+    async (text: string, appendUser: boolean) => {
+      const allowed = await gateEnsure();
+      if (!allowed) {
+        setConsentNote(true);
+        return;
+      }
+      setConsentNote(false);
+      void runSend(text, appendUser);
+    },
+    [gateEnsure, runSend],
+  );
+
   const submit = useCallback(() => {
     const text = draftRef.current.trim();
     if (!text || inFlightRef.current) return;
     stopDictation();
     speaker.stop();
-    void runSend(text, true);
-  }, [runSend, speaker, stopDictation]);
+    void gatedRunSend(text, true);
+  }, [gatedRunSend, speaker, stopDictation]);
 
   const retry = useCallback(() => {
     const text = lastFailedRef.current;
     if (!text || inFlightRef.current) return;
     applyTurns(turnsRef.current.filter((t) => t.id !== errorTurnId));
     setErrorTurnId(null);
-    void runSend(text, false);
-  }, [applyTurns, errorTurnId, runSend]);
+    void gatedRunSend(text, false);
+  }, [applyTurns, errorTurnId, gatedRunSend]);
 
   /* ------------------------- proposal confirm ------------------------- */
 
@@ -841,7 +868,7 @@ export function CoachOrb() {
                         key={starter}
                         type="button"
                         className="coach-orb-starter"
-                        onClick={() => void runSend(starter, true)}
+                        onClick={() => void gatedRunSend(starter, true)}
                       >
                         {starter}
                       </button>
@@ -998,6 +1025,17 @@ export function CoachOrb() {
               )}
             </div>
 
+            {consentNote ? (
+              <p
+                role="status"
+                data-testid="vitalis-consent-note"
+                className="mx-4 mb-2 rounded-[var(--radius-control)] border border-border bg-surface-2 px-3.5 py-2.5 text-[length:var(--text-caption)] leading-relaxed text-muted-foreground"
+              >
+                Nothing was sent — Vitalis needs your permission to use AI first. You can turn it
+                on any time in Profile → Privacy → Your consent.
+              </p>
+            ) : null}
+
             <form
               className="coach-orb-composer"
               onSubmit={(event) => {
@@ -1062,6 +1100,8 @@ export function CoachOrb() {
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
+
+      <AiConsentSheet open={aiGate.askOpen} onAllow={aiGate.allow} onNotNow={aiGate.notNow} />
     </>
   );
 }

@@ -142,6 +142,25 @@ vi.mock("@/hooks/useCoachSystem", async () => {
 });
 
 import { CoachPage } from "./CoachPage";
+import { setPref } from "@/lib/prefs";
+import { resetPrefCache } from "@/lib/prefsStore";
+import { ASSESSMENT_KEY, emptyAssessmentState, recordConsents } from "@/lib/assessment/state";
+import { consentDecision } from "@/lib/vitalis/domain/consent";
+
+/**
+ * These suites model a person who already uses Coach — since M-232 that
+ * includes having granted the ai_assistance permission (the gate's own
+ * behaviour is pinned in useAiConsentGate.test.ts). Seed the grant the
+ * way the Assessment flow stores it.
+ */
+function seedAiConsent() {
+  const at = "2026-03-04T09:15:00.000Z";
+  setPref(
+    ASSESSMENT_KEY,
+    recordConsents(emptyAssessmentState(at), [consentDecision("ai_assistance", true, at)], at),
+  );
+  resetPrefCache();
+}
 
 afterEach(cleanup);
 
@@ -150,6 +169,7 @@ beforeEach(() => {
   hoisted.requestResponse.mockReset();
   window.sessionStorage.clear();
   window.localStorage.clear();
+  seedAiConsent();
   window.matchMedia = ((query: string) =>
     ({
       matches: false,
@@ -226,5 +246,65 @@ describe("CoachPage — the accepted signal fires at append, not at reply", () =
       ).toBeTruthy(),
     );
     expect(textbox().value).toBe("");
+  });
+});
+
+describe("CoachPage — the AI consent gate (M-232)", () => {
+  /** Back to never-asked: no consent records, no per-surface ask flags. */
+  function clearAiConsent() {
+    const at = "2026-03-04T09:15:00.000Z";
+    setPref(ASSESSMENT_KEY, emptyAssessmentState(at));
+    setPref("health.aiConsentPrompt.v1", {});
+    resetPrefCache();
+  }
+
+  it("asks before the first send; Not now sends nothing, keeps the draft, and never asks twice", async () => {
+    clearAiConsent();
+    hoisted.requestResponse.mockResolvedValue({
+      paragraphs: ["A reply."],
+      sources: [],
+      blocks: [],
+      source: "online",
+    });
+    const { container } = render(<CoachPage />);
+
+    send("Hello Bloom", container);
+
+    /* The ask is up, and nothing has been sent or appended. */
+    expect(await screen.findByTestId("ai-consent-sheet")).toBeTruthy();
+    expect(hoisted.requestResponse).not.toHaveBeenCalled();
+    expect(screen.queryByTestId("thread-message")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Not now" }));
+
+    /* The sheet closes, the notice explains, the draft survives. */
+    await waitFor(() => expect(screen.queryByTestId("ai-consent-sheet")).toBeNull());
+    await waitFor(() => expect(screen.getByText(/Nothing was sent/)).toBeTruthy());
+    expect(textbox().value).toBe("Hello Bloom");
+    expect(hoisted.requestResponse).not.toHaveBeenCalled();
+
+    /* A second send does not re-ask — it is refused quietly. */
+    send("Hello Bloom", container);
+    await waitFor(() => expect(screen.getByText(/Nothing was sent/)).toBeTruthy());
+    expect(screen.queryByTestId("ai-consent-sheet")).toBeNull();
+    expect(hoisted.requestResponse).not.toHaveBeenCalled();
+  });
+
+  it("Allow records the permission and the send proceeds", async () => {
+    clearAiConsent();
+    hoisted.requestResponse.mockResolvedValue({
+      paragraphs: ["A reply."],
+      sources: [],
+      blocks: [],
+      source: "online",
+    });
+    const { container } = render(<CoachPage />);
+
+    send("Hello Bloom", container);
+    expect(await screen.findByTestId("ai-consent-sheet")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Allow" }));
+
+    await waitFor(() => expect(hoisted.requestResponse).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect(screen.getAllByTestId("thread-message")).toHaveLength(2));
   });
 });

@@ -80,12 +80,22 @@ export function useCoachChat({
   coach,
   entries,
   record,
+  ensureAiConsent,
 }: {
   coach: CoachSystem;
   /** The mood record, for the grounded context every request carries. */
   entries: MoodEntry[];
   /** The assembled record — read by the on-device knowledge path only. */
   record: CoachRecord;
+  /**
+   * The ai_assistance consent gate (M-232), consulted at the very top of
+   * every answer request — before the user message is appended, before
+   * onAccepted, and long before the provider call that deducts a credit.
+   * Resolving false rejects the send outright: no message lands, no
+   * credit moves. Optional so non-AI harnesses keep working; the Coach
+   * page always passes it.
+   */
+  ensureAiConsent?: (() => Promise<boolean>) | undefined;
 }) {
   const [thinking, setThinking] = useState(false);
   const [responseSlow, setResponseSlow] = useState(false);
@@ -93,6 +103,9 @@ export function useCoachChat({
   const [notice, setNotice] = useState<string | null>(null);
   const [signInRequired, setSignInRequired] = useState(false);
   const [previews, setPreviews] = useState<Record<string, string>>({});
+
+  const ensureAiConsentRef = useRef(ensureAiConsent);
+  ensureAiConsentRef.current = ensureAiConsent;
 
   const mountedRef = useRef(true);
   const slowTimerRef = useRef<number | null>(null);
@@ -164,6 +177,14 @@ export function useCoachChat({
         return "rejected";
       }
       if (thinking) return "rejected";
+      /* AI consent (M-232): checked before anything is appended or sent,
+         so a declined consent costs nothing — no message in the thread,
+         no provider call, no credit. The gate itself owns the asking
+         (once per surface) and any notice about why nothing sent. */
+      if (ensureAiConsentRef.current) {
+        const allowed = await ensureAiConsentRef.current();
+        if (!allowed) return "rejected";
+      }
       inFlightRef.current = true;
       setThinking(true);
       setResponseSlow(false);

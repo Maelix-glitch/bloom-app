@@ -160,6 +160,7 @@ describe("every health prefs key is covered by export and erasure", () => {
    * and the whole user_prefs row set (account).
    */
   const HEALTH_PREFS_KEYS = [
+    "health.aiConsentPrompt.v1",
     "health.assessment.v1",
     "health.assessmentDelta.v1",
     "health.assessmentHistory.v1",
