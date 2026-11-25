@@ -13,12 +13,17 @@
  * The discipline, in order of importance:
  *
  *   1. A sample must NEVER affect the response. The insert is
- *      fire-and-forget: registered with the execution context's
- *      waitUntil when one reaches this layer, otherwise left as a
- *      floating promise, and every failure is swallowed. (The
- *      shell-cache note in src/lib/shell-cache.ts records that the
- *      built chain does not reliably pass an ExecutionContext this
- *      deep - hence "when one reaches this layer". A lost sample
+ *      fire-and-forget: registered with a waitUntil, and every
+ *      failure is swallowed. (The shell-cache note in
+ *      src/lib/shell-cache.ts records that the built chain does
+ *      not reliably pass an ExecutionContext this deep. M-245
+ *      proved it live: after the M-242 deploy, 73 eligible page
+ *      loads produced ZERO samples - the ctx never reaches this
+ *      layer in the shipped Worker, so a floating write is
+ *      dropped the moment the response finishes. The waitUntil
+ *      therefore comes from the platform module, captured by
+ *      primeServerEnv exactly like the env; a ctx waitUntil is
+ *      used only when one is actually passed. A lost sample
  *      costs a statistic; a broken page costs a user.)
  *   2. It must be CHEAP. The Worker lives under a hard CPU ceiling
  *      (M-227). Sampling is one comparison and, for roughly 1 in
@@ -72,16 +77,37 @@ function envString(env: EnvRecord | null, key: string): string | null {
  */
 let platformEnvCache: EnvRecord | null | undefined;
 
+/**
+ * The platform's waitUntil, captured by the same prime. The
+ * execution context never reaches this layer in the shipped
+ * Worker (see the module note), so the write's keep-alive comes
+ * from the cloudflare:workers module - the platform's own
+ * channel, valid while a request is being handled. Null when
+ * the module does not offer one (off-platform, older runtime).
+ */
+type WaitUntilFn = (promise: Promise<unknown>) => void;
+let platformWaitUntilCache: WaitUntilFn | null | undefined;
+
 export async function primeServerEnv(): Promise<void> {
   if (platformEnvCache !== undefined) return;
   try {
     const mod = (await import(/* @vite-ignore */ "cloudflare:workers")) as {
       env?: EnvRecord;
+      waitUntil?: WaitUntilFn;
     };
     platformEnvCache = mod.env ?? null;
+    platformWaitUntilCache =
+      typeof mod.waitUntil === "function" ? mod.waitUntil : null;
   } catch {
     platformEnvCache = null;
+    platformWaitUntilCache = null;
   }
+}
+
+/** Test seam: primeServerEnv fills the platform waitUntil from
+    the module; tests set it directly to prove the fallback. */
+export function setPlatformWaitUntilForTests(fn: WaitUntilFn | null): void {
+  platformWaitUntilCache = fn;
 }
 
 /**
@@ -197,12 +223,29 @@ export function recordLatencySample(
     }
   })();
 
-  const waitUntil = narrowCtx(ctx)?.waitUntil;
-  if (typeof waitUntil === "function") {
+  /* Keep-alive, in order: a ctx waitUntil when one actually
+     reaches this layer (tests, a future chain), else the
+     platform module's waitUntil captured by primeServerEnv -
+     in the shipped Worker the ctx never arrives (M-245: 73
+     eligible live loads, zero samples), so the platform
+     channel is the one that keeps the write alive. Either may
+     refuse (no active request context); the write then floats,
+     exactly as before. */
+  const ctxWaitUntil = narrowCtx(ctx)?.waitUntil;
+  if (typeof ctxWaitUntil === "function") {
     try {
-      waitUntil.call(narrowCtx(ctx), write);
+      ctxWaitUntil.call(narrowCtx(ctx), write);
+      return true;
     } catch {
-      /* A ctx that refuses the promise changes nothing. */
+      /* A ctx that refuses the promise falls through to the
+         platform channel. */
+    }
+  }
+  if (typeof platformWaitUntilCache === "function") {
+    try {
+      platformWaitUntilCache(write);
+    } catch {
+      /* Outside a request context the write floats, as before. */
     }
   }
   return true;

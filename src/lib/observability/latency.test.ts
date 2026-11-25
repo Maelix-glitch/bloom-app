@@ -14,6 +14,7 @@ import {
   primeServerEnv,
   recordLatencySample,
   resolveServerConfig,
+  setPlatformWaitUntilForTests,
   shouldSample,
   withLatencySampling,
   type FetchImpl,
@@ -151,6 +152,50 @@ describe("recordLatencySample", () => {
     };
     expect(recordLatencySample(ENV, SAMPLE, ctx, fetchImpl)).toBe(true);
     await expect(waited).resolves.toBeUndefined();
+  });
+
+  it("falls back to the platform waitUntil when no ctx reaches the layer (M-245)", async () => {
+    const calls: { input: string }[] = [];
+    const fetchImpl: FetchImpl = async (input) => {
+      calls.push({ input });
+      return new Response(null, { status: 201 });
+    };
+    let waited: Promise<unknown> | undefined;
+    setPlatformWaitUntilForTests((p) => {
+      waited = p;
+    });
+    try {
+      /* No ctx at all - the shipped Worker's shape. */
+      expect(recordLatencySample(ENV, SAMPLE, undefined, fetchImpl)).toBe(true);
+      await waited;
+      expect(calls).toHaveLength(1);
+      expect(calls[0]?.input).toBe(
+        "https://proj.supabase.co/rest/v1/latency_samples",
+      );
+    } finally {
+      setPlatformWaitUntilForTests(null);
+    }
+  });
+
+  it("prefers a real ctx waitUntil over the platform one", async () => {
+    const fetchImpl: FetchImpl = async () => new Response(null, { status: 201 });
+    let ctxWaited = false;
+    let platformWaited = false;
+    setPlatformWaitUntilForTests(() => {
+      platformWaited = true;
+    });
+    try {
+      const ctx = {
+        waitUntil: () => {
+          ctxWaited = true;
+        },
+      };
+      expect(recordLatencySample(ENV, SAMPLE, ctx, fetchImpl)).toBe(true);
+      expect(ctxWaited).toBe(true);
+      expect(platformWaited).toBe(false);
+    } finally {
+      setPlatformWaitUntilForTests(null);
+    }
   });
 
   it("does nothing at all without a service-role key", () => {
