@@ -3,6 +3,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { handleHealth } from "./lib/observability/health";
+import { handleStatus } from "./lib/observability/status";
 import { primeServerEnv, withLatencySampling } from "./lib/observability/latency";
 import { withSecurityHeaders } from "./lib/security-headers";
 import { withShellCache } from "./lib/shell-cache";
@@ -66,6 +67,18 @@ export default {
         /* handleHealth is built to never throw; if it somehow
            does, fall through to the normal pipeline rather than
            answering health with the error page. */
+      }
+    }
+    /* M-247: /api/status feeds the public status page - the same
+       database check plus the 24h per-route percentiles. Always
+       200 with the state inside the payload (it is a page feed,
+       not an alarm); aggregate timings only, no per-person data. */
+    if (new URL(request.url).pathname === "/api/status") {
+      try {
+        return withSecurityHeaders(await handleStatus(env));
+      } catch {
+        /* Same discipline as health: never answer the feed with
+           the error page. */
       }
     }
     try {
