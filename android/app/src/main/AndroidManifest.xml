@@ -22,6 +22,19 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- App links (M-239): https links on the live app host open in
+                 Bloom instead of the browser. autoVerify stays off in v1:
+                 verified links need /.well-known/assetlinks.json served on
+                 the host, which is a follow-up (see NATIVE_SHELL.md). Until
+                 then Android shows its standard app chooser. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https"
+                      android:host="maelix-glitch-bloom-app.bloomlabs.workers.dev" />
+            </intent-filter>
+
         </activity>
 
         <provider
@@ -43,4 +56,8 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+    <!-- Local notifications (M-239): Android 13+ requires this before the
+         app may post notifications; requested at runtime through the
+         Capacitor bridge, only when the person turns reminders on. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 </manifest>

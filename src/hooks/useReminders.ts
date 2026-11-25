@@ -19,6 +19,12 @@ import { useTrackers } from "@/hooks/useTrackers";
 import { getPref, PREFS_CHANGED, setPref } from "@/lib/prefs";
 import { habitStreak } from "@/lib/reminders/streak";
 import { subscribeToPush, unsubscribeFromPush } from "@/lib/reminders/push";
+import { isNativePlatform } from "@/lib/native-shell";
+import {
+  checkNativeNotificationPermission,
+  notifyNowNative,
+  requestNativeNotificationPermission,
+} from "@/lib/native-notifications";
 import { recordNotice } from "@/lib/notifications/center";
 import {
   DEFAULT_REMINDERS,
@@ -49,6 +55,19 @@ function permissionOf(): PermissionState {
 }
 
 async function show(reminder: Reminder): Promise<void> {
+  /* Inside the bundled app the web routes below cannot fire: the service
+     worker does not run under the capacitor scheme, and iOS webviews drop
+     web notifications. The native bridge presents it instead (M-239). If
+     the plugin is somehow missing, fall through to the web routes. */
+  if (isNativePlatform()) {
+    const fired = await notifyNowNative({
+      key: reminder.key,
+      title: reminder.title,
+      body: reminder.body,
+      url: reminder.url,
+    });
+    if (fired) return;
+  }
   const options: NotificationOptions = {
     body: reminder.body,
     tag: reminder.key,
@@ -103,6 +122,14 @@ export function useReminders(): RemindersStore {
     const sync = () => setSettings(readSettings());
     sync();
     setPermission(permissionOf());
+    /* In the bundled app the web permission state means nothing; read the
+       native one so an already-granted shell delivers on launch without
+       the person having to re-toggle reminders (M-239). */
+    if (isNativePlatform()) {
+      void checkNativeNotificationPermission().then((state) => {
+        if (state) setPermission(state);
+      });
+    }
     delivered.current = loadDelivered();
     window.addEventListener(PREFS_CHANGED, sync);
     window.addEventListener("storage", sync);
@@ -234,6 +261,14 @@ export function useReminders(): RemindersStore {
   );
 
   const enable = useCallback(async () => {
+    /* In the bundled app, permission lives on the native side (M-239). */
+    if (isNativePlatform()) {
+      const granted = await requestNativeNotificationPermission();
+      if (!granted) return false;
+      setPermission("granted");
+      set("enabled", true);
+      return true;
+    }
     if (permissionOf() === "unsupported") return false;
     let state = permissionOf();
     if (state === "default") {
