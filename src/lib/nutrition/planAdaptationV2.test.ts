@@ -149,9 +149,9 @@ describe("no usable learning — the P6 plan, unchanged", () => {
     const base = gen({ day: OWNER_DAY });
     const withEmpty = gen({ day: OWNER_DAY, recentLog: [], storedPlan: null });
     expect(withEmpty).toEqual(base);
-    /* Method 15 = the engine evidence-audit fixes (M-219): version
-       pin moved; the inertness pinned here is unchanged. */
-    expect(base.methodVersion).toBe(15);
+    /* Method 16 = the per-meal protein aim (M-244): version pin
+       moved; the inertness pinned here is unchanged. */
+    expect(base.methodVersion).toBe(16);
   });
 
   it("an on-target log with no dish history changes nothing", () => {

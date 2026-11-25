@@ -75,7 +75,11 @@ describe("micronutrients — math", () => {
     const incomplete = incompleteOptionalFields([a, b]);
     expect(incomplete.has("potassiumMg")).toBe(true);
     expect(incomplete.has("fibreG")).toBe(true);
-    expect(incompleteOptionalFields([a]).size).toBe(5);
+    /* [a] alone is incomplete in the six optional fields it does not
+       report — sugar among them since M-244 added sugarG to the
+       panel (the count was five before the field existed). */
+    expect(incompleteOptionalFields([a]).has("sugarG")).toBe(true);
+    expect(incompleteOptionalFields([a]).size).toBe(6);
     expect(incompleteOptionalFields([]).size).toBe(0);
   });
 });

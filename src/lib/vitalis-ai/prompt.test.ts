@@ -30,6 +30,7 @@ function sliceBetween(startMarker: string, endMarker: string): string {
 }
 
 const VITALIS_PROMPT = sliceBetween("const VITALIS_SYSTEM", "`;");
+const COACH_PROMPT = sliceBetween("const SYSTEM", "`;");
 const TTS_SECTION = sliceBetween("const ELEVENLABS_DEFAULT_VOICE_ID", "Deno.serve");
 
 describe("the Vitalis system prompt", () => {
@@ -62,6 +63,32 @@ describe("the Vitalis system prompt", () => {
   it("forbids bracketed sidecar directives — Vitalis writes no Coach memories", () => {
     expect(VITALIS_PROMPT).toContain("[BLOOM_");
     expect(VITALIS_PROMPT).toMatch(/never emit/i);
+  });
+});
+
+describe("motivational interviewing (M-244, research R-2511-06)", () => {
+  it("the Coach prompt carries the OARS skills and the autonomy rules", () => {
+    expect(COACH_PROMPT).toContain("MOTIVATIONAL INTERVIEWING");
+    expect(COACH_PROMPT).toContain("OARS");
+    expect(COACH_PROMPT).toMatch(/Open questions over closed ones/);
+    expect(COACH_PROMPT).toMatch(/Affirm what is real/);
+    expect(COACH_PROMPT).toMatch(/Reflect before you advise/);
+    expect(COACH_PROMPT).toMatch(/Summarise at turning points/);
+    expect(COACH_PROMPT).toMatch(/change talk/);
+    expect(COACH_PROMPT).toMatch(/Roll with resistance/);
+    expect(COACH_PROMPT).toMatch(/Never lecture/);
+    expect(COACH_PROMPT).toMatch(/Ask permission before advice/);
+  });
+
+  it("the Vitalis prompt carries the same stance, in its spoken form", () => {
+    expect(VITALIS_PROMPT).toContain("MOTIVATIONAL INTERVIEWING");
+    expect(VITALIS_PROMPT).toMatch(/open questions/i);
+    expect(VITALIS_PROMPT).toMatch(/Affirm real effort/);
+    expect(VITALIS_PROMPT).toMatch(/Reflect what they said/);
+    expect(VITALIS_PROMPT).toMatch(/summarise what they have told you/i);
+    expect(VITALIS_PROMPT).toMatch(/drop it without a fight/);
+    expect(VITALIS_PROMPT).toMatch(/never lecture/i);
+    expect(VITALIS_PROMPT).toMatch(/ask permission/i);
   });
 });
 

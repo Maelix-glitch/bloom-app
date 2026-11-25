@@ -76,7 +76,21 @@ import { useTrackers } from "@/hooks/useTrackers";
 import { useSession } from "@/hooks/useSession";
 import { GOAL_LABEL } from "@/lib/assessment/questions";
 import { fmtGrams, fmtInt, fmtKcalApprox } from "@/lib/format";
-import { adjustmentCopy, reasonDetail, type AdjustmentCopy } from "@/lib/reasons";
+import {
+  adjustmentCopy,
+  diagnosisCopy,
+  planChecksCopy,
+  reasonDetail,
+  type AdjustmentCopy,
+} from "@/lib/reasons";
+import { diagnosisFor } from "@/lib/nutrition/diagnosis";
+import {
+  EMPTY_MODES_VALUE,
+  MODES_KEY,
+  effectiveModes,
+  parseModesValue,
+} from "@/lib/modes/modes";
+import { usePrefValue } from "@/lib/prefsStore";
 import { useInView } from "@/components/ci/motion";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { SAFETY_DISCLAIMER } from "@/lib/vitalis/domain/safety";
@@ -357,6 +371,12 @@ export function NutritionPlanSection() {
      plan has been made for, and this is the same resolved figure
      Trackers measures against — never a second computation. */
   const trackerStore = useTrackers();
+  /* M-244 (research R-2511-03's display half): the person's effective
+     Condition Modes — stored toggles plus the modes their Assessment
+     answers auto-enable (M-219) — read the same way usePlan reads
+     them for composition. Only the blood-sugar flag is consumed
+     here: it decides whether each meal row states its carbs. */
+  const modesValue = usePrefValue(MODES_KEY, parseModesValue, EMPTY_MODES_VALUE);
 
   /* P8: the composing sequence — the step currently on show, or
      null when no composition is running. The timers are the
@@ -752,6 +772,25 @@ export function NutritionPlanSection() {
     byFoodId: foodById,
     byDishId: dishById,
   });
+  /* M-244: the plan's working diagnosis (R-2511-01) and its sodium
+     and sugar checks (R-2511-09 + R-2511-10) — data from the lib
+     derivations, words from reasons.ts, like everything else the
+     page states. The blood-sugar flag (R-2511-03's display half)
+     decides whether each meal row also states its carbs: the
+     spread across the day is the thing that mode exists to make
+     visible, and the rows are where it can be seen. */
+  const diagnosisLines = diagnosisCopy(
+    diagnosisFor({
+      plan,
+      conditions: profile.constraints.conditions,
+      entries: nutrition.entries,
+    }),
+  );
+  const checksLines = planChecksCopy(view.checks);
+  const bloodSugarOn = effectiveModes(
+    modesValue.active,
+    profile.constraints.conditions,
+  ).includes("blood_sugar");
   const showKcal = view.showKcal;
   /** A kcal figure under the view's calorie visibility (rule 8):
    *  the number, or the redaction the rows render in its place. */
@@ -1059,6 +1098,7 @@ export function NutritionPlanSection() {
                   ) : null}
                   <span className="meal-row__meta" data-meta>
                     {kcalText(sums.kcal)} · {fmtGrams(sums.proteinG)} g protein
+                    {bloodSugarOn ? <> · {fmtGrams(sums.carbsG)} g carbs</> : null}
                     {anchorDish ? (
                       <>
                         {" "}
@@ -1355,6 +1395,27 @@ export function NutritionPlanSection() {
 
     <section className="nut-card nut-rise section" aria-label="Your day">
 
+      {/* M-244 (R-2511-01): the working diagnosis heads the day —
+          Working on, Why, Watching: three short lines from the
+          record, worded by reasons.ts. Not a card inside the card:
+          plain rows in the day card's own flow, above the path
+          they frame — a dietitian names the problem before the
+          plan, and Bloom's plan now does the same. */}
+      <div>
+        <p className="nut-group-label">What this plan is working on</p>
+        <p className="nut-note">
+          <span className="font-medium text-foreground">Working on.</span>{" "}
+          {diagnosisLines.problem}
+        </p>
+        <p className="nut-note">
+          <span className="font-medium text-foreground">Why.</span> {diagnosisLines.why}
+        </p>
+        <p className="nut-note">
+          <span className="font-medium text-foreground">Watching.</span>{" "}
+          {diagnosisLines.signs}
+        </p>
+      </div>
+
       {/* Brief v7 N3: the day as a path (N2's DayPath, consuming the
           view's rail verbatim) replaces the P12 timeline list —
           retiring its "—" time cells (M-144). Two of the list's
@@ -1365,7 +1426,7 @@ export function NutritionPlanSection() {
           above, so it is said once either way). Brief v7 N5: the
           path and the meals below it are the day card now — the
           plan's second shell section, after the water slot. */}
-      <div>
+      <div className="mt-5">
         <p className="nut-group-label">Your day</p>
         <DayPath stops={view.rail} thumbFor={thumbFor} showKcal={view.showKcal} />
         {plan.hydration && plan.morning ? (
@@ -1386,6 +1447,18 @@ export function NutritionPlanSection() {
           planView's order (M-159) — no card inside the section's
           card, no second order anywhere on the page. */}
       <div className="meals-panel mt-5">{view.meals.map(mealRow)}</div>
+
+      {/* M-244 (R-2511-09 + R-2511-10): the plan judged against the
+          sodium ceiling and the sugar line, under the meals they
+          sum. A line renders only when the plan's items report the
+          nutrient — absence is never dressed as a figure. */}
+      {checksLines.sodium || checksLines.sugar ? (
+        <div className="mt-5">
+          <p className="nut-group-label">In this plan</p>
+          {checksLines.sodium ? <p className="nut-note">{checksLines.sodium}</p> : null}
+          {checksLines.sugar ? <p className="nut-note">{checksLines.sugar}</p> : null}
+        </div>
+      ) : null}
 
       {plan.cautions.length > 0 ? (
         <div className="mt-5">

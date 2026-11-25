@@ -56,7 +56,7 @@ import {
   GUIDELINE_VEGETABLES_G,
   type BalanceGroupKey,
 } from "./balance";
-import { sumNutrients } from "./math";
+import { incompleteOptionalFields, sumNutrients } from "./math";
 import type { Dish } from "./dishes";
 import type { DailyPlan, PlanGoalProfile, PlanMeal, PlanSuggestion } from "./plan";
 import type { Food, LogEntry, Meal, Nutrients } from "./types";
@@ -507,6 +507,35 @@ export interface PlanViewMeal {
   addOns: { suggestion: PlanSuggestion; included: boolean }[];
 }
 
+/** The sodium ceiling the plan is judged against, mg/day: WHO's
+ *  salt limit (under 5 g of salt a day) is ≈ 2,000 mg of sodium,
+ *  and ICMR-NIN's Dietary Guidelines for Indians 2024 state the
+ *  same salt line. The day spectrum judges logged days against
+ *  the same figure (dayView.ts) — one ceiling, both surfaces. */
+export const PLAN_SODIUM_CEILING_MG = 2000;
+
+/** The sugar line the plan is judged against, % of the day's
+ *  energy: ICMR-NIN DGI 2024 — sugar under 5% of total energy.
+ *  Sugar energy is counted at 4 kcal per gram, the standard
+ *  Atwater factor the source data itself uses. */
+export const PLAN_SUGAR_LIMIT_PCT = 5;
+export const SUGAR_KCAL_PER_G = 4;
+
+export interface PlanChecks {
+  /** The plan's sodium, summed over the dishes and foods that
+   *  report it. `mg` is null when nothing in the plan reports
+   *  sodium at all (the check then renders nothing — an absent
+   *  field is never dressed as zero). `complete` is false when
+   *  at least one served item does not report sodium: the total
+   *  is then a floor, and the copy says "at least". */
+  sodium: { mg: number | null; ceilingMg: number; complete: boolean };
+  /** The plan's total sugars, same absence rules. `shareOfEnergyPct`
+   *  is the sugar share of the plan's own energy, and is null when
+   *  calories are hidden (the share is an energy fact) or when the
+   *  plan carries no energy to divide by. */
+  sugar: { g: number | null; shareOfEnergyPct: number | null; limitPct: number; complete: boolean };
+}
+
 export interface PlanView {
   goal: { key: PlanGoalProfile };
   showKcal: boolean;
@@ -514,6 +543,12 @@ export interface PlanView {
     plan: { kcal: number; proteinG: number; meals: number; waterMl: number | null };
     guide: { kcal: number; proteinG: number };
   };
+  /** M-244 (research R-2511-09 + R-2511-10): the plan judged
+   *  against the two published ceilings the day's targets do not
+   *  carry — sodium (display first; nothing blocks on it) and
+   *  sugar's share of energy. Data only; the words live in
+   *  reasons.ts, per the house rule. */
+  checks: PlanChecks;
   rail: PlanRailStop[];
   /** The day's meals in the ONE canonical order (`sortMeals`). */
   meals: PlanViewMeal[];
@@ -577,9 +612,40 @@ export function buildPlanView(input: PlanViewInput): PlanView {
     return { key, label, eaten: eatenG, planned: plannedG, reach: eatenG + plannedG, target, unit: "g" };
   };
 
+  /* M-244: the plan checks — sodium and sugar over EVERY panel the
+     * plan serves (the same item set mealTotals sums: dishes plus
+     * every suggestion, top-ups included), with completeness read
+     * per field, so a total built from partial reporting is named
+     * a floor by the copy, never read as the whole. */
+  const servedPanels = plan.meals.flatMap((m) => [
+    ...m.dishes.map((d) => d.nutrients),
+    ...m.suggestions.map((s) => s.nutrients),
+  ]);
+  const servedTotals = sumNutrients(servedPanels);
+  const servedIncomplete = incompleteOptionalFields(servedPanels);
+  const checks: PlanChecks = {
+    sodium: {
+      mg: servedTotals.sodiumMg ?? null,
+      ceilingMg: PLAN_SODIUM_CEILING_MG,
+      complete: !servedIncomplete.has("sodiumMg"),
+    },
+    sugar: {
+      g: servedTotals.sugarG ?? null,
+      shareOfEnergyPct:
+        servedTotals.sugarG !== undefined &&
+        planKcal > 0 &&
+        !(input.prefs?.hideCalories ?? false)
+          ? Math.round(((servedTotals.sugarG * SUGAR_KCAL_PER_G) / planKcal) * 1000) / 10
+          : null,
+      limitPct: PLAN_SUGAR_LIMIT_PCT,
+      complete: !servedIncomplete.has("sugarG"),
+    },
+  };
+
   return {
     goal: { key: plan.goalProfile },
     showKcal: !(input.prefs?.hideCalories ?? false),
+    checks,
     totals: {
       plan: {
         kcal: planKcal,

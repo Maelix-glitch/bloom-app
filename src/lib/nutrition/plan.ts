@@ -521,8 +521,13 @@ export interface DailyPlan {
  *  place in the day also becomes the person's choice: the
  *  widest-gap rule stays the default, and a "morning"
  *  preference places the snack in the breakfast→lunch gap
- *  when that gap can hold it (see dayTimelineFor). */
-export const PLAN_METHOD_VERSION = 15;
+ *  when that gap can hold it (see dayTimelineFor). Method 16
+ *  (M-244, research R-2511-04) adds the per-meal protein aim to
+ *  the pick cost: a main-meal pick under 0.25 g/kg of the
+ *  engine's protein-basis weight pays a bounded shortfall cost,
+ *  so the day's protein is distributed across its meals instead
+ *  of landing wherever the fit leaves it. */
+export const PLAN_METHOD_VERSION = 16;
 
 export type PlanRefusal =
   | {
@@ -2986,7 +2991,48 @@ interface DishPickOpts {
    *  PROTEIN_WAVE_GUIDE_DENSITY), so the dedicated protein wave
    *  gets its bounded pick preference. */
   proteinWaveBonus?: boolean | undefined;
+  /** M-244 (research R-2511-04): the per-meal protein aim in grams —
+   *  0.25 g per kg of the engine's own protein-basis weight, derived
+   *  from the resolved targets by `perMealProteinAimG`. A main-meal
+   *  pick under the aim pays a bounded shortfall cost in the pick
+   *  (see PER_MEAL_PROTEIN_AIM_COST). Absent = the aim is off. */
+  perMealProteinAimG?: number | undefined;
 }
+
+/** M-244 (research R-2511-04, ISSN 2017 position stand): the per-meal
+ *  protein aim — 0.25 g per kg body weight per meal, the stand's
+ *  per-meal figure for distributing the day's protein. The weight is
+ *  the engine's OWN protein basis, recovered from the resolved
+ *  targets: body.ts doses the day's protein on a reference weight
+ *  above BMI 23 (M-219, audit F-05) at a goal band of 1.4–2.2 g/kg,
+ *  so basis = proteinG ÷ band, exactly, with no second BMI
+ *  computation and no change to the basis itself (the basis is a
+ *  human-review item, M-82 — this derivation only reads it). The
+ *  bands below mirror body.ts `bodyTargetsOf`; a test pins the two
+ *  together. */
+export const PER_MEAL_PROTEIN_AIM_G_PER_KG = 0.25;
+
+const PROTEIN_BAND_G_PER_KG: Record<PlanGoalProfile, number> = {
+  lose: 1.8,
+  gain: 1.6,
+  maintain: 1.4,
+  recomp: 2.2,
+};
+
+export function perMealProteinAimG(
+  targets: NutritionTargets,
+  goalProfile: PlanGoalProfile,
+): number {
+  const basisKg = targets.proteinG / PROTEIN_BAND_G_PER_KG[goalProfile];
+  return Math.round(basisKg * PER_MEAL_PROTEIN_AIM_G_PER_KG * 10) / 10;
+}
+
+/** The per-meal aim's pick cost at a total shortfall — deliberately
+ *  in the ranking-term class (compare the cuisine pull, 0.08): it
+ *  re-orders near-equals toward meals that carry their protein, and
+ *  it can never crown a dish that fits badly, because the fit terms
+ *  and the day guard still judge the composed day. */
+const PER_MEAL_PROTEIN_AIM_COST = 0.1;
 
 /**
  * The served-yesterday penalty: what it costs a dish to be picked
@@ -3191,6 +3237,24 @@ function dishPickCost(
    *  and the day guard still judges the composed day: a wave pick
    *  that breaks the day's bands is re-picked like any other. */
   if (opts.proteinWaveBonus && PROTEIN_WAVE_DISH_IDS.has(candidate.dish.id)) cost -= 0.3;
+  /* M-244 (research R-2511-04): the per-meal protein aim. A main
+   *  meal whose pick lands under the aim pays in proportion to the
+   *  shortfall — breakfast first among equals, since breakfast is
+   *  the meal that most often lands thin — while a pick at or over
+   *  the aim pays nothing. Snacks carry no aim: the ISSN figure is
+   *  a per-meal distribution rule, and a snack is not a meal (the
+   *  same distinction the complete-day rule, M-244/R-2511-08,
+   *  draws). The term is capped by PER_MEAL_PROTEIN_AIM_COST, so
+   *  the day bands are never traded away for it. */
+  if (
+    opts.perMealProteinAimG !== undefined &&
+    split.meal !== "snack" &&
+    scaled.proteinG < opts.perMealProteinAimG
+  ) {
+    cost +=
+      PER_MEAL_PROTEIN_AIM_COST *
+      ((opts.perMealProteinAimG - scaled.proteinG) / opts.perMealProteinAimG);
+  }
   /* A breakfast dish at breakfast fits the meal's idiom. */
   if (split.meal === "breakfast" && candidate.dish.category === "breakfast") cost -= 0.04;
   return cost;
@@ -4841,6 +4905,9 @@ export function generatePlan(input: PlanGenerationInput): PlanOutcome {
      *  guide's own protein density. */
     ...(preferNoCook ? { preferNoCook } : {}),
     proteinWaveBonus: targets.proteinG / targets.kcal >= PROTEIN_WAVE_GUIDE_DENSITY,
+    /* M-244 (research R-2511-04): the per-meal protein aim, derived
+     *  from the resolved targets on the engine's own basis. */
+    perMealProteinAimG: perMealProteinAimG(targets, goalProfileOf(goal)),
   };
   const usedDishIds = new Set<string>();
   const meals: PlanMeal[] = splits.map((split) => {

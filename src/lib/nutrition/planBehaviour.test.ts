@@ -118,9 +118,9 @@ function cloneDish(over: Partial<Dish> & { id: string }): Dish {
 /* ------------------------------ the record ------------------------------ */
 
 describe("P10 · method and record", () => {
-  it("plans carry method version 15", () => {
-    expect(PLAN_METHOD_VERSION).toBe(15);
-    expect(gen(profileWith({})).methodVersion).toBe(15);
+  it("plans carry method version 16", () => {
+    expect(PLAN_METHOD_VERSION).toBe(16);
+    expect(gen(profileWith({})).methodVersion).toBe(16);
   });
 
   it("the snapshot records the behavioural answers, outside the fingerprint", () => {

@@ -461,3 +461,97 @@ export function adjustmentCopy(a: AdjustmentLike | null | undefined): Adjustment
   }
   return copy;
 }
+
+/* --------------------- M-244: diagnosis + plan checks -------------------- */
+
+export interface DiagnosisCopy {
+  /** The Problem line: the goal, stated as the work. No numbers —
+   *  the header's stat strip owns the figures (brief v7 rule 2). */
+  problem: string;
+  /** The Etiology line: what in the record the plan works with. */
+  why: string;
+  /** The Signs line: the measurable things this plan watches. */
+  signs: string;
+}
+
+/** Structural twin of PlanDiagnosis (lib/nutrition/diagnosis.ts) —
+ *  structural so this copy module imports no plan-view code. */
+export interface DiagnosisLike {
+  goalProfile: "lose" | "gain" | "maintain" | "recomp";
+  conditionLabels: readonly string[];
+  perMealProteinAimG: number;
+  completeDaysInWindow: number;
+  windowDays: number;
+}
+
+const DIAGNOSIS_PROBLEM: Record<DiagnosisLike["goalProfile"], string> = {
+  lose: "Losing weight at a steady pace, without losing strength.",
+  gain: "Gaining weight steadily, with strength to match.",
+  maintain: "Holding your weight steady while eating well.",
+  recomp: "Building strength and muscle while your weight holds steady.",
+};
+
+/**
+ * The working diagnosis at the head of the plan (M-244, research
+ * R-2511-01): a dietitian names the problem before the plan —
+ * Problem, Etiology, Signs — in plain words, from the record.
+ * Every line ≤ 140 chars and a complete sentence; no line claims
+ * Bloom treats a condition (the guardrails are the plan's, the
+ * condition is the person's own stated fact).
+ */
+export function diagnosisCopy(d: DiagnosisLike): DiagnosisCopy {
+  const labels = d.conditionLabels;
+  const why =
+    labels.length === 0
+      ? "This plan follows the goal and answers in your assessment."
+      : labels.length === 1
+        ? `Your assessment mentions ${labels[0]}, so its guardrails are on.`
+        : labels.length === 2
+          ? `Your assessment mentions ${labels[0]} and ${labels[1]}, so their guardrails are on.`
+          : `Your assessment mentions ${labels[0]}, ${labels[1]} and ${labels.length - 2} more, so their guardrails are on.`;
+  const aim = Math.round(d.perMealProteinAimG);
+  const signs =
+    d.completeDaysInWindow > 0
+      ? `Each main meal aims for about ${aim} g of protein. ${plural(d.completeDaysInWindow, "complete day")} in the last 4 weeks are shaping this plan.`
+      : `Each main meal aims for about ${aim} g of protein. No complete days logged yet, so nothing here is adapted.`;
+  const copy = { problem: DIAGNOSIS_PROBLEM[d.goalProfile], why, signs };
+  for (const line of Object.values(copy)) {
+    if (line.length > 140) console.warn("diagnosis copy over 140 chars:", line.length);
+  }
+  return copy;
+}
+
+/** Structural twin of PlanChecks (lib/nutrition/planView.ts). */
+export interface PlanChecksLike {
+  sodium: { mg: number | null; ceilingMg: number; complete: boolean };
+  sugar: {
+    g: number | null;
+    shareOfEnergyPct: number | null;
+    limitPct: number;
+    complete: boolean;
+  };
+}
+
+/**
+ * The plan's sodium and sugar lines (M-244, research R-2511-09 +
+ * R-2511-10). A null figure renders no line at all — a nutrient
+ * nothing in the plan reports is absent, never a dressed-up zero.
+ * An incomplete total reads "at least": it is a floor over the
+ * items that reported the nutrient, stated as one.
+ */
+export function planChecksCopy(checks: PlanChecksLike): {
+  sodium: string | null;
+  sugar: string | null;
+} {
+  const sodium =
+    checks.sodium.mg === null
+      ? null
+      : `Sodium ${checks.sodium.complete ? "" : "at least "}${whole(checks.sodium.mg)} mg of the ${whole(checks.sodium.ceilingMg)} mg daily guide.`;
+  const sugar =
+    checks.sugar.g === null
+      ? null
+      : checks.sugar.shareOfEnergyPct === null
+        ? `Sugar ${checks.sugar.complete ? "" : "at least "}${checks.sugar.g} g in the day's plan.`
+        : `Sugar ${checks.sugar.complete ? "" : "at least "}${checks.sugar.g} g, ${checks.sugar.shareOfEnergyPct}% of the day's energy. The guide is under ${checks.sugar.limitPct}%.`;
+  return { sodium, sugar };
+}

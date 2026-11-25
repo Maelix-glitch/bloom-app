@@ -164,10 +164,10 @@ describe("no usable log — the P5 plan, unchanged", () => {
   const base = gen(ownerProfile(), { day: OWNER_DAY, fallbackTargets: OWNER_TARGETS });
 
   it("no recentLog field at all", () => {
-    /* Method 15 = the engine evidence-audit fixes (M-219): the pin
+    /* Method 16 = the per-meal protein aim (M-244): the pin
        moves with the version; the behaviour pinned here — no log,
        no learning notes — is unchanged. */
-    expect(base.methodVersion).toBe(15);
+    expect(base.methodVersion).toBe(16);
     expect(base.notes.some((n) => n.startsWith("From your log"))).toBe(false);
   });
 
