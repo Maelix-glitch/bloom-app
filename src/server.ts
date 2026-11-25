@@ -2,6 +2,8 @@ import "./lib/error-capture";
 
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
+import { handleHealth } from "./lib/observability/health";
+import { primeServerEnv, withLatencySampling } from "./lib/observability/latency";
 import { withSecurityHeaders } from "./lib/security-headers";
 import { withShellCache } from "./lib/shell-cache";
 
@@ -48,6 +50,24 @@ function isH3SwallowedErrorBody(body: string): boolean {
 
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
+    /* M-242: capture the platform env once (the built chain
+       forwards only the request to this entry, so the env and
+       ctx parameters cannot be relied on - see
+       lib/observability/latency.ts). A no-op after first call. */
+    await primeServerEnv();
+    /* M-242: /api/health answers before the SSR pipeline - one
+       small database check, no render, nothing cached (the shell
+       cache already excludes /api paths). The alert check watches
+       this endpoint. */
+    if (new URL(request.url).pathname === "/api/health") {
+      try {
+        return withSecurityHeaders(await handleHealth(env));
+      } catch {
+        /* handleHealth is built to never throw; if it somehow
+           does, fall through to the normal pipeline rather than
+           answering health with the error page. */
+      }
+    }
     try {
       const handler = await getServerEntry();
       /* Document GETs may be served from the shell edge cache
@@ -57,7 +77,14 @@ export default {
          the cache only decides whether it needs to run. */
       const render = async () =>
         normalizeCatastrophicSsrResponse(await handler.fetch(request, env, ctx));
-      const response = await withShellCache(request, {}, render);
+      /* M-242: every app request is timed and sampled
+         (lib/observability/latency.ts) around the cache + render
+         pipeline. The sampler is fire-and-forget and cannot
+         affect the response; it only decides whether this
+         request's duration joins public.latency_samples. */
+      const response = await withLatencySampling(request, env, ctx, () =>
+        withShellCache(request, {}, render),
+      );
       /* Every response — document, asset, redirect, error — carries
          the security headers (see lib/security-headers.ts). The
          shell cache returns raw responses, so cache hits pass
