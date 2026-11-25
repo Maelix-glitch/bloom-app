@@ -150,7 +150,7 @@ const ART: Record<string, React.ReactNode> = {
       <g {...P}>
         <path
           d="M20 46h24a8 8 0 0 0 1-16 11 11 0 0 0-21-3 7 7 0 0 0-4 19Z"
-          {...F("#9fb6cf", 0.55)}
+          {...F("#aebfae", 0.55)}
         />
         <path d="M24 52l-1.5 3M32 52v3M40 52l1.5 3" strokeWidth={2.4} />
       </g>
@@ -203,7 +203,7 @@ const ART: Record<string, React.ReactNode> = {
   "mood.calm": (
     <S>
       <g {...P}>
-        <circle cx="32" cy="32" r="20" {...F("#9fb6cf", 0.35)} />
+        <circle cx="32" cy="32" r="20" {...F("#aebfae", 0.35)} />
         <path d="M24 30c2-2 5-2 7 0M33 30c2-2 5-2 7 0" />
         <path d="M26 40c3 2.5 9 2.5 12 0" />
       </g>
@@ -230,12 +230,12 @@ const ART: Record<string, React.ReactNode> = {
   "mood.tired": (
     <S>
       <g {...P}>
-        <circle cx="32" cy="32" r="20" {...F("#9fb6cf", 0.3)} />
+        <circle cx="32" cy="32" r="20" {...F("#aebfae", 0.3)} />
         <path d="M24 30h8M32 30h8" strokeWidth={2.6} />
         <path d="M28 41h8" strokeWidth={2.6} />
         <path
           d="M48 12l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1 1-2.4Z"
-          {...F("#9fb6cf", 0.8)}
+          {...F("#aebfae", 0.8)}
           stroke="none"
         />
       </g>
@@ -253,7 +253,7 @@ const ART: Record<string, React.ReactNode> = {
   "mood.low": (
     <S>
       <g {...P}>
-        <circle cx="32" cy="32" r="20" {...F("#9fb6cf", 0.3)} />
+        <circle cx="32" cy="32" r="20" {...F("#aebfae", 0.3)} />
         <path d="M24 28c2-1.5 5-1.5 7 0M33 28c2-1.5 5-1.5 7 0" strokeWidth={2.6} />
         <path d="M27 41c2.5-2 7.5-2 10 0" strokeWidth={2.6} />
         <path d="M20 50c4 1.5 8-1 9-4" strokeWidth={2.4} />
@@ -284,7 +284,7 @@ const ART: Record<string, React.ReactNode> = {
   "well.water": (
     <S>
       <g {...P}>
-        <path d="M32 8c8 10 14 17 14 25a14 14 0 0 1-28 0c0-8 6-15 14-25Z" {...F("#9fb6cf", 0.55)} />
+        <path d="M32 8c8 10 14 17 14 25a14 14 0 0 1-28 0c0-8 6-15 14-25Z" {...F("#aebfae", 0.55)} />
         <path d="M26 34a6 6 0 0 0 4 6" strokeWidth={2.4} />
       </g>
     </S>
@@ -292,7 +292,7 @@ const ART: Record<string, React.ReactNode> = {
   "well.rest": (
     <S>
       <g {...P}>
-        <rect x="12" y="26" width="40" height="22" rx="8" {...F("#9fb6cf", 0.35)} />
+        <rect x="12" y="26" width="40" height="22" rx="8" {...F("#aebfae", 0.35)} />
         <path d="M12 34h40" strokeWidth={2.4} />
         <circle cx="24" cy="20" r="4" {...F("#eed9a4", 0.7)} />
         <path
@@ -414,7 +414,7 @@ const ART: Record<string, React.ReactNode> = {
   "sleep.moon-2": (
     <S>
       <g {...P}>
-        <path d="M40 10a18 18 0 1 0 11 32A14 14 0 0 1 40 10Z" {...F("#9fb6cf", 0.6)} />
+        <path d="M40 10a18 18 0 1 0 11 32A14 14 0 0 1 40 10Z" {...F("#aebfae", 0.6)} />
         <path
           d="M20 14l1 2.6 2.6 1-2.6 1-1 2.6-1-2.6-2.6-1 2.6-1 1-2.6Z"
           {...F("#f4efe4", 0.9)}
@@ -532,7 +532,7 @@ const ART: Record<string, React.ReactNode> = {
       <g {...P}>
         <path
           d="M14 16a8 6 0 0 1 16 0v32a8 6 0 0 0-16 0V16ZM30 16a8 6 0 0 1 16 0v32a8 6 0 0 0-16 0"
-          {...F("#9fb6cf", 0.4)}
+          {...F("#aebfae", 0.4)}
         />
       </g>
     </S>
@@ -549,7 +549,7 @@ const ART: Record<string, React.ReactNode> = {
   "day.camera": (
     <S>
       <g {...P}>
-        <rect x="10" y="22" width="44" height="28" rx="8" {...F("#9fb6cf", 0.4)} />
+        <rect x="10" y="22" width="44" height="28" rx="8" {...F("#aebfae", 0.4)} />
         <path d="M24 22l3-6h10l3 6" />
         <circle cx="32" cy="36" r="7" {...F("#f4efe4", 0.5)} />
       </g>
@@ -656,7 +656,7 @@ const ART: Record<string, React.ReactNode> = {
     <S>
       <g {...P}>
         <path d="M32 8v48M12 20l40 24M52 20L12 44" strokeWidth={2.8} />
-        <circle cx="32" cy="32" r="4" {...F("#9fb6cf", 0.7)} />
+        <circle cx="32" cy="32" r="4" {...F("#aebfae", 0.7)} />
       </g>
     </S>
   ),

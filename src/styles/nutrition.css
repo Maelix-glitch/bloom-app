@@ -2139,12 +2139,12 @@ a.nut-chip {
 
 /* Macro dots (rulebook §18): category colour lives ONLY in the
    8px dot; the number is neutral, always. Contrast against the
-   card surface is ≥3:1 with margin (worst pair: the fat dot on
-   --surface-2 at 6.79:1 — computed for the slice, in its log). */
+   card surface is at least 3:1 with margin (M-240 re-measure for
+   the bronze fat dot: 4.75:1 on --surface-2, 4.23:1 on --surface-3). */
 :root {
   --macro-protein: #8fbf9f;
   --macro-carb: #c9b8a0;
-  --macro-fat: #8aa4c4;
+  --macro-fat: #b07a4a; /* M-240: warm bronze (was steel blue) */
   --macro-fibre: #c48b9d; /* muted rose (M-225: was lavender) */
 }
 /* The meal card's foot and its .macros list retired with brief

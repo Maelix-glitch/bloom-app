@@ -138,7 +138,7 @@ export function DishDetailSheet({
           <div className="mt-4 grid grid-cols-3 gap-3">
             {[
               { label: "Protein", value: n.proteinG, color: "var(--sage)" },
-              { label: "Carbs", value: n.carbsG, color: "var(--sky)" },
+              { label: "Carbs", value: n.carbsG, color: "var(--macro-carb)" },
               { label: "Fat", value: n.fatG, color: "var(--amber)" },
             ].map((tile) => (
               <div

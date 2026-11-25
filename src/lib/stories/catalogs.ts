@@ -25,7 +25,7 @@ export const STORY_PALETTE: StorySwatch[] = [
   { id: "sage", label: "Sage", color: "#9db89a", onColor: "#20222a" },
   { id: "rose", label: "Rose", color: "#e0a3b8", onColor: "#2c2130" },
   { id: "champagne", label: "Champagne", color: "#eed9a4", onColor: "#2c2415" },
-  { id: "mist", label: "Mist blue", color: "#9fb6cf", onColor: "#1f2433" },
+  { id: "mist", label: "Mist sage", color: "#aebfae", onColor: "#1d2b22" },
   { id: "sand", label: "Warm sand", color: "#d3b795", onColor: "#2c2415" },
   { id: "ink", label: "Ink", color: "#121317", onColor: "#f4efe4" },
   { id: "clay", label: "Clay", color: "#c07a5e", onColor: "#fbf3e6" },
@@ -74,7 +74,7 @@ export const STORY_BACKGROUNDS: StoryBackground[] = [
   {
     id: "soft-rain",
     name: "Soft rain",
-    css: "linear-gradient(180deg, #2b3348 0%, #232b3d 55%, #181d2b 100%)",
+    css: "linear-gradient(180deg, #33363f 0%, #24252c 55%, #17181d 100%)",
     ink: "#e8ecf4",
   },
   {
@@ -98,7 +98,7 @@ export const STORY_BACKGROUNDS: StoryBackground[] = [
   {
     id: "mist",
     name: "Mist",
-    css: "linear-gradient(180deg, #aebfd2 0%, #8fa0b8 55%, #6e7f98 100%)",
+    css: "linear-gradient(180deg, #c2beb4 0%, #8f8c85 55%, #6d6a64 100%)",
     ink: "#1f2433",
   },
   {
@@ -303,7 +303,7 @@ export const STORY_FILTERS: StoryFilter[] = [
     name: "Cool",
     hint: "Blue-shifted calm",
     css: "brightness(1.0) contrast(1.03) saturate(0.95) hue-rotate(-12deg)",
-    wash: ["linear-gradient(180deg, rgba(90,120,180,0.1), rgba(30,50,90,0.14))", "overlay", 1],
+    wash: ["linear-gradient(180deg, rgba(110,114,118,0.1), rgba(24,26,30,0.14))", "overlay", 1],
   },
   {
     id: "soft",
@@ -376,7 +376,7 @@ export const STORY_FILTERS: StoryFilter[] = [
     name: "Midnight",
     hint: "Cool evening",
     css: "brightness(0.94) contrast(1.06) saturate(0.92) hue-rotate(-8deg)",
-    wash: ["linear-gradient(180deg, rgba(70,80,160,0.16), rgba(17,17,22,0.22))", "overlay", 1],
+    wash: ["linear-gradient(180deg, rgba(52,54,66,0.16), rgba(17,17,22,0.22))", "overlay", 1],
   },
   {
     id: "mist",
@@ -468,7 +468,7 @@ export const GIFT_META: Record<StoryGiftKind, GiftMeta> = {
   star: { id: "star", name: "Star", hint: "For a bright one", glyph: "⭐", tint: "#eed9a4" },
   heart: { id: "heart", name: "Heart", hint: "Held close", glyph: "💛", tint: "#dcc08f" },
   candle: { id: "candle", name: "Candle", hint: "A quiet light", glyph: "🕯️", tint: "#e8c98a" },
-  moon: { id: "moon", name: "Moon", hint: "Rest well", glyph: "🌙", tint: "#9fb6cf" },
+  moon: { id: "moon", name: "Moon", hint: "Rest well", glyph: "🌙", tint: "#aebfae" },
   ribbon: { id: "ribbon", name: "Ribbon", hint: "Tied with care", glyph: "🎀", tint: "#e0a3b8" },
   spark: { id: "spark", name: "Spark", hint: "A tiny celebration", glyph: "✨", tint: "#eed9a4" },
 };

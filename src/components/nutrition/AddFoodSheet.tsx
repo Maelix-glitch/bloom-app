@@ -476,7 +476,7 @@ export function LogDialog({
                   <div className="mt-6 grid grid-cols-3 gap-3">
                     {[
                       { label: "Protein", value: preview.proteinG, color: "var(--sage)" },
-                      { label: "Carbs", value: preview.carbsG, color: "var(--sky)" },
+                      { label: "Carbs", value: preview.carbsG, color: "var(--macro-carb)" },
                       { label: "Fat", value: preview.fatG, color: "var(--amber)" },
                     ].map((tile) => (
                       <div

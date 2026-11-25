@@ -54,6 +54,20 @@ import { describe, expect, it } from "vitest";
  * live there. Slate semantics (hue 240–255 at chroma/saturation under the
  * thresholds — the --mp-sad blue-grey, rain-glass tints) stay legal: they
  * read as blue-grey, not violet.
+ *
+ * M-240 (2026-11-25, the owner's fourth raising of this class): the band
+ * above starts at hue 240, so the STEEL-BLUE family (hue 205–240) walked
+ * straight past three purges inside component tokens: --info/--sky/
+ * --chart-1 (#879dbb), --macro-fat (#8aa4c4), --mood-tone-low (#8aa4c8),
+ * the mood sad tone, the add-habit sky, the Stories editor steel and the
+ * Cycle navy surfaces. The owner saw them as purple-ish words, buttons,
+ * badges and dots in Settings and across Nutrition. M-240 re-grounds
+ * the whole family (info to sage, chart-1 to gold, macro-fat to bronze,
+ * sad to a near-neutral ink grey, Stories and Cycle grounds to ink
+ * neutrals) and adds the perceptual band scan below: hue 205–320 at
+ * real saturation/lightness, over every file in src, so no component
+ * token can carry this family again. Near-black inks are spared by the
+ * value/lightness floors, exactly as before.
  */
 
 const SRC = join(process.cwd(), "src");
@@ -273,5 +287,136 @@ describe("M-233 · no violet anywhere in Bloom", () => {
     const block = css.match(/\.home-panel\s*\{[^}]*\}/)?.[0] ?? "";
     expect(block).not.toBe("");
     expect(block).not.toContain("backdrop-filter");
+  });
+});
+
+/* ------------------------- M-240: the steel-blue band -------------------------
+ * Perceptual thresholds, chosen to spare near-black inks (Bloom's grounds
+ * live at value under 0.35) while catching every visibly blue or violet
+ * UI colour: for hex/rgb/hsl, HSV saturation at least 0.18 AND value at
+ * least 0.35; for oklch, chroma at least 0.03 AND lightness at least
+ * 0.35; hue 205–320 throughout (steel blue through violet). */
+
+/** HSV of an rgb triple (0–255). Returns [hueDeg, saturation, value]. */
+function hsvOf(r: number, g: number, b: number): [number, number, number] {
+  r /= 255;
+  g /= 255;
+  b /= 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const d = max - min;
+  const s = max === 0 ? 0 : d / max;
+  let hue = 0;
+  if (d !== 0) {
+    if (max === r) hue = ((g - b) / d + (g < b ? 6 : 0)) * 60;
+    else if (max === g) hue = ((b - r) / d + 2) * 60;
+    else hue = ((r - g) / d + 4) * 60;
+  }
+  return [hue, s, max];
+}
+
+function rgbOfHex(hex: string): [number, number, number] {
+  let h = hex.slice(1);
+  if (h.length === 3 || h.length === 4) h = h.split("").map((c) => c + c).join("");
+  if (h.length === 8) h = h.slice(0, 6);
+  return [parseInt(h.slice(0, 2), 16), parseInt(h.slice(2, 4), 16), parseInt(h.slice(4, 6), 16)];
+}
+
+function rgbOfHsl(hDeg: number, s: number, l: number): [number, number, number] {
+  const c = (1 - Math.abs(2 * l - 1)) * s;
+  const x = c * (1 - Math.abs(((hDeg / 60) % 2) - 1));
+  const m = l - c / 2;
+  let rgb: [number, number, number] = [0, 0, 0];
+  if (hDeg < 60) rgb = [c, x, 0];
+  else if (hDeg < 120) rgb = [x, c, 0];
+  else if (hDeg < 180) rgb = [0, c, x];
+  else if (hDeg < 240) rgb = [0, x, c];
+  else if (hDeg < 300) rgb = [x, 0, c];
+  else rgb = [c, 0, x];
+  return [(rgb[0] + m) * 255, (rgb[1] + m) * 255, (rgb[2] + m) * 255];
+}
+
+const inSteelBand = (hue: number, sat: number, val: number) =>
+  hue >= 205 && hue <= 320 && sat >= 0.18 && val >= 0.35;
+
+function steelValues(text: string): string[] {
+  const hits: string[] = [];
+  for (const m of text.matchAll(/#(?:[0-9a-fA-F]{8}|[0-9a-fA-F]{6}|[0-9a-fA-F]{4}|[0-9a-fA-F]{3})\b/g)) {
+    const [hue, sat, val] = hsvOf(...rgbOfHex(m[0]));
+    if (inSteelBand(hue, sat, val)) hits.push(m[0]);
+  }
+  for (const m of text.matchAll(/rgba?\(\s*(\d+)[,\s]+(\d+)[,\s]+(\d+)/g)) {
+    const [hue, sat, val] = hsvOf(Number(m[1]), Number(m[2]), Number(m[3]));
+    if (inSteelBand(hue, sat, val)) hits.push(m[0]);
+  }
+  for (const m of text.matchAll(/hsla?\(\s*([\d.]+)(?:deg)?[,\s]+([\d.]+)%[,\s]+([\d.]+)%/g)) {
+    const [hue, sat, val] = hsvOf(...rgbOfHsl(Number(m[1]) % 360, Number(m[2]) / 100, Number(m[3]) / 100));
+    if (inSteelBand(hue, sat, val)) hits.push(m[0]);
+  }
+  for (const m of text.matchAll(/oklch\(\s*([\d.]+)(%?)\s+([\d.]+)\s+([\d.]+)/g)) {
+    const light = m[2] === "%" ? Number(m[1]) / 100 : Number(m[1]);
+    const chroma = Number(m[3]);
+    const hue = Number(m[4]);
+    if (hue >= 205 && hue <= 320 && chroma >= 0.03 && light >= 0.35) hits.push(m[0]);
+  }
+  return hits;
+}
+
+/**
+ * Named allowlist for the M-240 scan — user content and negative
+ * fixtures only, each with its reason. Anything else in the band fails.
+ * The first two entries are the M-240 owner-call flags: the Soft Blue
+ * accent is a deliberate user choice, so its paint survives until the
+ * owner rules on the option itself.
+ */
+const STEEL_ALLOWLIST: Record<string, { values: string[]; reason: string }> = {
+  "components/stories/StoryEditor.tsx": {
+    values: ["#9fb6cf"],
+    reason:
+      "renders the user-selectable Soft Blue accent (Appearance) into story data widgets; the accent option is an owner call flagged by M-240, not chrome",
+  },
+  "lib/stories/exporter.test.ts": {
+    values: ["#9fb6cf"],
+    reason: "fixture standing in for an arbitrary user-chosen story accent (user content), not app chrome",
+  },
+  "lib/ui.guard.test.ts": {
+    values: ["oklch(0.55 0.19 295"],
+    reason: "negative fixture: names the retired violet only to assert its absence from rewards.css",
+  },
+  "lib/profile/presetAvatars.test.ts": {
+    values: ["#a58bff", "#8fb6d9"],
+    reason: "negative pins: assert no curated avatar tint equals these excluded colours; nothing renders them",
+  },
+};
+
+describe("M-240 · no steel-blue or violet chrome anywhere in src", () => {
+  it("no band colour values in any source or test file, beyond the named allowlist", () => {
+    const offenders: string[] = [];
+    for (const file of valueFiles) {
+      const rel = file.slice(SRC.length + 1);
+      const text = stripComments(readFileSync(file, "utf8"));
+      const allowed = (STEEL_ALLOWLIST[rel]?.values ?? []).map((v) => v.toLowerCase());
+      for (const hit of steelValues(text)) {
+        if (allowed.some((a) => hit.toLowerCase().startsWith(a))) continue;
+        offenders.push(`${rel}: ${hit}`);
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+
+  it("the re-grounded tokens carry the Bloom family values", () => {
+    const styles = stripComments(readFileSync(join(SRC, "styles.css"), "utf8"));
+    expect(styles).toContain("--info: #8fc7a2");
+    expect(styles).toContain("--chart-1: var(--gold)");
+    expect(styles).toContain("--mood-tone-low: #9aa9a0");
+    expect(styles).not.toContain("oklch(0.72 0.06 250)");
+    const rewards = stripComments(readFileSync(join(SRC, "styles/rewards.css"), "utf8"));
+    expect(rewards).toContain("--sky: #8fc7a2");
+    const nutrition = stripComments(readFileSync(join(SRC, "styles/nutrition.css"), "utf8"));
+    expect(nutrition).toContain("--macro-fat: #b07a4a");
+    const mood = stripComments(readFileSync(join(SRC, "styles/mood.css"), "utf8"));
+    expect(mood).toContain("--mp-sad: oklch(0.72 0.02 160)");
+    const habit = stripComments(readFileSync(join(SRC, "styles/add-habit-modal.css"), "utf8"));
+    expect(habit).toContain("--ahm-sky: #8fc7a2");
   });
 });
