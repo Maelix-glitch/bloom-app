@@ -516,7 +516,6 @@ function LogMood({
         <div className="mt-10 grid grid-cols-3 gap-x-4 gap-y-9 sm:grid-cols-6 sm:gap-x-6 lg:gap-x-8">
           {PAGE_MOODS.map((mood) => {
             const active = selected === mood;
-            const busy = saving === mood;
             return (
               <button
                 key={mood}
@@ -529,7 +528,7 @@ function LogMood({
                 data-testid={`mood-face-${mood}`}
               >
                 <span
-                  className={`mm-face ${busy ? "animate-pulse" : ""} [&_svg]:h-[68px] [&_svg]:w-[68px] sm:[&_svg]:h-20 sm:[&_svg]:w-20`}
+                  className="mm-face [&_svg]:h-[68px] [&_svg]:w-[68px] sm:[&_svg]:h-20 sm:[&_svg]:w-20"
                   data-active={active}
                 >
                   <MoodBlob mood={mood} active={active} size={80} fullOpacity />

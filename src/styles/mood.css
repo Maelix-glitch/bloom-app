@@ -862,10 +862,31 @@ select.bmood-input {
   display: grid;
   place-items: center;
   border-radius: var(--radius-pill);
+  isolation: isolate;
   transition:
     transform var(--motion-page) var(--mm-spring),
-    opacity var(--motion-page) var(--ease-out-expo),
-    filter var(--motion-page) var(--ease-out-expo);
+    opacity var(--motion-page) var(--ease-out-expo);
+}
+/* The chosen face's glow is a halo BEHIND the blob whose opacity
+   fades (M-246). It used to be an animated drop-shadow filter on
+   the face itself: animating a filter repaints a large blurred
+   area every frame and stutters on phones, and it ran on its own
+   timing beside the scale. An opacity fade is composited, costs
+   nothing per frame, and lands together with the grow. */
+.mood-page .mm-face::before {
+  content: "";
+  position: absolute;
+  inset: -28px;
+  z-index: -1;
+  border-radius: var(--radius-pill);
+  background: radial-gradient(
+    closest-side,
+    oklch(0.86 0.1 85 / 0.5),
+    transparent 72%
+  );
+  opacity: 0;
+  transition: opacity var(--motion-page) var(--ease-out-expo);
+  pointer-events: none;
 }
 .mood-page .mm-face-btn:hover:not(:disabled) .mm-face {
   transform: scale(1.04) translateY(-2px);
@@ -874,11 +895,12 @@ select.bmood-input {
   transform: scale(0.97);
   transition-duration: var(--motion-micro);
 }
-/* the chosen face: glow + scale 1.06; the others recede */
+/* the chosen face: halo fades in + scale 1.06; the others recede */
 .mood-page .mm-face[data-active="true"] {
   transform: scale(1.06);
-  filter: drop-shadow(0 0 22px oklch(0.86 0.1 85 / 0.5))
-    drop-shadow(0 0 2px oklch(0.86 0.1 85 / 0.6));
+}
+.mood-page .mm-face[data-active="true"]::before {
+  opacity: 1;
 }
 .mood-page .mm-face-btn:hover:not(:disabled) .mm-face[data-active="true"] {
   transform: scale(1.08) translateY(-2px);
@@ -1199,7 +1221,13 @@ select.bmood-input {
   padding: 0;
 }
 .mood-page section.mp-panel[data-testid="mood-log"] > div:first-child {
-  padding: 0;
+  /* M-246: the de-box zeroed ALL padding here, which left the
+     quote strip's hairline ~3px under the face labels (measured
+     live on the owner's tab) - faces and quote read as one
+     block. The float-on-canvas look stays; the bottom air
+     before the hairline is restored at the page's own rhythm
+     (--space-10, the same step mood-graph takes above itself). */
+  padding: 0 0 var(--space-10);
 }
 .mood-page section.mp-panel[data-testid="mood-log"] > div:last-child > div:last-child {
   padding-inline: 0;
