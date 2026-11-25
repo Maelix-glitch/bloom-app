@@ -66,8 +66,11 @@ describe("mood de-box complete", () => {
     expect(rule![1]).toContain("background: transparent;");
     expect(rule![1]).toContain("border: 0;");
     expect(rule![1]).toContain("box-shadow: none;");
-    // The log panel's inner wrappers lose their panel padding too.
-    expect(BLOCK).toContain('section.mp-panel[data-testid="mood-log"] > div:first-child {\n  padding: 0;');
+    // The log panel's inner wrappers lose their panel padding too —
+    // except the bottom air above the quote hairline, restored by
+    // M-246 (the zeroed padding glued the hairline ~3px under the
+    // face labels; pinned in moodSelectSmooth.guard.test.tsx).
+    expect(BLOCK).toContain("padding: 0 0 var(--space-10);");
   });
 
   it("the featured insight is a gold-bar callout, not a photo box", () => {
