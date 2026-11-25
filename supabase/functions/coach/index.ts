@@ -97,6 +97,20 @@
  *   application/octet-stream — supabase-js hands octet-stream responses
  *   back as a Blob; the client re-wraps it as audio/mpeg for playback.
  *
+ * AI CONSENT GATE (consent-core.ts, M-250):
+ *   Before the money gate, every AI path — Coach chat, Vitalis chat,
+ *   TTS — verifies the caller's stored `ai_assistance` consent
+ *   server-side, from the synced prefs document in `user_prefs` read
+ *   under the caller's own JWT. Until M-250 the client hook
+ *   (useAiConsentGate) was the only enforcement (R-VIT-007); a client
+ *   that skipped the hook could reach the providers unconsented. A
+ *   missing, withdrawn or stale-policy grant answers 403
+ *   ({ error: "ai_consent_required" }) and no provider is called and
+ *   no credit is checked; an unanswered prefs read FAILS CLOSED with
+ *   a retryable 503 ({ error: "ai_consent_unavailable" }) — an outage
+ *   is never consent. The vitalis-action-result path touches no
+ *   provider and is not gated, exactly as it is not billing-gated.
+ *
  * MONEY SYSTEM GATE (billing-core.ts):
  *   Every AI path — Coach chat, Vitalis chat, TTS — is gated on the
  *   caller's entitlement BEFORE any provider is called, and charged
@@ -153,6 +167,12 @@ import {
   type VitalisKind,
   type VitalisOutcome,
 } from "./billing-core.ts";
+import {
+  consentErrorBody,
+  consentErrorStatus,
+  decideAiConsent,
+  type AiConsentDecision,
+} from "./consent-core.ts";
 
 const CORS = {
   "Access-Control-Allow-Origin": "*",
@@ -353,6 +373,13 @@ async function handleTts(body: Body, req: Request, rid: string): Promise<Respons
   }
   const text = typeof body.text === "string" ? body.text.trim().slice(0, TTS_MAX_TEXT_CHARS) : "";
   if (!text) return json({ error: "empty text" }, 400);
+  /* AI consent gate (M-250): speech sends the person's words to a
+     voice provider, so the same stored-consent check runs before the
+     money gate here too. The voice client treats any failure as
+     silence by design, so a refusal simply quiets the voice. */
+  const consent = await aiConsentGateCheck(req, rid);
+  const consentError = consentErrorBody(consent, rid);
+  if (consentError) return json(consentError, consentErrorStatus(consent) ?? 403);
   /* Money System gate: speech costs a credit like any AI call. The
      voice client treats any failure as silence by design, so a denial
      here simply quiets the voice — the words themselves arrive via
@@ -451,6 +478,46 @@ async function billingRpc(
 async function billingEntitlement(req: Request): Promise<EntitlementSnapshot | null> {
   const rows = await billingRpc(req, "get_my_entitlement", {});
   return parseEntitlementRows(rows);
+}
+
+/* ============================================================================
+   AI CONSENT GATE — the caller's stored `ai_assistance` consent,
+   verified server-side BEFORE the billing gate on every provider
+   path (M-250; decisions live in consent-core.ts, pure and
+   unit-tested). The transport reads the caller's synced prefs
+   document from `user_prefs` under the caller's own JWT — RLS scopes
+   the read to the caller, and there is no service-role key in this
+   function. A read that does not answer fails closed in the decision
+   (503 ai_consent_unavailable), never as consent.
+   ========================================================================== */
+async function aiConsentGateCheck(req: Request, rid: string): Promise<AiConsentDecision> {
+  const url = Deno.env.get("SUPABASE_URL") ?? "";
+  const anon = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+  const auth = req.headers.get("authorization") ?? "";
+  let decision: AiConsentDecision;
+  if (!url || !anon || !auth) {
+    decision = decideAiConsent({ ok: false });
+  } else {
+    try {
+      const headers: Record<string, string> = {};
+      headers["apikey"] = anon;
+      headers["Authorization"] = auth;
+      const res = await fetch(`${url}/rest/v1/user_prefs?select=prefs`, {
+        method: "GET",
+        headers,
+        signal: AbortSignal.timeout(4_000),
+      });
+      decision = res.ok
+        ? decideAiConsent({ ok: true, rows: await res.json() })
+        : decideAiConsent({ ok: false });
+    } catch {
+      decision = decideAiConsent({ ok: false });
+    }
+  }
+  if (decision.kind !== "allow") {
+    console.info(`coach request=${rid} ai_consent=${decision.kind}`);
+  }
+  return decision;
 }
 
 async function billingGateCheck(
@@ -1615,6 +1682,16 @@ Deno.serve(async (req: Request) => {
        the gate with billing-core's mirror of the handler's own
        deliberation rule, so a plan session is balance-checked at 10
        BEFORE any provider is called — never discovered afterwards. */
+    /* AI consent gate (M-250) — BEFORE the money gate, for both chat
+       paths: the caller's stored ai_assistance consent is verified
+       server-side, so a request the client hook would have stopped
+       can never reach a provider or a credit check by skipping the
+       hook. A refusal is a clean 403; an unanswered prefs read is a
+       retryable 503 (fail closed, consent-core.ts). */
+    const consent = await aiConsentGateCheck(req, rid);
+    const consentError = consentErrorBody(consent, rid);
+    if (consentError) return json(consentError, consentErrorStatus(consent) ?? 403);
+
     const vitalisKind: VitalisKind | undefined = isVitalis
       ? vitalisKindFor({
           recordValid:
