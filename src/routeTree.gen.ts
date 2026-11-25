@@ -23,6 +23,7 @@ import { Route as RefundRouteImport } from './routes/refund'
 import { Route as ReportRouteImport } from './routes/report'
 import { Route as RewardsRouteImport } from './routes/rewards'
 import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as StatusRouteImport } from './routes/status'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as TrackersRouteImport } from './routes/trackers'
 import { Route as AdminProgressionRouteImport } from './routes/admin/progression'
@@ -104,6 +105,11 @@ const SettingsRoute = SettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => rootRouteImport,
 } as any)
+const StatusRoute = StatusRouteImport.update({
+  id: '/status',
+  path: '/status',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -170,6 +176,7 @@ export interface FileRoutesByFullPath {
   '/report': typeof ReportRoute
   '/rewards': typeof RewardsRouteWithChildren
   '/settings': typeof SettingsRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/admin/progression': typeof AdminProgressionRoute
@@ -194,6 +201,7 @@ export interface FileRoutesByTo {
   '/refund': typeof RefundRoute
   '/report': typeof ReportRoute
   '/settings': typeof SettingsRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/admin/progression': typeof AdminProgressionRoute
@@ -221,6 +229,7 @@ export interface FileRoutesById {
   '/report': typeof ReportRoute
   '/rewards': typeof RewardsRouteWithChildren
   '/settings': typeof SettingsRoute
+  '/status': typeof StatusRoute
   '/terms': typeof TermsRoute
   '/trackers': typeof TrackersRoute
   '/admin/progression': typeof AdminProgressionRoute
@@ -249,6 +258,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/rewards'
     | '/settings'
+    | '/status'
     | '/terms'
     | '/trackers'
     | '/admin/progression'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/refund'
     | '/report'
     | '/settings'
+    | '/status'
     | '/terms'
     | '/trackers'
     | '/admin/progression'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/report'
     | '/rewards'
     | '/settings'
+    | '/status'
     | '/terms'
     | '/trackers'
     | '/admin/progression'
@@ -326,6 +338,7 @@ export interface RootRouteChildren {
   ReportRoute: typeof ReportRoute
   RewardsRoute: typeof RewardsRouteWithChildren
   SettingsRoute: typeof SettingsRoute
+  StatusRoute: typeof StatusRoute
   TermsRoute: typeof TermsRoute
   TrackersRoute: typeof TrackersRoute
   AdminProgressionRoute: typeof AdminProgressionRoute
@@ -432,6 +445,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/status': {
+      id: '/status'
+      path: '/status'
+      fullPath: '/status'
+      preLoaderRoute: typeof StatusRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -549,6 +569,7 @@ const rootRouteChildren: RootRouteChildren = {
   ReportRoute: ReportRoute,
   RewardsRoute: RewardsRouteWithChildren,
   SettingsRoute: SettingsRoute,
+  StatusRoute: StatusRoute,
   TermsRoute: TermsRoute,
   TrackersRoute: TrackersRoute,
   AdminProgressionRoute: AdminProgressionRoute,

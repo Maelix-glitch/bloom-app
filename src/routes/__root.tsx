@@ -123,8 +123,10 @@ function ErrorComponent({ error, reset }: ErrorComponentProps) {
  *     is the same trade `WelcomeGate` and `useAdminAccess` already make, and
  *     the lesser evil. The server-side trigger is the real enforcement.
  */
-/* Legal pages are public in every deployment, configured or not. */
-const PUBLIC_ROUTES = ["/privacy", "/terms", "/refund", "/contact"];
+/* Legal pages and the status page are public in every deployment,
+   configured or not — the status page most of all: it exists for
+   the moment someone cannot sign in. */
+const PUBLIC_ROUTES = ["/privacy", "/terms", "/refund", "/contact", "/status"];
 
 function AccessControl({ children }: { children: ReactNode }) {
   const session = useSession();
