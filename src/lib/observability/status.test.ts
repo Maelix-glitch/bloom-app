@@ -8,7 +8,14 @@
 import { describe, expect, it } from "vitest";
 
 import type { FetchImpl } from "./latency";
-import { buildStatus, handleStatus, isDegraded, shapeStatusRows } from "./status";
+import {
+  buildStatus,
+  handleStatus,
+  isDegraded,
+  shapeStatusRows,
+  speedBand,
+  speedBarPercent,
+} from "./status";
 
 const ENV = {
   SUPABASE_URL: "https://proj.supabase.co/",
@@ -37,6 +44,32 @@ describe("isDegraded", () => {
     expect(isDegraded(19, 9000)).toBe(false);
     expect(isDegraded(200, 2000)).toBe(false);
     expect(isDegraded(200, 150)).toBe(false);
+  });
+});
+
+describe("speed bands (M-248)", () => {
+  it("steps sage -> gold -> rose at 500 and past 2,000 ms", () => {
+    expect(speedBand(4)).toBe("fast");
+    expect(speedBand(499)).toBe("fast");
+    expect(speedBand(500)).toBe("slowing");
+    expect(speedBand(2000)).toBe("slowing");
+    expect(speedBand(2001)).toBe("slow");
+    expect(speedBand(9000)).toBe("slow");
+  });
+
+  it("the rose band starts at the exact line the degraded rule uses", () => {
+    expect(speedBand(2000)).toBe("slowing");
+    expect(isDegraded(20, 2000)).toBe(false);
+    expect(speedBand(2001)).toBe("slow");
+    expect(isDegraded(20, 2001)).toBe(true);
+  });
+
+  it("the bar fills toward the top of the fast band and caps there", () => {
+    expect(speedBarPercent(0)).toBe(0);
+    expect(speedBarPercent(250)).toBe(50);
+    expect(speedBarPercent(500)).toBe(100);
+    expect(speedBarPercent(5000)).toBe(100);
+    expect(speedBarPercent(Number.NaN)).toBe(0);
   });
 });
 

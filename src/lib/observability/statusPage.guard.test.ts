@@ -35,6 +35,17 @@ describe("M-247: status page wiring", () => {
     expect(PAGE).not.toContain("latency_samples");
   });
 
+  it("the speed bars ride the shared bands, in Bloom's three colours", () => {
+    expect(PAGE).toContain("speedBand");
+    expect(PAGE).toContain("speedBarPercent");
+    expect(PAGE).toContain("bg-sage");
+    expect(PAGE).toContain("bg-gold");
+    expect(PAGE).toContain("bg-rose");
+    /* the feel layer's rule: bars grow by transform, never width */
+    expect(PAGE).toContain("scaleX");
+    expect(PAGE).not.toMatch(/transition-\[width\]/);
+  });
+
   it("no secret ever reaches the page", () => {
     expect(PAGE).not.toContain("SERVICE_ROLE");
     expect(PAGE).not.toContain("service_role");

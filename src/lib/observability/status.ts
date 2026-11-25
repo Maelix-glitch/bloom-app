@@ -25,6 +25,17 @@ import { resolveServerConfig, type FetchImpl } from "./latency";
 export const LATENCY_DEGRADED_P99_MS = 2000;
 export const LATENCY_DEGRADED_MIN_SAMPLES = 20;
 
+/* M-248: the speed bands live in their own import-free module
+   (speedBands.ts) so the client page can use them without
+   pulling this server module into the browser bundle. They are
+   re-exported here so the feed and the page share one source. */
+export {
+  SPEED_FAST_MAX_MS,
+  speedBand,
+  speedBarPercent,
+  type SpeedBand,
+} from "./speedBands";
+
 export interface RouteLatency {
   route: string;
   samples: number;

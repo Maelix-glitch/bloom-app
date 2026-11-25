@@ -4,7 +4,21 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 
 import { BloomLogo } from "@/components/BloomLogo";
+import {
+  speedBand,
+  speedBarPercent,
+  type SpeedBand,
+} from "@/lib/observability/speedBands";
 import type { StatusPayload } from "@/lib/observability/status";
+
+/* The bar's colour per band: sage is fast, gold is slowing,
+   rose needs attention (the bands themselves live in
+   speedBands.ts, shared with the server feed). */
+const BAND_CLASS: Record<SpeedBand, string> = {
+  fast: "bg-sage",
+  slowing: "bg-gold",
+  slow: "bg-rose",
+};
 
 export const Route = createFileRoute("/status")({
   head: () => ({
@@ -54,6 +68,15 @@ type Load =
 
 function StatusRoute() {
   const [load, setLoad] = useState<Load>({ kind: "loading" });
+  /* The speed bars grow once, when the first real numbers land
+     (a transform, never a width - the feel layer's rule). */
+  const [grown, setGrown] = useState(false);
+
+  useEffect(() => {
+    if (load.kind !== "ready") return;
+    const raf = requestAnimationFrame(() => setGrown(true));
+    return () => cancelAnimationFrame(raf);
+  }, [load.kind]);
 
   useEffect(() => {
     let live = true;
@@ -160,6 +183,10 @@ function StatusRoute() {
           <h2 className="eyebrow">
             Page speeds · last 24 hours
           </h2>
+          <p className="type-caption mt-2">
+            Each bar shows the slowest 1% of visits, filling toward half a second. Sage is
+            fast, gold is slowing, rose needs attention.
+          </p>
           {load.kind === "ready" && payload!.routes.length === 0 ? (
             <p className="mt-4 text-[length:var(--text-callout)] leading-relaxed text-muted-foreground">
               Speed records are still gathering. Bloom samples real requests as they happen, so
@@ -168,22 +195,33 @@ function StatusRoute() {
           ) : (
             <div className="mt-2">
               {(payload?.routes ?? []).map((r) => (
-                <div
-                  key={r.route}
-                  className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-border py-4"
-                >
-                  <span className="text-[length:var(--text-callout)] text-foreground/90">
-                    {ROUTE_LABELS[r.route] ?? r.route}
-                    {r.degraded ? (
-                      <span className="type-badge ml-2 rounded-full border border-rose/40 bg-rose/10 px-2 py-0.5 text-rose">
-                        Slower than usual
-                      </span>
-                    ) : null}
-                  </span>
-                  <span className="text-[length:var(--text-support)] text-muted-foreground">
-                    typical {fmtMs(r.p50Ms)} · slowest 1% {fmtMs(r.p99Ms)} · {r.samples}{" "}
-                    {r.samples === 1 ? "check" : "checks"}
-                  </span>
+                <div key={r.route} className="border-t border-border py-4">
+                  <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+                    <span className="text-[length:var(--text-callout)] text-foreground/90">
+                      {ROUTE_LABELS[r.route] ?? r.route}
+                      {r.degraded ? (
+                        <span className="type-badge ml-2 rounded-full border border-rose/40 bg-rose/10 px-2 py-0.5 text-rose">
+                          Slower than usual
+                        </span>
+                      ) : null}
+                    </span>
+                    <span className="text-[length:var(--text-support)] text-muted-foreground">
+                      typical {fmtMs(r.p50Ms)} · slowest 1% {fmtMs(r.p99Ms)} · {r.samples}{" "}
+                      {r.samples === 1 ? "check" : "checks"}
+                    </span>
+                  </div>
+                  <div
+                    className="mt-2.5 h-1.5 w-full overflow-hidden rounded-full bg-foreground/10"
+                    role="img"
+                    aria-label={`Slowest 1% of visits: ${fmtMs(r.p99Ms)}`}
+                  >
+                    <div
+                      className={`h-full w-full origin-left rounded-full transition-transform duration-[var(--motion-signature)] ease-[var(--ease-out-expo)] ${BAND_CLASS[speedBand(r.p99Ms)]}`}
+                      style={{
+                        transform: `scaleX(${grown ? Math.max(0.02, speedBarPercent(r.p99Ms) / 100) : 0})`,
+                      }}
+                    />
+                  </div>
                 </div>
               ))}
               {load.kind === "loading" ? (
