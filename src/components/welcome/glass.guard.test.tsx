@@ -389,7 +389,9 @@ describe("glass guard: one dock, wearing the one material", () => {
     expect(someExactBlock("styles.css", ".dock__top", "var(--lg-blur-deep)")).toBe(true);
     expect(someExactBlock("styles.css", ".dock__log", "var(--lg-blur-deep)")).toBe(true);
     expect(someExactBlock("styles/orb.css", ".coach-orb", "var(--lg-blur-deep)")).toBe(true);
-    expect(someExactBlock("styles.css", ".app-mobile-bar", "var(--lg-blur)")).toBe(true);
+    /* M-249: .app-mobile-bar no longer carries the recipe — the brand
+       strip is gone; its buttons float on their own chips. */
+    expect(someExactBlock("styles.css", ".app-mobile-bar", "var(--lg-blur)")).toBe(false);
     /* And the material is loaded once, from the root sheet. */
     expect(read("styles.css")).toContain('@import "./styles/glass.css"');
   });

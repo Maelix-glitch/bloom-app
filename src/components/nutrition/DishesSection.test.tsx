@@ -92,6 +92,19 @@ function revealCard(dish: Dish) {
 }
 
 describe("DishesSection, browsing", () => {
+  it("caps the dish grid's phone column so long names cannot stretch it past the screen (M-249)", () => {
+    render(<DishesSection day={todayLocal()} />);
+    const card = revealCard(dal);
+    const list = card.closest("ul");
+    expect(list).toBeTruthy();
+    /* grid-cols-1 = minmax(0,1fr): the track can never exceed the
+       screen, so the title's truncate engages inside the card. Without
+       it the implicit column auto-sizes to the widest title (~200px of
+       spill on a phone, measured live 2026-11-25). */
+    expect(list!.className).toContain("grid-cols-1");
+    expect(list!.className).toContain("sm:grid-cols-2");
+  });
+
   it("renders the library with bilingual names and computed per-serving numbers", () => {
     render(<DishesSection day={todayLocal()} />);
     expect(screen.getByText(/1,203 dishes/)).toBeTruthy();

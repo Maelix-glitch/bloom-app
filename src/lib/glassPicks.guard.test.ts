@@ -165,9 +165,11 @@ describe("true liquid glass (M-224): the floating-layer allowlist", () => {
     expect(materialBlock(ORB, ".coach-orb::before", "var(--lg-blur-deep)")).toBeDefined();
   });
 
-  it("the TopBar sync pill and the phone brand bar wear the regular recipe", () => {
+  it("the TopBar sync pill wears the regular recipe (the phone brand bar retired in M-249)", () => {
     expect(materialBlock(STYLES, ".home-sync-pill", "var(--lg-blur)")).toBeDefined();
-    expect(materialBlock(STYLES, ".app-mobile-bar", "var(--lg-blur)")).toBeDefined();
+    /* M-249: .app-mobile-bar no longer wears a material — the strip is
+       gone and its buttons float on their own .bloom-icon-btn chips. */
+    expect(materialBlock(STYLES, ".app-mobile-bar", "var(--lg-blur)")).toBeUndefined();
   });
 
   it("Today's quick-action pills join the floating layer — the quiet ghost opts out", () => {
@@ -210,7 +212,10 @@ describe("true liquid glass (M-224): the floating-layer allowlist", () => {
       .filter((s) => !rail.includes(s))
       .sort();
     expect(stylesConsumers).toEqual(
-      [".app-mobile-bar", ".dock__log", ".dock__top", ".home-chip", ".home-sync-pill"].sort(),
+      /* M-249: ".app-mobile-bar" left the census — the brand strip is
+         gone; its buttons float on .bloom-icon-btn chips (a plain
+         blur(14px), not a --lg- recipe, so they never entered it). */
+      [".dock__log", ".dock__top", ".home-chip", ".home-sync-pill"].sort(),
     );
     expect(lgBackdropConsumers(ORB).sort()).toEqual(
       [".coach-orb", ".coach-orb::before"].sort(),

@@ -17,8 +17,9 @@
  *       tonal wash and row hairlines stay;
  *   (d) Cycle's one layout container: rim and deep shadow gone, the
  *       tonal surface and its ::before specular catch stay;
- *   (e) the ruled glass places the shell owns are untouched: the phone
- *       brand bar still wears the Night Glass tokens.
+ *   (e) the ruled glass places the shell owns are untouched — EXCEPT the
+ *       phone brand bar, removed outright by M-249 (owner ask): its block
+ *       now wears no Night Glass at all, pinned below.
  */
 
 import { readFileSync } from "node:fs";
@@ -93,9 +94,17 @@ describe("de-box complete: the shell (M-186)", () => {
     expect(STYLES).toContain(".app-nav-link-active .app-nav-glyph");
   });
 
-  it("the phone brand bar keeps its ruled Night Glass", () => {
-    expect(STYLES).toContain("background: var(--lg-tint-strong)");
-    expect(STYLES).toContain("backdrop-filter: var(--lg-blur)");
+  it("the phone brand bar is gone: its block wears no Night Glass (M-249)", () => {
+    /* M-249 (owner, 2026-11-25): the brand strip was removed outright —
+       the account cluster floats on the buttons' own chip material.
+       This pin used to assert the bar's Night Glass; it now asserts the
+       strip cannot quietly return: the surviving .app-mobile-bar
+       geometry block carries no glass material and no background. */
+    const bar = lastBlock(STYLES, ".app-mobile-bar")!;
+    expect(bar).toBeDefined();
+    expect(bar.body).not.toContain("--lg-");
+    expect(bar.body).not.toContain("backdrop-filter");
+    expect(bar.body).not.toContain("background");
   });
 });
 

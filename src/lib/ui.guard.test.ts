@@ -1270,14 +1270,16 @@ describe("UI guard: reskin chrome (R-2)", () => {
     expect(TOPBAR.text).toContain("home-sync-dot--live");
   });
 
-  it("floats the mobile nav as a pill with a white 7% active item", () => {
+  it("floats the mobile nav as a white-glass pill with a white 15% active item (M-249)", () => {
     expect(SIDEBAR.text).toContain("app-mobile-nav fixed inset-x-3");
     const bar = blockFor(RESPONSIVE.text, "nav.app-mobile-nav")!;
     expect(bar.body).toContain("border-radius: var(--radius-lg)");
-    expect(bar.body).toContain("color-mix(in oklab, var(--surface) 90%, transparent)");
+    /* M-249 (owner, 2026-11-25): white glass — a pale foreground tint at
+       16% replaces the ink panel at 90%. */
+    expect(bar.body).toContain("color-mix(in oklab, var(--foreground) 16%, transparent)");
     expect(bar.body).toContain("backdrop-filter: blur(16px)");
     const active = blockFor(RESPONSIVE.text, '.app-mobile-nav > a[aria-current="page"]')!;
-    expect(active.body).toContain("color-mix(in oklab, var(--foreground) 7%, transparent)");
+    expect(active.body).toContain("color-mix(in oklab, var(--foreground) 15%, transparent)");
     expect(active.body).toContain("color: var(--gold)");
   });
 

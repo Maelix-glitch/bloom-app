@@ -256,7 +256,13 @@ export function DishesSection({ day }: { day: string }) {
         </div>
       ) : (
         <>
-          <ul className="mt-4 grid gap-4 sm:grid-cols-2">
+          {/* grid-cols-1 is load-bearing (M-249): without a capped base
+              template, the single phone column is auto-sized to the
+              widest card's max-content — a long dish name + Hindi line
+              stretched the column ~200px past the screen and the title's
+              truncate never engaged. minmax(0,1fr) caps the track at the
+              screen, so the title ellipsizes inside its card. */}
+          <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
             {visibleRows.map(({ dish, labelled }) => (
               <li key={dish.id}>
                 <button
