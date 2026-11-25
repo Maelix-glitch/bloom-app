@@ -105,6 +105,7 @@ interface NutrientCaps {
   carbsG: number;
   fatG: number;
   fibreG: number;
+  sugarG: number;
   sodiumMg: number;
   potassiumMg: number;
   magnesiumMg: number;
@@ -125,6 +126,7 @@ const FOOD_NUTRIENT_CAPS: NutrientCaps = {
   carbsG: 100,
   fatG: 100,
   fibreG: 100,
+  sugarG: 100,
   sodiumMg: 40000,
   potassiumMg: 10000,
   magnesiumMg: 2000,
@@ -144,6 +146,7 @@ const ENTRY_NUTRIENT_CAPS: NutrientCaps = {
   carbsG: 1000,
   fatG: 1000,
   fibreG: 500,
+  sugarG: 1000,
   sodiumMg: 100000,
   potassiumMg: 50000,
   magnesiumMg: 10000,
@@ -156,6 +159,7 @@ const ENTRY_NUTRIENT_CAPS: NutrientCaps = {
  *  optional nutrient joins the parser by joining this list and the caps. */
 const OPTIONAL_FIELDS = [
   "fibreG",
+  "sugarG",
   "sodiumMg",
   "potassiumMg",
   "magnesiumMg",

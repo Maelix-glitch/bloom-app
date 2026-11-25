@@ -9,12 +9,14 @@
  * Each mode is a small set of mechanical rules over data Bloom actually
  * has, stated in the same plain words the UI shows:
  *
- *   · Blood-sugar aware — Bloom's food data carries NO sugar values
- *     (the nutrient panel has no sugar field), so this mode cannot and
- *     does not judge sugar grams. What it can judge honestly: whether
- *     a dish's ingredients include an added sugar (granulated sugar or
- *     honey, named reference foods), and the dish's computed
- *     carbohydrate per serving.
+ *   · Blood-sugar aware — this mode does not judge sugar grams.
+ *     (When the mode was written, Bloom's food data carried no sugar
+ *     values at all; since M-244 many foods report total sugars, but
+ *     coverage is partial — a dish's sugar total can be a floor over
+ *     the ingredients that reported it — so the mode's rules stay
+ *     with what is complete: ) whether a dish's ingredients include
+ *     an added sugar (granulated sugar or honey, named reference
+ *     foods), and the dish's computed carbohydrate per serving.
  *   · Blood-pressure aware — sodium is computed per serving for every
  *     library dish (salt is an ingredient line), so this mode hides
  *     dishes over a stated sodium-per-serving limit. A dish whose

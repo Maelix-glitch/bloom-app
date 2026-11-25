@@ -27,6 +27,7 @@ const round0 = (n: number) => Math.round(n);
  *  decimal, where a whole-milligram rounding would erase them. */
 const OPTIONAL_ROUND: Record<OptionalNutrientKey, (n: number) => number> = {
   fibreG: round1,
+  sugarG: round1,
   sodiumMg: round0,
   potassiumMg: round0,
   magnesiumMg: round0,

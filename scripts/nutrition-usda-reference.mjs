@@ -624,6 +624,11 @@ const NUTRIENT_IDS = {
   fatG: 1004,
   carbsG: 1005,
   fibreG: 1079,
+  /* M-244 (research R-2511-09): total sugars — 1063 "Sugars, Total"
+   *  in the datasets' own nutrient.csv (verified against the
+   *  Foundation download, 2026-11-25). Shipped under the same
+   *  absence rule as fibre: only where the source row publishes it. */
+  sugarG: 1063,
   sodiumMg: 1093,
   potassiumMg: 1092,
   magnesiumMg: 1090,
@@ -635,6 +640,7 @@ const NUTRIENT_IDS = {
  *  published value outside its cap fails generation, like the core four. */
 const OPTIONAL_RANGES = {
   fibreG: 100,
+  sugarG: 100,
   sodiumMg: 40000,
   potassiumMg: 10000,
   magnesiumMg: 2000,
@@ -644,6 +650,15 @@ const OPTIONAL_RANGES = {
 };
 /** Energy is a choice among USDA-published values, in this order. */
 const ENERGY_IDS = [1008, 2048, 2047];
+
+/** Total sugars is likewise a choice among USDA-published values
+ *  (M-244): the Foundation download files it under 1063 ("Sugars,
+ *  Total"), the SR Legacy download under 2000 ("Sugars, Total",
+ *  its legacy nutrient 269) — both verified against the datasets'
+ *  own nutrient.csv and food_nutrient.csv on 2026-11-25 (Foundation:
+ *  160 rows under 1063; SR Legacy: 6,012 rows under 2000, 6 under
+ *  1063). First present wins, exactly like energy. */
+const SUGAR_IDS = [1063, 2000];
 
 /** Minimal RFC 4180 CSV reader — the FDC files are plain quoted CSV. */
 function parseCsv(text) {
@@ -777,8 +792,9 @@ function extractFood(pick, tables) {
     throw new Error(`pick ${pick.fdcId} (${pick.expect}): core value outside the parser's sane range`);
   }
   for (const [key, cap] of Object.entries(OPTIONAL_RANGES)) {
-    const id = NUTRIENT_IDS[key];
-    if (!values.has(id)) continue;
+    const id =
+      key === "sugarG" ? SUGAR_IDS.find((i) => values.has(i)) : NUTRIENT_IDS[key];
+    if (id === undefined || !values.has(id)) continue;
     const value = values.get(id);
     if (!inRange(value, cap)) {
       throw new Error(`pick ${pick.fdcId} (${pick.expect}): ${key} outside the parser's sane range`);
@@ -859,7 +875,7 @@ async function generate() {
     " * (2025-04-24 release) and SR Legacy (2018-04 release), fdc.nal.usda.gov.",
     " * Licence: CC0 1.0 (evidence catalogue source `usda-fooddata-central`).",
     " * Every nutrient value below is a value USDA published for that food,",
-    " * per 100 g; fibre, sodium and the micronutrient panel (potassium,",
+    " * per 100 g; fibre, sugar, sodium and the micronutrient panel (potassium,",
     " * magnesium, calcium, iron, vitamin C) appear only where the source",
     " * row has them — absent means not reported, never zero.",
     " * Each entry also carries a food group + dietary-pattern classification,",

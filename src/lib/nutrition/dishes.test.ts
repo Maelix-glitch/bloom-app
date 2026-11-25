@@ -70,29 +70,35 @@ describe("the proof dishes", () => {
 
 describe("dishNutrients — computed, never stored", () => {
   it("matches the hand-summed per-serving values for every proof dish", () => {
+    /* Sugar (M-244, research R-2511-09): hand-summed the same way
+     *  from the source rows — Σ sugarG × grams/100 ÷ servings over
+     *  the lines whose food reports sugar. Not every line reports
+     *  it (dal 10/12, rice 3/5, chutney 6/7, raita 4/6, aloo gobi
+     *  10/14), so each dish's sugar is a floor over its reporters,
+     *  never a claim about the lines that stayed silent. */
     expect(dishNutrients(byId("dish-masoor-dal-tadka")).nutrients).toEqual({
       kcal: 244, proteinG: 12.9, carbsG: 36.8, fatG: 5.4,
-      fibreG: 6.8, sodiumMg: 491, potassiumMg: 493, magnesiumMg: 43,
+      fibreG: 6.8, sugarG: 2.3, sodiumMg: 491, potassiumMg: 493, magnesiumMg: 43,
       calciumMg: 42, ironMg: 4.7, vitaminCMg: 10.6,
     });
     expect(dishNutrients(byId("dish-jeera-rice")).nutrients).toEqual({
       kcal: 304, proteinG: 5.4, carbsG: 60.7, fatG: 3.5,
-      fibreG: 0.3, sodiumMg: 389, potassiumMg: 76, magnesiumMg: 23,
+      fibreG: 0.3, sugarG: 0, sodiumMg: 389, potassiumMg: 76, magnesiumMg: 23,
       calciumMg: 12, ironMg: 0.7, vitaminCMg: 0.2,
     });
     expect(dishNutrients(byId("dish-mint-coriander-chutney")).nutrients).toEqual({
       kcal: 12, proteinG: 0.7, carbsG: 2.2, fatG: 0.2,
-      fibreG: 1.1, sodiumMg: 300, potassiumMg: 122, magnesiumMg: 11,
+      fibreG: 1.1, sugarG: 0.4, sodiumMg: 300, potassiumMg: 122, magnesiumMg: 11,
       calciumMg: 27, ironMg: 1.2, vitaminCMg: 11.3,
     });
     expect(dishNutrients(byId("dish-cucumber-raita")).nutrients).toEqual({
       kcal: 88, proteinG: 4.2, carbsG: 7.6, fatG: 4.7,
-      fibreG: 0.3, sodiumMg: 335, potassiumMg: 267, magnesiumMg: 19,
+      fibreG: 0.3, sugarG: 4.1, sodiumMg: 335, potassiumMg: 267, magnesiumMg: 19,
       calciumMg: 143, ironMg: 0.4, vitaminCMg: 0.2,
     });
     expect(dishNutrients(byId("dish-aloo-gobi")).nutrients).toEqual({
       kcal: 179, proteinG: 4.9, carbsG: 28.3, fatG: 6,
-      fibreG: 3.7, sodiumMg: 510, potassiumMg: 900, magnesiumMg: 54,
+      fibreG: 3.7, sugarG: 2.8, sodiumMg: 510, potassiumMg: 900, magnesiumMg: 54,
       calciumMg: 50, ironMg: 1.9, vitaminCMg: 88.1,
     });
   });

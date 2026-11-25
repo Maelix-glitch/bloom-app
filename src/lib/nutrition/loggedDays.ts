@@ -21,9 +21,18 @@
  * — "did the person show up?" — and is NOT changed by this module.
  * This one answers "is this day's record whole enough to learn
  * from?", and only the learning paths ask it.
+ *
+ * M-244 (research R-2511-08, owner's decision 2026-11-25): the two
+ * meals must be MAIN meals — breakfast, lunch or dinner. A snack is
+ * not a meal for this purpose: a day holding one lunch and one snack
+ * is a fragment, not a day of eating, and the learning paths must
+ * not read it as complete. The owner chose the main-meal rule over
+ * a calorie floor (a floor breaks at the edges — too high for a
+ * 1,350 kcal target, meaningless for a 3,000 kcal one — and one
+ * giant meal can beat it).
  */
 
-import type { LogEntry } from "./types";
+import type { LogEntry, Meal } from "./types";
 
 export interface LoggedDayTotals {
   day: string;
@@ -31,19 +40,29 @@ export interface LoggedDayTotals {
   proteinG: number;
   entries: number;
   meals: number;
+  /** Distinct MAIN meals (breakfast/lunch/dinner) — snacks excluded (M-244). */
+  mainMeals: number;
 }
 
 /** The completeness rule, as constants so tests and copy agree. */
 export const COMPLETE_DAY_MIN_ENTRIES = 2;
 export const COMPLETE_DAY_MIN_MEALS = 2;
+/** M-244: of the day's meals, at least this many must be main meals. */
+export const COMPLETE_DAY_MIN_MAIN_MEALS = 2;
 
-export function isCompleteLoggedDay(totals: { entries: number; meals: number }): boolean {
-  return totals.entries >= COMPLETE_DAY_MIN_ENTRIES && totals.meals >= COMPLETE_DAY_MIN_MEALS;
+const MAIN_MEALS: ReadonlySet<Meal> = new Set(["breakfast", "lunch", "dinner"]);
+
+export function isCompleteLoggedDay(totals: { entries: number; meals: number; mainMeals: number }): boolean {
+  return (
+    totals.entries >= COMPLETE_DAY_MIN_ENTRIES &&
+    totals.meals >= COMPLETE_DAY_MIN_MEALS &&
+    totals.mainMeals >= COMPLETE_DAY_MIN_MAIN_MEALS
+  );
 }
 
 /** Per-day totals for every day in the log, complete or not. */
 export function loggedDayTotals(entries: readonly LogEntry[]): Map<string, LoggedDayTotals> {
-  const byDay = new Map<string, LoggedDayTotals & { mealSet: Set<string> }>();
+  const byDay = new Map<string, LoggedDayTotals & { mealSet: Set<string>; mainMealSet: Set<string> }>();
   for (const entry of entries) {
     const totals = byDay.get(entry.day) ?? {
       day: entry.day,
@@ -51,13 +70,17 @@ export function loggedDayTotals(entries: readonly LogEntry[]): Map<string, Logge
       proteinG: 0,
       entries: 0,
       meals: 0,
+      mainMeals: 0,
       mealSet: new Set<string>(),
+      mainMealSet: new Set<string>(),
     };
     totals.kcal += entry.nutrients.kcal;
     totals.proteinG += entry.nutrients.proteinG;
     totals.entries += 1;
     totals.mealSet.add(entry.meal);
     totals.meals = totals.mealSet.size;
+    if (MAIN_MEALS.has(entry.meal)) totals.mainMealSet.add(entry.meal);
+    totals.mainMeals = totals.mainMealSet.size;
     byDay.set(entry.day, totals);
   }
   const out = new Map<string, LoggedDayTotals>();
@@ -68,6 +91,7 @@ export function loggedDayTotals(entries: readonly LogEntry[]): Map<string, Logge
       proteinG: totals.proteinG,
       entries: totals.entries,
       meals: totals.meals,
+      mainMeals: totals.mainMeals,
     });
   }
   return out;

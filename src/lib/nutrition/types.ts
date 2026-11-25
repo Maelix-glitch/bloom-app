@@ -19,6 +19,15 @@ export interface Nutrients {
   fatG: number;
   /** Only when the source provides it. Absent is not zero. */
   fibreG?: number;
+  /**
+   * Total sugars, grams (M-244, research R-2511-09). Only when the
+   * source provides it — the field exists so the ICMR-NIN DGI 2024
+   * line "under 5% of energy from sugar" is measurable at all; before
+   * this field, Bloom's food data carried no sugar values and the
+   * blood-sugar mode could judge only ingredient identity, never
+   * grams (see modes.ts). Absent is not zero.
+   */
+  sugarG?: number;
   /** Only when the source provides it. Absent is not zero. */
   sodiumMg?: number;
   /**
@@ -41,6 +50,7 @@ export interface Nutrients {
  *  not report it, so the total is a floor, not a claim. */
 export const OPTIONAL_NUTRIENT_KEYS = [
   "fibreG",
+  "sugarG",
   "sodiumMg",
   "potassiumMg",
   "magnesiumMg",

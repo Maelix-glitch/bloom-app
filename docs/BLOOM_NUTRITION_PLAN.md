@@ -143,6 +143,24 @@ future slice that touches composition:
   no new section, §7.1 order untouched. Labels follow the clock
   ("Mid-morning snack" at 10:55 on a 07:00–23:00 frame).
 
+## Method 16 addendum (2026-11-25 — M-244; PLAN_METHOD_VERSION 16)
+
+One composer rule from the daily research programme (R-2511-04, ISSN
+2017 per-meal protein distribution), approved by the owner as part of
+the M-244 package:
+
+- **Each main meal carries a protein aim.** A main-meal pick under
+  0.25 g per kg of the engine's own protein-basis weight (the
+  reference weight body.ts doses the day's protein on, recovered
+  from the resolved targets — the basis itself is unchanged and
+  remains the M-82 human-review item) pays a bounded shortfall cost
+  in the pick (0.1 at a total shortfall, ranking-term class), so the
+  day's protein is distributed across its meals instead of landing
+  wherever the fit leaves it. Snacks carry no aim. The day bands the
+  day guard judges are untouched, and the aim is stated on the plan
+  page itself, in the working-diagnosis block (M-244's PES card:
+  "What this plan is working on" at the head of the day card).
+
 ## Acceptance (every slice)
 - No horizontal scroll at 360/768/1280/1920 (guard proxies in vitest/jsdom;
   geometry verified live by the parent after deploy).
