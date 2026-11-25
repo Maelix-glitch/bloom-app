@@ -293,21 +293,24 @@ function RailProfile() {
 }
 
 /**
- * Phones and tablets have no rail, so a brand bar fixed to the top carries
- * the mark, the wordmark and the profile link; the primary links live in the
- * bottom tab bar (HomeMobileNav). Its height is `--app-top-bar` (60px) and
- * the `.app-shell` wrapper pads for it — see src/styles.css.
+ * Phones and tablets have no rail. Until M-249 this mounted a fixed brand
+ * bar (mark + wordmark + the account buttons); the owner asked for the
+ * brand header gone (2026-11-25) — "just the floating profile and the
+ * other buttons". What remains is exactly that: the account cluster
+ * (points, bell, settings, profile) floating at the top right, each
+ * button carrying its own chip material (.bloom-icon-btn in shell.css,
+ * the points pill its own), no strip behind them. The container is
+ * click-through (pointer-events-none) so the page owns the top again;
+ * the shell still reserves the old 60px (--app-top-bar) so no page
+ * layout moved. The primary links live in the bottom tab bar
+ * (HomeMobileNav).
  */
 export function HomeMobileBar() {
   const { pathname } = useLocation();
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
   return (
-    <div className="app-nav app-mobile-bar fixed inset-x-0 top-0 z-20 flex h-[60px] items-center justify-between border-b border-border px-5 lg:hidden">
-      <Link to="/" className="flex items-center gap-2.5 text-foreground" aria-label="Bloom - Today">
-        <BloomLogo size={22} />
-        <span className="font-display text-[length:var(--text-title)] leading-none tracking-wide">Bloom</span>
-      </Link>
-      <div className="flex items-center gap-2">
+    <div className="app-nav app-mobile-bar pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-end px-5 pt-3 lg:hidden">
+      <div className="pointer-events-auto flex items-center gap-2">
         <PointsChip compact />
         <NotificationBell />
         {/* The rail's settings gear, mirrored in the phone bar (Plan B):

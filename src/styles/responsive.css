@@ -105,11 +105,16 @@
    Six destinations must always fit. Equal flex shares, a guaranteed touch
    height, labels that shrink gracefully — never clipped, never overflowing.
    Reskin slice 2: the bar is a floating pill after the owner's prototype —
-   inset from the screen edges (inset-x-3 in HomeMobileNav), the panel at
-   90% over a backdrop blur, a 16px radius (the --radius-lg role) and a
-   heavy soft shadow. It floats above the home indicator instead of
-   filling the zone: the lift is the 12px air plus the safe-area inset,
-   and --app-bottom-nav carries the same total so page content clears it. */
+   inset from the screen edges (inset-x-3 in HomeMobileNav), a 16px radius
+   (the --radius-lg role) and a heavy soft shadow. It floats above the home
+   indicator instead of filling the zone: the lift is the 12px air plus the
+   safe-area inset, and --app-bottom-nav carries the same total so page
+   content clears it.
+   M-249 (owner, 2026-11-25): the panel goes WHITE GLASS — a pale cream
+   tint at 16% over a saturating blur, so the page glows through it,
+   replacing the near-solid ink panel at 90%. The specular rim brightens
+   with it, and the active pill deepens so it still reads on the lighter
+   glass. */
 
 nav.app-mobile-nav {
   display: flex;
@@ -119,17 +124,19 @@ nav.app-mobile-nav {
   gap: var(--space-1);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
-  background: color-mix(in oklab, var(--surface) 90%, transparent);
-  backdrop-filter: blur(16px);
+  background: color-mix(in oklab, var(--foreground) 16%, transparent);
+  backdrop-filter: blur(16px) saturate(160%);
   box-shadow:
-    inset 0 1px 0 color-mix(in oklab, var(--foreground) 5%, transparent),
+    inset 0 1px 0 color-mix(in oklab, var(--foreground) 20%, transparent),
     0 24px 48px -16px rgba(0, 0, 0, 0.65);
 }
 
-/* The active destination: a white 7% pill with gold text — the glyph
-   already takes gold from the .app-nav-glyph active rules in styles.css. */
+/* The active destination: a white 15% pill with gold text — the glyph
+   already takes gold from the .app-nav-glyph active rules in styles.css.
+   (7% in the ink-panel days; deepened in M-249 so it survives the move to
+   white glass.) */
 .app-mobile-nav > a[aria-current="page"] {
-  background: color-mix(in oklab, var(--foreground) 7%, transparent);
+  background: color-mix(in oklab, var(--foreground) 15%, transparent);
   color: var(--gold);
 }
 
