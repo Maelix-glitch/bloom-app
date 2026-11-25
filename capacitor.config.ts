@@ -12,13 +12,17 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * Full steps, store publishing and the PWA/TWA alternatives: APP_WRAPPER.md.
  */
 const config: CapacitorConfig = {
-  // Reverse-domain id. Change to a domain you own before publishing to a store.
+  // Reverse-domain id. Still the scaffold id: the final id waits on the
+  // owner's domain/rename decision (see NATIVE_SHELL.md). Change it to a
+  // domain you own before publishing to a store.
   appId: "app.bloom.tracker",
   appName: "Bloom",
   // The offline static build from `npm run build:app` — index.html lives here.
   webDir: "dist/client",
-  // Behind the webview while the app boots: matches theme-color, no white flash.
-  backgroundColor: "#14151f",
+  // Behind the webview while the app boots: Bloom's official ink (#0a0b0e),
+  // no white flash. Keep in step with the StatusBar colour in
+  // src/lib/native-shell.ts.
+  backgroundColor: "#0a0b0e",
   ios: {
     // Web content extends under the notch/home indicator; the app's own
     // safe-area CSS (viewport-fit=cover + env(safe-area-inset-*)) handles it.
