@@ -242,7 +242,7 @@ export function ColorField({
         <label
           className="se-swatch relative grid shrink-0 place-items-center overflow-hidden"
           style={{
-            background: `conic-gradient(from 0deg, ${current}, #e0a3b8, #eed9a4, #9db89a, #9fb6cf, #dcc08f, ${current})`,
+            background: `conic-gradient(from 0deg, ${current}, #e0a3b8, #eed9a4, #9db89a, #aebfae, #dcc08f, ${current})`,
           }}
           title="Custom colour"
         >

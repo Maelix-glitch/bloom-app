@@ -34,7 +34,7 @@
   --mp-happy: oklch(0.86 0.1 85);
   --mp-calm: oklch(0.76 0.06 145);
   --mp-neutral: oklch(0.62 0.01 160);
-  --mp-sad: oklch(0.72 0.06 250);
+  --mp-sad: oklch(0.72 0.02 160); /* M-240: near-neutral ink grey (was blue) */
   --mp-anxious: oklch(0.71 0.08 30);
   --mp-angry: oklch(0.64 0.12 25);
 

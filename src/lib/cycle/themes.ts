@@ -27,7 +27,7 @@ export const CYCLE_THEMES: CycleTheme[] = [
       { label: "Surface", hex: "#111318" },
       { label: "Ink", hex: "#f2ecec" },
       { label: "Menstrual", hex: "#cf6d8f" },
-      { label: "Follicular", hex: "#879dbb" },
+      { label: "Follicular", hex: "#8fc7a2" },
       { label: "Ovulation", hex: "#e3c187" },
       { label: "Luteal", hex: "#8fc7a2" },
     ],
@@ -55,12 +55,12 @@ export const CYCLE_THEMES: CycleTheme[] = [
   {
     id: "tide",
     name: "Deep tide",
-    tagline: "Slate-blue ground, crisp and technical",
+    tagline: "Neutral ink ground, crisp and technical",
     description:
-      "The most instrument-like direction: slate-blue charcoal, tight 10px radii, no drop shadows, heavier rules between rows. Raspberry, aqua and saffron do the semantic work.",
+      "The most instrument-like direction: neutral ink charcoal, tight 10px radii, no drop shadows, heavier rules between rows. Raspberry, aqua and saffron do the semantic work.",
     palette: [
-      { label: "Ground", hex: "#0d1620" },
-      { label: "Surface", hex: "#131f2a" },
+      { label: "Ground", hex: "#0a0b0e" },
+      { label: "Surface", hex: "#111318" },
       { label: "Ink", hex: "#edf1f5" },
       { label: "Menstrual", hex: "#c4557a" },
       { label: "Follicular", hex: "#3fb6c6" },
@@ -91,12 +91,12 @@ export const CYCLE_THEMES: CycleTheme[] = [
   {
     id: "aurora",
     name: "Aurora",
-    tagline: "Deep teal-indigo, glass panels, drifting light",
+    tagline: "Deep ink, glass panels, drifting light",
     description:
-      "The most atmospheric direction: three blurred orbs drift behind translucent, blurred cards. Mint follicular, hot berry menstrual, saffron ovulation on a deep teal-indigo ground.",
+      "The most atmospheric direction: three blurred orbs drift behind translucent, blurred cards. Mint follicular, hot berry menstrual, saffron ovulation on a deep ink ground.",
     palette: [
-      { label: "Ground", hex: "#09131a" },
-      { label: "Surface", hex: "#10222a" },
+      { label: "Ground", hex: "#090b0d" },
+      { label: "Surface", hex: "#111318" },
       { label: "Ink", hex: "#e8f6f4" },
       { label: "Menstrual", hex: "#e2578c" },
       { label: "Follicular", hex: "#45e0c0" },

@@ -245,14 +245,14 @@
   --rose-bright: #f0b3bf; /* bright pair to --rose/--danger (mood/cycle contexts) */
   --silver: #cfd2d6; /* neutral silver (Crescent frame, Starlight — M-225) */
   --destructive: #e3919f;
-  --info: #879dbb;
+  --info: #8fc7a2; /* M-240: sage (was steel blue) */
   --sage: var(--success);
   --amber: var(--warning);
   --rose: #e3919f;
   --sky: var(--info);
 
   /* ---- data visualisation -------------------------------------------- */
-  --chart-1: #879dbb;
+  --chart-1: var(--gold); /* M-240: gold (was steel blue) */
   --chart-2: #8fc7a2;
   --chart-3: var(--gold);
   --chart-4: #f4f0e6; /* cream-2 — M-225: was lavender; cream keeps the slot distinct from gold/amber */
@@ -2150,7 +2150,7 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   --mp-happy: oklch(0.86 0.1 85);
   --mp-calm: oklch(0.76 0.06 145);
   --mp-neutral: oklch(0.62 0.01 160);
-  --mp-sad: oklch(0.72 0.06 250);
+  --mp-sad: oklch(0.72 0.02 160); /* M-240: near-neutral ink grey (was blue) */
   --mp-anxious: oklch(0.71 0.08 30);
   --mp-angry: oklch(0.64 0.12 25);
   --mp-gradient-gold: linear-gradient(135deg, oklch(0.9 0.06 90), oklch(0.82 0.1 78));
@@ -2167,10 +2167,10 @@ html.bloom-navigated .mood-page .mm-hero-copy > * {
   --mp-happy: oklch(0.86 0.1 85);
   --mp-calm: oklch(0.76 0.06 145);
   --mp-neutral: oklch(0.62 0.01 160);
-  --mp-sad: oklch(0.72 0.06 250);
+  --mp-sad: oklch(0.72 0.02 160); /* M-240: near-neutral ink grey (was blue) */
   --mp-anxious: oklch(0.71 0.08 30);
   --mp-angry: oklch(0.64 0.12 25);
-  --mood-tone-low: #8aa4c8;
+  --mood-tone-low: #9aa9a0; /* M-240: neutral sage-grey (was steel blue) */
   --mood-tone-flat: #a9aebb;
   --mood-tone-steady: #cdbd9a;
   --mood-tone-good: #e6c27d;
@@ -3734,11 +3734,11 @@ html[data-bloom-wallpaper="wp-candle-glow"] {
 }
 html[data-bloom-wallpaper="wp-still-water"] {
   --bloom-wallpaper-image: url("/rewards/art/hydration-mist.jpg");
-  --bloom-wallpaper-tint: oklch(0.75 0.08 235 / 0.32);
+  --bloom-wallpaper-tint: oklch(0.78 0.04 85 / 0.32); /* M-240: warm neutral (was steel blue) */
 }
 html[data-bloom-wallpaper="wp-night-sky"] {
   --bloom-wallpaper-image: url("/rewards/art/deep-rest.jpg");
-  --bloom-wallpaper-tint: oklch(0.72 0.05 250 / 0.36); /* slate night (M-225: was violet) */
+  --bloom-wallpaper-tint: oklch(0.72 0.02 85 / 0.36); /* warm night (M-240: was slate blue) */
 }
 html[data-bloom-wallpaper="wp-golden-dusk"] {
   --bloom-wallpaper-image: url("/rewards/art/golden-hour.jpg");
@@ -3754,7 +3754,7 @@ html[data-bloom-effect="fx-ember-light"] {
   --bloom-fx-color: oklch(0.85 0.1 85);
 }
 html[data-bloom-effect="fx-rain-spark"] {
-  --bloom-fx-color: oklch(0.79 0.05 230);
+  --bloom-fx-color: oklch(0.82 0.09 80); /* M-240: gold family (was steel blue) */
 }
 html[data-bloom-effect="fx-starlight"] {
   --bloom-fx-color: oklch(0.78 0.005 250); /* silver, per the effect's own copy (M-225: was violet) */

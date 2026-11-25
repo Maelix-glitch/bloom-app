@@ -17,7 +17,7 @@
  *     coach, profile. That is reversible but it is not small, so it asks first.
  */
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   IconArchive,
   IconBell,
@@ -54,6 +54,15 @@ import { BlockedSection } from "@/components/profile/BlockedSection";
 import { ConsentSection } from "@/components/profile/ConsentSection";
 import { ModerationSection } from "@/components/profile/ModerationSection";
 import { TrustSection } from "@/components/profile/TrustSection";
+import { BloomSheet, SheetBody } from "@/components/ui/bloom-sheet";
+import { ThemesGallery } from "@/components/progression/ThemesGallery";
+import { CATALOG, componentsById } from "@/lib/rewards/catalog";
+import { sanitizeProfile } from "@/lib/rewards/customization";
+import {
+  loadRewardsStore,
+  setEquipped,
+  subscribeRewards,
+} from "@/lib/rewards/store";
 
 import type {
   AccountDetails,
@@ -399,6 +408,62 @@ const ACCENT_LABEL: Record<ProfileIdentity["accent"], string> = {
   rose: "Rose",
 };
 
+/**
+ * Themes: the Appearance group's door to the twelve founded themes
+ * (M-241).
+ *
+ * Until now the themes lived only in the Atelier (Rewards, then a
+ * second door), and Settings, where a person naturally looks to change
+ * how the app looks, offered only the accent colour. This row closes
+ * that gap with the same store and the same gallery: the name is the
+ * equipped theme read live from the rewards store (the Atelier's own
+ * source), and the sheet renders ThemesGallery itself, so there is one
+ * gallery in the app, not a Settings copy of it. Equipping goes through
+ * setEquipped, exactly as the Atelier's does, and BloomSkin republishes
+ * the skin app-wide; the row's name follows because the row subscribes
+ * to the same store. Nothing equipped reads as the honest default,
+ * "Bloom default", the Atelier's own words for the same state.
+ */
+export function ThemesRow() {
+  const [store, setStore] = useState(() => loadRewardsStore());
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => subscribeRewards(() => setStore(loadRewardsStore())), []);
+
+  const equipped = useMemo(() => sanitizeProfile(store.equipped), [store.equipped]);
+  const themes = useMemo(() => CATALOG.components.filter((c) => c.kind === "theme"), []);
+  const current = equipped.themeId ? componentsById.get(equipped.themeId) : undefined;
+
+  return (
+    <>
+      <Row
+        icon={<IconSparkles />}
+        label="Theme"
+        hint="The whole look: colours, surfaces and artwork"
+        value={current?.title ?? "Bloom default"}
+        onClick={() => setOpen(true)}
+        testId="pf-row-theme"
+      />
+      <BloomSheet open={open} onClose={() => setOpen(false)} title="Themes" size="lg">
+        <SheetBody className="thg-sheet-body">
+          <div className="thg-sheet-scroll">
+            <p className="bsheet-eyebrow">Appearance</p>
+            <h3 className="thg-sheet-title">Themes</h3>
+            <ThemesGallery
+              themes={themes}
+              equippedThemeId={equipped.themeId}
+              onEquip={(theme) => {
+                setEquipped({ themeId: theme.id });
+                setStore(loadRewardsStore());
+              }}
+            />
+          </div>
+        </SheetBody>
+      </BloomSheet>
+    </>
+  );
+}
+
 export function AccountRow({
   identity,
   account,
@@ -502,6 +567,7 @@ export function AccountRow({
       <PersonalizationSection />
 
       <Group label="Appearance">
+        <ThemesRow />
         <Row
           icon={<IconPalette />}
           label="Accent"

@@ -7,7 +7,7 @@ export const DRAW_COLORS = [
   "#9db89a",
   "#e0a3b8",
   "#eed9a4",
-  "#9fb6cf",
+  "#aebfae", /* M-240: pale sage (was steel blue) */
   "#c07a5e",
 ];
 

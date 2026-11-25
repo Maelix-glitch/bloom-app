@@ -332,7 +332,7 @@ export function NutritionHero({
             </div>
 
             {[
-              { label: "Carbs", value: totals.carbsG, color: "var(--sky)" },
+              { label: "Carbs", value: totals.carbsG, color: "var(--macro-carb)" },
               { label: "Fat", value: totals.fatG, color: "var(--amber)" },
             ].map((m) => (
               <div
