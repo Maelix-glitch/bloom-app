@@ -2,6 +2,9 @@ import type { GuildId, OnboardingState, RoleId, UserId } from '@bloom/shared-typ
 import { BaseRepository } from '../repository.js';
 import { toDatabaseError, type Database, type TransactionSql } from '../client.js';
 
+/** Hard ceiling on a role-membership read. There is no pagination. */
+const MAX_ROLE_MEMBERS = 1000;
+
 export interface GuildRecord {
   readonly guildId: GuildId;
   readonly name: string;
@@ -230,6 +233,20 @@ export class PostgresIdentityRepository
     }
   }
 
+  /**
+   * Members currently holding a role.
+   *
+   * Bounded and ordered, which it was not. ❋ Bloom Member is held by every
+   * member of the server, so an unbounded version of this pulls the entire
+   * membership into process memory the first time anyone calls it.
+   *
+   * Nothing calls it today. That is exactly why it is worth bounding now:
+   * the first caller will be written by someone who assumes the repository
+   * would not hand back something unbounded, and they will be right because
+   * of this line rather than by luck. A caller that needs more than the cap
+   * needs pagination, which this platform does not have — see the known
+   * limitations in the production checklist.
+   */
   public async findMembersWithRole(
     guildId: GuildId,
     roleId: RoleId,
@@ -242,6 +259,8 @@ export class PostgresIdentityRepository
         JOIN ${sql(this.schema)}.guild_members gm
           ON gm.guild_id = mr.guild_id AND gm.user_id = mr.user_id
         WHERE mr.guild_id = ${guildId} AND mr.role_id = ${roleId} AND gm.left_at IS NULL
+        ORDER BY mr.user_id ASC
+        LIMIT ${MAX_ROLE_MEMBERS}
       `;
       return rows.map((row) => row.user_id as UserId);
     } catch (error) {

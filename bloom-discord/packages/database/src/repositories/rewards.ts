@@ -127,11 +127,46 @@ export interface RewardsRepository {
     since: Date,
   ): Promise<number>;
 
+  /**
+   * What the ledger did across a guild in a window.
+   *
+   * Three numbers, aggregated server-side. The alternative — fetching the
+   * rows and summing them here — would be unbounded by construction, and a
+   * busy week is exactly when it would break.
+   *
+   * `points` is the sum of a window's rows, so a correction inside the window
+   * reduces it. That is the honest figure: it is what the economy actually
+   * did, not what it handed out before anyone took anything back.
+   *
+   * `to` may be null, meaning "and everything since". A live view has no
+   * upper bound — there is no future data — and giving it one at the instant
+   * the clock was read would silently exclude anything that happened in the
+   * same millisecond as the read.
+   */
+  activitySummary(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<{
+    readonly points: number;
+    readonly events: number;
+    readonly members: number;
+  }>;
+
   /** Top members by points earned since `since` (or all time when omitted). */
   leaderboard(
     guildId: GuildId,
     options?: { readonly since?: Date; readonly limit?: number },
   ): Promise<readonly LeaderboardEntry[]>;
+
+  /** Point events of one kind for a member inside a half-open window. */
+  countEventsInWindow(
+    guildId: GuildId,
+    userId: UserId,
+    kind: PointKind,
+    from: Date,
+    to: Date,
+  ): Promise<number>;
 
   /**
    * The counts the award definitions evaluate against.
@@ -413,6 +448,37 @@ export class PostgresRewardsRepository
     }
   }
 
+  public async activitySummary(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<{
+    readonly points: number;
+    readonly events: number;
+    readonly members: number;
+  }> {
+    try {
+      const rows = await this.db.sql<
+        { points: string; events: string; members: string }[]
+      >`
+        SELECT coalesce(sum(points), 0)::text  AS points,
+               count(*)::text                  AS events,
+               count(DISTINCT user_id)::text   AS members
+        FROM ${this.db.sql(this.schema)}.point_events
+        WHERE guild_id = ${guildId}
+          AND created_at >= ${from}
+          AND (${to}::timestamptz IS NULL OR created_at < ${to})
+      `;
+      return {
+        points: Number(rows[0]?.points ?? '0'),
+        events: Number(rows[0]?.events ?? '0'),
+        members: Number(rows[0]?.members ?? '0'),
+      };
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
   public async leaderboard(
     guildId: GuildId,
     options: { readonly since?: Date; readonly limit?: number } = {},
@@ -438,7 +504,11 @@ export class PostgresRewardsRepository
          * one.
          */
         HAVING sum(points) > 0
-        ORDER BY sum(points) DESC, min(created_at) ASC
+        -- user_id closes the ordering: points and first-event time can both
+        -- tie, and a tied ORDER BY lets the plan decide the rest, so the board
+        -- could reshuffle between refreshes with nothing having changed.
+        -- GROUP BY makes user_id unique here, so it is a true tiebreaker.
+        ORDER BY sum(points) DESC, min(created_at) ASC, user_id ASC
         LIMIT ${limit}
       `;
 
@@ -467,6 +537,41 @@ export class PostgresRewardsRepository
         LIMIT ${capped}
       `;
       return rows.map(toEvent);
+    } catch (error) {
+      throw toDatabaseError(error);
+    }
+  }
+
+  /**
+   * How many point events of one kind a member has inside a window.
+   *
+   * Added for challenge targets, which ask "how many times did you check in
+   * while this challenge was running" — a question the existing
+   * `participation` summary cannot answer because it is lifetime-to-date and
+   * has no window.
+   *
+   * Half-open `[from, to)`, matching how every other window in this codebase
+   * is expressed, so two back-to-back challenges cannot both count the same
+   * check-in on the boundary.
+   */
+  public async countEventsInWindow(
+    guildId: GuildId,
+    userId: UserId,
+    kind: PointKind,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    try {
+      const rows = await this.db.sql<{ count: string }[]>`
+        SELECT count(*)::text AS count
+        FROM ${this.db.sql(this.schema)}.point_events
+        WHERE guild_id = ${guildId}
+          AND user_id = ${userId}
+          AND kind = ${kind}
+          AND created_at >= ${from}
+          AND created_at < ${to}
+      `;
+      return Number(rows[0]?.count ?? '0');
     } catch (error) {
       throw toDatabaseError(error);
     }

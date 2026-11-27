@@ -205,7 +205,7 @@ export class PostgresJobRunRepository extends BaseRepository implements JobRunRe
         FROM ${sql(this.schema)}.job_runs
         WHERE job_key = ${jobKey}
           AND guild_id IS NOT DISTINCT FROM ${guildId ?? null}
-        ORDER BY started_at DESC
+        ORDER BY started_at DESC, id DESC
         LIMIT 1
       `;
       const row = rows[0];
@@ -232,7 +232,7 @@ export class PostgresJobRunRepository extends BaseRepository implements JobRunRe
     const rows = await sql<{ attempt: number }[]>`
       SELECT attempt FROM ${sql(this.schema)}.job_runs
       WHERE job_key = ${jobKey} AND guild_id IS NOT DISTINCT FROM ${guildId}
-      ORDER BY started_at DESC
+      ORDER BY started_at DESC, id DESC
       LIMIT 1
     `;
     const previous = rows[0]?.attempt ?? 0;
