@@ -21,6 +21,7 @@ supabase secrets set OPENAI_API_KEY=sk-...        # provider: bloom
 supabase secrets set GEMINI_API_KEY=...           # provider: gemini (vision)
 supabase secrets set GROQ_API_KEY=...             # provider: groq
 supabase secrets set APINEX_API_KEY=...           # provider: apinex (free tier)
+supabase secrets set FREEMODEL_API_KEY=<redacted>
 supabase secrets set TEAMOROUTER_API_KEY=...      # provider: teamo (free tier)
 supabase secrets set HF_API_KEY=...               # provider: hf (Hugging Face)
 ```
