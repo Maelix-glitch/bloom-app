@@ -45,13 +45,15 @@ Owns the member lifecycle from arrival to departure:
 - **Reports and cases.** `OPEN → IN_REVIEW → ESCALATED → RESOLVED → CLOSED`.
 - **Audit logging.** Append-only, with the actor, target, reason and correlation
   id for every state-changing action.
-- **Anti-spam.** Guardian's to own — and **not implemented**. No message intent
-  is requested and no message event is handled today. The planned approach reacts
-  to Discord's native Auto Moderation rather than reading messages, which keeps
-  the Message Content intent unnecessary; see
+- **Anti-spam.** Guardian's, and implemented (Phase 8) the way the design
+  note specified: no message intent is requested and no message content is
+  handled. Guardian reacts to Discord's native Auto Moderation execution
+  events and adds the escalation ladder, cases and moderator review Discord
+  does not provide; see
   [design note 001](./design-notes/001-auto-moderation.md).
 
-Intents: `Guilds`, `GuildMembers` (privileged), `GuildModeration`.
+Intents: `Guilds`, `GuildMembers` (privileged), `GuildModeration`,
+`AutoModerationExecution`.
 
 ### Why only Guardian writes roles
 

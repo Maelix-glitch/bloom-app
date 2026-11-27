@@ -1,9 +1,10 @@
 # Command reference
 
-**Live as of Phase 5: verification, onboarding, moderation, reports and cases,
-scheduled work, and Companion's check-in, small wins and Bloom Rewards.**
-Everything else in this document is planned, not built, and is marked with the
-phase that delivers it.
+**Live as of Phase 8: everything in this document is built** — verification,
+onboarding, moderation, reports and cases, scheduled work, auto-moderation,
+Companion's check-in, small wins, Bloom Rewards, challenges and events, and
+Labs' intake and pipeline. The two exceptions are items marked **dropped**,
+which are recorded so the decision is not re-litigated.
 The platform does not pretend otherwise — the registrar publishes only what the
 dispatcher can actually route, and `apps/guardian/src/commands.test.ts` asserts
 those two lists match.
@@ -123,6 +124,27 @@ A staff note is deliberately not sent to the member. A note is context ("this
 came up before", "handled informally"), and notifying would turn every piece of
 context into a confrontation, which stops people writing them.
 
+### Auto-moderation
+
+| Command                                                                    | Policy    | Description                             |  Phase   |
+| -------------------------------------------------------------------------- | --------- | --------------------------------------- | :------: |
+| `/guardian automod status`                                                 | Moderator | The switch, the policies, recent volume | **8 ✅** |
+| `/guardian automod threshold <rule> <count> <window> [duration] [channel]` | Moderator | Set an escalation threshold             | **8 ✅** |
+| `/guardian automod exempt <role>`                                          | Moderator | Exempt a role from escalation           | **8 ✅** |
+
+Guardian does not read messages. It reacts to Discord's native Auto
+Moderation: Discord detects and blocks server-side, and the
+`AUTO_MODERATION_ACTION_EXECUTION` event is what Guardian escalates on —
+repeat offences inside a policy's window earn a timeout, recorded exactly
+like a moderator's, except the actor is null and the case origin is
+`automation`. The ceiling is a timeout; nothing here bans. See
+[design note 001](../architecture/design-notes/001-auto-moderation.md).
+
+The feature is off per guild until staff set `automod.enabled`, and without
+a policy row an execution is recorded and alerted on, never acted on. Every
+alert in `#moderation` carries **Confirm / Reverse / Escalate** buttons: a
+reverse lifts the timeout, revokes the record and tells the member.
+
 ### Onboarding
 
 | Command                                  | Policy        | Description                          |  Phase   |
@@ -230,21 +252,24 @@ one namespace.
 
 ### Built
 
-| Command                           | Policy            | Description                                   |  Phase   |
-| --------------------------------- | ----------------- | --------------------------------------------- | :------: |
-| `/checkin`                        | Bloom Member      | Check in for today                            | **5 ✅** |
-| `/win <description>`              | Bloom Member      | Share something that went well                | **5 ✅** |
-| `/companion profile [member]`     | Bloom Member      | Points, rank, streak and recent activity      | **5 ✅** |
-| `/companion rank`                 | Bloom Member      | Your rank and what is next                    | **5 ✅** |
-| `/companion leaderboard [period]` | Bloom Member      | Who earned the most in the last 7 or 30 days  | **5 ✅** |
-| `/companion milestones`           | Bloom Member      | Milestones reached, and the next one          | **6 ✅** |
-| `/companion achievements`         | Bloom Member      | Achievements earned                           | **6 ✅** |
-| `/companion admin award`          | **Administrator** | Adjust a member's points, with a reason       | **6 ✅** |
-| `/companion jobs list`            | Moderator         | Companion's jobs, schedules and next runs     | **4 ✅** |
-| `/companion jobs history <job>`   | Moderator         | The last recorded runs, including the failure | **4 ✅** |
-| `/companion jobs run <job>`       | **Administrator** | Run a job now, without waiting for its cron   | **4 ✅** |
-| `/companion jobs enable <job>`    | **Administrator** | Switch a job on for this server               | **4 ✅** |
-| `/companion jobs disable <job>`   | **Administrator** | Switch a job off for this server              | **4 ✅** |
+| Command                                      | Policy            | Description                                                       |  Phase   |
+| -------------------------------------------- | ----------------- | ----------------------------------------------------------------- | :------: |
+| `/checkin`                                   | Bloom Member      | Check in for today                                                | **5 ✅** |
+| `/win <description>`                         | Bloom Member      | Share something that went well                                    | **5 ✅** |
+| `/companion profile [member]`                | Bloom Member      | Points, rank, streak and recent activity                          | **5 ✅** |
+| `/companion rank`                            | Bloom Member      | Your rank and what is next                                        | **5 ✅** |
+| `/companion leaderboard [category] [period]` | Bloom Member      | Points, referrals, challenges or events, over 7d / 30d / all time | **5 ✅** |
+| `/companion community highlights`            | Bloom Member      | Who has been doing what, lately                                   | **7 ✅** |
+| `/companion community status`                | Bloom Member      | What is running now, and how the week is going                    | **7 ✅** |
+| `/companion milestones`                      | Bloom Member      | Milestones reached, and the next one                              | **6 ✅** |
+| `/companion achievements`                    | Bloom Member      | Achievements earned                                               | **6 ✅** |
+| `/companion admin award`                     | **Administrator** | Adjust a member's points, with a reason                           | **6 ✅** |
+| `/companion admin community-overview`        | **Administrator** | Activities, participation and totals. Read-only                   | **7 ✅** |
+| `/companion jobs list`                       | Moderator         | Companion's jobs, schedules and next runs                         | **4 ✅** |
+| `/companion jobs history <job>`              | Moderator         | The last recorded runs, including the failure                     | **4 ✅** |
+| `/companion jobs run <job>`                  | **Administrator** | Run a job now, without waiting for its cron                       | **4 ✅** |
+| `/companion jobs enable <job>`               | **Administrator** | Switch a job on for this server                                   | **4 ✅** |
+| `/companion jobs disable <job>`              | **Administrator** | Switch a job off for this server                                  | **4 ✅** |
 
 `/checkin` and `/win` are top-level because they are things a member does most
 days, and `/companion checkin` every morning is the kind of friction that
@@ -308,12 +333,19 @@ audit row at **warn** severity — quiet, unilateral, and it changes how a membe
 appears to everyone else. A negative amount is recorded as an `adjustment`
 rather than a `manual_award`, so a correction never reads as a gift.
 
-### Planned
+### Challenges and events
 
-| Command                | Policy       | Description       | Phase |
-| ---------------------- | ------------ | ----------------- | :---: |
-| `/challenge list`      | Bloom Member | Active challenges |   7   |
-| `/challenge join <id>` | Bloom Member | Join one          |   7   |
+Shipped in the shape the namespace allows rather than the top-level shape
+originally sketched here: a challenge has nothing to join — progress is
+counted from what members already log — so it is a listing, not a verb.
+
+| Command                       | Policy       | Description                               | Phase |
+| ----------------------------- | ------------ | ----------------------------------------- | :---: |
+| `/companion challenges`       | Bloom Member | Challenges running now, and your progress |   7   |
+| `/companion event list`       | Bloom Member | Events you can join                       |   7   |
+| `/companion event info <id>`  | Bloom Member | Details of one event                      |   7   |
+| `/companion event join <id>`  | Bloom Member | Put your name down for an event           |   7   |
+| `/companion event leave <id>` | Bloom Member | Take your name off an event               |   7   |
 
 `/companion admin schedule` was planned here and has been **dropped**: the shared
 `jobs` group does that job for every bot, and a second way to toggle the same
@@ -331,13 +363,23 @@ asserted in a test so it is not re-added as an oversight.
 
 ### Shipped
 
-| Command                                         | Policy       | Description                          | Phase |
-| ----------------------------------------------- | ------------ | ------------------------------------ | :---: |
-| `/feedback <category>`                          | Bloom Member | Share feedback — opens a modal       |   7   |
-| `/labs bug report <area>`                       | Bloom Member | Report a defect — opens a modal      |   7   |
-| `/labs bug show <number>`                       | Bloom Member | Look up a bug and its triage history |   7   |
-| `/labs bug queue [status]`                      | Moderator    | Bugs still waiting on someone        |   7   |
-| `/labs admin triage <number> <status> [reason]` | Moderator    | Move a bug through triage            |   7   |
+| Command                                                 | Policy       | Description                          | Phase |
+| ------------------------------------------------------- | ------------ | ------------------------------------ | :---: |
+| `/feedback <category>`                                  | Bloom Member | Share feedback — opens a modal       |   7   |
+| `/labs bug report <area>`                               | Bloom Member | Report a defect — opens a modal      |   7   |
+| `/labs bug show <number>`                               | Bloom Member | Look up a bug and its triage history |   7   |
+| `/labs bug queue [status]`                              | Moderator    | Bugs still waiting on someone        |   7   |
+| `/labs admin triage <number> <status> [reason]`         | Moderator    | Move a bug through triage            |   7   |
+| `/labs feature status [name]`                           | Bloom Member | The feature pipeline, with backing   |   8   |
+| `/labs vote <feature>`                                  | Bloom Member | Back a feature — again to withdraw   |   8   |
+| `/labs cohort list`                                     | Bloom Member | The cohorts, and whether you are in  |   8   |
+| `/labs cohort join <name>`                              | Bloom Member | Put your name down for a cohort      |   8   |
+| `/labs cohort leave <name>`                             | Bloom Member | Take your name off a cohort          |   8   |
+| `/labs release latest`                                  | Bloom Member | The most recent release notes        |   8   |
+| `/labs admin feature-add <name> [description]`          | Moderator    | Add a feature to the pipeline        |   8   |
+| `/labs admin feature-status <name> <status>`            | Moderator    | Move a feature along the pipeline    |   8   |
+| `/labs admin cohort-create <name> [closed]`             | Moderator    | Open a beta cohort                   |   8   |
+| `/labs admin release-publish <version> <title> <notes>` | Moderator    | Publish release notes                |   8   |
 
 Both submission commands open a modal, which is why neither defers: a modal may
 only be an interaction's _initial_ response, so deferring first makes opening one
@@ -369,28 +411,32 @@ a number nobody outside staff can resolve is a worse conversation than no
 number. It shows the report, its status and its history — never the operator
 hint attached to any error.
 
-### Not built yet
+**The pipeline (Phase 8).** `/labs feature status` reads the pipeline table
+staff maintain with `/labs admin feature-add` and `/labs admin
+feature-status`: `proposed → building → testing → shipped`, with `parked`
+for shelved ideas. `/labs vote` is backing, not a ballot — one row per
+member per feature, voting again withdraws it, and the count is the number
+of rows. Backing closes on `shipped` and `parked` features. It tells the
+team what members would use; it does not commit the team to building the
+winner.
 
-Phase 7 covered intake only. These were specified and are deliberately absent
-rather than stubbed:
+**Cohorts (Phase 8).** The open question in earlier drafts — how channel
+access is granted — is answered by not granting it: Labs never grants
+`◌ Beta Tester`. Cohort membership is a database fact; channel access stays
+a manual staff grant, so a bug in Labs can never widen anyone's access.
+Joining and leaving are self-service while a cohort is open; staff can
+create one already closed.
 
-| Command                       | Why it is not here                                                          |
-| ----------------------------- | --------------------------------------------------------------------------- |
-| `/labs feature status [name]` | Needs a feature pipeline table; nothing to read yet                         |
-| `/labs vote <feature>`        | Needs the candidate list `feature status` reads                             |
-| `/labs cohort join \| leave`  | Needs cohorts, and a staff answer on how channel access is granted          |
-| `/labs release latest`        | Release notes are posted by hand today; a command implies a source of truth |
-| `/labs admin cohort create`   | Same dependency as `cohort join`                                            |
+**Release notes (Phase 8).** `/labs admin release-publish` writes the note
+and announces it in `#release-notes` when that channel is configured;
+`/labs release latest` reads the newest row back. The table is the source
+of truth the earlier draft said a command would imply.
 
 `/labs admin experiment start` has been **dropped**, not deferred. An experiment
 that announces itself and records a row is an announcement with extra steps, and
 `#development-updates` already does announcements with more context than a slash
 command will collect. If experiments become real they arrive with measurement
 attached — see [D2](../architecture/decisions.md).
-
-Labs never grants `◌ Beta Tester`, and will not when cohorts land. Cohort
-membership is a database fact; channel access stays a manual staff grant, so a
-bug in Labs can never widen anyone's access.
 
 ---
 

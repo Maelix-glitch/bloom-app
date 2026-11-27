@@ -233,19 +233,24 @@ permission integers.
 
 **Guardian** — `1497064631542` (baseline + Manage Roles, Kick, Ban, Timeout, Manage Messages, Manage Channels, View Audit Log, threads, **Manage Guild**)
 
-> Before auto-moderation ships, `1497064631510` — the same set without Manage
-> Guild — is correct and is what the staging runbook uses. Manage Guild buys
-> exactly one thing: delivery of AutoMod events. Until Guardian consumes them,
-> granting it early is permission without purpose.
-
-Unchanged by Phase 2. Every permission moderation needs was already in the
-Phase 0 baseline, so existing installs do not need re-inviting — which is the
-point of deciding the permission set up front rather than growing it per
-feature.
+> **Changed by referral attribution.** The previous integer was
+> `1497064631510` — the same set without Manage Guild. Existing installs must
+> be re-invited with the new integer, or `GET /guilds/{id}/invites` returns
+> 403 and every join is recorded `unavailable` rather than attributed. That
+> failure is silent from a member's point of view, which is why it is called
+> out here rather than left to the changelog.
+>
+> Manage Guild is the only permission Discord offers for reading invite use
+> counts; there is no narrower scope. It additionally grants server settings,
+> integration management and vanity URL control, none of which Bloom uses.
+>
+> It also makes Guardian eligible to receive AutoMod events (see
+> [design note 001](../architecture/design-notes/001-auto-moderation.md)).
+> Nothing consumes them — the bit was taken for invites, and AutoMod remains
+> unbuilt.
 
 ```
-https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=1497064631510&scope=bot+applications.commands
-# with auto-moderation: permissions=1497064631542
+https://discord.com/oauth2/authorize?client_id=YOUR_CLIENT_ID&permissions=1497064631542&scope=bot+applications.commands
 ```
 
 **Companion** — `319975148608` (baseline + Manage Events)

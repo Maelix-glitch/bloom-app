@@ -11,18 +11,18 @@ marked unverified, and that is the useful part.
 
 ## Status summary
 
-| Area                 | State         | Notes                                                                                |
-| -------------------- | ------------- | ------------------------------------------------------------------------------------ |
-| Code, types, lint    | ✅ Verified   | 696 tests, 44 files; clean lint, format, both typechecks                             |
-| Database schema      | ✅ Verified   | 8 migrations, applied and re-applied against PostgreSQL 17                           |
-| Integration tests    | ✅ Verified   | Run against a real PostgreSQL, opt-in flag                                           |
-| Data retention       | ✅ Verified   | Nightly job, bounded batches, mutation-tested                                        |
-| Member erasure       | ✅ Verified   | CLI exercised end to end: dry run, apply, audit row                                  |
-| Container image      | ⚠️ Unverified | Dockerfile reviewed; **never built** — no Docker daemon available                    |
-| CI pipeline          | ⚠️ Not active | Written and syntax-checked; needs installing, see [D7](../architecture/decisions.md) |
-| Discord gateway      | ❌ Unverified | `discord.com` unreachable from the build environment                                 |
-| Command registration | ❌ Unverified | Needs a live token                                                                   |
-| Backups / restore    | ❌ Human task | Supabase-managed; must be enabled and rehearsed                                      |
+| Area                 | State         | Notes                                                                                                                                          |
+| -------------------- | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Code, types, lint    | ✅ Verified   | 1,413 tests, 66 files; clean lint, format, both typechecks                                                                                     |
+| Database schema      | ⚠️ Partially  | 14 migrations; 0001–0012 applied and re-applied against PostgreSQL 17; 0013–0014 covered by opt-in integration tests, not yet applied anywhere |
+| Integration tests    | ✅ Verified   | Run against a real PostgreSQL, opt-in flag                                                                                                     |
+| Data retention       | ✅ Verified   | Nightly job, bounded batches, mutation-tested                                                                                                  |
+| Member erasure       | ✅ Verified   | CLI exercised end to end: dry run, apply, audit row                                                                                            |
+| Container image      | ⚠️ Unverified | Dockerfile reviewed; **never built** — no Docker daemon available                                                                              |
+| CI pipeline          | ⚠️ Not active | Written and syntax-checked; needs installing, see [D7](../architecture/decisions.md)                                                           |
+| Discord gateway      | ❌ Unverified | `discord.com` unreachable from the build environment                                                                                           |
+| Command registration | ❌ Unverified | Needs a live token                                                                                                                             |
+| Backups / restore    | ❌ Human task | Supabase-managed; must be enabled and rehearsed                                                                                                |
 
 **The honest summary: everything that can be verified without a Discord token
 or a Docker daemon has been. Nothing that requires either has been.** That is
@@ -184,9 +184,13 @@ These are real, and none of them are hidden elsewhere:
    dashboards, that is a Prometheus endpoint and a decision about cardinality,
    not a quick addition.
 7. **No alerting.** Logs are structured for it; nothing is wired to a pager.
-8. **Labs is intake only.** Cohorts, voting, feature status and release notes are
-   not built. [Commands reference](../reference/commands.md) lists what is
-   missing and why.
+8. **Labs' pipeline is built but has never run live.** Cohorts, voting
+   (backing), feature status and release notes landed in Phase 8 with the
+   same caveat as everything else here: compiled, type-checked and
+   fake-tested, never round-tripped against Discord. Guardian's
+   auto-moderation is in the same position, and carries one extra unknown —
+   the `AUTO_MODERATION_ACTION_EXECUTION` payload shape is taken from the
+   installed discord-api-types, not from a live event.
 9. **Retention has never run against a large table.** Batching is tested for
    correctness against thousands of rows, not for duration against millions.
 

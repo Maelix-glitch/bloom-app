@@ -1,8 +1,23 @@
 # Design note 001 — Auto-moderation
 
-**Status:** design only, nothing implemented.
+**Status:** implemented in Phase 8, as specified here. The one structural
+deviation: migration 0013 relaxed `moderation_actions.actor_id` and
+`moderation_cases.opened_by` to nullable, which this note's audit rule
+required and the original schema did not allow.
 **Supersedes:** the `Anti-spam | ✅ owns` row that was wrong in
-`bot-responsibilities.md`.
+`bot-responsibilities.md` — it is accurate now.
+
+## Decisions taken on the open questions
+
+1. **Who tunes thresholds.** Holders of `staff.moderation.execute` — the
+   same tier that can time a member out by hand. Reading status takes
+   `staff.cases.read`.
+2. **One ladder or two.** Parallel: automod offences count only automod
+   events. A member's human warning history neither accelerates nor is
+   accelerated by the automated ladder; the case links both for context.
+3. **Do reversals notify the member.** Yes. A timeout that is lifted
+   silently leaves the member believing it stood; the reversal DM says it
+   was reversed and by the review, not by expiry.
 
 ## Purpose
 
@@ -47,12 +62,22 @@ not hold the permission that would deliver them.
 
 ## Permissions required
 
-**Manage Guild (`1 << 5`) — new.** Guardian's integer is `1497064631510`, which
-has bit 5 clear. Auto Moderation events are delivered only to apps holding
-Manage Guild, and creating or updating rules requires it too.
+**Manage Guild (`1 << 5`) — already held.** When this note was written
+Guardian's integer was `1497064631510`, with bit 5 clear. It is now
+`1497064631542`: the referral attribution work took the permission to read
+invite use counts, which needs the same bit. Auto Moderation events are
+delivered only to apps holding Manage Guild, and creating or updating rules
+requires it too — so this note no longer has a permission cost to argue.
 
-This is a genuine escalation and should be argued, not slipped in. Manage Guild
-is broad: it covers guild settings, integrations and invites. The alternatives:
+That removes the objection; it does not make the feature free. Everything
+below still applies, and the permission being present must not be mistaken for
+AutoMod being wired up. Nothing listens for
+`AUTO_MODERATION_ACTION_EXECUTION` today.
+
+The escalation was argued rather than slipped in — see
+[design note 002](./002-manage-guild-permission.md). Manage Guild is broad: it
+covers guild settings, integrations and invites. The alternatives considered
+at the time:
 
 - **Do not manage rules from Bloom.** Staff configure AutoMod by hand in the
   Discord UI; Guardian only reacts. Still needs Manage Guild for the event.
@@ -142,10 +167,5 @@ back the code leaves orphaned rows and no broken behaviour.
 
 ## Open questions
 
-1. **Who tunes thresholds?** Founder-only, or Moderator too? Affects the
-   authorization policy.
-2. **Does an automod action count toward the warning ladder that human warnings
-   use, or a parallel one?** A shared ladder is simpler; a parallel one avoids a
-   spam wave escalating someone toward a ban.
-3. **Should reversals notify the member?** "You were timed out and it was a
-   mistake" is honest but draws attention to something they may not have noticed.
+Answered at the top of this note, under "Decisions taken on the open
+questions", when the feature was built in Phase 8.

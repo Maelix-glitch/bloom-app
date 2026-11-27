@@ -423,6 +423,64 @@ the same button produce one transition and one event; the second is answered
 `unchanged`, not a second row. Removing `FOR UPDATE` makes an integration test
 fail.
 
+### `automod_events` and `automod_policies` — Phase 8
+
+Design note 001, built. Discord's native Auto Moderation detects and blocks;
+these tables are what Guardian adds around it — the escalation ladder and the
+review trail.
+
+`automod_events` is one row per execution Discord reported: guild, member,
+channel, message, rule, trigger type (`automod_trigger_type`: `keyword`,
+`spam`, `keyword_preset`, `mention_spam`, `member_profile`), the
+staff-configured `matched_keyword`, Discord's own action as text, the ladder
+step taken, and links to the `moderation_actions` row and `moderation_cases`
+row the escalation produced. `review_status` (`automod_review_status`:
+`pending`, `confirmed`, `reversed`, `escalated`) is completed by
+`reviewed_by`/`reviewed_at` — a CHECK keeps the three consistent. A partial
+unique index on `(guild_id, user_id, message_id, rule_id) WHERE message_id IS
+NOT NULL` makes a redelivered execution a no-op.
+
+There is **no content column**, and there never will be: the execution event
+offers message content only to holders of the Message Content intent, which
+no Bloom bot requests. `matched_keyword` is the rule's text, not the member's.
+
+`automod_policies` holds the thresholds: one row per scope (guild, channel,
+trigger — nulls widen), `threshold_count` offences inside `window_seconds`
+earn a timeout of `timeout_seconds`. A CHECK requires the three threshold
+fields to be all set or all null, so an exemptions-only row cannot be
+mistaken for a policy. `exempt_role_ids` is a snowflake array, unioned across
+matching scopes at read time.
+
+Migration 0013 also relaxed `moderation_actions.actor_id` and
+`moderation_cases.opened_by` to nullable. An automated action is
+indistinguishable from a human one except for its actor, which is null — the
+precedent `case_events` and `audit_events` already set.
+
+Retention prunes `automod_events` at 180 days.
+
+### `labs_features`, `labs_feature_votes`, `labs_cohorts`, `labs_cohort_members`, `labs_release_notes` — Phase 8
+
+The Labs pipeline (migration 0014). `labs_features` is the pipeline itself:
+name, `labs_feature_status` (`proposed`, `building`, `testing`, `shipped`,
+`parked`), description. Names are unique per guild case-insensitively —
+members address features by name, and "Dark mode" and "dark mode" must be
+the same feature.
+
+`labs_feature_votes` is a pure join table, `(feature_id, user_id)` primary
+key. A vote is a row; voting again deletes it. There is no counter column to
+drift — every count is `count(*)` over rows that either exist or do not.
+
+`labs_cohorts` and `labs_cohort_members` are the beta cohorts. The tables
+carry no role, channel or permission column of any kind: membership is a
+database fact, channel access stays a manual staff grant, and nothing here
+can widen anyone's access. `joinable = false` closes a cohort to new joins
+without touching existing membership.
+
+`labs_release_notes` is the source of truth `/labs release latest` reads:
+version, title, body, publisher, timestamp, and the announcement message id
+when a release-notes channel is configured. The latest row per guild wins;
+nothing scrapes a channel for it.
+
 ### Member-authored text
 
 `feedback` and `bug_reports` hold prose a member wrote, which nothing else in
@@ -442,8 +500,8 @@ useful is a product decision, not something to guess at in a migration.
 
 No table is added for either. Retention is a nightly job over an explicit
 allowlist — `idempotency_keys`, `message_cooldowns`, `job_runs`, `command_usage`,
-`verification_attempts`, `audit_events` — deleting in bounded batches of 5,000
-per table per run.
+`verification_attempts`, `audit_events`, `automod_events` — deleting in bounded
+batches of 5,000 per table per run.
 
 An allowlist rather than a denylist because the failure modes are not
 symmetrical: forgetting to add a table means it grows, which is visible and
