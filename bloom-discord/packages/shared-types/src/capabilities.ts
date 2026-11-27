@@ -31,6 +31,11 @@ export const CAPABILITIES = [
   'message:send',
   /** Grant Bloom Points and reward state. Companion only. */
   'rewards:grant',
+  /**
+   * Read guild invite use counts, to attribute a join to an inviter.
+   * Guardian only, and the only thing Manage Server is held for.
+   */
+  'invite:read',
   /** Create and manage guild scheduled events. Companion only. */
   'events:manage',
   /** Manage beta cohorts, experiments and feature status. Labs only. */
@@ -57,6 +62,7 @@ export const BOT_CAPABILITIES: Readonly<Record<BotName, readonly Capability[]>> 
     'staff:channels',
     'message:manage',
     'message:send',
+    'invite:read',
     'audit:write',
   ],
   companion: [
