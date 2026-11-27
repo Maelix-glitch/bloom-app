@@ -12,6 +12,7 @@
  *     · grok              — Groq open models       (GROQ_API_KEY)
  *     · apinex            — APINEX gateway          (APINEX_API_KEY)
  *     · huggingface-qwen  — Qwen via HF router     (HF_TOKEN)
+ *     · freemodel         — FreeModel gateway      (FREEMODEL_API_KEY, streamed transport only)
  *   No TeamoRouter. No local/offline provider. No client-side failover.
  *
  *   Routing: COACH_PROVIDER_ORDER (default apinex,grok,huggingface-qwen;
@@ -46,7 +47,8 @@
  *   supabase secrets set GEMINI_API_KEY=...        # Gemini (required first)
  *   supabase secrets set GROQ_API_KEY=...           # Groq (optional)
  *   supabase secrets set APINEX_API_KEY=...          # APINEX (optional)
- *   supabase secrets set HF_TOKEN=...              # HF Qwen (optional)
+ *   supabase secrets set HF_TOKEN=...
+ *   supabase secrets set FREEMODEL_API_KEY=<redacted>              # HF Qwen (optional)
  *   supabase secrets set ELEVENLABS_API_KEY=...    # ElevenLabs (Vitalis voice)
  *
  * VITALIS MODE (the orb's AI — a distinct identity from the Coach):
@@ -576,7 +578,7 @@ interface Media {
   dataBase64: string;
 }
 
-type ProviderId = "gemini" | "grok" | "apinex" | "huggingface-qwen";
+type ProviderId = "gemini" | "grok" | "apinex" | "huggingface-qwen" | "freemodel";
 type ErrorCategory =
   | "rate_limited"
   | "auth"
@@ -607,7 +609,7 @@ const envBool = (key: string, fallback = true): boolean => {
  *  or disabled is skipped automatically — when the direct key works, it
  *  is the strongest companion model in the chain; when it doesn't, the
  *  chain falls through to the gateways exactly as before. */
-const PROVIDER_ORDER_DEFAULT: ProviderId[] = ["gemini", "apinex", "grok", "huggingface-qwen"];
+const PROVIDER_ORDER_DEFAULT: ProviderId[] = ["gemini", "apinex", "grok", "huggingface-qwen", "freemodel"];
 const MAX_PROVIDER_ATTEMPTS = () => Math.min(envInt("COACH_MAX_PROVIDER_ATTEMPTS", 3), 5);
 /* Fail FAST on a stalled provider: on free tiers a hang is common, and a
  * 12s first attempt eats the whole deadline before the chain can reroute
@@ -638,14 +640,15 @@ function providerOrder(): ProviderId[] {
     .map((id) => id.trim())
     .filter(
       (id): id is ProviderId =>
-        id === "gemini" || id === "grok" || id === "apinex" || id === "huggingface-qwen",
+        id === "gemini" || id === "grok" || id === "apinex" || id === "huggingface-qwen" || id === "freemodel",
     );
   return configured.length > 0 ? configured : PROVIDER_ORDER_DEFAULT;
 }
 
 /* ============================================================================
    Provider registry — the ONLY providers Bloom talks to:
-   Gemini (Google direct), Groq open models, Qwen (Hugging Face router).
+   Gemini (Google direct), Groq open models, Qwen (Hugging Face router),
+   FreeModel gateway (streamed).
    No TeamoRouter. No local/offline provider. Ever.
    ========================================================================== */
 interface ProviderDef {
@@ -657,6 +660,13 @@ interface ProviderDef {
   url?: string;
   /** Native OpenAI tool schemas for providers whose models prefer real tool calls. */
   tools?: boolean;
+  /** Streamed transport: the gateway only answers SSE streams — a plain
+   *  request hangs and the connection drops (FreeModel, verified
+   *  2026-11-27). The caller reassembles the deltas into the reply text. */
+  stream?: boolean;
+  /** Per-provider attempt budget override: a streamed reply needs longer
+   *  than the 6s text cap, which would strangle it mid-answer. */
+  timeoutMs?: () => number;
   model: () => string;
   /** Vision requests use this model instead of `model()` when set — a
    *  provider's text brain and its eyes are rarely the same model. */
@@ -719,6 +729,28 @@ const REGISTRY: Record<ProviderId, ProviderDef> = {
     },
     enabled: () => envBool("COACH_HF_ENABLED"),
     tools: true,
+  },
+  freemodel: {
+    id: "freemodel",
+    label: "FreeModel",
+    secret: "FREEMODEL_API_KEY",
+    kind: "openai",
+    /* Text only: this gateway's vision support is unverified, so photo
+       requests never route here (computeProviderOrder filters by vision). */
+    vision: false,
+    url: "https://freemodel.in/v1/chat/completions",
+    /* Verified live 2026-11-27 against the owner's key: the gateway's
+       free-plan models answer a streamed request at once; the same
+       request without stream:true hangs ~15s and the connection drops
+       with no response. Hence the streamed transport + reassembly in
+       the caller, and a longer attempt budget than the 6s text cap.
+       No native tool schemas: tool-call support is unverified, and the
+       [BLOOM_TOOL] text sidecars the prompts teach still parse from
+       the reply text. */
+    stream: true,
+    timeoutMs: () => envInt("FREEMODEL_TIMEOUT_MS", 20000),
+    model: () => envStr("FREEMODEL_MODEL", "deepseek-v4.1-flash-1017"),
+    enabled: () => envBool("COACH_FREEMODEL_ENABLED"),
   },
 };
 
@@ -972,6 +1004,41 @@ const BLOOM_TOOLS = [
 
 /** OpenAI-compatible (Groq, APINEX, Hugging Face router). Reads both plain
     content and native tool_calls — reasoning traces are never read. */
+/** Reassemble an OpenAI-style SSE stream into the reply text. Deltas
+ *  arrive as `data: {json}` lines and `[DONE]` ends the stream; anything
+ *  unparsable is skipped — a partial stream still yields its text. The
+ *  fetch signal aborts the read mid-stream, so the attempt budget and
+ *  the total deadline still bind a streamed provider. */
+async function readStreamedText(res: Response): Promise<string> {
+  if (!res.body) return "";
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  let text = "";
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed.startsWith("data:")) continue;
+      const payload = trimmed.slice(5).trim();
+      if (payload === "[DONE]") return text.trim();
+      try {
+        const json = JSON.parse(payload) as Record<string, unknown>;
+        const choices = json["choices"] as Array<Record<string, unknown>> | undefined;
+        const delta = choices?.[0]?.["delta"] as Record<string, unknown> | undefined;
+        if (typeof delta?.["content"] === "string") text += delta["content"];
+      } catch {
+        /* a torn chunk boundary — the following lines carry on */
+      }
+    }
+  }
+  return text.trim();
+}
+
 async function callOpenAICompatible(
   url: string,
   key: string,
@@ -979,6 +1046,7 @@ async function callOpenAICompatible(
   messages: Array<Record<string, unknown>>,
   signal: AbortSignal,
   tools?: readonly unknown[],
+  stream = false,
 ): Promise<string> {
   const body: Record<string, unknown> = {
     model,
@@ -989,7 +1057,8 @@ async function callOpenAICompatible(
        client budget was the first. */
     max_tokens: 2400,
   };
-  if (tools && tools.length > 0) body["tools"] = tools;
+  if (tools && tools.length > 0 && !stream) body["tools"] = tools;
+  if (stream) body["stream"] = true;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
@@ -997,6 +1066,11 @@ async function callOpenAICompatible(
     signal,
   });
   if (!res.ok) throw new HttpError(res.status, (await res.text()).slice(0, 500));
+  if (stream) {
+    const streamed = await readStreamedText(res);
+    if (!streamed) throw new EmptyError();
+    return streamed;
+  }
   const json = await res.json();
   const message = json?.choices?.[0]?.message as Record<string, unknown> | undefined;
   const content = typeof message?.["content"] === "string" ? message["content"].trim() : "";
@@ -1075,6 +1149,7 @@ async function callProvider(
     messages,
     signal,
     hasImage ? undefined : def.tools ? BLOOM_TOOLS : undefined,
+    def.stream ?? false,
   );
 }
 
@@ -1330,9 +1405,12 @@ async function runProviderChain(params: {
     if (!key) continue;
     const attemptStart = Date.now();
     try {
-      const signal = AbortSignal.timeout(
-        Math.min(media ? MEDIA_PROVIDER_TIMEOUT_MS() : PROVIDER_TIMEOUT_MS(), Math.max(1000, remaining - 700)),
-      );
+      const budget = def.timeoutMs
+        ? def.timeoutMs()
+        : media
+          ? MEDIA_PROVIDER_TIMEOUT_MS()
+          : PROVIDER_TIMEOUT_MS();
+      const signal = AbortSignal.timeout(Math.min(budget, Math.max(1000, remaining - 700)));
       const text = await callProvider(def, key, systemText, turns, media, signal);
       recordSuccess(id);
       diagnostics.push(
