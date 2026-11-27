@@ -3,6 +3,7 @@ import type { LabsRepositories } from '@bloom/database';
 import type { GuildQueryService, MessagingService } from '@bloom/discord';
 import type { Logger } from '@bloom/logging';
 import type { IntakeService } from './features/intake/service.js';
+import type { PipelineService } from './features/pipeline/service.js';
 
 /**
  * Everything Labs' commands and handlers are given.
@@ -33,4 +34,7 @@ export interface LabsDeps {
 
   /** Feedback and bug intake, and the triage lifecycle. */
   readonly intake: IntakeService;
+
+  /** The feature pipeline, backing, cohorts and release notes. */
+  readonly pipeline: PipelineService;
 }

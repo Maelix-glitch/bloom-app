@@ -194,7 +194,8 @@ specs agree, so a command cannot be registered without a handler or handled
 without being registered.
 
 **Discord permissions required:** unchanged from Phase 0. Guardian's integer
-stays **`1497064631510`**; the lifecycle needs `MANAGE_ROLES` (1 << 28), which
+stays **`1497064631510`** (superseded by `1497064631542` when referral
+attribution took Manage Guild); the lifecycle needs `MANAGE_ROLES` (1 << 28), which
 Guardian already had and the other two bots still do not. Intents unchanged:
 Guilds + GuildMembers (privileged) + GuildModeration.
 
