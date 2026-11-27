@@ -334,6 +334,26 @@ describe("planView — adjustmentsOf (M-138)", () => {
     expect(isAdjustmentKind("kitchen-relaxed")).toBe(true);
   });
 
+  it("the country widenings are tier-0 adjustments carrying their data (M-251)", () => {
+    const adj = adjustmentsOf(
+      planWith({
+        reasons: [
+          { kind: "country-widened", countryName: "Bulgaria" },
+          { kind: "food-side-widened", countryName: "India", sideLabel: "East Indian" },
+        ],
+      }),
+    );
+    expect(adj.find((a) => a.kind === "country-widened")).toMatchObject({
+      countryName: "Bulgaria",
+    });
+    expect(adj.find((a) => a.kind === "food-side-widened")).toMatchObject({
+      countryName: "India",
+      sideLabel: "East Indian",
+    });
+    expect(isAdjustmentKind("country-widened")).toBe(true);
+    expect(isAdjustmentKind("food-side-widened")).toBe(true);
+  });
+
   it("gate and adaptation adjustments carry their data on the array (brief v7 N4)", () => {
     /* N4 renders the rows from this array through `adjustmentCopy`
        alone, so the numbers its copy needs ride on the adjustment

@@ -9,7 +9,21 @@ import { INDIA_DISHES } from "./data/dishLibraryIndia";
 import { SHAKES_DISHES } from "./data/dishLibraryShakes";
 import { PW2_DISHES } from "./data/dishLibraryProteinBreakfasts";
 import { PROTEIN_INDIA_DISHES } from "./data/dishLibraryProteinIndia";
+import { BULGARIA_DISHES } from "./data/dishLibraryBulgaria";
+import { BULGARIA2_DISHES } from "./data/dishLibraryBulgaria2";
 import { PROTEIN_INTL_DISHES } from "./data/dishLibraryProteinIntl";
+import {
+  BALANCED_WAVE_A_DISHES,
+  PROTEIN_WAVE_A_DISHES,
+} from "./data/dishLibraryProteinWaveA";
+import {
+  BALANCED_WAVE_C_DISHES,
+  PROTEIN_WAVE_C_DISHES,
+} from "./data/dishLibraryProteinWaveC";
+import {
+  BALANCED_WAVE_B_DISHES,
+  PROTEIN_WAVE_B_DISHES,
+} from "./data/dishLibraryProteinWaveB";
 import {
   dishNutrients,
   parseDishList,
@@ -78,7 +92,19 @@ describe("wave X-1 — international high-protein dishes", () => {
         SHAKES_DISHES.length +
         PW2_DISHES.length +
         PROTEIN_INDIA_DISHES.length +
-        PROTEIN_INTL_DISHES.length,
+        PROTEIN_INTL_DISHES.length +
+        /* The Bulgarian waves (2026-11-26). */
+        BULGARIA_DISHES.length +
+        BULGARIA2_DISHES.length +
+        /* Protein wave A (2026-11-26): both shelves. */
+        PROTEIN_WAVE_A_DISHES.length +
+        BALANCED_WAVE_A_DISHES.length +
+        /* Protein wave B (2026-11-26): both shelves. */
+        PROTEIN_WAVE_B_DISHES.length +
+        BALANCED_WAVE_B_DISHES.length +
+        /* Protein wave C (2026-11-26): both shelves. */
+        PROTEIN_WAVE_C_DISHES.length +
+        BALANCED_WAVE_C_DISHES.length,
     );
   });
 

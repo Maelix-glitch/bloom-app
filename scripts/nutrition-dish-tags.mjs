@@ -15,7 +15,7 @@
  *     the derivation derives; --check fails on any dish whose pins
  *     disagree with a fresh derivation, so a hand-edit of a tag (or
  *     a method edit that changes what the method needs) is caught.
- *   • **Where the tags live.** The dish literals in the 14 data files
+ *   • **Where the tags live.** The dish literals in the 15 data files
  *     under src/lib/nutrition/data/ are the library's source of
  *     truth (hand-authored, not generated), so the pins are written
  *     INTO those literals, as the last fields of each dish object.
@@ -57,6 +57,14 @@ const PARTS = [
   ["src/lib/nutrition/data/dishLibraryProteinBreakfasts.ts", "PW2_DISHES"],
   ["src/lib/nutrition/data/dishLibraryProteinIndia.ts", "PROTEIN_INDIA_DISHES"],
   ["src/lib/nutrition/data/dishLibraryIndia.ts", "INDIA_DISHES"],
+  ["src/lib/nutrition/data/dishLibraryBulgaria.ts", "BULGARIA_DISHES"],
+  ["src/lib/nutrition/data/dishLibraryBulgaria2.ts", "BULGARIA2_DISHES"],
+  ["src/lib/nutrition/data/dishLibraryProteinWaveA.ts", "PROTEIN_WAVE_A_DISHES"],
+  ["src/lib/nutrition/data/dishLibraryProteinWaveA.ts", "BALANCED_WAVE_A_DISHES"],
+  ["src/lib/nutrition/data/dishLibraryProteinWaveB.ts", "PROTEIN_WAVE_B_DISHES"],
+  ["src/lib/nutrition/data/dishLibraryProteinWaveB.ts", "BALANCED_WAVE_B_DISHES"],
+  ["src/lib/nutrition/data/dishLibraryProteinWaveC.ts", "PROTEIN_WAVE_C_DISHES"],
+  ["src/lib/nutrition/data/dishLibraryProteinWaveC.ts", "BALANCED_WAVE_C_DISHES"],
 ];
 
 const { deriveDishTags } = await load("src/lib/nutrition/dishTags.ts");

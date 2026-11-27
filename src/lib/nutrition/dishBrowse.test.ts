@@ -10,6 +10,7 @@ import {
   sortDishesForYou,
   type DishBrowseFilters,
 } from "./dishBrowse";
+import { dishCountry, dishOnShelf } from "./countries";
 import { dishRegion } from "./regions";
 import { USDA_REFERENCE_FOODS } from "./usdaReference";
 
@@ -59,7 +60,11 @@ describe("browseDishes — the Dishes section's filter logic", () => {
 
   it("filters by cuisine — only dishes carrying the tag", () => {
     const kerala = browseDishes(filters({ cuisine: "kerala" }));
-    expect(kerala).toHaveLength(125);
+    /* 125 through the Bulgarian waves; Protein Wave A (M-254) added
+       three Kerala dishes (fish moilee-style, prawn coconut curry,
+       egg roast), 125 + 3 = 128. Protein Wave B (M-255) added two
+       more (prawn pepper fry, beef coconut fry-style), 128 + 2 = 130. */
+    expect(kerala).toHaveLength(130);
     expect(kerala.every((r) => r.dish.cuisine === "kerala")).toBe(true);
     expect(kerala.map((r) => r.dish.id)).toContain("dish-avial");
     expect(kerala.map((r) => r.dish.id)).not.toContain("dish-masoor-dal-tadka");
@@ -308,6 +313,60 @@ describe("dishIdeaFor — the plan's dish idea", () => {
       const curry = findDish("dish-chicken-curry")!; /* tier 3, the only dish */
       const p = profile({ pattern: null, budgetTier: 1 });
       expect(dishIdeaFor(p, "2026-11-16", "lunch", [curry])?.id).toBe(curry.id);
+    });
+  });
+
+  describe("the person's stated country (M-251)", () => {
+    it("draws every idea from the person's country when they stated one", () => {
+      const p = profile({ pattern: null, country: "IN" });
+      for (const day of DAYS) {
+        for (const meal of ["breakfast", "lunch", "dinner"] as const) {
+          const idea = dishIdeaFor(p, day, meal);
+          expect(idea).not.toBeNull();
+          expect(dishCountry(idea!)).toBe("IN");
+        }
+      }
+    });
+
+    it("draws from the person's side of the country when they stated one", () => {
+      const p = profile({ pattern: null, country: "IN", foodSide: "north_indian" });
+      for (const day of DAYS) {
+        for (const meal of ["lunch", "dinner"] as const) {
+          const idea = dishIdeaFor(p, day, meal);
+          expect(idea).not.toBeNull();
+          expect(dishOnShelf(idea!, "IN", "north_indian")).toBe(true);
+        }
+      }
+    });
+
+    it("serves the country's one dish when the country has exactly one", () => {
+      /* Singapore has exactly one placed dish. (Bulgaria held this
+         role when M-251 was written; the M-252/M-253 waves grew it
+         to 133 placed dishes.) */
+      const p = profile({ pattern: null, country: "SG" });
+      for (const day of DAYS) {
+        expect(dishIdeaFor(p, day, "lunch")?.id).toBe("dish-cn-hainanese-chicken-rice");
+      }
+    });
+
+    it("falls back to any qualifier when the country has no dishes — the same pick as no country", () => {
+      const none = profile({ pattern: null });
+      const iceland = profile({ pattern: null, country: "IS" });
+      for (const day of DAYS) {
+        expect(dishIdeaFor(iceland, day, "lunch")?.id).toBe(
+          dishIdeaFor(none, day, "lunch")?.id,
+        );
+      }
+    });
+
+    it("the country never resurrects a dish the pattern excluded", () => {
+      const p = profile({ pattern: "vegan", country: "IN" });
+      for (const day of DAYS) {
+        const idea = dishIdeaFor(p, day, "lunch");
+        expect(idea).not.toBeNull();
+        expect(dishPatterns(idea!)).toContain("vegan");
+        expect(dishCountry(idea!)).toBe("IN");
+      }
     });
   });
 });

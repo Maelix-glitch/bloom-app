@@ -149,6 +149,8 @@ export function pickPrimaryMeal(
  */
 export const ADJUSTMENT_TIER: Record<string, number> = {
   "budget-widened": 0,
+  "country-widened": 0,
+  "food-side-widened": 0,
   "kitchen-relaxed": 0,
   "kitchen-cap-raised": 0,
   "kitchen-cap-quickest": 0,
@@ -201,6 +203,19 @@ export type PlanAdjustment =
       index: number;
     }
   | {
+      kind: "country-widened";
+      countryName: string;
+      reason: PlanReason;
+      index: number;
+    }
+  | {
+      kind: "food-side-widened";
+      countryName: string;
+      sideLabel: string;
+      reason: PlanReason;
+      index: number;
+    }
+  | {
       kind: "kitchen-cap-raised";
       capMinutes: number;
       stageMinutes: number;
@@ -240,6 +255,16 @@ function toAdjustment(reason: PlanReason, index: number): PlanAdjustment | null 
       };
     case "budget-widened":
       return { kind: "budget-widened", ceilingRupees: reason.ceilingRupees, reason, index };
+    case "country-widened":
+      return { kind: "country-widened", countryName: reason.countryName, reason, index };
+    case "food-side-widened":
+      return {
+        kind: "food-side-widened",
+        countryName: reason.countryName,
+        sideLabel: reason.sideLabel,
+        reason,
+        index,
+      };
     case "kitchen-cap-raised":
       return {
         kind: "kitchen-cap-raised",

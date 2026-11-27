@@ -105,6 +105,19 @@ describe("dish photograph manifest", () => {
       ["dish-mango-lassi", "dish-shake-pumpkin-seed-mango"],
       ["dish-badam-doodh", "dish-shake-almond-cardamom"],
       ["dish-intl-overnight-oats", "dish-shake-overnight-oat-banana"],
+      /* The Bulgarian wave (2026-11-26): skumriya na skara IS grilled
+         mackerel — the same dish the international shelf already
+         carried, so the same photograph honestly serves both. */
+      ["dish-intl-grilled-mackerel", "dish-bg-skumriya-na-skara"],
+      /* The Bulgarian wave 2 (2026-11-26): the owner's beef-and-pork
+         decision restored the real grill classics beside wave 1's
+         lamb adaptations — a grilled kebapche and a karnache spiral
+         photograph exactly what both versions are, so each pair
+         shares its photograph. The honeyed yogurt with walnuts is
+         one served dish in two traditions and shares likewise. */
+      ["dish-bg-kebapche", "dish-bg2-kebapche-skara"],
+      ["dish-bg-karnache-style", "dish-bg2-karnache-style"],
+      ["dish-greek-yogurt-power-bowl", "dish-bg2-kiselo-mlyako-med"],
     ];
     const slugs = DISH_PHOTOS.map((p) => p.slug);
     expect(new Set(slugs).size).toBe(slugs.length);

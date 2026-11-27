@@ -271,7 +271,17 @@ describe("a protein-shortfall log", () => {
        un-leaned 2026-11-22 lands exactly on 119 g and the lean
        swaps anchors for denser ones and lifts the day to 124 g,
        inside the 110% ceiling. The mechanism assertions are
-       unchanged. */
+       unchanged.
+       Protein Wave B re-pin (M-255, 2026-11-26): on 2026-11-22
+       the un-leaned composer now lands at 129 g — wave B's
+       Salisbury steak-style anchor entered the base picks — above
+       the 119 g guide, so that day the lean has nothing left to
+       rescue and base and leaned days coincide. The fixture day
+       moves to 2026-11-25, same profile, same log: the un-leaned
+       day lands at 123 g and the lean swaps the lunch and snack
+       anchors for denser ones (wave A's chicken shawarma plate
+       among them) and lifts the day to 126 g, inside the 110%
+       ceiling. The mechanism assertions are unchanged. */
     const leanProfile: HealthProfile = {
       ...ownerProfile(),
       height: observation(quantity(170, "cm"), PROVENANCE),
@@ -281,7 +291,7 @@ describe("a protein-shortfall log", () => {
       rateKgPerWeek: 0.5,
       dietary: { ...EMPTY_DIETARY, pattern: "omnivore", mealsPerDay: 3, budgetTier: null },
     };
-    const day = "2026-11-22";
+    const day = "2026-11-25";
     const log: LogEntry[] = [
       ...dayEntries("2026-11-19", 1500, 60),
       ...dayEntries("2026-11-20", 1550, 65),
@@ -294,8 +304,8 @@ describe("a protein-shortfall log", () => {
       recentLog: log,
     });
     expect(anchorIds(biasedDay)).not.toEqual(anchorIds(baseDay));
-    expect(Math.round(dayTotals(baseDay).proteinG)).toBe(119);
-    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(124);
+    expect(Math.round(dayTotals(baseDay).proteinG)).toBe(123);
+    expect(Math.round(dayTotals(biasedDay).proteinG)).toBe(126);
     expect(dayTotals(biasedDay).proteinG).toBeGreaterThan(dayTotals(baseDay).proteinG);
     expect(dayTotals(biasedDay).proteinG).toBeLessThanOrEqual(1.1 * 119);
     expect(meanAnchorDensity(biasedDay)).toBeGreaterThan(meanAnchorDensity(baseDay));

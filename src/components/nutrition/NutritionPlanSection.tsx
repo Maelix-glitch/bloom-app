@@ -57,6 +57,7 @@ import {
   Clock,
   Cookie,
   Flame,
+  Globe,
   Plus,
   RefreshCw,
   SlidersHorizontal,
@@ -307,6 +308,7 @@ const ADJ_ICON: Record<string, ReactNode> = {
   wallet: <Wallet />,
   clock: <Clock />,
   flame: <Flame />,
+  globe: <Globe />,
 };
 
 /**

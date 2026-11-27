@@ -30,6 +30,7 @@ import {
   EATING_SETTINGS,
   EQUIPMENT_ITEMS,
   FAILURE_REASONS,
+  FOOD_SIDES,
   HUNGER_PATTERNS,
   PREP_TIME_BANDS,
   type ActivityLevel,
@@ -40,6 +41,7 @@ import {
   type EatingSetting,
   type EquipmentItem,
   type FailureReason,
+  type FoodSide,
   type HealthProfile,
   type HungerPattern,
   type PastAttempt,
@@ -56,6 +58,7 @@ import {
 import type { Observation } from "@/lib/vitalis/domain/provenance";
 import type { Quantity } from "@/lib/vitalis/domain/units";
 import { ASSESSMENT_STEPS, type AssessmentStep, type SleepQuality } from "./questions";
+import { foodSidesForCountry, isCountryCode } from "@/lib/nutrition/countries";
 
 export const ASSESSMENT_KEY = "health.assessment.v1";
 export const ASSESSMENT_PROMPT_KEY = "health.assessmentPrompt.v1";
@@ -98,6 +101,18 @@ export interface AssessmentAnswers {
    *  pattern and the budget — a living-assessment delta can never
    *  carry it (see living.ts). */
   cuisinePreference: CuisinePreference | null;
+  /** The country the person eats from (M-251): an ISO 3166-1
+   *  alpha-2 code, or null = never asked (assessments stored before
+   *  the question existed read exactly this way, and null means NO
+   *  country filter anywhere). Asked here and nowhere else, exactly
+   *  like the pattern and the budget — a living-assessment delta can
+   *  never carry it (see living.ts). */
+  country: string | null;
+  /** The region of that country the person eats from (M-251), or
+   *  null for the whole country. Only India has sides in the dish
+   *  data today (see nutrition/countries.ts). Asked here and
+   *  nowhere else. */
+  foodSide: FoodSide | null;
   allergies: string[];
   intolerances: string[];
   dislikedFoods: string[];
@@ -163,6 +178,8 @@ export const EMPTY_ANSWERS: AssessmentAnswers = {
   mealsPerDay: null,
   foodBudget: null,
   cuisinePreference: null,
+  country: null,
+  foodSide: null,
   allergies: [],
   intolerances: [],
   dislikedFoods: [],
@@ -226,6 +243,16 @@ function boolOrNull(value: unknown): boolean | null {
 /** A budget tier is exactly 1, 2 or 3 — anything else is not a tier. */
 function tierOrNull(value: unknown): 1 | 2 | 3 | null {
   return value === 1 || value === 2 || value === 3 ? value : null;
+}
+
+function countryOrNull(value: unknown): string | null {
+  return isCountryCode(value) ? value : null;
+}
+
+function sideOrNull(value: unknown, country: unknown): FoodSide | null {
+  const side = oneOf(value, FOOD_SIDES);
+  if (side === null || !isCountryCode(country)) return null;
+  return foodSidesForCountry(country).includes(side) ? side : null;
 }
 
 function textList(value: unknown, maxItems: number, maxLength: number): string[] {
@@ -337,6 +364,13 @@ export function parseAnswers(raw: unknown): AssessmentAnswers {
     mealsPerDay: intOrNull(r["mealsPerDay"], 1, 12),
     foodBudget: tierOrNull(r["foodBudget"]),
     cuisinePreference: oneOf(r["cuisinePreference"], CUISINE_PREFERENCES),
+    /* M-251: a stored country counts only if it is a real code from
+       the list (a tampered or stale value reads as never-asked, not
+       as a filter); a side counts only beside a country that HAS
+       sides — a side stored for a one-pool country is meaningless
+       and drops here rather than filtering by a fiction. */
+    country: countryOrNull(r["country"]),
+    foodSide: sideOrNull(r["foodSide"], r["country"]),
     allergies: textList(r["allergies"], 30, 60),
     intolerances: textList(r["intolerances"], 30, 60),
     dislikedFoods: textList(r["dislikedFoods"], 50, 60),
@@ -534,6 +568,8 @@ export function toHealthProfile(state: AssessmentState, userId: string): HealthP
       mealsPerDay: a.mealsPerDay,
       budgetTier: a.foodBudget,
       cuisinePreference: a.cuisinePreference,
+      country: a.country,
+      foodSide: a.foodSide,
     },
     behavioural: {
       cookingAbility: a.cookingAbility,

@@ -15,7 +15,12 @@ import { DISH_LIBRARY, findDish } from "./data/dishLibrary";
  */
 describe("the dish library", () => {
   it("clears the owner's 200-dish bar", () => {
-    /* 1,203 after method 14 (2026-11-20) added the plain Steamed
+    /* 1,551 after protein wave C (2026-11-26) added 70 dishes;
+       1,481 after protein wave B (2026-11-26) added 70 dishes;
+       1,411 after protein wave A (2026-11-26) added 70 dishes;
+       1,341 after the Bulgarian wave 2 (2026-11-26) added 86 dishes;
+       1,255 after the Bulgarian wave (2026-11-26) added 52 dishes;
+       1,203 after method 14 (2026-11-20) added the plain Steamed
        Rice — the base dish the accompaniment rule serves beside a
        gravy (M-160); before that, 1,202 after the 2026-11-17 protein
        waves added 300 dishes (PW-1
@@ -27,7 +32,7 @@ describe("the dish library", () => {
        condiments and deep-fried breads); 910 before that, after the same
        day's duplicate audit removed 31 twice-authored dishes (941 before
        the dedupe). */
-    expect(DISH_LIBRARY.length).toBe(1203);
+    expect(DISH_LIBRARY.length).toBe(1551);
     expect(DISH_LIBRARY.length).toBeGreaterThanOrEqual(200);
   });
 
@@ -73,7 +78,7 @@ describe("the dish library", () => {
       const tag = dish.cuisine as string;
       counts[tag] = (counts[tag] ?? 0) + 1;
     }
-    expect(counts).toEqual({ india: 376, kerala: 125, international: 702 });
+    expect(counts).toEqual({ india: 411, kerala: 130, international: 1010 });
   });
 
   it("covers every category", () => {

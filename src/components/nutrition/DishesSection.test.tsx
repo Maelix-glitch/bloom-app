@@ -32,6 +32,7 @@ import {
   readFoodLog,
   type Dish,
 } from "@/lib/nutrition";
+import { dishCountry, dishOnShelf } from "@/lib/nutrition/countries";
 import { dishRegion } from "@/lib/nutrition/regions";
 import { DishesSection } from "./DishesSection";
 
@@ -77,7 +78,7 @@ function cardOf(dish: Dish) {
 }
 
 /* The shelf renders in pages now (component slice §M — the whole
-   1,203-card library no longer mounts at once). Tests that assert a
+   1,551-card library no longer mounts at once). Tests that assert a
    specific dish's card page through "Show more" the way a person
    would, instead of assuming every card is already in the DOM. */
 function revealCard(dish: Dish) {
@@ -107,7 +108,7 @@ describe("DishesSection, browsing", () => {
 
   it("renders the library with bilingual names and computed per-serving numbers", () => {
     render(<DishesSection day={todayLocal()} />);
-    expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
     const card = revealCard(dal);
     expect(within(card).getByText(/मसूर दाल तड़का/)).toBeTruthy();
     const perServing = dishNutrients(dal).nutrients;
@@ -129,8 +130,17 @@ describe("DishesSection, browsing", () => {
     ).toBeTruthy();
   });
 
-  /* Chip counts pin the integrated library: 1,203 dishes (Indian 376,
-     Kerala 125, International 702) — method 14 (2026-11-20) added the
+  /* Chip counts pin the integrated library: 1,551 dishes (Indian 411,
+     Kerala 130, International 1010) — protein wave C (2026-11-26)
+     added 70 dishes (8 Indian, 62 international) to protein wave B's
+     1,481 (Indian 403, Kerala 130, International 948) — protein wave B (2026-11-26)
+     added 70 dishes (14 Indian, 2 Kerala, 54 international) to protein
+     wave A's 1,411 (Indian 389, Kerala 128, International 894) — protein wave A (2026-11-26)
+     added 70 dishes (13 Indian, 3 Kerala, 54 international) to the
+     Bulgarian wave 2's 1,341, which
+     added 86 international dishes to the Bulgarian wave's 1,255, which
+     added 52 international dishes to the 1,203 of method 14
+     (2026-11-20), which added the
      plain Steamed Rice (Indian) to the 1,202 of the 2026-11-17 protein
      waves, which added 299 dishes to the borderline-trimmed 903 (Indian 300, Kerala
      97, International 506; the borderline removal took out 7
@@ -140,16 +150,16 @@ describe("DishesSection, browsing", () => {
   it("offers cuisine chips with live counts counted from the shelf", () => {
     render(<DishesSection day={todayLocal()} />);
     const group = screen.getByRole("group", { name: "Cuisine" });
-    expect(within(group).getByRole("button", { name: "All · 1203" })).toBeTruthy();
-    expect(within(group).getByRole("button", { name: "Indian · 376" })).toBeTruthy();
-    expect(within(group).getByRole("button", { name: "Kerala · 125" })).toBeTruthy();
-    expect(within(group).getByRole("button", { name: "International · 702" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "All · 1551" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "Indian · 411" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "Kerala · 130" })).toBeTruthy();
+    expect(within(group).getByRole("button", { name: "International · 1010" })).toBeTruthy();
   });
 
   it("selecting a cuisine shows only that cuisine's dishes", () => {
     render(<DishesSection day={todayLocal()} />);
-    fireEvent.click(screen.getByRole("button", { name: "Kerala · 125" }));
-    expect(screen.getByText(/125 dishes/)).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Kerala · 130" }));
+    expect(screen.getByText(/130 dishes/)).toBeTruthy();
     expect(screen.getByText(/Kerala dishes only/)).toBeTruthy();
     expect(revealCard(avial)).toBeTruthy();
     /* An Indian dish and an international dish both fall away. */
@@ -163,7 +173,7 @@ describe("DishesSection, browsing", () => {
 
   it("the cuisine filter composes with search, an impossible pairing is honestly empty", () => {
     render(<DishesSection day={todayLocal()} />);
-    fireEvent.click(screen.getByRole("button", { name: "International · 702" }));
+    fireEvent.click(screen.getByRole("button", { name: "International · 1010" }));
     fireEvent.change(screen.getByLabelText("Search dishes"), {
       target: { value: "masoor" },
     });
@@ -173,9 +183,9 @@ describe("DishesSection, browsing", () => {
     expect(screen.getByText(/No dishes match, try clearing a filter/)).toBeTruthy();
     /* Clearing restores the whole library, cuisine included. */
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
-    expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: "All · 1203" }).getAttribute("aria-pressed"),
+      screen.getByRole("button", { name: "All · 1551" }).getAttribute("aria-pressed"),
     ).toBe("true");
   });
 
@@ -206,7 +216,7 @@ describe("DishesSection, browsing", () => {
     expect(screen.getByText(/your pattern is Omnivore, it excludes nothing/)).toBeTruthy();
     expect(screen.queryByText(/non-vegetarian/i)).toBeNull();
     expect(screen.queryByText(/showing what suits you/)).toBeNull();
-    expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
   });
 
   it("searches by Hindi name", () => {
@@ -228,7 +238,7 @@ describe("DishesSection, browsing", () => {
     });
     expect(screen.getByText(/No dishes match, try clearing a filter/)).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Clear filters" }));
-    expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
   });
 
   it("the shelf follows the person's own pattern, silently, with no pattern or budget controls", () => {
@@ -248,7 +258,7 @@ describe("DishesSection, browsing", () => {
     render(<DishesSection day={todayLocal()} />);
     expect(screen.queryByRole("group", { name: "Pattern" })).toBeNull();
     expect(screen.queryByRole("group", { name: "Budget" })).toBeNull();
-    expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
   });
 
   it("a stated budget keeps dishes above the tier off the shelf", () => {
@@ -262,7 +272,7 @@ describe("DishesSection, browsing", () => {
     seedAnswers({ foodBudget: 1 });
     render(<DishesSection day={todayLocal()} />);
     expect(screen.getByText(/your everyday ₹ budget preferred first/)).toBeTruthy();
-    expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
     /* The tier-1 dal leads; the tier-3 curry is ON the shelf now,
        further down the order — reachable, not hidden. */
     expect(cardOf(dal)).toBeTruthy();
@@ -280,7 +290,7 @@ describe("DishesSection, browsing", () => {
     const cards = () =>
       screen.getAllByRole("button", { name: /, view recipe$/ });
     /* The status line still counts the whole library… */
-    expect(screen.getByText(/1,203 dishes/)).toBeTruthy();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
     /* …but only the first page of cards is in the DOM. */
     expect(cards().length).toBe(48);
     expect(screen.getByRole("button", { name: /Show more/ })).toBeTruthy();
@@ -311,6 +321,51 @@ describe("DishesSection, browsing", () => {
       const dish = DISH_LIBRARY.find((d) => d.name.en === name)!;
       expect(dishRegion(dish)).toBe("south_indian");
     }
+  });
+});
+
+describe("DishesSection, the country shelf (M-251)", () => {
+  it("a stated country narrows the shelf to that country's dishes, and the status line says so", () => {
+    seedAnswers({ country: "GR" });
+    render(<DishesSection day={todayLocal()} />);
+    expect(screen.getByText(/dishes from Greece/)).toBeTruthy();
+    expect(screen.getByText(/55 dishes/)).toBeTruthy();
+    const cards = screen.getAllByRole("button", { name: /, view recipe$/ });
+    expect(cards.length).toBe(48);
+    for (const card of cards) {
+      const name = card.getAttribute("aria-label")!.replace(/, view recipe$/, "");
+      const dish = DISH_LIBRARY.find((d) => d.name.en === name)!;
+      expect(dishCountry(dish)).toBe("GR");
+    }
+  });
+
+  it("a stated side narrows the shelf to the side and the shared dishes", () => {
+    seedAnswers({ country: "IN", foodSide: "north_indian" });
+    render(<DishesSection day={todayLocal()} />);
+    expect(screen.getByText(/dishes from India, North Indian and shared dishes/)).toBeTruthy();
+    const cards = screen.getAllByRole("button", { name: /, view recipe$/ });
+    for (const card of cards) {
+      const name = card.getAttribute("aria-label")!.replace(/, view recipe$/, "");
+      const dish = DISH_LIBRARY.find((d) => d.name.en === name)!;
+      expect(dishOnShelf(dish, "IN", "north_indian")).toBe(true);
+    }
+    /* A South-sided dish is NOT on this shelf, however far you page. */
+    expect(screen.queryByRole("button", { name: "Avial, view recipe" })).toBeNull();
+  });
+
+  it("a country with no dishes yet shows the whole library and says so plainly", () => {
+    seedAnswers({ country: "IS" });
+    render(<DishesSection day={todayLocal()} />);
+    expect(
+      screen.getByText(/no dishes from Iceland yet, showing the whole library/),
+    ).toBeTruthy();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
+  });
+
+  it("no country stated: no country line, the whole library (backward compatibility)", () => {
+    render(<DishesSection day={todayLocal()} />);
+    expect(screen.queryByText(/dishes from/)).toBeNull();
+    expect(screen.getByText(/1,551 dishes/)).toBeTruthy();
   });
 });
 

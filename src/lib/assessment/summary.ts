@@ -41,6 +41,7 @@ import {
   EMOTIONAL_EATING_LABEL,
   EQUIPMENT_LABEL,
   FAILURE_REASON_LABEL,
+  FOOD_SIDE_LABEL,
   GOAL_LABEL,
   HUNGER_LABEL,
   PREP_TIME_LABEL,
@@ -48,6 +49,7 @@ import {
   RESTEDNESS_LABEL,
   SLEEP_QUALITY_LABEL,
 } from "./questions";
+import { countryNameOf } from "@/lib/nutrition/countries";
 import { readAssessmentState, toHealthProfile, type AssessmentState } from "./state";
 
 /** One scalar answer as a value-first stat (anti-document Slice 5):
@@ -265,6 +267,22 @@ export function summaryOf(
       "Cuisine preference",
       CUISINE_PREFERENCE_LABEL[a.cuisinePreference],
       `Cuisine preference: ${CUISINE_PREFERENCE_LABEL[a.cuisinePreference].toLowerCase()}.`,
+    );
+  }
+  /* M-251: the country (and side, when one was chosen) the person's
+     dishes are drawn from. Unanswered country = no line at all —
+     never a guessed homeland. */
+  const countryName = countryNameOf(a.country);
+  if (countryName !== null) {
+    const sideLabel = a.foodSide !== null ? FOOD_SIDE_LABEL[a.foodSide] : null;
+    stat(
+      nutritionStats,
+      nutritionLines,
+      "Food country",
+      sideLabel !== null ? `${sideLabel} · ${countryName}` : countryName,
+      sideLabel !== null
+        ? `Food country: ${countryName}, ${sideLabel.toLowerCase()} dishes.`
+        : `Food country: ${countryName}.`,
     );
   }
   /* The kitchen facts (§10) sit with the rest of the food facts. */

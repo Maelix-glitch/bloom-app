@@ -295,29 +295,33 @@ describe("P10 · kitchen gates", () => {
        plan. The contract this pin now holds is the method-13 one:
        the gate relaxes only across the floor, only by the named
        stage (never more than one extra item here), and never
-       silently. */
+       silently.
+       Rewritten again 2026-11-26 (the Bulgarian wave): the wave's
+       tarator is a chilled main that needs nothing but a fridge,
+       and it brought the fridge-only pool up to the floor — so the
+       ladder no longer widens at all. The contract now pinned is
+       the stronger one: every served dish needs NOTHING beyond the
+       fridge, no kitchen-relaxed reason is raised, and no widening
+       is named because none happened. */
     const plan = gen(profileWith({ equipment: ["fridge"] }));
     const served = servedDishes(plan);
     expect(served.length).toBeGreaterThan(0);
     for (const s of served) {
       const needs = dishPreparationNeeds(findDish(s.dishId)!);
       const beyond = needs.equipment.filter((item) => item !== "fridge");
-      expect(beyond.length, s.dishId).toBeLessThanOrEqual(1);
+      expect(beyond.length, s.dishId).toBe(0);
     }
-    /* Brief v4 (Slice 1): the relaxation is a structured
-       kitchen-relaxed reason now; the note string is reasons.ts's
-       derived detail. The pin follows the data, then the words. */
     expect(
       plan.reasons?.some(
         (r) => r.kind === "kitchen-relaxed" && r.stages.some((s) => s.stage === "extra-equipment"),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       plan.notes.some(
         (n) =>
           n.includes("leave almost no real dishes") && n.includes("one more piece of equipment"),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       plan.notes.some((n) => n.startsWith("No dish in the library fits your kitchen answers yet")),
     ).toBe(false);
