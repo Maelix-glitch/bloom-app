@@ -37,6 +37,10 @@ import { discordTimestamp, formatDuration, pluralise } from '@bloom/utils';
  */
 
 const mention = (userId: UserId): string => `<@${userId}>`;
+
+/** An action's actor: a moderator, or Bloom itself for an automated action. */
+const actorMention = (actorId: UserId | null): string =>
+  actorId ? mention(actorId) : 'Bloom (automatic)';
 const channelMention = (channelId: ChannelId): string => `<#${channelId}>`;
 
 // -----------------------------------------------------------------------------
@@ -282,7 +286,7 @@ export function memberHistory(input: {
           .map((row) => {
             const when = discordTimestamp(row.createdAt, 'R');
             const revoked = row.revokedAt ? ' _(cleared)_' : '';
-            return `**${MODERATION_ACTION_LABELS[row.action]}**${revoked} · ${when} · by ${mention(row.actorId)}\n${row.reason}`;
+            return `**${MODERATION_ACTION_LABELS[row.action]}**${revoked} · ${when} · by ${actorMention(row.actorId)}\n${row.reason}`;
           })
           .join('\n\n');
 
@@ -400,7 +404,7 @@ export function caseDetail(input: {
   const c = input.case;
   const header = [
     `**Status** — ${CASE_STATUS_LABELS[c.status]}`,
-    `**Opened** — ${discordTimestamp(c.openedAt, 'f')} by ${mention(c.openedBy)}`,
+    `**Opened** — ${discordTimestamp(c.openedAt, 'f')} by ${actorMention(c.openedBy)}`,
     c.subjectId ? `**Subject** — ${mention(c.subjectId)}` : null,
     c.assignedTo ? `**Assigned** — ${mention(c.assignedTo)}` : '**Assigned** — nobody',
     c.category ? `**Category** — ${REPORT_CATEGORY_LABELS[c.category]}` : null,
@@ -422,7 +426,7 @@ export function caseDetail(input: {
       input.actions
         .map(
           (a) =>
-            `• ${MODERATION_ACTION_LABELS[a.action]} by ${mention(a.actorId)} — ${a.reason}`,
+            `• ${MODERATION_ACTION_LABELS[a.action]} by ${actorMention(a.actorId)} — ${a.reason}`,
         )
         .join('\n'),
     );

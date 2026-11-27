@@ -4,7 +4,8 @@
  * Guardian is the highest-trust application: verification and onboarding, the
  * role lifecycle, moderation, reports and cases, and audit logging.
  *
- * Not anti-spam: that is Guardian's to own and is not implemented. See
+ * Anti-spam is Guardian's too, and is implemented: it reacts to Discord's
+ * native Auto Moderation rather than reading messages. See
  * docs/architecture/design-notes/001-auto-moderation.md.
  * It is the only bot with Manage Roles, and the only one holding the privileged
  * GuildMembers intent.
@@ -12,11 +13,41 @@
  * Phase 1 gave it onboarding, so this became the first bot that actually
  * starts. Phase 2 adds moderation actions, reports and cases.
  */
-
+import { bloomError } from '@bloom/shared-types';
+import {
+  CommandDispatcher,
+  CommandRegistry,
+  InteractionDispatcher,
+} from '@bloom/commands';
+import { EventDispatcher } from '@bloom/events';
 import { auditGuardianRolePlacement } from '@bloom/permissions';
-import { runBotMain, startBotProcess, type HealthCheck } from '@bloom/discord';
+import { DatabaseRateLimiter, TokenBucketRateLimiter } from '@bloom/security';
+import {
+  commandTelemetry,
+  runBotMain,
+  startBotProcess,
+  type HealthCheck,
+} from '@bloom/discord';
 import type { GuardianDeps } from './deps.js';
-import { createGuardianDeps, createGuardianFeatures } from './bootstrap.js';
+import { OnboardingService } from './features/onboarding/service.js';
+import { ModerationActionService } from './features/moderation/service.js';
+import { CaseService } from './features/moderation/case-service.js';
+import { guardianCommands } from './commands.js';
+import { memberJoinHandler, memberLeaveHandler } from './features/onboarding/handlers.js';
+import {
+  inviteCreateHandler,
+  inviteDeleteHandler,
+} from './features/referrals/handlers.js';
+import { recoverInviteBaseline } from './features/referrals/recovery.js';
+import { ReferralService } from './features/referrals/service.js';
+import { createReferralQualificationJob } from './features/referrals/qualification-job.js';
+import { createStaleCaseSweepJob } from './features/jobs/stale-case-sweep.js';
+import { createRetentionSweepJob } from './features/jobs/retention-sweep.js';
+import { AutomodService } from './features/automod/service.js';
+import {
+  automodComponentHandlers,
+  automodExecutionHandler,
+} from './features/automod/handlers.js';
 
 /**
  * Advisories from the most recent role audit.
@@ -32,18 +63,233 @@ interface RoleAuditState {
   warnings: readonly string[];
 }
 
-const roleAudit: RoleAuditState = {
-  checkedAt: null,
-  errors: [],
-  warnings: [],
-};
+const roleAudit: RoleAuditState = { checkedAt: null, errors: [], warnings: [] };
 
 await runBotMain(() =>
   startBotProcess<GuardianDeps>({
     bot: 'guardian',
 
-    createDeps: createGuardianDeps,
-    createFeatures: createGuardianFeatures,
+    createDeps(context) {
+      const roles = context.discord.roles;
+      if (!roles) {
+        // Unreachable in practice — Guardian's capability manifest includes
+        // `role:write`, so bootstrap builds the service. Checked anyway,
+        // because the alternative to this four-line guard is a non-null
+        // assertion on the single most dangerous dependency in the platform.
+        throw bloomError('CAPABILITY_DENIED', {
+          operatorHint:
+            'Guardian started without a role service. Its capability manifest must include "role:write".',
+        });
+      }
+
+      const discordModeration = context.discord.moderation;
+      const channelModeration = context.discord.channelModeration;
+      if (!discordModeration || !channelModeration) {
+        // Same reasoning as the role service above: Guardian's manifest
+        // includes `moderation:execute` and `message:manage`, so these are
+        // always built. Asserting rather than non-null-asserting keeps the
+        // failure legible if the manifest is ever edited.
+        throw bloomError('CAPABILITY_DENIED', {
+          operatorHint:
+            'Guardian started without the moderation services. Its capability manifest must include "moderation:execute" and "message:manage".',
+        });
+      }
+
+      const onboarding = new OnboardingService({
+        config: context.platform,
+        repositories: context.repositories,
+        roles,
+        messaging: context.discord.messaging,
+        guilds: context.discord.guilds,
+        logger: context.logger,
+      });
+
+      const moderation = new ModerationActionService({
+        config: context.platform,
+        repositories: context.repositories,
+        guilds: context.discord.guilds,
+        discord: discordModeration,
+        channels: channelModeration,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+      });
+
+      /*
+       * Invite reading is optional in the type system but not in practice:
+       * Guardian's manifest grants `invite:read`, so bootstrap always builds
+       * it. The guard exists because the alternative is a non-null assertion
+       * on the dependency that decides who gets paid.
+       */
+      const invites = context.discord.invites;
+      if (!invites) {
+        throw bloomError('CAPABILITY_DENIED', {
+          operatorHint:
+            'Guardian started without an invite reader. Its capability manifest must include "invite:read".',
+        });
+      }
+
+      const cases = new CaseService({
+        config: context.platform,
+        repositories: context.repositories,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+      });
+
+      const automod = new AutomodService({
+        config: context.platform,
+        repositories: context.repositories,
+        guilds: context.discord.guilds,
+        discord: discordModeration,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+      });
+
+      const referrals = new ReferralService({
+        repositories: context.repositories,
+        guilds: context.discord.guilds,
+        invites,
+        logger: context.logger,
+        now: () => new Date(),
+      });
+
+      return {
+        bot: 'guardian',
+        config: context.platform,
+        logger: context.logger,
+        repositories: context.repositories,
+        scheduler: context.scheduler,
+        jobSettings: context.jobSettings,
+        guilds: context.discord.guilds,
+        invites,
+        roles,
+        messaging: context.discord.messaging,
+        discordModeration,
+        channelModeration,
+        onboarding,
+        moderation,
+        cases,
+        referrals,
+        automod,
+        /*
+         * One verification attempt per member per 30 seconds.
+         *
+         * Database backed, so the budget is shared across processes and
+         * survives a restart. Deliberately loose: the point is to blunt a
+         * join-spam wave, not to make a confused member wait.
+         */
+        verifyLimiter: new DatabaseRateLimiter(
+          context.repositories.cooldowns,
+          context.platform.discord.guildId,
+          'onboarding.verify',
+          30,
+        ),
+        /*
+         * Staff moderation: a burst of 10, refilling at one every two seconds.
+         *
+         * A token bucket rather than a cooldown, because the shapes differ in
+         * exactly the case that matters. A flat "one action per N seconds"
+         * throttles the legitimate burst — clearing a raid is six kicks in ten
+         * seconds — while barely inconveniencing an automated abuser, who is
+         * happy to pace itself. A bucket permits the burst and then bites.
+         *
+         * In-process, unlike the durable limiters below. Guardian is a single
+         * process, and a restart resetting the bucket errs in the moderator's
+         * favour rather than the attacker's — restarts are not something an
+         * abuser can trigger.
+         */
+        moderationLimiter: new TokenBucketRateLimiter({
+          capacity: 10,
+          refillPerSecond: 0.5,
+        }),
+        /*
+         * `/report` is reachable by any member, including a brand-new account,
+         * so it gets the tightest budget: one report per member per 60 seconds.
+         * Flooding the staff queue is itself a form of abuse.
+         */
+        reportLimiter: new DatabaseRateLimiter(
+          context.repositories.cooldowns,
+          context.platform.discord.guildId,
+          'moderation.report',
+          60,
+        ),
+      };
+    },
+
+    createFeatures(deps, context) {
+      /*
+       * Scheduled work, registered into the process's one scheduler.
+       *
+       * Registration is unconditional; whether a job fires is decided by its
+       * own `enabled` flag and the global FEATURE_SCHEDULED_MESSAGES switch.
+       * Registering even when disabled is what lets `/guardian jobs list` show
+       * an operator a job that exists and is switched off, rather than an empty
+       * list that looks like a broken deployment.
+       */
+      context.scheduler
+        .register(createStaleCaseSweepJob(deps))
+        .register(createRetentionSweepJob(deps))
+        .register(createReferralQualificationJob(deps));
+
+      const registry = new CommandRegistry<GuardianDeps>('guardian').registerAll(
+        guardianCommands,
+      );
+
+      const commands = new CommandDispatcher<GuardianDeps>({
+        bot: 'guardian',
+        config: context.platform,
+        logger: context.logger,
+        registry,
+        deps,
+        telemetry: commandTelemetry(context.repositories.telemetry),
+      });
+
+      const events = new EventDispatcher<GuardianDeps>({
+        bot: 'guardian',
+        logger: context.logger,
+        deps,
+        /*
+         * Durable duplicate suppression, so a gateway resume cannot re-welcome
+         * a member another process already handled.
+         *
+         * Backed by the cooldown table rather than the idempotency table. Both
+         * are atomic test-and-set, but only the cooldown honours a caller
+         * supplied TTL — `idempotency_keys` expires on a fixed 30-day default,
+         * which would suppress a legitimate rejoin months later.
+         */
+        dedupe: {
+          tryClaim: async (key, ttlSeconds) => {
+            const result = await context.repositories.cooldowns.tryAcquire(
+              context.platform.discord.guildId,
+              'event.dedupe',
+              key,
+              ttlSeconds,
+            );
+            return result.allowed;
+          },
+        },
+      })
+        .register(memberJoinHandler)
+        .register(memberLeaveHandler)
+        .register(inviteCreateHandler)
+        .register(inviteDeleteHandler)
+        .register(automodExecutionHandler);
+
+      const interactions = new InteractionDispatcher<GuardianDeps>({
+        bot: 'guardian',
+        config: context.platform,
+        logger: context.logger,
+        deps,
+        components: automodComponentHandlers,
+      });
+
+      return {
+        commands,
+        events,
+        interactions,
+        commandCount: registry.size,
+        interactionCount: interactions.size,
+      };
+    },
 
     /**
      * Startup preflight.
@@ -59,6 +305,21 @@ await runBotMain(() =>
      */
     async onReady(context, deps) {
       const guildId = context.platform.discord.guildId;
+
+      /*
+       * Build the invite baseline before anything else awaits.
+       *
+       * Referral attribution is a diff, so until this completes there is
+       * nothing to diff against and every join is recorded `unavailable`.
+       * That window is unavoidable — Discord has no "who invited them" field
+       * — but it should be the length of one REST call, not the lifetime of
+       * the process, which is what it was before this ran at startup.
+       *
+       * Deliberately not awaited together with the role audit: a failure
+       * here is operational, not fatal, and `primeInviteCache` reports it
+       * rather than throwing. Guardian serves commands either way.
+       */
+      await recoverInviteBaseline(deps, guildId, 'startup');
 
       const [self, roles] = await Promise.all([
         deps.guilds.getSelf(guildId),
@@ -76,11 +337,9 @@ await runBotMain(() =>
       );
 
       roleAudit.checkedAt = new Date();
-
       roleAudit.errors = advisories
         .filter((entry) => entry.severity === 'error')
         .map((entry) => entry.message);
-
       roleAudit.warnings = advisories
         .filter((entry) => entry.severity === 'warn')
         .map((entry) => entry.message);
@@ -90,12 +349,7 @@ await runBotMain(() =>
           advisory.severity === 'error' ? 'error' : 'warn',
           'startup.role_audit',
           advisory.message,
-          {
-            context: {
-              code: advisory.code,
-              role_key: advisory.roleKey ?? null,
-            },
-          },
+          { context: { code: advisory.code, role_key: advisory.roleKey ?? null } },
         );
       }
 
@@ -105,6 +359,23 @@ await runBotMain(() =>
           `Role placement is correct: "${self.highestRoleName}" at position ${String(self.highestRolePosition)}.`,
         );
       }
+    },
+
+    /**
+     * Recovery after a dropped gateway session.
+     *
+     * A resume replays buffered gateway events, but the invite cache was
+     * built from a REST read and nothing replays that. Invites created,
+     * deleted or *used* during the outage are invisible, so the baseline is
+     * stale by an unknown amount — and a stale baseline is the one input that
+     * can make attribution confidently wrong rather than merely absent.
+     *
+     * So it is rebuilt from Discord. If that read fails, `primeInviteCache`
+     * clears the cache instead of keeping it, and attribution falls back to
+     * `unavailable` until a later read succeeds.
+     */
+    async onResume(context, deps) {
+      await recoverInviteBaseline(deps, context.platform.discord.guildId, 'resume');
     },
 
     healthChecks(): readonly HealthCheck[] {

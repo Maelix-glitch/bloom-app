@@ -4,6 +4,7 @@ import type {
   ChannelModerationService,
   JobAdminDeps,
   GuildQueryService,
+  InviteQueryService,
   MessagingService,
   ModerationService,
   JobSettingsService,
@@ -15,6 +16,8 @@ import type { RateLimiter } from '@bloom/security';
 import type { OnboardingService } from './features/onboarding/service.js';
 import type { ModerationActionService } from './features/moderation/service.js';
 import type { CaseService } from './features/moderation/case-service.js';
+import type { ReferralService } from './features/referrals/service.js';
+import type { AutomodService } from './features/automod/service.js';
 
 /**
  * Everything Guardian's commands and handlers are given.
@@ -40,6 +43,12 @@ export interface GuardianDeps extends JobAdminDeps {
   readonly repositories: GuardianRepositories;
 
   readonly guilds: GuildQueryService;
+  /**
+   * Reads invite use counts, which is the only way Discord reveals who
+   * invited a member. Requires Manage Server; degrades to unattributed joins
+   * without it rather than failing.
+   */
+  readonly invites: InviteQueryService;
   readonly roles: RoleService;
   readonly messaging: MessagingService;
   readonly discordModeration: ModerationService;
@@ -56,6 +65,17 @@ export interface GuardianDeps extends JobAdminDeps {
   readonly onboarding: OnboardingService;
   readonly moderation: ModerationActionService;
   readonly cases: CaseService;
+  /**
+   * Attributes joins to inviters and decides whether a referral qualifies.
+   * Guardian never pays one — it writes a durable trigger that Companion
+   * consumes, because only Companion may touch the points ledger.
+   */
+  readonly referrals: ReferralService;
+  /**
+   * Reactions to Discord's native Auto Moderation (design note 001):
+   * escalation, cases and staff review, without ever holding message content.
+   */
+  readonly automod: AutomodService;
 
   /** Durable, cross-process limit on verification attempts. */
   readonly verifyLimiter: RateLimiter;

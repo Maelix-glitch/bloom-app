@@ -15,6 +15,8 @@ import {
   requireAdministrator,
   requireModerator,
   type AuthorizationPolicy,
+  requireStaffCapability,
+  STAFF_TIERS,
 } from '@bloom/permissions';
 import type { BloomMessage } from '@bloom/embeds';
 import { rateLimitError } from '@bloom/security';
@@ -605,6 +607,7 @@ export function parseMessageLink(link: string): ParsedMessageLink | null {
 export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps>[] = [
   {
     group: 'case',
+    policy: requireStaffCapability('staff.cases.read'),
     spec: {
       name: 'view',
       description: 'Show a case in full.',
@@ -622,10 +625,22 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'case',
+    policy: requireStaffCapability('staff.cases.read'),
     spec: {
       name: 'list',
       description: 'List cases, most urgent first.',
       options: [
+        {
+          name: 'assignment',
+          description: 'Narrow by who owns the case.',
+          type: 'string',
+          required: false,
+          choices: [
+            { name: 'Assigned to me', value: 'mine' },
+            { name: 'Unassigned', value: 'unassigned' },
+            { name: 'Assigned to anyone', value: 'assigned' },
+          ],
+        },
         {
           name: 'status',
           description: 'Only show cases in this status.',
@@ -645,6 +660,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'case',
+    policy: requireStaffCapability('staff.cases.manage'),
     spec: {
       name: 'open',
       description: 'Open a case without a report.',
@@ -669,6 +685,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'case',
+    policy: requireStaffCapability('staff.cases.manage'),
     spec: {
       name: 'assign',
       description: 'Assign a case, or clear the assignment.',
@@ -692,6 +709,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'case',
+    policy: requireStaffCapability('staff.cases.manage'),
     spec: {
       name: 'status',
       description: 'Move a case to another status.',
@@ -728,6 +746,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'case',
+    policy: requireStaffCapability('staff.cases.manage'),
     spec: {
       name: 'note',
       description: 'Add a note to a case.',
@@ -753,6 +772,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'member',
+    policy: requireStaffCapability('staff.members.read'),
     spec: {
       name: 'history',
       description: 'Show a member’s moderation history.',
@@ -762,6 +782,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'member',
+    policy: requireStaffCapability('staff.moderation.execute'),
     spec: {
       name: 'note',
       description: 'Record a private note about a member. They are not told.',
@@ -781,6 +802,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'member',
+    policy: requireStaffCapability('staff.moderation.execute'),
     spec: {
       name: 'clear-warnings',
       description: 'Clear a member’s active warnings. The history is kept.',
@@ -793,6 +815,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'member',
+    policy: requireStaffCapability('staff.moderation.execute'),
     spec: {
       name: 'unban',
       description: 'Lift a ban by user id.',
@@ -812,6 +835,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'channel',
+    policy: requireStaffCapability('staff.moderation.execute'),
     spec: {
       name: 'slowmode',
       description: 'Set how often members may post in a channel.',
@@ -836,6 +860,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'channel',
+    policy: requireStaffCapability('staff.moderation.execute'),
     spec: {
       name: 'lock',
       description: 'Stop members posting in a channel.',
@@ -853,6 +878,7 @@ export const moderationSubcommands: readonly SubcommandContribution<GuardianDeps
   },
   {
     group: 'channel',
+    policy: requireStaffCapability('staff.moderation.execute'),
     spec: {
       name: 'unlock',
       description: 'Restore posting in a locked channel.',
@@ -910,8 +936,24 @@ async function listCases(
   const raw = invocation.options.getString('status');
   const status: CaseStatus | null = isCaseStatus(raw) ? raw : null;
 
+  /*
+   * Three questions staff actually ask of a queue: what is mine, what is
+   * nobody's, and what is in flight. "Mine" resolves against the caller rather
+   * than taking a user option, so it cannot be used to inspect another
+   * moderator's workload by accident.
+   */
+  const assignment = invocation.options.getString('assignment');
+  const scope =
+    assignment === 'mine'
+      ? { assignedTo: invocation.actor.userId }
+      : assignment === 'unassigned'
+        ? { assignment: 'unassigned' as const }
+        : assignment === 'assigned'
+          ? { assignment: 'assigned' as const }
+          : {};
+
   const [cases, counts] = await Promise.all([
-    deps.cases.list(guildId, { status }),
+    deps.cases.list(guildId, { status, ...scope }),
     deps.cases.counts(guildId),
   ]);
 
@@ -941,12 +983,56 @@ async function openCase(
   });
 }
 
+/**
+ * Is this member allowed to own a case?
+ *
+ * Assignment is not a notification — it is the record of who is accountable
+ * for an outcome, and it appears in every later view of the case. Pointing it
+ * at an ordinary member makes the queue lie about who is working what, and in
+ * an appeal it names someone who never had the standing to act.
+ *
+ * Checked against live Discord roles rather than the resolved interaction
+ * option, because the option carries only an id and the roles are the thing
+ * that confers standing.
+ */
+async function assertAssignable(
+  deps: GuardianDeps,
+  guildId: GuildId,
+  assignee: UserId,
+): Promise<void> {
+  const snapshot = await deps.guilds.getMember(guildId, assignee);
+  if (!snapshot) {
+    throw bloomError('INVALID_INPUT', {
+      userMessage: 'That member is not in this server.',
+      operatorHint: `Cannot assign a case to ${assignee}: no member record in ${guildId}.`,
+    });
+  }
+
+  const isStaff =
+    snapshot.isGuildOwner ||
+    STAFF_TIERS.some((key) => {
+      const roleId = deps.config.roles[key];
+      return roleId !== null && snapshot.roleIds.includes(roleId);
+    });
+
+  if (!isStaff) {
+    throw bloomError('INVALID_INPUT', {
+      userMessage: 'Cases can only be assigned to the staff team.',
+      operatorHint: `${assignee} holds none of [${STAFF_TIERS.join(', ')}]. Give them a staff role before assigning work to them.`,
+      details: { assignee, required_roles: [...STAFF_TIERS] },
+    });
+  }
+}
+
 async function assignCase(
   invocation: CommandInvocation,
   deps: GuardianDeps,
 ): Promise<BloomMessage> {
   const number = caseNumberOf(invocation);
   const member = invocation.options.getUser('member');
+
+  // Unassigning (no member given) needs no eligibility check.
+  if (member) await assertAssignable(deps, guildOf(invocation), member.id);
 
   const updated = await deps.cases.assign({
     guildId: guildOf(invocation),
