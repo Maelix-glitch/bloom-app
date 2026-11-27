@@ -19,7 +19,12 @@ import type { CompanionDeps } from './deps.js';
 import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
+import { CommunityService } from './features/community/service.js';
+import { HighlightsService } from './features/highlights/service.js';
+import { createWeeklyRecapJob } from './features/highlights/job.js';
 import { RewardsService } from './features/rewards/service.js';
+import { ReferralConsumer } from './features/rewards/referral-consumer.js';
+import { createReferralPaymentJob } from './features/rewards/referral-job.js';
 
 await runBotMain(() =>
   startBotProcess<CompanionDeps>({
@@ -38,6 +43,37 @@ await runBotMain(() =>
         repositories: context.repositories,
         messaging: context.discord.messaging,
         logger: context.logger,
+        rewards,
+      });
+
+      const community = new CommunityService({
+        config: context.platform,
+        repositories: context.repositories,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+        rewards,
+        awards,
+        now: () => new Date(),
+      });
+
+      const highlights = new HighlightsService({
+        config: context.platform,
+        repositories: context.repositories,
+        now: () => new Date(),
+      });
+
+      const referralConsumer = new ReferralConsumer({
+        repositories: context.repositories,
+        rewards,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+        now: () => new Date(),
+        /*
+         * Identifies this process in a claim. The run id would be per-job;
+         * this is per-process, which is the thing an operator looking at a
+         * stuck claim actually wants to know.
+         */
+        workerId: `companion:${String(process.pid)}`,
       });
 
       return {
@@ -51,6 +87,9 @@ await runBotMain(() =>
         jobSettings: context.jobSettings,
         rewards,
         awards,
+        referralConsumer,
+        community,
+        highlights,
       };
     },
 
@@ -65,6 +104,8 @@ await runBotMain(() =>
        * list that looks like a broken deployment.
        */
       context.scheduler.register(createDailyCheckInJob(deps));
+      context.scheduler.register(createReferralPaymentJob(deps));
+      context.scheduler.register(createWeeklyRecapJob(deps));
 
       const registry = new CommandRegistry<CompanionDeps>('companion').registerAll(
         companionCommands,

@@ -2,10 +2,12 @@ import {
   bloomError,
   DAILY_SMALL_WIN_LIMIT,
   POINT_AWARDS,
+  REFERRAL_POINTS,
   pointsToNextRank,
   rankForPoints,
   type CorrelationId,
   type GuildId,
+  type PointKind,
   type Rank,
   type UserId,
 } from '@bloom/shared-types';
@@ -47,6 +49,27 @@ import {
  * more honest degradation than hiding the commands, and it means a server can
  * run Bloom's community loop without a points economy at all.
  */
+
+export interface ReferralAwardRequest {
+  readonly guildId: GuildId;
+  /** The person who gets the points. Never the member who was invited. */
+  readonly inviterUserId: UserId;
+  readonly referredUserId: UserId;
+  readonly referralId: string;
+  /** The trigger's own identity, reused so a replay cannot double-pay. */
+  readonly idempotencyKey: string;
+  readonly correlationId?: CorrelationId | null;
+}
+
+export type ReferralAwardResult =
+  | {
+      readonly kind: 'paid';
+      readonly pointEventId: string;
+      readonly balance: number;
+      /** True when this trigger had already produced the ledger row. */
+      readonly alreadyPaid: boolean;
+    }
+  | { readonly kind: 'failed'; readonly reason: 'insufficient' };
 
 export interface RewardsServiceOptions {
   readonly config: PlatformConfig;
@@ -134,6 +157,47 @@ export interface MemberProfile {
 /** How far back a streak is allowed to reach. Bounds the query, and no one */
 /** needs to be told their streak is 400 days for it to mean something. */
 const STREAK_WINDOW_DAYS = 120;
+
+export interface AchievementAwardRequest {
+  readonly guildId: GuildId;
+  readonly userId: UserId;
+  /** The definition key, which is what makes the payment idempotent. */
+  readonly awardKey: string;
+  readonly points: number;
+  readonly correlationId?: CorrelationId | null;
+}
+
+export type AchievementAwardResult =
+  | { readonly kind: 'paid'; readonly alreadyPaid: boolean; readonly balance: number }
+  | { readonly kind: 'failed'; readonly reason: 'insufficient' };
+
+export interface ActivityAwardRequest {
+  readonly guildId: GuildId;
+  readonly userId: UserId;
+  /** `challenge_completion` or `event_completion`. */
+  readonly kind: Extract<PointKind, 'challenge_completion' | 'event_completion'>;
+  readonly points: number;
+  /** Derived from the activity and member by the caller, never per attempt. */
+  readonly idempotencyKey: string;
+  readonly correlationId?: CorrelationId | null;
+}
+
+export type ActivityAwardResult =
+  | {
+      readonly kind: 'paid';
+      readonly alreadyPaid: boolean;
+      readonly balance: number;
+      /**
+       * The ledger row this payment is recorded in.
+       *
+       * Returned so the caller can store the link back on its own record.
+       * Present on a duplicate too, and deliberately so: a retry that finds
+       * the payment already made still needs the id, because the reason it
+       * is retrying is usually that the link was never written.
+       */
+      readonly eventId: string;
+    }
+  | { readonly kind: 'failed'; readonly reason: 'insufficient' };
 
 export class RewardsService {
   private readonly clock: Clock;
@@ -361,6 +425,185 @@ export class RewardsService {
     });
 
     return { kind: 'applied', balance: outcome.balance };
+  }
+
+  /**
+   * Pay a community activity completion.
+   *
+   * The single entry point for challenge and event rewards, and the reason
+   * `CommunityService` holds no repository write path to the ledger. The
+   * caller supplies the idempotency key because it owns the identity of the
+   * completion; this service owns everything about how a payment is made.
+   */
+  public async awardActivity(
+    request: ActivityAwardRequest,
+  ): Promise<ActivityAwardResult> {
+    if (request.points <= 0 || !Number.isInteger(request.points)) {
+      throw bloomError('INVALID_INPUT', {
+        operatorHint: `A community reward must be a positive whole number; got ${String(request.points)}.`,
+      });
+    }
+
+    const outcome = await this.options.repositories.rewards.award({
+      guildId: request.guildId,
+      userId: request.userId,
+      kind: request.kind,
+      points: request.points,
+      // Automatic kinds carry no reason and no actor; the activity id in the
+      // audit row is a better record than a sentence.
+      reason: null,
+      awardedBy: null,
+      idempotencyKey: request.idempotencyKey,
+      correlationId: request.correlationId ?? null,
+    });
+
+    if (outcome.kind === 'insufficient') {
+      // Unreachable: validated positive above, and the insufficient rule
+      // applies only to debits. Handled rather than asserted, as elsewhere.
+      return { kind: 'failed', reason: 'insufficient' };
+    }
+
+    return {
+      kind: 'paid',
+      alreadyPaid: outcome.kind === 'duplicate',
+      balance: outcome.balance,
+      eventId: outcome.event.id,
+    };
+  }
+
+  /**
+   * Pay the points attached to an unlocked achievement.
+   *
+   * The only route by which an award becomes points, and it goes through the
+   * same ledger write as everything else — there is no balance to mutate and
+   * no second economy here.
+   *
+   * The idempotency key is derived from the award rather than from the
+   * attempt: `achievement:{guild}:{user}:{key}`. An award is unique per
+   * member by primary key, so that string is unique per payable event, and a
+   * retry after a crash between the grant and the payment collides with the
+   * ledger's unique index and returns `duplicate`. Two concurrent
+   * evaluations therefore produce one ledger row even if both somehow reach
+   * this method.
+   */
+  public async awardAchievement(
+    request: AchievementAwardRequest,
+  ): Promise<AchievementAwardResult> {
+    if (request.points <= 0) {
+      throw bloomError('INVALID_INPUT', {
+        operatorHint: `Achievement ${request.awardKey} asked to pay ${String(request.points)} points; achievement rewards must be positive.`,
+      });
+    }
+
+    const outcome = await this.options.repositories.rewards.award({
+      guildId: request.guildId,
+      userId: request.userId,
+      kind: 'achievement_reward',
+      points: request.points,
+      // The schema forbids a reason and an actor on automatic kinds; the
+      // award key in the audit row is the better record anyway.
+      reason: null,
+      awardedBy: null,
+      idempotencyKey: `achievement:${request.guildId}:${request.userId}:${request.awardKey}`,
+      correlationId: request.correlationId ?? null,
+    });
+
+    if (outcome.kind === 'insufficient') {
+      // Unreachable: the amount is validated positive above, and the
+      // insufficient rule only applies to debits. Handled rather than
+      // asserted, for the same reason as the referral path.
+      return { kind: 'failed', reason: 'insufficient' };
+    }
+
+    const alreadyPaid = outcome.kind === 'duplicate';
+
+    if (!alreadyPaid) {
+      await this.options.repositories.audit.append({
+        guildId: request.guildId,
+        botName: 'companion',
+        event: 'rewards.achievement',
+        targetId: request.userId,
+        // Info, not warn: a published rule applied by the platform, with no
+        // staff discretion involved.
+        severity: 'info',
+        source: 'awards',
+        correlationId: request.correlationId ?? null,
+        details: { points: request.points, award: request.awardKey },
+      });
+    }
+
+    return { kind: 'paid', alreadyPaid, balance: outcome.balance };
+  }
+
+  /**
+   * Pay a qualified referral.
+   *
+   * The only way a `referral` point event is ever created. Guardian decided
+   * *that* a referral earned something; this decides *what*, and it is the
+   * only side of the boundary that may.
+   *
+   * Three things make a replay safe, and all three are load-bearing:
+   *
+   *   - the amount comes from REFERRAL_POINTS, not from the caller, so a
+   *     malformed trigger cannot name its own price;
+   *   - the idempotency key is the trigger's own identity, so a second
+   *     attempt collapses onto the first ledger row instead of adding one;
+   *   - `awardedBy` is null, which the schema requires for an automatic kind
+   *     and which stops a referral being laundered into a staff grant.
+   */
+  public async awardReferral(
+    request: ReferralAwardRequest,
+  ): Promise<ReferralAwardResult> {
+    const outcome = await this.options.repositories.rewards.award({
+      guildId: request.guildId,
+      userId: request.inviterUserId,
+      kind: 'referral',
+      points: REFERRAL_POINTS,
+      // No reason text: the schema forbids one for automatic kinds, and the
+      // trigger id in the audit row is a better record than a sentence.
+      reason: null,
+      awardedBy: null,
+      idempotencyKey: request.idempotencyKey,
+      correlationId: request.correlationId ?? null,
+    });
+
+    if (outcome.kind === 'insufficient') {
+      /*
+       * Unreachable by construction — REFERRAL_POINTS is positive and the
+       * insufficient-balance rule only applies to debits — but handled rather
+       * than asserted, because an unreachable branch that throws is how a
+       * future negative constant becomes a crash in production.
+       */
+      return { kind: 'failed', reason: 'insufficient' };
+    }
+
+    const alreadyPaid = outcome.kind === 'duplicate';
+
+    if (!alreadyPaid) {
+      await this.options.repositories.audit.append({
+        guildId: request.guildId,
+        botName: 'companion',
+        event: 'rewards.referral',
+        targetId: request.inviterUserId,
+        // Info: the platform applying a published rule, with no staff
+        // discretion involved. Manual awards are warn because a person chose.
+        severity: 'info',
+        source: 'referral consumer',
+        correlationId: request.correlationId ?? null,
+        details: {
+          points: REFERRAL_POINTS,
+          referral_id: request.referralId,
+          referred_user_id: request.referredUserId,
+        },
+      });
+    }
+
+    return {
+      kind: 'paid',
+      pointEventId: outcome.event.id,
+      balance: outcome.balance,
+      alreadyPaid,
+    };
   }
 
   public async profile(guildId: GuildId, userId: UserId): Promise<MemberProfile> {

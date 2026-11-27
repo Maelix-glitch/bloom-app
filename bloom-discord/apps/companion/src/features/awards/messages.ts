@@ -47,12 +47,35 @@ export function earnedLines(granted: readonly AwardDefinition[]): readonly strin
   return ['', ...granted.map((award) => `**${award.name}** — ${award.earnedLine}`)];
 }
 
+/**
+ * One line per award, earned or not.
+ *
+ * An unearned award shows its condition, and a count of how far along if the
+ * criterion is a count at all. The fraction is deliberately plain text and
+ * not a bar of blocks: a progress bar turns "you have checked in nine times"
+ * into a thing that is 90% finished and therefore nagging, which is the
+ * opposite of what this is for.
+ *
+ * Points are shown only when an award actually carries them. No shipped
+ * definition does, so this renders nothing today — but an award that paid
+ * silently would be worse than one that pays loudly.
+ */
 function progressLines(entries: readonly AwardProgress[]): readonly string[] {
-  return entries.map(({ definition, award }) =>
-    award
-      ? `**${definition.name}** · ${discordTimestamp(award.earnedAt, 'D')}`
-      : `${definition.name} · ${definition.condition}`,
-  );
+  return entries.map(({ definition, award, measure }) => {
+    const reward =
+      definition.points === undefined ? '' : ` · +${String(definition.points)} points`;
+
+    if (award) {
+      return `**${definition.name}** · ${discordTimestamp(award.earnedAt, 'D')}${reward}`;
+    }
+
+    const progress =
+      measure === null
+        ? ''
+        : ` · ${String(Math.min(measure.current, measure.target))} of ${String(measure.target)}`;
+
+    return `${definition.name} · ${definition.condition}${progress}${reward}`;
+  });
 }
 
 export function milestonesMessage(entries: readonly AwardProgress[]): BloomMessage {

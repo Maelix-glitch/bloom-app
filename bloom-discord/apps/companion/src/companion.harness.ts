@@ -19,7 +19,12 @@ import type { CompanionDeps } from './deps.js';
 import { companionCommands } from './commands.js';
 import { createDailyCheckInJob } from './features/checkin/job.js';
 import { AwardsService } from './features/awards/service.js';
+import { CommunityService } from './features/community/service.js';
+import { HighlightsService } from './features/highlights/service.js';
+import { createWeeklyRecapJob } from './features/highlights/job.js';
+import type { AwardDefinition } from './features/awards/definitions.js';
 import { RewardsService } from './features/rewards/service.js';
+import { ReferralConsumer } from './features/rewards/referral-consumer.js';
 
 /**
  * The harness clock, unless a test supplies its own.
@@ -57,6 +62,7 @@ export interface CompanionHarness {
   readonly jobSettings: JobSettingsService;
   readonly rewards: RewardsService;
   readonly awards: AwardsService;
+  readonly highlights: HighlightsService;
   readonly logs: ReturnType<typeof createTestLogger>['sink'];
 }
 
@@ -78,8 +84,21 @@ export interface CompanionHarnessOptions {
   readonly smallWinsChannel?: null;
   /** Unset the milestones channel, so an earned award has nowhere to go. */
   readonly milestonesChannel?: null;
+  /** Unset the challenges channel, so a new activity has nowhere to announce. */
+  readonly challengesChannel?: null;
   /** Fix the clock. Rewards are date-sensitive, so tests need to own "today". */
   readonly now?: () => Date;
+  /**
+   * Replace the award definitions the service evaluates.
+   *
+   * The reason this exists: no shipped definition carries points, and that is
+   * a product decision that should stay true. Proving the point-paying path
+   * works therefore needs a definition that pays, and the only honest place
+   * to put one is a test. Anything passed here is additional to nothing — it
+   * replaces the real list outright, so a test that uses it is clearly not
+   * describing production behaviour.
+   */
+  readonly awardDefinitions?: readonly AwardDefinition[];
 }
 
 export function companionHarness(
@@ -97,6 +116,7 @@ export function companionHarness(
       ...(options.milestonesChannel === null
         ? { milestones: null }
         : { milestones: TEST_CHANNEL_IDS.milestones }),
+      ...(options.challengesChannel === null ? { challenges: null } : {}),
     },
     // On by default: a harness where every job is switched off would make the
     // job tests pass without running anything.
@@ -114,6 +134,8 @@ export function companionHarness(
     TEST_CHANNEL_IDS.smallWins,
     TEST_CHANNEL_IDS.milestones,
     TEST_CHANNEL_IDS.achievements,
+    // Community activities announce here. One post per activity, never per join.
+    TEST_CHANNEL_IDS.challenges,
   );
 
   const messaging = new FakeMessaging(guild);
@@ -149,6 +171,33 @@ export function companionHarness(
     repositories,
     messaging,
     logger,
+    rewards,
+    ...(options.awardDefinitions ? { definitions: options.awardDefinitions } : {}),
+  });
+
+  const community = new CommunityService({
+    config,
+    repositories,
+    messaging,
+    logger,
+    rewards,
+    awards,
+    now: () => clock.date(),
+  });
+
+  const highlights = new HighlightsService({
+    config,
+    repositories,
+    now: () => clock.date(),
+  });
+
+  const referralConsumer = new ReferralConsumer({
+    repositories,
+    rewards,
+    messaging,
+    logger,
+    now: () => clock.date(),
+    workerId: 'companion:test',
   });
 
   const deps: CompanionDeps = {
@@ -162,11 +211,15 @@ export function companionHarness(
     jobSettings,
     rewards,
     awards,
+    referralConsumer,
+    community,
+    highlights,
   };
 
   // The same registration `main.ts` performs, so the command tests inspect the
   // real job list rather than a fixture that can drift from it.
   scheduler.register(createDailyCheckInJob(deps));
+  scheduler.register(createWeeklyRecapJob(deps));
 
   const registry = new CommandRegistry<CompanionDeps>('companion').registerAll(
     companionCommands,
@@ -196,6 +249,7 @@ export function companionHarness(
     jobSettings,
     rewards,
     awards,
+    highlights,
     logs: sink,
   };
 }
