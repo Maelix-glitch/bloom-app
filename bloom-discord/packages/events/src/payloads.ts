@@ -1,4 +1,11 @@
-import type { GuildId, RoleId, UserId } from '@bloom/shared-types';
+import type {
+  AutomodTriggerType,
+  ChannelId,
+  GuildId,
+  MessageId,
+  RoleId,
+  UserId,
+} from '@bloom/shared-types';
 
 /**
  * Gateway event payloads, as plain data.
@@ -38,12 +45,56 @@ export interface MemberLeavePayload {
   readonly leftAt: Date;
 }
 
+/**
+ * An invite was created.
+ *
+ * Carries `uses` even though a freshly created invite is always zero: the
+ * value comes from the gateway payload rather than from an assumption, and if
+ * Discord ever delivers this for an invite that already has uses, the cache
+ * records what was actually reported.
+ */
+export interface InviteCreatePayload {
+  readonly guildId: GuildId;
+  readonly code: string;
+  readonly uses: number;
+  /** Null for widget and system invites, which have no creator to pay. */
+  readonly inviterId: UserId | null;
+  readonly inviterIsBot: boolean;
+}
+
+export interface InviteDeletePayload {
+  readonly guildId: GuildId;
+  readonly code: string;
+}
+
 export interface MemberUpdatePayload {
   readonly guildId: GuildId;
   readonly userId: UserId;
   readonly username: string;
   readonly roleIds: readonly RoleId[];
   readonly previousRoleIds: readonly RoleId[];
+}
+
+/**
+ * Discord's Auto Moderation fired a rule (design note 001).
+ *
+ * The gateway event offers more than this: `content` and `matchedContent`
+ * are present for holders of the Message Content intent. Bloom does not
+ * hold it and this payload does not carry them — the adapter drops both,
+ * so no handler downstream can store what was never received.
+ * `matchedKeyword` is the staff-configured pattern that matched.
+ */
+export interface AutoModerationExecutionPayload {
+  readonly guildId: GuildId;
+  readonly userId: UserId;
+  /** Null when the trigger was a member profile update, not a message. */
+  readonly channelId: ChannelId | null;
+  readonly messageId: MessageId | null;
+  readonly ruleId: string;
+  readonly triggerType: AutomodTriggerType;
+  /** What Discord itself did, in Discord's words ('BLOCK_MESSAGE', …). */
+  readonly discordAction: string;
+  readonly matchedKeyword: string | null;
 }
 
 export interface RoleChangePayload {
