@@ -5,12 +5,15 @@ import {
   CASE_TRANSITIONS,
   ONBOARDING_TRANSITIONS,
   requiresResolution,
+  type AutomodReviewStatus,
+  type AutomodTriggerType,
   type BotName,
   type CaseEventType,
   type CaseStatus,
   type ModerationAction,
   type ChannelId,
   type ChannelKey,
+  type CorrelationId,
   type GuildId,
   type IdempotencyKey,
   type JsonValue,
@@ -22,7 +25,27 @@ import {
   type UserId,
 } from '@bloom/shared-types';
 import { localDateIn, localDaysBetween, type LocalDate } from '@bloom/utils';
+import { ACTIVE_CASE_STATUSES } from '@bloom/database';
 import type {
+  ActivityKind,
+  ActivityStatus,
+  CommunityActivity,
+  CommunityParticipant,
+  CompletionCount,
+  CommunityRepository,
+  CompleteOutcome,
+  CompleteParticipantInput,
+  CreateActivityInput,
+  JoinOutcome,
+  ListActivitiesOptions,
+  ClaimedReferral,
+  RecordReferralInput,
+  RecordReferralOutcome,
+  ReferralRejection,
+  ReferralRepository,
+  ReferralState,
+  ReferralCount,
+  ReferralTrigger,
   AuditEventInput,
   AwardInput,
   AwardOutcome,
@@ -48,10 +71,17 @@ import type {
   MemberRecordSummary,
   ModerationActionRow,
   ModerationRepository,
+  AutomodRepository,
+  AutomodEventRow,
+  AutomodPolicyRow,
+  RecordAutomodEventInput,
+  UpsertAutomodPolicyInput,
   OpenCaseInput,
   RecordActionInput,
   ReportInput,
+  ReportListFilter,
   ReportRow,
+  ReportSummaryRow,
   TransitionCaseInput,
   CooldownResult,
   GuildRecord,
@@ -81,6 +111,16 @@ import type {
   FileBugInput,
   TriageInput,
   TriageOutcome,
+  LabsFeature,
+  LabsFeatureStatus,
+  CreateFeatureInput,
+  VoteOutcome,
+  LabsCohort,
+  CreateCohortInput,
+  JoinCohortOutcome,
+  LeaveCohortOutcome,
+  LabsReleaseNote,
+  PublishReleaseInput,
   RetentionRepository,
   HealthSnapshot,
   PruneOptions,
@@ -889,6 +929,243 @@ export class FakeModerationRepository implements ModerationRepository {
  * "RESOLVED needs a resolution" constraint that Postgres enforces with a CHECK.
  * Case numbers increment per guild, so a test can assert on "#1" meaningfully.
  */
+
+export class FakeAutomodRepository implements AutomodRepository {
+  public readonly events: AutomodEventRow[] = [];
+  public readonly policies: AutomodPolicyRow[] = [];
+  private nextEventId = 1;
+  private nextPolicyId = 1;
+
+  public constructor(private readonly now: () => Date) {}
+
+  public recordEvent(
+    input: RecordAutomodEventInput,
+  ): Promise<{ readonly event: AutomodEventRow; readonly duplicate: boolean }> {
+    if (input.messageId != null) {
+      const existing = this.events.find(
+        (row) =>
+          row.guildId === input.guildId &&
+          row.userId === input.userId &&
+          row.messageId === input.messageId &&
+          row.ruleId === input.ruleId,
+      );
+      if (existing) return Promise.resolve({ event: existing, duplicate: true });
+    }
+    const row: AutomodEventRow = {
+      id: String(this.nextEventId++),
+      guildId: input.guildId,
+      userId: input.userId,
+      channelId: input.channelId ?? null,
+      messageId: input.messageId ?? null,
+      ruleId: input.ruleId,
+      triggerType: input.triggerType,
+      matchedKeyword: input.matchedKeyword ?? null,
+      discordAction: input.discordAction,
+      ladderStep: null,
+      moderationActionId: null,
+      caseId: null,
+      alertMessageId: null,
+      reviewStatus: 'pending',
+      reviewedBy: null,
+      reviewedAt: null,
+      createdAt: this.now(),
+    };
+    this.events.push(row);
+    return Promise.resolve({ event: row, duplicate: false });
+  }
+
+  public findEventById(id: string): Promise<AutomodEventRow | null> {
+    return Promise.resolve(this.events.find((row) => row.id === id) ?? null);
+  }
+
+  public findLatestEventWithCase(
+    guildId: GuildId,
+    userId: UserId,
+  ): Promise<AutomodEventRow | null> {
+    const matches = this.events.filter(
+      (row) => row.guildId === guildId && row.userId === userId && row.caseId !== null,
+    );
+    return Promise.resolve(matches[matches.length - 1] ?? null);
+  }
+
+  public countEventsInWindow(
+    guildId: GuildId,
+    userId: UserId,
+    triggerType: AutomodTriggerType,
+    since: Date,
+  ): Promise<number> {
+    return Promise.resolve(
+      this.events.filter(
+        (row) =>
+          row.guildId === guildId &&
+          row.userId === userId &&
+          row.triggerType === triggerType &&
+          row.createdAt >= since,
+      ).length,
+    );
+  }
+
+  public countByTriggerSince(
+    guildId: GuildId,
+    since: Date,
+  ): Promise<ReadonlyMap<AutomodTriggerType, number>> {
+    const counts = new Map<AutomodTriggerType, number>();
+    for (const row of this.events) {
+      if (row.guildId === guildId && row.createdAt >= since) {
+        counts.set(row.triggerType, (counts.get(row.triggerType) ?? 0) + 1);
+      }
+    }
+    return Promise.resolve(counts);
+  }
+
+  private scopeMatches(
+    policy: AutomodPolicyRow,
+    channelId: ChannelId | null,
+    triggerType: AutomodTriggerType,
+  ): boolean {
+    return (
+      (policy.channelId === null || policy.channelId === channelId) &&
+      (policy.triggerType === null || policy.triggerType === triggerType)
+    );
+  }
+
+  public resolveThresholds(
+    guildId: GuildId,
+    channelId: ChannelId | null,
+    triggerType: AutomodTriggerType,
+  ): Promise<AutomodPolicyRow | null> {
+    const candidates = this.policies
+      .filter(
+        (row) =>
+          row.guildId === guildId &&
+          row.thresholdCount !== null &&
+          this.scopeMatches(row, channelId, triggerType),
+      )
+      .sort(
+        (a, b) =>
+          Number(b.channelId !== null) - Number(a.channelId !== null) ||
+          Number(b.triggerType !== null) - Number(a.triggerType !== null),
+      );
+    return Promise.resolve(candidates[0] ?? null);
+  }
+
+  public exemptRoleIds(
+    guildId: GuildId,
+    channelId: ChannelId | null,
+    triggerType: AutomodTriggerType,
+  ): Promise<readonly RoleId[]> {
+    const union = new Set<RoleId>();
+    for (const row of this.policies) {
+      if (row.guildId === guildId && this.scopeMatches(row, channelId, triggerType)) {
+        for (const roleId of row.exemptRoleIds) union.add(roleId);
+      }
+    }
+    return Promise.resolve([...union]);
+  }
+
+  public listPolicies(guildId: GuildId): Promise<readonly AutomodPolicyRow[]> {
+    return Promise.resolve(this.policies.filter((row) => row.guildId === guildId));
+  }
+
+  public upsertPolicy(input: UpsertAutomodPolicyInput): Promise<AutomodPolicyRow> {
+    const channelId = input.channelId ?? null;
+    const triggerType = input.triggerType ?? null;
+    const existing = this.policies.find(
+      (row) =>
+        row.guildId === input.guildId &&
+        row.channelId === channelId &&
+        row.triggerType === triggerType,
+    );
+    if (!existing) {
+      const row: AutomodPolicyRow = {
+        id: String(this.nextPolicyId++),
+        guildId: input.guildId,
+        channelId,
+        triggerType,
+        thresholdCount: input.thresholdCount ?? null,
+        windowSeconds: input.windowSeconds ?? null,
+        timeoutSeconds: input.timeoutSeconds ?? null,
+        exemptRoleIds: input.exemptRoleIds ?? [],
+        updatedBy: input.updatedBy,
+        updatedAt: this.now(),
+      };
+      this.policies.push(row);
+      return Promise.resolve(row);
+    }
+    const updated: AutomodPolicyRow = {
+      ...existing,
+      thresholdCount: input.thresholdCount ?? existing.thresholdCount,
+      windowSeconds: input.windowSeconds ?? existing.windowSeconds,
+      timeoutSeconds: input.timeoutSeconds ?? existing.timeoutSeconds,
+      exemptRoleIds:
+        input.exemptRoleIds && input.exemptRoleIds.length > 0
+          ? input.exemptRoleIds
+          : existing.exemptRoleIds,
+      updatedBy: input.updatedBy,
+      updatedAt: this.now(),
+    };
+    this.policies[this.policies.indexOf(existing)] = updated;
+    return Promise.resolve(updated);
+  }
+
+  public attachOutcome(
+    eventId: string,
+    outcome: {
+      readonly ladderStep: number;
+      readonly moderationActionId?: string | null;
+      readonly caseId?: string | null;
+    },
+  ): Promise<void> {
+    const row = this.events.find((event) => event.id === eventId);
+    if (row) {
+      const updated: AutomodEventRow = {
+        ...row,
+        ladderStep: outcome.ladderStep,
+        moderationActionId: outcome.moderationActionId ?? null,
+        caseId: outcome.caseId ?? null,
+      };
+      this.events[this.events.indexOf(row)] = updated;
+    }
+    return Promise.resolve();
+  }
+
+  public attachAlertMessage(eventId: string, alertMessageId: MessageId): Promise<void> {
+    const row = this.events.find((event) => event.id === eventId);
+    if (row) {
+      const updated: AutomodEventRow = { ...row, alertMessageId };
+      this.events[this.events.indexOf(row)] = updated;
+    }
+    return Promise.resolve();
+  }
+
+  public attachCase(eventId: string, caseId: string): Promise<void> {
+    const row = this.events.find((event) => event.id === eventId);
+    if (row) {
+      const updated: AutomodEventRow = { ...row, caseId };
+      this.events[this.events.indexOf(row)] = updated;
+    }
+    return Promise.resolve();
+  }
+
+  public setReview(
+    eventId: string,
+    status: Exclude<AutomodReviewStatus, 'pending'>,
+    reviewedBy: UserId,
+    reviewedAt: Date,
+  ): Promise<AutomodEventRow | null> {
+    const row = this.events.find((event) => event.id === eventId);
+    if (row?.reviewStatus !== 'pending') return Promise.resolve(null);
+    const updated: AutomodEventRow = {
+      ...row,
+      reviewStatus: status,
+      reviewedBy,
+      reviewedAt,
+    };
+    this.events[this.events.indexOf(row)] = updated;
+    return Promise.resolve(updated);
+  }
+}
+
 export class FakeCaseRepository implements CaseRepository {
   public readonly cases: CaseRow[] = [];
   public readonly events: CaseEventRow[] = [];
@@ -898,6 +1175,53 @@ export class FakeCaseRepository implements CaseRepository {
   private readonly counters = new Map<GuildId, number>();
 
   public constructor(private readonly now: () => Date) {}
+
+  public listReports(
+    guildId: GuildId,
+    filter?: ReportListFilter,
+  ): Promise<readonly ReportSummaryRow[]> {
+    const statuses = filter?.status ? [filter.status] : ACTIVE_CASE_STATUSES;
+    const limit = Math.min(Math.max(filter?.limit ?? 20, 1), 100);
+    const rank: Readonly<Record<CaseStatus, number>> = {
+      ESCALATED: 0,
+      OPEN: 1,
+      IN_REVIEW: 2,
+      RESOLVED: 3,
+      CLOSED: 4,
+    };
+
+    const summaries = this.reports
+      .flatMap((report) => {
+        const parent = this.cases.find((row) => row.id === report.caseId);
+        if (parent?.guildId !== guildId) return [];
+        if (!statuses.includes(parent.status)) return [];
+        return [
+          {
+            id: report.id,
+            caseId: report.caseId,
+            caseNumber: parent.caseNumber,
+            caseStatus: parent.status,
+            reporterId: report.reporterId,
+            category: report.category,
+            targetUserId: report.targetUserId,
+            assignedTo: parent.assignedTo,
+            createdAt: report.createdAt,
+          } satisfies ReportSummaryRow,
+        ];
+      })
+      .sort(
+        (a, b) =>
+          rank[a.caseStatus] - rank[b.caseStatus] ||
+          a.createdAt.getTime() - b.createdAt.getTime() ||
+          // Matches the `r.id ASC` tiebreaker in the SQL. Without it the fake
+          // would be stable where Postgres was not, and the difference would
+          // only show up in production.
+          a.id.localeCompare(b.id, undefined, { numeric: true }),
+      )
+      .slice(0, limit);
+
+    return Promise.resolve(summaries);
+  }
 
   public open(
     input: OpenCaseInput,
@@ -991,6 +1315,11 @@ export class FakeCaseRepository implements CaseRepository {
       .filter((c) => c.guildId === guildId)
       .filter((c) => !filter?.status || c.status === filter.status)
       .filter((c) => !filter?.assignedTo || c.assignedTo === filter.assignedTo)
+      .filter((c) => {
+        if (filter?.assignment === 'assigned') return c.assignedTo !== null;
+        if (filter?.assignment === 'unassigned') return c.assignedTo === null;
+        return true;
+      })
       .filter((c) => !filter?.subjectId || c.subjectId === filter.subjectId)
       .sort(
         (a, b) =>
@@ -1274,6 +1603,34 @@ export class FakeRewardsRepository implements RewardsRepository {
     return Promise.resolve(count);
   }
 
+  public activitySummary(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<{
+    readonly points: number;
+    readonly events: number;
+    readonly members: number;
+  }> {
+    const members = new Set<UserId>();
+    let points = 0;
+    let events = 0;
+
+    for (const event of this.events) {
+      if (event.guildId !== guildId) continue;
+      const at = event.createdAt.getTime();
+      // Half-open when bounded, matching the SQL; open-ended when `to` is
+      // null, which is what a live view passes.
+      if (at < from.getTime()) continue;
+      if (to && at >= to.getTime()) continue;
+      points += event.points;
+      events += 1;
+      members.add(event.userId);
+    }
+
+    return Promise.resolve({ points, events, members: members.size });
+  }
+
   public leaderboard(
     guildId: GuildId,
     options: { readonly since?: Date; readonly limit?: number } = {},
@@ -1298,7 +1655,14 @@ export class FakeRewardsRepository implements RewardsRepository {
 
     const entries = [...totals.entries()]
       .filter(([, value]) => value.points > 0)
-      .sort((a, b) => b[1].points - a[1].points || a[1].first - b[1].first)
+      // Matches the SQL's `user_id ASC` tiebreaker, so the fake cannot be
+      // stable where Postgres is not.
+      .sort(
+        (a, b) =>
+          b[1].points - a[1].points ||
+          a[1].first - b[1].first ||
+          a[0].localeCompare(b[0]),
+      )
       .slice(0, limit)
       .map(([userId, value]) => ({
         userId,
@@ -1320,6 +1684,25 @@ export class FakeRewardsRepository implements RewardsRepository {
       .reverse()
       .slice(0, Math.min(Math.max(limit, 1), 50));
     return Promise.resolve(rows);
+  }
+
+  public countEventsInWindow(
+    guildId: GuildId,
+    userId: UserId,
+    kind: PointKind,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    return Promise.resolve(
+      this.events.filter(
+        (event) =>
+          event.guildId === guildId &&
+          event.userId === userId &&
+          event.kind === kind &&
+          event.createdAt.getTime() >= from.getTime() &&
+          event.createdAt.getTime() < to.getTime(),
+      ).length,
+    );
   }
 
   public participation(
@@ -1441,6 +1824,30 @@ export class FakeAwardsRepository implements AwardsRepository {
     if (award) this.awards.set(key, { ...award, announced: true });
     return Promise.resolve();
   }
+  public recent(
+    guildId: GuildId,
+    options: { readonly since?: Date; readonly limit?: number } = {},
+  ): Promise<readonly MemberAward[]> {
+    const requested = options.limit ?? 5;
+    const limit = Number.isInteger(requested) ? Math.min(Math.max(requested, 1), 25) : 5;
+
+    const rows = [...this.awards.values()]
+      .filter((award) => award.guildId === guildId)
+      .filter(
+        (award) => !options.since || award.earnedAt.getTime() >= options.since.getTime(),
+      )
+      // Same total order as the SQL: newest first, then the two keys that
+      // make it deterministic when one evaluation grants two awards.
+      .sort(
+        (a, b) =>
+          b.earnedAt.getTime() - a.earnedAt.getTime() ||
+          a.userId.localeCompare(b.userId) ||
+          a.awardKey.localeCompare(b.awardKey),
+      )
+      .slice(0, limit);
+
+    return Promise.resolve(rows);
+  }
 }
 
 /**
@@ -1502,6 +1909,7 @@ function emptyPruneResult(): PruneResult {
       command_usage: 0,
       verification_attempts: 0,
       audit_events: 0,
+      automod_events: 0,
     },
     total: 0,
     more: false,
@@ -1512,6 +1920,11 @@ export class FakeLabsRepository implements LabsRepository {
   public readonly feedback: FeedbackEntry[] = [];
   public readonly bugs: BugReport[] = [];
   public readonly events: BugEvent[] = [];
+  public readonly features: LabsFeature[] = [];
+  public readonly votes: { featureId: string; userId: UserId }[] = [];
+  public readonly cohorts: LabsCohort[] = [];
+  public readonly cohortMembers: { cohortId: string; userId: UserId }[] = [];
+  public readonly releases: LabsReleaseNote[] = [];
 
   private readonly counters = new Map<string, number>();
   private sequence = 0;
@@ -1549,8 +1962,12 @@ export class FakeLabsRepository implements LabsRepository {
     return Promise.resolve(
       this.feedback
         .filter((entry) => entry.guildId === guildId)
-        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-        .slice(0, limit),
+        // Mirrors the SQL's `id DESC` tiebreaker.
+        .sort(
+          (a, b) =>
+            b.createdAt.getTime() - a.createdAt.getTime() || b.id.localeCompare(a.id),
+        )
+        .slice(0, Math.min(Math.max(limit, 1), 25)),
     );
   }
 
@@ -1661,13 +2078,25 @@ export class FakeLabsRepository implements LabsRepository {
         .filter((bug) =>
           options.status ? bug.status === options.status : open.includes(bug.status),
         )
-        .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-        .slice(0, options.limit ?? 10),
+        // Mirrors the SQL: `bug_number ASC` tiebreaker, and the same clamp.
+        .sort(
+          (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() || a.bugNumber - b.bugNumber,
+        )
+        .slice(0, Math.min(Math.max(options.limit ?? 10, 1), 25)),
     );
   }
 
-  public bugHistory(bugId: string): Promise<readonly BugEvent[]> {
-    return Promise.resolve(this.events.filter((event) => event.bugId === bugId));
+  public bugHistory(bugId: string, limit = 25): Promise<readonly BugEvent[]> {
+    return Promise.resolve(
+      this.events
+        .filter((event) => event.bugId === bugId)
+        .sort(
+          (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id),
+        )
+        .slice(0, Math.min(Math.max(limit, 1), 50)),
+    );
   }
 
   public countBugsSince(guildId: GuildId, userId: UserId, since: Date): Promise<number> {
@@ -1680,13 +2109,969 @@ export class FakeLabsRepository implements LabsRepository {
       ).length,
     );
   }
+
+  // ---------------------------------------------------------------------------
+  // The pipeline
+  // ---------------------------------------------------------------------------
+
+  private withVoteCount(feature: LabsFeature): LabsFeature {
+    return {
+      ...feature,
+      votes: this.votes.filter((vote) => vote.featureId === feature.id).length,
+    };
+  }
+
+  private withMemberCount(cohort: LabsCohort): LabsCohort {
+    return {
+      ...cohort,
+      members: this.cohortMembers.filter((row) => row.cohortId === cohort.id).length,
+    };
+  }
+
+  public createFeature(input: CreateFeatureInput): Promise<LabsFeature> {
+    const feature: LabsFeature = {
+      id: this.nextId(),
+      guildId: input.guildId,
+      name: input.name,
+      status: 'proposed',
+      description: input.description ?? null,
+      votes: 0,
+      createdBy: input.createdBy,
+      createdAt: this.now(),
+      updatedAt: this.now(),
+    };
+    this.features.push(feature);
+    return Promise.resolve(feature);
+  }
+
+  public findFeatureByName(guildId: GuildId, name: string): Promise<LabsFeature | null> {
+    const found = this.features.find(
+      (feature) =>
+        feature.guildId === guildId &&
+        feature.name.trim().toLowerCase() === name.trim().toLowerCase(),
+    );
+    return Promise.resolve(found ? this.withVoteCount(found) : null);
+  }
+
+  public listFeatures(guildId: GuildId): Promise<readonly LabsFeature[]> {
+    return Promise.resolve(
+      this.features
+        .filter((feature) => feature.guildId === guildId)
+        .map((feature) => this.withVoteCount(feature)),
+    );
+  }
+
+  public setFeatureStatus(
+    featureId: string,
+    status: LabsFeatureStatus,
+  ): Promise<LabsFeature | null> {
+    const index = this.features.findIndex((feature) => feature.id === featureId);
+    const current = this.features[index];
+    if (index === -1 || !current) return Promise.resolve(null);
+    const updated: LabsFeature = { ...current, status, updatedAt: this.now() };
+    this.features[index] = updated;
+    return Promise.resolve(this.withVoteCount(updated));
+  }
+
+  public hasVoted(featureId: string, userId: UserId): Promise<boolean> {
+    return Promise.resolve(
+      this.votes.some((vote) => vote.featureId === featureId && vote.userId === userId),
+    );
+  }
+
+  public toggleVote(featureId: string, userId: UserId): Promise<VoteOutcome | null> {
+    const feature = this.features.find((row) => row.id === featureId);
+    if (!feature) return Promise.resolve(null);
+    const index = this.votes.findIndex(
+      (vote) => vote.featureId === featureId && vote.userId === userId,
+    );
+    let voted: boolean;
+    if (index === -1) {
+      this.votes.push({ featureId, userId });
+      voted = true;
+    } else {
+      this.votes.splice(index, 1);
+      voted = false;
+    }
+    return Promise.resolve({ feature: this.withVoteCount(feature), voted });
+  }
+
+  public createCohort(input: CreateCohortInput): Promise<LabsCohort> {
+    const cohort: LabsCohort = {
+      id: this.nextId(),
+      guildId: input.guildId,
+      name: input.name,
+      description: input.description ?? null,
+      joinable: input.joinable ?? true,
+      members: 0,
+      createdBy: input.createdBy,
+      createdAt: this.now(),
+    };
+    this.cohorts.push(cohort);
+    return Promise.resolve(cohort);
+  }
+
+  public findCohortByName(guildId: GuildId, name: string): Promise<LabsCohort | null> {
+    const found = this.cohorts.find(
+      (cohort) =>
+        cohort.guildId === guildId &&
+        cohort.name.trim().toLowerCase() === name.trim().toLowerCase(),
+    );
+    return Promise.resolve(found ? this.withMemberCount(found) : null);
+  }
+
+  public listCohorts(guildId: GuildId): Promise<readonly LabsCohort[]> {
+    return Promise.resolve(
+      this.cohorts
+        .filter((cohort) => cohort.guildId === guildId)
+        .map((cohort) => this.withMemberCount(cohort)),
+    );
+  }
+
+  public joinCohort(
+    guildId: GuildId,
+    name: string,
+    userId: UserId,
+  ): Promise<JoinCohortOutcome> {
+    const cohort = this.cohorts.find(
+      (row) =>
+        row.guildId === guildId &&
+        row.name.trim().toLowerCase() === name.trim().toLowerCase(),
+    );
+    if (!cohort) return Promise.resolve({ kind: 'not_found' });
+    if (
+      this.cohortMembers.some(
+        (row) => row.cohortId === cohort.id && row.userId === userId,
+      )
+    ) {
+      return Promise.resolve({
+        kind: 'already_member',
+        cohort: this.withMemberCount(cohort),
+      });
+    }
+    if (!cohort.joinable) {
+      return Promise.resolve({ kind: 'closed', cohort: this.withMemberCount(cohort) });
+    }
+    this.cohortMembers.push({ cohortId: cohort.id, userId });
+    return Promise.resolve({ kind: 'joined', cohort: this.withMemberCount(cohort) });
+  }
+
+  public leaveCohort(
+    guildId: GuildId,
+    name: string,
+    userId: UserId,
+  ): Promise<LeaveCohortOutcome> {
+    const cohort = this.cohorts.find(
+      (row) =>
+        row.guildId === guildId &&
+        row.name.trim().toLowerCase() === name.trim().toLowerCase(),
+    );
+    if (!cohort) return Promise.resolve({ kind: 'not_found' });
+    const index = this.cohortMembers.findIndex(
+      (row) => row.cohortId === cohort.id && row.userId === userId,
+    );
+    if (index === -1) {
+      return Promise.resolve({
+        kind: 'not_member',
+        cohort: this.withMemberCount(cohort),
+      });
+    }
+    this.cohortMembers.splice(index, 1);
+    return Promise.resolve({ kind: 'left', cohort: this.withMemberCount(cohort) });
+  }
+
+  public isCohortMember(cohortId: string, userId: UserId): Promise<boolean> {
+    return Promise.resolve(
+      this.cohortMembers.some(
+        (row) => row.cohortId === cohortId && row.userId === userId,
+      ),
+    );
+  }
+
+  public publishRelease(input: PublishReleaseInput): Promise<LabsReleaseNote> {
+    const note: LabsReleaseNote = {
+      id: this.nextId(),
+      guildId: input.guildId,
+      version: input.version,
+      title: input.title,
+      body: input.body,
+      publishedBy: input.publishedBy,
+      publishedAt: this.now(),
+      messageId: null,
+    };
+    this.releases.push(note);
+    return Promise.resolve(note);
+  }
+
+  public attachReleaseMessage(id: string, messageId: MessageId): Promise<void> {
+    const index = this.releases.findIndex((note) => note.id === id);
+    const current = this.releases[index];
+    if (index !== -1 && current) {
+      this.releases[index] = { ...current, messageId };
+    }
+    return Promise.resolve();
+  }
+
+  public latestRelease(guildId: GuildId): Promise<LabsReleaseNote | null> {
+    const mine = this.releases.filter((note) => note.guildId === guildId);
+    const sorted = [...mine].sort(
+      (a, b) => b.publishedAt.getTime() - a.publishedAt.getTime(),
+    );
+    return Promise.resolve(sorted[0] ?? null);
+  }
 }
 
 export type { AwardKind };
 
+/**
+ * The referral handoff, in memory.
+ *
+ * Mirrors the SQL's state machine exactly, including the bits that look like
+ * paranoia: every transition re-checks the state it is moving *from*, because
+ * that is what the real UPDATE does in its WHERE clause and it is the reason
+ * two workers cannot both pay the same row. A fake that merely sets the field
+ * would let a concurrency test pass against a broken implementation.
+ *
+ * JavaScript's single thread does not reproduce row locks, so `claim` models
+ * SKIP LOCKED the way the database behaves rather than the way it is written:
+ * a row already claimed and not yet stale is invisible to the next caller.
+ */
+export class FakeReferralRepository implements ReferralRepository {
+  public readonly triggers: ReferralTrigger[] = [];
+  private sequence = 0;
+
+  public constructor(private readonly now: () => Date) {}
+
+  public record(input: RecordReferralInput): Promise<RecordReferralOutcome> {
+    const existing = this.triggers.find(
+      (row) =>
+        row.guildId === input.guildId && row.referredUserId === input.referredUserId,
+    );
+    if (existing) {
+      return Promise.resolve({ kind: 'already_referred', trigger: existing });
+    }
+
+    if (input.inviterUserId === input.referredUserId) {
+      // The database refuses this outright; so does the fake, so a test
+      // cannot accidentally depend on a row that could never exist.
+      throw new Error('referral_triggers_no_self_referral');
+    }
+
+    this.sequence += 1;
+    const trigger: ReferralTrigger = {
+      id: `referral-${String(this.sequence)}`,
+      guildId: input.guildId,
+      referredUserId: input.referredUserId,
+      inviterUserId: input.inviterUserId,
+      inviteCode: input.inviteCode,
+      source: input.source,
+      state: 'pending',
+      rejectedReason: null,
+      claimedAt: null,
+      claimedBy: null,
+      attempts: 0,
+      pointEventId: null,
+      idempotencyKey: input.idempotencyKey,
+      correlationId: input.correlationId ?? null,
+      createdAt: this.now(),
+      qualifiedAt: null,
+      consumedAt: null,
+    };
+    this.triggers.push(trigger);
+    return Promise.resolve({ kind: 'recorded', trigger });
+  }
+
+  public listPending(
+    guildId: GuildId,
+    createdBefore: Date,
+    limit = 50,
+  ): Promise<readonly ReferralTrigger[]> {
+    return Promise.resolve(
+      this.triggers
+        .filter(
+          (row) =>
+            row.guildId === guildId &&
+            row.state === 'pending' &&
+            row.createdAt.getTime() <= createdBefore.getTime(),
+        )
+        .sort(
+          (a, b) =>
+            a.createdAt.getTime() - b.createdAt.getTime() || a.id.localeCompare(b.id),
+        )
+        .slice(0, Math.min(Math.max(limit, 1), 200)),
+    );
+  }
+
+  public markQualified(id: string, qualifiedAt: Date): Promise<boolean> {
+    return Promise.resolve(
+      this.transition(
+        id,
+        (row) => row.state === 'pending' && row.inviterUserId !== null,
+        { state: 'qualified', qualifiedAt },
+      ),
+    );
+  }
+
+  public markRejected(id: string, reason: ReferralRejection): Promise<boolean> {
+    return Promise.resolve(
+      this.transition(id, (row) => row.state === 'pending' || row.state === 'qualified', {
+        state: 'rejected',
+        rejectedReason: reason,
+        qualifiedAt: null,
+      }),
+    );
+  }
+
+  public claim(input: {
+    readonly guildId: GuildId;
+    readonly workerId: string;
+    readonly limit: number;
+    readonly now: Date;
+    readonly staleClaimsBefore: Date;
+  }): Promise<readonly ClaimedReferral[]> {
+    const claimable = this.triggers
+      .filter(
+        (row) =>
+          row.guildId === input.guildId &&
+          row.state === 'qualified' &&
+          row.inviterUserId !== null &&
+          (row.claimedAt === null ||
+            row.claimedAt.getTime() < input.staleClaimsBefore.getTime()),
+      )
+      .sort(
+        (a, b) =>
+          (a.qualifiedAt?.getTime() ?? 0) - (b.qualifiedAt?.getTime() ?? 0) ||
+          a.id.localeCompare(b.id),
+      )
+      .slice(0, Math.min(Math.max(input.limit, 1), 200));
+
+    const claimed: ClaimedReferral[] = [];
+    for (const row of claimable) {
+      const index = this.triggers.indexOf(row);
+      const updated: ReferralTrigger = {
+        ...row,
+        claimedAt: input.now,
+        claimedBy: input.workerId,
+        attempts: row.attempts + 1,
+      };
+      this.triggers[index] = updated;
+      claimed.push(updated as ClaimedReferral);
+    }
+    return Promise.resolve(claimed);
+  }
+
+  public markPaid(input: {
+    readonly id: string;
+    readonly pointEventId: string;
+    readonly consumedAt: Date;
+  }): Promise<boolean> {
+    return Promise.resolve(
+      this.transition(input.id, (row) => row.state === 'qualified', {
+        state: 'paid',
+        consumedAt: input.consumedAt,
+        pointEventId: input.pointEventId,
+        claimedAt: null,
+        claimedBy: null,
+      }),
+    );
+  }
+
+  public releaseClaim(id: string): Promise<boolean> {
+    return Promise.resolve(
+      this.transition(id, (row) => row.state === 'qualified', {
+        claimedAt: null,
+        claimedBy: null,
+      }),
+    );
+  }
+
+  public findById(id: string): Promise<ReferralTrigger | null> {
+    return Promise.resolve(this.triggers.find((row) => row.id === id) ?? null);
+  }
+
+  public listRecent(
+    guildId: GuildId,
+    options: { readonly state?: ReferralState; readonly limit?: number } = {},
+  ): Promise<readonly ReferralTrigger[]> {
+    return Promise.resolve(
+      this.triggers
+        .filter(
+          (row) =>
+            row.guildId === guildId && (!options.state || row.state === options.state),
+        )
+        .sort(
+          (a, b) =>
+            b.createdAt.getTime() - a.createdAt.getTime() || b.id.localeCompare(a.id),
+        )
+        .slice(0, Math.min(Math.max(options.limit ?? 10, 1), 25)),
+    );
+  }
+
+  public countPaidForInviterInWindow(
+    guildId: GuildId,
+    inviterUserId: UserId,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    return Promise.resolve(
+      this.triggers.filter(
+        (row) =>
+          row.guildId === guildId &&
+          row.inviterUserId === inviterUserId &&
+          row.state === 'paid' &&
+          row.consumedAt !== null &&
+          row.consumedAt.getTime() >= from.getTime() &&
+          row.consumedAt.getTime() < to.getTime(),
+      ).length,
+    );
+  }
+
+  public countPaidForInviter(guildId: GuildId, inviterUserId: UserId): Promise<number> {
+    return Promise.resolve(
+      this.triggers.filter(
+        (row) =>
+          row.guildId === guildId &&
+          row.inviterUserId === inviterUserId &&
+          row.state === 'paid',
+      ).length,
+    );
+  }
+
+  /** One place where "the WHERE clause must still match" is enforced. */
+  private transition(
+    id: string,
+    allowed: (row: ReferralTrigger) => boolean,
+    changes: Partial<ReferralTrigger>,
+  ): boolean {
+    const index = this.triggers.findIndex((row) => row.id === id);
+    if (index === -1) return false;
+
+    const row = this.triggers[index];
+    if (!row || !allowed(row)) return false;
+
+    this.triggers[index] = { ...row, ...changes };
+    return true;
+  }
+  public qualifiedLeaderboard(
+    guildId: GuildId,
+    options: { readonly since?: Date; readonly limit?: number } = {},
+  ): Promise<readonly ReferralCount[]> {
+    const limit = Math.min(Math.max(options.limit ?? 10, 1), 25);
+    const totals = new Map<UserId, { count: number; first: number }>();
+
+    for (const trigger of this.triggers) {
+      if (trigger.guildId !== guildId) continue;
+      if (trigger.state !== 'qualified' && trigger.state !== 'paid') continue;
+      const qualifiedAt = trigger.qualifiedAt;
+      if (!qualifiedAt) continue;
+      if (options.since && qualifiedAt.getTime() < options.since.getTime()) continue;
+      const inviter = trigger.inviterUserId;
+      if (!inviter) continue;
+
+      const current = totals.get(inviter) ?? { count: 0, first: qualifiedAt.getTime() };
+      totals.set(inviter, {
+        count: current.count + 1,
+        first: Math.min(current.first, qualifiedAt.getTime()),
+      });
+    }
+
+    const entries = [...totals.entries()]
+      .sort(
+        (a, b) =>
+          b[1].count - a[1].count || a[1].first - b[1].first || a[0].localeCompare(b[0]),
+      )
+      .slice(0, limit)
+      .map(([userId, value]) => ({ userId, count: value.count }));
+
+    return Promise.resolve(entries);
+  }
+
+  public countQualifiedInWindow(
+    guildId: GuildId,
+    from: Date,
+    to: Date | null,
+  ): Promise<number> {
+    let count = 0;
+    for (const trigger of this.triggers) {
+      if (trigger.guildId !== guildId) continue;
+      if (trigger.state !== 'qualified' && trigger.state !== 'paid') continue;
+      const qualifiedAt = trigger.qualifiedAt;
+      if (!qualifiedAt) continue;
+      const at = qualifiedAt.getTime();
+      if (at < from.getTime()) continue;
+      if (to && at >= to.getTime()) continue;
+      count += 1;
+    }
+    return Promise.resolve(count);
+  }
+}
+
+/**
+ * Challenges and events in memory.
+ *
+ * The one place a fake can lie about something that matters here is capacity:
+ * the real repository serialises the seat count behind an advisory lock, and
+ * JavaScript's single-threaded model means a naive fake can never reproduce
+ * the interleaving that lock exists to prevent. This fake deliberately yields
+ * between the count and the insert (`await Promise.resolve()`), so a test that
+ * fires concurrent joins actually interleaves them and would observe an
+ * oversubscribed event if the seat check were not also serialised here.
+ */
+export class FakeCommunityRepository implements CommunityRepository {
+  public readonly activities: CommunityActivity[] = [];
+  /** Keyed `activityId:userId`, mirroring the real primary key. */
+  public readonly records = new Map<string, CommunityParticipant>();
+
+  private nextId = 1;
+  /** Stands in for the advisory lock: one capacity check at a time. */
+  private seatGate: Promise<unknown> = Promise.resolve();
+
+  public constructor(private readonly now: () => Date = () => new Date()) {}
+
+  public create(input: CreateActivityInput): Promise<CommunityActivity> {
+    const activity: CommunityActivity = {
+      id: `activity-${String(this.nextId++)}`,
+      guildId: input.guildId,
+      kind: input.kind,
+      title: input.title,
+      description: input.description,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+      status: 'open',
+      targetMetric: input.targetMetric ?? null,
+      targetAmount: input.targetAmount ?? null,
+      capacity: input.capacity ?? null,
+      rewardPoints: input.rewardPoints,
+      achievementKey: input.achievementKey ?? null,
+      createdBy: input.createdBy,
+      createdAt: this.now(),
+      closedBy: null,
+      closedAt: null,
+      correlationId: input.correlationId ?? null,
+    };
+    this.activities.push(activity);
+    return Promise.resolve(activity);
+  }
+
+  public byId(guildId: GuildId, activityId: string): Promise<CommunityActivity | null> {
+    return Promise.resolve(
+      this.activities.find(
+        (activity) => activity.guildId === guildId && activity.id === activityId,
+      ) ?? null,
+    );
+  }
+
+  public list(
+    guildId: GuildId,
+    options: ListActivitiesOptions,
+  ): Promise<readonly CommunityActivity[]> {
+    const limit = Math.min(options.limit ?? 10, 25);
+    return Promise.resolve(
+      this.activities
+        .filter(
+          (activity) =>
+            activity.guildId === guildId &&
+            activity.kind === options.kind &&
+            (options.status === undefined || activity.status === options.status),
+        )
+        .sort(
+          (a, b) => b.endsAt.getTime() - a.endsAt.getTime() || b.id.localeCompare(a.id),
+        )
+        .slice(0, limit),
+    );
+  }
+
+  public openAt(
+    guildId: GuildId,
+    kind: ActivityKind,
+    at: Date,
+  ): Promise<readonly CommunityActivity[]> {
+    return Promise.resolve(
+      this.activities
+        .filter(
+          (activity) =>
+            activity.guildId === guildId &&
+            activity.kind === kind &&
+            activity.status === 'open' &&
+            activity.startsAt.getTime() <= at.getTime() &&
+            activity.endsAt.getTime() > at.getTime(),
+        )
+        .sort(
+          (a, b) => a.endsAt.getTime() - b.endsAt.getTime() || a.id.localeCompare(b.id),
+        ),
+    );
+  }
+
+  public close(input: {
+    readonly guildId: GuildId;
+    readonly activityId: string;
+    readonly status: Exclude<ActivityStatus, 'open'>;
+    readonly closedBy: UserId;
+    readonly closedAt: Date;
+  }): Promise<CommunityActivity | null> {
+    const index = this.activities.findIndex(
+      (activity) =>
+        activity.guildId === input.guildId &&
+        activity.id === input.activityId &&
+        activity.status === 'open',
+    );
+    if (index === -1) return Promise.resolve(null);
+
+    const current = this.activities[index];
+    if (!current) return Promise.resolve(null);
+
+    const closed: CommunityActivity = {
+      ...current,
+      status: input.status,
+      closedBy: input.closedBy,
+      closedAt: input.closedAt,
+    };
+    this.activities[index] = closed;
+    return Promise.resolve(closed);
+  }
+
+  public async join(input: {
+    readonly activityId: string;
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly capacity: number | null;
+    readonly joinedAt: Date;
+    readonly correlationId?: CorrelationId | null;
+  }): Promise<JoinOutcome> {
+    const key = `${input.activityId}:${input.userId}`;
+
+    const attempt = async (): Promise<JoinOutcome> => {
+      const existing = this.records.get(key);
+      if (existing && existing.state !== 'withdrawn') {
+        return { kind: 'already_joined', participant: existing };
+      }
+
+      if (input.capacity !== null) {
+        const seatsUsed = [...this.records.values()].filter(
+          (participant) =>
+            participant.activityId === input.activityId &&
+            participant.state !== 'withdrawn',
+        ).length;
+
+        // Yield, so concurrent joins genuinely interleave here. Without this
+        // the test for the capacity race would pass against a broken
+        // implementation.
+        await Promise.resolve();
+
+        if (seatsUsed >= input.capacity) {
+          return existing
+            ? { kind: 'already_joined', participant: existing }
+            : { kind: 'full' };
+        }
+      }
+
+      const participant: CommunityParticipant = {
+        activityId: input.activityId,
+        guildId: input.guildId,
+        userId: input.userId,
+        state: 'joined',
+        joinedAt: existing?.joinedAt ?? input.joinedAt,
+        completedAt: null,
+        progress: null,
+        pointEventId: null,
+      };
+      this.records.set(key, participant);
+      return existing
+        ? { kind: 'already_joined', participant }
+        : { kind: 'joined', participant };
+    };
+
+    // Serialise, the way the advisory lock does. Only capped joins contend.
+    if (input.capacity === null) return await attempt();
+    const gated = this.seatGate.then(attempt);
+    this.seatGate = gated.catch(() => undefined);
+    return await gated;
+  }
+
+  public leave(
+    activityId: string,
+    guildId: GuildId,
+    userId: UserId,
+  ): Promise<'withdrawn' | 'not_joined'> {
+    const key = `${activityId}:${userId}`;
+    const existing = this.records.get(key);
+    if (existing?.guildId !== guildId || existing.state !== 'joined') {
+      return Promise.resolve('not_joined');
+    }
+    this.records.set(key, { ...existing, state: 'withdrawn' });
+    return Promise.resolve('withdrawn');
+  }
+
+  public participant(
+    activityId: string,
+    userId: UserId,
+  ): Promise<CommunityParticipant | null> {
+    return Promise.resolve(this.records.get(`${activityId}:${userId}`) ?? null);
+  }
+
+  public records_(activityId: string): readonly CommunityParticipant[] {
+    return [...this.records.values()].filter(
+      (participant) => participant.activityId === activityId,
+    );
+  }
+
+  public participants(
+    activityId: string,
+    limit = 100,
+  ): Promise<readonly CommunityParticipant[]> {
+    return Promise.resolve(
+      [...this.records_(activityId)]
+        .sort(
+          (a, b) =>
+            a.joinedAt.getTime() - b.joinedAt.getTime() ||
+            a.userId.localeCompare(b.userId),
+        )
+        .slice(0, Math.min(limit, 100)),
+    );
+  }
+
+  public counts(activityId: string): Promise<{ joined: number; completed: number }> {
+    const rows = this.records_(activityId);
+    return Promise.resolve({
+      joined: rows.filter((row) => row.state !== 'withdrawn').length,
+      completed: rows.filter((row) => row.state === 'completed').length,
+    });
+  }
+
+  public memberActivityIds(
+    guildId: GuildId,
+    userId: UserId,
+    activityIds: readonly string[],
+  ): Promise<ReadonlyMap<string, CommunityParticipant>> {
+    const wanted = new Set(activityIds);
+    return Promise.resolve(
+      new Map(
+        [...this.records.values()]
+          .filter(
+            (participant) =>
+              participant.guildId === guildId &&
+              participant.userId === userId &&
+              wanted.has(participant.activityId),
+          )
+          .map((participant) => [participant.activityId, participant]),
+      ),
+    );
+  }
+
+  public complete(input: CompleteParticipantInput): Promise<CompleteOutcome> {
+    const key = `${input.activityId}:${input.userId}`;
+    const existing = this.records.get(key);
+    if (existing?.guildId !== input.guildId || existing.state !== 'joined') {
+      return Promise.resolve({ kind: 'already_completed' });
+    }
+    const completed: CommunityParticipant = {
+      ...existing,
+      state: 'completed',
+      completedAt: this.now(),
+      progress: input.progress ?? null,
+      pointEventId: input.pointEventId ?? null,
+    };
+    this.records.set(key, completed);
+    return Promise.resolve({ kind: 'completed', participant: completed });
+  }
+
+  public completeDirect(input: CompleteParticipantInput): Promise<CompleteOutcome> {
+    const key = `${input.activityId}:${input.userId}`;
+    if (this.records.has(key)) {
+      return Promise.resolve({ kind: 'already_completed' });
+    }
+    const completed: CommunityParticipant = {
+      activityId: input.activityId,
+      guildId: input.guildId,
+      userId: input.userId,
+      state: 'completed',
+      joinedAt: this.now(),
+      completedAt: this.now(),
+      progress: input.progress ?? null,
+      pointEventId: input.pointEventId ?? null,
+    };
+    this.records.set(key, completed);
+    return Promise.resolve({ kind: 'completed', participant: completed });
+  }
+
+  public markPaid(input: {
+    readonly activityId: string;
+    readonly guildId: GuildId;
+    readonly userId: UserId;
+    readonly pointEventId: string;
+  }): Promise<boolean> {
+    const key = `${input.activityId}:${input.userId}`;
+    const existing = this.records.get(key);
+    if (
+      existing?.guildId !== input.guildId ||
+      existing.state !== 'completed' ||
+      existing.pointEventId !== null
+    ) {
+      return Promise.resolve(false);
+    }
+    this.records.set(key, { ...existing, pointEventId: input.pointEventId });
+    return Promise.resolve(true);
+  }
+
+  public unpaidCompletions(
+    guildId: GuildId,
+    activityId: string,
+    limit = 100,
+  ): Promise<readonly CommunityParticipant[]> {
+    const activity = this.activities.find((candidate) => candidate.id === activityId);
+    if (activity?.status !== 'completed' || activity.rewardPoints <= 0) {
+      return Promise.resolve([]);
+    }
+
+    return Promise.resolve(
+      [...this.records.values()]
+        .filter(
+          (record) =>
+            record.guildId === guildId &&
+            record.activityId === activityId &&
+            record.state === 'completed' &&
+            record.pointEventId === null,
+        )
+        .sort(
+          (a, b) =>
+            (a.completedAt?.getTime() ?? 0) - (b.completedAt?.getTime() ?? 0) ||
+            a.userId.localeCompare(b.userId),
+        )
+        .slice(0, Math.min(limit, 100)),
+    );
+  }
+
+  public countCompletedEvents(
+    guildId: GuildId,
+    userId: UserId,
+    from: Date,
+    to: Date,
+  ): Promise<number> {
+    const events = new Set(
+      this.activities
+        .filter((activity) => activity.kind === 'event')
+        .map((activity) => activity.id),
+    );
+    return Promise.resolve(
+      [...this.records.values()].filter(
+        (participant) =>
+          participant.guildId === guildId &&
+          participant.userId === userId &&
+          participant.state === 'completed' &&
+          events.has(participant.activityId) &&
+          participant.completedAt !== null &&
+          participant.completedAt.getTime() >= from.getTime() &&
+          participant.completedAt.getTime() < to.getTime(),
+      ).length,
+    );
+  }
+
+  public upcomingAfter(
+    guildId: GuildId,
+    kind: ActivityKind,
+    at: Date,
+    limit?: number,
+  ): Promise<readonly CommunityActivity[]> {
+    const bounded = Math.min(Math.max(limit ?? 10, 1), 25);
+    const rows = this.activities
+      .filter(
+        (activity) =>
+          activity.guildId === guildId &&
+          activity.kind === kind &&
+          activity.status === 'open' &&
+          activity.startsAt.getTime() > at.getTime(),
+      )
+      .sort(
+        (a, b) => a.startsAt.getTime() - b.startsAt.getTime() || a.id.localeCompare(b.id),
+      )
+      .slice(0, bounded);
+    return Promise.resolve(rows);
+  }
+
+  public completionLeaderboard(
+    guildId: GuildId,
+    options: {
+      readonly kind: ActivityKind;
+      readonly since?: Date;
+      readonly limit?: number;
+    },
+  ): Promise<readonly CompletionCount[]> {
+    const limit = Math.min(Math.max(options.limit ?? 10, 1), 25);
+    const totals = new Map<UserId, { count: number; first: number }>();
+
+    for (const record of this.records.values()) {
+      if (record.guildId !== guildId) continue;
+      if (record.state !== 'completed') continue;
+      const completedAt = record.completedAt;
+      if (!completedAt) continue;
+      if (options.since && completedAt.getTime() < options.since.getTime()) continue;
+
+      const activity = this.activities.find(
+        (candidate) => candidate.id === record.activityId,
+      );
+      if (!activity) continue;
+      if (activity.kind !== options.kind) continue;
+      // Cancelled paid nobody and recognises nobody.
+      if (activity.status === 'cancelled') continue;
+
+      const current = totals.get(record.userId) ?? {
+        count: 0,
+        first: completedAt.getTime(),
+      };
+      totals.set(record.userId, {
+        count: current.count + 1,
+        first: Math.min(current.first, completedAt.getTime()),
+      });
+    }
+
+    const entries = [...totals.entries()]
+      .sort(
+        (a, b) =>
+          b[1].count - a[1].count || a[1].first - b[1].first || a[0].localeCompare(b[0]),
+      )
+      .slice(0, limit)
+      .map(([userId, value]) => ({ userId, count: value.count }));
+
+    return Promise.resolve(entries);
+  }
+
+  public completionTotals(
+    guildId: GuildId,
+    kind: ActivityKind,
+    from: Date,
+    to: Date | null,
+  ): Promise<{ readonly completions: number; readonly members: number }> {
+    const members = new Set<UserId>();
+    let completions = 0;
+
+    for (const record of this.records.values()) {
+      if (record.guildId !== guildId) continue;
+      if (record.state !== 'completed') continue;
+      const completedAt = record.completedAt;
+      if (!completedAt) continue;
+      const at = completedAt.getTime();
+      if (at < from.getTime()) continue;
+      if (to && at >= to.getTime()) continue;
+
+      const activity = this.activities.find(
+        (candidate) => candidate.id === record.activityId,
+      );
+      if (!activity) continue;
+      if (activity.kind !== kind) continue;
+      if (activity.status === 'cancelled') continue;
+
+      completions += 1;
+      members.add(record.userId);
+    }
+
+    return Promise.resolve({ completions, members: members.size });
+  }
+}
+
 export interface FakeRepositories extends Repositories {
   readonly identity: FakeIdentityRepository;
   readonly moderation: FakeModerationRepository;
+  readonly automod: FakeAutomodRepository;
   readonly cases: FakeCaseRepository;
   readonly onboarding: FakeOnboardingRepository;
   readonly audit: FakeAuditRepository;
@@ -1695,8 +3080,10 @@ export interface FakeRepositories extends Repositories {
   readonly telemetry: FakeTelemetryRepository;
   readonly jobs: FakeJobRunRepository;
   readonly settings: FakeSettingsRepository;
+  readonly referrals: FakeReferralRepository;
   readonly rewards: FakeRewardsRepository;
   readonly awards: FakeAwardsRepository;
+  readonly community: FakeCommunityRepository;
   readonly labs: FakeLabsRepository;
   readonly retention: FakeRetentionRepository;
 }
@@ -1723,9 +3110,12 @@ export function fakeRepositories(
     jobs: new FakeJobRunRepository(now),
     settings: new FakeSettingsRepository(),
     moderation: new FakeModerationRepository(now),
+    automod: new FakeAutomodRepository(now),
     cases: new FakeCaseRepository(now),
+    referrals: new FakeReferralRepository(now),
     rewards: new FakeRewardsRepository(now),
     awards: new FakeAwardsRepository(now),
+    community: new FakeCommunityRepository(now),
     retention: new FakeRetentionRepository(),
     labs: new FakeLabsRepository(now),
   };
