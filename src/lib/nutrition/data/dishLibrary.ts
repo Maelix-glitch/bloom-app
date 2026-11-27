@@ -49,6 +49,52 @@
  *                         and the Kerala wave: North, West, East,
  *                         Central and the non-Kerala South, in the
  *                         full category range
+ *   - dishLibraryBulgaria.ts the Bulgarian wave (2026-11-26, owner
+ *                         ask) — the classic Bulgarian table across
+ *                         the full category range, composed from the
+ *                         same verified foods with its stand-ins
+ *                         stated in the file (sirene through cottage
+ *                         cheese, lamb and turkey at the grill)
+ *   - dishLibraryBulgaria2.ts the Bulgarian wave 2 (2026-11-26,
+ *                         owner ask) — the everyday Bulgarian table
+ *                         widened: the full chorba range, the skara
+ *                         grill, more kavarma and clay pots, the
+ *                         fried weekday dishes, festive roasts and
+ *                         the sweet shelf. Beef and pork ship as
+ *                         themselves on this shelf (owner decision
+ *                         2026-11-26); its stand-ins are stated in
+ *                         the file
+ *   - dishLibraryProteinWaveA.ts protein wave A (2026-11-26, owner
+ *                         directive: three waves, 200+ dishes) —
+ *                         protein-rich mains and breakfasts that
+ *                         clear the computed 25 g bar and join
+ *                         PROTEIN_WAVE_DISH_IDS, plus balanced
+ *                         plates (anchor, vegetables, base) that
+ *                         honestly sit below it and do not
+ *   - dishLibraryProteinWaveB.ts protein wave B (2026-11-26, the
+ *                         second of the three waves) — the same
+ *                         two shelves on fresh ground: rendang and
+ *                         stroganoff, potstickers and carbonara,
+ *                         murgh cholay and hariyali, seitan and
+ *                         lupin and moringa dal on the protein
+ *                         shelf; khichdi, chowders and noodle
+ *                         soups on the balanced shelf. Beef and
+ *                         pork ship as themselves through the
+ *                         three verified ids; stand-ins are
+ *                         stated in the file
+ *   - dishLibraryProteinWaveC.ts protein wave C (2026-11-26, the
+ *                         third and final wave, landing the
+ *                         programme at 210 dishes) — the same two
+ *                         shelves on fresh ground again: yakitori
+ *                         and kung pao, cassoulet, cocido and
+ *                         petit salé, étouffée and cioppino,
+ *                         kibbeh, lablabi and ghormeh sabzi, akara
+ *                         and moin moin on the protein shelf;
+ *                         tabbouleh, bissara, causa and the two
+ *                         yogurt desserts on the balanced shelf.
+ *                         Beef and pork ship as themselves
+ *                         through the three verified ids;
+ *                         stand-ins are stated in the file
  */
 import type { Dish } from "../dishes";
 import { DISHES_MAINS } from "./dishesMains";
@@ -64,6 +110,11 @@ import { SHAKES_DISHES } from "./dishLibraryShakes";
 import { PW2_DISHES } from "./dishLibraryProteinBreakfasts";
 import { PROTEIN_INDIA_DISHES } from "./dishLibraryProteinIndia";
 import { INDIA_DISHES } from "./dishLibraryIndia";
+import { BULGARIA_DISHES } from "./dishLibraryBulgaria";
+import { BULGARIA2_DISHES } from "./dishLibraryBulgaria2";
+import { BALANCED_WAVE_A_DISHES, PROTEIN_WAVE_A_DISHES } from "./dishLibraryProteinWaveA";
+import { BALANCED_WAVE_B_DISHES, PROTEIN_WAVE_B_DISHES } from "./dishLibraryProteinWaveB";
+import { BALANCED_WAVE_C_DISHES, PROTEIN_WAVE_C_DISHES } from "./dishLibraryProteinWaveC";
 import { PROOF_DISHES } from "./proofDishes";
 
 export const DISH_LIBRARY: readonly Dish[] = [
@@ -81,6 +132,14 @@ export const DISH_LIBRARY: readonly Dish[] = [
   ...PW2_DISHES,
   ...PROTEIN_INDIA_DISHES,
   ...INDIA_DISHES,
+  ...BULGARIA_DISHES,
+  ...BULGARIA2_DISHES,
+  ...PROTEIN_WAVE_A_DISHES,
+  ...BALANCED_WAVE_A_DISHES,
+  ...PROTEIN_WAVE_B_DISHES,
+  ...BALANCED_WAVE_B_DISHES,
+  ...PROTEIN_WAVE_C_DISHES,
+  ...BALANCED_WAVE_C_DISHES,
 ];
 
 const BY_ID = new Map(DISH_LIBRARY.map((d) => [d.id, d]));
@@ -100,7 +159,22 @@ export function findDish(id: string): Dish | null {
  * where the library is assembled, and nowhere else.
  */
 export const PROTEIN_WAVE_DISH_IDS: ReadonlySet<string> = new Set(
-  [...SHAKES_DISHES, ...PW2_DISHES, ...PROTEIN_INDIA_DISHES, ...PROTEIN_INTL_DISHES].map(
-    (d) => d.id,
-  ),
+  [
+    ...SHAKES_DISHES,
+    ...PW2_DISHES,
+    ...PROTEIN_INDIA_DISHES,
+    ...PROTEIN_INTL_DISHES,
+    /* Protein wave A (2026-11-26): only its protein-rich shelf
+       joins — the balanced plates in the same file compute below
+       the 25 g bar and stay out, so the set's fact (every member
+       clears the bar) survives the wave. */
+    ...PROTEIN_WAVE_A_DISHES,
+    /* Protein wave B (2026-11-26): the same rule — only its
+       protein-rich shelf joins; its balanced shelf stays out. */
+    ...PROTEIN_WAVE_B_DISHES,
+    /* Protein wave C (2026-11-26): the final wave, same rule —
+       only its protein-rich shelf joins; its balanced shelf
+       stays out. */
+    ...PROTEIN_WAVE_C_DISHES,
+  ].map((d) => d.id),
 );

@@ -59,9 +59,43 @@ export const CUISINE_PREFERENCES = [
 
 export type CuisinePreference = (typeof CUISINE_PREFERENCES)[number];
 
+/**
+ * The region of a country a person eats from (M-251) — asked in the
+ * Assessment beside the country, and NOWHERE else. Only India has
+ * regional sides in the dish data today; every other country is one
+ * pool, so its side is simply absent (null). The first four values
+ * deliberately reuse the region vocabulary of
+ * `src/lib/nutrition/regions.ts` so a side and the older North/South
+ * ranking preference speak the same language.
+ */
+export const FOOD_SIDES = [
+  "north_indian",
+  "south_indian",
+  "east_indian",
+  "west_indian",
+  "central_indian",
+  "north_east_indian",
+] as const;
+
+export type FoodSide = (typeof FOOD_SIDES)[number];
+
 export interface DietaryProfile {
   /** Null means not answered yet. */
   readonly pattern: DietaryPattern | null;
+  /**
+   * The country the person eats from (M-251), an ISO 3166-1 alpha-2
+   * code mirrored from the Assessment. Null = not answered = NO
+   * country filter anywhere (stored profiles from before the
+   * question existed read exactly this way).
+   */
+  readonly country: string | null;
+  /**
+   * The region of that country the person eats from (M-251), or
+   * null for the whole country. Only India has sides in the dish
+   * data today; a side is a preference-class filter like budget —
+   * it widens, it never starves a plan.
+   */
+  readonly foodSide: FoodSide | null;
   readonly allergies: readonly string[];
   readonly intolerances: readonly string[];
   readonly dislikedFoods: readonly string[];
@@ -217,6 +251,8 @@ export interface HealthProfile {
 
 export const EMPTY_DIETARY: DietaryProfile = {
   pattern: null,
+  country: null,
+  foodSide: null,
   allergies: [],
   intolerances: [],
   dislikedFoods: [],

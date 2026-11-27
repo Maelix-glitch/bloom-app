@@ -51,7 +51,7 @@ const dish = (id: string): Dish => {
 
 describe("§10.4 · coverage", () => {
   it("classifies every dish in the library — pinned or counted method-less", () => {
-    expect(DISH_LIBRARY.length).toBe(1203);
+    expect(DISH_LIBRARY.length).toBe(1551);
     const methodLess = DISH_LIBRARY.filter((d) => !Array.isArray(d.method) || d.method.length === 0);
     /* Today the count is zero: every shipped dish carries a method.
        A future method-less dish must stay UNTAGGED (the conservative
@@ -85,15 +85,42 @@ describe("§10.4 · coverage", () => {
 
   it("the tag census — a count moves only with a method edit or a rule change", () => {
     const count = (item: string) => DISH_LIBRARY.filter((d) => d.equipment?.includes(item as never)).length;
-    expect(count("stove")).toBe(1115);
+    /* The Bulgarian wave (2026-11-26, +52 dishes) moved the census:
+       stove +43, oven +18, mixer_grinder +2, fridge +11, noCook +5 —
+       its chilled dishes (tarator, snezhanka, ayran, the marinated
+       mushrooms) are the fridge growth. The Bulgarian wave 2
+       (2026-11-26, +86 dishes) moved it again: stove +69, oven +29,
+       mixer_grinder +1 (the katak), fridge +13 (the turshiya jars,
+       the chilled soups and salads), noCook +5 (the pickles, the
+       marinated mackerel, the lemonade, the honeyed yogurt).
+       Protein wave A (2026-11-26, +70 dishes) moved it again:
+       stove +67, oven +8 (the bakes and the frittatas),
+       mixer_grinder +3 (the blitzed makhani base, the ground soya,
+       the blended peanut sauce), fridge +1 (the chilled seekh
+       kebabs), noCook +1 (the chia parfait).
+       Protein wave B (2026-11-26, +70 dishes) moved it again:
+       stove +66, oven +7 (the tandoori, the char siu, the pasta
+       bakes, the quiche, the jacket potato), mixer_grinder +4
+       (the blended soups), fridge +4 (the fish cakes, the
+       waldorf, the devilled eggs, the quark pudding), noCook +3
+       (the quark pudding and the two no-cook bowls).
+       Protein wave C (2026-11-26, +70 dishes) moved it again:
+       stove +63, oven +11 (the bakes: kiev, pastilla, porchetta,
+       cassoulet, toad in the hole, farinata, granola; the grill
+       and temperature readings: açorda, the full English, lablabi,
+       salmorejo's baked bread), mixer_grinder +8 (the blitzed
+       soups and sauces), fridge +7 (the chilled causa, salmorejo,
+       shrikhand, tonnato, malfatti, kiev and egg potato salad),
+       noCook +2 (the tonnato plate and the kefir smoothie). */
+    expect(count("stove")).toBe(1423);
     expect(count("pressure_cooker")).toBe(68);
-    expect(count("oven")).toBe(102);
+    expect(count("oven")).toBe(175);
     /* No shipped method uses a microwave. The honest count is zero,
        pinned so a future microwave method is a deliberate addition. */
     expect(count("microwave")).toBe(0);
-    expect(count("mixer_grinder")).toBe(331);
-    expect(count("fridge")).toBe(99);
-    expect(DISH_LIBRARY.filter((d) => d.noCook === true).length).toBe(71);
+    expect(count("mixer_grinder")).toBe(349);
+    expect(count("fridge")).toBe(135);
+    expect(DISH_LIBRARY.filter((d) => d.noCook === true).length).toBe(87);
   });
 
   it("an explicitly empty equipment pin survives the strict parser", () => {
@@ -278,35 +305,36 @@ describe("§10.4 · the kitchen gates, after the pass", () => {
 
   it("a kitchen with only a fridge is served — and only what a fridge covers", () => {
     /* Method 13 rewrite (2026-11-19, the dish-first repair): the
-       fridge-only pool holds only TWO dishes that can carry a
-       lunch or dinner (measured against the tagged library) —
-       below the kitchen floor of three — so the relaxation ladder
-       widens the equipment gate by one item and NAMES it. The
-       contract now pinned is the method-13 one: no served dish
-       needs more than one item beyond the fridge, and the
-       widening is named in the plan's notes, never silent. (The
-       same contract is pinned at plan level in
-       planBehaviour.test.ts.) */
+       fridge-only pool held only TWO dishes that could carry a
+       lunch or dinner — below the kitchen floor of three — so the
+       relaxation ladder widened the equipment gate by one item and
+       NAMED it.
+       Rewritten 2026-11-26 (the Bulgarian wave): the wave's tarator
+       is a chilled main that needs nothing but a fridge, and it
+       brought the fridge-only pool up to the floor — so the ladder
+       no longer widens at all. The contract now pinned is the
+       stronger one: every served dish needs NOTHING beyond the
+       fridge, no kitchen-relaxed reason is raised, and no widening
+       is named because none happened. (The same contract is pinned
+       at plan level in planBehaviour.test.ts.) */
     const plan = gen({ equipment: ["fridge"] });
     const served = plan.meals.flatMap((m) => m.dishes);
     expect(served.length).toBeGreaterThan(0);
     for (const s of served) {
       const needs = dishPreparationNeeds(dish(s.dishId));
       const beyond = needs.equipment.filter((item) => item !== "fridge");
-      expect(beyond.length, s.dishId).toBeLessThanOrEqual(1);
+      expect(beyond.length, s.dishId).toBe(0);
     }
-    /* Brief v4 (Slice 1): the naming is the kitchen-relaxed reason
-       (stage extra-equipment); the note is reasons.ts's detail. */
     expect(
       plan.reasons?.some(
         (r) => r.kind === "kitchen-relaxed" && r.stages.some((s) => s.stage === "extra-equipment"),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       plan.notes.some(
         (n) => n.includes("leave almost no real dishes") && n.includes("one more piece of equipment"),
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(plan.notes.some((n) => n.startsWith(KITCHEN_NOTE))).toBe(false);
   });
 

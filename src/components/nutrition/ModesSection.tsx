@@ -10,7 +10,7 @@
  * form row. The switch sits inside the tile's head (never floating
  * mid-card, M-66); the mode's rules are chips derived from its rule
  * data (M-68); and the footer states the mode's effect — "Would hide
- * N of 1,203 dishes" — in BOTH switch states, computed from the real
+ * N of 1,551 dishes" — in BOTH switch states, computed from the real
  * library by the same predicates the plan composer judges with. A
  * mode with no rules (thyroid, whose nutrients Bloom's data does not
  * carry) is a dimmed tile whose footer names the missing data; it

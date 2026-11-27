@@ -76,6 +76,29 @@ describe("health profile schema", () => {
     expect(bad.ok).toBe(false);
   });
 
+  it("carries a stated country and food side, and rejects ones that do not exist (M-251)", () => {
+    const stated = parseHealthProfile({
+      ...validProfile(),
+      dietary: { ...EMPTY_DIETARY, pattern: "omnivore", country: "IN", foodSide: "west_indian" },
+    });
+    expect(stated.dietary.country).toBe("IN");
+    expect(stated.dietary.foodSide).toBe("west_indian");
+    expect(parseHealthProfile(validProfile()).dietary.country).toBeNull();
+    expect(parseHealthProfile(validProfile()).dietary.foodSide).toBeNull();
+    /* A code that is not a country, and a side that is not a side,
+       are refusals at the boundary, never stored values. */
+    const badCountry = safeParseHealthProfile({
+      ...validProfile(),
+      dietary: { ...EMPTY_DIETARY, country: "XX" },
+    });
+    expect(badCountry.ok).toBe(false);
+    const badSide = safeParseHealthProfile({
+      ...validProfile(),
+      dietary: { ...EMPTY_DIETARY, country: "IN", foodSide: "upstate" },
+    });
+    expect(badSide.ok).toBe(false);
+  });
+
   it("carries a stated behavioural profile (§10), and keeps unanswered empty", () => {
     const stated = parseHealthProfile({
       ...validProfile(),

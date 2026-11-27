@@ -33,6 +33,7 @@ import {
   EMOTIONAL_EATING_OPTIONS,
   EQUIPMENT_OPTIONS,
   FAILURE_REASON_OPTIONS,
+  FOOD_SIDE_LABEL,
   GOAL_OPTIONS,
   HUNGER_OPTIONS,
   MEALS_OPTIONS,
@@ -46,10 +47,16 @@ import {
   type AssessmentStep,
 } from "@/lib/assessment/questions";
 import { EMPTY_ANSWERS, type AssessmentAnswers } from "@/lib/assessment/state";
+import {
+  COUNTRIES,
+  countryNameOf,
+  foodSidesForCountry,
+} from "@/lib/nutrition/countries";
 import type {
   CravingKind,
   EquipmentItem,
   FailureReason,
+  FoodSide,
   PastAttempt,
 } from "@/lib/vitalis/domain/profile";
 import { summaryOf } from "@/lib/assessment/summary";
@@ -104,6 +111,93 @@ function ChoiceGroup<T extends string | number>({
           </button>
         );
       })}
+    </div>
+  );
+}
+
+/**
+ * The country question (M-251): a search box over the full country
+ * list — 247 countries cannot be a radio list — with the chosen
+ * country pinned as a selected row and a plain way to clear it back
+ * to "no country" (which means no country filter, never a guess).
+ */
+function CountrySelect({
+  value,
+  onSelect,
+}: {
+  value: string | null;
+  onSelect: (code: string | null) => void;
+}) {
+  const [query, setQuery] = useState("");
+  const selectedName = countryNameOf(value);
+  const q = query.trim().toLowerCase();
+  const matches = q
+    ? COUNTRIES.filter((c) => c.name.toLowerCase().includes(q))
+    : COUNTRIES;
+  const visible = matches.slice(0, 40);
+  return (
+    <div className="flex flex-col gap-2">
+      <Input
+        value={query}
+        onChange={(e) => setQuery(e.target.value)}
+        placeholder="Search countries"
+        aria-label="Search countries"
+        className="rounded-2xl border-border bg-surface-2"
+      />
+      {selectedName !== null && q === "" ? (
+        <div className="flex items-center justify-between rounded-2xl border border-gold/60 bg-gold/10 px-4 py-3">
+          <span className="text-[length:var(--text-support)] font-medium text-foreground">
+            {selectedName}
+          </span>
+          <button
+            type="button"
+            onClick={() => onSelect(null)}
+            className="text-[length:var(--text-support)] font-medium text-muted-foreground underline underline-offset-4"
+          >
+            Clear
+          </button>
+        </div>
+      ) : null}
+      <div
+        className="flex max-h-56 flex-col gap-2 overflow-y-auto"
+        role="listbox"
+        aria-label="Countries"
+      >
+        {visible.map((c) => {
+          const selected = value === c.code;
+          if (selected && q === "") return null;
+          return (
+            <button
+              key={c.code}
+              type="button"
+              role="option"
+              aria-selected={selected}
+              onClick={() => {
+                onSelect(c.code);
+                setQuery("");
+              }}
+              className={cn(
+                "rounded-2xl border px-4 py-3 text-left text-[length:var(--text-support)] font-medium transition-colors duration-[var(--motion-micro)] ease-out-expo",
+                selected
+                  ? "border-gold/60 bg-gold/10 text-foreground"
+                  : "border-border bg-surface-2 text-foreground hover:border-border-strong",
+              )}
+            >
+              {c.name}
+            </button>
+          );
+        })}
+        {matches.length === 0 ? (
+          <p className="px-1 py-2 text-[length:var(--text-support)] text-muted-foreground">
+            No country matches that search.
+          </p>
+        ) : null}
+        {matches.length > visible.length ? (
+          <p className="px-1 py-2 text-[length:var(--text-support)] text-muted-foreground">
+            Showing the first {visible.length}. Type to narrow the list down.
+          </p>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -809,18 +903,72 @@ export function AssessmentFlow({
                   />
                 </div>
                 <div className="flex flex-col gap-2">
-                  <FieldLabel>North Indian or South Indian food?</FieldLabel>
-                  <ChoiceGroup
-                    ariaLabel="Cuisine preference"
-                    options={CUISINE_PREFERENCE_OPTIONS}
-                    value={draft.cuisinePreference}
-                    onSelect={(cuisinePreference) => patch({ cuisinePreference })}
+                  <FieldLabel>Which country's food do you eat?</FieldLabel>
+                  <CountrySelect
+                    value={draft.country}
+                    onSelect={(country) => patch({ country, foodSide: null })}
                   />
                   <p className="text-[length:var(--text-support)] text-muted-foreground">
-                    Bloom leans your plan toward the cooking you prefer. It never rules
-                    anything out.
+                    Bloom builds your plan and your dish shelf from your country's
+                    dishes. If there are too few to make a full day, the plan widens
+                    and tells you plainly.
                   </p>
                 </div>
+                {foodSidesForCountry(draft.country).length > 0 ? (
+                  <div className="flex flex-col gap-2">
+                    <FieldLabel>
+                      {`Which side of ${countryNameOf(draft.country) ?? "your country"}?`}
+                    </FieldLabel>
+                    <ChoiceGroup
+                      ariaLabel="Side of the country"
+                      options={[
+                        {
+                          value: "all" as const,
+                          label: `All of ${countryNameOf(draft.country) ?? "the country"}`,
+                        },
+                        ...foodSidesForCountry(draft.country).map((side) => ({
+                          value: side as FoodSide | "all",
+                          label: FOOD_SIDE_LABEL[side],
+                        })),
+                      ]}
+                      value={draft.foodSide ?? "all"}
+                      onSelect={(choice) => {
+                        const foodSide = choice === "all" ? null : choice;
+                        patch({
+                          foodSide,
+                          /* The side IS the person's North/South answer now:
+                             keep the older ranking preference in step, so
+                             ranking surfaces never contradict the filter. */
+                          cuisinePreference:
+                            foodSide === "north_indian"
+                              ? "north_indian"
+                              : foodSide === "south_indian"
+                                ? "south_indian"
+                                : "both",
+                        });
+                      }}
+                    />
+                    <p className="text-[length:var(--text-support)] text-muted-foreground">
+                      Your side's dishes and the country's shared dishes make your
+                      shelf. Dishes from other sides are left out.
+                    </p>
+                  </div>
+                ) : null}
+                {draft.country === null ? (
+                  <div className="flex flex-col gap-2">
+                    <FieldLabel>North Indian or South Indian food?</FieldLabel>
+                    <ChoiceGroup
+                      ariaLabel="Cuisine preference"
+                      options={CUISINE_PREFERENCE_OPTIONS}
+                      value={draft.cuisinePreference}
+                      onSelect={(cuisinePreference) => patch({ cuisinePreference })}
+                    />
+                    <p className="text-[length:var(--text-support)] text-muted-foreground">
+                      Bloom leans your plan toward the cooking you prefer. It never rules
+                      anything out.
+                    </p>
+                  </div>
+                ) : null}
                 <div className="flex flex-col gap-2">
                   <FieldLabel>Where do most of your meals come from?</FieldLabel>
                   <ChoiceGroup

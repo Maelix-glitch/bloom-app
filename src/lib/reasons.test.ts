@@ -27,6 +27,9 @@ const FIXTURES: PlanReason[] = [
   { kind: "micro-gap", label: "Fibre", days: 7, avg: 18.25, unit: "g", reference: 40 },
   { kind: "budget-widened", ceilingRupees: 45 },
   { kind: "budget-widened", ceilingRupees: null },
+  { kind: "country-widened", countryName: "Bulgaria" },
+  { kind: "country-widened", countryName: "South Georgia and the South Sandwich Islands" },
+  { kind: "food-side-widened", countryName: "India", sideLabel: "East Indian" },
   {
     kind: "kitchen-relaxed",
     answers: { noCook: true, capMinutes: 10, equipmentListed: true },
@@ -79,7 +82,18 @@ describe("reasons, the copy contract (brief v4 Part 6)", () => {
 
   it("every kind in the union has a fixture (a new kind without copy fails here)", () => {
     const covered = new Set(FIXTURES.map((r) => r.kind));
-    expect(covered.size).toBe(20);
+    expect(covered.size).toBe(22);
+  });
+
+  it("the country widening copy names the country and the preference plainly (M-251)", () => {
+    expect(reasonDetail({ kind: "country-widened", countryName: "Bulgaria" })).toBe(
+      "Dishes from Bulgaria alone leave too few main dishes, so your country is treated as a preference.",
+    );
+    expect(
+      reasonDetail({ kind: "food-side-widened", countryName: "India", sideLabel: "East Indian" }),
+    ).toBe(
+      "East Indian dishes alone leave too few main dishes, so the plan draws from all of India.",
+    );
   });
 
   it("an unknown kind renders nothing", () => {
@@ -89,7 +103,7 @@ describe("reasons, the copy contract (brief v4 Part 6)", () => {
   });
 
   it("the kitchen detail names the headline relaxation and offers the review action", () => {
-    const copy = reasonCopy(FIXTURES[9]!);
+    const copy = reasonCopy(FIXTURES.find((r) => r.kind === "kitchen-relaxed")!);
     expect(copy!.detail).toBe(
       "Your kitchen answers leave almost no real dishes, so cooking is allowed.",
     );
@@ -196,6 +210,25 @@ describe("reasons, adjustmentCopy (brief v7)", () => {
     expect(adjustmentCopy({ kind: "log-energy-overshoot", days: 3 })).toBeNull();
   });
 
+  it("the country kinds render their rows (M-251)", () => {
+    const country = adjustmentCopy({ kind: "country-widened", countryName: "Bulgaria" });
+    expect(country!.title).toBe("Country treated as a preference");
+    expect(country!.detail).toBe(
+      "Dishes from Bulgaria alone leave too few main dishes, so your country is treated as a preference.",
+    );
+    const side = adjustmentCopy({
+      kind: "food-side-widened",
+      countryName: "India",
+      sideLabel: "East Indian",
+    });
+    expect(side!.title).toBe("Side widened to the whole country");
+    expect(side!.detail).toBe(
+      "East Indian dishes alone leave too few main dishes, so the plan draws from all of India.",
+    );
+    expect(adjustmentCopy({ kind: "country-widened" })).toBeNull();
+    expect(adjustmentCopy({ kind: "food-side-widened", countryName: "India" })).toBeNull();
+  });
+
   it("every detail is ≤ 140 chars and no banned word appears in any output", () => {
     const outputs = [
       adjustmentCopy({ kind: "protein-lean", days: 2, avgG: 23, targetG: 171 }),
@@ -204,6 +237,12 @@ describe("reasons, adjustmentCopy (brief v7)", () => {
       adjustmentCopy({ kind: "meal-added", slot: "snack", assessmentMeals: 1 }),
       adjustmentCopy({ kind: "budget-widened", ceilingRupees: 45 }),
       adjustmentCopy({ kind: "budget-widened", ceilingRupees: null }),
+      adjustmentCopy({ kind: "country-widened", countryName: "Bulgaria" }),
+      adjustmentCopy({
+        kind: "food-side-widened",
+        countryName: "India",
+        sideLabel: "North-East Indian",
+      }),
       adjustmentCopy({ kind: "kitchen-cap-raised", capMinutes: 10, stageMinutes: 25 }),
       adjustmentCopy({ kind: "kitchen-cap-quickest", capMinutes: 10 }),
       adjustmentCopy({ kind: "log-energy-overshoot", days: 3, avgKcal: 2400, targetKcal: 1350 }),
