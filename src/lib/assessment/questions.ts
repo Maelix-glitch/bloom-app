@@ -24,6 +24,7 @@ import type {
   EatingSetting,
   EquipmentItem,
   FailureReason,
+  FoodSide,
   HungerPattern,
   PrepTimeMaxMinutes,
   VitalisGoal,
@@ -234,6 +235,23 @@ export const CUISINE_PREFERENCE_LABEL: Record<CuisinePreference, string> = {
   south_indian: "South Indian",
   both: "Both North and South Indian",
   no_preference: "No preference",
+};
+
+/**
+ * The food-side answers (M-251): which region of the person's
+ * country their food comes from. Only India has sides in the dish
+ * data today — the sides a country offers live in
+ * `COUNTRY_FOOD_SIDES` (nutrition/countries.ts); this is just the
+ * words. The whole-country choice is a null answer, rendered by the
+ * flow as "All of India" — it is not a FoodSide value.
+ */
+export const FOOD_SIDE_LABEL: Record<FoodSide, string> = {
+  north_indian: "North Indian",
+  south_indian: "South Indian",
+  east_indian: "East Indian",
+  west_indian: "West Indian",
+  central_indian: "Central Indian",
+  north_east_indian: "North-East Indian",
 };
 
 /* The structured condition list: the high-risk codes (which block

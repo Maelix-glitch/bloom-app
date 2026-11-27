@@ -100,6 +100,7 @@ import {
   COOKING_ABILITIES,
   CUISINE_PREFERENCES,
   EATING_SETTINGS,
+  FOOD_SIDES,
   HUNGER_PATTERNS,
   PREP_TIME_BANDS,
   profileHeightCm,
@@ -113,6 +114,7 @@ import {
   type DietaryPattern,
   type EatingSetting,
   type EquipmentItem,
+  type FoodSide,
   type HealthProfile,
   type HungerPattern,
   type PrepTimeMaxMinutes,
@@ -140,6 +142,8 @@ import { declaredAllergens, foodExcludedByAllergens } from "./allergens";
 import { newNutritionId } from "./ids";
 import { nutrientsForGrams } from "./math";
 import { dishRegion, type DishRegion } from "./regions";
+import { countryNameOf, dishCountry, dishOnShelf, isCountryCode } from "./countries";
+import { FOOD_SIDE_LABEL } from "@/lib/assessment/questions";
 import { dishIsGravyStyle } from "./gravyStyle";
 import { isRealDayKey, parseEntryNutrients, parseFoodProvenance } from "./parse";
 import { MICRO_RICH_SHARE, planLearningFor, type PlanLearning } from "./planAdaptation";
@@ -189,6 +193,13 @@ export interface PlanInputsSnapshot {
    *  adding it to the fingerprint would refuse every plan stored
    *  before the question existed). Absent on pre-P8 snapshots. */
   cuisinePreference?: CuisinePreference | null;
+  /** The Assessment's country + food side (M-251), recorded on the
+   *  cuisine precedent exactly: selection-shaping only, never
+   *  target-bearing, deliberately NOT part of the inputs
+   *  fingerprint, and named by the staleness check when one changes.
+   *  Absent on pre-M-251 snapshots. */
+  country?: string | null;
+  foodSide?: FoodSide | null;
   /** The composition-shaping behavioural answers (P10, spec §10),
    *  recorded on the cuisine precedent exactly: selection-shaping
    *  only, never target-bearing, deliberately NOT part of the
@@ -574,6 +585,8 @@ export function planInputsSnapshotOf(
     mealsPerDay: profile.dietary.mealsPerDay,
     dietaryPattern: profile.dietary.pattern,
     cuisinePreference: profile.dietary.cuisinePreference,
+    country: profile.dietary.country,
+    foodSide: profile.dietary.foodSide,
     prepTimeMaxMinutes: profile.behavioural.prepTimeMaxMinutes,
     kitchenEquipment:
       profile.behavioural.equipment.length > 0
@@ -642,6 +655,8 @@ const CHANGED_LABELS: readonly (readonly [keyof PlanInputsSnapshot, string])[] =
   ["mealsPerDay", "your meals per day"],
   ["dietaryPattern", "your eating pattern"],
   ["cuisinePreference", "your cuisine preference"],
+  ["country", "your country"],
+  ["foodSide", "your food side"],
   ["prepTimeMaxMinutes", "your prep-time limit"],
   ["kitchenEquipment", "your kitchen equipment"],
   ["cookingAbility", "your cooking experience"],
@@ -2518,6 +2533,13 @@ const BUDGET_POOL_MIN_PROTEIN_MAINS = 4;
  *    qualifying dish and the returned note names the relaxation.
  *    The pattern, the eligibility gates and Condition Modes never
  *    widen — only the budget does.
+ *  · the country + food side the person stated in the Assessment
+ *    (M-251) are a preference of the same class, staged BEFORE the
+ *    budget on the same floor: the pool prefers their country's
+ *    dishes (their side's first), widens side-then-country when a
+ *    shelf is too thin, and names each widening. No country stated
+ *    (every assessment stored before the question existed) means
+ *    no country stage at all.
  * A dish Bloom cannot price — a line naming a food outside the
  * reference set — is skipped, never guessed at.
  */
@@ -2550,17 +2572,65 @@ function dishPoolFor(
     candidates: [...list],
     byId: new Map(list.map((c) => [c.dish.id, c.dish])),
   });
-  if (budgetTier === null) return { data: poolOf(candidates), reasons: [] };
-  const inBudget = candidates.filter((c) => c.dish.budgetTier <= budgetTier);
-  const inBudgetMains = inBudget.filter(isMainCapableDish);
-  const inBudgetProteinMains = inBudgetMains.filter(
-    (c) => c.nutrients.proteinG >= ANCHOR_AIM_MAIN_G,
-  );
-  if (
-    inBudgetMains.length >= BUDGET_POOL_MIN_MAIN_CAPABLE &&
-    inBudgetProteinMains.length >= BUDGET_POOL_MIN_PROTEIN_MAINS
-  ) {
-    return { data: poolOf(inBudget), reasons: [] };
+  /* One floor for every preference-class stage (budget, country,
+     side): a restricted pool is trusted to carry the plan alone
+     only while it clears the budget floor's bars. */
+  const meetsFloor = (list: readonly DishCandidate[]): boolean => {
+    const mains = list.filter(isMainCapableDish);
+    return (
+      mains.length >= BUDGET_POOL_MIN_MAIN_CAPABLE &&
+      mains.filter((c) => c.nutrients.proteinG >= ANCHOR_AIM_MAIN_G).length >=
+        BUDGET_POOL_MIN_PROTEIN_MAINS
+    );
+  };
+  /* The country + side stage (M-251): the country the person stated
+     in the Assessment (and only there) is a PREFERENCE of the same
+     class as the budget — the pool prefers their country's dishes
+     (and their side's, when they chose one); a shelf below the
+     floor widens, and the widening is named. The side surrenders
+     first, the country last of all: budget stages below run on the
+     country pool, so a plan can carry both notes, and the country
+     note always means the widest fallback happened. The pattern,
+     the eligibility gates and Condition Modes never widen — only
+     the preference stages do. */
+  let base = candidates;
+  const countryReasons: PlanReason[] = [];
+  const country = profile.dietary.country;
+  if (country !== null) {
+    const countryName = countryNameOf(country) ?? country;
+    const side = profile.dietary.foodSide;
+    const inCountry = candidates.filter((c) => dishCountry(c.dish) === country);
+    if (side !== null) {
+      const inSide = candidates.filter((c) => dishOnShelf(c.dish, country, side));
+      if (meetsFloor(inSide)) {
+        base = inSide;
+      } else if (meetsFloor(inCountry)) {
+        base = inCountry;
+        countryReasons.push({
+          kind: "food-side-widened",
+          countryName,
+          sideLabel: FOOD_SIDE_LABEL[side],
+        });
+      } else {
+        countryReasons.push(
+          {
+            kind: "food-side-widened",
+            countryName,
+            sideLabel: FOOD_SIDE_LABEL[side],
+          },
+          { kind: "country-widened", countryName },
+        );
+      }
+    } else if (meetsFloor(inCountry)) {
+      base = inCountry;
+    } else {
+      countryReasons.push({ kind: "country-widened", countryName });
+    }
+  }
+  if (budgetTier === null) return { data: poolOf(base), reasons: countryReasons };
+  const inBudget = base.filter((c) => c.dish.budgetTier <= budgetTier);
+  if (meetsFloor(inBudget)) {
+    return { data: poolOf(inBudget), reasons: countryReasons };
   }
   const ceiling =
     budgetTier === 1
@@ -2569,8 +2639,8 @@ function dishPoolFor(
         ? BUDGET_TIER_2_MAX_PER_SERVING
         : null;
   return {
-    data: poolOf(candidates),
-    reasons: [{ kind: "budget-widened", ceilingRupees: ceiling }],
+    data: poolOf(base),
+    reasons: [{ kind: "budget-widened", ceilingRupees: ceiling }, ...countryReasons],
   };
 }
 
@@ -5233,6 +5303,25 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
   ) {
     return null;
   }
+  /* The country + food side (M-251): absent on snapshots stored
+     before the questions existed — read as unanswered; present-but-
+     invalid is a tamper, exactly like the cuisine preference above. */
+  const country =
+    raw["country"] === undefined || raw["country"] === null
+      ? null
+      : isCountryCode(raw["country"])
+        ? raw["country"]
+        : null;
+  if (raw["country"] !== undefined && raw["country"] !== null && country === null) {
+    return null;
+  }
+  const foodSide =
+    raw["foodSide"] === undefined || raw["foodSide"] === null
+      ? null
+      : oneOf(raw["foodSide"], FOOD_SIDES);
+  if (raw["foodSide"] !== undefined && raw["foodSide"] !== null && foodSide === null) {
+    return null;
+  }
   /* The behavioural snapshot fields (P10): absent on snapshots stored
      before the questions existed — read as unanswered; present-but-
      invalid is a tamper, exactly like the cuisine preference above. */
@@ -5343,6 +5432,8 @@ function parseSnapshot(raw: unknown): PlanInputsSnapshot | null {
     mealsPerDay: mealsPerDay === null ? null : Math.round(mealsPerDay),
     dietaryPattern,
     cuisinePreference,
+    country,
+    foodSide,
     prepTimeMaxMinutes,
     kitchenEquipment,
     cookingAbility,
@@ -5504,6 +5595,15 @@ function parseReason(raw: unknown): PlanReason | null {
       if (raw["ceilingRupees"] === null) return { kind, ceilingRupees: null };
       const ceilingRupees = num("ceilingRupees", 1, 100000);
       return ceilingRupees === null ? null : { kind, ceilingRupees };
+    }
+    case "country-widened": {
+      const countryName = text(raw["countryName"], 60);
+      return !countryName ? null : { kind, countryName };
+    }
+    case "food-side-widened": {
+      const countryName = text(raw["countryName"], 60);
+      const sideLabel = text(raw["sideLabel"], 40);
+      return !countryName || !sideLabel ? null : { kind, countryName, sideLabel };
     }
     case "kitchen-relaxed": {
       if (!isRecord(raw["answers"]) || !Array.isArray(raw["stages"])) return null;

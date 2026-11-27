@@ -8,17 +8,19 @@
  * derives a number: cards read `browseDishes`' labelled bundles.
  *
  * Which dishes are on the shelf is governed silently by the person's
- * assessment answers: their dietary pattern is a hard filter.
- * Pattern and budget are asked in the assessment and nowhere else, so
- * this section offers no controls for them — search, category, cuisine
- * and the enriched toggle are the only filters here, and the status
- * line says what is being shown. Budget tiers are the lib's stated
- * ingredient-cost ESTIMATE and are labelled as one wherever they appear.
+ * assessment answers: their dietary pattern is a hard filter, and
+ * their country (M-251) narrows the shelf to their country's dishes.
+ * Pattern, budget and country are asked in the assessment and nowhere
+ * else, so this section offers no controls for them — search,
+ * category, cuisine and the enriched toggle are the only filters
+ * here, and the status line says what is being shown. Budget tiers
+ * are the lib's stated ingredient-cost ESTIMATE and are labelled as
+ * one wherever they appear.
  *
  * Method 13 (2026-11-19): the meal budget is a PREFERENCE on the
  * shelf, not a cut. Until method 12 a stated budget kept every dish
  * above its tier off the shelf entirely — the owner saw 545 of the
- * library's 1,203 dishes, and the missing ones were
+ * library's 1,551 dishes, and the missing ones were
  * disproportionately the protein dishes (priced into the top tier
  * by a costing band that priced flesh and fish like almonds). Now
  * the shelf shows the full pattern pool; in-budget dishes sort
@@ -33,7 +35,8 @@ import { SectionHead } from "@/components/ui/SectionHead";
 import { Input } from "@/components/ui/input";
 import { useAssessment } from "@/hooks/useAssessment";
 import { useSession } from "@/hooks/useSession";
-import { DIETARY_LABEL } from "@/lib/assessment/questions";
+import { DIETARY_LABEL, FOOD_SIDE_LABEL } from "@/lib/assessment/questions";
+import { countryNameOf, dishOnShelf } from "@/lib/nutrition/countries";
 import { toHealthProfile } from "@/lib/assessment/state";
 import { fmtCount } from "@/lib/format";
 import {
@@ -82,6 +85,9 @@ export function DishesSection({ day }: { day: string }) {
   const pattern = planPatternOf(profile.dietary.pattern);
   const budgetTier = profile.dietary.budgetTier;
   const cuisinePreference = profile.dietary.cuisinePreference;
+  const country = profile.dietary.country;
+  const foodSide = profile.dietary.foodSide;
+  const countryName = countryNameOf(country);
 
   /* The shelf is browsed with no cuisine chosen: the cuisine chips
      count from the shelf, so a chip's number is exactly the number of
@@ -95,7 +101,23 @@ export function DishesSection({ day }: { day: string }) {
   /* Method 13: the budget no longer cuts the shelf — the shelf is
      the full pattern pool, and the budget only orders it (in-budget
      first, inside the "Best for you" sort below). */
-  const shelf = browsed;
+  /* M-251: the country DOES cut the shelf — silently, like the
+     pattern, because it is an Assessment answer and there are no
+     country controls here. The shelf is the person's country (their
+     side's dishes plus the country's shared dishes) within the
+     pattern pool; the cuisine chips below keep counting and
+     narrowing INSIDE that shelf. A country with no dishes placed
+     yet cannot show an empty library: the shelf falls back to the
+     whole pattern pool and the status line says so plainly. */
+  const countryShelf = useMemo(
+    () =>
+      country === null
+        ? browsed
+        : browsed.filter((row) => dishOnShelf(row.dish, country, foodSide)),
+    [browsed, country, foodSide],
+  );
+  const countryShelfEmpty = country !== null && countryShelf.length === 0;
+  const shelf = countryShelfEmpty ? browsed : countryShelf;
   const cuisineCounts = useMemo(() => {
     const counts: Record<DishCuisine, number> = { india: 0, kerala: 0, international: 0 };
     for (const row of shelf) {
@@ -121,7 +143,7 @@ export function DishesSection({ day }: { day: string }) {
   const [shownCount, setShownCount] = useState(DISH_PAGE_SIZE);
   useEffect(() => {
     setShownCount(DISH_PAGE_SIZE);
-  }, [query, category, cuisine, enrichedOnly, pattern, budgetTier]);
+  }, [query, category, cuisine, enrichedOnly, pattern, budgetTier, country, foodSide]);
   const visibleRows = rows.slice(0, shownCount);
 
   const anyFilter = query.trim() !== "" || category !== null || cuisine !== null || enrichedOnly;
@@ -232,6 +254,16 @@ export function DishesSection({ day }: { day: string }) {
         ) : null}
         {budgetTier === 1 ? <> · your everyday ₹ budget preferred first</> : null}
         {budgetTier === 2 ? <> · your moderate ₹₹ budget preferred first</> : null}
+        {countryName !== null && !countryShelfEmpty ? (
+          foodSide !== null ? (
+            <> · dishes from {countryName}, {FOOD_SIDE_LABEL[foodSide]} and shared dishes</>
+          ) : (
+            <> · dishes from {countryName}</>
+          )
+        ) : null}
+        {countryName !== null && countryShelfEmpty ? (
+          <> · no dishes from {countryName} yet, showing the whole library</>
+        ) : null}
         {cuisine ? <> · {DISH_CUISINE_LABEL[cuisine]} dishes only</> : null}
         {/* The sort's name, stated only when a personal judgement is
             actually ordering the shelf — with no pattern and no

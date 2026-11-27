@@ -81,8 +81,8 @@ export const ASSESSMENT_DELTA_CAP = 50;
 
 /**
  * The ONLY fields a delta update may change. Deliberately absent:
- * `dietaryPattern`, `foodBudget` and `cuisinePreference`
- * (Assessment-only, see header), every safety answer — a change
+ * `dietaryPattern`, `foodBudget`, `cuisinePreference`, `country`
+ * and `foodSide` (Assessment-only, see header), every safety answer — a change
  * there deserves the full flow, not a one-line edit — and the
  * reflective behavioural fields (`hungerPattern`, `cravings`,
  * `cravingKinds`, `emotionalEating`, `pastAttempts`, `motivation`,

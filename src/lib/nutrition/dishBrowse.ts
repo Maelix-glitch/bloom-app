@@ -29,6 +29,7 @@ import {
 } from "./dishes";
 import type { LabelledNutrients } from "./labels";
 import { eligiblePool, planPatternOf, type PlanPattern } from "./plan";
+import { dishCountry, dishOnShelf } from "./countries";
 import { dishRegion } from "./regions";
 import { REFERENCE_FOODS } from "./referenceFoods";
 import type { Meal } from "./types";
@@ -138,7 +139,7 @@ export function browseDishes(
  *      a tier is stated, dishes at or under it come before dishes
  *      above it. The budget never removes a dish from the shelf —
  *      until method 12 it silently cut the shelf from the library's
- *      1,203 dishes to the in-budget subset, protein dishes first
+ *      1,411 dishes to the in-budget subset, protein dishes first
  *      among the missing. Unstated: no budget key.
  *   4. Everything else keeps browseDishes' deterministic category /
  *      name order exactly (the sort is stable).
@@ -266,10 +267,27 @@ export function dishIdeaFor(
     return dish.lines.every((line) => eligible.has(line.foodId));
   });
   if (qualifiers.length === 0) return null;
+  /* The country + side preference (M-251), staged exactly as the
+     plan pool stages it, minus the floor: the idea prefers the
+     person's side of their country, then their country, then every
+     qualifier — the first non-empty stage wins, and the budget
+     preference applies within the winning stage. An idea is a
+     suggestion, not a day's plan, so it never needs the floor's
+     protection; it also never widens past the pattern/eligibility
+     gates above. */
+  let staged = qualifiers;
+  const country = profile.dietary.country;
+  if (country !== null) {
+    const side = profile.dietary.foodSide;
+    const inSide =
+      side === null ? [] : qualifiers.filter((dish) => dishOnShelf(dish, country, side));
+    const inCountry = qualifiers.filter((dish) => dishCountry(dish) === country);
+    staged = inSide.length > 0 ? inSide : inCountry.length > 0 ? inCountry : qualifiers;
+  }
   const budgetTier = profile.dietary.budgetTier;
   const inBudget =
-    budgetTier === null ? [] : qualifiers.filter((dish) => dish.budgetTier <= budgetTier);
-  const pool = inBudget.length > 0 ? inBudget : qualifiers;
+    budgetTier === null ? [] : staged.filter((dish) => dish.budgetTier <= budgetTier);
+  const pool = inBudget.length > 0 ? inBudget : staged;
   const ordered = pool
     .map((dish) => ({ dish, key: fnv1a(`${day}:dish:${dish.id}`) }))
     .sort((a, b) => a.key - b.key || (a.dish.id < b.dish.id ? -1 : 1));

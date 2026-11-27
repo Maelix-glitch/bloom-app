@@ -22,6 +22,7 @@ import {
   EATING_SETTINGS,
   EQUIPMENT_ITEMS,
   FAILURE_REASONS,
+  FOOD_SIDES,
   HEALTH_PROFILE_VERSION,
   HUNGER_PATTERNS,
   type ActivityLevel,
@@ -32,6 +33,7 @@ import {
   type EatingSetting,
   type EquipmentItem,
   type FailureReason,
+  type FoodSide,
   type HungerPattern,
   type PrepTimeMaxMinutes,
   type HealthProfile,
@@ -39,6 +41,7 @@ import {
   type UnitSystem,
   type VitalisGoal,
 } from "./profile";
+import { isCountryCode } from "@/lib/nutrition/countries";
 import { DATA_QUALITIES, PROVENANCE_SOURCES, isIsoTimestamp } from "./provenance";
 import {
   URGENT_SYMPTOMS,
@@ -94,6 +97,15 @@ export const dietaryProfileSchema = z
     mealsPerDay: z.number().int().min(1).max(12).nullable(),
     budgetTier: z.union([z.literal(1), z.literal(2), z.literal(3)]).nullable(),
     cuisinePreference: enumOf<CuisinePreference>(CUISINE_PREFERENCES).nullable(),
+    /* M-251: a country counts only as a real code from the full
+       list (the one list lives in nutrition/countries.ts, which is
+       also where the Assessment's parser validates it — the schema
+       borrows the check rather than copying 247 codes). */
+    country: z
+      .string()
+      .refine(isCountryCode, { message: "expected an ISO 3166-1 alpha-2 country code" })
+      .nullable(),
+    foodSide: enumOf<FoodSide>(FOOD_SIDES).nullable(),
   })
   .strict();
 

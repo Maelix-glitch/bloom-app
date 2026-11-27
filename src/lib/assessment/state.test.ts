@@ -122,6 +122,73 @@ describe("parseAssessmentState", () => {
     expect(legacy?.answers.mealsPerDay).toBe(3);
   });
 
+  it("parses a stated country and side; a legacy state without them reads as unanswered (M-251)", () => {
+    const stated = parseAssessmentState({
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: { country: "IN", foodSide: "north_indian" },
+      consents: [],
+      startedAt: T0,
+      completedAt: T2,
+      updatedAt: T2,
+    });
+    expect(stated?.answers.country).toBe("IN");
+    expect(stated?.answers.foodSide).toBe("north_indian");
+
+    /* States written before the country question existed carry no
+       country key at all. The version is unchanged, so they must
+       parse cleanly — as never-asked, which means NO country filter
+       anywhere — with nothing else lost. */
+    const legacy = parseAssessmentState({
+      version: 1,
+      status: "complete",
+      step: "summary",
+      answers: { dietaryPattern: "vegan", mealsPerDay: 3 },
+      consents: [],
+      startedAt: T0,
+      completedAt: T2,
+      updatedAt: T2,
+    });
+    expect(legacy?.answers.country).toBeNull();
+    expect(legacy?.answers.foodSide).toBeNull();
+    expect(legacy?.answers.dietaryPattern).toBe("vegan");
+  });
+
+  it("drops an unknown country code and a side its country does not have (M-251)", () => {
+    for (const answers of [
+      { country: "XX" },
+      { country: "india" },
+      { country: 42 },
+      /* Greece has no sides in the dish data: a stored North-Indian
+         side beside it is meaningless and drops, the country stays. */
+      { country: "GR", foodSide: "north_indian" },
+      { country: "IN", foodSide: "central_indian" },
+      { foodSide: "south_indian" },
+    ]) {
+      const parsed = parseAssessmentState({
+        version: 1,
+        status: "in_progress",
+        step: "nutrition",
+        answers,
+        consents: [],
+        startedAt: T0,
+        completedAt: null,
+        updatedAt: T0,
+      });
+      if (answers.country === "GR") {
+        expect(parsed?.answers.country).toBe("GR");
+        expect(parsed?.answers.foodSide).toBeNull();
+      } else if (answers.country === "IN") {
+        expect(parsed?.answers.country).toBe("IN");
+        expect(parsed?.answers.foodSide).toBeNull();
+      } else {
+        expect(parsed?.answers.country).toBeNull();
+        expect(parsed?.answers.foodSide).toBeNull();
+      }
+    }
+  });
+
   it("drops a malformed food budget instead of repairing it", () => {
     for (const bad of [0, 4, 2.5, "2", true]) {
       const parsed = parseAssessmentState({
@@ -407,6 +474,21 @@ describe("toHealthProfile", () => {
     expect(toHealthProfile(s, "user-1").dietary.cuisinePreference).toBe("south_indian");
     const unanswered = toHealthProfile(emptyAssessmentState(T0), "user-1");
     expect(unanswered.dietary.cuisinePreference).toBeNull();
+  });
+
+  it("maps the country and food side onto the profile's dietary profile (M-251)", () => {
+    const s = saveStep(
+      answeredState(),
+      { country: "IN", foodSide: "west_indian" },
+      "summary",
+      T1,
+    );
+    const dietary = toHealthProfile(s, "user-1").dietary;
+    expect(dietary.country).toBe("IN");
+    expect(dietary.foodSide).toBe("west_indian");
+    const unanswered = toHealthProfile(emptyAssessmentState(T0), "user-1");
+    expect(unanswered.dietary.country).toBeNull();
+    expect(unanswered.dietary.foodSide).toBeNull();
   });
 
   it("maps the waist answer onto the profile's waist — the field that sat null", () => {

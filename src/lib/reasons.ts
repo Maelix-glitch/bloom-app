@@ -42,6 +42,8 @@ export type PlanReason =
   | { kind: "deprioritised-dishes"; names: readonly string[]; planDay: string; windowDays: number }
   | { kind: "micro-gap"; label: string; days: number; avg: number; unit: "g" | "mg"; reference: number }
   | { kind: "budget-widened"; ceilingRupees: number | null }
+  | { kind: "country-widened"; countryName: string }
+  | { kind: "food-side-widened"; countryName: string; sideLabel: string }
   | {
       kind: "kitchen-relaxed";
       answers: { noCook: boolean; capMinutes: number | null; equipmentListed: boolean };
@@ -75,6 +77,8 @@ export const PLAN_REASON_KINDS: readonly PlanReasonKind[] = [
   "deprioritised-dishes",
   "micro-gap",
   "budget-widened",
+  "country-widened",
+  "food-side-widened",
   "kitchen-relaxed",
   "kitchen-cap-raised",
   "kitchen-cap-quickest",
@@ -185,6 +189,18 @@ export function reasonCopy(reason: PlanReason): ReasonCopy | null {
             reason.ceilingRupees === null
               ? "Your meal budget leaves too few main dishes, so the plan treats it as a preference and includes dishes above it."
               : `Your budget (about ₹${reason.ceilingRupees} a serving) leaves too few main dishes, so the plan treats it as a preference.`,
+          source: ASSESSMENT,
+        };
+      case "country-widened":
+        return {
+          title: "Country treated as a preference",
+          detail: `Dishes from ${reason.countryName} alone leave too few main dishes, so your country is treated as a preference.`,
+          source: ASSESSMENT,
+        };
+      case "food-side-widened":
+        return {
+          title: "Side widened to the whole country",
+          detail: `${reason.sideLabel} dishes alone leave too few main dishes, so the plan draws from all of ${reason.countryName}.`,
           source: ASSESSMENT,
         };
       case "kitchen-relaxed":
@@ -338,6 +354,8 @@ export type AdjustmentData =
   | { kind: "kitchen-relaxed" }
   | { kind: "meal-added"; slot: string; assessmentMeals: number }
   | { kind: "budget-widened"; ceilingRupees: number | null }
+  | { kind: "country-widened"; countryName: string }
+  | { kind: "food-side-widened"; countryName: string; sideLabel: string }
   | { kind: "kitchen-cap-raised"; capMinutes: number; stageMinutes: number }
   | { kind: "kitchen-cap-quickest"; capMinutes: number }
   | { kind: "log-energy-overshoot"; days: number; avgKcal: number; targetKcal: number };
@@ -353,6 +371,8 @@ export interface AdjustmentLike {
   slot?: string;
   assessmentMeals?: number;
   ceilingRupees?: number | null;
+  countryName?: string;
+  sideLabel?: string;
   capMinutes?: number;
   stageMinutes?: number;
   avgKcal?: number;
@@ -425,6 +445,22 @@ export function adjustmentCopy(a: AdjustmentLike | null | undefined): Adjustment
             a.ceilingRupees === null
               ? "Your meal budget leaves too few main dishes, so the plan includes dishes above it."
               : `Your budget (about ₹${whole(a.ceilingRupees)} a serving) leaves too few main dishes, so the plan includes dishes above it.`,
+        };
+      }
+      case "country-widened": {
+        if (a.countryName === undefined) return null;
+        return {
+          icon: "globe",
+          title: "Country treated as a preference",
+          detail: `Dishes from ${a.countryName} alone leave too few main dishes, so your country is treated as a preference.`,
+        };
+      }
+      case "food-side-widened": {
+        if (a.countryName === undefined || a.sideLabel === undefined) return null;
+        return {
+          icon: "globe",
+          title: "Side widened to the whole country",
+          detail: `${a.sideLabel} dishes alone leave too few main dishes, so the plan draws from all of ${a.countryName}.`,
         };
       }
       case "kitchen-cap-raised": {

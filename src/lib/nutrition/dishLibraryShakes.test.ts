@@ -79,8 +79,13 @@ describe("protein wave PW-1 — shakes & smoothies", () => {
     }
     /* Rest of library at integration: 903 cleaned base + PW-2 (74 after
        the bacalhau dedupe) + PW-3 (75) + PW-4 (75) = 1,127; 1,128 after
-       method 14 (2026-11-20) added the plain Steamed Rice. */
-    expect(DISH_LIBRARY.length).toBe(1128 + SHAKES_DISHES.length);
+       method 14 (2026-11-20) added the plain Steamed Rice; 1,180 after
+       the Bulgarian wave (2026-11-26) added its 52 dishes; 1,266 after
+       the Bulgarian wave 2 (2026-11-26) added its 86 dishes; 1,336
+       after protein wave A (2026-11-26) added its 70 dishes; 1,406
+       after protein wave B (2026-11-26) added its 70 dishes; 1,476
+       after protein wave C (2026-11-26) added its 70 dishes. */
+    expect(DISH_LIBRARY.length).toBe(1476 + SHAKES_DISHES.length);
   });
 
   it("is complete against the reference set — every dish validates clean", () => {

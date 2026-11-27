@@ -37,10 +37,29 @@ function synthetic(over: Partial<Dish>): Dish {
 }
 
 describe("gravy-style derivation · the shipped census", () => {
-  it("exactly 354 of the 755 shipped mains are gravy-style", () => {
+  it("exactly 436 of the 994 shipped mains are gravy-style", () => {
+    /* 354 of 755 before the Bulgarian wave (2026-11-26) added 29
+       mains, 10 of them gravy-style (its soups, kavarma, musaka,
+       frikase and bean yahniya). The Bulgarian wave 2 (2026-11-26)
+       added 40 mains, 17 of them gravy-style (its seven soups, the
+       four kavarma, the Chirpanski meatballs, the bean and cabbage
+       pot, the two musaka and the two yahniya). Protein wave A
+       (2026-11-26) added 60 mains, 21 of them gravy-style (its
+       curries, dals and chillis, the coconut fish curries, and the
+       wet-simmer soft edges the derivation's header owns: the
+       lentil shepherd's pie, the meatloaf bake, the chowder, the
+       bean soup and the broad bean barley stew that replaced the
+       wave's draft mujadara). Protein wave B (2026-11-26) added
+       58 mains, 19 of them gravy-style (the two rendang, the
+       sinigang, the cod and chickpea stew, the pasta bakes in
+       sauce, murgh cholay, the lentil and bean stews, the moringa
+       dal and the blended soups). Protein wave C (2026-11-26)
+       added 52 mains, 15 of them gravy-style (the cassoulet, the
+       cocido, the birria, ghormeh sabzi, the étouffée and
+       cioppino, the two bean stews and the wet curries). */
     const mains = DISH_LIBRARY.filter((d) => d.category === "main");
-    expect(mains.length).toBe(755);
-    expect(mains.filter(dishIsGravyStyle).length).toBe(354);
+    expect(mains.length).toBe(994);
+    expect(mains.filter(dishIsGravyStyle).length).toBe(436);
   });
 
   it("no non-main dish is ever gravy-style", () => {
