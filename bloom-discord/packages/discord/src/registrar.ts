@@ -32,9 +32,15 @@ export interface RegistrationResult extends RegistrationPlan {
 /**
  * Application command registration.
  *
- * Discord uses bulk overwrite for application commands. This registrar
- * computes a normalized diff first so an already-synchronized command set
- * does not cause another REST write.
+ * Idempotency comes from the endpoint, not from bookkeeping: Discord's bulk
+ * overwrite (`PUT .../commands`) replaces the entire command set with whatever
+ * is sent. Running it twice with the same input produces the same result, and
+ * there is no way to accumulate duplicate commands — which is the failure the
+ * brief warns about, and which every "register each command individually"
+ * approach eventually hits.
+ *
+ * On top of that, this class diffs before it writes, so a no-op deploy is
+ * genuinely a no-op rather than a rewrite that churns command ids.
  */
 export class CommandRegistrar {
   private readonly rest: REST;
@@ -43,44 +49,27 @@ export class CommandRegistrar {
     this.rest = new REST({ version: '10' }).setToken(options.token);
   }
 
-  /** Calculate what would change without changing Discord. */
+  /** What would change, without changing it. */
   public async plan(
     specs: readonly CommandSpec[],
     scope: RegistrationScope,
   ): Promise<RegistrationPlan> {
     const desired = specs.map(toDiscordCommand);
-
     assertUniqueNames(desired);
 
     const existing = await this.fetchExisting(scope);
 
-    const desiredByName = new Map(
-      desired.map((command) => [commandKey(command), command]),
-    );
+    const desiredByName = new Map(desired.map((command) => [command.name, command]));
+    const existingByName = new Map(existing.map((command) => [command.name, command]));
 
-    const existingByName = new Map(
-      existing.map((command) => [commandKey(command), command]),
-    );
-
-    const added = [...desiredByName.keys()]
-      .filter((key) => !existingByName.has(key))
-      .map(displayCommandKey);
-
-    const removed = [...existingByName.keys()]
-      .filter((key) => !desiredByName.has(key))
-      .map(displayCommandKey);
-
+    const added = [...desiredByName.keys()].filter((name) => !existingByName.has(name));
+    const removed = [...existingByName.keys()].filter((name) => !desiredByName.has(name));
     const modified = [...desiredByName.entries()]
-      .filter(([key, command]) => {
-        const current = existingByName.get(key);
-
-        if (current === undefined) {
-          return false;
-        }
-
-        return fingerprint(current) !== fingerprint(command);
+      .filter(([name, command]) => {
+        const current = existingByName.get(name);
+        return current !== undefined && fingerprint(current) !== fingerprint(command);
       })
-      .map(([key]) => displayCommandKey(key));
+      .map(([name]) => name);
 
     return {
       scope,
@@ -96,51 +85,33 @@ export class CommandRegistrar {
   /**
    * Apply the plan.
    *
-   * Empty command sets are rejected unless explicitly allowed because Discord
-   * treats an empty bulk overwrite as deleting the entire command set.
+   * Refuses to publish an empty command set unless explicitly allowed. An empty
+   * array is a *valid* bulk overwrite that deletes every command — which is
+   * exactly what happens if the registry failed to load, and it would be
+   * indistinguishable from a successful deploy until members noticed every
+   * command had vanished.
    */
   public async apply(
     specs: readonly CommandSpec[],
     scope: RegistrationScope,
-    options: {
-      readonly allowEmpty?: boolean;
-      readonly force?: boolean;
-    } = {},
+    options: { readonly allowEmpty?: boolean; readonly force?: boolean } = {},
   ): Promise<RegistrationResult> {
     const plan = await this.plan(specs, scope);
 
     if (plan.desired.length === 0 && options.allowEmpty !== true) {
       throw bloomError('CONFIGURATION_ERROR', {
-        operatorHint:
-          `Refusing to register an empty command set for ${this.options.bot}: ` +
-          'a bulk overwrite with no commands deletes every command this ' +
-          'application has. If that is genuinely what you want, pass ' +
-          '--allow-empty.',
-        details: {
-          bot: this.options.bot,
-          scope,
-        },
+        operatorHint: `Refusing to register an empty command set for ${this.options.bot}: a bulk overwrite with no commands deletes every command this application has. If that is genuinely what you want, pass --allow-empty.`,
+        details: { bot: this.options.bot, scope },
       });
     }
 
     if (!plan.changed && options.force !== true) {
       this.options.logger.info(
         'commands.register.unchanged',
-        `Command set already matches Discord (${String(
-          plan.desired.length,
-        )} command(s)); nothing sent.`,
-        {
-          context: {
-            scope,
-            bot: this.options.bot,
-          },
-        },
+        `Command set already matches Discord (${String(plan.desired.length)} command(s)); nothing sent.`,
+        { context: { scope, bot: this.options.bot } },
       );
-
-      return {
-        ...plan,
-        applied: false,
-      };
+      return { ...plan, applied: false };
     }
 
     const route =
@@ -148,9 +119,7 @@ export class CommandRegistrar {
         ? Routes.applicationGuildCommands(this.options.clientId, this.options.guildId)
         : Routes.applicationCommands(this.options.clientId);
 
-    await this.rest.put(route, {
-      body: plan.desired,
-    });
+    await this.rest.put(route, { body: plan.desired });
 
     this.options.logger.info(
       'commands.register.applied',
@@ -165,10 +134,7 @@ export class CommandRegistrar {
       },
     );
 
-    return {
-      ...plan,
-      applied: true,
-    };
+    return { ...plan, applied: true };
   }
 
   private async fetchExisting(
@@ -180,270 +146,66 @@ export class CommandRegistrar {
         : Routes.applicationCommands(this.options.clientId);
 
     const response = await this.rest.get(route);
-
     return response as RESTPostAPIApplicationCommandsJSONBody[];
   }
 }
 
-/* -------------------------------------------------------------------------- */
-/* Command identity                                                            */
-/* -------------------------------------------------------------------------- */
-
 /**
- * Discord scopes application-command uniqueness by (type, name).
- */
-function commandKey(command: RESTPostAPIApplicationCommandsJSONBody): string {
-  return `${String(command.type ?? 1)}:${command.name}`;
-}
-
-function displayCommandKey(key: string): string {
-  const separator = key.indexOf(':');
-
-  if (separator < 0) {
-    return key;
-  }
-
-  return key.slice(separator + 1);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Fingerprinting                                                              */
-/* -------------------------------------------------------------------------- */
-
-/**
- * Only compare fields that represent the actual command definition.
+ * Compare only the fields we control.
  *
- * Discord returns additional response fields such as IDs and version data.
- * Those are intentionally excluded.
+ * Discord's response carries ids, version stamps and defaults it filled in
+ * itself. Hashing the raw response against our payload would report every
+ * command as modified on every run, which would make the diff useless and push
+ * people to `--force`.
  */
 function fingerprint(command: RESTPostAPIApplicationCommandsJSONBody): string {
-  const normalised = normalizeCommand(command);
-
+  const normalised = {
+    name: command.name,
+    description: 'description' in command ? (command.description ?? '') : '',
+    type: command.type ?? 1,
+    default_member_permissions: command.default_member_permissions ?? null,
+    contexts: [...(command.contexts ?? [])].sort((a, b) => a - b),
+    integration_types: [...(command.integration_types ?? [])].sort((a, b) => a - b),
+    options: 'options' in command ? normaliseOptions(command.options) : [],
+  };
   return createHash('sha256').update(JSON.stringify(normalised)).digest('hex');
 }
 
-interface NormalizedCommand {
-  readonly name: string;
-  readonly type: number;
-  readonly description: string;
-  readonly default_member_permissions: string | null;
-  readonly nsfw: boolean;
-  readonly options: readonly NormalizedOption[];
+interface RawOption {
+  name: string;
+  description?: string;
+  type: number;
+  required?: boolean;
+  choices?: { name: string; value: string | number }[];
+  options?: RawOption[];
 }
 
-function normalizeCommand(
-  command: RESTPostAPIApplicationCommandsJSONBody,
-): NormalizedCommand {
-  /*
-   * Context-menu commands do not have a description/options field.
-   * Use the discriminator/type to handle the Discord union safely.
-   */
-  const type = command.type ?? 1;
-
-  const isChatInput = type === 1;
-
-  return {
-    name: command.name,
-    type,
-    description:
-      isChatInput && 'description' in command ? normalizeString(command.description) : '',
-
-    default_member_permissions: normalizeNullableString(
-      command.default_member_permissions,
-    ),
-
-    nsfw: isChatInput && 'nsfw' in command ? (command.nsfw ?? false) : false,
-
-    options: isChatInput && 'options' in command ? normalizeOptions(command.options) : [],
-  };
-}
-
-interface NormalizedOption {
-  readonly name: string;
-  readonly description: string;
-  readonly type: number;
-  readonly required: boolean;
-  readonly autocomplete: boolean;
-  readonly choices: readonly NormalizedChoice[];
-  readonly options: readonly NormalizedOption[];
-  readonly channel_types: readonly number[];
-  readonly min_value: number | string | null;
-  readonly max_value: number | string | null;
-  readonly min_length: number | null;
-  readonly max_length: number | null;
-}
-
-interface NormalizedChoice {
-  readonly name: string;
-  readonly value: string | number;
-}
-
-function normalizeOptions(options: unknown): NormalizedOption[] {
-  if (!Array.isArray(options)) {
-    return [];
-  }
-
-  return options.map((raw) => normalizeOption(raw));
-}
-
-function normalizeOption(value: unknown): NormalizedOption {
-  const option = isRecord(value) ? value : {};
-
-  return {
-    name: normalizeString(option['name']),
-
-    description: normalizeString(option['description']),
-
-    type: normalizeNumber(option['type'], 1),
-
-    required: Boolean(option['required'] ?? false),
-
-    autocomplete: Boolean(option['autocomplete'] ?? false),
-
-    choices: normalizeChoices(option['choices']),
-
-    options: normalizeOptions(option['options']),
-
-    channel_types: normalizeNumberArray(option['channel_types']),
-
-    min_value: normalizeNullableNumberLike(option['min_value']),
-
-    max_value: normalizeNullableNumberLike(option['max_value']),
-
-    min_length: normalizeNullableNumber(option['min_length']),
-
-    max_length: normalizeNullableNumber(option['max_length']),
-  };
-}
-
-function normalizeChoices(value: unknown): NormalizedChoice[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value.filter(isRecord).map((choice) => ({
-    name: normalizeString(choice['name']),
-
-    value: normalizeChoiceValue(choice['value']),
+function normaliseOptions(options: unknown): unknown[] {
+  if (!Array.isArray(options)) return [];
+  return (options as RawOption[]).map((option) => ({
+    name: option.name,
+    description: option.description ?? '',
+    type: option.type,
+    required: option.required ?? false,
+    choices: option.choices ?? [],
+    options: normaliseOptions(option.options),
   }));
 }
-
-/* -------------------------------------------------------------------------- */
-/* Primitive normalization                                                     */
-/* -------------------------------------------------------------------------- */
-
-function normalizeChoiceValue(value: unknown): string | number {
-  if (typeof value === 'number') {
-    return value;
-  }
-
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  return '';
-}
-
-function normalizeString(value: unknown): string {
-  return typeof value === 'string' ? value : '';
-}
-
-function normalizeNullableString(value: unknown): string | null {
-  if (value === null || value === undefined || value === '') {
-    return null;
-  }
-
-  return typeof value === 'string' ? value : null;
-}
-
-function normalizeNumber(value: unknown, fallback: number): number {
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? value : fallback;
-  }
-
-  if (typeof value === 'string') {
-    const parsed = Number(value);
-
-    return Number.isFinite(parsed) ? parsed : fallback;
-  }
-
-  return fallback;
-}
-
-function normalizeNullableNumber(value: unknown): number | null {
-  if (value === null || value === undefined || value === '') {
-    return null;
-  }
-
-  const parsed = Number(value);
-
-  return Number.isFinite(parsed) ? parsed : null;
-}
-
-function normalizeNullableNumberLike(value: unknown): number | string | null {
-  if (value === null || value === undefined || value === '') {
-    return null;
-  }
-
-  if (typeof value === 'number') {
-    return Number.isFinite(value) ? value : null;
-  }
-
-  if (typeof value === 'string') {
-    const parsed = Number(value);
-
-    if (Number.isFinite(parsed)) {
-      return parsed;
-    }
-
-    return value;
-  }
-
-  return null;
-}
-
-function normalizeNumberArray(value: unknown): number[] {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((entry) => normalizeNullableNumber(entry))
-    .filter((entry): entry is number => entry !== null)
-    .sort((a, b) => a - b);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
-/* -------------------------------------------------------------------------- */
-/* Validation                                                                  */
-/* -------------------------------------------------------------------------- */
 
 function assertUniqueNames(
   commands: readonly RESTPostAPIApplicationCommandsJSONBody[],
 ): void {
   const seen = new Set<string>();
-
   for (const command of commands) {
-    /*
-     * Discord scopes uniqueness by (type, name), so a slash command and a
-     * context-menu command may legitimately share a name.
-     */
-    const key = commandKey(command);
-
+    // Discord scopes uniqueness by (type, name) — a slash command and a user
+    // context-menu entry may share a name.
+    const key = `${String(command.type ?? 1)}:${command.name}`;
     if (seen.has(key)) {
       throw bloomError('CONFIGURATION_ERROR', {
-        operatorHint:
-          `Duplicate command "${command.name}" in the registration payload. ` +
-          'Discord rejects the whole bulk overwrite when a name repeats.',
-        details: {
-          command: command.name,
-        },
+        operatorHint: `Duplicate command "${command.name}" in the registration payload. Discord rejects the whole bulk overwrite when a name repeats.`,
+        details: { command: command.name },
       });
     }
-
     seen.add(key);
   }
 }

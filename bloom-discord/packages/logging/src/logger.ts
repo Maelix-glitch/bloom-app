@@ -121,8 +121,17 @@ class BloomLogger implements Logger {
       environment: this.environment,
       version: this.version,
       ...(context ? { context } : {}),
+      /*
+       * Redacted like everything else.
+       *
+       * `context.error.message` goes through `redactObject`, but the stack
+       * used to bypass redaction entirely — and a stack's first line *is*
+       * the message. A `postgres` connection failure reports the DSN it
+       * tried, password included, so the one field that skipped the
+       * redactor was also the field most likely to carry a credential.
+       */
       ...(this.includeStacks && normalisedError?.stack
-        ? { stack: normalisedError.stack }
+        ? { stack: redactString(normalisedError.stack) }
         : {}),
     };
 

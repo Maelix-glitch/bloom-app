@@ -4,16 +4,19 @@ Three Discord applications — **Guardian**, **Companion** and **Labs** — shar
 one Supabase PostgreSQL database and a common set of packages, in a pnpm
 workspace of strict TypeScript ESM targeting Node 24.
 
-> **Status: Phase 7 complete, production hardening done.** Bloom Guardian is
+> **Status: Phase 8 complete.** Bloom Guardian is
 > functionally complete for verification, the role lifecycle, moderation,
-> reports and cases. Bloom Companion runs the
+> reports and cases, and — since Phase 8 — anti-spam: it reacts to Discord's
+> native Auto Moderation with an escalation ladder, cases and moderator
+> review, without ever reading message content. Bloom Companion runs the
 > community loop: the daily prompt, `/checkin`, `/win`, the Bloom Rewards ledger
 > with its nine-rank ladder, and milestones and achievements that recognise
-> participation without paying for it. Bloom Labs is now online with its intake
-> spine — `/feedback`, `/labs bug report`, `/labs bug show`, `/labs bug queue`
-> and `/labs admin triage`. Cohorts, voting, feature status and release notes
-> are **not built**; see [`docs/PHASE-7-REPORT.md`](docs/PHASE-7-REPORT.md) for
-> what that leaves undone.
+> participation without paying for it. Bloom Labs runs intake
+> (`/feedback`, `/labs bug report`, `/labs bug show`, `/labs bug queue`,
+> `/labs admin triage`) and, since Phase 8, the pipeline: feature status and
+> backing, beta cohorts, and release notes. See
+> [`docs/PHASE-8-REPORT.md`](docs/PHASE-8-REPORT.md) for what Phase 8 built
+> and what it deliberately did not.
 >
 > The platform prunes its own operational tables nightly, can erase a member's
 > content on request, and ships a CI pipeline. Before deploying, read
@@ -29,13 +32,13 @@ workspace of strict TypeScript ESM targeting Node 24.
 
 ## The three bots
 
-|              | **Guardian**                                                           | **Companion**                                                                   | **Labs**                                                               |
-| ------------ | ---------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
-| Trust        | highest                                                                | standard                                                                        | standard                                                               |
-| Owns         | verification, onboarding, roles, moderation, reports, audit, anti-spam | welcome, check-ins, wins, achievements, milestones, rewards, challenges, events | beta cohorts, feedback, voting, bug intake, experiments, release notes |
-| Manage Roles | ✅ **only bot**                                                        | ❌                                                                              | ❌                                                                     |
-| Moderation   | ✅ **only bot**                                                        | ❌                                                                              | ❌                                                                     |
-| Intents      | Guilds, GuildMembers _(privileged)_, GuildModeration                   | Guilds                                                                          | Guilds                                                                 |
+|              | **Guardian**                                                                  | **Companion**                                                                   | **Labs**                                                               |
+| ------------ | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| Trust        | highest                                                                       | standard                                                                        | standard                                                               |
+| Owns         | verification, onboarding, roles, moderation, reports, audit, anti-spam        | welcome, check-ins, wins, achievements, milestones, rewards, challenges, events | beta cohorts, feedback, voting, bug intake, experiments, release notes |
+| Manage Roles | ✅ **only bot**                                                               | ❌                                                                              | ❌                                                                     |
+| Moderation   | ✅ **only bot**                                                               | ❌                                                                              | ❌                                                                     |
+| Intents      | Guilds, GuildMembers _(privileged)_, GuildModeration, AutoModerationExecution | Guilds                                                                          | Guilds                                                                 |
 
 Full table: [`docs/architecture/bot-responsibilities.md`](docs/architecture/bot-responsibilities.md).
 

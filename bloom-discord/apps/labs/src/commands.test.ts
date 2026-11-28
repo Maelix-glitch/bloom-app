@@ -95,10 +95,16 @@ describe('Labs command set', () => {
     expect(isSlashCommandSpec(spec)).toBe(true);
     if (!isSlashCommandSpec(spec)) return;
 
-    // Both groups are visible to any member; the branches under `admin` refuse
+    // All groups are visible to any member; the branches under `admin` refuse
     // on their own policy. Discord cannot express per-subcommand permissions,
     // so this is the same trust model as everywhere else: the client-side hint
     // is a hint, and the server-side check is the boundary.
-    expect(spec.groups?.map((group) => group.name).sort()).toEqual(['admin', 'bug']);
+    expect(spec.groups?.map((group) => group.name).sort()).toEqual([
+      'admin',
+      'bug',
+      'cohort',
+      'feature',
+      'release',
+    ]);
   });
 });

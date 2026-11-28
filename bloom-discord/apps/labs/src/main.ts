@@ -9,7 +9,8 @@
  * the role and moderation services are not built for this process.
  *
  * Phase 7 brings it online with the intake spine — feedback, bug reports and
- * triage — and with the platform's first modal-driven flow.
+ * triage — and with the platform's first modal-driven flow. Phase 8 adds the
+ * pipeline: feature status and backing, cohorts, and release notes.
  */
 import {
   CommandDispatcher,
@@ -21,6 +22,7 @@ import type { LabsDeps } from './deps.js';
 import { labsCommands } from './commands.js';
 import { intakeModalHandlers } from './features/intake/handlers.js';
 import { IntakeService } from './features/intake/service.js';
+import { PipelineService } from './features/pipeline/service.js';
 
 await runBotMain(() =>
   startBotProcess<LabsDeps>({
@@ -28,6 +30,13 @@ await runBotMain(() =>
 
     createDeps(context) {
       const intake = new IntakeService({
+        config: context.platform,
+        repositories: context.repositories,
+        messaging: context.discord.messaging,
+        logger: context.logger,
+      });
+
+      const pipeline = new PipelineService({
         config: context.platform,
         repositories: context.repositories,
         messaging: context.discord.messaging,
@@ -42,6 +51,7 @@ await runBotMain(() =>
         guilds: context.discord.guilds,
         messaging: context.discord.messaging,
         intake,
+        pipeline,
       };
     },
 

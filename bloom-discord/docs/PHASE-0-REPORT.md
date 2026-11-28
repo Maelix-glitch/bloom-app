@@ -200,7 +200,9 @@ Threads, Manage Threads.
 **Never requested by any bot:** Administrator, Mention Everyone, Manage
 Webhooks, Manage Guild.
 
-Install permission integers: Guardian `1497064631510`, Companion `319975148608`,
+Install permission integers: Guardian `1497064631510` (superseded — now
+`1497064631542`, see the
+[permission matrix](./permissions/bloom-bot-permission-matrix.md)), Companion `319975148608`,
 Labs `380104723520`.
 
 **Intents:** Guardian `Guilds + GuildMembers (privileged) + GuildModeration`;

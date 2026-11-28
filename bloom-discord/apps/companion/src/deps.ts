@@ -9,6 +9,9 @@ import type {
 import type { Scheduler } from '@bloom/events';
 import type { Logger } from '@bloom/logging';
 import type { AwardsService } from './features/awards/service.js';
+import type { CommunityService } from './features/community/service.js';
+import type { HighlightsService } from './features/highlights/service.js';
+import type { ReferralConsumer } from './features/rewards/referral-consumer.js';
 import type { RewardsService } from './features/rewards/service.js';
 
 /**
@@ -47,4 +50,33 @@ export interface CompanionDeps extends JobAdminDeps {
 
   /** Milestones and achievements, derived from the same records. */
   readonly awards: AwardsService;
+
+  /**
+   * Claims qualified referrals from the shared trigger table and pays them.
+   *
+   * The only consumer of Guardian's handoff, and the reason Companion needs
+   * no access to identity or onboarding: everything it must know about the
+   * referral is already on the row.
+   */
+  readonly referralConsumer: ReferralConsumer;
+
+  /**
+   * Challenges and events, on one participation model.
+   *
+   * One service for both, because the only thing that differs between them
+   * is how completion is decided. It never writes to the ledger itself —
+   * every reward goes through `rewards` above.
+   */
+  readonly community: CommunityService;
+
+  /**
+   * The read side: boards, the two member views, the recap and the staff
+   * overview.
+   *
+   * Separate from `community` because it is the half with no write path. It
+   * holds no reference to `rewards` or `awards` and cannot reach the ledger,
+   * so no amount of future feature pressure can turn a view into something
+   * that pays.
+   */
+  readonly highlights: HighlightsService;
 }

@@ -8,7 +8,18 @@ import { JOBS_GROUP_DESCRIPTION, jobSubcommands } from '@bloom/discord';
 import { allOf, requireBloomMember } from '@bloom/permissions';
 import type { CompanionDeps } from './deps.js';
 import { awardsSubcommands } from './features/awards/commands.js';
+import {
+  communityMemberSubcommands,
+  communityStaffSubcommands,
+  COMMUNITY_GROUP_DESCRIPTION,
+} from './features/community/commands.js';
+import {
+  highlightsMemberSubcommands,
+  highlightsStaffSubcommands,
+  HIGHLIGHTS_GROUP_DESCRIPTION,
+} from './features/highlights/commands.js';
 import { rewardsCommands, rewardsSubcommands } from './features/rewards/commands.js';
+import { rewardsStaffSubcommands } from './features/rewards/staff-commands.js';
 
 /**
  * The `/companion` namespace.
@@ -47,10 +58,17 @@ export const companionNamespaceCommand: BloomCommand<CompanionDeps> = namespaceC
   groupDescriptions: {
     jobs: JOBS_GROUP_DESCRIPTION,
     admin: 'Staff actions that change a member’s standing. Always audited.',
+    event: COMMUNITY_GROUP_DESCRIPTION,
+    community: HIGHLIGHTS_GROUP_DESCRIPTION,
   },
   contributions: [
     ...rewardsSubcommands,
     ...awardsSubcommands,
+    ...rewardsStaffSubcommands,
+    ...communityMemberSubcommands,
+    ...communityStaffSubcommands,
+    ...highlightsMemberSubcommands,
+    ...highlightsStaffSubcommands,
     ...jobSubcommands<CompanionDeps>(),
   ],
 });

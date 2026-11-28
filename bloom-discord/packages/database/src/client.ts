@@ -1,7 +1,19 @@
 import postgres from 'postgres';
 import { BloomError, bloomError } from '@bloom/shared-types';
+import { backoffDelay, sleep } from '@bloom/utils';
 import type { Logger } from '@bloom/logging';
 import { noopLogger } from '@bloom/logging';
+
+/**
+ * How many times a transaction may be retried after a conflict.
+ *
+ * Two. A third attempt is almost never the one that succeeds — by then the
+ * contention is structural rather than incidental — and every retry holds a
+ * connection from a small pool while a member waits.
+ */
+const TRANSACTION_RETRIES = 2;
+const RETRY_BASE_MS = 25;
+const RETRY_MAX_MS = 200;
 
 export type Sql = postgres.Sql<Record<string, never>>;
 export type TransactionSql = postgres.TransactionSql<Record<string, never>>;
@@ -97,12 +109,75 @@ class PostgresDatabase implements Database {
     });
   }
 
+  /**
+   * Run a transaction, retrying only the two failures that are safe to retry.
+   *
+   * PostgreSQL raises `40001 serialization_failure` and `40P01
+   * deadlock_detected` when it has already rolled the transaction back
+   * entirely. Nothing was committed, no side effect survived, and the correct
+   * response is to run it again — which is why `toDatabaseError` has always
+   * labelled them "safe to retry" while nothing in the platform retried.
+   *
+   * Bloom reaches for both. Concurrent joins to a capacity-limited event take
+   * an advisory lock; two members completing activities that touch the same
+   * ledger rows can deadlock. Each is rare, each presents to a member as a
+   * command that failed for no visible reason, and each is fixed by trying
+   * once more.
+   *
+   * Three properties keep this narrow, which is the instruction:
+   *
+   *   • Only those two SQLSTATEs. A connection failure is *not* retried here
+   *     — the transaction may have committed before the connection dropped,
+   *     and retrying could double-apply it. Those surface as before.
+   *   • Bounded: two retries, then the error is raised.
+   *   • The callback is re-run from the top, because the transaction it was
+   *     operating in no longer exists.
+   *
+   * It is not a resilience framework and nothing else may use it: there is no
+   * generic `retry()` here to be reached for by code whose operation is not
+   * known to be side-effect-free on failure.
+   */
   public async transaction<T>(fn: (tx: TransactionSql) => Promise<T>): Promise<T> {
-    try {
-      return (await this.sql.begin(async (tx) => await fn(tx))) as T;
-    } catch (error) {
-      throw toDatabaseError(error);
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= TRANSACTION_RETRIES; attempt += 1) {
+      try {
+        return (await this.sql.begin(async (tx) => await fn(tx))) as T;
+      } catch (error) {
+        lastError = error;
+        const sqlstate = extractSqlState(error);
+        const retryable = sqlstate === '40001' || sqlstate === '40P01';
+
+        if (!retryable || attempt === TRANSACTION_RETRIES) break;
+
+        /*
+         * A short, jittered pause. Two transactions that deadlocked and then
+         * retried in lockstep would deadlock again on the same pair of rows;
+         * the jitter is what separates them.
+         */
+        /*
+         * The platform's existing backoff helper, not a second one. It uses
+         * `crypto.randomInt` for the jitter — overkill for a 25ms pause, and
+         * the reason is the lint rule rather than the randomness: one rule
+         * banning `Math.random` outright beats a judgement call per site.
+         */
+        const backoffMs = backoffDelay(attempt + 1, RETRY_BASE_MS, RETRY_MAX_MS);
+        this.logger.warn(
+          'database.transaction_retry',
+          `Transaction conflict (SQLSTATE ${sqlstate}); retrying.`,
+          {
+            context: {
+              attempt: attempt + 1,
+              sqlstate,
+              backoff_ms: Math.round(backoffMs),
+            },
+          },
+        );
+        await sleep(backoffMs);
+      }
     }
+
+    throw toDatabaseError(lastError);
   }
 
   public async ping(): Promise<PingResult> {

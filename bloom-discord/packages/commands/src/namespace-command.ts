@@ -153,6 +153,7 @@ export function namespaceCommand<TDeps>(
   return {
     bot: options.bot,
     policy: options.policy,
+    contributions: options.contributions,
     /*
      * Resolved per invocation by routing first. A branch that opens a modal
      * declares `defer: false`, and the alternative — making the whole namespace

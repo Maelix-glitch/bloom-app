@@ -20,6 +20,7 @@ import type { LabsDeps } from './deps.js';
 import { labsCommands } from './commands.js';
 import { intakeModalHandlers } from './features/intake/handlers.js';
 import { IntakeService } from './features/intake/service.js';
+import { PipelineService } from './features/pipeline/service.js';
 
 /**
  * A whole Labs, in memory.
@@ -46,6 +47,7 @@ export interface LabsHarness {
   readonly guild: FakeGuild;
   readonly messaging: FakeMessaging;
   readonly intake: IntakeService;
+  readonly pipeline: PipelineService;
   readonly logs: ReturnType<typeof createTestLogger>['sink'];
 }
 
@@ -73,7 +75,11 @@ export function labsHarness(options: LabsHarnessOptions = {}): LabsHarness {
   };
 
   const guild = new FakeGuild().withStandardRoles();
-  guild.withChannels(TEST_CHANNEL_IDS.feedback, TEST_CHANNEL_IDS.bugReports);
+  guild.withChannels(
+    TEST_CHANNEL_IDS.feedback,
+    TEST_CHANNEL_IDS.bugReports,
+    TEST_CHANNEL_IDS.releaseNotes,
+  );
 
   const messaging = new FakeMessaging(guild);
   const clock: Clock = options.now
@@ -90,6 +96,13 @@ export function labsHarness(options: LabsHarnessOptions = {}): LabsHarness {
     clock,
   });
 
+  const pipeline = new PipelineService({
+    config,
+    repositories,
+    messaging,
+    logger,
+  });
+
   const deps: LabsDeps = {
     bot: 'labs',
     config,
@@ -98,6 +111,7 @@ export function labsHarness(options: LabsHarnessOptions = {}): LabsHarness {
     guilds: guild,
     messaging,
     intake,
+    pipeline,
   };
 
   const registry = new CommandRegistry<LabsDeps>('labs').registerAll(labsCommands);
@@ -135,6 +149,7 @@ export function labsHarness(options: LabsHarnessOptions = {}): LabsHarness {
     guild,
     messaging,
     intake,
+    pipeline,
     logs: sink,
   };
 }

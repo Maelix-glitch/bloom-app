@@ -12,7 +12,13 @@ import {
 } from '@bloom/shared-types';
 import type { Logger } from '@bloom/logging';
 import type { PlatformConfig } from '@bloom/config';
-import type { CaseEventRow, CaseRow, ReportRow, Repositories } from '@bloom/database';
+import type {
+  CaseAssignmentFilter,
+  CaseEventRow,
+  CaseRow,
+  ReportRow,
+  Repositories,
+} from '@bloom/database';
 import type { MessagingService } from '@bloom/discord';
 import type { AuthorizationSubject } from '@bloom/permissions';
 import { sanitiseUserText } from '@bloom/utils';
@@ -364,10 +370,17 @@ export class CaseService {
 
   public list(
     guildId: GuildId,
-    filter?: { readonly status?: CaseStatus | null; readonly limit?: number },
+    filter?: {
+      readonly status?: CaseStatus | null;
+      readonly assignedTo?: UserId | null;
+      readonly assignment?: CaseAssignmentFilter | null;
+      readonly limit?: number;
+    },
   ): Promise<readonly CaseRow[]> {
     return this.options.repositories.cases.list(guildId, {
       status: filter?.status ?? null,
+      assignedTo: filter?.assignedTo ?? null,
+      assignment: filter?.assignment ?? null,
       limit: filter?.limit ?? 15,
     });
   }

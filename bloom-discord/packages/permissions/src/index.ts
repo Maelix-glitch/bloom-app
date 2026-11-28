@@ -11,3 +11,5 @@ export * from './policies.js';
 export * from './role-hierarchy.js';
 export * from './moderation-target.js';
 export * from './capabilities.js';
+export * from './staff-capabilities.js';
+export * from './staff-policies.js';

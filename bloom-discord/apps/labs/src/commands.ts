@@ -7,6 +7,7 @@ import {
 import { allOf, requireBloomMember } from '@bloom/permissions';
 import type { LabsDeps } from './deps.js';
 import { intakeCommands, intakeSubcommands } from './features/intake/commands.js';
+import { pipelineSubcommands } from './features/pipeline/commands.js';
 
 /**
  * The `/labs` namespace.
@@ -28,9 +29,12 @@ export const labsNamespaceCommand: BloomCommand<LabsDeps> = namespaceCommand({
   policy: allOf(requireBloomMember()),
   groupDescriptions: {
     bug: 'Report a defect, or look one up.',
+    feature: 'The feature pipeline: what is being shaped and shipped.',
+    cohort: 'Beta cohorts. Membership is a list, not an access grant.',
+    release: 'Release notes, published by the team.',
     admin: 'Staff actions on submissions. Always audited.',
   },
-  contributions: [...intakeSubcommands],
+  contributions: [...intakeSubcommands, ...pipelineSubcommands],
 });
 
 /**

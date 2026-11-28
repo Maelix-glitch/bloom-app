@@ -1,7 +1,11 @@
 import { bloomError } from '@bloom/shared-types';
 import type { BugArea, BugStatus, FeedbackCategory, TriageTarget } from '@bloom/database';
 import { TRIAGE_TARGETS } from '@bloom/database';
-import { requireBloomMember, requireModerator } from '@bloom/permissions';
+import {
+  hasStaffCapability,
+  requireBloomMember,
+  requireStaffCapability,
+} from '@bloom/permissions';
 import {
   encodeCustomId,
   type BloomCommand,
@@ -129,6 +133,10 @@ export const intakeCommands: readonly BloomCommand<LabsDeps>[] = [feedbackComman
 // /labs bug …
 // -----------------------------------------------------------------------------
 
+/** Matches the repository's own ceiling, so the option cannot promise more. */
+const MAX_FEEDBACK_PAGE = 25;
+const DEFAULT_FEEDBACK_PAGE = 10;
+
 export const intakeSubcommands: readonly SubcommandContribution<LabsDeps>[] = [
   {
     group: 'bug',
@@ -181,9 +189,19 @@ export const intakeSubcommands: readonly SubcommandContribution<LabsDeps>[] = [
        *
        * A bug report is about the software, it is already posted in a public
        * channel, and "is this known?" is the question that stops the same
-       * thing being filed six times. What is gated is the triager's name.
+       * thing being filed six times. What is gated is the operational detail:
+       * who triaged it, and how it got where it is.
+       *
+       * The gate is the staff kernel rather than `requireModerator()`, so the
+       * Discord permission bit alone no longer reveals it — the same
+       * tightening applied to the Guardian and Companion staff surfaces.
        */
-      return copy.bugDetail(bug, requireModerator()(auth).ok);
+      const viewerIsStaff = hasStaffCapability(auth, 'staff.labs.read');
+      const history = viewerIsStaff
+        ? await deps.repositories.labs.bugHistory(bug.id)
+        : [];
+
+      return copy.bugDetail(bug, viewerIsStaff, history);
     },
   },
 
@@ -209,7 +227,7 @@ export const intakeSubcommands: readonly SubcommandContribution<LabsDeps>[] = [
       ],
     },
     // Reading the queue is staff work: it is a to-do list, not a catalogue.
-    policy: requireModerator(),
+    policy: requireStaffCapability('staff.labs.read'),
     async execute(invocation, deps) {
       const status = invocation.options.getString('status') as BugStatus | null;
       const bugs = await deps.repositories.labs.bugQueue(
@@ -256,7 +274,12 @@ export const intakeSubcommands: readonly SubcommandContribution<LabsDeps>[] = [
         },
       ],
     },
-    policy: requireModerator(),
+    /*
+     * Triage is a mutation, so it takes the triage capability rather than the
+     * read one. Moderators hold both today; stating them separately is what
+     * lets that change without touching this file.
+     */
+    policy: requireStaffCapability('staff.labs.triage'),
     async execute(invocation, deps) {
       const status = invocation.options.getString('status') ?? '';
       if (!isTriageTarget(status)) {
@@ -289,6 +312,44 @@ export const intakeSubcommands: readonly SubcommandContribution<LabsDeps>[] = [
         case 'duplicate_target_missing':
           return copy.duplicateTargetMissing(result.bugNumber);
       }
+    },
+  },
+
+  {
+    group: 'admin',
+    spec: {
+      name: 'feedback',
+      description: 'Recent feedback submissions.',
+      options: [
+        {
+          type: 'integer',
+          name: 'limit',
+          description: 'How many to show. 1–25, default 10.',
+          required: false,
+          minValue: 1,
+          maxValue: MAX_FEEDBACK_PAGE,
+        },
+      ],
+    },
+    /*
+     * Feedback is written to staff, not to the room.
+     *
+     * Members submit through a modal and are told it reached the team; the
+     * text itself is theirs, often about something that frustrated them, and
+     * it was never offered to an audience. So this is a read for
+     * `staff.labs.read` only, the reply is ephemeral like every other staff
+     * surface, and there is deliberately no command that republishes an entry
+     * to a channel.
+     */
+    policy: requireStaffCapability('staff.labs.read'),
+    async execute(invocation, deps) {
+      const limit = invocation.options.getInteger('limit') ?? DEFAULT_FEEDBACK_PAGE;
+      const entries = await deps.repositories.labs.recentFeedback(
+        requireGuildId(invocation.guildId),
+        limit,
+      );
+
+      return copy.feedbackQueue(entries);
     },
   },
 ];

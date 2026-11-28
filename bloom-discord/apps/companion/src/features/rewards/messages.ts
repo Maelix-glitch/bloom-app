@@ -1,11 +1,7 @@
 import { pluralise, type LocalDate } from '@bloom/utils';
-import {
-  RANK_DISPLAY_NAMES,
-  type PointKind,
-  type Rank,
-  type UserId,
-} from '@bloom/shared-types';
+import { RANK_DISPLAY_NAMES, type PointKind, type Rank } from '@bloom/shared-types';
 import { bloomEmbed, neutralEmbed, type BloomMessage } from '@bloom/embeds';
+import type { CommunityActivity } from '@bloom/database';
 import type { AwardDefinition } from '../awards/definitions.js';
 import { earnedLines } from '../awards/messages.js';
 import type { MemberProfile, RankMove } from './service.js';
@@ -27,11 +23,21 @@ import type { MemberProfile, RankMove } from './service.js';
  * These are asserted in the tests, not just described here.
  */
 
+/*
+ * Exhaustive over `PointKind` on purpose: adding a kind without deciding what
+ * a member should see it called is a compile error, not a row rendered as
+ * `undefined`. The four reserved kinds have no feature behind them yet, so
+ * they are named for what they will mean rather than left blank.
+ */
 const POINT_KIND_LABELS: Readonly<Record<PointKind, string>> = {
   check_in: 'Check-in',
   small_win: 'Small win',
   manual_award: 'Awarded by staff',
   adjustment: 'Adjustment',
+  referral: 'Referral',
+  event_completion: 'Event',
+  challenge_completion: 'Challenge',
+  achievement_reward: 'Achievement',
 };
 
 function rankName(rank: Rank): string {
@@ -49,12 +55,32 @@ function streakLine(streak: number): string {
   return `${pluralise(streak, 'day')} in a row.`;
 }
 
+/**
+ * Challenges finished by the action that just happened.
+ *
+ * One line each, in the reply to whatever the member was doing — the same
+ * treatment milestones get, and for the same reason. A separate congratulatory
+ * message would be a second notification for one action.
+ */
+function challengeLines(completed: readonly CommunityActivity[]): readonly string[] {
+  if (completed.length === 0) return [];
+  return [
+    '',
+    ...completed.map((activity) =>
+      activity.rewardPoints > 0
+        ? `**${activity.title}** — challenge complete, +${String(activity.rewardPoints)} points`
+        : `**${activity.title}** — challenge complete`,
+    ),
+  ];
+}
+
 export function checkedInMessage(input: {
   readonly pointsAwarded: number;
   readonly balance: number;
   readonly streak: number;
   readonly rankMove: RankMove | null;
   readonly granted?: readonly AwardDefinition[];
+  readonly challenges?: readonly CommunityActivity[];
 }): BloomMessage {
   const lines = [
     'Checked in for today.',
@@ -64,6 +90,7 @@ export function checkedInMessage(input: {
       : []),
     ...rankLine(input.rankMove),
     ...earnedLines(input.granted ?? []),
+    ...challengeLines(input.challenges ?? []),
   ];
 
   return {
@@ -93,6 +120,7 @@ export function winSharedMessage(input: {
   readonly rankMove: RankMove | null;
   readonly posted: boolean;
   readonly granted?: readonly AwardDefinition[];
+  readonly challenges?: readonly CommunityActivity[];
 }): BloomMessage {
   const lines = [
     input.posted
@@ -102,6 +130,7 @@ export function winSharedMessage(input: {
     `+${String(input.pointsAwarded)} points · ${String(input.balance)} total`,
     ...rankLine(input.rankMove),
     ...earnedLines(input.granted ?? []),
+    ...challengeLines(input.challenges ?? []),
   ];
 
   return {
@@ -239,45 +268,12 @@ export function rankMessage(profile: MemberProfile): BloomMessage {
   };
 }
 
-/**
- * The leaderboard.
- *
- * Period-scoped and short by design. An all-time list of every member is a
- * status game — it ranks how long someone has been here, which nobody can
- * change, and it tells the person in 340th place something they did not ask.
+/*
+ * The leaderboard's copy moved to `../highlights/messages.ts` when the board
+ * grew three more categories. One renderer, because the four boards differ
+ * only in what the number means — two would have drifted on the day one of
+ * them learned to mark the viewer.
  */
-export function leaderboardMessage(
-  entries: readonly { readonly userId: UserId; readonly points: number }[],
-  input: { readonly periodLabel: string; readonly viewer: UserId },
-): BloomMessage {
-  if (entries.length === 0) {
-    return {
-      ephemeral: true,
-      embeds: [
-        neutralEmbed({
-          title: `Leaderboard · ${input.periodLabel}`,
-          description: 'No points have been earned in this period yet.',
-        }),
-      ],
-    };
-  }
-
-  const lines = entries.map((entry, index) => {
-    const position = `${String(index + 1)}.`.padEnd(3, ' ');
-    const you = entry.userId === input.viewer ? ' ← you' : '';
-    return `${position} <@${entry.userId}> · ${String(entry.points)}${you}`;
-  });
-
-  return {
-    ephemeral: true,
-    embeds: [
-      bloomEmbed({
-        title: `Leaderboard · ${input.periodLabel}`,
-        description: lines.join('\n'),
-      }),
-    ],
-  };
-}
 
 export function rewardsDisabledMessage(): BloomMessage {
   return {
@@ -297,4 +293,28 @@ export function rewardsDisabledMessage(): BloomMessage {
 /** Used only in tests and diagnostics, so the date format stays one decision. */
 export function formatLocalDate(date: LocalDate): string {
   return date;
+}
+
+/**
+ * The inviter's notice that a referral paid out.
+ *
+ * Short, and sent once. It names the amount and says why, because a balance
+ * that changes without explanation is the thing members complain about in
+ * every points system. It does not name the person they invited: that is
+ * someone else's membership to disclose, not ours.
+ */
+export function referralPaid(points: number): BloomMessage {
+  return {
+    ephemeral: true,
+    embeds: [
+      bloomEmbed({
+        title: 'Someone you invited settled in',
+        description: [
+          `A member you invited has been here a week, so **${String(points)} points** have been added to your balance.`,
+          '',
+          'Thank you for bringing them. Rewards like this one are paid once per member, after they stay.',
+        ].join('\n'),
+      }),
+    ],
+  };
 }

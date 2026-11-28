@@ -137,6 +137,23 @@ export const POINT_KINDS = [
   'small_win',
   'manual_award',
   'adjustment',
+
+  /*
+   * Reserved for sources that do not exist yet — see migration 0009.
+   *
+   * They are declared ahead of their features on purpose. The alternative is
+   * that referrals arrive with nowhere to write, and the quickest fix in that
+   * moment is a second table with its own balance — which is how a community
+   * ends up with two economies and no answer to "how many points do I have".
+   * Naming them here costs nothing and makes the ledger the obvious home.
+   *
+   * Nothing emits these today. `POINT_AWARDS` deliberately does not price
+   * them: an unpriced kind cannot be awarded by accident.
+   */
+  'referral',
+  'event_completion',
+  'challenge_completion',
+  'achievement_reward',
 ] as const;
 
 export type PointKind = (typeof POINT_KINDS)[number];
@@ -144,6 +161,38 @@ export type PointKind = (typeof POINT_KINDS)[number];
 export function isPointKind(value: unknown): value is PointKind {
   return typeof value === 'string' && (POINT_KINDS as readonly string[]).includes(value);
 }
+
+/**
+ * The kinds a human chooses to create.
+ *
+ * Mirrors `point_events_actor_matches_kind`: exactly these two require an
+ * actor, and every other kind forbids one. Keeping the list here means the
+ * rule is stated once in TypeScript and once in SQL, rather than rediscovered
+ * by whoever next adds a source.
+ */
+export const MANUAL_POINT_KINDS = [
+  'manual_award',
+  'adjustment',
+] as const satisfies readonly PointKind[];
+
+export type ManualPointKind = (typeof MANUAL_POINT_KINDS)[number];
+
+export function isManualPointKind(value: unknown): value is ManualPointKind {
+  return (
+    typeof value === 'string' && (MANUAL_POINT_KINDS as readonly string[]).includes(value)
+  );
+}
+
+/**
+ * Kinds the platform awards on its own behalf, which may never name an actor.
+ *
+ * Derived rather than listed, so a kind added to `POINT_KINDS` without a
+ * thought about attribution lands here automatically — the safe side.
+ */
+export const AUTOMATIC_POINT_KINDS: readonly PointKind[] = POINT_KINDS.filter(
+  (kind): kind is Exclude<PointKind, ManualPointKind> =>
+    !(MANUAL_POINT_KINDS as readonly string[]).includes(kind),
+);
 
 /**
  * What each automatic action pays. Fixed, small, and boring on purpose.

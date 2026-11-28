@@ -9,6 +9,9 @@ import type {
 import { BaseRepository } from '../repository.js';
 import { toDatabaseError, type Database, type TransactionSql } from '../client.js';
 
+/** Actions shown for one case. Beyond this the view would be unreadable anyway. */
+const MAX_ACTIONS_PER_CASE = 200;
+
 /**
  * The moderation action log.
  *
@@ -26,7 +29,8 @@ import { toDatabaseError, type Database, type TransactionSql } from '../client.j
 export interface RecordActionInput {
   readonly guildId: GuildId;
   readonly action: ModerationAction;
-  readonly actorId: UserId;
+  /** The moderator who acted, or null when Guardian acted on its own (auto-moderation). */
+  readonly actorId: UserId | null;
   readonly reason: string;
   readonly subjectId?: UserId | null;
   readonly channelId?: ChannelId | null;
@@ -44,7 +48,8 @@ export interface ModerationActionRow {
   readonly action: ModerationAction;
   readonly subjectId: UserId | null;
   readonly channelId: ChannelId | null;
-  readonly actorId: UserId;
+  /** Null for an automated action: the one deliberate difference from a human one. */
+  readonly actorId: UserId | null;
   readonly reason: string;
   readonly durationSeconds: number | null;
   readonly expiresAt: Date | null;
@@ -124,7 +129,7 @@ interface RawActionRow {
   readonly action: ModerationAction;
   readonly subject_id: UserId | null;
   readonly channel_id: ChannelId | null;
-  readonly actor_id: UserId;
+  readonly actor_id: UserId | null;
   readonly reason: string;
   readonly duration_seconds: number | null;
   readonly expires_at: Date | null;
@@ -276,6 +281,9 @@ export class PostgresModerationRepository
         FROM ${sql(this.schema)}.moderation_actions
         WHERE case_id = ${caseId}
         ORDER BY created_at ASC, id ASC
+        -- A case accumulates actions over its life. Small in practice, but
+        -- the detail view renders all of them and nothing else caps it.
+        LIMIT ${MAX_ACTIONS_PER_CASE}
       `;
       return rows.map(mapAction);
     } catch (error) {

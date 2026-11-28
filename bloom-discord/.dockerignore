@@ -9,6 +9,10 @@ coverage
 .env
 .env.*
 !.env.example
+# Real per-service env files must never be baked into an image; compose
+# supplies them at run time.
+deploy/env/*.env
+!deploy/env/*.env.example
 .git
 docs
 *.md

@@ -102,7 +102,7 @@ export class PostgresAuditEventRepository
       const rows = await sql<RawAuditRow[]>`
         SELECT * FROM ${sql(this.schema)}.audit_events
         WHERE guild_id = ${guildId} AND target_id = ${targetId}
-        ORDER BY created_at DESC
+        ORDER BY created_at DESC, id DESC
         LIMIT ${clampLimit(limit)}
       `;
       return rows.map(mapAuditRow);
@@ -120,7 +120,7 @@ export class PostgresAuditEventRepository
       const rows = await sql<RawAuditRow[]>`
         SELECT * FROM ${sql(this.schema)}.audit_events
         WHERE guild_id = ${guildId}
-        ORDER BY created_at DESC
+        ORDER BY created_at DESC, id DESC
         LIMIT ${clampLimit(limit)}
       `;
       return rows.map(mapAuditRow);

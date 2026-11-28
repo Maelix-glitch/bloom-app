@@ -189,6 +189,49 @@ export interface ChannelModerationService {
   }): Promise<PurgeResult>;
 }
 
+/** One guild invite, reduced to the two facts attribution needs. */
+export interface InviteSnapshot {
+  readonly code: string;
+  readonly uses: number;
+  /** Who created the invite. Null for widget and system invites. */
+  readonly inviterId: UserId | null;
+  /**
+   * Whether that creator is an application rather than a person.
+   *
+   * Captured here because it is the only place it is available: Discord
+   * reports it on the invite's creator, and by qualification time — days
+   * later, possibly after they have left — there is nothing left to ask.
+   */
+  readonly inviterIsBot: boolean;
+}
+
+/**
+ * The guild's invites, as a point-in-time reading.
+ *
+ * `vanityUses` is the vanity URL's running total, which Discord reports
+ * separately from the invite list and which has no inviter by definition. It
+ * is read so that "a member joined and no ordinary invite advanced" can be
+ * explained rather than guessed at.
+ */
+export interface InviteUsageSnapshot {
+  readonly invites: readonly InviteSnapshot[];
+  readonly vanityUses: number | null;
+}
+
+/**
+ * Reading invite usage, so a join can be attributed to the person who invited
+ * them.
+ *
+ * Discord exposes no "who invited this member" field; the only mechanism is
+ * comparing use counts before and after. That makes this a privileged read —
+ * it requires Manage Guild — and an unreliable one, so the port is allowed to
+ * fail. `null` means "could not read", which the caller must treat as
+ * unattributed rather than as "nobody invited them".
+ */
+export interface InviteQueryService {
+  readUsage(guildId: GuildId): Promise<InviteUsageSnapshot | null>;
+}
+
 export interface GatewayStatus {
   readonly connected: boolean;
   /** Websocket heartbeat round trip. `null` before the first heartbeat completes. */

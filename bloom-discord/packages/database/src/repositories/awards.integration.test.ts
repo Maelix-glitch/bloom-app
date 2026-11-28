@@ -288,4 +288,89 @@ describe('member awards (integration)', () => {
       expect((await rewards.participation(GUILD, other, SYDNEY)).checkIns).toBe(0);
     });
   });
+
+  describe('recent grants, guild-wide', () => {
+    const other = unsafeSnowflake<UserId>('100000000000092099');
+
+    async function grantAt(
+      userId: UserId,
+      awardKey: string,
+      earnedAt: string,
+    ): Promise<void> {
+      await awards.grant({
+        guildId: GUILD,
+        userId,
+        awardKey,
+        kind: 'milestone',
+        evidence: { checkIns: 1 },
+      });
+      await database.sql`
+        UPDATE ${database.sql(SCHEMA)}.member_awards
+        SET earned_at = ${new Date(earnedAt)}
+        WHERE guild_id = ${GUILD} AND user_id = ${userId} AND award_key = ${awardKey}
+      `;
+    }
+
+    it('returns the newest first, across members', async () => {
+      await grantAt(MEMBER, 'milestone.checkins.1', '2026-03-01T00:00:00.000Z');
+      await grantAt(other, 'milestone.checkins.10', '2026-03-05T00:00:00.000Z');
+
+      const recent = await awards.recent(GUILD);
+
+      expect(recent.map((row) => row.awardKey)).toEqual([
+        'milestone.checkins.10',
+        'milestone.checkins.1',
+      ]);
+    });
+
+    it('is a total order when two awards share an instant', async () => {
+      /*
+       * One evaluation can grant two awards in the same microsecond, so
+       * earned_at alone is not an order. Without the tiebreaks a recap could
+       * list them differently on two reads of identical data.
+       */
+      const at = '2026-03-01T00:00:00.000Z';
+      await grantAt(MEMBER, 'milestone.checkins.1', at);
+      await grantAt(MEMBER, 'milestone.checkins.10', at);
+      await grantAt(other, 'milestone.checkins.30', at);
+
+      const first = await awards.recent(GUILD);
+      const again = await awards.recent(GUILD);
+
+      expect(again.map((row) => row.awardKey)).toEqual(first.map((row) => row.awardKey));
+    });
+
+    it('honours the window', async () => {
+      await grantAt(MEMBER, 'milestone.checkins.1', '2026-01-01T00:00:00.000Z');
+
+      expect(
+        await awards.recent(GUILD, { since: new Date('2026-02-01T00:00:00.000Z') }),
+      ).toHaveLength(0);
+      expect(
+        await awards.recent(GUILD, { since: new Date('2025-12-01T00:00:00.000Z') }),
+      ).toHaveLength(1);
+    });
+
+    it('is bounded however many have been granted', async () => {
+      for (let index = 0; index < 30; index += 1) {
+        await awards.grant({
+          guildId: GUILD,
+          userId: MEMBER,
+          awardKey: `milestone.bounded.${String(index)}`,
+          kind: 'milestone',
+          evidence: {},
+        });
+      }
+
+      expect(await awards.recent(GUILD, { limit: 10_000 })).toHaveLength(25);
+      expect(await awards.recent(GUILD)).toHaveLength(5);
+    });
+
+    it('returns nothing for another guild', async () => {
+      await grantAt(MEMBER, 'milestone.checkins.1', '2026-03-01T00:00:00.000Z');
+
+      const elsewhere = unsafeSnowflake<GuildId>('100000000000092999');
+      expect(await awards.recent(elsewhere)).toHaveLength(0);
+    });
+  });
 });

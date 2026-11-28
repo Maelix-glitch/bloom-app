@@ -39,6 +39,8 @@ export interface RetentionPolicy {
   readonly commandUsageDays: number;
   readonly verificationAttemptDays: number;
   readonly auditEventDays: number;
+  /** Design note 001: automod executions are operational data, kept 180 days. */
+  readonly automodEventDays: number;
 }
 
 export const DEFAULT_RETENTION_POLICY: RetentionPolicy = {
@@ -46,6 +48,7 @@ export const DEFAULT_RETENTION_POLICY: RetentionPolicy = {
   commandUsageDays: 90,
   verificationAttemptDays: 180,
   auditEventDays: 730,
+  automodEventDays: 180,
 };
 
 /**
@@ -72,6 +75,7 @@ export const PRUNABLE_TABLES = [
   'command_usage',
   'verification_attempts',
   'audit_events',
+  'automod_events',
 ] as const;
 
 export type PrunableTable = (typeof PRUNABLE_TABLES)[number];
@@ -196,6 +200,12 @@ export class PostgresRetentionRepository
           'audit_events',
           'created_at',
           policy.auditEventDays,
+          batchSize,
+        ),
+        automod_events: await this.pruneByAge(
+          'automod_events',
+          'created_at',
+          policy.automodEventDays,
           batchSize,
         ),
       };

@@ -33,13 +33,31 @@ export const memberJoinHandler: EventHandler<MemberJoinPayload, GuardianDeps> = 
   },
 
   async handle(payload, deps) {
+    const correlationId = newCorrelationId();
+
     await deps.onboarding.handleJoin({
       guildId: payload.guildId,
       userId: payload.userId,
       username: payload.username,
       isBot: payload.isBot,
       joinedAt: payload.joinedAt,
-      correlationId: newCorrelationId(),
+      correlationId,
+    });
+
+    /*
+     * Referral attribution runs after onboarding, never before.
+     *
+     * Onboarding is what the member is waiting on; attribution is
+     * bookkeeping. `recordJoin` handles its own failures and does not throw,
+     * so the ordering here is about who gets served first, not about error
+     * handling.
+     */
+    await deps.referrals.recordJoin({
+      guildId: payload.guildId,
+      userId: payload.userId,
+      isBot: payload.isBot,
+      accountCreatedAt: payload.accountCreatedAt,
+      correlationId,
     });
   },
 };
@@ -68,5 +86,9 @@ export const memberLeaveHandler: EventHandler<MemberLeavePayload, GuardianDeps> 
       leftAt: payload.leftAt,
       correlationId: newCorrelationId(),
     });
+
+    // An unpaid referral for someone who has left is rejected: the reward is
+    // for a member who stayed, and they did not.
+    await deps.referrals.recordLeave(payload.guildId, payload.userId);
   },
 };

@@ -141,6 +141,7 @@ describe('retention (integration)', () => {
           commandUsageDays: 90,
           verificationAttemptDays: 180,
           auditEventDays: 5,
+          automodEventDays: 180,
         },
       });
 
@@ -250,6 +251,7 @@ describe('retention (integration)', () => {
           commandUsageDays: 0,
           verificationAttemptDays: 0,
           auditEventDays: 0,
+          automodEventDays: 180,
         },
       });
 

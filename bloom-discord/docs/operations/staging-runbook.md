@@ -71,7 +71,7 @@ Use the permission integers from
 
 | Bot       | Permissions     |
 | --------- | --------------- |
-| Guardian  | `1497064631510` |
+| Guardian  | `1497064631542` |
 | Companion | `319975148608`  |
 | Labs      | `380104723520`  |
 
