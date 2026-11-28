@@ -37,7 +37,7 @@ function synthetic(over: Partial<Dish>): Dish {
 }
 
 describe("gravy-style derivation · the shipped census", () => {
-  it("exactly 436 of the 994 shipped mains are gravy-style", () => {
+  it("exactly 407 of the 994 shipped mains are gravy-style", () => {
     /* 354 of 755 before the Bulgarian wave (2026-11-26) added 29
        mains, 10 of them gravy-style (its soups, kavarma, musaka,
        frikase and bean yahniya). The Bulgarian wave 2 (2026-11-26)
@@ -56,10 +56,21 @@ describe("gravy-style derivation · the shipped census", () => {
        dal and the blended soups). Protein wave C (2026-11-26)
        added 52 mains, 15 of them gravy-style (the cassoulet, the
        cocido, the birria, ghormeh sabzi, the étouffée and
-       cioppino, the two bean stews and the wet curries). */
+       cioppino, the two bean stews and the wet curries). M-261
+       (2026-11-28) then moved the count DOWN by 29 without any
+       library change: rule 1's grain set learned the worked
+       forms of the cereals (semolina, the wheat and rice
+       flours, cornmeal, barley, oats, rye, buckwheat, millet),
+       so the pasta bakes, noodle soups, pies, dumpling dishes
+       and barley soups the waves above had counted as
+       gravy-style are now seen as the complete plates they
+       are and are served no second base. The five besan-heavy
+       dishes (the kadhis, gatte, shiro wat, the manchurian)
+       stay gravy-style by deliberate boundary: chickpea flour
+       is a legume flour, not a base. */
     const mains = DISH_LIBRARY.filter((d) => d.category === "main");
     expect(mains.length).toBe(994);
-    expect(mains.filter(dishIsGravyStyle).length).toBe(436);
+    expect(mains.filter(dishIsGravyStyle).length).toBe(407);
   });
 
   it("no non-main dish is ever gravy-style", () => {
@@ -92,6 +103,16 @@ describe("gravy-style derivation · the named verdicts", () => {
     "dish-us-yogurt-tuna-salad", // a cold filling
     "dish-mushroom-masala", // its own method dries the masala off
     "dish-chicken-biryani", // rice category: the grain is in the pot
+    "dish-pwb-beef-bolognese", // M-261: 70 g of pasta a serving is its base
+    "dish-pwb-chicken-alfredo-style", // M-261: pasta in its sauce, complete
+    "dish-dal-baati", // M-261: the baati is the bread, served with the dal
+    "dish-dal-dhokli", // M-261: the dhokli dumplings cook in the dal
+    "dish-kozhikode-pidi", // M-261: rice dumplings carry their own starch
+    "dish-za-bunny-chow-style", // M-261: the bread bowl is in its lines
+  ];
+  const STILL_GRAVY_BESAN = [
+    "dish-paneer-kadhi", // M-261 boundary: besan forms the gravy itself
+    "dish-gatte-ki-sabzi", // M-261 boundary: besan dumplings, eaten with a base
   ];
   for (const id of GRAVY) {
     it(`${id} is gravy-style`, () => {
@@ -101,6 +122,11 @@ describe("gravy-style derivation · the named verdicts", () => {
   for (const id of NOT_GRAVY) {
     it(`${id} is not gravy-style`, () => {
       expect(dishIsGravyStyle(BY_ID.get(id)!), id).toBe(false);
+    });
+  }
+  for (const id of STILL_GRAVY_BESAN) {
+    it(`${id} stays gravy-style (the besan boundary)`, () => {
+      expect(dishIsGravyStyle(BY_ID.get(id)!), id).toBe(true);
     });
   }
 });
@@ -183,6 +209,39 @@ describe("gravy-style derivation · one synthetic dish per rule", () => {
       method: ["Fold everything into the gravy."],
     });
     expect(dishIsGravyStyle(dish)).toBe(false);
+  });
+
+  it("a dish carrying its pasta is never gravy-style (M-261)", () => {
+    const dish = synthetic({
+      lines: [
+        { foodId: "usda-171077", grams: 150 },
+        { foodId: "usda-168933", grams: 70 }, // semolina: the pasta, over the floor
+      ],
+      method: ["Fold everything into the gravy."],
+    });
+    expect(dishIsGravyStyle(dish)).toBe(false);
+  });
+
+  it("a spoon of flour in a sauce does not veto the base (M-261 floor)", () => {
+    const dish = synthetic({
+      lines: [
+        { foodId: "usda-171077", grams: 150 },
+        { foodId: "usda-168936", grams: 10 }, // a thickener's worth of wheat flour
+      ],
+      method: ["Fold everything into the gravy."],
+    });
+    expect(dishIsGravyStyle(dish)).toBe(true);
+  });
+
+  it("chickpea flour never vetoes the base (M-261 besan boundary)", () => {
+    const dish = synthetic({
+      lines: [
+        { foodId: "usda-171077", grams: 150 },
+        { foodId: "usda-174288", grams: 100 }, // besan, far over the grain floor
+      ],
+      method: ["Fold everything into the gravy."],
+    });
+    expect(dishIsGravyStyle(dish)).toBe(true);
   });
 
   it("a non-main category is never gravy-style, however wet", () => {
