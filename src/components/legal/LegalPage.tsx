@@ -94,6 +94,12 @@ export function LegalPage({
             <Link to="/contact" className="underline underline-offset-2 hover:text-foreground">
               Contact
             </Link>
+            <Link
+              to="/accessibility"
+              className="underline underline-offset-2 hover:text-foreground"
+            >
+              Accessibility
+            </Link>
           </p>
         </footer>
       </main>
