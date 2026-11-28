@@ -20,13 +20,14 @@ function PrivacyRoute() {
   return (
     <LegalPage
       title="Privacy, in plain words."
-      updated="19 November 2026"
+      updated="28 November 2026"
       intro="This page says what Bloom does with what you write into it. Bloom Vitalis is a personal health companion, and the arrangement is simple: your record is yours, it lives on your device first, it syncs to your account only when you sign in, and it is never sold."
       sections={[
         {
           heading: "Who is responsible",
           paras: [
-            "Bloom is run by Bloom Vitalis. For anything about your data, a question, a correction, a complaint, write to maelix67@gmail.com. That inbox is also our grievance contact under India's Digital Personal Data Protection Act, 2023 (the DPDP Act).",
+            "Bloom is run by Bloom Vitalis, from Varkala, Thiruvananthapuram, Kerala, India. For anything about your data, a question, a correction, a complaint, write to maelix67@gmail.com.",
+            "Our Grievance Officer under India's Digital Personal Data Protection Act, 2023 (the DPDP Act) and the Information Technology Act, 2000 is Said Ali, reachable at the same address, maelix67@gmail.com, with “Grievance” in the subject. We acknowledge a grievance within 24 hours and resolve it within 15 days.",
           ],
         },
         {
@@ -81,13 +82,14 @@ function PrivacyRoute() {
         {
           heading: "Adults only",
           paras: [
-            "Bloom is for adults, 18 and over, and we do not knowingly collect data from children. If you believe a child's data is in Bloom, email us and we will remove it.",
+            "Bloom is for adults, 18 and over, and we do not knowingly collect data from children. Bloom asks your age in the Assessment before it builds any plan, and it will not build a calorie plan for anyone under 18. If you believe a child's data is in Bloom, email us and we will remove it.",
           ],
         },
         {
           heading: "Security, without overclaiming",
           paras: [
             "Sign-in is by an emailed link, there is no Bloom password to steal. Data travels over encrypted connections, and each account's record is fenced off from every other account's. No system is perfect, which is one more reason the export exists: your record is never trapped inside Bloom.",
+            "If a data breach ever affects your record, we will tell you what happened and notify the Data Protection Board of India, as the DPDP Act requires.",
           ],
         },
         {
