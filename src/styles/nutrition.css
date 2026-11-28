@@ -3757,3 +3757,35 @@ a.day-path__label:hover {
 .nut-chip {
   min-height: var(--bloom-touch-min);
 }
+
+/* ---------------------------------------------------------------------------
+ * M-258 — the date strip fits the phone (owner screenshot, 2026-11-27).
+ * The strip's floor widths cannot fit a phone: 7 day cells at their 44px
+ * min-width (308px) + two 44px stepper buttons + gaps = 448px against a
+ * ~344px content width, so the last days ran off the right edge and the
+ * next-day stepper was pushed off-screen. On small screens the cells give
+ * up the width floor and share the row equally; the steppers keep their
+ * full 44px touch size, every cell keeps its full height, and the day
+ * ring steps down to 30px so neighbouring rings never touch.
+ * ------------------------------------------------------------------------- */
+@media (max-width: 30rem) {
+  .nut-datenav {
+    gap: var(--space-1);
+  }
+  .nut-datenav > div {
+    gap: var(--space-1);
+    min-width: 0;
+  }
+  .nut-daycell {
+    min-width: 0;
+    padding-inline: 0;
+  }
+  .nut-daycell > span.relative {
+    width: 30px;
+    height: 30px;
+  }
+  .nut-daycell svg {
+    width: 30px;
+    height: 30px;
+  }
+}

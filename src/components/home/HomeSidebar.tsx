@@ -309,9 +309,13 @@ export function HomeMobileBar() {
   const { pathname } = useLocation();
   const profileActive = pathname === "/profile" || pathname.startsWith("/@");
   return (
-    <div className="app-nav app-mobile-bar pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-end px-5 pt-3 lg:hidden">
-      <div className="pointer-events-auto flex items-center gap-2">
+    <div className="app-nav app-mobile-bar pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between px-5 pt-3 lg:hidden">
+      {/* M-258 (owner, 2026-11-27): the points pill lives at the top-LEFT;
+          the bell, settings and profile stay at the top-right. */}
+      <div className="pointer-events-auto">
         <PointsChip compact />
+      </div>
+      <div className="pointer-events-auto flex items-center gap-2">
         <NotificationBell />
         {/* The rail's settings gear, mirrored in the phone bar (Plan B):
             the account sections live on /settings now, and phones have
