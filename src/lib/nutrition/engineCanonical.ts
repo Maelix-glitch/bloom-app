@@ -10,7 +10,7 @@
  *
  * This file exists in two places that MUST stay identical:
  *   - the app repo: src/lib/nutrition/engineCanonical.ts
- *   - the private engine tree: functions/engine/canonical.ts
+ *   - the private engine tree: supabase/functions/engine/canonical.ts
  * If you change one, change the other, or parity results are void.
  */
 
