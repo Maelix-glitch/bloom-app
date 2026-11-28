@@ -29,6 +29,7 @@ import { useBodyProfile } from "@/hooks/useBodyProfile";
 import { useNutrition } from "@/hooks/useNutrition";
 import { useSession } from "@/hooks/useSession";
 import { todayLocal } from "@/lib/localDay";
+import { shadowCheckPlan } from "@/lib/nutrition/engineShadow";
 import { ASSESSMENT_KEY, parseAssessmentState, toHealthProfile } from "@/lib/assessment/state";
 import { toSafetyInput, type HealthProfile, type VitalisGoal } from "@/lib/vitalis/domain/profile";
 import { classifySafety } from "@/lib/vitalis/safety/classify";
@@ -260,8 +261,14 @@ export function usePlan(): PlanStore {
   const generate = useCallback((): PlanOutcome => {
     const outcome = generatePlan(buildInput(new Date().toISOString()));
     if (outcome.ok) writePlan(outcome.plan);
+    /* Phase B shadow: the server engine computes the same day from
+       the synced record and the two outcomes are compared by hash in
+       engine_shadow_log. Fire-and-forget — the result is never shown
+       and can never affect this outcome. Only the real generate path
+       shadows; the preview does not (it runs on every render). */
+    shadowCheckPlan(today, outcome);
     return outcome;
-  }, [buildInput]);
+  }, [buildInput, today]);
 
   const swapPlanDish = useCallback<PlanStore["swapPlanDish"]>(
     (meal, fromDishId, toDishId) => {
