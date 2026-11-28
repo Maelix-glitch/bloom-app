@@ -643,7 +643,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
-      { foodId: "usda-328841", grams: 200 }, // cottage cheese (paneer stand-in)
+      { foodId: "cofid-12-495", grams: 200 }, // paneer, from the CoFID record
       { foodId: "usda-170419", grams: 80 }, // green peas
       { foodId: "usda-2258586", grams: 80 }, // carrot
       { foodId: "usda-790646", grams: 100 }, // onion
@@ -677,7 +677,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-2512381", grams: 300 }, // white rice, dry
-      { foodId: "usda-328841", grams: 150 }, // cottage cheese (paneer stand-in)
+      { foodId: "cofid-12-495", grams: 150 }, // paneer, from the CoFID record
       { foodId: "usda-2515374", grams: 30 }, // cashew nuts
       { foodId: "usda-2259793", grams: 150 }, // yogurt (dahi)
       { foodId: "usda-2346401", grams: 100 }, // potato
@@ -1079,7 +1079,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-168893", grams: 240 }, // whole wheat flour (atta)
-      { foodId: "usda-328841", grams: 200 }, // cottage cheese (paneer stand-in)
+      { foodId: "cofid-12-495", grams: 200 }, // paneer, from the CoFID record
       { foodId: "usda-790646", grams: 60 }, // onion
       { foodId: "usda-170497", grams: 5 }, // green chilli
       { foodId: "usda-170923", grams: 2 }, // cumin seeds
@@ -1385,7 +1385,7 @@ export const DISHES_RICE_BREAD: Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 120 }, // chickpea flour (besan)
-      { foodId: "usda-328841", grams: 100 }, // cottage cheese (paneer stand-in)
+      { foodId: "cofid-12-495", grams: 100 }, // paneer, from the CoFID record
       { foodId: "usda-168462", grams: 50 }, // spinach
       { foodId: "usda-790646", grams: 60 }, // onion
       { foodId: "usda-170457", grams: 60 }, // tomato

@@ -16,9 +16,10 @@
  *
  * Authoring notes — what the reference set does and does not hold,
  * and how this wave stays honest about it:
- * - There is NO paneer in the set; as in every earlier wave, the
- *   set's cottage cheese (usda-328841) is the paneer stand-in, at
- *   like weight and behaviour.
+ * - Paneer: this wave was authored when the set held no paneer, so
+ *   its paneer lines rode the set's cottage cheese (usda-328841) as
+ *   a stand-in. Since M-264 they cost the real paneer record (UK
+ *   CoFID, cofid-12-495) directly, at the same weights.
  * - There are NO curry leaves and NO kudampuli, so Kerala tempering
  *   never claims them and the fish curries sour with tamarind, as
  *   many Kerala homes do (the Kerala wave's standing handling).
@@ -900,7 +901,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 800 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 800 }, // paneer, from the CoFID record
       { foodId: "usda-330137", grams: 240 }, // Greek yogurt
       { foodId: "usda-2515374", grams: 40 }, // cashew nuts
       { foodId: "usda-790646", grams: 150 }, // onion
@@ -934,7 +935,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 920 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 920 }, // paneer, from the CoFID record
       { foodId: "usda-170427", grams: 150 }, // capsicum (green pepper)
       { foodId: "usda-170108", grams: 100 }, // capsicum (red pepper)
       { foodId: "usda-790646", grams: 150 }, // onion
@@ -969,7 +970,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 920 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 920 }, // paneer, from the CoFID record
       { foodId: "usda-330137", grams: 200 }, // Greek yogurt
       { foodId: "usda-170427", grams: 120 }, // capsicum (green pepper)
       { foodId: "usda-790646", grams: 120 }, // onion
@@ -1004,7 +1005,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 800 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 800 }, // paneer, from the CoFID record
       { foodId: "usda-322892", grams: 200 }, // milk
       { foodId: "usda-330137", grams: 120 }, // Greek yogurt
       { foodId: "usda-171323", grams: 4 }, // fennel seeds
@@ -1037,7 +1038,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 920 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 920 }, // paneer, from the CoFID record
       { foodId: "usda-170169", grams: 60 }, // coconut (fresh)
       { foodId: "usda-790646", grams: 150 }, // onion
       { foodId: "usda-170457", grams: 120 }, // tomato
@@ -1074,7 +1075,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-174288", grams: 240 }, // chickpea flour (besan)
-      { foodId: "usda-328841", grams: 600 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 600 }, // paneer, from the CoFID record
       { foodId: "usda-330137", grams: 300 }, // Greek yogurt
       { foodId: "usda-790646", grams: 80 }, // onion
       { foodId: "usda-169231", grams: 8 }, // ginger
@@ -1107,7 +1108,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 800 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 800 }, // paneer, from the CoFID record
       { foodId: "usda-2710826", grams: 400 }, // sweetcorn
       { foodId: "usda-170419", grams: 100 }, // peas (green)
       { foodId: "usda-790646", grams: 120 }, // onion
@@ -1142,7 +1143,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 720 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 720 }, // paneer, from the CoFID record
       { foodId: "usda-1750347", grams: 400 }, // mushroom (white)
       { foodId: "usda-330137", grams: 160 }, // Greek yogurt
       { foodId: "usda-170419", grams: 100 }, // peas (green)
@@ -1551,7 +1552,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 480 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 480 }, // paneer, from the CoFID record
       { foodId: "usda-171287", grams: 480 }, // egg (about 10 large eggs)
       { foodId: "usda-790646", grams: 150 }, // onion
       { foodId: "usda-170457", grams: 120 }, // tomato
@@ -1856,7 +1857,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-168410", grams: 600 }, // edamame (shelled)
-      { foodId: "usda-328841", grams: 400 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 400 }, // paneer, from the CoFID record
       { foodId: "usda-790646", grams: 120 }, // onion
       { foodId: "usda-170457", grams: 120 }, // tomato
       { foodId: "usda-169231", grams: 10 }, // ginger
@@ -2059,7 +2060,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 480 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 480 }, // paneer, from the CoFID record
       { foodId: "usda-174270", grams: 160 }, // soybeans (whole, dry)
       { foodId: "usda-790646", grams: 120 }, // onion
       { foodId: "usda-170457", grams: 120 }, // tomato
@@ -2198,7 +2199,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-2644282", grams: 320 }, // chickpeas
-      { foodId: "usda-328841", grams: 320 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 320 }, // paneer, from the CoFID record
       { foodId: "usda-790646", grams: 120 }, // onion
       { foodId: "usda-170457", grams: 150 }, // tomato
       { foodId: "usda-169231", grams: 10 }, // ginger
@@ -2232,7 +2233,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-174256", grams: 320 }, // mung beans (whole moong)
-      { foodId: "usda-328841", grams: 320 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 320 }, // paneer, from the CoFID record
       { foodId: "usda-790646", grams: 100 }, // onion
       { foodId: "usda-170457", grams: 100 }, // tomato
       { foodId: "usda-169231", grams: 10 }, // ginger
@@ -2332,7 +2333,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 680 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 680 }, // paneer, from the CoFID record
       { foodId: "usda-172430", grams: 120 }, // peanuts
       { foodId: "usda-790646", grams: 120 }, // onion
       { foodId: "usda-170457", grams: 120 }, // tomato
@@ -2366,7 +2367,7 @@ export const PROTEIN_INDIA_DISHES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 600 }, // cottage cheese (the set's paneer stand-in)
+      { foodId: "cofid-12-495", grams: 600 }, // paneer, from the CoFID record
       { foodId: "usda-2515374", grams: 200 }, // cashew nuts
       { foodId: "usda-790646", grams: 120 }, // onion
       { foodId: "usda-170457", grams: 120 }, // tomato

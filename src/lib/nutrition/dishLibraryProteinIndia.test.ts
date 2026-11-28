@@ -9,7 +9,7 @@ import {
 } from "./dishes";
 import { DISH_LIBRARY } from "./data/dishLibrary";
 import { PROTEIN_INDIA_DISHES } from "./data/dishLibraryProteinIndia";
-import { USDA_REFERENCE_FOODS } from "./usdaReference";
+import { REFERENCE_FOODS } from "./referenceFoods";
 
 /**
  * Wave PW-3 — high-protein Indian and Kerala MAINS. The wave's hard
@@ -41,7 +41,9 @@ describe("wave PW-3 protein India & Kerala mains", () => {
   });
 
   it("every dish validates clean, and every line names a verified food", () => {
-    const known = new Set(USDA_REFERENCE_FOODS.map((f) => f.id));
+    /* The full verified set, not USDA alone: since M-264 this wave's
+       paneer lines name the UK CoFID paneer record (cofid-12-495). */
+    const known = new Set(REFERENCE_FOODS.map((f) => f.id));
     for (const dish of PROTEIN_INDIA_DISHES) {
       expect(validateDish(dish), dish.id).toEqual([]);
       for (const line of dish.lines) {
@@ -130,7 +132,7 @@ describe("wave PW-3 protein India & Kerala mains", () => {
   });
 
   it("no dish uses beef or pork (the library's standing precedent)", () => {
-    const nameById = new Map(USDA_REFERENCE_FOODS.map((f) => [f.id, f.name]));
+    const nameById = new Map(REFERENCE_FOODS.map((f) => [f.id, f.name]));
     for (const dish of PROTEIN_INDIA_DISHES) {
       for (const line of dish.lines) {
         expect(nameById.get(line.foodId) ?? "", `${dish.id} -> ${line.foodId}`).not.toMatch(
