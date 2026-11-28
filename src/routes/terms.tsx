@@ -97,7 +97,7 @@ function TermsRoute() {
         {
           heading: "Grievance officer and who runs Bloom",
           paras: [
-            "Bloom Vitalis is run by Said Ali, trading as Bloom Vitalis, from Varkala, Thiruvananthapuram, Kerala, India.",
+            "Bloom Vitalis is run by Said Ali, trading as Bloom Vitalis.",
             "Our Grievance Officer under the Information Technology Act, 2000 and the rules made under it is Said Ali. Write to maelix67@gmail.com with “Grievance” in the subject. We acknowledge a grievance within 24 hours and resolve it within 15 days, the timelines the rules set. The same address reaches us for support, billing and copyright notices.",
           ],
         },

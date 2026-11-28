@@ -26,7 +26,7 @@ function PrivacyRoute() {
         {
           heading: "Who is responsible",
           paras: [
-            "Bloom is run by Bloom Vitalis, from Varkala, Thiruvananthapuram, Kerala, India. For anything about your data, a question, a correction, a complaint, write to maelix67@gmail.com.",
+            "Bloom is run by Bloom Vitalis. For anything about your data, a question, a correction, a complaint, write to maelix67@gmail.com.",
             "Our Grievance Officer under India's Digital Personal Data Protection Act, 2023 (the DPDP Act) and the Information Technology Act, 2000 is Said Ali, reachable at the same address, maelix67@gmail.com, with “Grievance” in the subject. We acknowledge a grievance within 24 hours and resolve it within 15 days.",
           ],
         },

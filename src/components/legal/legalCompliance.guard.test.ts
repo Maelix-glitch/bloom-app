@@ -24,17 +24,17 @@ const SRC = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(SRC, rel), "utf8");
 
 describe("legal compliance — India (M-262)", () => {
-  it("terms name the Grievance Officer, the timelines and the place of business", () => {
+  it("terms name the Grievance Officer and the timelines, and publish no location", () => {
     const terms = read("routes/terms.tsx");
     expect(terms).toContain("Grievance Officer");
     expect(terms).toContain("Said Ali");
     expect(terms).toContain("within 24 hours");
     expect(terms).toContain("within 15 days");
-    expect(terms).toContain("Varkala, Thiruvananthapuram, Kerala, India");
-    /* The full home postal address is deliberately NOT published (owner
-       decision 2026-11-28): name, town and the grievance email are the
-       public contact; the full address lives on payment records only. */
+    /* NO location is published at all (owner decision 2026-11-28): the
+       public contact is the officer's name and the grievance email only.
+       The full address lives on payment records (Razorpay), never here. */
     expect(terms).not.toContain("Raseena Manzil");
+    expect(terms).not.toContain("Varkala");
   });
 
   it("terms carry the copyright notice-and-takedown route", () => {
