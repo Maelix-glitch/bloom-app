@@ -20,7 +20,7 @@ function TermsRoute() {
   return (
     <LegalPage
       title="Terms, without the thicket."
-      updated="19 November 2026"
+      updated="28 November 2026"
       intro="Bloom is a personal health companion, nutrition, habits, activity, sleep and cycle tracking, with two AI companions, Coach and Vitalis. These terms are the whole arrangement: you keep your data, we keep our promises, and the app never pretends to be something it isn't."
       sections={[
         {
@@ -82,9 +82,23 @@ function TermsRoute() {
           ],
         },
         {
+          heading: "Content you upload, and copyright",
+          paras: [
+            "Photos and other content you add to Bloom stay yours, and you must have the right to add them. Bloom only holds them to run the service for you.",
+            "If you believe content in Bloom infringes your copyright, write to our Grievance Officer (below) saying what the work is, where it appears in Bloom, and how to reach you. We review every such notice and remove content that infringes, as the Copyright Act, 1957 and the Information Technology Act, 2000 provide.",
+          ],
+        },
+        {
           heading: "Ownership",
           paras: [
             "The Bloom name, design and software belong to Bloom Vitalis. Your record belongs to you, see above.",
+          ],
+        },
+        {
+          heading: "Grievance officer and who runs Bloom",
+          paras: [
+            "Bloom Vitalis is run by Said Ali, trading as Bloom Vitalis.",
+            "Our Grievance Officer under the Information Technology Act, 2000 and the rules made under it is Said Ali. Write to maelix67@gmail.com with “Grievance” in the subject. We acknowledge a grievance within 24 hours and resolve it within 15 days, the timelines the rules set. The same address reaches us for support, billing and copyright notices.",
           ],
         },
         {

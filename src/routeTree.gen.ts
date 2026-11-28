@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as HandleRouteImport } from './routes/$handle'
+import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CycleRouteImport } from './routes/cycle'
@@ -43,6 +44,11 @@ const IndexRoute = IndexRouteImport.update({
 const HandleRoute = HandleRouteImport.update({
   id: '/$handle',
   path: '/$handle',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccessibilityRoute = AccessibilityRouteImport.update({
+  id: '/accessibility',
+  path: '/accessibility',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoachRoute = CoachRouteImport.update({
@@ -164,6 +170,7 @@ const RewardsAtelierRoute = RewardsAtelierRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
+  '/accessibility': typeof AccessibilityRoute
   '/coach': typeof CoachRoute
   '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
@@ -191,6 +198,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
+  '/accessibility': typeof AccessibilityRoute
   '/coach': typeof CoachRoute
   '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
@@ -217,6 +225,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/$handle': typeof HandleRoute
+  '/accessibility': typeof AccessibilityRoute
   '/coach': typeof CoachRoute
   '/contact': typeof ContactRoute
   '/cycle': typeof CycleRoute
@@ -246,6 +255,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/$handle'
+    | '/accessibility'
     | '/coach'
     | '/contact'
     | '/cycle'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/$handle'
+    | '/accessibility'
     | '/coach'
     | '/contact'
     | '/cycle'
@@ -298,6 +309,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/$handle'
+    | '/accessibility'
     | '/coach'
     | '/contact'
     | '/cycle'
@@ -326,6 +338,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   HandleRoute: typeof HandleRoute
+  AccessibilityRoute: typeof AccessibilityRoute
   CoachRoute: typeof CoachRoute
   ContactRoute: typeof ContactRoute
   CycleRoute: typeof CycleRoute
@@ -361,6 +374,13 @@ declare module '@tanstack/react-router' {
       path: '/$handle'
       fullPath: '/$handle'
       preLoaderRoute: typeof HandleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accessibility': {
+      id: '/accessibility'
+      path: '/accessibility'
+      fullPath: '/accessibility'
+      preLoaderRoute: typeof AccessibilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coach': {
@@ -557,6 +577,7 @@ const RewardsRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   HandleRoute: HandleRoute,
+  AccessibilityRoute: AccessibilityRoute,
   CoachRoute: CoachRoute,
   ContactRoute: ContactRoute,
   CycleRoute: CycleRoute,
