@@ -10,8 +10,9 @@
  * - There is NO jaggery in the set, so desserts and the imli chutney
  *   are sweetened with the set's granulated sugar or honey. That is a
  *   substitution of the sweetener only, stated here, never hidden.
- * - There is NO paneer in the set; cottage cheese stands in for it
- *   (the mains library's Shahi Paneer notes the stand-in on its lines).
+ * - Paneer IS in the set now (UK CoFID, cofid-12-495, M-229); the
+ *   Shahi Mixed Veg line below costs it directly (M-264). Before
+ *   M-264, cottage cheese stood in for paneer on lines like this one.
  * - There is no tea and no coffee in the set, so there is no masala
  *   chai and no filter coffee here — a drink Bloom cannot cost or
  *   compute honestly is not invented.
@@ -729,7 +730,7 @@ export const DISHES_SIDES: Dish[] = [
     servings: 4,
     cuisine: "india",
     lines: [
-      { foodId: "usda-328841", grams: 150 }, // cottage cheese (paneer stand-in)
+      { foodId: "cofid-12-495", grams: 150 }, // paneer, from the CoFID record
       { foodId: "usda-2515374", grams: 30 }, // cashews (ground in the method)
       { foodId: "usda-2258586", grams: 100 }, // carrot
       { foodId: "usda-2346400", grams: 100 }, // green beans

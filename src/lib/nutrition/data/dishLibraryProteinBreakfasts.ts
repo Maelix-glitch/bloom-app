@@ -13,9 +13,10 @@
  * beef, no pork, no branded items. Where a classic needs an ingredient
  * the set does not carry (feta, soy sauce, fish sauce, capers), the
  * dish is composed truthfully without it or left out; the method never
- * names an ingredient that is not a line. Cottage cheese
- * (usda-328841) is the data layer's paneer stand-in, as in the mains
- * library — dishes keep their names, the line shows the ingredient.
+ * names an ingredient that is not a line. Paneer lines cost the
+ * real paneer record (UK CoFID, cofid-12-495) since M-264; the
+ * cottage cheese (usda-328841) lines that remain in this file are
+ * genuine cottage cheese, as their dishes' names say.
  * No dish duplicates an existing library dish by name or by recipe
  * (checked against the whole library, normalised — see the wave test).
  */
@@ -1906,7 +1907,7 @@ export const PW2_DISHES: readonly Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-168936", grams: 110 }, // white flour
-      { foodId: "usda-328841", grams: 320 }, // cottage cheese (the paneer stand-in)
+      { foodId: "cofid-12-495", grams: 320 }, // paneer, from the CoFID record
       { foodId: "usda-170419", grams: 100 }, // green peas
       { foodId: "usda-790646", grams: 50 }, // onion
       { foodId: "usda-169231", grams: 6 }, // ginger
@@ -2021,7 +2022,7 @@ export const PW2_DISHES: readonly Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-2346396", grams: 110 }, // rolled oats
-      { foodId: "usda-328841", grams: 300 }, // cottage cheese (the paneer stand-in)
+      { foodId: "cofid-12-495", grams: 300 }, // paneer, from the CoFID record
       { foodId: "usda-172183", grams: 80 }, // egg white
       { foodId: "usda-2258586", grams: 60 }, // carrots
       { foodId: "usda-790646", grams: 50 }, // onion
@@ -2136,7 +2137,7 @@ export const PW2_DISHES: readonly Dish[] = [
     cuisine: "india",
     lines: [
       { foodId: "usda-2710826", grams: 260 }, // sweet corn
-      { foodId: "usda-328841", grams: 300 }, // cottage cheese (the paneer stand-in)
+      { foodId: "cofid-12-495", grams: 300 }, // paneer, from the CoFID record
       { foodId: "usda-174288", grams: 70 }, // besan (chickpea flour)
       { foodId: "usda-790646", grams: 50 }, // onion
       { foodId: "usda-170497", grams: 4 }, // green chilli
